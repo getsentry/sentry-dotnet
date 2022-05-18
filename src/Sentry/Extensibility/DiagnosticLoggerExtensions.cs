@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 
 namespace Sentry.Extensibility
 {
@@ -8,6 +9,7 @@ namespace Sentry.Extensibility
     /// <remarks>
     /// Calls to this class verify the level before calling the overload with object params.
     /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class DiagnosticLoggerExtensions
     {
         /// <summary>

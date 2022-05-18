@@ -74,7 +74,8 @@ namespace Sentry
 #endif
 
         /// <summary>
-        /// Disables the capture of errors through <see cref="AppDomain.ProcessExit"/>
+        /// By default, any queued events (i.e: captures errors) are flushed on <see cref="AppDomain.ProcessExit"/>.
+        /// This method disables that behaviour.
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableAppDomainProcessExitFlush(this SentryOptions options) =>
@@ -95,7 +96,7 @@ namespace Sentry
         /// </summary>
         /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
         /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
-        internal static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
+        public static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
             => options.Integrations = options.Integrations?.Where(p => p.GetType() != typeof(TIntegration)).ToArray();
 
         /// <summary>

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Sentry.Internal;
 
 /// <summary>
 /// Extends Exception with formatted data that can be used by Sentry SDK.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryExceptionExtensions
 {
     /// <summary>

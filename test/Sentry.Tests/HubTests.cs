@@ -1,33 +1,16 @@
-// ReSharper disable once CheckNamespace
-// Tests code path which excludes frames with namespace Sentry
-
 using System.IO.Compression;
 using System.Net.Http;
+using Sentry.Internal.Http;
+using Sentry.Testing;
+
 #if NETCOREAPP2_1
 using System.Reflection;
 #endif
-using Sentry.Testing;
-using Sentry.Tests;
 
-namespace NotSentry.Tests;
+namespace Sentry.Tests;
 
 public class HubTests
 {
-    private class FakeBackgroundWorker : IBackgroundWorker
-    {
-        public List<Envelope> Queue { get; } = new();
-
-        public int QueuedItems => Queue.Count;
-
-        public bool EnqueueEnvelope(Envelope envelope)
-        {
-            Queue.Add(envelope);
-            return true;
-        }
-
-        public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
-    }
-
     [Fact]
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
@@ -66,36 +49,6 @@ public class HubTests
         }
 
         hub.ConfigureScope(s => Assert.False(s.Locked));
-    }
-
-    [Fact]
-    public void CaptureMessage_AttachStacktraceFalse_DoesNotIncludeStackTrace()
-    {
-        // Arrange
-        var worker = new FakeBackgroundWorker();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            BackgroundWorker = worker,
-            AttachStacktrace = true
-        });
-
-        // Act
-        hub.CaptureMessage("test");
-
-        // Assert
-        var envelope = worker.Queue.Single();
-
-        var stackTrace = envelope.Items
-            .Select(i => i.Payload)
-            .OfType<JsonSerializable>()
-            .Select(i => i.Source)
-            .OfType<SentryEvent>()
-            .Single()
-            .SentryExceptionValues;
-
-        stackTrace.Should().BeNull();
     }
 
     [Fact]
@@ -299,6 +252,8 @@ public class HubTests
 
     private class EvilContext
     {
+        // This property will throw an exception during serialization.
+        // ReSharper disable once UnusedMember.Local
         public string Thrower => throw new InvalidDataException();
     }
 
@@ -313,7 +268,7 @@ public class HubTests
         var requests = new List<string>();
         async Task VerifyAsync(HttpRequestMessage message)
         {
-            var payload = await message.Content.ReadAsStringAsync();
+            var payload = await message.Content!.ReadAsStringAsync();
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
@@ -321,46 +276,64 @@ public class HubTests
             }
         }
 
-        var cachePath = offlineCaching ? Path.GetTempPath() : null;
+        using var tempDirectory = offlineCaching ? new TempDirectory() : null;
 
         var logger = Substitute.For<IDiagnosticLogger>();
-        var expectedLevel = SentryLevel.Error;
-        logger.IsEnabled(expectedLevel).Returns(true);
+        logger.IsEnabled(SentryLevel.Error).Returns(true);
 
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
-            RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
+            // To go through a round trip serialization of cached envelope
+            CacheDirectoryPath = tempDirectory?.Path,
+            // So we don't need to deal with gzip'ed payload
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
-            AutoSessionTracking = false, // Not to send some session envelope
+            // Not to send some session envelope
+            AutoSessionTracking = false,
             Debug = true,
-            DiagnosticLevel = expectedLevel,
+            DiagnosticLevel = SentryLevel.Error,
             DiagnosticLogger = logger
-        });
-
-        var expectedContextKey = Guid.NewGuid().ToString();
-        var evt = new SentryEvent
-        {
-            Contexts = { [expectedContextKey] = new EvilContext() },
-            Message = new SentryMessage { Formatted = expectedMessage }
         };
 
-        hub.CaptureEvent(evt);
+        try
+        {
+            var hub = new Hub(options);
 
-        // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
-        await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
-        Assert.True(tcs.Task.IsCompleted, "Event not captured");
-        Assert.True(requests.All(p => p.Contains(expectedContextKey)),
-            "Un-serializable context key should exist");
+            var expectedContextKey = Guid.NewGuid().ToString();
+            var evt = new SentryEvent
+            {
+                Contexts = {[expectedContextKey] = new EvilContext()},
+                Message = new SentryMessage {Formatted = expectedMessage}
+            };
 
-        logger.Received().Log(expectedLevel, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            hub.CaptureEvent(evt);
+
+            // Synchronizing in the tests to go through the caching and http transports
+            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+            Assert.True(tcs.Task.IsCompleted, "Event not captured");
+            Assert.True(requests.All(p => p.Contains(expectedContextKey)),
+                "Un-serializable context key should exist");
+
+            logger.Received().Log(SentryLevel.Error,
+                "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
-            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+            Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
 #else
-            Arg.Any<InvalidDataException>(),
+                Arg.Any<InvalidDataException>(),
 #endif
-            Arg.Any<object[]>());
+                Arg.Any<object[]>());
+
+        }
+        finally
+        {
+            if (options.Transport is CachingTransport cachingTransport)
+            {
+                // Disposing the caching transport will ensure its worker
+                // is shut down before we try to dispose and delete the temp folder
+                await cachingTransport.DisposeAsync();
+            }
+        }
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
@@ -234,47 +235,85 @@ public class SentrySdkTests : SentrySdkTestFixture
         second.Dispose();
     }
 
-    [Fact(Skip = "Flaky (after review)")]
-    public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [InlineData(null)]
+    public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed(bool? testDelayWorking)
     {
         // Arrange
         using var cacheDirectory = new TempDirectory();
+        var cachePath = cacheDirectory.Path;
+
+        // Pre-populate cache
+        var initialInnerTransport = Substitute.For<ITransport>();
+        await using var initialTransport = CachingTransport.Create(initialInnerTransport, new SentryOptions
         {
-            // Pre-populate cache
-            var initialInnerTransport = new FakeFailingTransport();
-            await using var initialTransport = CachingTransport.Create(initialInnerTransport, new SentryOptions
-            {
-                DiagnosticLogger = _logger,
-                Dsn = ValidDsnWithoutSecret,
-                CacheDirectoryPath = cacheDirectory.Path
-            });
-
-            // Shutdown the worker to make sure nothing gets processed
-            await initialTransport.StopWorkerAsync();
-
-            for (var i = 0; i < 3; i++)
-            {
-                using var envelope = Envelope.FromEvent(new SentryEvent());
-                await initialTransport.SendEnvelopeAsync(envelope);
-            }
+            DiagnosticLogger = _logger,
+            Dsn = ValidDsnWithoutSecret,
+            CacheDirectoryPath = cachePath
+        }, startWorker: false);
+        const int numEnvelopes = 3;
+        for (var i = 0; i < numEnvelopes; i++)
+        {
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+            await initialTransport.SendEnvelopeAsync(envelope);
         }
 
-        // Act
-        using var transport = new FakeTransport();
-        using var _ = SentrySdk.Init(o =>
-        {
-            o.Dsn = ValidDsnWithoutSecret;
-            o.DiagnosticLogger = _logger;
-            o.CacheDirectoryPath = cacheDirectory.Path;
-            o.InitCacheFlushTimeout = TimeSpan.FromSeconds(30);
-            o.Transport = transport;
-        });
+        // Setup the transport to be slow.
+        // NOTE: This must be slow enough for CI or the tests will fail.  If the test becomes flaky, increase the timeout.
+        // We are testing the timing delay behavior, so there's no alternative that will suffice.
+        var processingDelayPerEnvelope = TimeSpan.FromSeconds(2);
+        var transport = new FakeTransport(processingDelayPerEnvelope);
 
-        // Assert
-        Directory
-            .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
-            .ToArray()
-            .Should().BeEmpty();
+        // Set the timeout for the desired result
+        var initFlushTimeout = testDelayWorking switch
+        {
+            true => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes + 1)),
+            false => TimeSpan.FromTicks((long)(processingDelayPerEnvelope.Ticks * 1.9)), // not quite 2, since we want 1 envelope
+            null => TimeSpan.Zero
+        };
+
+        // Act
+        SentryOptions options = null;
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            using var _ = SentrySdk.Init(o =>
+            {
+                o.Dsn = ValidDsnWithoutSecret;
+                o.DiagnosticLogger = _logger;
+                o.CacheDirectoryPath = cachePath;
+                o.InitCacheFlushTimeout = initFlushTimeout;
+                o.Transport = transport;
+                options = o;
+            });
+
+            stopwatch.Stop();
+
+            // Assert
+            var actualCount = transport.GetSentEnvelopes().Count;
+            var expectedCount = testDelayWorking switch
+            {
+                true => numEnvelopes, // We waited long enough to have them all
+                false => 1,           // We only waited long enough to have one
+                null => 0             // We shouldn't have any, as we didn't ask to flush the cache on init
+            };
+
+            Assert.Equal(expectedCount, actualCount);
+
+            if (testDelayWorking is true)
+            {
+                Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
+            }
+        }
+        finally
+        {
+            // cleanup to avoid disposing/deleting the temp directory while the cache worker is still running
+            var cachingTransport = (CachingTransport) options!.Transport;
+            await cachingTransport!.StopWorkerAsync();
+        }
     }
 
     [Fact]

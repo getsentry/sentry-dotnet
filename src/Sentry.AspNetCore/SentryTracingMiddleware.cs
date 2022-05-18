@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -198,6 +199,7 @@ namespace Microsoft.AspNetCore.Builder
     /// <summary>
     /// Extensions for enabling <see cref="SentryTracingMiddleware"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryTracingMiddlewareExtensions
     {
         /// <summary>

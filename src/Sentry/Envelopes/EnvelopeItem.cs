@@ -16,11 +16,14 @@ namespace Sentry.Protocol.Envelopes
     public sealed class EnvelopeItem : ISerializable, IDisposable
     {
         private const string TypeKey = "type";
+
         private const string TypeValueEvent = "event";
         private const string TypeValueUserReport = "user_report";
         private const string TypeValueTransaction = "transaction";
         private const string TypeValueSession = "session";
         private const string TypeValueAttachment = "attachment";
+        private const string TypeValueClientReport = "client_report";
+
         private const string LengthKey = "length";
         private const string FileNameKey = "filename";
 
@@ -33,6 +36,21 @@ namespace Sentry.Protocol.Envelopes
         /// Item payload.
         /// </summary>
         public ISerializable Payload { get; }
+
+        internal DataCategory DataCategory => TryGetType() switch
+        {
+            // Yes, the "event" item type corresponds to the "error" data category
+            TypeValueEvent => DataCategory.Error,
+
+            // These ones are equivalent
+            TypeValueTransaction => DataCategory.Transaction,
+            TypeValueSession => DataCategory.Session,
+            TypeValueAttachment => DataCategory.Attachment,
+
+            // Not all envelope item types equate to data categories
+            // Specifically, user_report and client_report just use "default"
+            _ => DataCategory.Default
+        };
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopeItem"/>.
@@ -187,7 +205,7 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() => (Payload as IDisposable)?.Dispose();
 
         /// <summary>
-        /// Creates an envelope item from an event.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="event"/>.
         /// </summary>
         public static EnvelopeItem FromEvent(SentryEvent @event)
         {
@@ -200,7 +218,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from user feedback.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sentryUserFeedback"/>.
         /// </summary>
         public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
         {
@@ -213,7 +231,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from transaction.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
         /// </summary>
         public static EnvelopeItem FromTransaction(Transaction transaction)
         {
@@ -226,7 +244,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from a session update.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sessionUpdate"/>.
         /// </summary>
         public static EnvelopeItem FromSession(SessionUpdate sessionUpdate)
         {
@@ -239,7 +257,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Creates an envelope item from attachment.
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="attachment"/>.
         /// </summary>
         public static EnvelopeItem FromAttachment(Attachment attachment)
         {
@@ -264,6 +282,19 @@ namespace Sentry.Protocol.Envelopes
             };
 
             return new EnvelopeItem(header, new StreamSerializable(stream));
+        }
+
+        /// <summary>
+        /// Creates an <see cref="EnvelopeItem"/> from <paramref name="report"/>.
+        /// </summary>
+        internal static EnvelopeItem FromClientReport(ClientReport report)
+        {
+            var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+            {
+                [TypeKey] = TypeValueClientReport
+            };
+
+            return new EnvelopeItem(header, new JsonSerializable(report));
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
@@ -341,6 +372,16 @@ namespace Sentry.Protocol.Envelopes
                 var json = Json.Parse(buffer);
 
                 return new JsonSerializable(SessionUpdate.FromJson(json));
+            }
+
+            // Client Report
+            if (string.Equals(payloadType, TypeValueClientReport, StringComparison.OrdinalIgnoreCase))
+            {
+                var bufferLength = (int)(payloadLength ?? stream.Length);
+                var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
+                var json = Json.Parse(buffer);
+
+                return new JsonSerializable(ClientReport.FromJson(json));
             }
 
             // Arbitrary payload

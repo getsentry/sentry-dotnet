@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -6,6 +7,7 @@ namespace Sentry.Tunnel;
 /// <summary>
 /// Extension methods to add Sentry ingestion tunnel.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryTunnelingApplicationBuilderExtensions
 {
     /// <summary>

@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Web;
 
 namespace Sentry.AspNet;
@@ -6,6 +7,7 @@ namespace Sentry.AspNet;
 /// <summary>
 /// Sentry extensions for <see cref="HttpContext"/>.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class HttpContextExtensions
 {
     private const string HttpContextTransactionItemName = "__SentryTransaction";
