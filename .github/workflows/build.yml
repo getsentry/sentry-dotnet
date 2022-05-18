@@ -23,12 +23,12 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
-          - os: ubuntu-latest
-            slnf: SentryLinux.slnf
-          - os: windows-latest
-            slnf: SentryWindows.slnf
-          - os: macos-latest
-            slnf: SentryMac.slnf
+          - slnf: SentryLinux.slnf
+            os: ubuntu-latest
+          - slnf: SentryWindows.slnf
+            os: windows-latest
+          - slnf: SentryMac.slnf
+            os: macos-latest
 
     steps:
         - name: Checkout
