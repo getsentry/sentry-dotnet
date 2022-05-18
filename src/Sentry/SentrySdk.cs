@@ -48,12 +48,8 @@ namespace Sentry
             // Validate DSN for an early exception in case it's malformed
             _ = Dsn.Parse(dsn);
 
-            var hub = new Hub(options);
-            InitNative(hub);
-            return hub;
+            return new Hub(options);
         }
-
-        static partial void InitNative(IHub hub);
 
         /// <summary>
         /// Initializes the SDK while attempting to locate the DSN.

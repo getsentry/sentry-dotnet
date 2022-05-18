@@ -17,6 +17,7 @@ namespace Sentry
             var options = new SentryOptions();
             // TODO: Pause/Resume
             options.AutoSessionTracking = true;
+            options.IsGlobalModeEnabled = true;
             options.AddEventProcessor(new DelegateEventProcessor(evt =>
             {
 #pragma warning disable 618
@@ -39,11 +40,6 @@ namespace Sentry
             AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 
             return Init(options);
-        }
-
-        static partial void InitNative(IHub hub)
-        {
-
         }
 
         private static void AndroidEnvironment_UnhandledExceptionRaiser(object? _, RaiseThrowableEventArgs e)

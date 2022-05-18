@@ -59,7 +59,7 @@ jobs:
           with:
             dotnet-version: 2.1.818
 
-        # .NET Android workload doesn't support Linux
+        # .NET Android workload doesn't support Linux https://github.com/dotnet/sdk/issues/22411
         - name: Install Android workload (macOS)
           if: startsWith(matrix.os, 'macos')
           run: sudo dotnet workload install android
