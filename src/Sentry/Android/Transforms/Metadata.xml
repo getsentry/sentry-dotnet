@@ -35,8 +35,6 @@
 
 
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AppLifecycleIntegration']" />
-
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']/method[@name='onSensorChanged' and count(parameter)=1 and parameter[1][@type='android.hardware.SensorEvent']]" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']" />
   <remove-node path="/api/package[@name='io.sentry.cache']" />
 
