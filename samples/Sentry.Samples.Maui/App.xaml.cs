@@ -1,11 +1,11 @@
-﻿namespace Sentry.Samples.Maui;
+namespace Sentry.Samples.Maui;
 
 public partial class App : Application
 {
-	public App()
-	{
-		InitializeComponent();
+    public App()
+    {
+        InitializeComponent();
 
-		MainPage = new AppShell();
-	}
+        MainPage = new AppShell();
+    }
 }

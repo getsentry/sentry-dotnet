@@ -1,4 +1,4 @@
-﻿namespace Sentry.Samples.Maui;
+namespace Sentry.Samples.Maui;
 
 public static class MauiProgram
 {
