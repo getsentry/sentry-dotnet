@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Initial support for .NET MAUI ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
+
 ## 3.17.1
 
 ### Fixes
