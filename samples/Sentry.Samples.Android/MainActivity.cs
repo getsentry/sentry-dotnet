@@ -5,8 +5,6 @@ namespace Sentry.Samples.Android
     [Activity(Label = "@string/app_name", MainLauncher = true)]
     public class MainActivity : Activity
     {
-        // public MainActivity() => global::Java.Lang.JavaSystem.LoadLibrary("buggy");
-
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             SentrySdk.Init(this, o =>
