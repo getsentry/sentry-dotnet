@@ -3,7 +3,8 @@
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <!-- BINDINGSGENERATOR : warning BG8604: Could not find top ancestor type 'LifecycleWatcher' for nested type 'Sentry.Android.LifecycleWatcher._1' -->
     <!-- BG8604 Results in a missing API and for as long as we don't need that (and all Java/Android SDK is internal to this lib), it just doesn't matter: -->
-    <NoWarn>$(NoWarn);BG8604</NoWarn>
+    <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
+    <NoWarn>$(NoWarn);BG8604;BG8605;BG8606</NoWarn>
     <SentryAndroidSdkVersion>5.3.0</SentryAndroidSdkVersion>
     <AndroidLibsDirectory>$(MSBuildProjectDirectory)/../../libs/Android/</AndroidLibsDirectory>
     <!-- Should be built in: https://docs.microsoft.com/en-us/dotnet/standard/frameworks#how-to-specify-a-target-framework but isn't available on .NET 6 RC2 -->
