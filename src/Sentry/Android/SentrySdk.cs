@@ -33,6 +33,7 @@ namespace Sentry
                 new ConfigureOption(o =>
                 {
                     o.Dsn = options.Dsn;
+                    //TODO: we'll need to pass other stuff here from SentryOptions to SentryAndroidOptions
                 }));
 
             options.CrashedLastRun = () => Sentry.Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
