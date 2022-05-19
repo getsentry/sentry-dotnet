@@ -13,6 +13,9 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
     {
         base.Configure(options);
 
+        // We'll initialize the SDK in SentryMauiInitializer
+        options.InitializeSdk = false;
+
         // TODO: Anything MAUI specific for setting up the options. (Can inject dependencies.)
     }
 }
