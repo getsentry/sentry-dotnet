@@ -35,6 +35,13 @@
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Center" />
 
+            <Button
+                x:Name="ExceptionBtn"
+                Text="Throw Exception"
+                SemanticProperties.Hint="Throws an unhandled exception"
+                Clicked="OnExceptionClicked"
+                HorizontalOptions="Center" />
+
         </VerticalStackLayout>
     </ScrollView>
  

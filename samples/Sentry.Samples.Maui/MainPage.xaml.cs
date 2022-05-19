@@ -20,5 +20,10 @@ public partial class MainPage : ContentPage
 
 		SemanticScreenReader.Announce(CounterBtn.Text);
 	}
+
+    private void OnExceptionClicked(object sebnder, EventArgs e)
+    {
+        throw new Exception("This is a test exception, thrown from managed code in a MAUI app!");
+    }
 }
 
