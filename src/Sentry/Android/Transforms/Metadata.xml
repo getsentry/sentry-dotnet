@@ -1,0 +1,50 @@
+<metadata>
+  <!-- Make all public types, internal -->
+  <attr path="/api/package/class[@visibility='public']" name="visibility">internal</attr>
+  <attr path="/api/package/interface[@visibility='public']" name="visibility">internal</attr>
+
+  <attr path="/api/package[@name='io.sentry']" name="managedName">Sentry.Java</attr>
+  <attr path="/api/package[@name='io.sentry.cache']" name="managedName">Sentry.Java.Cache</attr>
+  <attr path="/api/package[@name='io.sentry.transport']" name="managedName">Sentry.Java.Transport</attr>
+  <attr path="/api/package[@name='io.sentry.config']" name="managedName">Sentry.Java.Configuration</attr>
+  <attr path="/api/package[@name='io.sentry.hints']" name="managedName">Sentry.Java.Hints</attr>
+  <attr path="/api/package[@name='io.sentry.util']" name="managedName">Sentry.Java.Util</attr>
+  <attr path="/api/package[@name='io.sentry.protocol']" name="managedName">Sentry.Java.Protocol</attr>
+  <attr path="/api/package[@name='io.sentry.vendor']" name="managedName">Sentry.Java.Vendor</attr>
+  <attr path="/api/package[@name='io.sentry.exception']" name="managedName">Sentry.Java.Exception</attr>
+  <attr path="/api/package[@name='io.sentry.android.core']" name="managedName">Sentry.Android</attr>
+  <attr path="/api/package[@name='io.sentry.android.core.util']" name="managedName">Sentry.Android.Util</attr>
+  <attr path="/api/package[@name='io.sentry.android.ndk']" name="managedName">Sentry.Android.Ndk</attr>
+
+  <remove-node path="/api/package[@name='io.sentry.adapters']/class[@name='CollectionAdapter']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='SessionAdapter']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='SentryEnvelopeItemHeaderAdapter']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='Session']/method[@name='clone' and count(parameter)=0]" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='HubAdapter']/method[@name='clone' and count(parameter)=0]" />
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IHub']/method[@name='clone' and count(parameter)=0]" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='NoOpHub']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='OutboxSender']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='TraceStateHeader']/field[@name='TRACE_STATE_HEADER']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='SentryOptions']/method[@name='setEnvelopeDiskCache']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='SentryOptions']/method[@name='getEnvelopeDiskCache']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='SentryTraceHeader']/field[@name='SENTRY_TRACE_HEADER']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='SentryEnvelopeHeaderAdapter']" />
+  <remove-node path="/api/package[@name='io.sentry.transport']/class[@name='NoOpEnvelopeCache']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='EnvelopeSender']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='Hub']/method[@name='clone' and count(parameter)=0]" />
+
+
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AppLifecycleIntegration']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']" />
+  <remove-node path="/api/package[@name='io.sentry.cache']" />
+
+  <remove-node path="/api/package[@name='io.sentry.adapters']" />
+  <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryEnvelopeException']" />
+  <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='ExceptionMechanismException']" />
+  <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='InvalidSentryTraceHeaderException']" />
+
+  <attr path="/api/package[@name='io.sentry']/class[@name='SpanContext']/field[@name='tags']" name="managedName">GetTags</attr>
+  <attr path="/api/package[@name='io.sentry']/class[@name='SpanContext']/field[@name='status']" name="managedName">GetStatus</attr>
+  <attr path="/api/package[@name='io.sentry']/class[@name='SpanContext']/field[@name='description']" name="managedName">GetDescription</attr>
+  <attr path="/api/package[@name='io.sentry']/class[@name='SentryBaseEvent']/field[@name='throwable']" name="managedName">GetThrowable</attr>
+</metadata>

@@ -1,0 +1,46 @@
+<Project>
+  <PropertyGroup>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <!-- BINDINGSGENERATOR : warning BG8604: Could not find top ancestor type 'LifecycleWatcher' for nested type 'Sentry.Android.LifecycleWatcher._1' -->
+    <!-- BG8604 Results in a missing API and for as long as we don't need that (and all Java/Android SDK is internal to this lib), it just doesn't matter: -->
+    <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
+    <NoWarn>$(NoWarn);BG8604;BG8605;BG8606</NoWarn>
+    <SentryAndroidSdkVersion>5.3.0</SentryAndroidSdkVersion>
+    <AndroidLibsDirectory>$(MSBuildProjectDirectory)/../../libs/Android/</AndroidLibsDirectory>
+    <!-- Should be built in: https://docs.microsoft.com/en-us/dotnet/standard/frameworks#how-to-specify-a-target-framework but isn't available on .NET 6 RC2 -->
+    <DefineConstants>$(DefineConstants);NET6_0_ANDROID_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Android/Transforms/*.xml" />
+    <TransformFile Include="Android/Transforms/*.xml" />
+    <!-- Gson will be dropped on sentry-android version 6.0.0 -->
+    <PackageReference Include="GoogleGson" Version="2.8.5" />
+    <!-- TODO: How to add JavaDocPaths for each package? -->
+    <AndroidLibrary Include="$(AndroidLibsDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
+    <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-core-$(SentryAndroidSdkVersion).aar" />
+    <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Android/*.cs" />
+  </ItemGroup>
+  <!-- Update Android SDK: Update SentryAndroidSdkVersion and run:
+    dotnet msbuild src/Sentry /t:DownloadSentryAndroidSdk /p:TargetFramework=net6.0-android -->
+  <Target Name="DownloadSentryAndroidSdk">
+    <RemoveDir Directories="$(AndroidLibsDirectory)" />
+    <DownloadFile SourceUrl="https://search.maven.org/remotecontent?filepath=io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar" 
+      DestinationFolder="$(AndroidLibsDirectory)"
+      SkipUnchangedFiles="true">
+      <Output TaskParameter="DownloadedFile" ItemName="Content" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://search.maven.org/remotecontent?filepath=io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar" 
+      DestinationFolder="$(AndroidLibsDirectory)"
+      SkipUnchangedFiles="true">
+      <Output TaskParameter="DownloadedFile" ItemName="Content" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://search.maven.org/remotecontent?filepath=io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar" 
+      DestinationFolder="$(AndroidLibsDirectory)"
+      SkipUnchangedFiles="true">
+      <Output TaskParameter="DownloadedFile" ItemName="Content" />
+    </DownloadFile>
+  </Target>
+</Project>
