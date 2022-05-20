@@ -57,7 +57,7 @@ jobs:
         - name: Install .NET Workloads
           # .NET Android workloads don't support Linux https://github.com/dotnet/sdk/issues/22411
           if: "!startsWith(matrix.os, 'ubuntu')"
-          run: sudo dotnet workload install android maui
+          run: dotnet workload install android maui
 
         - name: Dependency Caching
           uses: actions/cache@v3
