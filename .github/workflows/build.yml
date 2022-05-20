@@ -21,13 +21,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
+        os: [ubuntu-latest, windows-latest, macos-12]
         include:
           - os: ubuntu-latest
             slnf: SentryLinux.slnf
           - os: windows-latest
             slnf: SentryWindows.slnf
-          - os: macos-latest
+          - os: macos-12
             slnf: SentryMac.slnf
 
     steps:
