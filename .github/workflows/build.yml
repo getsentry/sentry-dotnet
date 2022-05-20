@@ -94,6 +94,11 @@ jobs:
           if: startsWith(matrix.os, 'windows')
           run: dotnet pack ${{ matrix.slnf }} -c Release --no-build
 
+        - name: Pack (MAUI)
+          # only pack on macos since we need ios native targets included
+          if: startsWith(matrix.os, 'macos')
+          run: dotnet pack src/Sentry.Maui -c Release --no-build
+
         - name: Upload Verify Results
           if: failure()
           uses: actions/upload-artifact@v3
@@ -111,3 +116,13 @@ jobs:
             if-no-files-found: error
             path: |
               ${{ github.workspace }}/src/**/Release/*.nupkg
+
+        - name: Archive Artifacts (MAUI)
+          # only archive MAUI on macos since we only pack MAUI on macos. See Pack step.
+          if: startsWith(matrix.os, 'macos')
+          uses: actions/upload-artifact@v3
+          with:
+            name: ${{ github.sha }}
+            if-no-files-found: error
+            path: |
+              ${{ github.workspace }}/src/Sentry.Maui/bin/Release/*.nupkg

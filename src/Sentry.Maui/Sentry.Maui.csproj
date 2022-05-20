@@ -1,22 +1,50 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    
-    <!-- 
+    <!--
+      Target each MAUI platform that we intend to have native support for.
+    -->
+    <TargetFrameworks>net6.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+
+    <!--
+      Also target non-platform specific so we can still get some functionality for managed code on other platforms.
+      Note that we can't currently target net6.0 when building on Windows due to a bug in MAUI.
+      For now, we'll build net6.0-windows just so we have something that works, but really we shouldn't.
+      See: https://github.com/dotnet/maui/issues/6529#issuecomment-1133225730
+    -->
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows</TargetFrameworks>
+
+    <!-- We'll need to package this only on OSX, so we get the iOS native support. -->
+    <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
+
+    <!--
       Imports the MAUI core reference assemblies.
       See https://github.com/dotnet/maui/blob/main/src/Workload/README.md
-      
+
       Requires the MAUI .NET workload to be installed with:
        dotnet workload install maui
     -->
     <UseMauiCore>true</UseMauiCore>
-    
-    <!-- 
+
+    <!--
       MAUI dependencies are not signed, as of RC3.  See https://github.com/dotnet/maui/issues/749
       If MAUI assemblies are signed in the future, remove this to sign our library - which will be a breaking change.
      -->
     <SignAssembly>false</SignAssembly>
+
+    <!--
+      Because MAUI is not yet released, we must publish Sentry.Maui using a pre-release tag to avoid the following error when packing:
+
+          error NU5104: A stable release of a package should not have a prerelease dependency.
+                        Either modify the version spec of dependency "Microsoft.Maui.Dependencies [6.0.300-rc.3.5667, )"
+                        or update the version field in the nuspec.
+
+      We can use our own versioning scheme to indicate status of our library. "preview.1", "preview.2", etc.
+    -->
+    <Version>$(Version)-preview.1</Version>
+
   </PropertyGroup>
 
   <ItemGroup>
