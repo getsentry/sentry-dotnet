@@ -54,18 +54,22 @@ jobs:
           with:
             dotnet-version: 2.1.818
 
-        - name: Install .NET Workloads
-          # .NET Android workloads don't support Linux https://github.com/dotnet/sdk/issues/22411
-          if: "!startsWith(matrix.os, 'ubuntu')"
-          run: dotnet workload install android maui
-
         - name: Dependency Caching
           uses: actions/cache@v3
           with:
             path: ~/.nuget/packages
-            ## we don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
-            key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
-            restore-keys: ${{ runner.os }}-nuget
+            # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
+            # Workloads also get installed in the nuget packages cache, so if you modify workloads below, increment the number in the cache keys
+            key: ${{ runner.os }}-nuget+workloads1-${{ hashFiles('**/*.*proj', '**/*.props') }}
+            restore-keys: ${{ runner.os }}-nuget+workloads1
+
+        # .NET Android workloads don't support Linux https://github.com/dotnet/sdk/issues/22411
+        - name: Install .NET Workloads (Windows)
+          if: startsWith(matrix.os, 'windows')
+          run: dotnet workload install maui-android maui-windows
+        - name: Install .NET Workloads (macOS)
+          if: startsWith(matrix.os, 'macos')
+          run: dotnet workload install maui-android maui-ios maui-maccatalyst
 
         - name: Build
           run: dotnet build ${{ matrix.slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
