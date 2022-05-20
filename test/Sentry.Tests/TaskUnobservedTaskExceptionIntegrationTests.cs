@@ -33,33 +33,26 @@ public class TaskUnobservedTaskExceptionIntegrationTests
     public void Handle_UnobservedTaskException_CaptureEvent()
     {
         _fixture.AppDomain = AppDomainAdapter.Instance;
-        var captureCalledEvent = new System.Threading.ManualResetEvent(false);
+        var captureCalledEvent = new ManualResetEvent(false);
         _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
             .Do(_ => captureCalledEvent.Set());
 
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
-        try
+        var taskStartedEvent = new ManualResetEvent(false);
+        _ = Task.Run(() =>
         {
-            var taskStartedEvent = new System.Threading.ManualResetEvent(false);
-            _ = Task.Run(() =>
-            {
-                _ = taskStartedEvent.Set();
-                throw new Exception("Unhandled on Task");
-            });
-            Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(10)));
-            var counter = 0;
-            do
-            {
-                Assert.True(counter++ < 20);
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));
-        }
-        finally
+            _ = taskStartedEvent.Set();
+            throw new Exception("Unhandled on Task");
+        });
+        Assert.True(taskStartedEvent.WaitOne(TimeSpan.FromSeconds(10)));
+        var counter = 0;
+        do
         {
-            sut.Unregister(_fixture.Hub);
-        }
+            Assert.True(counter++ < 20);
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));
     }
 #endif
 
@@ -81,15 +74,5 @@ public class TaskUnobservedTaskExceptionIntegrationTests
         sut.Register(_fixture.Hub, SentryOptions);
 
         _fixture.AppDomain.Received().UnobservedTaskException += sut.Handle;
-    }
-
-    [Fact]
-    public void Unregister_UnhandledException_Unsubscribes()
-    {
-        var sut = _fixture.GetSut();
-        sut.Register(_fixture.Hub, SentryOptions);
-        sut.Unregister(_fixture.Hub);
-
-        _fixture.AppDomain.Received(1).UnobservedTaskException -= sut.Handle;
     }
 }

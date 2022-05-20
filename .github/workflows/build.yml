@@ -15,19 +15,31 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
-      # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs on Ubuntut and Windows (doesn't happen on macOS)
+      # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs on Ubuntu and Windows (doesn't happen on macOS)
       DOTNET_INSTALL_DIR: ${{ startsWith(matrix.os, 'ubuntu') && '/usr/share/dotnet' || startsWith(matrix.os, 'windows') && 'C:\Program Files\dotnet' || '' }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            slnf: SentryLinux.slnf
+          - os: windows-latest
+            slnf: SentryWindows.slnf
+          - os: macos-latest
+            slnf: SentryMac.slnf
 
     steps:
         - name: Checkout
           uses: actions/checkout@v3
           with:
             submodules: recursive
+
+        - name: "Set up Java: 11"
+          uses: actions/setup-java@v1
+          with:
+            java-version: 11
 
         - name: Setup .NET SDK (Windows)
           if: startsWith(matrix.os, 'windows')
@@ -47,6 +59,15 @@ jobs:
           with:
             dotnet-version: 2.1.818
 
+        # .NET Android workload doesn't support Linux https://github.com/dotnet/sdk/issues/22411
+        - name: Install Android workload (macOS)
+          if: startsWith(matrix.os, 'macos')
+          run: sudo dotnet workload install android
+
+        - name: Install Android workload (Windows)
+          if: startsWith(matrix.os, 'windows')
+          run: dotnet workload install android
+
         - name: Dependency Caching
           uses: actions/cache@v3
           with:
@@ -56,10 +77,10 @@ jobs:
             restore-keys: ${{ runner.os }}-nuget
 
         - name: Build
-          run: dotnet build Sentry.sln -c Release /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build ${{ matrix.slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test Sentry.sln -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
+          run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Create Test Report
           uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
@@ -75,7 +96,7 @@ jobs:
         - name: Pack
           # only pack on windows since we need classic .net assemblies
           if: startsWith(matrix.os, 'windows')
-          run: dotnet pack Sentry.sln -c Release --no-build /p:ContinuousIntegrationBuild=true
+          run: dotnet pack ${{ matrix.slnf }} -c Release --no-build
 
         - name: Upload Verify Results
           if: failure()
