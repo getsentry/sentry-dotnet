@@ -101,14 +101,4 @@ public class AppDomainUnhandledExceptionIntegrationTests
 
         _fixture.AppDomain.Received().UnhandledException += sut.Handle;
     }
-
-    [Fact]
-    public void Unregister_UnhandledException_Unsubscribes()
-    {
-        var sut = _fixture.GetSut();
-        sut.Register(_fixture.Hub, SentryOptions);
-        sut.Unregister(_fixture.Hub);
-
-        _fixture.AppDomain.Received(1).UnhandledException -= sut.Handle;
-    }
 }

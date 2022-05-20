@@ -957,26 +957,6 @@ public class HubTests
     }
 
     [Fact]
-    public void Dispose_AutoSessionTrackingEnabled_EndsSession()
-    {
-        // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTracking = true,
-            Release = "release"
-        }, client);
-
-        // Act
-        hub.Dispose();
-
-        // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
-    }
-
-    [Fact]
     public void ResumeSession_WithinAutoTrackingInterval_ContinuesSameSession()
     {
         // Arrange

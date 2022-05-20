@@ -40,6 +40,8 @@ namespace Sentry.Internal.Http
         private readonly CancellationTokenSource _workerCts = new();
         private Task _worker = null!;
 
+        private ManualResetEventSlim? _initCacheResetEvent;
+
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
@@ -80,6 +82,32 @@ namespace Sentry.Internal.Http
 
             // Start a worker, if one is needed
             _worker = startWorker ? Task.Run(CachedTransportBackgroundTaskAsync) : Task.CompletedTask;
+
+            // Wait for init timeout, if configured.  (Can't do this without a worker.)
+            if (startWorker && _options.InitCacheFlushTimeout > TimeSpan.Zero)
+            {
+                _options.LogDebug("Blocking initialization to flush the cache.");
+
+                using (_initCacheResetEvent = new ManualResetEventSlim())
+                {
+                    // This will complete either when the first round of processing is done,
+                    // or on timeout, whichever comes first.
+                    var completed = _initCacheResetEvent.Wait(_options.InitCacheFlushTimeout);
+                    if (completed)
+                    {
+                        _options.LogDebug("Completed flushing the cache. Resuming initialization.");
+                    }
+                    else
+                    {
+                        _options.LogDebug(
+                            $"InitCacheFlushTimeout of {_options.InitCacheFlushTimeout} reached. " +
+                            "Resuming initialization. Cache will continue flushing in the background.");
+                    }
+                }
+
+                // We're done with this. Set null to avoid object disposed exceptions on future processing calls.
+                _initCacheResetEvent = null;
+            }
         }
 
         private async Task CachedTransportBackgroundTaskAsync()
@@ -132,16 +160,45 @@ namespace Sentry.Internal.Http
 
             foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
             {
-                try
+                var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.", filePath, destinationPath);
+
+                const int maxAttempts = 3;
+                for (var attempt = 1; attempt <= maxAttempts; attempt++)
                 {
-                    var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                    _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                        filePath, destinationPath);
-                    File.Move(filePath, destinationPath);
-                }
-                catch (Exception e)
-                {
-                    _options.LogError("Failed to move unprocessed file back to cache: {0}", e, filePath);
+                    try
+                    {
+                        File.Move(filePath, destinationPath);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (!File.Exists(filePath))
+                        {
+                            _options.LogDebug(
+                                "Failed to move unprocessed file back to cache (attempt {0}), " +
+                                "but the file no longer exists so it must have been handled by another process: {1}",
+                                attempt, filePath);
+                            break;
+                        }
+
+                        if (attempt < maxAttempts)
+                        {
+                            _options.LogDebug(
+                                "Failed to move unprocessed file back to cache (attempt {0}, retrying.): {1}",
+                                attempt, filePath);
+
+                            Thread.Sleep(200); // give a small bit of time before retry
+                        }
+                        else
+                        {
+                            _options.LogError(
+                                "Failed to move unprocessed file back to cache (attempt {0}, done.): {1}", ex,
+                                attempt, filePath);
+                        }
+
+                        // note: we do *not* want to re-throw the exception
+                    }
                 }
             }
         }
@@ -185,6 +242,9 @@ namespace Sentry.Internal.Http
             {
                 await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
             }
+
+            // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
+            _initCacheResetEvent?.Set();
         }
 
         private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)

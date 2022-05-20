@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
@@ -9,6 +10,7 @@ namespace NLog;
 /// <summary>
 /// NLog configuration extensions.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class ConfigurationExtensions
 {
     // Internal for testability

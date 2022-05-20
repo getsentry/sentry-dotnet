@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ namespace Sentry.Tunnel;
 /// Extension methods to add Sentry ingestion tunnel.
 /// </summary>
 [Obsolete(_obsolete)]
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryTunnelingApplicationBuilderExtensions
 {
     private const string _obsolete = @"The functionality from Sentry.Tunnel has been moved into Sentry.AspNetCore.

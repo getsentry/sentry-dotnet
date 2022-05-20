@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Web;
 using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
@@ -8,6 +9,7 @@ namespace Sentry.AspNet;
 /// <summary>
 /// SentryOptions extensions.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryAspNetOptionsExtensions
 {
     /// <summary>

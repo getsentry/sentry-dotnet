@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 
 namespace Sentry
 {
@@ -54,6 +55,7 @@ namespace Sentry
     /// <summary>
     /// Extensions for <see cref="ISpan"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SpanExtensions
     {
         /// <summary>
