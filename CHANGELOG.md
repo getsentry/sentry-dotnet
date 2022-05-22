@@ -6,7 +6,6 @@
 
 - Remove IInternalSdkIntegration ([#1656](https://github.com/getsentry/sentry-dotnet/pull/1656))
 - On async Main, dont unregister unhandled exception before capturing crash  ([#321](https://github.com/getsentry/sentry-dotnet/issues/321))
-- Re-add exception filters ([#1665](https://github.com/getsentry/sentry-dotnet/pull/1665))
 
 ## 3.17.1
 
