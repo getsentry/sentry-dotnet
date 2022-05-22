@@ -14,7 +14,7 @@
       See: https://github.com/dotnet/maui/issues/6529#issuecomment-1133225730
     -->
     <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.17763.0</TargetFrameworks>
 
     <!-- We'll need to package this only on OSX, so we get the iOS native support. -->
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
