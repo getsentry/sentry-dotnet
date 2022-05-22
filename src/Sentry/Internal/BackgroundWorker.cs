@@ -91,26 +91,22 @@ namespace Sentry.Internal
                         {
                             await _queuedEnvelopeSemaphore.WaitAsync(cancellation).ConfigureAwait(false);
                         }
-                        // Cancellation requested, scheduled shutdown but continue in case there are more items
+                        // Cancellation requested, but continue as there are more items
+                        catch (OperationCanceledException) when (_options.ShutdownTimeout == TimeSpan.Zero)
+                        {
+                            _options.LogDebug("Exiting immediately due to 0 shutdown timeout. #{0} in queue.", _queue.Count);
+
+                            return;
+                        }
+                        // Cancellation requested, scheduled shutdown
                         catch (OperationCanceledException)
                         {
-                            if (_options.ShutdownTimeout == TimeSpan.Zero)
-                            {
-                                _options.LogDebug(
-                                    "Exiting immediately due to 0 shutdown timeout. #{0} in queue.",
-                                    _queue.Count);
+                            _options.LogDebug(
+                                "Shutdown scheduled. Stopping by: {0}. #{1} in queue.",
+                                _options.ShutdownTimeout,
+                                _queue.Count);
 
-                                return;
-                            }
-                            else
-                            {
-                                _options.LogDebug(
-                                    "Shutdown scheduled. Stopping by: {0}. #{1} in queue.",
-                                    _options.ShutdownTimeout,
-                                    _queue.Count);
-
-                                shutdownTimeout.CancelAfter(_options.ShutdownTimeout);
-                            }
+                            shutdownTimeout.CancelAfter(_options.ShutdownTimeout);
 
                             shutdownRequested = true;
                         }
