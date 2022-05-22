@@ -1,9 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <!--
+      On Mac, we'll build for Android, IOS, and MacCatalyst.
+      On Windows, only build for Android due to this issue:
+      https://github.com/dotnet/maui/issues/6529#issuecomment-1133958063
+      (When resolved, we should also build for Windows.)
+    -->
+    <TargetFramework Condition="$([MSBuild]::IsOSPlatform('windows'))">net6.0-android</TargetFramework>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Samples.Maui</RootNamespace>
     <UseMaui>true</UseMaui>

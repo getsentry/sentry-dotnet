@@ -1,13 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-   <!--
-      We currently have to run windows tests on net6.0-windows due to this issue:
-      See: https://github.com/dotnet/maui/issues/6529#issuecomment-1133225730
-    -->
-    <TargetFramework Condition="!$([MSBuild]::IsOSPlatform('windows'))">net6.0</TargetFramework>
-    <TargetFramework Condition="$([MSBuild]::IsOSPlatform('windows'))">net6.0-windows10.0.17763.0</TargetFramework>
-
+    <TargetFrameworks>net6.0</TargetFrameworks>
+   
     <!--
       Imports the MAUI core reference assemblies.
       See https://github.com/dotnet/maui/blob/main/src/Workload/README.md
@@ -23,17 +18,7 @@
       the InternalsVisibleTo reference in Sentry.Maui/Properties/AssemblyInfo.cs to use the public key.
     -->
     <SignAssembly>false</SignAssembly>
-
-    <!--
-      As long as we are using platform-specific targets, we have to set some default supported versions.
-      TODO: These are the same ones used in the MAUI RC3 sample app.  Investigate if we can/should go lower.
-    -->
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-  </PropertyGroup>
+ </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />

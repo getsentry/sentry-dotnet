@@ -2,19 +2,11 @@
 
   <PropertyGroup>
     <!--
-      Target each MAUI platform that we intend to have native support for.
+      Build for net6.0 to cover all managed platforms,
+      but also target platforms where we intend to bundle native SDKs.
     -->
-    <TargetFrameworks>net6.0-android</TargetFrameworks>
+    <TargetFrameworks>net6.0;net6.0-android</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-
-    <!--
-      Also target non-platform specific so we can still get some functionality for managed code on other platforms.
-      Note that we can't currently target net6.0 when building on Windows due to a bug in MAUI.
-      For now, we'll build net6.0-windows just so we have something that works, but really we shouldn't.
-      See: https://github.com/dotnet/maui/issues/6529#issuecomment-1133225730
-    -->
-    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.17763.0</TargetFrameworks>
 
     <!-- We'll need to package this only on OSX, so we get the iOS native support. -->
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
@@ -53,8 +45,6 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>
 
   <ItemGroup>
