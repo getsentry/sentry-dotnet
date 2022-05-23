@@ -16,31 +16,19 @@
       See https://github.com/dotnet/maui/blob/main/src/Workload/README.md
 
       Requires the MAUI .NET workload to be installed with:
-       dotnet workload install maui
+        dotnet workload install maui
     -->
     <UseMauiCore>true</UseMauiCore>
 
     <!--
-      MAUI dependencies are not signed, as of RC3.  See https://github.com/dotnet/maui/issues/749
+      MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749
       If MAUI assemblies are signed in the future, remove this to sign our library - which will be a breaking change.
      -->
     <SignAssembly>false</SignAssembly>
 
     <!--
-      Because MAUI is not yet released, we must publish Sentry.Maui using a pre-release tag to avoid the following error when packing:
-
-          error NU5104: A stable release of a package should not have a prerelease dependency.
-                        Either modify the version spec of dependency "Microsoft.Maui.Dependencies [6.0.300-rc.3.5667, )"
-                        or update the version field in the nuspec.
-
-      We can use our own versioning scheme to indicate status of our library. "preview.1", "preview.2", etc.
-    -->
-    <Version>$(Version)-preview.1</Version>
-
-
-    <!--
       As long as we are using platform-specific targets, we have to set some default supported versions.
-      TODO: These are the same ones used in the MAUI RC3 sample app.  Investigate if we can/should go lower.
+      TODO: These are the same ones used in the MAUI sample app.  Investigate if we can/should go lower.
     -->
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>

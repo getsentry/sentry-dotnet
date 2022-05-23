@@ -61,8 +61,8 @@ jobs:
             path: ~/.nuget/packages
             # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
             # Workloads also get installed in the nuget packages cache, so if you modify workloads below, increment the number in the cache keys
-            key: ${{ runner.os }}-nuget+workloads1-${{ hashFiles('**/*.*proj', '**/*.props') }}
-            restore-keys: ${{ runner.os }}-nuget+workloads1
+            key: ${{ runner.os }}-nuget+workloads2-${{ hashFiles('**/*.*proj', '**/*.props') }}
+            restore-keys: ${{ runner.os }}-nuget+workloads2
 
         # .NET Android workloads don't support Linux https://github.com/dotnet/sdk/issues/22411
         - name: Install .NET Workloads (Windows)
