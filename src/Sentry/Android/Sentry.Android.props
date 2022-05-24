@@ -7,8 +7,6 @@
     <NoWarn>$(NoWarn);BG8604;BG8605;BG8606</NoWarn>
     <SentryAndroidSdkVersion>5.7.4</SentryAndroidSdkVersion>
     <AndroidLibsDirectory>$(MSBuildProjectDirectory)/../../libs/Android/</AndroidLibsDirectory>
-    <!-- Should be built in: https://docs.microsoft.com/en-us/dotnet/standard/frameworks#how-to-specify-a-target-framework but isn't available on .NET 6 RC2 -->
-    <DefineConstants>$(DefineConstants);NET6_0_ANDROID_OR_GREATER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Android/Transforms/*.xml" />
