@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
-using Microsoft.Maui.LifecycleEvents;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
 
@@ -46,17 +44,18 @@ public static class SentryMauiAppBuilderExtensions
 
         // builder.Logging.AddConfiguration();
 
-        builder.Services.Configure<SentryMauiOptions>(options =>
+        var services = builder.Services;
+        services.Configure<SentryMauiOptions>(options =>
             builder.Configuration.GetSection("Sentry").Bind(options));
 
         if (configureOptions != null)
         {
-            builder.Services.Configure(configureOptions);
+            services.Configure(configureOptions);
         }
 
-        builder.Services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
-        builder.Services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
-        builder.Services.AddSentry<SentryMauiOptions>();
+        services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
+        services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
+        services.AddSentry<SentryMauiOptions>();
 
         return builder;
     }
