@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+
+    <!--
+      Imports the MAUI core reference assemblies.
+      See https://github.com/dotnet/maui/blob/main/src/Workload/README.md
+
+      Requires the MAUI .NET workload to be installed with:
+        dotnet workload install maui
+    -->
+    <UseMauiCore>true</UseMauiCore>
+
+    <!--
+      MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749
+      If MAUI assemblies are signed in the future, remove this to sign these unit tests, then go update
+      the InternalsVisibleTo reference in Sentry.Maui/Properties/AssemblyInfo.cs to use the public key.
+    -->
+    <SignAssembly>false</SignAssembly>
+ </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- Initial support for .NET MAUI ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
+- Initial support for `net6.0-android` apps ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288))
+
 ### Fixes
 
 - Remove IInternalSdkIntegration ([#1656](https://github.com/getsentry/sentry-dotnet/pull/1656))
