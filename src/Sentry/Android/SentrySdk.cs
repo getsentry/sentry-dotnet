@@ -15,6 +15,14 @@ namespace Sentry
             Action<SentryOptions>? configureOptions)
         {
             var options = new SentryOptions();
+            configureOptions?.Invoke(options);
+            return Init(context, options);
+        }
+
+        public static IDisposable Init(
+            global::Android.Content.Context context,
+            SentryOptions options)
+        {
             // TODO: Pause/Resume
             options.AutoSessionTracking = true;
             options.IsGlobalModeEnabled = true;
@@ -26,8 +34,6 @@ namespace Sentry
                 evt.Contexts.Device.Manufacturer = Build.Manufacturer;
                 return evt;
             }));
-
-            configureOptions?.Invoke(options);
 
             Sentry.Android.SentryAndroid.Init(context, new JavaLogger(options),
                 new ConfigureOption(o =>
