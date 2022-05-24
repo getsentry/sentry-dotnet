@@ -60,4 +60,11 @@
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
   </ItemGroup>
 
+  <!-- Workaround for https://github.com/dotnet/maui/issues/7272 -->
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
+    <ItemGroup>
+      <ResolvedFileToPublish Update="@(DocFileItem)" PublishFolderType="None" />
+    </ItemGroup>
+  </Target>
+
 </Project>
