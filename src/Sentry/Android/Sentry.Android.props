@@ -14,7 +14,7 @@
     <None Remove="Android/Transforms/*.xml" />
     <TransformFile Include="Android/Transforms/*.xml" />
     <!-- Gson will be dropped on sentry-android version 6.0.0 -->
-    <PackageReference Include="GoogleGson" Version="2.8.5" />
+    <PackageReference Include="GoogleGson" Version="2.9.0.1" />
     <!-- TODO: How to add JavaDocPaths for each package? -->
     <AndroidLibrary Include="$(AndroidLibsDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-core-$(SentryAndroidSdkVersion).aar" />
