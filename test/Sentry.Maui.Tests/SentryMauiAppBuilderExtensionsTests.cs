@@ -95,4 +95,20 @@ public class SentryMauiAppBuilderExtensionsTests
         Assert.Equal(DsnSamples.ValidDsnWithoutSecret, options.Dsn);
         Assert.True(options.Debug);
     }
+
+    [Fact]
+    public void UseSentry_EnablesGlobalMode()
+    {
+        // Arrange
+        var builder = MauiApp.CreateBuilder();
+
+        // Act
+        _ = builder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        Assert.True(options.IsGlobalModeEnabled);
+    }
 }

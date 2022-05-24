@@ -16,6 +16,7 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
         // We'll initialize the SDK in SentryMauiInitializer
         options.InitializeSdk = false;
 
-        // TODO: Anything MAUI specific for setting up the options. (Can inject dependencies.)
+        // Global Mode makes sense for client apps
+        options.IsGlobalModeEnabled = true;
     }
 }
