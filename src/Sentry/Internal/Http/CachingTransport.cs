@@ -120,16 +120,13 @@ namespace Sentry.Internal.Http
                     _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
                     await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
                 }
+                catch (OperationCanceledException) when (_workerCts.IsCancellationRequested)
+                {
+                    // Swallow if IsCancellationRequested as it'll get out of the loop
+                    break;
+                }
                 catch (Exception ex)
                 {
-                    // Can't use exception filters because of a Unity 2019.4.35f IL2CPP bug
-                    // https://github.com/getsentry/sentry-unity/issues/550
-                    if (ex is OperationCanceledException && _workerCts.IsCancellationRequested)
-                    {
-                        // Swallow if IsCancellationRequested as it'll get out of the loop
-                        break;
-                    }
-
                     _options.LogError("Exception in background worker of CachingTransport.", ex);
 
                     try
@@ -272,24 +269,19 @@ namespace Sentry.Internal.Http
                     // Let the worker catch, log, wait a bit and retry.
                     throw;
                 }
+                catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
+                {
+                    _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
+                    // Let the worker catch, log, wait a bit and retry.
+                    throw;
+                }
+                catch (Exception ex) when (ex.Source == "FakeFailingTransport")
+                {
+                    // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
+                    return;
+                }
                 catch (Exception ex)
                 {
-                    // Can't use exception filters because of a Unity 2019.4.35f IL2CPP bug
-                    // https://github.com/getsentry/sentry-unity/issues/550
-                    if (ex is HttpRequestException or SocketException or IOException)
-                    {
-                        _options.LogError("Failed to send cached envelope: {0}, type: {1}, retrying after a delay.", ex,
-                            file, ex.GetType().Name);
-                        // Let the worker catch, log, wait a bit and retry.
-                        throw;
-                    }
-
-                    if (ex.Source == "FakeFailingTransport")
-                    {
-                        // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
-                        return;
-                    }
-
                     _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
                     LogFailureWithDiscard(file, ex);
                 }
