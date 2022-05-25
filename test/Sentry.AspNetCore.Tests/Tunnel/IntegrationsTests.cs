@@ -6,8 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.Tunnel.Tests;
 
-[Collection("SentryTunnelCollection")]
-public partial class IntegrationsTests
+public class IntegrationsTests
 {
     private readonly TestServer _server;
     private HttpClient _httpClient;

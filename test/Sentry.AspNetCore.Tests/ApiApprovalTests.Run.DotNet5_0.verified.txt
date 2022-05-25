@@ -61,5 +61,10 @@ namespace Sentry.AspNetCore
         public SentryStartupFilter() { }
         public System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> Configure(System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> next) { }
     }
+    public class SentryTunnelMiddleware : Microsoft.AspNetCore.Http.IMiddleware
+    {
+        public SentryTunnelMiddleware(string[] allowedHosts) { }
+        public System.Threading.Tasks.Task InvokeAsync(Microsoft.AspNetCore.Http.HttpContext context, Microsoft.AspNetCore.Http.RequestDelegate next) { }
+    }
     public delegate string? TransactionNameProvider(Microsoft.AspNetCore.Http.HttpContext context);
 }

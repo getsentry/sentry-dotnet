@@ -24,7 +24,10 @@
         integrity="sha384-l+UQ7KbPIcq6l4DoWCwMvaOJ0pdJ+oTVGD6GyROFzSriOH1F1f6dl90fOgcigkMX"
         crossorigin="anonymous"></script>
     <script>
-        Sentry.init({ dsn: "@(SentryOptions.Value.Dsn)" });
+        Sentry.init({
+          dsn: "@(SentryOptions.Value.Dsn)",
+          tunnel: "/tunnel"
+        });
         Sentry.showReportDialog({
             eventId: "@SentrySdk.LastEventId",
             subtitle2: "Event ID: @SentrySdk.LastEventId"
