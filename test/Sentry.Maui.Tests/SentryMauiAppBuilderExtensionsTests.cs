@@ -111,4 +111,34 @@ public class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.True(options.IsGlobalModeEnabled);
     }
+
+    [Fact]
+    public void UseSentry_SetsMauiSdkNameAndVersion()
+    {
+        // Arrange
+        SentryEvent @event = null;
+        var builder = MauiApp.CreateBuilder()
+            .UseSentry(options =>
+            {
+                options.Dsn = DsnSamples.ValidDsnWithoutSecret;
+                options.BeforeSend = e =>
+                {
+                    // capture the event
+                    @event = e;
+
+                    // but don't actually send it
+                    return null;
+                };
+            });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        client.CaptureMessage("test");
+
+        // Assert
+        Assert.NotNull(@event);
+        Assert.Equal(Constants.SdkName, @event.Sdk.Name);
+        Assert.Equal(Constants.SdkVersion, @event.Sdk.Version);
+    }
 }

@@ -18,5 +18,8 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
 
         // Global Mode makes sense for client apps
         options.IsGlobalModeEnabled = true;
+
+        // We'll use an event processor to set things like SDK name
+        options.AddEventProcessor(new MauiEventProcessor());
     }
 }
