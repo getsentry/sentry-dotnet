@@ -2,7 +2,12 @@
 
 ## Unreleased
 
+### Features
+
 - Move tunnel functionality into Sentry.AspNetCore ([#1645](https://github.com/getsentry/sentry-dotnet/pull/1645))
+- Initial support for .NET MAUI ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663)) ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
+- Initial support for `net6.0-android` apps ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288)) ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669))
+
 ### Fixes
 
 - Remove IInternalSdkIntegration ([#1656](https://github.com/getsentry/sentry-dotnet/pull/1656))

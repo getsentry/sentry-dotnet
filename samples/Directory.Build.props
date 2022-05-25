@@ -5,6 +5,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
