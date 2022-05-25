@@ -29,7 +29,7 @@
       "test\\Sentry.NLog.Tests\\Sentry.NLog.Tests.csproj",
       "test\\Sentry.Serilog.Tests\\Sentry.Serilog.Tests.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
-      "test\\Sentry.Tests\\Sentry.Tests.csproj",
+      "test\\Sentry.Tests\\Sentry.Tests.csproj"
     ]
   }
 }
