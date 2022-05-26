@@ -236,9 +236,9 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    [InlineData(null)]
+    [InlineData(true)]  // InitCacheFlushTimeout is more than enough time to process all messages
+    [InlineData(false)] // InitCacheFlushTimeout is less time than needed to process all messages
+    [InlineData(null)]  // InitCacheFlushTimeout is not set
     public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed(bool? testDelayWorking)
     {
         // Arrange
