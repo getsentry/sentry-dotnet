@@ -300,6 +300,9 @@ public class SentrySdkTests : SentrySdkTestFixture
                 case true:
                     // We waited long enough to have them all
                     Assert.Equal(numEnvelopes, actualCount);
+
+                    // But we should not have waited longer than we needed to
+                    Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
                     break;
                 case false:
                     // We only waited long enough to have at least one, but not all of them
@@ -309,11 +312,6 @@ public class SentrySdkTests : SentrySdkTestFixture
                     // We shouldn't have any, as we didn't ask to flush the cache on init
                     Assert.Equal(0, actualCount);
                     break;
-            }
-
-            if (testDelayWorking is true)
-            {
-                Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
             }
         }
         finally
