@@ -16,6 +16,7 @@
 
 - Remove IInternalSdkIntegration ([#1656](https://github.com/getsentry/sentry-dotnet/pull/1656))
 - On async Main, dont unregister unhandled exception before capturing crash  ([#321](https://github.com/getsentry/sentry-dotnet/issues/321))
+- Handle BadHttpRequestException from Kestrel inside SentryTunnelMiddleware ([#1673](https://github.com/getsentry/sentry-dotnet/pull/1673))
 
 ## 3.17.1
 

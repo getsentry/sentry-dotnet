@@ -41,11 +41,20 @@ public class SentryTunnelMiddleware : IMiddleware
             return;
         }
 
-        var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
-        var client = httpClientFactory.CreateClient("SentryTunnel");
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version.Value));
         var memoryStream = new MemoryStream();
-        await request.Body.CopyToAsync(memoryStream).ConfigureAwait(false);
+        try
+        {
+            await request.Body.CopyToAsync(memoryStream).ConfigureAwait(false);
+        }
+        catch (IOException ex) when (ex.GetType().Name == "BadHttpRequestException")
+        {
+            // See https://github.com/dotnet/aspnetcore/issues/23949
+            // This is an exception thrown by Kestrel if the client breaks off the request while trying to read the input stream
+            // We can't forward this to Sentry so we just return a 400
+            response.StatusCode = StatusCodes.Status400BadRequest;
+            return;
+        }
+
         memoryStream.Position = 0;
         using var reader = new StreamReader(memoryStream);
         var header = await reader.ReadLineAsync().ConfigureAwait(false);
@@ -54,6 +63,10 @@ public class SentryTunnelMiddleware : IMiddleware
             response.StatusCode = StatusCodes.Status400BadRequest;
             return;
         }
+
+        var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
+        var client = httpClientFactory.CreateClient("SentryTunnel");
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version.Value));
 
         try
         {
