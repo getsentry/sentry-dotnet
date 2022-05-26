@@ -270,7 +270,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         var initFlushTimeout = testDelayWorking switch
         {
             true => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes + 1)), // more than enough
-            false => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * 2), // just enough for at least one, but not all
+            false => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * 3), // enough for at least one, but not all
             null => TimeSpan.Zero // none at all
         };
 
