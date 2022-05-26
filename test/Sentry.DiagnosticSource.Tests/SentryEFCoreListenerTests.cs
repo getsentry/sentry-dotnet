@@ -84,7 +84,7 @@ public class SentryEFCoreListenerTests
     [InlineData(EFQueryCompiling, "data")]
     [InlineData(EFConnectionOpening, null)]
     [InlineData(EFCommandExecuting, "data")]
-    public void OnNext_KnownKey_GetSpanInvoked(string key, string value)
+    public void OnNext_KnownKey_GetSpanInvoked_OnMainTransaction(string key, string value)
     {
         // Arrange
         var interceptor = new SentryEFCoreListener(_fixture.Hub, _fixture.Options);
@@ -94,6 +94,25 @@ public class SentryEFCoreListenerTests
 
         // Assert
         var child = _fixture.Spans.First(s => GetValidator(key)(s));
+        Assert.Equal(_fixture.Tracer.SpanId, child.ParentSpanId);
+    }
+
+    [Theory]
+    [InlineData(EFQueryCompiling, "data")]
+    [InlineData(EFConnectionOpening, null)]
+    [InlineData(EFCommandExecuting, "data")]
+    public void OnNext_KnownKey_GetSpanInvoked_WithPreviousSpan(string key, string value)
+    {
+        var mainSpan = _fixture.Tracer.StartChild("hello-world");
+        // Arrange
+        var interceptor = new SentryEFCoreListener(_fixture.Hub, _fixture.Options);
+
+        // Act
+        interceptor.OnNext(new(key, value));
+
+        // Assert
+        var child = _fixture.Spans.First(s => GetValidator(key)(s));
+        Assert.Equal(mainSpan.SpanId, child.ParentSpanId);
     }
 
     [Theory]
