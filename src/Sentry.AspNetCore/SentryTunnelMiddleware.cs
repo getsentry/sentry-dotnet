@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.AspNetCore;
@@ -47,7 +46,7 @@ public class SentryTunnelMiddleware : IMiddleware
         {
             await request.Body.CopyToAsync(memoryStream).ConfigureAwait(false);
         }
-        catch(BadHttpRequestException)
+        catch (IOException ex) when (ex.GetType().Name == "BadHttpRequestException")
         {
             // See https://github.com/dotnet/aspnetcore/issues/23949
             // This is an exception thrown by Kestrel if the client breaks off the request while trying to read the input stream
@@ -55,6 +54,7 @@ public class SentryTunnelMiddleware : IMiddleware
             response.StatusCode = StatusCodes.Status400BadRequest;
             return;
         }
+
         memoryStream.Position = 0;
         using var reader = new StreamReader(memoryStream);
         var header = await reader.ReadLineAsync().ConfigureAwait(false);
