@@ -78,16 +78,16 @@ jobs:
         - name: Test
           run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
-        - name: Create Test Report
-          uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
-          # run this step even if previous step failed
-          if: success() || failure()
-          with:
-            name: Unit Test Results (${{ matrix.os }})
-            path: '**/*.trx'
-            reporter: dotnet-trx
-            list-suites: 'failed'
-            list-tests: 'failed'
+        # - name: Create Test Report
+        #   uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
+        #   # run this step even if previous step failed
+        #   if: success() || failure()
+        #   with:
+        #     name: Unit Test Results (${{ matrix.os }})
+        #     path: '**/*.trx'
+        #     reporter: dotnet-trx
+        #     list-suites: 'failed'
+        #     list-tests: 'failed'
 
         - name: Pack
           # only pack on windows since we need classic .net assemblies
