@@ -62,7 +62,7 @@ namespace Sentry.Internals.DiagnosticSource
                 return scope.GetSpan();
             }
 
-            return scope.Transaction;
+            return scope.Transaction?.GetLastActiveSpan() ?? scope.Transaction;
         }
 
         private void AddSpan(SentryEFSpanType type, string operation, string? description)
