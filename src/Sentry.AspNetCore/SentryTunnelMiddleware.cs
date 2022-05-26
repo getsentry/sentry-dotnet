@@ -50,7 +50,7 @@ public class SentryTunnelMiddleware : IMiddleware
         catch(BadHttpRequestException)
         {
             // See https://github.com/dotnet/aspnetcore/issues/23949
-            // This is an exception thrown by Kestrel if the client breaks off the request while trying to read the input stram
+            // This is an exception thrown by Kestrel if the client breaks off the request while trying to read the input stream
             // We can't forward this to Sentry so we just return a 400
             response.StatusCode = StatusCodes.Status400BadRequest;
             return;
