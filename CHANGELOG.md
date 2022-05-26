@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Flatten AggregateException ([#1672](https://github.com/getsentry/sentry-dotnet/pull/1672))
+
 ### Features
 
 - Move tunnel functionality into Sentry.AspNetCore ([#1645](https://github.com/getsentry/sentry-dotnet/pull/1645))
