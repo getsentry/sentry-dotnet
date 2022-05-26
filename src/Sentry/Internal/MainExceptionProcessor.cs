@@ -88,6 +88,11 @@ namespace Sentry.Internal
                 {
                     yield return inner;
                 }
+
+                if (!_options.KeepAggregateException)
+                {
+                    yield break;
+                }
             }
             else if (exception.InnerException != null)
             {

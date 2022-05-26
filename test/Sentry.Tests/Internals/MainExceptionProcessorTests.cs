@@ -153,14 +153,31 @@ public class MainExceptionProcessorTests
     public Task CreateSentryException_Aggregate()
     {
         var sut = _fixture.GetSut();
-        var inner1 = new Exception("Inner message1");
-        var inner2 = new Exception("Inner message2");
-        var aggregateException = new AggregateException(inner1, inner2);
+        var aggregateException = BuildAggregateException();
+
+        var sentryException = sut.CreateSentryException(aggregateException);
+
+        return Verify(sentryException);
+    }
+
+    [Fact]
+    public Task CreateSentryException_Aggregate_Keep()
+    {
+        _fixture.SentryOptions.KeepAggregateException = true;
+        var sut = _fixture.GetSut();
+        var aggregateException = BuildAggregateException();
 
         var sentryException = sut.CreateSentryException(aggregateException);
 
         return Verify(sentryException)
-            .ScrubLines(x=>x.Contains("One or more errors occurred"));
+            .ScrubLines(x => x.Contains("One or more errors occurred"));
+    }
+
+    private static AggregateException BuildAggregateException()
+    {
+        return new AggregateException(
+            new Exception("Inner message1"),
+            new Exception("Inner message2"));
     }
 
     [Fact]

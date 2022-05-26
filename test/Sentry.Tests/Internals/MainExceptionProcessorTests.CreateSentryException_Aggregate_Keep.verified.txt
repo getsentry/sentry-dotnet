@@ -10,5 +10,10 @@
     Value: Inner message2,
     ThreadId: Id_1,
     Mechanism: {}
+  },
+  {
+    Type: System.AggregateException,
+    ThreadId: Id_1,
+    Mechanism: {}
   }
 ]

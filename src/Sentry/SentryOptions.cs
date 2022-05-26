@@ -592,6 +592,13 @@ namespace Sentry
         public Func<bool>? CrashedLastRun { get; set; }
 
         /// <summary>
+        /// Keep <see cref="AggregateException"/> in sentry logging.
+        /// The default behaviour is to only log <see cref="AggregateException.InnerExceptions"/> and not include the root <see cref="AggregateException"/>.
+        /// Set KeepAggregateException to true to include the root <see cref="AggregateException"/>.
+        /// </summary>
+        public bool KeepAggregateException { get; set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
