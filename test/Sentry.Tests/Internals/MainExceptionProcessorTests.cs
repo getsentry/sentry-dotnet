@@ -1,5 +1,6 @@
 namespace Sentry.Tests.Internals;
 
+[UsesVerify]
 public class MainExceptionProcessorTests
 {
     private class Fixture
@@ -149,7 +150,38 @@ public class MainExceptionProcessorTests
     }
 
     [Fact]
-    public void Process_HasTagsOnExceptionData_TagsSetted()
+    public Task CreateSentryException_Aggregate()
+    {
+        var sut = _fixture.GetSut();
+        var aggregateException = BuildAggregateException();
+
+        var sentryException = sut.CreateSentryException(aggregateException);
+
+        return Verify(sentryException);
+    }
+
+    [Fact]
+    public Task CreateSentryException_Aggregate_Keep()
+    {
+        _fixture.SentryOptions.KeepAggregateException = true;
+        var sut = _fixture.GetSut();
+        var aggregateException = BuildAggregateException();
+
+        var sentryException = sut.CreateSentryException(aggregateException);
+
+        return Verify(sentryException)
+            .ScrubLines(x => x.Contains("One or more errors occurred"));
+    }
+
+    private static AggregateException BuildAggregateException()
+    {
+        return new AggregateException(
+            new Exception("Inner message1"),
+            new Exception("Inner message2"));
+    }
+
+    [Fact]
+    public void Process_HasTagsOnExceptionData_TagsSet()
     {
         //Assert
         var sut = _fixture.GetSut();
