@@ -5,6 +5,7 @@
 ### Fixes
 
 - Flatten AggregateException ([#1672](https://github.com/getsentry/sentry-dotnet/pull/1672))
+- Improve timestamp precision of transactions and spans ([#1680](https://github.com/getsentry/sentry-dotnet/pull/1680))
 
 ### Features
 
