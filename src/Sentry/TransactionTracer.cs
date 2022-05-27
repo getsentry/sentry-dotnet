@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -11,6 +12,7 @@ namespace Sentry
     public class TransactionTracer : ITransaction
     {
         private readonly IHub _hub;
+        private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
         /// <inheritdoc />
         public SpanId SpanId
@@ -50,7 +52,7 @@ namespace Sentry
         public string? Release { get; set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; internal set; }
@@ -170,8 +172,10 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public TransactionTracer(IHub hub, ITransactionContext context)
-            : this(hub, context.Name, context.Operation)
         {
+            _hub = hub;
+            Name = context.Name;
+            Operation = context.Operation;
             SpanId = context.SpanId;
             ParentSpanId = context.ParentSpanId;
             TraceId = context.TraceId;
@@ -224,7 +228,7 @@ namespace Sentry
         public void Finish()
         {
             Status ??= SpanStatus.UnknownError;
-            EndTimestamp = DateTimeOffset.UtcNow;
+            EndTimestamp = _stopwatch.CurrentDateTimeOffset;
 
             foreach (var span in _spans)
             {
