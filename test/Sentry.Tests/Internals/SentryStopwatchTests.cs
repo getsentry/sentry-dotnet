@@ -2,7 +2,8 @@ namespace Sentry.Tests.Internals;
 
 public class SentryStopwatchTests
 {
-    private static readonly TimeSpan TestPrecision = TimeSpan.FromMilliseconds(10);
+    // Note: We can really can't test this at fine precision.  This is just to make sure we're in the right ballpark.
+    private static readonly TimeSpan TestPrecision = TimeSpan.FromMilliseconds(500);
 
     [Fact]
     public void StartDateTimeOffset_IsValid()
@@ -12,7 +13,6 @@ public class SentryStopwatchTests
 
         start.Should().BeCloseTo(DateTimeOffset.UtcNow, TestPrecision);
     }
-
 
     [Fact]
     public void CurrentDateTimeOffset_IsValid()
