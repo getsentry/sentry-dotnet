@@ -33,6 +33,7 @@ public class SentryStopwatchTests
         Thread.Sleep(sleepTime);
         var elapsed = sw.Elapsed;
 
+        elapsed.Should().BeGreaterThan(TimeSpan.Zero);
         elapsed.Should().BeCloseTo(sleepTime, TestPrecision);
     }
 }
