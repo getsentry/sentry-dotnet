@@ -236,9 +236,9 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    [InlineData(null)]
+    [InlineData(true)]  // InitCacheFlushTimeout is more than enough time to process all messages
+    [InlineData(false)] // InitCacheFlushTimeout is less time than needed to process all messages
+    [InlineData(null)]  // InitCacheFlushTimeout is not set
     public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed(bool? testDelayWorking)
     {
         // Arrange
@@ -253,7 +253,7 @@ public class SentrySdkTests : SentrySdkTestFixture
             Dsn = ValidDsnWithoutSecret,
             CacheDirectoryPath = cachePath
         }, startWorker: false);
-        const int numEnvelopes = 3;
+        const int numEnvelopes = 5;  // Not too many, or this will be slow.  Not too few or this will be flaky.
         for (var i = 0; i < numEnvelopes; i++)
         {
             using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -269,9 +269,9 @@ public class SentrySdkTests : SentrySdkTestFixture
         // Set the timeout for the desired result
         var initFlushTimeout = testDelayWorking switch
         {
-            true => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes + 1)),
-            false => TimeSpan.FromTicks((long)(processingDelayPerEnvelope.Ticks * 1.9)), // not quite 2, since we want 1 envelope
-            null => TimeSpan.Zero
+            true => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes + 1)), // more than enough
+            false => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * 3), // enough for at least one, but not all
+            null => TimeSpan.Zero // none at all
         };
 
         // Act
@@ -294,18 +294,24 @@ public class SentrySdkTests : SentrySdkTestFixture
 
             // Assert
             var actualCount = transport.GetSentEnvelopes().Count;
-            var expectedCount = testDelayWorking switch
-            {
-                true => numEnvelopes, // We waited long enough to have them all
-                false => 1,           // We only waited long enough to have one
-                null => 0             // We shouldn't have any, as we didn't ask to flush the cache on init
-            };
 
-            Assert.Equal(expectedCount, actualCount);
-
-            if (testDelayWorking is true)
+            switch (testDelayWorking)
             {
-                Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
+                case true:
+                    // We waited long enough to have them all
+                    Assert.Equal(numEnvelopes, actualCount);
+
+                    // But we should not have waited longer than we needed to
+                    Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
+                    break;
+                case false:
+                    // We only waited long enough to have at least one, but not all of them
+                    Assert.True(actualCount is > 0 and < numEnvelopes);
+                    break;
+                case null:
+                    // We shouldn't have any, as we didn't ask to flush the cache on init
+                    Assert.Equal(0, actualCount);
+                    break;
             }
         }
         finally
