@@ -66,7 +66,7 @@ namespace Sentry
             (_extra ??= new Dictionary<string, object?>())[key] = value;
 
         /// <summary>
-        /// Initializes an instance of <see cref="SpanTracer"/>.
+        /// Initializes an instance of <see cref="Span"/>.
         /// </summary>
         public Span(SpanId? parentSpanId, string operation)
         {
@@ -77,7 +77,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="SpanTracer"/>.
+        /// Initializes an instance of <see cref="Span"/>.
         /// </summary>
         public Span(ISpan tracer)
             : this(tracer.ParentSpanId, tracer.Operation)
