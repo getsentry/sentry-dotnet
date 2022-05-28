@@ -72,11 +72,12 @@ namespace Sentry.AspNetCore
                     ? new TransactionContext(transactionName ?? string.Empty, OperationName, traceHeader)
                     : new TransactionContext(transactionName ?? string.Empty, OperationName);
 
-                var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+                var customSamplingContext = new Dictionary<string, object?>(4, StringComparer.Ordinal)
                 {
                     [SamplingExtensions.KeyForHttpMethod] = context.Request.Method,
                     [SamplingExtensions.KeyForHttpRoute] = context.TryGetRouteTemplate(),
-                    [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value
+                    [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value,
+                    [SamplingExtensions.KeyForHttpContext] = context,
                 };
 
                 var transaction = hub.StartTransaction(transactionContext, customSamplingContext);
