@@ -76,7 +76,7 @@ jobs:
           run: dotnet build ${{ matrix.slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l "GitHubActions;report-warnings=false" -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
+          run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l GitHubActions -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         # - name: Create Test Report
         #   uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
