@@ -198,6 +198,7 @@ public class SentryTracingMiddlewareTests
     {
         // Arrange
         TransactionSamplingContext samplingContext = null;
+        HttpContext httpContext = null;
 
         var sentryClient = Substitute.For<ISentryClient>();
 
@@ -226,7 +227,11 @@ public class SentryTracingMiddlewareTests
                 app.UseRouting();
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
+                app.UseEndpoints(routes => routes.Map("/person/{id}", context =>
+                {
+                    httpContext = context;
+                    return Task.CompletedTask;
+                }));
             }));
 
         var client = server.CreateClient();
@@ -239,6 +244,7 @@ public class SentryTracingMiddlewareTests
         samplingContext.TryGetHttpMethod().Should().Be("GET");
         samplingContext.TryGetHttpRoute().Should().Be("/person/{id}");
         samplingContext.TryGetHttpPath().Should().Be("/person/13");
+        samplingContext.TryGetHttpContext().Should().BeSameAs(httpContext);
     }
 
     [Fact]
