@@ -1,18 +1,14 @@
 <Project>
   <PropertyGroup>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
-    <!-- BINDINGSGENERATOR : warning BG8604: Could not find top ancestor type 'LifecycleWatcher' for nested type 'Sentry.Android.LifecycleWatcher._1' -->
-    <!-- BG8604 Results in a missing API and for as long as we don't need that (and all Java/Android SDK is internal to this lib), it just doesn't matter: -->
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
-    <NoWarn>$(NoWarn);BG8604;BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>5.7.4</SentryAndroidSdkVersion>
+    <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
+    <SentryAndroidSdkVersion>6.0.0-rc.1</SentryAndroidSdkVersion>
     <AndroidLibsDirectory>$(MSBuildProjectDirectory)/../../libs/Android/</AndroidLibsDirectory>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Android/Transforms/*.xml" />
     <TransformFile Include="Android/Transforms/*.xml" />
-    <!-- Gson will be dropped on sentry-android version 6.0.0 -->
-    <PackageReference Include="GoogleGson" Version="2.9.0.1" />
     <!-- TODO: How to add JavaDocPaths for each package? -->
     <AndroidLibrary Include="$(AndroidLibsDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-core-$(SentryAndroidSdkVersion).aar" />
