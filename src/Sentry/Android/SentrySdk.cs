@@ -40,6 +40,10 @@ namespace Sentry
                 {
                     o.Dsn = options.Dsn;
                     //TODO: we'll need to pass other stuff here from SentryOptions to SentryAndroidOptions
+
+                    // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
+                    o.AddIgnoredExceptionForType(Class.ForName("android.runtime.JavaProxyThrowable"));
+
                 }));
 
             options.CrashedLastRun = () => Sentry.Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
