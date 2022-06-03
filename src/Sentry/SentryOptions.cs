@@ -680,7 +680,10 @@ namespace Sentry
                     "ServiceStack"
             };
 
-            InAppInclude = Array.Empty<string>();
+            InAppInclude = new[]
+            {
+                "Sentry.Samples."
+            };
         }
     }
 }
