@@ -668,6 +668,7 @@ namespace Sentry
                     "IdentityModel",
                     "SqlitePclRaw",
                     "Xamarin",
+                    "Android.", // Ex: Android.Runtime.JNINativeWrapper...
                     "Google.",
                     "MongoDB.",
                     "Remotion.Linq",
