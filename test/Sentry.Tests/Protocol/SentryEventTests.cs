@@ -1,9 +1,10 @@
 namespace Sentry.Tests.Protocol;
 
+[UsesVerify]
 public class SentryEventTests
 {
     [Fact]
-    public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
+    public async Task SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
         var ex = new Exception("exception message");
         var timestamp = DateTimeOffset.MaxValue;
@@ -58,6 +59,8 @@ public class SentryEventTests
         sut.SetTag("tag_key", "tag_value");
 
         var actualString = sut.ToJsonString();
+
+        await VerifyJson(actualString);
 
         actualString.Should().Contain(
             "\"debug_meta\":{\"images\":[" +
