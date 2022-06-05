@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Sentry.Internal.Extensions
@@ -39,5 +40,10 @@ namespace Sentry.Internal.Extensions
                 }
             }
         }
+
+        public static IReadOnlyList<T> AsReadOnly<T>(this IList<T> list) =>
+            list is IReadOnlyList<T> readOnlyList
+                ? readOnlyList
+                : new ReadOnlyCollection<T>(list);
     }
 }
