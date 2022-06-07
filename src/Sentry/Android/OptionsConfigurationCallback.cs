@@ -1,6 +1,3 @@
-using System;
-using JavaObject = Java.Lang.Object;
-
 namespace Sentry.Android
 {
     internal class OptionsConfigurationCallback : JavaObject, Java.Sentry.IOptionsConfiguration

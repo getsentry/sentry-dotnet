@@ -1,7 +1,3 @@
-using System.Linq;
-using Java.Lang;
-using JavaObject = Java.Lang.Object;
-
 namespace Sentry.Android
 {
     internal class JavaLogger : JavaObject, Java.ILogger

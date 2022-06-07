@@ -1,10 +1,5 @@
-using System;
-using System.Linq;
-using System.IO;
 using System.Text.Json;
 using Sentry.Extensibility;
-using JavaInputStreamReader = Java.IO.InputStreamReader;
-using JavaOutputStreamWriter = Java.IO.OutputStreamWriter;
 
 namespace Sentry.Android
 {

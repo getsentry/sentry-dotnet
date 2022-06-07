@@ -1,6 +1,4 @@
-using System;
 using Sentry.Extensibility;
-using JavaObject = Java.Lang.Object;
 
 namespace Sentry.Android
 {

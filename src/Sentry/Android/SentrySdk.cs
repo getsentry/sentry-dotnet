@@ -1,15 +1,6 @@
-using System;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
 using Sentry.Android;
 using Sentry.Internal;
 using Sentry.Protocol;
-using JavaClass = Java.Lang.Class;
-using JavaDouble = Java.Lang.Double;
 
 namespace Sentry
 {
@@ -21,7 +12,7 @@ namespace Sentry
         /// <param name="context">The Android application context.</param>
         /// <param name="configureOptions">The configuration options callback.</param>
         /// <returns>An object that should be disposed when the application terminates.</returns>
-        public static IDisposable Init(Context context, Action<SentryOptions>? configureOptions)
+        public static IDisposable Init(AndroidContext context, Action<SentryOptions>? configureOptions)
         {
             var options = new SentryOptions();
             configureOptions?.Invoke(options);
@@ -34,25 +25,25 @@ namespace Sentry
         /// <param name="context">The Android application context.</param>
         /// <param name="options">The configuration options instance.</param>
         /// <returns>An object that should be disposed when the application terminates.</returns>
-        public static IDisposable Init(Context context, SentryOptions options)
+        public static IDisposable Init(AndroidContext context, SentryOptions options)
         {
             // TODO: Pause/Resume
             options.AutoSessionTracking = true;
             options.IsGlobalModeEnabled = true;
             options.AddEventProcessor(new DelegateEventProcessor(evt =>
             {
-                if (Build.SupportedAbis is { } abis)
+                if (AndroidBuild.SupportedAbis is { } abis)
                 {
                     evt.Contexts.Device.Architecture = abis[0];
                 }
                 else
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    evt.Contexts.Device.Architecture = Build.CpuAbi;
+                    evt.Contexts.Device.Architecture = AndroidBuild.CpuAbi;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
 
-                evt.Contexts.Device.Manufacturer = Build.Manufacturer;
+                evt.Contexts.Device.Manufacturer = AndroidBuild.Manufacturer;
 
                 return evt;
             }));

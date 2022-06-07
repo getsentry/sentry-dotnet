@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-
 namespace Sentry
 {
     public partial class SentryOptions

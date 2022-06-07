@@ -1,7 +1,4 @@
-using System;
 using Sentry.Java;
-using JavaDouble = Java.Lang.Double;
-using JavaObject = Java.Lang.Object;
 
 namespace Sentry.Android
 {
