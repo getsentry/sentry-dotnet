@@ -7,6 +7,7 @@
 - Improve timestamp precision of transactions and spans ([#1680](https://github.com/getsentry/sentry-dotnet/pull/1680))
 - Flatten AggregateException ([#1672](https://github.com/getsentry/sentry-dotnet/pull/1672))
   - NOTE: This can affect grouping. You can keep the original behavior by setting the option `KeepAggregateException` to `true`.  
+- Serialize stack frame addresses as strings. ([#1692](https://github.com/getsentry/sentry-dotnet/pull/1692))
 
 ### Features
 
