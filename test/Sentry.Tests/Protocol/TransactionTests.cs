@@ -74,7 +74,7 @@ public class TransactionTests
         // Act
         var finalTransaction = new Transaction(transaction);
         var actualString = finalTransaction.ToJsonString();
-        var actual = Transaction.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Transaction.FromJson);
 
         // Assert
         actual.Should().BeEquivalentTo(finalTransaction, o =>

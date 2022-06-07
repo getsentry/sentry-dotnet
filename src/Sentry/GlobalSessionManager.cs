@@ -41,7 +41,7 @@ namespace Sentry
             _options = options;
             _clock = clock ?? SystemClock.Clock;
             _persistedSessionProvider = persistedSessionProvider
-                                        ?? (filePath => PersistedSessionUpdate.FromJson(Json.Load(filePath)));
+                                        ?? (filePath => Json.Load(filePath, PersistedSessionUpdate.FromJson));
 
             // TODO: session file should really be process-isolated, but we
             // don't have a proper mechanism for that right now.

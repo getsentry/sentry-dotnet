@@ -203,7 +203,7 @@ public class DeviceTests
         const string json = "{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}";
 
         // Act
-        var device = Device.FromJson(Json.Parse(json));
+        var device = Json.Parse(json, Device.FromJson);
 
         // Assert
         device.Timezone.Should().NotBeNull();

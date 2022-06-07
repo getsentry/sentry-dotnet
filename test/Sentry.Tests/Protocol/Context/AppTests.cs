@@ -18,7 +18,7 @@ public class AppTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = App.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, App.FromJson);
         actual.Should().BeEquivalentTo(sut);
     }
 

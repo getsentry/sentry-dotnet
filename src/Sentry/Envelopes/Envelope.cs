@@ -232,7 +232,7 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return
-                Json.Parse(buffer.ToArray()).GetDictionaryOrNull()
+                Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
         }
 

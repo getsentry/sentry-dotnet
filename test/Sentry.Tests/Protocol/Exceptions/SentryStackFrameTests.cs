@@ -54,7 +54,7 @@ public class SentryStackFrameTests
             "}",
             actual);
 
-        var parsed = SentryStackFrame.FromJson(Json.Parse(actual));
+        var parsed = Json.Parse(actual, SentryStackFrame.FromJson);
 
         parsed.Should().BeEquivalentTo(sut);
     }
