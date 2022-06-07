@@ -46,8 +46,8 @@ public class SentryStackFrameTests
             "\"in_app\":true," +
             "\"package\":\"Package\"," +
             "\"platform\":\"Platform\"," +
-            "\"image_addr\":3," +
-            "\"symbol_addr\":4," +
+            "\"image_addr\":\"0x3\"," +
+            "\"symbol_addr\":\"0x4\"," +
             "\"instruction_addr\":\"0xffffffff\"," +
             "\"instruction_offset\":5," +
             "\"addr_mode\":\"rel:0\"" +
