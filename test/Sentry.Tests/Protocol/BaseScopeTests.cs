@@ -1,16 +1,8 @@
 namespace Sentry.Tests.Protocol;
 
-[UsesVerify]
 public class BaseScopeTests
 {
     private readonly Scope _sut = new(new SentryOptions());
-
-    [Fact]
-    public Task Invalid_Type_in_Contexts()
-    {
-        _sut.Contexts["device"] = "value";
-        return Throws(() => _sut.Contexts.Device);
-    }
 
     [Fact]
     public void Fingerprint_ByDefault_ReturnsEmptyEnumerable()
