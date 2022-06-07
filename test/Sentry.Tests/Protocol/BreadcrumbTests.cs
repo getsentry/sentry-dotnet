@@ -8,7 +8,7 @@ public class BreadcrumbTests : ImmutableTests<Breadcrumb>
         var sut = new Breadcrumb("test", "unit");
 
         var actualJson = sut.ToJsonString();
-        var actual = Breadcrumb.FromJson(Json.Parse(actualJson));
+        var actual = Json.Parse(actualJson, Breadcrumb.FromJson);
 
         Assert.NotEqual(default, actual.Timestamp);
     }

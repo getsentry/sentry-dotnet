@@ -104,6 +104,36 @@ namespace Sentry.Internal.Extensions
             return double.Parse(json.ToString()!);
         }
 
+        public static long? GetAddressAsLong(this JsonElement json)
+        {
+            // If the address is in json as a number, we can just use it.
+            if (json.ValueKind == JsonValueKind.Number)
+            {
+                return json.GetInt64();
+            }
+
+            // Otherwise it will be a string, but we need to convert it to a number.
+            var s = json.GetString();
+            if (s == null)
+            {
+                return null;
+            }
+
+            // It should be in hex format, such as "0x7fff5bf346c0"
+#if NETCOREAPP || NETSTANDARD2_1_OR_GREATER
+            var substring = s[2..];
+#else
+            var substring = s.Substring(2);
+#endif
+            if (s.StartsWith("0x") &&
+                long.TryParse(substring, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
+            {
+                return result;
+            }
+
+            throw new FormatException();
+        }
+
         public static string GetStringOrThrow(this JsonElement json) =>
             json.GetString() ?? throw new InvalidOperationException("JSON string is null.");
 

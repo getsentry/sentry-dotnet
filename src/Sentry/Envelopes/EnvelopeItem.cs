@@ -317,7 +317,7 @@ namespace Sentry.Protocol.Envelopes
             }
 
             return
-                Json.Parse(buffer.ToArray()).GetDictionaryOrNull()
+                Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
@@ -339,9 +339,9 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                var json = Json.Parse(buffer);
+                var sentryEvent = Json.Parse(buffer, SentryEvent.FromJson);
 
-                return new JsonSerializable(SentryEvent.FromJson(json));
+                return new JsonSerializable(sentryEvent);
             }
 
             // User report
@@ -349,9 +349,9 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                var json = Json.Parse(buffer);
+                var userFeedback = Json.Parse(buffer, UserFeedback.FromJson);
 
-                return new JsonSerializable(UserFeedback.FromJson(json));
+                return new JsonSerializable(userFeedback);
             }
 
             // Transaction
@@ -359,9 +359,9 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                var json = Json.Parse(buffer);
+                var transaction = Json.Parse(buffer, Transaction.FromJson);
 
-                return new JsonSerializable(Transaction.FromJson(json));
+                return new JsonSerializable(transaction);
             }
 
             // Session
@@ -369,9 +369,9 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                var json = Json.Parse(buffer);
+                var sessionUpdate = Json.Parse(buffer, SessionUpdate.FromJson);
 
-                return new JsonSerializable(SessionUpdate.FromJson(json));
+                return new JsonSerializable(sessionUpdate);
             }
 
             // Client Report
@@ -379,9 +379,9 @@ namespace Sentry.Protocol.Envelopes
             {
                 var bufferLength = (int)(payloadLength ?? stream.Length);
                 var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-                var json = Json.Parse(buffer);
+                var clientReport = Json.Parse(buffer, ClientReport.FromJson);
 
-                return new JsonSerializable(ClientReport.FromJson(json));
+                return new JsonSerializable(clientReport);
             }
 
             // Arbitrary payload
