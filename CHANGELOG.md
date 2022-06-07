@@ -13,7 +13,7 @@
 - Move tunnel functionality into Sentry.AspNetCore ([#1645](https://github.com/getsentry/sentry-dotnet/pull/1645))
 - Make `HttpContext` available for sampling decisions ([#1682](https://github.com/getsentry/sentry-dotnet/pull/1682))
 - Initial support for .NET MAUI ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663)) ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
-- Initial support for `net6.0-android` apps ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288)) ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669)) ([#1686](https://github.com/getsentry/sentry-dotnet/pull/1686))
+- Initial support for `net6.0-android` apps ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288)) ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669)) ([#1686](https://github.com/getsentry/sentry-dotnet/pull/1686)) ([#1694](https://github.com/getsentry/sentry-dotnet/pull/1694))
 
 ### Fixes
 
