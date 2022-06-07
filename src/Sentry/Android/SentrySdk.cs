@@ -15,6 +15,12 @@ namespace Sentry
 {
     public static partial class SentrySdk
     {
+        /// <summary>
+        /// Initializes the SDK for Android, with an optional configuration options callback.
+        /// </summary>
+        /// <param name="context">The Android application context.</param>
+        /// <param name="configureOptions">The configuration options callback.</param>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init(Context context, Action<SentryOptions>? configureOptions)
         {
             var options = new SentryOptions();
@@ -22,6 +28,12 @@ namespace Sentry
             return Init(context, options);
         }
 
+        /// <summary>
+        /// Initializes the SDK for Android, using a configuration options instance.
+        /// </summary>
+        /// <param name="context">The Android application context.</param>
+        /// <param name="options">The configuration options instance.</param>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init(Context context, SentryOptions options)
         {
             // TODO: Pause/Resume
@@ -130,14 +142,13 @@ namespace Sentry
                     o.ProfilingTracesIntervalMillis = (int)options.Android.ProfilingTracesInterval.TotalMilliseconds;
 
                     // These options are in Java.SentryOptions but not ours
-                    o.AttachServerName = options.Android.AttachServerName;
                     o.AttachThreads = options.Android.AttachThreads;
                     o.ConnectionTimeoutMillis = (int)options.Android.ConnectionTimeout.TotalMilliseconds;
                     o.Dist = options.Android.Distribution;
                     o.EnableNdk = options.Android.EnableNdk;
-                    o.EnableShutdownHook = options.Android.EnableShutdownHoook;
+                    o.EnableShutdownHook = options.Android.EnableShutdownHook;
                     o.EnableUncaughtExceptionHandler = options.Android.EnableUncaughtExceptionHandler;
-                    o.MaxSpans = options.Android.MaxSpans;
+                    o.ProfilingEnabled = options.Android.ProfilingEnabled;
                     o.PrintUncaughtStackTrace = options.Android.PrintUncaughtStackTrace;
                     o.ReadTimeoutMillis = (int)options.Android.ReadTimeout.TotalMilliseconds;
 
@@ -148,9 +159,11 @@ namespace Sentry
                     // These options are intentionally set and not exposed for modification
                     o.EnableExternalConfiguration = false;
                     o.EnableDeduplication = false;
+                    o.AttachServerName = false;
 
-                    // These options are not applicable for Android apps, so we don't expose or set them
-                    //o.MaxRequestBodySize
+                    // These options are intentionally not expose or modified
+                    //o.MaxRequestBodySize   // N/A for Android apps
+                    //o.MaxSpans             // See https://github.com/getsentry/sentry-dotnet/discussions/1698
 
                     // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
                     o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
