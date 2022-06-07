@@ -14,8 +14,14 @@
 
 - Move tunnel functionality into Sentry.AspNetCore ([#1645](https://github.com/getsentry/sentry-dotnet/pull/1645))
 - Make `HttpContext` available for sampling decisions ([#1682](https://github.com/getsentry/sentry-dotnet/pull/1682))
-- Initial support for .NET MAUI ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663)) ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
-- Initial support for `net6.0-android` apps ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288)) ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669)) ([#1686](https://github.com/getsentry/sentry-dotnet/pull/1686))
+- Added a new `Sentry.Maui` integration library for the [.NET MAUI](https://dotnet.microsoft.com/apps/maui) platform:
+  - Initial MAUI support ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
+  - Continue with adding MAUI support ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
+- Added a new `net6.0-android` target for the `Sentry` core library, which bundles the [Sentry Android SDK](https://docs.sentry.io/platforms/android/):
+  - Initial .NET 6 Android support ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288))
+  - Update Android Support ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669))
+  - Update Sentry-Android to 6.0.0-rc.1 ([#1686](https://github.com/getsentry/sentry-dotnet/pull/1686))
+  - Update Sentry-Android to 6.0.0 ([#1697](https://github.com/getsentry/sentry-dotnet/pull/1697))
 
 ### Fixes
 
