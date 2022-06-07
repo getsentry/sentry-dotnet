@@ -1,7 +1,4 @@
 ﻿{
   Type: Exception,
-  Message: Expected a type of Sentry.Tests.Protocol.CollectionExtensionsTests+Value to exist for the key 'key'. Instead found a System.Int32. The likely cause of this is that the value for 'key' has been incorrectly set to an instance of a different type.,
-  StackTrace:
-at Sentry.Internal.Extensions.CollectionsExtensions.GetOrCreate[TValue](ConcurrentDictionary`2 dictionary, String key)
-at Sentry.Tests.Protocol.CollectionExtensionsTests.<>c__DisplayClass1_0.<GetOrCreate_invalid_type>b__0()
+  Message: Expected a type of CollectionExtensionsTests+Value to exist for the key 'key'. Instead found a System.Int32. The likely cause of this is that the value for 'key' has been incorrectly set to an instance of a different type.
 }
