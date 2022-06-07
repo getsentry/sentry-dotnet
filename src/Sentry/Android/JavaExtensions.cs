@@ -24,7 +24,7 @@ namespace Sentry.Android
             if (level == Java.SentryLevel.Fatal)
                 return SentryLevel.Fatal;
 
-            throw new ArgumentException(null, nameof(level));
+            throw new ArgumentOutOfRangeException(nameof(level), level, message: default);
         }
 
         public static Java.SentryLevel ToJavaSentryLevel(this SentryLevel level) =>
@@ -35,7 +35,7 @@ namespace Sentry.Android
                 SentryLevel.Warning => Java.SentryLevel.Warning!,
                 SentryLevel.Error => Java.SentryLevel.Error!,
                 SentryLevel.Fatal => Java.SentryLevel.Fatal!,
-                _ => throw new ArgumentException(null, nameof(level))
+                _ => throw new ArgumentOutOfRangeException(nameof(level), level, message: default)
             };
 
         public static SentryId ToSentryId(this Java.Protocol.SentryId sentryId) =>
@@ -82,7 +82,7 @@ namespace Sentry.Android
             if (status == Java.SpanStatus.DataLoss)
                 return SpanStatus.DataLoss;
 
-            throw new ArgumentException(null, nameof(status));
+            throw new ArgumentOutOfRangeException(nameof(status), status, message: default);
         }
 
         public static SentryEvent ToSentryEvent(this Java.SentryEvent sentryEvent, Java.SentryOptions javaOptions)
