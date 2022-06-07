@@ -273,8 +273,8 @@ namespace Sentry
             var logger = json.GetPropertyOrNull("logger")?.GetString();
             var serverName = json.GetPropertyOrNull("server_name")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
-            var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).Pipe(v => new SentryValues<SentryException>(v));
-            var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).Pipe(v => new SentryValues<SentryThread>(v));
+            var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).ToList().Pipe(v => new SentryValues<SentryException>(v));
+            var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).ToList().Pipe(v => new SentryValues<SentryThread>(v));
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
             var transaction = json.GetPropertyOrNull("transaction")?.GetString();
             var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);

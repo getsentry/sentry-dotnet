@@ -30,7 +30,7 @@ public class DebugImageTests
             "}",
             actual);
 
-        var parsed = DebugImage.FromJson(Json.Parse(actual));
+        var parsed = Json.Parse(actual, DebugImage.FromJson);
 
         parsed.Should().BeEquivalentTo(sut);
     }
