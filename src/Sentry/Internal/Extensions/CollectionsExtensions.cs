@@ -10,7 +10,19 @@ namespace Sentry.Internal.Extensions
             this ConcurrentDictionary<string, object> dictionary,
             string key)
             where TValue : class, new()
-            => (TValue)dictionary.GetOrAdd(key, _ => new TValue());
+        {
+            if (dictionary.TryGetValue(key, out var value))
+            {
+                if (value is TValue casted)
+                {
+                    return casted;
+                }
+
+                throw new($"Expected a type of {nameof(TValue)} to exist for the key '{key}'. Instead found a {value.GetType()}");
+            }
+
+            return new TValue();
+        }
 
         public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
             where TKey : notnull
