@@ -61,7 +61,7 @@ namespace Sentry
                     // These options are copied over from our SentryOptions
                     o.AttachStacktrace = options.AttachStacktrace;
                     o.Debug = options.Debug;
-                    o.DiagnosticLevel = (Java.SentryLevel)options.DiagnosticLevel;
+                    o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
                     o.Dsn = options.Dsn;
                     o.EnableAutoSessionTracking = options.AutoSessionTracking;
                     o.Environment = options.Environment;

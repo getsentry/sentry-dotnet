@@ -5,11 +5,80 @@ namespace Sentry.Android
 {
     internal static class JavaExtensions
     {
+        public static SentryLevel ToSentryLevel(this Java.SentryLevel level)
+        {
+            // note: switch doesn't work here because JNI enums are not constants
+            if (level == Java.SentryLevel.Debug)
+                return SentryLevel.Debug;
+            if (level == Java.SentryLevel.Info)
+                return SentryLevel.Info;
+            if (level == Java.SentryLevel.Warning)
+                return SentryLevel.Warning;
+            if (level == Java.SentryLevel.Error)
+                return SentryLevel.Error;
+            if (level == Java.SentryLevel.Fatal)
+                return SentryLevel.Fatal;
+
+            throw new ArgumentOutOfRangeException(nameof(level), level, message: default);
+        }
+
+        public static Java.SentryLevel ToJavaSentryLevel(this SentryLevel level) =>
+            level switch
+            {
+                SentryLevel.Debug => Java.SentryLevel.Debug!,
+                SentryLevel.Info => Java.SentryLevel.Info!,
+                SentryLevel.Warning => Java.SentryLevel.Warning!,
+                SentryLevel.Error => Java.SentryLevel.Error!,
+                SentryLevel.Fatal => Java.SentryLevel.Fatal!,
+                _ => throw new ArgumentOutOfRangeException(nameof(level), level, message: default)
+            };
+
         public static SentryId ToSentryId(this Java.Protocol.SentryId sentryId) =>
             new(Guid.Parse(sentryId.ToString()));
 
         public static SpanId ToSpanId(this Java.SpanId spanId) =>
             new(spanId.ToString());
+
+        public static SpanStatus ToSpanStatus(this Java.SpanStatus status)
+        {
+            // note: switch doesn't work here because JNI enums are not constants
+            if (status == Java.SpanStatus.Ok)
+                return SpanStatus.Ok;
+            if (status == Java.SpanStatus.DeadlineExceeded)
+                return SpanStatus.DeadlineExceeded;
+            if (status == Java.SpanStatus.Unauthenticated)
+                return SpanStatus.Unauthenticated;
+            if (status == Java.SpanStatus.PermissionDenied)
+                return SpanStatus.PermissionDenied;
+            if (status == Java.SpanStatus.NotFound)
+                return SpanStatus.NotFound;
+            if (status == Java.SpanStatus.ResourceExhausted)
+                return SpanStatus.ResourceExhausted;
+            if (status == Java.SpanStatus.InvalidArgument)
+                return SpanStatus.InvalidArgument;
+            if (status == Java.SpanStatus.Unimplemented)
+                return SpanStatus.Unimplemented;
+            if (status == Java.SpanStatus.Unavailable)
+                return SpanStatus.Unavailable;
+            if (status == Java.SpanStatus.InternalError)
+                return SpanStatus.InternalError;
+            if (status == Java.SpanStatus.UnknownError)
+                return SpanStatus.UnknownError;
+            if (status == Java.SpanStatus.Cancelled)
+                return SpanStatus.Cancelled;
+            if (status == Java.SpanStatus.AlreadyExists)
+                return SpanStatus.AlreadyExists;
+            if (status == Java.SpanStatus.FailedPrecondition)
+                return SpanStatus.FailedPrecondition;
+            if (status == Java.SpanStatus.Aborted)
+                return SpanStatus.Aborted;
+            if (status == Java.SpanStatus.OutOfRange)
+                return SpanStatus.OutOfRange;
+            if (status == Java.SpanStatus.DataLoss)
+                return SpanStatus.DataLoss;
+
+            throw new ArgumentOutOfRangeException(nameof(status), status, message: default);
+        }
 
         public static SentryEvent ToSentryEvent(this Java.SentryEvent sentryEvent, Java.SentryOptions javaOptions)
         {
@@ -75,7 +144,7 @@ namespace Sentry.Android
                 tc.Name,
                 tc.Operation,
                 tc.Description,
-                (SpanStatus)tc.Status,
+                tc.Status?.ToSpanStatus(),
                 tc.Sampled?.BooleanValue(),
                 tc.ParentSampled?.BooleanValue());
 
