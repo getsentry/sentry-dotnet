@@ -46,6 +46,15 @@
   <attr path="/api/package[@name='io.sentry']/class[@name='SentryTraceHeader']/field[@name='SENTRY_TRACE_HEADER']" name="managedName">SentryTraceHeaderName</attr>
   <attr path="/api/package[@name='io.sentry']/class[@name='TraceStateHeader']/field[@name='TRACE_STATE_HEADER']" name="managedName">TraceStateHeaderName</attr>
 
+  <!-- Adjust enums and their usages.  See comments in EnumFields.xml -->
+  <attr path="/api/package[@name='io.sentry']/class[@name='SentryLevel']" name="visibility" />
+  <attr path="//*[@type='io.sentry.SentryLevel']" name="enumType">Sentry.Java.SentryLevel</attr>
+  <attr path="//*[@return='io.sentry.SentryLevel']" name="enumReturn">Sentry.Java.SentryLevel</attr>
+
+  <attr path="/api/package[@name='io.sentry']/class[@name='SpanStatus']" name="visibility" />
+  <attr path="//*[@type='io.sentry.SpanStatus']" name="enumType">Sentry.Java.SpanStatus</attr>
+  <attr path="//*[@return='io.sentry.SpanStatus']" name="enumReturn">Sentry.Java.SpanStatus</attr>
+
   <!--
     The remaining APIS are removed to prevent various errors/warnings.
     TODO: Find other workarounds for each one, rather than removing the APIs.
