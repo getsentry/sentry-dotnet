@@ -314,6 +314,16 @@ public class MainSentryEventProcessorTests
     }
 
     [Fact]
+    public void Process_Platform_CSharp()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        _ = sut.Process(evt);
+
+        Assert.Equal(Constants.Platform, evt.Platform);
+    }
+
+    [Fact]
     public void Process_Modules_NotEmpty()
     {
         var sut = _fixture.GetSut();
