@@ -57,6 +57,7 @@ namespace Sentry
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init() => Init((string?)null);
 
         /// <summary>
@@ -67,6 +68,7 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn.</param>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init(string? dsn) => !Dsn.IsDisabled(dsn)
             ? Init(c => c.Dsn = dsn)
             : DisabledHub.Instance;
@@ -74,7 +76,8 @@ namespace Sentry
         /// <summary>
         /// Initializes the SDK with an optional configuration options callback.
         /// </summary>
-        /// <param name="configureOptions">The configure options.</param>
+        /// <param name="configureOptions">The configuration options callback.</param>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init(Action<SentryOptions>? configureOptions)
         {
             var options = new SentryOptions();
@@ -90,7 +93,7 @@ namespace Sentry
         /// <remarks>
         /// Used by integrations which have their own delegates.
         /// </remarks>
-        /// <returns>A disposable to close the SDK.</returns>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options) => UseHub(InitHub(options));
 
