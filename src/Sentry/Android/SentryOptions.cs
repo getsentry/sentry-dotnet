@@ -146,7 +146,7 @@ namespace Sentry
             public bool AttachThreads { get; set; }
 
             /// <summary>
-            /// Gets or sets the connection timeouton the HTTP connection used by Java when sending data to Sentry.
+            /// Gets or sets the connection timeout on the HTTP connection used by Java when sending data to Sentry.
             /// The default value is 5 seconds.
             /// </summary>
             public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(5);
