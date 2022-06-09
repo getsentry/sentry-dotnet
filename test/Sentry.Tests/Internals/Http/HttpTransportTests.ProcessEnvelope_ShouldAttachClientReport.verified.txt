@@ -22,13 +22,13 @@
         reason: ratelimit_backoff
       }
     ],
-    timestamp: DateTime_1
+    timestamp: Date_MaxValue
   },
   eventItemJson: {
     event_id: Guid_1,
     platform: csharp,
     sdk: {},
-    sent_at: DateTime_2,
-    timestamp: DateTime_3
+    sent_at: DateTime_1,
+    timestamp: DateTime_2
   }
 }
