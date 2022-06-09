@@ -774,16 +774,12 @@ public class HttpTransportTests
     {
         var options = new SentryOptions();
 
-        var expectedTimestamp = DateTimeOffset.MaxValue;
-        var clock = Substitute.For<ISystemClock>();
-        clock.GetUtcNow().Returns(expectedTimestamp);
-
-        var recorder = new ClientReportRecorder(options, clock);
+        var recorder = new ClientReportRecorder(options);
         options.ClientReportRecorder = recorder;
 
         var logger = Substitute.For<IDiagnosticLogger>();
 
-        var httpTransport = Substitute.For<HttpTransportBase>(options, null, clock);
+        var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
 
         // add some fake discards for the report
         recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Internal);
