@@ -10,6 +10,7 @@
 - Serialize stack frame addresses as strings. ([#1692](https://github.com/getsentry/sentry-dotnet/pull/1692))
 - Improve serialization perf and fix memory leak in `SentryEvent` ([#1693](https://github.com/getsentry/sentry-dotnet/pull/1693))
 - Add type checking in contexts TryGetValue ([#1700](https://github.com/getsentry/sentry-dotnet/pull/1700))
+- Restore serialization of the `Platform` name ([#1702](https://github.com/getsentry/sentry-dotnet/pull/1702))
 
 ### Features
 
@@ -52,6 +53,7 @@
 
 - Workaround `System.Text.Json` issue with Unity IL2CPP. ([#1583](https://github.com/getsentry/sentry-dotnet/pull/1583))
 - Demystify stack traces for exceptions that fire in a `BeforeSend` callback. ([#1587](https://github.com/getsentry/sentry-dotnet/pull/1587))
+- Obsolete `Platform` and always write `csharp` ([#1610](https://github.com/getsentry/sentry-dotnet/pull/1610))
 - Fix a minor issue in the caching transport related to recovery of files from previous session. ([#1617](https://github.com/getsentry/sentry-dotnet/pull/1617))
 - Better DisableAppDomainProcessExitFlush docs ([#1634](https://github.com/getsentry/sentry-dotnet/pull/1634))
 
