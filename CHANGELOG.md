@@ -9,6 +9,7 @@
   - NOTE: This can affect grouping. You can keep the original behavior by setting the option `KeepAggregateException` to `true`.
 - Serialize stack frame addresses as strings. ([#1692](https://github.com/getsentry/sentry-dotnet/pull/1692))
 - Improve serialization perf and fix memory leak in `SentryEvent` ([#1693](https://github.com/getsentry/sentry-dotnet/pull/1693))
+- Add type checking in contexts TryGetValue ([#1700](https://github.com/getsentry/sentry-dotnet/pull/1700))
 
 ### Features
 
@@ -22,6 +23,7 @@
   - Update Android Support ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669))
   - Update Sentry-Android to 6.0.0-rc.1 ([#1686](https://github.com/getsentry/sentry-dotnet/pull/1686))
   - Update Sentry-Android to 6.0.0 ([#1697](https://github.com/getsentry/sentry-dotnet/pull/1697))
+  - Set Java/Android SDK options ([#1694](https://github.com/getsentry/sentry-dotnet/pull/1694))
 
 ### Fixes
 

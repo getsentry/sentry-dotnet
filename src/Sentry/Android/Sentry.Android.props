@@ -1,11 +1,15 @@
 <Project>
+
   <PropertyGroup>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
     <SentryAndroidSdkVersion>6.0.0</SentryAndroidSdkVersion>
     <AndroidLibsDirectory>$(MSBuildProjectDirectory)/../../libs/Android/</AndroidLibsDirectory>
+    <LangVersion>10</LangVersion>
+    <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Android/Transforms/*.xml" />
     <TransformFile Include="Android/Transforms/*.xml" />
@@ -14,9 +18,25 @@
     <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-core-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="$(AndroidLibsDirectory)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Android/*.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.Globalization" />
+    <Using Include="System.Text.Json" />
+    <Using Include="Android.Runtime" />
+    <Using Include="Android.Content.Context" Alias="AndroidContext" />
+    <Using Include="Android.OS.Build" Alias="AndroidBuild" />
+    <Using Include="Java.Lang.Class" Alias="JavaClass" />
+    <Using Include="Java.Lang.Double" Alias="JavaDouble" />
+    <Using Include="Java.Lang.Object" Alias="JavaObject" />
+    <Using Include="Java.Lang.Throwable" Alias="Throwable" />
+    <Using Include="Java.IO.InputStreamReader" Alias="JavaInputStreamReader" />
+    <Using Include="Java.IO.OutputStreamWriter" Alias="JavaOutputStreamWriter" />
+  </ItemGroup>
+
   <!-- Update Android SDK: Update SentryAndroidSdkVersion and run:
     dotnet msbuild src/Sentry /t:DownloadSentryAndroidSdk /p:TargetFramework=net6.0-android -->
   <Target Name="DownloadSentryAndroidSdk">
@@ -37,4 +57,5 @@
       <Output TaskParameter="DownloadedFile" ItemName="Content" />
     </DownloadFile>
   </Target>
+
 </Project>

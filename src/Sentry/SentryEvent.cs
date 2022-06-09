@@ -264,7 +264,9 @@ namespace Sentry
         /// <summary>
         /// Parses from JSON.
         /// </summary>
-        public static SentryEvent FromJson(JsonElement json)
+        public static SentryEvent FromJson(JsonElement json) => FromJson(json, null);
+
+        internal static SentryEvent FromJson(JsonElement json, Exception? exception)
         {
             var modules = json.GetPropertyOrNull("modules")?.GetStringDictionaryOrNull();
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
@@ -290,7 +292,7 @@ namespace Sentry
             var debugMeta = json.GetPropertyOrNull("debug_meta");
             var images = debugMeta?.GetPropertyOrNull("images")?.EnumerateArray().Select(DebugImage.FromJson).ToList();
 
-            return new SentryEvent(null, timestamp, eventId)
+            return new SentryEvent(exception, timestamp, eventId)
             {
                 _modules = modules?.WhereNotNullValue().ToDictionary(),
                 Message = message,
