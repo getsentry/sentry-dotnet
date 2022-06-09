@@ -66,7 +66,7 @@ namespace Sentry
         public string? Platform { get; set; }
 
         /// <summary>
-        /// Identifies the host SDK from which the event was recorded.
+        /// Identifies the computer from which the event was recorded.
         /// </summary>
         public string? ServerName { get; set; }
 
@@ -113,7 +113,7 @@ namespace Sentry
         /// <inheritdoc />
         public string? TransactionName { get; set; }
 
-        private Request? _request;
+        internal Request? _request;
 
         /// <inheritdoc />
         public Request Request
