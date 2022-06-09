@@ -8,6 +8,7 @@ using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Internals.Http;
 
+[UsesVerify]
 public class HttpTransportTests
 {
     [Fact]
@@ -769,7 +770,7 @@ public class HttpTransportTests
     }
 
     [Fact]
-    public void ProcessEnvelope_ShouldAttachClientReport()
+    public Task ProcessEnvelope_ShouldAttachClientReport()
     {
         var options = new SentryOptions();
 
@@ -794,7 +795,6 @@ public class HttpTransportTests
         recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
 
         var sentryEvent = new SentryEvent();
-        var expectedEventJson = EnvelopeItem.FromEvent(sentryEvent).Payload.SerializeToString(logger);
 
         var envelope = Envelope.FromEvent(sentryEvent);
         var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
@@ -808,21 +808,9 @@ public class HttpTransportTests
         Assert.Equal("event", eventItem.TryGetType());
         Assert.Equal("client_report", clientReportItem.TryGetType());
 
-        // The event should be unmodified
-        Assert.Equal(expectedEventJson, eventItem.Payload.SerializeToString(logger));
-
-        // The client report should contain the counts of the fake discards
-        const string expectedClientReportJson =
-            "{\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-            "\"discarded_events\":[" +
-            "{\"reason\":\"network_error\",\"category\":\"internal\",\"quantity\":1}," +
-            "{\"reason\":\"network_error\",\"category\":\"security\",\"quantity\":1}," +
-            "{\"reason\":\"queue_overflow\",\"category\":\"error\",\"quantity\":2}," +
-            "{\"reason\":\"ratelimit_backoff\",\"category\":\"transaction\",\"quantity\":3}" +
-            "]}";
-
+        var eventItemJson = eventItem.Payload.SerializeToString(logger);
         var clientReportJson = clientReportItem.Payload.SerializeToString(logger);
-        Assert.Equal(expectedClientReportJson, clientReportJson);
+        return VerifyJson($"{{eventItemJson:{eventItemJson},clientReportJson:{clientReportJson}}}");
     }
 
     [Fact]
