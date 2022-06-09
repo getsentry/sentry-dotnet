@@ -14,7 +14,7 @@ public class BrowserTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Browser.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Browser.FromJson);
         actual.Should().BeEquivalentTo(sut);
     }
 

@@ -161,8 +161,8 @@ namespace Sentry
             writer.WriteBooleanIfNotNull("in_app", InApp);
             writer.WriteStringIfNotWhiteSpace("package", Package);
             writer.WriteStringIfNotWhiteSpace("platform", Platform);
-            writer.WriteNumberIfNotNull("image_addr", ImageAddress.NullIfDefault());
-            writer.WriteNumberIfNotNull("symbol_addr", SymbolAddress);
+            writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress.NullIfDefault()?.ToHexString());
+            writer.WriteStringIfNotWhiteSpace("symbol_addr", SymbolAddress?.ToHexString());
             writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
             writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
             writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
@@ -212,8 +212,8 @@ namespace Sentry
             var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
             var package = json.GetPropertyOrNull("package")?.GetString();
             var platform = json.GetPropertyOrNull("platform")?.GetString();
-            var imageAddress = json.GetPropertyOrNull("image_addr")?.GetInt64() ?? 0;
-            var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetInt64();
+            var imageAddress = json.GetPropertyOrNull("image_addr")?.GetAddressAsLong() ?? 0;
+            var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetAddressAsLong();
             var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetString();
             var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
             var addressMode = json.GetPropertyOrNull("addr_mode")?.GetString();

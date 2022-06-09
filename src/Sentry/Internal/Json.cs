@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text.Json;
 
@@ -5,23 +6,23 @@ namespace Sentry.Internal
 {
     internal static class Json
     {
-        public static JsonElement Parse(byte[] json)
+        public static T Parse<T>(byte[] json, Func<JsonElement, T> factory)
         {
             using var jsonDocument = JsonDocument.Parse(json);
-            return jsonDocument.RootElement.Clone();
+            return factory.Invoke(jsonDocument.RootElement);
         }
 
-        public static JsonElement Parse(string json)
+        public static T Parse<T>(string json, Func<JsonElement, T> factory)
         {
             using var jsonDocument = JsonDocument.Parse(json);
-            return jsonDocument.RootElement.Clone();
+            return factory.Invoke(jsonDocument.RootElement);
         }
 
-        public static JsonElement Load(string filePath)
+        public static T Load<T>(string filePath, Func<JsonElement, T> factory)
         {
             using var file = File.OpenRead(filePath);
             using var jsonDocument = JsonDocument.Parse(file);
-            return jsonDocument.RootElement.Clone();
+            return factory.Invoke(jsonDocument.RootElement);
         }
     }
 }

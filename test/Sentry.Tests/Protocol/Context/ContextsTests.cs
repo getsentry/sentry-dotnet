@@ -10,7 +10,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{}", actualString);
@@ -28,7 +28,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{\"server\":{\"type\":\"os\",\"name\":\"Linux\"}}", actualString);
@@ -47,7 +47,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{\"device\":{\"type\":\"device\",\"arch\":\"x86\"}}", actualString);
@@ -66,7 +66,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{\"app\":{\"type\":\"app\",\"app_name\":\"My.App\"}}", actualString);
@@ -85,7 +85,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{\"gpu\":{\"type\":\"gpu\",\"name\":\"My.Gpu\"}}", actualString);
@@ -104,7 +104,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{\"runtime\":{\"type\":\"runtime\",\"version\":\"2.1.1.100\"}}", actualString);
@@ -121,7 +121,7 @@ public class ContextsTests
 
         // Act
         var json = contexts.ToJsonString();
-        var roundtrip = Contexts.FromJson(Json.Parse(json));
+        var roundtrip = Json.Parse(json, Contexts.FromJson);
 
         // Assert
         json.Should().Be("{\"foo\":{\"Bar\":42,\"Baz\":\"kek\"}}");
@@ -146,7 +146,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{\"browser\":{\"type\":\"browser\",\"name\":\"Netscape 1\"}}", actualString);
@@ -165,7 +165,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString();
 
-        var actual = Contexts.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{\"os\":{\"type\":\"os\",\"name\":\"BeOS 1\"}}", actualString);

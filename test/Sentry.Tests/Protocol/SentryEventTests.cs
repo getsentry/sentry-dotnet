@@ -67,7 +67,7 @@ public class SentryEventTests
             "{\"type\":\"wasm\",\"debug_id\":\"900f7d1b868432939de4457478f34720\"}" +
             "]}");
 
-        var actual = SentryEvent.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, SentryEvent.FromJson);
 
         // Assert
         actual.Should().BeEquivalentTo(sut, o =>

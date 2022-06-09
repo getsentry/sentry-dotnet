@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Sentry.Internal.Extensions
 {
@@ -11,5 +12,8 @@ namespace Sentry.Internal.Extensions
             !EqualityComparer<T>.Default.Equals(value, default)
                 ? value
                 : null;
+
+        public static string ToHexString(this long l) =>
+            "0x" + l.ToString("x", CultureInfo.InvariantCulture);
     }
 }
