@@ -127,8 +127,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
-        public string? Platform { get; set; } = Constants.Platform;
+        public string? Platform { get; set; }
 
         /// <inheritdoc />
         public string? Release { get; set; }
@@ -361,6 +360,7 @@ namespace Sentry
             Request.CopyTo(other.Request);
             User.CopyTo(other.User);
 
+            other.Platform ??= Platform;
             other.Release ??= Release;
             other.Environment ??= Environment;
             other.TransactionName ??= TransactionName;
