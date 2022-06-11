@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Android/*.cs" />
+    <Compile Include="Android/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,12 +29,17 @@
     <Using Include="Android.Runtime" />
     <Using Include="Android.Content.Context" Alias="AndroidContext" />
     <Using Include="Android.OS.Build" Alias="AndroidBuild" />
+    <Using Include="Java.Lang.Boolean" Alias="JavaBoolean" />
     <Using Include="Java.Lang.Class" Alias="JavaClass" />
     <Using Include="Java.Lang.Double" Alias="JavaDouble" />
+    <Using Include="Java.Lang.Enum" Alias="JavaEnum" />
+    <Using Include="Java.Lang.Integer" Alias="JavaInteger" />
+    <Using Include="Java.Lang.Long" Alias="JavaLong" />
     <Using Include="Java.Lang.Object" Alias="JavaObject" />
     <Using Include="Java.Lang.Throwable" Alias="Throwable" />
     <Using Include="Java.IO.InputStreamReader" Alias="JavaInputStreamReader" />
     <Using Include="Java.IO.OutputStreamWriter" Alias="JavaOutputStreamWriter" />
+    <Using Include="Java.Util.Date" Alias="JavaDate" />
   </ItemGroup>
 
   <!-- Update Android SDK: Update SentryAndroidSdkVersion and run:
