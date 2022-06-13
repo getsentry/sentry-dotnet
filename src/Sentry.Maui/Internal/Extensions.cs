@@ -3,14 +3,16 @@ namespace Sentry.Maui.Internal;
 internal static class Extensions
 {
     public static void AddBreadcrumbForEvent(this IHub hub,
+        SentryMauiOptions options,
         object? sender,
         string eventName,
         string? type,
         string? category,
         Action<Dictionary<string, string>>? addExtraData)
-        => hub.AddBreadcrumbForEvent(sender, eventName, type, category, default, addExtraData);
+        => hub.AddBreadcrumbForEvent(options, sender, eventName, type, category, default, addExtraData);
 
     public static void AddBreadcrumbForEvent(this IHub hub,
+        SentryMauiOptions options,
         object? sender,
         string eventName,
         string? type = null,
@@ -21,7 +23,7 @@ internal static class Extensions
         var data = new Dictionary<string, string>();
         if (sender is Element element)
         {
-            data.AddElementInfo(element, null);
+            data.AddElementInfo(options, element, null);
         }
 
         addExtraData?.Invoke(data);
@@ -30,7 +32,10 @@ internal static class Extensions
         hub.AddBreadcrumb(message, category, type, data, level);
     }
 
-    public static void AddElementInfo(this IDictionary<string, string> data, Element? element, string? property)
+    public static void AddElementInfo(this IDictionary<string, string> data,
+        SentryMauiOptions options,
+        Element? element,
+        string? property)
     {
         if (element is null)
         {
@@ -55,15 +60,13 @@ internal static class Extensions
             data.Add(prefix + "Name", element.StyleId);
         }
 
-        if (element is ITitledElement { Title: { } } titledElement)
+        if (options.IncludeTitleInBreadcrumbs && element is ITitledElement { Title: { } } titledElement)
         {
-            // TODO: Scrub PII ?
             data.Add(prefix + nameof(titledElement.Title), titledElement.Title);
         }
 
-        if (element is IText { Text: { } } textElement)
+        if (options.IncludeTextInBreadcrumbs && element is IText { Text: { } } textElement)
         {
-            // TODO: Scrub PII ?
             data.Add(prefix + nameof(textElement.Text), textElement.Text);
         }
     }

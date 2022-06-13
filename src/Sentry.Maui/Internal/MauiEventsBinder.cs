@@ -91,28 +91,28 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
         // Navigation events
         application.ModalPopping += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Application.ModalPopping), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopping), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         application.ModalPopped += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         application.ModalPushing += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         application.ModalPushed += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         application.PageAppearing += (sender, page) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Application.PageAppearing), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(page, nameof(Page)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageAppearing), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, page, nameof(Page)));
         application.PageDisappearing += (sender, page) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(page, nameof(Page)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, page, nameof(Page)));
 
         // Theme changed event
         // https://docs.microsoft.com/dotnet/maui/user-interface/system-theme-changes#react-to-theme-changes
         application.RequestedThemeChanged += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Application.RequestedThemeChanged), SystemType, RenderingCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.RequestedThemeChanged), SystemType, RenderingCategory,
                 data => data.Add(nameof(e.RequestedTheme), e.RequestedTheme.ToString()));
     }
 
@@ -127,7 +127,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         {
             Action<object, object> handler = (sender, _) =>
             {
-                _hub.AddBreadcrumbForEvent(sender, eventInfo.Name);
+                _hub.AddBreadcrumbForEvent(_options, sender, eventInfo.Name);
             };
 
             try
@@ -151,31 +151,35 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
         // Lifecycle events caused by user action
         window.Activated += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Activated), SystemType, LifecycleCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Activated), SystemType, LifecycleCategory);
         window.Deactivated += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Deactivated), SystemType, LifecycleCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Deactivated), SystemType, LifecycleCategory);
         window.Stopped += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Stopped), SystemType, LifecycleCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Stopped), SystemType, LifecycleCategory);
         window.Resumed += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Resumed), SystemType, LifecycleCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Resumed), SystemType, LifecycleCategory);
 
         // System generated lifecycle events
         window.Created += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Created), SystemType, LifecycleCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Created), SystemType, LifecycleCategory);
         window.Destroying += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Destroying), SystemType, LifecycleCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Destroying), SystemType, LifecycleCategory);
         window.Backgrounding += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Destroying), SystemType, LifecycleCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.Backgrounding), SystemType, LifecycleCategory,
                 data =>
                 {
-                    // TODO: Could this contain PII?
+                    if (!_options.IncludeBackgroundingStateInBreadcrumbs)
+                    {
+                        return;
+                    }
+
                     foreach (var item in e.State)
                     {
                         data.Add($"{nameof(e.State)}.{item.Key}", item.Value ?? "<null>");
                     }
                 });
         window.DisplayDensityChanged += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Destroying), SystemType, LifecycleCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.DisplayDensityChanged), SystemType, LifecycleCategory,
                 data =>
                 {
                     var displayDensity = e.DisplayDensity.ToString(CultureInfo.InvariantCulture);
@@ -184,19 +188,19 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
         // Navigation events
         window.ModalPopping += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ModalPopping), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopping), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.ModalPopped += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ModalPopped), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopped), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.ModalPushing += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ModalPushing), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPushing), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.ModalPushed += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ModalPushed), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(e.Modal, nameof(e.Modal)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPushed), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.PopCanceled += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.PopCanceled), NavigationType, NavigationCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.PopCanceled), NavigationType, NavigationCategory);
     }
 
     private void BindElementEvents(Element element)
@@ -204,31 +208,31 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // Element handler events
         // https://docs.microsoft.com/dotnet/maui/user-interface/handlers/customize#handler-lifecycle
         element.HandlerChanging += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.HandlerChanging), SystemType, HandlersCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.HandlerChanging), SystemType, HandlersCategory,
                 data =>
                 {
                     data.Add(nameof(e.OldHandler), e.OldHandler?.ToString() ?? "");
                     data.Add(nameof(e.NewHandler), e.NewHandler?.ToString() ?? "");
                 });
         element.HandlerChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.HandlerChanged), SystemType, HandlersCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.HandlerChanged), SystemType, HandlersCategory);
 
         // Rendering events
         element.ChildAdded += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ChildAdded), SystemType, RenderingCategory,
-                data => data.AddElementInfo(e.Element, nameof(e.Element)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ChildAdded), SystemType, RenderingCategory,
+                data => data.AddElementInfo(_options, e.Element, nameof(e.Element)));
         element.ChildRemoved += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ChildRemoved), SystemType, RenderingCategory,
-                data => data.AddElementInfo(e.Element, nameof(e.Element)));
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ChildRemoved), SystemType, RenderingCategory,
+                data => data.AddElementInfo(_options, e.Element, nameof(e.Element)));
         element.ParentChanging += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ParentChanging), SystemType, RenderingCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ParentChanging), SystemType, RenderingCategory,
                 data =>
                 {
-                    data.AddElementInfo(e.OldParent, nameof(e.OldParent));
-                    data.AddElementInfo(e.NewParent, nameof(e.NewParent));
+                    data.AddElementInfo(_options, e.OldParent, nameof(e.OldParent));
+                    data.AddElementInfo(_options, e.NewParent, nameof(e.NewParent));
                 });
         element.ParentChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.ParentChanged), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ParentChanged), SystemType, RenderingCategory);
 
         // These lead to lots of duplicate information, so probably best not to include them.
         // element.DescendantAdded
@@ -241,7 +245,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             if (bo.BindingContext != null)
             {
                 // Don't add breadcrumbs when this is null
-                _hub.AddBreadcrumbForEvent(element, nameof(bo.BindingContextChanged), SystemType, RenderingCategory,
+                _hub.AddBreadcrumbForEvent(_options, element, nameof(bo.BindingContextChanged), SystemType, RenderingCategory,
                     data => data.Add(nameof(bo.BindingContext), bo.BindingContext.GetType().Name));
             }
         };
@@ -256,7 +260,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // Navigation events
         // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/navigation
         shell.Navigating += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Shell.Navigating), NavigationType, NavigationCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Shell.Navigating), NavigationType, NavigationCategory,
                 data =>
                 {
                     data.Add("from", e.Current?.Location.ToString() ?? "");
@@ -264,7 +268,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
                     data.Add(nameof(e.Source), e.Source.ToString());
                 });
         shell.Navigated += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Shell.Navigated), NavigationType, NavigationCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Shell.Navigated), NavigationType, NavigationCategory,
                 data =>
                 {
                     data.Add("from", e.Previous?.Location.ToString() ?? "");
@@ -281,32 +285,32 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // Lifecycle events
         // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/lifecycle
         page.Appearing += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Page.Appearing), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.Appearing), SystemType, RenderingCategory);
         page.Disappearing += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Page.Disappearing), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.Disappearing), SystemType, RenderingCategory);
 
         // Navigation events
         // https://github.com/dotnet/docs-maui/issues/583
         page.NavigatingFrom += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Page.NavigatingFrom), NavigationType, NavigationCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatingFrom), NavigationType, NavigationCategory);
         page.NavigatedFrom += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Page.NavigatedFrom), NavigationType, NavigationCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedFrom), NavigationType, NavigationCategory);
         page.NavigatedTo += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory);
 
         // Layout changed event
         // https://docs.microsoft.com/dotnet/api/xamarin.forms.ilayout.layoutchanged
         page.LayoutChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Page.LayoutChanged), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.LayoutChanged), SystemType, RenderingCategory);
     }
 
     private void BindButtonEvents(Button button)
     {
         button.Clicked += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Button.Clicked), UserType, UserActionCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Clicked), UserType, UserActionCategory);
         button.Pressed += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Button.Pressed), UserType,UserActionCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Pressed), UserType,UserActionCategory);
         button.Released += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Button.Released), UserType,UserActionCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Released), UserType,UserActionCategory);
     }
 }
