@@ -78,6 +78,16 @@ public class RuntimeInfoTests
         Assert.Equal(".NET", input.Name);
         Assert.Null(input.Version);
     }
+
+    [Fact]
+    public void SetRuntimeIdentifier()
+    {
+        var input = new Runtime(".NET");
+        RuntimeInfo.SetRuntimeIdentifier(input);
+
+        Assert.Equal(".NET", input.Name);
+        Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, input.Identifier);
+    }
 #endif
 
     public static IEnumerable<object[]> ParseTestCases()

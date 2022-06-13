@@ -71,6 +71,20 @@ public class MainSentryEventProcessorTests
     }
 #endif
 
+#if NET5_0_OR_GREATER
+    [Fact]
+    public void EnsureRuntimeIdentifierExists()
+    {
+        var evt = new SentryEvent();
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+
+        var runtime = evt.Contexts.Runtime;
+        Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, runtime.Identifier);
+    }
+#endif
+
     [Fact]
     public void Process_SendDefaultPiiTrueIdEnvironmentTrue_UserNameSet()
     {
