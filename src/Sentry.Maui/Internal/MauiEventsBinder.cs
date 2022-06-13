@@ -165,7 +165,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         window.Destroying += (sender, _) =>
             _hub.AddBreadcrumbForEvent(sender, nameof(Window.Destroying), SystemType, LifecycleCategory);
         window.Backgrounding += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Destroying), SystemType, LifecycleCategory,
+            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Backgrounding), SystemType, LifecycleCategory,
                 data =>
                 {
                     // TODO: Could this contain PII?
@@ -175,7 +175,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
                     }
                 });
         window.DisplayDensityChanged += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(sender, nameof(Window.Destroying), SystemType, LifecycleCategory,
+            _hub.AddBreadcrumbForEvent(sender, nameof(Window.DisplayDensityChanged), SystemType, LifecycleCategory,
                 data =>
                 {
                     var displayDensity = e.DisplayDensity.ToString(CultureInfo.InvariantCulture);
