@@ -83,18 +83,6 @@ public class MainSentryEventProcessorTests
         var runtime = evt.Contexts.Runtime;
         Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, runtime.Identifier);
     }
-
-    [Fact]
-    public void EnsureRuntimeIdentifierTagExists()
-    {
-        var evt = new SentryEvent();
-        var sut = _fixture.GetSut();
-
-        _ = sut.Process(evt);
-
-        var runtimeIdentifier = evt.Tags["runtime.identifier"];
-        Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, runtimeIdentifier);
-    }
 #endif
 
     [Fact]
