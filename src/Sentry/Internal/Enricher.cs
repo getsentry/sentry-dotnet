@@ -17,6 +17,7 @@ namespace Sentry.Internal
             {
                 Name = current.Name,
                 Version = current.Version,
+                Identifier = current.Identifier,
                 RawDescription = current.Raw
             };
         });

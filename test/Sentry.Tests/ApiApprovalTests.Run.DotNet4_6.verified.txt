@@ -1158,6 +1158,7 @@ namespace Sentry.PlatformAbstractions
     {
         public Runtime(string? name = null, string? version = null, Sentry.PlatformAbstractions.FrameworkInstallation? frameworkInstallation = null, string? raw = null) { }
         public Sentry.PlatformAbstractions.FrameworkInstallation FrameworkInstallation { get; }
+        public string? Identifier { get; set; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }
@@ -1313,6 +1314,7 @@ namespace Sentry.Protocol
         public const string Type = "runtime";
         public Runtime() { }
         public string? Build { get; set; }
+        public string? Identifier { get; set; }
         public string? Name { get; set; }
         public string? RawDescription { get; set; }
         public string? Version { get; set; }

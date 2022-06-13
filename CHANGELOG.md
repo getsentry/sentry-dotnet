@@ -16,6 +16,7 @@
 
 - Move tunnel functionality into Sentry.AspNetCore ([#1645](https://github.com/getsentry/sentry-dotnet/pull/1645))
 - Make `HttpContext` available for sampling decisions ([#1682](https://github.com/getsentry/sentry-dotnet/pull/1682))
+- Send the .NET Runtime Identifier to Sentry ([#1708](https://github.com/getsentry/sentry-dotnet/pull/1708)) 
 - Added a new `Sentry.Maui` integration library for the [.NET MAUI](https://dotnet.microsoft.com/apps/maui) platform:
   - Initial MAUI support ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
   - Continue with adding MAUI support ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))

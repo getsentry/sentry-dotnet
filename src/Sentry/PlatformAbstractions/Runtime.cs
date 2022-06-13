@@ -57,6 +57,14 @@ namespace Sentry.PlatformAbstractions
         public string? Raw { get; }
 
         /// <summary>
+        /// The .NET Runtime Identifier of the runtime
+        /// </summary>
+        /// <remarks>
+        /// This property will be populated for .NET 5 and newer, or <c>null</c> otherwise.
+        /// </remarks>
+        public string? Identifier { get; set; }
+
+        /// <summary>
         /// Creates a new Runtime instance
         /// </summary>
         public Runtime(

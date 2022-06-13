@@ -26,6 +26,7 @@ public class RuntimeTests
         {
             Name = "name",
             RawDescription = "RawDescription",
+            Identifier = "identifier",
             Build = "build",
             Version = "version"
         };
@@ -34,6 +35,7 @@ public class RuntimeTests
 
         Assert.Equal(sut.Name, clone.Name);
         Assert.Equal(sut.RawDescription, clone.RawDescription);
+        Assert.Equal(sut.Identifier, clone.Identifier);
         Assert.Equal(sut.Build, clone.Build);
         Assert.Equal(sut.Version, clone.Version);
     }
@@ -52,6 +54,7 @@ public class RuntimeTests
         yield return new object[] { (new Runtime(), "{\"type\":\"runtime\"}") };
         yield return new object[] { (new Runtime { Name = "some name" }, "{\"type\":\"runtime\",\"name\":\"some name\"}") };
         yield return new object[] { (new Runtime { Version = "some version" }, "{\"type\":\"runtime\",\"version\":\"some version\"}") };
+        yield return new object[] { (new Runtime { Identifier = "some identifier" }, "{\"type\":\"runtime\",\"identifier\":\"some identifier\"}") };
         yield return new object[] { (new Runtime { Build = "some build" }, "{\"type\":\"runtime\",\"build\":\"some build\"}") };
         yield return new object[] { (new Runtime { RawDescription = "some Name, some version" }, "{\"type\":\"runtime\",\"raw_description\":\"some Name, some version\"}") };
     }
