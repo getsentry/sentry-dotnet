@@ -19,6 +19,7 @@
 - Added a new `Sentry.Maui` integration library for the [.NET MAUI](https://dotnet.microsoft.com/apps/maui) platform:
   - Initial MAUI support ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
   - Continue with adding MAUI support ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
+  - MAUI events become extra context in Sentry events ([#1706](https://github.com/getsentry/sentry-dotnet/pull/1706))
 - Added a new `net6.0-android` target for the `Sentry` core library, which bundles the [Sentry Android SDK](https://docs.sentry.io/platforms/android/):
   - Initial .NET 6 Android support ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288))
   - Update Android Support ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669))

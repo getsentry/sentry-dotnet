@@ -63,7 +63,10 @@
   <!-- Workaround for https://github.com/dotnet/maui/issues/7272 -->
   <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
     <ItemGroup>
-      <ResolvedFileToPublish Update="@(DocFileItem)" PublishFolderType="None" />
+      <ResolvedFileToPublish
+        Update="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+        PublishFolderType="None" />
     </ItemGroup>
   </Target>
 

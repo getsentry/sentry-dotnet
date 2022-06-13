@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
+using Sentry.Maui.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Maui.Hosting;
@@ -55,6 +55,9 @@ public static class SentryMauiAppBuilderExtensions
 
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
+        services.AddSingleton<Disposer>();
+        services.AddSingleton<MauiEventsBinder>();
+
         services.AddSentry<SentryMauiOptions>();
 
         return builder;

@@ -36,10 +36,17 @@
                 HorizontalOptions="Center" />
 
             <Button
-                x:Name="ExceptionBtn"
-                Text="Throw Exception"
-                SemanticProperties.Hint="Throws an unhandled exception"
-                Clicked="OnExceptionClicked"
+                x:Name="ExceptionBtn1"
+                Text="Throw Unhandled Exception (Crash)"
+                SemanticProperties.Hint="Throws an unhandled exception, crashing the app"
+                Clicked="OnUnhandledExceptionClicked"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="ExceptionBtn2"
+                Text="Throw and Capture Exception"
+                SemanticProperties.Hint="Throws an exception and captures it"
+                Clicked="OnCapturedExceptionClicked"
                 HorizontalOptions="Center" />
 
         </VerticalStackLayout>

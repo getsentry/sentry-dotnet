@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Sentry.Maui;
+namespace Sentry.Maui.Internal;
 
 internal static class Constants
 {
