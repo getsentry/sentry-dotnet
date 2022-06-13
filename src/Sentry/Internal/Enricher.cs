@@ -17,6 +17,7 @@ namespace Sentry.Internal
             {
                 Name = current.Name,
                 Version = current.Version,
+                Identifier = current.Identifier,
                 RawDescription = current.Raw
             };
         });
@@ -82,6 +83,13 @@ namespace Sentry.Internal
 
             // Default tags
             _options.ApplyDefaultTags(eventLike);
+
+            // Pass the runtime identifier as a tag also
+            const string ridTag = "runtime.identifier";
+            if (_runtimeLazy.Value.Identifier is { } ridValue && !eventLike.Tags.ContainsKey(ridTag))
+            {
+                eventLike.SetTag(ridTag, ridValue);
+            }
         }
     }
 }
