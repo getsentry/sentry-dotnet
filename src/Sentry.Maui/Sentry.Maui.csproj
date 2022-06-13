@@ -11,6 +11,9 @@
     <!-- We'll need to package this only on OSX, so we get the iOS native support. -->
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
 
+    <!-- Add a pre-release identifier for this package  -->
+    <Version>$(Version)-preview.1</Version>
+
     <!--
       Imports MAUI dependencies.
       Requires the MAUI .NET workload to be installed with:
