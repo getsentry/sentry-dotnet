@@ -6,9 +6,9 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
 {
     public SentryEvent Process(SentryEvent @event)
     {
-        // Set SDK name and version for MAUI
         @event.Sdk.Name = Constants.SdkName;
         @event.Sdk.Version = Constants.SdkVersion;
+        @event.Contexts.Device.ApplyMauiDeviceData();
 
         return @event;
     }
