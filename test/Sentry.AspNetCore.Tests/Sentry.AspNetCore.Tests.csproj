@@ -13,6 +13,10 @@
     <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
     <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0"/>
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.1.1" />
