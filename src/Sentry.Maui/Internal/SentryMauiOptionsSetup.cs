@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace Sentry.Maui;
+namespace Sentry.Maui.Internal;
 
 internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<SentryMauiOptions>
 {
@@ -20,6 +20,6 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
         options.IsGlobalModeEnabled = true;
 
         // We'll use an event processor to set things like SDK name
-        options.AddEventProcessor(new MauiEventProcessor());
+        options.AddEventProcessor(new SentryMauiEventProcessor());
     }
 }

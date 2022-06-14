@@ -1,3 +1,5 @@
+using Sentry.Tests.Helpers;
+
 namespace Sentry.Tests.Protocol;
 
 public class SentryEventTests
@@ -79,6 +81,13 @@ public class SentryEventTests
 
             return o;
         });
+    }
+
+    [Fact]
+    public void Ctor_Platform_CSharp()
+    {
+        var evt = new SentryEvent();
+        Assert.Equal(Constants.Platform, evt.Platform);
     }
 
     [Fact]

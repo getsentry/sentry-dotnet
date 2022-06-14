@@ -31,6 +31,9 @@ namespace Sentry.PlatformAbstractions
 #else
             SetNetCoreVersion(runtime);
 #endif
+#if NET5_0_OR_GREATER
+            SetRuntimeIdentifier(runtime);
+#endif
         }
 
         internal static Runtime? Parse(string rawRuntimeDescription, string? name = null)
@@ -96,6 +99,20 @@ namespace Sentry.PlatformAbstractions
                 {
                     runtime.Version = assemblyPath[netCoreAppIndex + 1];
                 }
+            }
+        }
+#endif
+
+#if NET5_0_OR_GREATER
+        internal static void SetRuntimeIdentifier(Runtime runtime)
+        {
+            try
+            {
+                runtime.Identifier = RuntimeInformation.RuntimeIdentifier;
+            }
+            catch
+            {
+                return;
             }
         }
 #endif

@@ -12,13 +12,14 @@ body:
         - Sentry.AspNetCore
         - Sentry.AspNetCore.Grpc
         - Sentry.AspNet
-        - Sentry.EntityFramework
-        - Sentry.Google.Cloud.Functions
         - Sentry.DiagnosticSource
-        - Sentry.Serilog
-        - Sentry.Nlog
-        - Sentry.Log4net
+        - Sentry.EntityFramework
         - Sentry.Extensions.Logging
+        - Sentry.Google.Cloud.Functions
+        - Sentry.Log4net
+        - Sentry.Maui
+        - Sentry.Nlog
+        - Sentry.Serilog
         - Sentry.Tunnel
         - Other
     validations:
@@ -33,9 +34,9 @@ body:
         - .NET
         - .NET Core
         - .NET Framework
+        - IL2CPP
         - Mono
         - Xamarin
-        - IL2CPP
         - Other
     validations:
       required: true
@@ -55,12 +56,13 @@ body:
       label: OS
       description: Operating System
       options:
-        - Windows
-        - Linux
-        - macOS
         - Android
-        - iOS
         - Browser
+        - macOS
+        - iOS
+        - Linux
+        - Windows
+        - Any (not platform specific)
         - Other
     validations:
       required: true

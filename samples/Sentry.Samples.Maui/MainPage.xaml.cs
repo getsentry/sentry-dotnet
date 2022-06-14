@@ -21,9 +21,21 @@ public partial class MainPage : ContentPage
         SemanticScreenReader.Announce(CounterBtn.Text);
     }
 
-    private void OnExceptionClicked(object sebnder, EventArgs e)
+    private void OnUnhandledExceptionClicked(object sender, EventArgs e)
     {
-        throw new Exception("This is a test exception, thrown from managed code in a MAUI app!");
+        throw new Exception("This is an unhanded test exception, thrown from managed code in a MAUI app!");
+    }
+
+    private void OnCapturedExceptionClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            throw new Exception("This is a captured test exception, thrown from managed code in a MAUI app!");
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+        }
     }
 }
 

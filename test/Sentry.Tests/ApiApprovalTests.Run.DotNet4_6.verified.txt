@@ -152,8 +152,6 @@ namespace Sentry
         string? Environment { get; set; }
         System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         Sentry.SentryLevel? Level { get; set; }
-        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
-            " will be removed in version 4.")]
         string? Platform { get; set; }
         string? Release { get; set; }
         Sentry.Request Request { get; set; }
@@ -308,8 +306,6 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public Sentry.SentryLevel? Level { get; set; }
-        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
-            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
@@ -389,8 +385,6 @@ namespace Sentry
         public string? Logger { get; set; }
         public Sentry.SentryMessage? Message { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Modules { get; }
-        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
-            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
@@ -812,8 +806,6 @@ namespace Sentry
         public string Name { get; }
         public string Operation { get; }
         public Sentry.SpanId? ParentSpanId { get; }
-        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
-            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
@@ -867,8 +859,6 @@ namespace Sentry
         public string Name { get; set; }
         public string Operation { get; set; }
         public Sentry.SpanId? ParentSpanId { get; }
-        [System.Obsolete("Platform is always csharp, and should not be set by consuming code. This property" +
-            " will be removed in version 4.")]
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
@@ -1168,6 +1158,7 @@ namespace Sentry.PlatformAbstractions
     {
         public Runtime(string? name = null, string? version = null, Sentry.PlatformAbstractions.FrameworkInstallation? frameworkInstallation = null, string? raw = null) { }
         public Sentry.PlatformAbstractions.FrameworkInstallation FrameworkInstallation { get; }
+        public string? Identifier { get; set; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }
@@ -1323,6 +1314,7 @@ namespace Sentry.Protocol
         public const string Type = "runtime";
         public Runtime() { }
         public string? Build { get; set; }
+        public string? Identifier { get; set; }
         public string? Name { get; set; }
         public string? RawDescription { get; set; }
         public string? Version { get; set; }

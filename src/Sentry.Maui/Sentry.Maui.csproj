@@ -11,14 +11,15 @@
     <!-- We'll need to package this only on OSX, so we get the iOS native support. -->
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
 
-    <!--
-      Imports the MAUI core reference assemblies.
-      See https://github.com/dotnet/maui/blob/main/src/Workload/README.md
+    <!-- Add a pre-release identifier for this package  -->
+    <Version>$(Version)-preview.1</Version>
 
+    <!--
+      Imports MAUI dependencies.
       Requires the MAUI .NET workload to be installed with:
         dotnet workload install maui
     -->
-    <UseMauiCore>true</UseMauiCore>
+    <UseMaui>true</UseMaui>
 
     <!--
       MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749

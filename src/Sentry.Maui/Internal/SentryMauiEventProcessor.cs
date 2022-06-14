@@ -1,8 +1,8 @@
 using Sentry.Extensibility;
 
-namespace Sentry.Maui;
+namespace Sentry.Maui.Internal;
 
-internal class MauiEventProcessor : ISentryEventProcessor
+internal class SentryMauiEventProcessor : ISentryEventProcessor
 {
     public SentryEvent Process(SentryEvent @event)
     {

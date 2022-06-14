@@ -138,15 +138,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Android", "samples\Sentry.Samples.Android\Sentry.Samples.Android.csproj", "{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.IntegrationTests", "test\Sentry.DiagnosticSource.IntegrationTests\Sentry.DiagnosticSource.IntegrationTests.csproj", "{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.DiagnosticSource.IntegrationTests", "test\Sentry.DiagnosticSource.IntegrationTests\Sentry.DiagnosticSource.IntegrationTests.csproj", "{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Maui", "samples\Sentry.Samples.Maui\Sentry.Samples.Maui.csproj", "{EBCCABF9-F670-4C8D-AABC-4EB132961929}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui", "src\Sentry.Maui\Sentry.Maui.csproj", "{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui.Tests", "test\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj", "{143076C0-8D6B-4054-9F45-06B21655F417}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.Blazor.Server", "samples\Sentry.Samples.AspNetCore.Blazor.Server\Sentry.Samples.AspNetCore.Blazor.Server.csproj", "{6F8C1C3D-6579-4D93-AB1A-FB61D2CA5BA4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -330,8 +328,10 @@ Global
 		{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -340,10 +340,6 @@ Global
 		{143076C0-8D6B-4054-9F45-06B21655F417}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{143076C0-8D6B-4054-9F45-06B21655F417}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{143076C0-8D6B-4054-9F45-06B21655F417}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F8C1C3D-6579-4D93-AB1A-FB61D2CA5BA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F8C1C3D-6579-4D93-AB1A-FB61D2CA5BA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F8C1C3D-6579-4D93-AB1A-FB61D2CA5BA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F8C1C3D-6579-4D93-AB1A-FB61D2CA5BA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -398,7 +394,6 @@ Global
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{143076C0-8D6B-4054-9F45-06B21655F417} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
-		{6F8C1C3D-6579-4D93-AB1A-FB61D2CA5BA4} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
