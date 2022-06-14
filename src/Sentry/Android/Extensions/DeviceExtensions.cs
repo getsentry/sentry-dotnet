@@ -4,15 +4,35 @@ namespace Sentry.Android.Extensions;
 
 internal static class DeviceExtensions
 {
-    public static void ApplyTo(this Java.Protocol.Device d, Device device)
+    public static void ApplyFromAndroidRuntime(this Device device)
     {
+        device.Manufacturer ??= AndroidBuild.Manufacturer;
+        device.Brand ??= AndroidBuild.Brand;
+        device.Model ??= AndroidBuild.Model;
+
+        if (AndroidBuild.SupportedAbis is { } abis)
+        {
+            device.Architecture ??= abis[0];
+        }
+        else
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            device.Architecture ??= AndroidBuild.CpuAbi;
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
+    }
+
+    public static void ApplyFromSentryAndroidSdk(this Device device, Java.Protocol.Device d)
+    {
+        // We already have these above
+        // device.Manufacturer ??= d.Manufacturer;
+        // device.Brand ??= d.Brand;
+        // device.Model ??= d.Model;
+        // device.Architecture ??= d.GetArchs()?.FirstOrDefault();
+
         device.Name ??= d.Name;
-        device.Manufacturer ??= d.Manufacturer;
-        device.Brand ??= d.Brand;
         device.Family ??= d.Family;
-        device.Model ??= d.Model;
         device.ModelId ??= d.ModelId;
-        device.Architecture ??= d.GetArchs()?.FirstOrDefault();
         device.BatteryLevel ??= d.BatteryLevel?.ShortValue();
         device.IsCharging ??= d.IsCharging()?.BooleanValue();
         device.IsOnline ??= d.IsOnline()?.BooleanValue();
