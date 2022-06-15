@@ -6,7 +6,8 @@ public static class ModuleInit
     public static void Init()
     {
         VerifyDiffPlex.Initialize();
-        VerifierSettings.IgnoreMember<SentryException>(_=>_.Module);
+        VerifierSettings.IgnoreMembers<SentryException>(_ => _.Module, _ => _.ThreadId);
+
         VerifierSettings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(
             target => target.Data,
             (_, value) =>
