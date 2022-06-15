@@ -90,14 +90,9 @@ jobs:
         #     list-tests: 'failed'
 
         - name: Pack
-          # only pack on windows since we need classic .net assemblies
-          if: startsWith(matrix.os, 'windows')
-          run: dotnet pack ${{ matrix.slnf }} -c Release --no-build
-
-        - name: Pack (MAUI)
-          # only pack on macos since we need ios native targets included
+          # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
           if: startsWith(matrix.os, 'macos')
-          run: dotnet pack src/Sentry.Maui -c Release --no-build
+          run: dotnet pack ${{ matrix.slnf }} -c Release --no-build
 
         - name: Upload Verify Results
           if: failure()
