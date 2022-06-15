@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Description>Official MAUI integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <!--
       Build for net6.0 to cover all managed platforms,
       but also target platforms where we intend to bundle native SDKs.
