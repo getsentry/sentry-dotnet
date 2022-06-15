@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.18.0
 
 ### Fixes
 
