@@ -5,29 +5,31 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
+[UsesVerify]
 public class VersioningTests
 {
     [Fact]
-    public async Task Foo()
+    public async Task Simple()
     {
         var builder = WebApplication.CreateBuilder();
-       // builder.Services.AddControllers();
+
+        var controllers = builder.Services.AddControllers();
+        controllers.UseSpecificControllers(typeof(TargetController));
         await using var app = builder.Build();
-      //  app.MapControllers();
 
-        app.MapGet("/", () => "a");
-        var task = app.RunAsync();
+        app.MapControllers();
 
-        var httpClient = new HttpClient();
-        var uri = $"{app.Urls.First()}";
-        var message = await httpClient.GetStringAsync(uri);
-        Assert.Equal("Hello world",message);
-        await app.StopAsync();
+        await app.StartAsync();
+
+        using var client = new HttpClient();
+        var result = client.GetStringAsync($"{app.Urls.First()}/Target");
+
+        await Verify(result);
     }
 
     [ApiController]
-    [Route("Controller")]
-    public class MyController : ControllerBase
+    [Route("[controller]")]
+    public class TargetController : ControllerBase
     {
         [HttpGet]
         public string Method()
