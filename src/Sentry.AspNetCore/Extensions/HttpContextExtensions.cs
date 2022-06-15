@@ -100,17 +100,22 @@ namespace Sentry.AspNetCore.Extensions
             // shows the nullable output.
             var routeData = context?.GetRouteData();
 
-            if (routeData?.Values["controller"]?.ToString() is { } controller)
+            if (routeData == null)
+            {
+                return route;
+            }
+
+            if (routeData.Values["controller"]?.ToString() is { } controller)
             {
                 route = Regex.Replace(route, "{controller=[^}]+}", controller);
             }
 
-            if (routeData?.Values["action"]?.ToString() is { } action)
+            if (routeData.Values["action"]?.ToString() is { } action)
             {
                 route = Regex.Replace(route, "{action=[^}]+}", action);
             }
 
-            if (routeData?.Values["area"]?.ToString() is { } area)
+            if (routeData.Values["area"]?.ToString() is { } area)
             {
                 route = Regex.Replace(route, "{area=[^}]+}", area);
             }
