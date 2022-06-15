@@ -13,22 +13,33 @@ public class VersioningTests
     {
         var builder = WebApplication.CreateBuilder();
 
-        var controllers = builder.Services.AddControllers();
+        var services = builder.Services;
+        var controllers = services.AddControllers();
         controllers.UseSpecificControllers(typeof(TargetController));
+        services.AddApiVersioning(_ =>
+        {
+            _.DefaultApiVersion = new ApiVersion(1, 0);
+            _.AssumeDefaultVersionWhenUnspecified = true;
+            _.ReportApiVersions = true;
+        });
+
         await using var app = builder.Build();
 
         app.MapControllers();
 
+
         await app.StartAsync();
 
         using var client = new HttpClient();
-        var result = client.GetStringAsync($"{app.Urls.First()}/Target");
+        var result = client.GetStringAsync($"{app.Urls.First()}/v1.1/Target");
 
         await Verify(result);
     }
 
     [ApiController]
     [Route("[controller]")]
+    [Route("v{version:apiVersion}/Target")]
+    [ApiVersion("1.1")]
     public class TargetController : ControllerBase
     {
         [HttpGet]
