@@ -1,0 +1,56 @@
+using Sentry.Android.Extensions;
+using Sentry.Extensibility;
+
+namespace Sentry.Android;
+
+internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
+{
+    private readonly Java.IEventProcessor? _androidProcessor;
+    private readonly Java.Hint _hint = new();
+
+    public AndroidEventProcessor(SentryAndroidOptions androidOptions)
+    {
+        // Locate the Android SDK's default event processor by its class
+        // NOTE: This approach avoids hardcoding the class name (which could be obfuscated by proguard)
+        _androidProcessor = androidOptions.EventProcessors.OfType<JavaObject>()
+            .Where(o => o.Class == JavaClass.FromType(typeof(DefaultAndroidEventProcessor)))
+            .Cast<Java.IEventProcessor>()
+            .FirstOrDefault();
+
+        // TODO: This would be cleaner, but doesn't compile. Figure out why.
+        // _androidProcessor = androidOptions.EventProcessors
+        //     .OfType<DefaultAndroidEventProcessor>()
+        //     .FirstOrDefault();
+    }
+
+    public SentryEvent Process(SentryEvent @event)
+    {
+        // Get what information we can ourselves first
+        @event.Contexts.Device.ApplyFromAndroidRuntime();
+
+        // Copy more information from the Android SDK
+        if (_androidProcessor is { } androidProcessor)
+        {
+            // TODO: Can we gather more device data directly and remove this?
+
+            // Run a fake event through the Android processor, so we can get context info from the Android SDK.
+            // We'll want to do this every time, so that all information is current. (ex: device orientation)
+            using var e = new Java.SentryEvent();
+            androidProcessor.Process(e, _hint);
+
+            // Copy what we need to the managed event
+            if (e.Contexts.Device is { } device)
+            {
+                @event.Contexts.Device.ApplyFromSentryAndroidSdk(device);
+            }
+        }
+
+        return @event;
+    }
+
+    public void Dispose()
+    {
+        _androidProcessor?.Dispose();
+        _hint.Dispose();
+    }
+}

@@ -46,6 +46,9 @@
   <attr path="/api/package[@name='io.sentry']/class[@name='SentryTraceHeader']/field[@name='SENTRY_TRACE_HEADER']" name="managedName">SentryTraceHeaderName</attr>
   <attr path="/api/package[@name='io.sentry']/class[@name='TraceStateHeader']/field[@name='TRACE_STATE_HEADER']" name="managedName">TraceStateHeaderName</attr>
 
+  <!-- Fix visibility of this type, for use in AndroidEventProcessor.cs -->
+  <attr path="/api/package[@name='io.sentry.android.core']/class[@name='DefaultAndroidEventProcessor']" name="visibility">internal</attr>
+
   <!--
     The remaining APIS are removed to prevent various errors/warnings.
     TODO: Find other workarounds for each one, rather than removing the APIs.

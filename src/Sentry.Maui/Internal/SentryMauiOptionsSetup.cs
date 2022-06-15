@@ -20,6 +20,6 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
         options.IsGlobalModeEnabled = true;
 
         // We'll use an event processor to set things like SDK name
-        options.AddEventProcessor(new SentryMauiEventProcessor());
+        options.AddEventProcessor(new SentryMauiEventProcessor(options));
     }
 }
