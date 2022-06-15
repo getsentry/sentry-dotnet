@@ -29,30 +29,14 @@ public static partial class SentrySdk
     /// <returns>An object that should be disposed when the application terminates.</returns>
     public static IDisposable Init(AndroidContext context, SentryOptions options)
     {
-        // TODO: Pause/Resume
-        options.AutoSessionTracking = true;
-        options.IsGlobalModeEnabled = true;
-        options.AddEventProcessor(new DelegateEventProcessor(evt =>
-        {
-            if (AndroidBuild.SupportedAbis is { } abis)
-            {
-                evt.Contexts.Device.Architecture = abis[0];
-            }
-            else
-            {
-#pragma warning disable CS0618 // Type or member is obsolete
-                evt.Contexts.Device.Architecture = AndroidBuild.CpuAbi;
-#pragma warning restore CS0618 // Type or member is obsolete
-            }
-
-            evt.Contexts.Device.Manufacturer = AndroidBuild.Manufacturer;
-
-            return evt;
-        }));
-
+        // Init the Java Android SDK first
+        SentryAndroidOptions? androidOptions = null;
         SentryAndroid.Init(context, new JavaLogger(options),
             new OptionsConfigurationCallback(o =>
             {
+                // Capture the android options reference on the outer scope
+                androidOptions = o;
+
                 // TODO: Should we set the DistinctId to match the one used by GlobalSessionManager?
                 //o.DistinctId = ?
 
@@ -168,10 +152,17 @@ public static partial class SentrySdk
                 o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
             }));
 
-        options.CrashedLastRun = () => Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
-
+        // Make sure we capture managed exceptions from the Android environment
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 
+        // Set options for the managed SDK
+        options.AutoSessionTracking = true;
+        options.IsGlobalModeEnabled = true;
+        options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
+        options.CrashedLastRun = () => Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
+        // TODO: Pause/Resume
+
+        // Init the managed SDK
         return Init(options);
     }
 
