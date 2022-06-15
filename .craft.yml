@@ -16,3 +16,4 @@ targets:
       nuget:Sentry.Serilog:
       nuget:Sentry.NLog:
       nuget:Sentry.Google.Cloud.Functions:
+      nuget:Sentry.Maui:
