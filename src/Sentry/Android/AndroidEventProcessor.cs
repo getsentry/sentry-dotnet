@@ -1,6 +1,5 @@
 using Sentry.Android.Extensions;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 
 namespace Sentry.Android;
 
@@ -11,10 +10,17 @@ internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
 
     public AndroidEventProcessor(SentryAndroidOptions androidOptions)
     {
+        // Locate the Android SDK's default event processor by its class
+        // NOTE: This approach avoids hardcoding the class name (which could be obfuscated by proguard)
         _androidProcessor = androidOptions.EventProcessors.OfType<JavaObject>()
-            .Where(x => x.Class.Name == "io.sentry.android.core.DefaultAndroidEventProcessor")
+            .Where(o => o.Class == JavaClass.FromType(typeof(DefaultAndroidEventProcessor)))
             .Cast<Java.IEventProcessor>()
             .FirstOrDefault();
+
+        // TODO: This would be cleaner, but doesn't compile. Figure out why.
+        // _androidProcessor = androidOptions.EventProcessors
+        //     .OfType<DefaultAndroidEventProcessor>()
+        //     .FirstOrDefault();
     }
 
     public SentryEvent Process(SentryEvent @event)
