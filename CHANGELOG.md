@@ -30,6 +30,7 @@
   - Update Sentry-Android to 6.0.0 ([#1697](https://github.com/getsentry/sentry-dotnet/pull/1697))
   - Set Java/Android SDK options ([#1694](https://github.com/getsentry/sentry-dotnet/pull/1694))
   - Refactor and update Android options ([#1705](https://github.com/getsentry/sentry-dotnet/pull/1705))
+  - Add Android OS information to the event context ([#1716](https://github.com/getsentry/sentry-dotnet/pull/1716))
 
 ### Fixes
 
