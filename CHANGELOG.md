@@ -23,6 +23,7 @@
   - MAUI events become extra context in Sentry events ([#1706](https://github.com/getsentry/sentry-dotnet/pull/1706))
   - Add options for PII breadcrumbs from MAUI events ([#1709](https://github.com/getsentry/sentry-dotnet/pull/1709))
   - Add device information to the event context ([#1713](https://github.com/getsentry/sentry-dotnet/pull/1713))
+  - Add platform OS information to the event context ([#1717](https://github.com/getsentry/sentry-dotnet/pull/1717))
 - Added a new `net6.0-android` target for the `Sentry` core library, which bundles the [Sentry Android SDK](https://docs.sentry.io/platforms/android/):
   - Initial .NET 6 Android support ([#1288](https://github.com/getsentry/sentry-dotnet/pull/1288))
   - Update Android Support ([#1669](https://github.com/getsentry/sentry-dotnet/pull/1669))
