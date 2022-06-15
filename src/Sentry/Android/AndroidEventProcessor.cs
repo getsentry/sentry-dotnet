@@ -27,11 +27,12 @@ internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
     {
         // Get what information we can ourselves first
         @event.Contexts.Device.ApplyFromAndroidRuntime();
+        @event.Contexts.OperatingSystem.ApplyFromAndroidRuntime();
 
         // Copy more information from the Android SDK
         if (_androidProcessor is { } androidProcessor)
         {
-            // TODO: Can we gather more device data directly and remove this?
+            // TODO: Can we gather more data directly and remove this?
 
             // Run a fake event through the Android processor, so we can get context info from the Android SDK.
             // We'll want to do this every time, so that all information is current. (ex: device orientation)
@@ -42,6 +43,10 @@ internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
             if (e.Contexts.Device is { } device)
             {
                 @event.Contexts.Device.ApplyFromSentryAndroidSdk(device);
+            }
+            if (e.Contexts.OperatingSystem is { } os)
+            {
+                @event.Contexts.OperatingSystem.ApplyFromSentryAndroidSdk(os);
             }
         }
 
