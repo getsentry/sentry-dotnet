@@ -28,7 +28,7 @@ internal static class MauiOsData
         catch (Exception ex)
         {
             // Log, but swallow the exception so we can continue sending events
-            logger?.LogError("Error getting MAUI device information.", ex);
+            logger?.LogError("Error getting MAUI OS information.", ex);
         }
     }
 }
