@@ -103,21 +103,11 @@ jobs:
               **/*.received.*
 
         - name: Archive Artifacts
-          # only archive on windows since we only pack on windows. See Pack step.
-          if: startsWith(matrix.os, 'windows')
-          uses: actions/upload-artifact@v3
-          with:
-            name: ${{ github.sha }}
-            if-no-files-found: error
-            path: |
-              ${{ github.workspace }}/src/**/Release/*.nupkg
-
-        - name: Archive Artifacts (MAUI)
-          # only archive MAUI on macos since we only pack MAUI on macos. See Pack step.
+          # only archive on macos since we only pack on macos. See Pack step.
           if: startsWith(matrix.os, 'macos')
           uses: actions/upload-artifact@v3
           with:
             name: ${{ github.sha }}
             if-no-files-found: error
             path: |
-              ${{ github.workspace }}/src/Sentry.Maui/bin/Release/*.nupkg
+              ${{ github.workspace }}/src/**/Release/*.nupkg
