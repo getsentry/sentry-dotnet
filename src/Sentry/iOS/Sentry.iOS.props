@@ -4,10 +4,25 @@
     <LangVersion>10</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
     <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    <IsBindingProject>true</IsBindingProject>
+    <NoBindingEmbedding>true</NoBindingEmbedding>
+    <!-- Don't remove native symbols, because it makes debugging native crashes harder -->
+    <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+    <iOSLibsDirectory>$(MSBuildProjectDirectory)/../../libs/iOS/</iOSLibsDirectory>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="iOS/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ObjcBindingApiDefinition Include="iOS/ApiDefinition.cs" />
+    <ObjcBindingCoreSource Include="iOS/Structs.cs" />
+    <NativeReference Include="$(iOSLibsDirectory)/Sentry.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>False</SmartLink>
+      <!-- <Frameworks>CoreLocation ModelIO</Frameworks> -->
+    </NativeReference>
   </ItemGroup>
 
   <ItemGroup>
