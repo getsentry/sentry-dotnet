@@ -11,6 +11,12 @@ public class AppDelegate : UIApplicationDelegate
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
+        SentrySdk.Init(o =>
+        {
+            o.Debug = true;
+            o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+        });
+
         // create a new window instance based on the screen size
         Window = new UIWindow(UIScreen.MainScreen.Bounds);
 
@@ -27,6 +33,9 @@ public class AppDelegate : UIApplicationDelegate
 
         // make the window visible
         Window.MakeKeyAndVisible();
+
+
+        SentrySdk.CaptureMessage("From iOS");
 
         return true;
     }
