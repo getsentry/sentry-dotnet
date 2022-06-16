@@ -81,7 +81,6 @@ For more details, please: **refer to the [documentation](https://getsentry.githu
 Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/) is still available, and recommended for use with .NET Framework 3.5 to 4.6.0.
 
 ## Resources
-https://img.shields.io/github/discussions/getsentry/sentry-dotnet.svg
 * [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/)
 * [![Discussions](https://img.shields.io/github/discussions/getsentry/sentry-dotnet.svg)]([https://forum.sentry.io/c/sdks](https://github.com/getsentry/sentry-dotnet/discussions))
 * [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
