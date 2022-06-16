@@ -1,1 +1,80 @@
-﻿Hello world
+﻿{
+  result: Hello world,
+  payloads: [
+    {
+      Source: {
+        Name: GET v{version:apiVersion}/Target,
+        Platform: csharp,
+        Operation: http.server,
+        Description: ,
+        Status: Ok,
+        IsSampled: true,
+        Request: {
+          Url: http://localhost:5000/v1.1/Target,
+          Method: GET,
+          QueryString: ,
+          Headers: {
+            Host: localhost:5000
+          },
+          Env: {
+            SERVER_NAME: MACBOOK16,
+            SERVER_PORT: 5000,
+            SERVER_SOFTWARE: Kestrel
+          }
+        },
+        User: {},
+        Environment: production,
+        Breadcrumbs: [
+          {
+            Message: Request starting HTTP/1.1 GET http://localhost:5000/v1.1/Target - -,
+            Data: {
+              eventId: 1
+            },
+            Category: Microsoft.AspNetCore.Hosting.Diagnostics
+          },
+          {
+            Message: Executing endpoint 'VersioningTests+TargetController.Method (Sentry.AspNetCore.Tests)',
+            Data: {
+              eventId: ExecutingEndpoint
+            },
+            Category: Microsoft.AspNetCore.Routing.EndpointMiddleware
+          },
+          {
+            Message: Route matched with {action = "Method", controller = "Target"}. Executing controller action with signature System.String Method() on controller VersioningTests+TargetController (Sentry.AspNetCore.Tests).,
+            Data: {
+              eventId: ControllerActionExecuting
+            },
+            Category: Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker
+          },
+          {
+            Message: Executing ObjectResult, writing value of type 'System.String'.,
+            Data: {
+              eventId: ObjectResultExecuting
+            },
+            Category: Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor
+          },
+          {
+            Data: {
+              eventId: ActionExecuted
+            },
+            Category: Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker
+          },
+          {
+            Message: Executed endpoint 'VersioningTests+TargetController.Method (Sentry.AspNetCore.Tests)',
+            Data: {
+              eventId: ExecutedEndpoint
+            },
+            Category: Microsoft.AspNetCore.Routing.EndpointMiddleware
+          }
+        ],
+        Tags: {
+          ActionId: Guid_1,
+          ActionName: VersioningTests+TargetController.Method (Sentry.AspNetCore.Tests),
+          route.action: Method,
+          route.controller: Target
+        },
+        IsFinished: true
+      }
+    }
+  ]
+}

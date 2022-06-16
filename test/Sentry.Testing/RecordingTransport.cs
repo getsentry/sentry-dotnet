@@ -1,4 +1,4 @@
-internal class RecordingTransport : ITransport
+public class RecordingTransport : ITransport
 {
     private List<Envelope> _envelopes = new();
 
@@ -10,6 +10,7 @@ internal class RecordingTransport : ITransport
         {
             _envelopes.Add(envelope);
         }
+
         return Task.CompletedTask;
     }
 }
