@@ -4,6 +4,7 @@
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <!-- .NET Android Workload doesn't support Linux -->
     <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net6.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios</TargetFrameworks>
     <!-- We'll pin to C# 9 and ImplicitUsings false to allow us to compile within Unity -->
     <LangVersion>9</LangVersion>
     <ImplicitUsings>false</ImplicitUsings>
@@ -12,9 +13,12 @@
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
     <!-- Files under Android are included below when TFM ends with android -->
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/Android/**</DefaultItemExcludes>
+    <!-- Files under iOS are included below when TFM ends with ios -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/iOS/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android/Sentry.Android.props" />
+  <Import Condition="$(TargetFramework.EndsWith('ios'))" Project="iOS/Sentry.iOS.props" />
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">
