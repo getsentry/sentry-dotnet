@@ -13,14 +13,15 @@
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
 
     <!-- Add a pre-release identifier for this package  -->
-    <Version>$(Version)-preview.1</Version>
+    <Version>$(Version)-preview.2</Version>
 
     <!--
-      Imports MAUI dependencies.
+      Imports MAUI dependencies, and sets the minimum compatible version.
       Requires the MAUI .NET workload to be installed with:
         dotnet workload install maui
     -->
     <UseMaui>true</UseMaui>
+    <MauiVersion>6.0.312</MauiVersion>
 
     <!--
       MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749
