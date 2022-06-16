@@ -73,6 +73,10 @@ namespace Sentry.Internal
                     TimeSpan.TicksPerSecond);
             }
 
+// Don't compile this in for iOS:
+//   System.PlatformNotSupportedException: Operation is not supported on this platform.
+//      at System.Diagnostics.Process.get_StartTime()
+#if !IOS
             // An opt-out to the more precise approach (mainly due to IL2CPP):
             // https://issuetracker.unity3d.com/issues/il2cpp-player-crashes-when-calling-process-dot-getcurrentprocess-dot-starttime
             if (_options.DetectStartupTime == StartupTimeDetectionMode.Best)
@@ -96,6 +100,7 @@ namespace Sentry.Internal
                     // Let the actual task get collected
                     PreciseAppStartupTask = Task.CompletedTask);
             }
+#endif
         }
 
         private static DateTimeOffset GetStartupTime()

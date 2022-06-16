@@ -3,6 +3,7 @@
   <PropertyGroup>
     <LangVersion>10</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>

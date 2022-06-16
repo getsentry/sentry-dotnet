@@ -15,6 +15,7 @@
       "samples\\Sentry.Samples.Console.Customized\\Sentry.Samples.Console.Customized.csproj",
       "samples\\Sentry.Samples.EntityFramework\\Sentry.Samples.EntityFramework.csproj",
       "samples\\Sentry.Samples.GenericHost\\Sentry.Samples.GenericHost.csproj",
+      "samples\\Sentry.Samples.iOS\\Sentry.Samples.iOS.csproj",
       "samples\\Sentry.Samples.Google.Cloud.Functions\\Sentry.Samples.Google.Cloud.Functions.csproj",
       "samples\\Sentry.Samples.Log4Net\\Sentry.Samples.Log4Net.csproj",
       "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj",
