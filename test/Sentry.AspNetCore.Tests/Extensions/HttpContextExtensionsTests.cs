@@ -66,7 +66,6 @@ public class HttpContextExtensionsTests
     {
         // Arrange
         var httpContext = Fixture.GetMvcSut(area, controller, action);
-
         // Act
         var filteredRoute = HttpContextExtensions.ReplaceMvcParameters(routeInput, httpContext);
 
@@ -81,6 +80,7 @@ public class HttpContextExtensionsTests
     [InlineData("abc/{controller=}/")]
     [InlineData("{action=Index}/{id?}")]
     [InlineData("{area=Index}/{id?}")]
+    [InlineData("v{version:apiVersion}/Target")]
     public void RouteHasMvcParameters_RouteWithMvcParameters_True(string route)
     {
         // Assert
@@ -129,6 +129,7 @@ public class HttpContextExtensionsTests
     [InlineData("{controller=Home}/{action=Index}", "house/about", "house", "about", null)]
     [InlineData("{controller=Home}/{id?}", "house/{id?}", "house", "about", null)]
     [InlineData("{action=Index}/{id?}", "about/{id?}", null, "about", null)]
+    [InlineData("v{version:apiVersion}/Target", "v1.1/Target", null, "about", null)]
     public void NewRouteFormat_MvcRouteWithoutPathBase_ParsedParameters(string routeInput, string expectedOutput, string controller, string action, string area)
     {
         // Arrange
