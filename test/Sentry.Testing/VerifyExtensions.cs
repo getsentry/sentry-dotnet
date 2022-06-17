@@ -10,6 +10,7 @@ public static class VerifyExtensions
             .IgnoreMembersWithType<SpanId>()
             .IgnoreMembersWithType<SentryId>()
             .IgnoreMembers<SentryEvent>(e => e.Modules, e => e.Release)
+            .IgnoreMembers<Request>(e => e.Env, e => e.Url, e => e.Headers)
             .IgnoreMembers<Transaction>(t => t.Release)
             .IgnoreMembers<SentryException>(e => e.Module, e => e.ThreadId);
     }

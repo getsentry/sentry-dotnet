@@ -110,19 +110,25 @@ namespace Sentry.AspNetCore.Extensions
                 return route;
             }
 
-            if (routeData.Values["controller"]?.ToString() is { } controller)
+            var values = routeData.Values;
+            if (values["controller"] is string controller)
             {
                 route = Regex.Replace(route, "{controller=[^}]+}", controller);
             }
 
-            if (routeData.Values["action"]?.ToString() is { } action)
+            if (values["action"] is string action)
             {
                 route = Regex.Replace(route, "{action=[^}]+}", action);
             }
 
-            if (routeData.Values["area"]?.ToString() is { } area)
+            if (values["area"] is string area)
             {
                 route = Regex.Replace(route, "{area=[^}]+}", area);
+            }
+
+            if (values["version"] is string version)
+            {
+                route = Regex.Replace(route, "{version:[^}]+}", version);
             }
 
             return route;
