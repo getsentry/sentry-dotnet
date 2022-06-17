@@ -52,12 +52,14 @@ namespace Sentry.AspNetCore.Extensions
             // {controller=Home}/{action=Index}/{id?}
             if (RouteHasMvcParameters(routePattern))
             {
-                return builder.Append(ReplaceMvcParameters(routePattern, context)).ToString();
+                builder.Append(ReplaceMvcParameters(routePattern, context));
             }
             else
             {
-                return builder.Append(routePattern).ToString();
+                builder.Append(routePattern);
             }
+
+            return builder.ToString();
         }
 
         // Internal for testing.
