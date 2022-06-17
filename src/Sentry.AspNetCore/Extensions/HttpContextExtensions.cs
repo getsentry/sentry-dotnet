@@ -103,10 +103,9 @@ namespace Sentry.AspNetCore.Extensions
         // Internal for testing.
         internal static string ReplaceMvcParameters(string route, HttpContext context)
         {
-            // Return RouteData or Null, marking the HttpContext as nullable since the output doesn't
-            // shows the nullable output.
             var routeData = context.GetRouteData();
 
+            // GetRouteData can return null on netstandard2
             if (routeData == null)
             {
                 return route;
