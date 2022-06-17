@@ -112,6 +112,7 @@ namespace Sentry.AspNetCore.Extensions
             }
 
             var values = routeData.Values;
+
             if (values["controller"] is string controller)
             {
                 route = Regex.Replace(route, "{controller=[^}]+}", controller);
