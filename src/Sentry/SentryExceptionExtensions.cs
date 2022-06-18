@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using Sentry;
 using Sentry.Internal;
 
 /// <summary>
@@ -17,6 +19,32 @@ public static class SentryExceptionExtensions
     /// <param name="value">The value of the key.</param>
     public static void AddSentryTag(this Exception ex, string name, string value)
         => ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{name}", value);
+
+    public static IEnumerable<Exception> EnumerateChainedExceptions(this Exception exception, SentryOptions options)
+    {
+        if (exception is AggregateException aggregateException)
+        {
+            foreach (var inner in aggregateException.InnerExceptions
+                         .SelectMany(_ => _.EnumerateChainedExceptions(options)))
+            {
+                yield return inner;
+            }
+
+            if (!options.KeepAggregateException)
+            {
+                yield break;
+            }
+        }
+        else if (exception.InnerException != null)
+        {
+            foreach (var inner in exception.InnerException.EnumerateChainedExceptions(options))
+            {
+                yield return inner;
+            }
+        }
+
+        yield return exception;
+    }
 
     /// <summary>
     /// Set a Sentry's structured Context to the Exception.
