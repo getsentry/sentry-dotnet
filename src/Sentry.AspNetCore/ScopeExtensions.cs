@@ -84,6 +84,12 @@ public static class ScopeExtensions
                 scope.SetTag("route.area", area);
             }
 
+            var version = routeData.Values["version"]?.ToString();
+            if (version != null)
+            {
+                scope.SetTag("route.version", version);
+            }
+
             // Transaction Name may only be available afterward the creation of the Transaction.
             // In this case, the event will update the transaction name if captured during the
             // pipeline execution, allowing it to match the correct transaction name as the current
