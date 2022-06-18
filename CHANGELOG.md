@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- - Detect MVC versioning in route ([#1731](https://github.com/getsentry/sentry-dotnet/pull/1731))
+- Detect MVC versioning in route ([#1731](https://github.com/getsentry/sentry-dotnet/pull/1731))
 
 ## Sentry.Maui 3.18.0-preview.1
 
