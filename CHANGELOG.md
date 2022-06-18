@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Expose EnumerateChainedExceptions ([#1733](https://github.com/getsentry/sentry-dotnet/pull/1733))
+
 ## Sentry.Maui 3.18.0-preview.1
 
 ### Features
