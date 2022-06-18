@@ -20,6 +20,10 @@ public static class SentryExceptionExtensions
     public static void AddSentryTag(this Exception ex, string name, string value)
         => ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{name}", value);
 
+    /// <summary>
+    /// Recursively enumerates all <see cref="AggregateException.InnerExceptions"/> and <see cref="Exception.InnerException"/>
+    /// Not for public use.
+    /// </summary>
     public static IEnumerable<Exception> EnumerateChainedExceptions(this Exception exception, SentryOptions options)
     {
         if (exception is AggregateException aggregateException)
