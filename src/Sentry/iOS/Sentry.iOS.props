@@ -5,9 +5,10 @@
     <ImplicitUsings>true</ImplicitUsings>
     <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
     <IsBindingProject>true</IsBindingProject>
-    <NoBindingEmbedding>true</NoBindingEmbedding>
-    <!-- Don't remove native symbols, because it makes debugging native crashes harder -->
+    <!-- default is true: -->
+    <NoBindingEmbedding>false</NoBindingEmbedding>
     <SentryCocoaSdkVersion>7.17.0</SentryCocoaSdkVersion>
+    <!-- Don't remove native symbols, because it makes debugging native crashes harder -->
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <iOSLibsDirectory>$(BaseIntermediateOutputPath)/SentrySDKs/iOS/$(SentryCocoaSdkVersion)/</iOSLibsDirectory>
     <iOSFramework>$(iOSLibsDirectory)Sentry.xcframework/Carthage/Build/Sentry.xcframework</iOSFramework>
@@ -21,17 +22,32 @@
     <ObjcBindingApiDefinition Include="iOS/ApiDefinition.cs" />
     <ObjcBindingCoreSource Include="iOS/Structs.cs" />
     <NativeReference Include="$(iOSFramework)" Kind="Framework" />
-
-    <NativeReference Include="$(iOSFramework)">
-      <Kind>Framework</Kind>
-      <SmartLink>False</SmartLink>
-    </NativeReference>
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="System.Globalization" />
     <Using Include="System.Text.Json" />
   </ItemGroup>
+
+  <!-- Pack is broken. Should be fixed on 6.0.400: https://github.com/dotnet/msbuild/issues/4584#issuecomment-1108100189 -->
+  	<!--
+		Binding projects may include NativeReference items, which makes the 'pack' target want to include a Native.$(AssemblyName).manifest into the NuGet,
+		which obviously fails because we don't create such a file. So let's remove that file.
+		Ref: https://github.com/dotnet/msbuild/blob/3a1e456fe227f3e2b190b434578844c31e8bcb4a/src/Tasks/Microsoft.Common.CurrentVersion.targets#L6111-L6118
+		Ref: https://github.com/dotnet/msbuild/issues/4584
+	-->
+	<PropertyGroup>
+		<GenerateNuspecDependsOn>
+			$(GenerateNuspecDependsOn);
+			_RemoveNativeManifestFromPack;
+		</GenerateNuspecDependsOn>
+	</PropertyGroup>
+	<Target Name="_RemoveNativeManifestFromPack">
+		<ItemGroup>
+			<_BuildOutputInPackage Remove="@(_BuildOutputInPackage)" Condition="'%(Filename)%(Extension)' == '$(_DeploymentTargetApplicationManifestFileName)'" />
+		</ItemGroup>
+	</Target>
+
 
   <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences">
     <DownloadFile SourceUrl="https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaSdkVersion)/Sentry.xcframework.zip"
