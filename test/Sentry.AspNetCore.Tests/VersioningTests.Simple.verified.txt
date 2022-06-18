@@ -62,8 +62,7 @@
           ActionId: Guid_1,
           ActionName: VersioningTests+TargetController.Method (Sentry.AspNetCore.Tests),
           route.action: Method,
-          route.controller: Target,
-          route.version: 1.1
+          route.controller: Target
         },
         IsFinished: true
       }
