@@ -25,13 +25,14 @@ namespace Sentry.iOS
     [Internal]
     internal delegate void SentryRequestOperationFinished([NullAllowed] NSHttpUrlResponse arg0, [NullAllowed] NSError arg1);
 
-    // typedef SentryBreadcrumb * _Nullable (^SentryBeforeBreadcrumbCallback)(SentryBreadcrumb * _Nonnull);
-    [Internal]
-    internal delegate SentryBreadcrumb SentryBeforeBreadcrumbCallback(SentryBreadcrumb arg0);
-
-    // typedef SentryEvent * _Nullable (^SentryBeforeSendEventCallback)(SentryEvent * _Nonnull);
-    [Internal]
-    internal delegate SentryEvent SentryBeforeSendEventCallback(SentryEvent arg0);
+    // Blocked by https://github.com/xamarin/xamarin-macios/issues/15299
+    // // typedef SentryBreadcrumb * _Nullable (^SentryBeforeBreadcrumbCallback)(SentryBreadcrumb * _Nonnull);
+    // [Internal]
+    // internal delegate SentryBreadcrumb SentryBeforeBreadcrumbCallback(SentryBreadcrumb arg0);
+    //
+    // // typedef SentryEvent * _Nullable (^SentryBeforeSendEventCallback)(SentryEvent * _Nonnull);
+    // [Internal]
+    // internal delegate SentryEvent SentryBeforeSendEventCallback(SentryEvent arg0);
 
     // typedef BOOL (^SentryShouldQueueEvent)(NSHTTPURLResponse * _Nullable, NSError * _Nullable);
     [Internal]
@@ -612,13 +613,15 @@ namespace Sentry.iOS
         [Export("maxBreadcrumbs")]
         nuint MaxBreadcrumbs { get; set; }
 
-        // @property (copy, nonatomic) SentryBeforeSendEventCallback _Nullable beforeSend;
-        [NullAllowed, Export("beforeSend", ArgumentSemantic.Copy)]
-        SentryBeforeSendEventCallback BeforeSend { get; set; }
+        // Blocked by https://github.com/xamarin/xamarin-macios/issues/15299
+        // // @property (copy, nonatomic) SentryBeforeSendEventCallback _Nullable beforeSend;
+        // [NullAllowed, Export("beforeSend", ArgumentSemantic.Copy)]
+        // SentryBeforeSendEventCallback BeforeSend { get; set; }
 
-        // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
-        [NullAllowed, Export("beforeBreadcrumb", ArgumentSemantic.Copy)]
-        SentryBeforeBreadcrumbCallback BeforeBreadcrumb { get; set; }
+        // Blocked by https://github.com/xamarin/xamarin-macios/issues/15299
+        // // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
+        // [NullAllowed, Export("beforeBreadcrumb", ArgumentSemantic.Copy)]
+        // SentryBeforeBreadcrumbCallback BeforeBreadcrumb { get; set; }
 
         // @property (copy, nonatomic) NSArray<NSString *> * _Nullable integrations;
         [NullAllowed, Export("integrations", ArgumentSemantic.Copy)]
@@ -790,6 +793,7 @@ namespace Sentry.iOS
     }
 
     // @interface SentryMechanism : NSObject <SentrySerializable>
+    [Internal]
     [BaseType(typeof(NSObject))]
     [DisableDefaultCtor]
     interface SentryMechanism : ISentrySerializable

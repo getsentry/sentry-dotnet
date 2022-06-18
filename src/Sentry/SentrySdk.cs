@@ -27,6 +27,8 @@ namespace Sentry
         /// </summary>
         public static SentryId LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
 
+        static partial void InitNative(SentryOptions options);
+
         internal static IHub InitHub(SentryOptions options)
         {
             options.SetupLogging();
@@ -48,6 +50,7 @@ namespace Sentry
             // Validate DSN for an early exception in case it's malformed
             _ = Dsn.Parse(dsn);
 
+            InitNative(options);
             return new Hub(options);
         }
 
