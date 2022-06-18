@@ -70,34 +70,43 @@ namespace Sentry.AspNetCore.Extensions
             // despite the annotations claiming otherwise.
             var routeData = context.GetRouteData();
 
-            var controller = routeData?.Values["controller"]?.ToString();
-            var action = routeData?.Values["action"]?.ToString();
-            var area = routeData?.Values["area"]?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(action))
+            // GetRouteData can return null on netstandard2
+            if (routeData == null)
             {
-                var builder = new StringBuilder();
-                if (context.Request.PathBase.HasValue)
-                {
-                    builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
-                        .Append('.');
-                }
-
-                if (!string.IsNullOrWhiteSpace(area))
-                {
-                    builder.Append(area)
-                        .Append('.');
-                }
-
-                builder.Append(controller)
-                    .Append('.')
-                    .Append(action);
-                return builder.ToString();
+                return null;
             }
 
-            // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
-            // then there is no way for us to extract anything that resembles a route template.
-            return null;
+            var values = routeData.Values;
+
+            if (values["action"] is not string action)
+            {
+                // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
+                // then there is no way for us to extract anything that resembles a route template.
+                return null;
+            }
+
+            var builder = new StringBuilder();
+            if (context.Request.PathBase.HasValue)
+            {
+                builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                    .Append('.');
+            }
+
+            if (values["area"] is string area)
+            {
+                builder.Append(area)
+                    .Append('.');
+            }
+
+            if (values["controller"] is string controller)
+            {
+                builder.Append(controller)
+                    .Append('.');
+            }
+
+            builder.Append(action);
+
+            return builder.ToString();
         }
 
         // Internal for testing.
