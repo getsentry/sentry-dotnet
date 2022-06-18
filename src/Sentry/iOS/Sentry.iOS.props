@@ -9,7 +9,7 @@
     <!-- Don't remove native symbols, because it makes debugging native crashes harder -->
     <SentryCocoaSdkVersion>7.17.0</SentryCocoaSdkVersion>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
-    <iOSLibsDirectory>$(BaseIntermediateOutputPath)/libs/iOS/</iOSLibsDirectory>
+    <iOSLibsDirectory>$(BaseIntermediateOutputPath)/SentrySDKs/iOS/$(SentryCocoaSdkVersion)/</iOSLibsDirectory>
     <iOSFramework>$(iOSLibsDirectory)Sentry.xcframework/Carthage/Build/Sentry.xcframework</iOSFramework>
   </PropertyGroup>
 
@@ -20,10 +20,11 @@
   <ItemGroup>
     <ObjcBindingApiDefinition Include="iOS/ApiDefinition.cs" />
     <ObjcBindingCoreSource Include="iOS/Structs.cs" />
+    <NativeReference Include="$(iOSFramework)" Kind="Framework" />
+
     <NativeReference Include="$(iOSFramework)">
       <Kind>Framework</Kind>
       <SmartLink>False</SmartLink>
-      <!-- <Frameworks>CoreLocation ModelIO</Frameworks> -->
     </NativeReference>
   </ItemGroup>
 
