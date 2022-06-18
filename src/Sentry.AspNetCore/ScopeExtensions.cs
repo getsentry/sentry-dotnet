@@ -62,42 +62,42 @@ public static class ScopeExtensions
         SetEnv(scope, context, options);
 
         // Extract the route data
-        try
+        var routeData = context.GetRouteData();
+        // GetRouteData can return null on netstandard2
+        if (routeData == null)
         {
-            var routeData = context.GetRouteData();
-            var controller = routeData.Values["controller"]?.ToString();
-            var action = routeData.Values["action"]?.ToString();
-            var area = routeData.Values["area"]?.ToString();
-
-            if (controller != null)
-            {
-                scope.SetTag("route.controller", controller);
-            }
-
-            if (action != null)
-            {
-                scope.SetTag("route.action", action);
-            }
-
-            if (area != null)
-            {
-                scope.SetTag("route.area", area);
-            }
-
-            // Transaction Name may only be available afterward the creation of the Transaction.
-            // In this case, the event will update the transaction name if captured during the
-            // pipeline execution, allowing it to match the correct transaction name as the current
-            // active transaction.
-            if (string.IsNullOrEmpty(scope.TransactionName))
-            {
-                scope.TransactionName = context.TryGetTransactionName();
-            }
+            return;
         }
-        catch (Exception e)
+
+        var values = routeData.Values;
+
+        if (values["controller"] is string controller)
         {
-            // Suppress the error here; we expect an ArgumentNullException if httpContext.Request.RouteValues is null from GetRouteData()
-            // TODO: Consider adding a bool to the Sentry options to make route data extraction optional in case they don't use a routing middleware?
-            options.LogDebug("Failed to extract route data.", e);
+            scope.SetTag("route.controller", controller);
+        }
+
+        if (values["action"] is string action)
+        {
+            scope.SetTag("route.action", action);
+        }
+
+        if (values["area"] is string area)
+        {
+            scope.SetTag("route.area", area);
+        }
+
+        if (values["version"] is string version)
+        {
+            scope.SetTag("route.version", version);
+        }
+
+        // Transaction Name may only be available afterward the creation of the Transaction.
+        // In this case, the event will update the transaction name if captured during the
+        // pipeline execution, allowing it to match the correct transaction name as the current
+        // active transaction.
+        if (string.IsNullOrEmpty(scope.TransactionName))
+        {
+            scope.TransactionName = context.TryGetTransactionName();
         }
 
         // TODO: Get context stuff into scope
@@ -108,7 +108,8 @@ public static class ScopeExtensions
 
     private static void SetEnv(Scope scope, HttpContext context, SentryAspNetCoreOptions options)
     {
-        scope.Request.Method = context.Request.Method;
+        var scopeRequest = scope.Request;
+        scopeRequest.Method = context.Request.Method;
 
         // Logging integration, if enabled, sets the following tag which ends up as duplicate
         // to Request.Url. Prefer the interface value and remove tag.
@@ -117,10 +118,10 @@ public static class ScopeExtensions
         {
             host += $":{context.Request.Host.Port}";
         }
-        scope.Request.Url = $"{context.Request.Scheme}://{host}{context.Request.Path}";
+        scopeRequest.Url = $"{context.Request.Scheme}://{host}{context.Request.Path}";
         scope.UnsetTag("RequestPath");
 
-        scope.Request.QueryString = context.Request.QueryString.ToString();
+        scopeRequest.QueryString = context.Request.QueryString.ToString();
         foreach (var requestHeader in context.Request.Headers)
         {
             if (!options.SendDefaultPii
@@ -131,7 +132,7 @@ public static class ScopeExtensions
                 continue;
             }
 
-            scope.Request.Headers[requestHeader.Key] = requestHeader.Value;
+            scopeRequest.Headers[requestHeader.Key] = requestHeader.Value;
         }
 
         // TODO: Hide these 'Env' behind some extension method as
@@ -139,15 +140,15 @@ public static class ScopeExtensions
         if (options.SendDefaultPii
             && context.Connection.RemoteIpAddress?.ToString() is { } ipAddress)
         {
-            scope.Request.Env["REMOTE_ADDR"] = ipAddress;
+            scopeRequest.Env["REMOTE_ADDR"] = ipAddress;
         }
 
-        scope.Request.Env["SERVER_NAME"] = Environment.MachineName;
-        scope.Request.Env["SERVER_PORT"] = context.Connection.LocalPort.ToString();
+        scopeRequest.Env["SERVER_NAME"] = Environment.MachineName;
+        scopeRequest.Env["SERVER_PORT"] = context.Connection.LocalPort.ToString();
 
         if (context.Response.Headers.TryGetValue("Server", out var server))
         {
-            scope.Request.Env["SERVER_SOFTWARE"] = server;
+            scopeRequest.Env["SERVER_SOFTWARE"] = server;
         }
     }
 
