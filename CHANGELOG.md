@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
+
 ## Sentry.Maui 3.18.0-preview.1
 
 ### Features
