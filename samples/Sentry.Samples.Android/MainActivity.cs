@@ -9,8 +9,25 @@ namespace Sentry.Samples.Android
         {
             SentrySdk.Init(this, o =>
             {
-                o.Debug = true;
                 o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                o.SendDefaultPii = true; // adds the user's IP address automatically
+            });
+
+            // Here's an example of adding custom scope information.
+            // This can be done at any time, and will be passed through to the Java SDK as well.
+            SentrySdk.ConfigureScope(scope =>
+            {
+                scope.AddBreadcrumb("Custom Breadcrumb");
+                scope.SetExtra("Test", "Custom Extra Data");
+                scope.User = new User
+                {
+                    Username = "SomeUser",
+                    Email = "test@example.com",
+                    Other =
+                    {
+                        ["CustomInfo"] = "Custom User Info"
+                    }
+                };
             });
 
             base.OnCreate(savedInstanceState);
