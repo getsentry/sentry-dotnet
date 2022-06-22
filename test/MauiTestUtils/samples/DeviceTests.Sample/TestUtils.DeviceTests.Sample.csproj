@@ -8,6 +8,7 @@
     <RootNamespace>Microsoft.Maui.TestUtils.DeviceTests.Sample</RootNamespace>
     <AssemblyName>Microsoft.Maui.TestUtils.DeviceTests.Sample</AssemblyName>
     <UseMaui>true</UseMaui>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
   </PropertyGroup>
 
   <PropertyGroup>
