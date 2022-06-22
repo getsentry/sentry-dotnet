@@ -2,6 +2,10 @@
   "solution": {
     "path": "Sentry.sln",
     "projects": [
+      "MauiTestUtils\\src\\DeviceTests.Runners.SourceGen\\TestUtils.DeviceTests.Runners.SourceGen.csproj",
+      "MauiTestUtils\\src\\DeviceTests.Runners\\TestUtils.DeviceTests.Runners.csproj",
+      "MauiTestUtils\\src\\DeviceTests\\TestUtils.DeviceTests.csproj",
+      "MauiTestUtils\\src\\TestUtils\\TestUtils.csproj",
       "samples\\Sentry.Samples.Android\\Sentry.Samples.Android.csproj",
       "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",

@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <UseMaui>true</UseMaui>
+    <MauiVersion>6.0.312</MauiVersion>
+  </PropertyGroup>
+</Project>

@@ -146,7 +146,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui", "src\Sentry.M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui.Tests", "test\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj", "{143076C0-8D6B-4054-9F45-06B21655F417}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui.Device.TestApp", "test\Sentry.Maui.Device.TestApp\Sentry.Maui.Device.TestApp.csproj", "{74221000-29E8-45E6-80D1-977862A3702C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui.Device.TestApp", "test\Sentry.Maui.Device.TestApp\Sentry.Maui.Device.TestApp.csproj", "{74221000-29E8-45E6-80D1-977862A3702C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUtils.DeviceTests", "MauiTestUtils\src\DeviceTests\TestUtils.DeviceTests.csproj", "{9FCD773C-3309-482F-A63F-C95B2FFFCDD6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUtils", "MauiTestUtils\src\TestUtils\TestUtils.csproj", "{110C9638-1A2D-45D9-AEEA-68E14CEABF07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUtils.DeviceTests.Runners.SourceGen", "MauiTestUtils\src\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj", "{CCF39E27-1318-4912-B684-91927592ABB9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUtils.DeviceTests.Runners", "MauiTestUtils\src\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj", "{6E3BB0B6-3792-47E5-95FB-B410C788507F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -348,6 +356,22 @@ Global
 		{74221000-29E8-45E6-80D1-977862A3702C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74221000-29E8-45E6-80D1-977862A3702C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{74221000-29E8-45E6-80D1-977862A3702C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{9FCD773C-3309-482F-A63F-C95B2FFFCDD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FCD773C-3309-482F-A63F-C95B2FFFCDD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FCD773C-3309-482F-A63F-C95B2FFFCDD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FCD773C-3309-482F-A63F-C95B2FFFCDD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{110C9638-1A2D-45D9-AEEA-68E14CEABF07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{110C9638-1A2D-45D9-AEEA-68E14CEABF07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{110C9638-1A2D-45D9-AEEA-68E14CEABF07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{110C9638-1A2D-45D9-AEEA-68E14CEABF07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCF39E27-1318-4912-B684-91927592ABB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCF39E27-1318-4912-B684-91927592ABB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCF39E27-1318-4912-B684-91927592ABB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCF39E27-1318-4912-B684-91927592ABB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E3BB0B6-3792-47E5-95FB-B410C788507F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E3BB0B6-3792-47E5-95FB-B410C788507F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E3BB0B6-3792-47E5-95FB-B410C788507F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E3BB0B6-3792-47E5-95FB-B410C788507F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -403,6 +427,10 @@ Global
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{143076C0-8D6B-4054-9F45-06B21655F417} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{74221000-29E8-45E6-80D1-977862A3702C} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{9FCD773C-3309-482F-A63F-C95B2FFFCDD6} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{110C9638-1A2D-45D9-AEEA-68E14CEABF07} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{CCF39E27-1318-4912-B684-91927592ABB9} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{6E3BB0B6-3792-47E5-95FB-B410C788507F} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
