@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(MauiPlatformsNoMacCat)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">net6.0-android;net6.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <SingleProject>true</SingleProject>
     <RootNamespace>Microsoft.Maui.TestUtils.DeviceTests.Sample</RootNamespace>
     <AssemblyName>Microsoft.Maui.TestUtils.DeviceTests.Sample</AssemblyName>
+    <UseMaui>true</UseMaui>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -20,15 +22,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\TestUtils\src\DeviceTests\TestUtils.DeviceTests.csproj" />
-    <ProjectReference Include="..\..\..\TestUtils\src\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj" />
-    <ProjectReference Include="..\..\..\TestUtils\src\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\Compatibility\Core\src\Compatibility.csproj" />
-    <ProjectReference Include="..\..\..\Core\src\Core.csproj" />
-    <ProjectReference Include="..\..\..\Controls\src\Xaml\Controls.Xaml.csproj" />
-    <ProjectReference Include="..\..\..\Controls\src\Core\Controls.Core.csproj" />
+    <ProjectReference Include="..\..\src\DeviceTests\TestUtils.DeviceTests.csproj" />
+    <ProjectReference Include="..\..\src\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj" />
+    <ProjectReference Include="..\..\src\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <Import Project="$(MauiSrcDirectory)Maui.InTree.props" Condition=" '$(UseMaui)' != 'true' " />
+  <!-- https://github.com/dotnet/maui/blob/main/.nuspec/Microsoft.Maui.TestUtils.DeviceTests.Runners.targets -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="RootNamespace" />
+    <CompilerVisibleProperty Include="ApplicationId" />
+    <CompilerVisibleProperty Include="ApplicationTitle" />
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="IsMauiSplashScreen" />
+    <AdditionalFiles Include="@(MauiSplashScreen)" IsMauiSplashScreen="True" />
+  </ItemGroup>
 
 </Project>

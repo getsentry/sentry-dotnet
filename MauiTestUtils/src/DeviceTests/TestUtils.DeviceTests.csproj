@@ -8,20 +8,14 @@
     <RootNamespace>Microsoft.Maui.TestUtils.DeviceTests</RootNamespace>
     <AssemblyName>Microsoft.Maui.TestUtils.DeviceTests</AssemblyName>
     <Nullable>enable</Nullable>
+    <UseMauiCore>true</UseMauiCore>
+    <UseMauiEssentials>true</UseMauiEssentials>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
-    <PackageReference Include="Microsoft.DotNet.XHarness.TestRunners.Xunit" Version="1.0.0-prerelease.21558.2" />
-  </ItemGroup>
-  <!--
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Core\src\Core.csproj" />
-    <ProjectReference Include="..\..\..\Essentials\src\Essentials.csproj" />
+    <PackageReference Include="Microsoft.DotNet.XHarness.TestRunners.Xunit" Version="1.*-*" />
   </ItemGroup>
 
-    <Import Project="$(MauiSrcDirectory)Maui.InTree.props" Condition=" '$(UseMaui)' != 'true' " />
-    <Import Project="$(_MauiBuildTasksLocation)Microsoft.Maui.Controls.MultiTargeting.targets" />
-  -->
 </Project>
