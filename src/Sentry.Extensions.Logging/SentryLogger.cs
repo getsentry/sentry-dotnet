@@ -131,12 +131,7 @@ internal sealed class SentryLogger : ILogger
         Exception? exception)
         => _options.MinimumEventLevel != LogLevel.None
            && logLevel >= _options.MinimumEventLevel
-           // No events from Sentry code using ILogger
-           // A type from the main SDK could be used to resolve a logger
-           // hence 'Sentry' and also 'Sentry.', won't block SentrySomething
-           // often used by users experimenting with Sentry
-           && !CategoryName.StartsWith("Sentry.", StringComparison.Ordinal)
-           && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal)
+           && !IsFromSentry()
            && _options.Filters.All(
                f => !f.Filter(
                    CategoryName,
@@ -150,12 +145,29 @@ internal sealed class SentryLogger : ILogger
         Exception? exception)
         => _options.MinimumBreadcrumbLevel != LogLevel.None
            && logLevel >= _options.MinimumBreadcrumbLevel
+           && !IsFromSentry()
            && _options.Filters.All(
                f => !f.Filter(
                    CategoryName,
                    logLevel,
                    eventId,
-                   exception))
-           && !CategoryName.StartsWith("Sentry.", StringComparison.Ordinal)
-           && !string.Equals(CategoryName, "Sentry", StringComparison.Ordinal);
+                   exception));
+
+
+    private bool IsFromSentry()
+    {
+        if (string.Equals(CategoryName, "Sentry", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+#if DEBUG
+        if (CategoryName.StartsWith("Sentry.Samples.", StringComparison.Ordinal))
+        {
+            return false;
+        }
+#endif
+
+        return CategoryName.StartsWith("Sentry.", StringComparison.Ordinal);
+    }
 }
