@@ -2,7 +2,7 @@
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Sample
+namespace Sentry.Maui.Device.TestApp
 {
     public class UnitTests
     {

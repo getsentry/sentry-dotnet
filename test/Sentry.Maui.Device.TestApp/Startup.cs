@@ -1,7 +1,7 @@
 ﻿using Microsoft.Maui.Hosting;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Sample
+namespace Sentry.Maui.Device.TestApp
 {
     public static class MauiProgram
     {
