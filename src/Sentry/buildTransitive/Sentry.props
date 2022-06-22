@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
+  </PropertyGroup>
+  <Target Name="WriteSentryAttributes"
+          Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
+          BeforeTargets="BeforeCompile;CoreCompile"
+          Inputs="$(MSBuildAllProjects)"
+          Outputs="$(IntermediateOutputPath)$(SentryAttributesFile)">
+    <PropertyGroup>
+      <SentryAttributesFilePath>$(IntermediateOutputPath)$(SentryAttributesFile)</SentryAttributesFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <SentryAttributes Include="System.Reflection.AssemblyMetadata">
+        <_Parameter1>Sentry.ProjectDirectory</_Parameter1>
+        <_Parameter2>$(ProjectDir)</_Parameter2>
+      </SentryAttributes>
+      <SentryAttributes Include="System.Reflection.AssemblyMetadata"
+                  Condition="'$(SolutionDir)' != '' And '$(SolutionDir)' != '*Undefined*'">
+        <_Parameter1>Sentry.SolutionDirectory</_Parameter1>
+        <_Parameter2>$(SolutionDir)</_Parameter2>
+      </SentryAttributes>
+      <!-- Ensure not part of Compile, as a workaround for https://github.com/dotnet/sdk/issues/114 -->
+      <Compile Remove="$(SentryAttributesFilePath)" />
+    </ItemGroup>
+    <WriteCodeFragment AssemblyAttributes="@(SentryAttributes)"
+                       Language="$(Language)"
+                       OutputFile="$(SentryAttributesFilePath)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" Condition="$(Language) != 'F#'" />
+      <Output TaskParameter="OutputFile" ItemName="CompileBefore" Condition="$(Language) == 'F#'" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
+  </Target>
+</Project>

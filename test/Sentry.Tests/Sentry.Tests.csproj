@@ -38,4 +38,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.11" />
   </ItemGroup>
 
+  <Import Project="$(ProjectDir)..\..\src\Sentry\buildTransitive\Sentry.props" />
+
 </Project>
