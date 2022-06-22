@@ -5,6 +5,7 @@
 ### Features
 
 - Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
+- Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
 
 ## Sentry.Maui 3.18.0-preview.1
 
