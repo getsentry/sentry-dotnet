@@ -8,7 +8,7 @@ namespace Sentry.PlatformAbstractions
     // https://github.com/dotnet/corefx/issues/17452
     internal static class RuntimeInfo
     {
-        private static readonly Regex RuntimeParseRegex = new("^(?<name>\\.?[\\w ]+) (?<version>[0-9\\.]+(-[\\w]+)?)?",
+        private static readonly Regex RuntimeParseRegex = new("^(?<name>[^\\d]*)(?<version>(\\d+\\.)+[^\\s]+)",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         /// <summary>
@@ -52,6 +52,11 @@ namespace Sentry.PlatformAbstractions
                     name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                     match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
                     raw: rawRuntimeDescription);
+            }
+
+            if (rawRuntimeDescription.Contains("IL2CPP"))
+            {
+                return new Runtime("IL2CPP");
             }
 
             return new Runtime(name, raw: rawRuntimeDescription);
