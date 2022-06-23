@@ -24,6 +24,7 @@ public static class SentryExceptionExtensions
     /// Recursively enumerates all <see cref="AggregateException.InnerExceptions"/> and <see cref="Exception.InnerException"/>
     /// Not for public use.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static IEnumerable<Exception> EnumerateChainedExceptions(this Exception exception, SentryOptions options)
     {
         if (exception is AggregateException aggregateException)
