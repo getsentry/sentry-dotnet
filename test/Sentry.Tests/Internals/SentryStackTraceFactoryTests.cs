@@ -45,6 +45,23 @@ public class SentryStackTraceFactoryTests
             ) == true);
     }
 
+    [Theory]
+    [InlineData(StackTraceMode.Original, "Create_Async_CurrentStackTrace { <lambda> }")]
+    [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.Create_Async_CurrentStackTrace(StackTraceMode mode, string method)+() => { }")]
+    public void Create_Async_CurrentStackTrace(StackTraceMode mode, string method)
+    {
+        _fixture.SentryOptions.AttachStacktrace = true;
+        _fixture.SentryOptions.StackTraceMode = mode;
+        var sut = _fixture.GetSut();
+
+        SentryStackTrace stackTrace = null!;
+        Task.Run(() => stackTrace = sut.Create()).Wait();
+
+        Assert.NotNull(stackTrace);
+
+        Assert.Equal(method, stackTrace.Frames.Last().Function);
+    }
+
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace()
     {
