@@ -29,8 +29,7 @@ public static class SentryExceptionExtensions
     {
         if (exception is AggregateException aggregateException)
         {
-            foreach (var inner in aggregateException.InnerExceptions
-                         .SelectMany(_ => _.EnumerateChainedExceptions(options)))
+            foreach (var inner in EnumerateInner(options, aggregateException))
             {
                 yield return inner;
             }
@@ -49,6 +48,12 @@ public static class SentryExceptionExtensions
         }
 
         yield return exception;
+    }
+
+    private static IEnumerable<Exception> EnumerateInner(SentryOptions options, AggregateException aggregateException)
+    {
+        return aggregateException.InnerExceptions
+            .SelectMany(exception => exception.EnumerateChainedExceptions(options));
     }
 
     /// <summary>
