@@ -4,6 +4,7 @@
 
 ### Features
 
+- Expose EnumerateChainedExceptions ([#1733](https://github.com/getsentry/sentry-dotnet/pull/1733))
 - Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
 - Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
 
