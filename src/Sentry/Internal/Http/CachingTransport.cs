@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
@@ -269,7 +270,7 @@ namespace Sentry.Internal.Http
                     // Let the worker catch, log, wait a bit and retry.
                     throw;
                 }
-                catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
+                catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException or IOException)
                 {
                     _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
                     // Let the worker catch, log, wait a bit and retry.

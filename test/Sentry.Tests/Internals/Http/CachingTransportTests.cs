@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using NSubstitute.ExceptionExtensions;
@@ -489,6 +490,7 @@ public class CachingTransportTests
         new List<object[]>
         {
             new object[] {new HttpRequestException(null)},
+            new object[] {new WebException(null)},
             new object[] {new IOException(null)},
             new object[] {new SocketException()}
         };
