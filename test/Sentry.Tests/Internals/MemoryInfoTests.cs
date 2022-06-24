@@ -1,3 +1,5 @@
+using Sentry.Testing;
+
 #if NETCOREAPP3_1_OR_GREATER
 
 namespace Sentry.Tests.Internals;
@@ -5,6 +7,13 @@ namespace Sentry.Tests.Internals;
 [UsesVerify]
 public class MemoryInfoTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public MemoryInfoTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public Task WriteTo()
     {
@@ -13,7 +22,7 @@ public class MemoryInfoTests
 #else
         var info = new MemoryInfo(1, 2, 3, 4, 5, 6);
 #endif
-        var json = info.ToJsonString();
+        var json = info.ToJsonString(_testOutputLogger);
 
         var settings = new VerifySettings();
         settings.UniqueForTargetFrameworkAndVersion();

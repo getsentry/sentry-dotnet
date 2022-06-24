@@ -3,13 +3,11 @@ using System.Text.Json;
 
 internal static class JsonSerializableExtensions
 {
-    private static readonly IDiagnosticLogger DebugLogger = new TraceDiagnosticLogger(SentryLevel.Debug);
+    public static string ToJsonString(this IJsonSerializable serializable, IDiagnosticLogger logger) =>
+        WriteToJsonString(writer => writer.WriteSerializableValue(serializable, logger));
 
-    public static string ToJsonString(this IJsonSerializable serializable) =>
-        WriteToJsonString(writer => writer.WriteSerializableValue(serializable, DebugLogger));
-
-    public static string ToJsonString(this object @object) =>
-        WriteToJsonString(writer => writer.WriteDynamicValue(@object, DebugLogger));
+    public static string ToJsonString(this object @object, IDiagnosticLogger logger) =>
+        WriteToJsonString(writer => writer.WriteDynamicValue(@object, logger));
 
     private static string WriteToJsonString(Action<Utf8JsonWriter> writeAction)
     {

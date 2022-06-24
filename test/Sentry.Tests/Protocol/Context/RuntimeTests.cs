@@ -1,8 +1,18 @@
 // ReSharper disable once CheckNamespace
+
+using Sentry.Testing;
+
 namespace Sentry.Protocol.Tests.Context;
 
 public class RuntimeTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public RuntimeTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -14,7 +24,7 @@ public class RuntimeTests
             RawDescription = ".NET Framework 4.7.2"
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal("{\"type\":\"runtime\",\"name\":\".NET Framework\",\"version\":\"4.7.2\",\"raw_description\":\".NET Framework 4.7.2\",\"build\":\"461814\"}", actual);
     }
@@ -44,7 +54,7 @@ public class RuntimeTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((Runtime runtime, string serialized) @case)
     {
-        var actual = @case.runtime.ToJsonString();
+        var actual = @case.runtime.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

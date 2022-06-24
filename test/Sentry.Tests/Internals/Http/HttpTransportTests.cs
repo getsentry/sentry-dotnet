@@ -10,7 +10,12 @@ namespace Sentry.Tests.Internals.Http;
 
 public class HttpTransportTests
 {
-    private static readonly IDiagnosticLogger DebugLogger = new TraceDiagnosticLogger(SentryLevel.Debug);
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public HttpTransportTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
 
     [Fact]
     public async Task SendEnvelopeAsync_CancellationToken_PassedToClient()
@@ -280,7 +285,7 @@ public class HttpTransportTests
             new SentryOptions
             {
                 Dsn = DsnSamples.ValidDsnWithSecret,
-                DiagnosticLogger = DebugLogger,
+                DiagnosticLogger = _testOutputLogger,
                 SendClientReports = false,
                 Debug = true
             },
@@ -319,7 +324,7 @@ public class HttpTransportTests
                     new EmptySerializable())
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(DebugLogger);
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -347,7 +352,7 @@ public class HttpTransportTests
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            DiagnosticLogger = DebugLogger,
+            DiagnosticLogger = _testOutputLogger,
             SendClientReports = true,
             Debug = true
         };
@@ -404,7 +409,7 @@ public class HttpTransportTests
                 EnvelopeItem.FromClientReport(expectedClientReport)
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(DebugLogger);
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -427,7 +432,7 @@ public class HttpTransportTests
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            DiagnosticLogger = DebugLogger,
+            DiagnosticLogger = _testOutputLogger,
             SendClientReports = true,
             Debug = true
         };
@@ -471,7 +476,7 @@ public class HttpTransportTests
         var options = new SentryOptions
         {
             Dsn = DsnSamples.ValidDsnWithSecret,
-            DiagnosticLogger = DebugLogger,
+            DiagnosticLogger = _testOutputLogger,
             SendClientReports = true,
             Debug = true
         };

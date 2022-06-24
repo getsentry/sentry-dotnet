@@ -1,9 +1,17 @@
+using Sentry.Testing;
 using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Protocol;
 
 public class SentryEventTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryEventTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -59,7 +67,7 @@ public class SentryEventTests
         sut.Fingerprint = new[] { "fingerprint" };
         sut.SetTag("tag_key", "tag_value");
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         actualString.Should().Contain(
             "\"debug_meta\":{\"images\":[" +
