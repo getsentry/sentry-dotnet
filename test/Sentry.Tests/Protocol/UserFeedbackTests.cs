@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol;
 
 public class UserFeedbackTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public UserFeedbackTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void Serialization_SentryUserFeedbacks_Success()
     {
@@ -11,7 +20,7 @@ public class UserFeedbackTests
         using var stream = new MemoryStream();
 
         // Act
-        var serializedContent = userFeedback.ToJsonString();
+        var serializedContent = userFeedback.ToJsonString(_testOutputLogger);
 
         // Assert
         serializedContent.Should().Be(

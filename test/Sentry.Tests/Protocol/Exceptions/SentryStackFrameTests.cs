@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol.Exceptions;
 
 public class SentryStackFrameTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryStackFrameTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -28,7 +37,7 @@ public class SentryStackFrameTests
             AddressMode = "rel:0"
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{" +
