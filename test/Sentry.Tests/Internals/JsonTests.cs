@@ -5,16 +5,6 @@ namespace Sentry.Tests.Internals;
 
 public class JsonTests
 {
-    public static string ToJsonString(object @object)
-    {
-        using var stream = new MemoryStream();
-        using (var writer = new Utf8JsonWriter(stream))
-        {
-            writer.WriteDynamicValue(@object, new TraceDiagnosticLogger(SentryLevel.Debug));
-        }
-        return Encoding.UTF8.GetString(stream.ToArray());
-    }
-
     public static Exception GenerateException(string description)
     {
         try
@@ -83,7 +73,7 @@ public class JsonTests
         var expectedData = new KeyValuePair<string, string>("a", "b");
         var ex = GenerateException(expectedMessage);
         ex.Data.Add(expectedData.Key, expectedData.Value);
-        var expectedStackTrace = ToJsonString(ex.StackTrace);
+        var expectedStackTrace = ex.StackTrace.ToJsonString();
         var expectedSerializedData = new[]
         {
             $"\"Message\":\"{expectedMessage}\"",
@@ -94,7 +84,7 @@ public class JsonTests
         };
 
         // Act
-        var serializedString = ToJsonString(ex);
+        var serializedString = ex.ToJsonString();
 
         // Assert
         Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
@@ -111,7 +101,7 @@ public class JsonTests
         var data = new DataWithSerializableObject<Exception>(ex);
 
         // Act
-        var serializedString = ToJsonString(data);
+        var serializedString = data.ToJsonString();
         var exceptionDeserialized = JsonSerializer.Deserialize<ExceptionMock>(serializedString);
 
         // Assert
@@ -137,7 +127,7 @@ public class JsonTests
         var expectedValue = "\"System.Exception\"";
 
         // Act
-        var serializedString = ToJsonString(type);
+        var serializedString = type.ToJsonString();
 
         // Assert
         Assert.Equal(expectedValue, serializedString);
@@ -157,7 +147,7 @@ public class JsonTests
             "}";
 
         // Act
-        var serializedString = ToJsonString(data);
+        var serializedString = data.ToJsonString();
 
         // Assert
         Assert.Equal(expectedSerializedData, serializedString);
@@ -171,7 +161,7 @@ public class JsonTests
         var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
 
         // Act
-        var serializedString = ToJsonString(data);
+        var serializedString = data.ToJsonString();
 
         // Assert
         Assert.Equal(expectedSerializedData, serializedString);
@@ -202,7 +192,7 @@ public class JsonTests
         var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
 
         // Act
-        var serializedString = ToJsonString(data);
+        var serializedString = data.ToJsonString();
 
         // Assert
         Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
