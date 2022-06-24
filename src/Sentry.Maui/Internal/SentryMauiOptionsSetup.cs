@@ -21,5 +21,11 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
 
         // We'll use an event processor to set things like SDK name
         options.AddEventProcessor(new SentryMauiEventProcessor(options));
+
+        // Set a default cache path on the device.
+        // NOTE: We move the Android SDK's cache path one level below this, in src/Sentry/Android/SentrySdk.cs
+        //       We'll want to do something similar when we add iOS support,
+        //       but that's blocked by https://github.com/getsentry/sentry-cocoa/issues/1051
+        options.CacheDirectoryPath = Path.Combine(FileSystem.CacheDirectory, "sentry");
     }
 }
