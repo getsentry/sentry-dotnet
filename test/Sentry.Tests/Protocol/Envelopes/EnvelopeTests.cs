@@ -7,6 +7,8 @@ public class EnvelopeTests
     // Tests driven by examples from docs:
     // https://develop.sentry.dev/sdk/envelopes/#full-examples
 
+    private static readonly IDiagnosticLogger DebugLogger = new TraceDiagnosticLogger(SentryLevel.Debug);
+
     [Fact]
     public async Task Serialization_EnvelopeWithoutItems_Success()
     {
@@ -16,7 +18,7 @@ public class EnvelopeTests
             Array.Empty<EnvelopeItem>());
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -32,7 +34,7 @@ public class EnvelopeTests
             Array.Empty<EnvelopeItem>());
 
         // Act
-        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = envelope.SerializeToString(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -72,7 +74,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -97,7 +99,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = envelope.SerializeToString(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -170,7 +172,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -217,7 +219,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = envelope.SerializeToString(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -305,7 +307,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -344,7 +346,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = envelope.SerializeToString(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -412,7 +414,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -436,7 +438,7 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = envelope.SerializeToString(DebugLogger);
 
         // Assert
         output.Should().Be(
@@ -510,7 +512,7 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, DebugLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
@@ -547,7 +549,7 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, DebugLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
@@ -584,7 +586,7 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, DebugLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
@@ -616,7 +618,7 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, DebugLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
@@ -642,7 +644,7 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, DebugLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
