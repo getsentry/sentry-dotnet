@@ -24,9 +24,7 @@ public class MemoryInfoTests
 #endif
         var json = info.ToJsonString(_testOutputLogger);
 
-        var settings = new VerifySettings();
-        settings.UniqueForTargetFrameworkAndVersion();
-        return VerifyJson(json, settings);
+        return VerifyJson(json).UniqueForTargetFrameworkAndVersion();
     }
 }
 
