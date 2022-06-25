@@ -7,6 +7,7 @@
 - Expose EnumerateChainedExceptions ([#1733](https://github.com/getsentry/sentry-dotnet/pull/1733))
 - Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
 - Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
+- Support IntPtr and UIntPtr serialization ([#1746](https://github.com/getsentry/sentry-dotnet/pull/1746))
 
 ## Sentry.Maui 3.18.0-preview.1
 
