@@ -37,22 +37,35 @@ internal static class MauiDeviceData
             // ? = deviceInfo.VersionString;
 
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/battery
-            var battery = Battery.Default;
-            device.BatteryLevel ??= battery.ChargeLevel < 0 ? null : (short)battery.ChargeLevel;
-            device.BatteryStatus ??= battery.State.ToString();
-            device.IsCharging ??= battery.State switch
+            try
             {
-                BatteryState.Unknown => null,
-                BatteryState.Charging => true,
-                _ => false
-            };
+                var battery = Battery.Default;
+                device.BatteryLevel ??= battery.ChargeLevel < 0 ? null : (short)battery.ChargeLevel;
+                device.BatteryStatus ??= battery.State.ToString();
+                device.IsCharging ??= battery.State switch
+                {
+                    BatteryState.Unknown => null,
+                    BatteryState.Charging => true,
+                    _ => false
+                };
+            }
+            catch (PermissionException)
+            {
+                logger?.LogDebug("No permission to read battery state from the device.");
+            }
 
             // https://docs.microsoft.com/dotnet/maui/platform-integration/communication/networking#using-connectivity
-            var connectivity = Connectivity.Current;
-            device.IsOnline ??= connectivity.NetworkAccess == NetworkAccess.Internet;
+            try
+            {
+                device.IsOnline ??= Connectivity.NetworkAccess == NetworkAccess.Internet;
+            }
+            catch (PermissionException)
+            {
+                logger?.LogDebug("No permission to read network state from the device.");
+            }
 
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
-            var display = DeviceDisplay.Current.MainDisplayInfo;
+            var display = DeviceDisplay.MainDisplayInfo;
             device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
             device.ScreenDensity ??= (float)display.Density;
             device.Orientation ??= display.Orientation switch
