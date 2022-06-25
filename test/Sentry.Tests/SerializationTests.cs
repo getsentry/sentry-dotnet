@@ -1,19 +1,21 @@
 using System.Text.Json;
+using Sentry.Testing;
 
 [UsesVerify]
 public class SerializationTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+    
+    public SerializationTests (ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+    
     [Theory]
     [MemberData(nameof(GetData))]
     public async Task Serialization(string name, object target)
     {
-        using var stream = new MemoryStream();
-        await using (var writer = new Utf8JsonWriter(stream))
-        {
-            writer.WriteDynamicValue(target, null);
-        }
-
-        var json = Encoding.UTF8.GetString(stream.ToArray());
+        var json = target.ToJsonString(_testOutputLogger);
         await Verify(json).UseParameters(name);
     }
 
