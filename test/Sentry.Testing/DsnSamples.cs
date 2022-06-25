@@ -16,3 +16,20 @@ public static class DsnSamples
     /// </summary>
     public const string InvalidDsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/";
 }
+
+public class ValidDsnNoSecretOptions : SentryOptions
+{
+    public ValidDsnNoSecretOptions()
+    {
+        Dsn = DsnSamples.ValidDsnWithoutSecret;
+    }
+}
+
+public class ValidDsnOptions : SentryOptions
+{
+    public static ValidDsnOptions Instance = new ValidDsnOptions();
+    public ValidDsnOptions()
+    {
+        Dsn = DsnSamples.ValidDsnWithSecret;
+    }
+}
