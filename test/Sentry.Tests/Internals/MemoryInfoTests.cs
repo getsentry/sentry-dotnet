@@ -1,27 +1,31 @@
-#if NETCOREAPP3_1_OR_GREATER
-using System.Text.Json;
+using Sentry.Testing;
 
+#if NETCOREAPP3_1_OR_GREATER
+
+namespace Sentry.Tests.Internals;
+
+[UsesVerify]
 public class MemoryInfoTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public MemoryInfoTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
-    public void WriteTo()
+    public Task WriteTo()
     {
 #if NET5_0_OR_GREATER
-        var info = new MemoryInfo(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, true, false, new[] { TimeSpan.FromSeconds(1) });
+        var info = new MemoryInfo(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, true, false, new[] {TimeSpan.FromSeconds(1)});
 #else
         var info = new MemoryInfo(1, 2, 3, 4, 5, 6);
 #endif
+        var json = info.ToJsonString(_testOutputLogger);
 
-        var stream = new MemoryStream();
-        var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
-        info.WriteTo(writer, null);
-        writer.Flush();
-        var json = Encoding.UTF8.GetString(stream.ToArray());
-        Assert.NotNull(json);
-        Assert.NotEmpty(json);
-        //Validate json
-        var serializer = new Newtonsoft.Json.JsonSerializer();
-        serializer.Deserialize(new Newtonsoft.Json.JsonTextReader(new StringReader(json)));
+        return VerifyJson(json).UniqueForTargetFrameworkAndVersion();
     }
 }
+
 #endif

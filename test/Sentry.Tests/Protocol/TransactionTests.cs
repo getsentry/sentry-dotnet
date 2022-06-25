@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol;
 
 public class TransactionTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public TransactionTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -73,7 +82,7 @@ public class TransactionTests
 
         // Act
         var finalTransaction = new Transaction(transaction);
-        var actualString = finalTransaction.ToJsonString();
+        var actualString = finalTransaction.ToJsonString(_testOutputLogger);
         var actual = Json.Parse(actualString, Transaction.FromJson);
 
         // Assert
