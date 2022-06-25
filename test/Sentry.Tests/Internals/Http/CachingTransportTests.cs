@@ -22,7 +22,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -73,7 +73,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -106,7 +106,7 @@ public class CachingTransportTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             CacheDirectoryPath = cacheDirectory.Path,
             Debug = true
@@ -160,7 +160,7 @@ public class CachingTransportTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             CacheDirectoryPath = cacheDirectory.Path,
             Debug = true
@@ -195,7 +195,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -222,7 +222,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path,
@@ -250,7 +250,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -289,7 +289,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -325,7 +325,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -370,7 +370,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path,
@@ -402,7 +402,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -449,7 +449,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -501,7 +501,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path

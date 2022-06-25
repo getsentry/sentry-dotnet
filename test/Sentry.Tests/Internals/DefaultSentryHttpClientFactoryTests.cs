@@ -10,7 +10,7 @@ public class DefaultSentryHttpClientFactoryTests
     {
         public SentryOptions HttpOptions { get; set; } = new()
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         };
 
         public DefaultSentryHttpClientFactory GetSut()

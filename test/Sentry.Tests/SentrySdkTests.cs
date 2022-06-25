@@ -3,7 +3,6 @@ using System.Reflection;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.Testing;
-using static Sentry.DsnSamples;
 using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests;
@@ -35,7 +34,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init())
@@ -51,7 +50,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init(o => o.TracesSampleRate = 1.0))
@@ -71,18 +70,9 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
-    public void Init_ValidDsnWithSecret_EnablesSdk()
+    public void Init_ValidDsn_EnablesSdk()
     {
-        using (SentrySdk.Init(ValidDsnWithSecret))
-        {
-            Assert.True(SentrySdk.IsEnabled);
-        }
-    }
-
-    [Fact]
-    public void Init_ValidDsnWithoutSecret_EnablesSdk()
-    {
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        using (SentrySdk.Init(ValidDsn))
         {
             Assert.True(SentrySdk.IsEnabled);
         }
@@ -93,7 +83,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init(_ => { }))
@@ -125,7 +115,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init())
@@ -212,7 +202,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     [Fact]
     public void Init_MultipleCalls_ReplacesHubWithLatest()
     {
-        var first = SentrySdk.Init(ValidDsnWithSecret);
+        var first = SentrySdk.Init(ValidDsn);
         SentrySdk.AddBreadcrumb("test", "category");
         var called = false;
         SentrySdk.ConfigureScope(p =>
@@ -223,7 +213,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         Assert.True(called);
         called = false;
 
-        var second = SentrySdk.Init(ValidDsnWithSecret);
+        var second = SentrySdk.Init(ValidDsn);
         SentrySdk.ConfigureScope(p =>
         {
             called = true;
@@ -250,7 +240,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         await using var initialTransport = CachingTransport.Create(initialInnerTransport, new SentryOptions
         {
             DiagnosticLogger = _logger,
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             CacheDirectoryPath = cachePath
         }, startWorker: false);
         const int numEnvelopes = 5;  // Not too many, or this will be slow.  Not too few or this will be flaky.
@@ -282,7 +272,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
             using var _ = SentrySdk.Init(o =>
             {
-                o.Dsn = ValidDsnWithoutSecret;
+                o.Dsn = ValidDsn;
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cachePath;
                 o.InitCacheFlushTimeout = initFlushTimeout;
@@ -334,8 +324,8 @@ public class SentrySdkTests : SentrySdkTestFixture
     [Fact]
     public void Dispose_DisposingFirst_DoesntAffectSecond()
     {
-        var first = SentrySdk.Init(ValidDsnWithSecret);
-        var second = SentrySdk.Init(ValidDsnWithSecret);
+        var first = SentrySdk.Init(ValidDsn);
+        var second = SentrySdk.Init(ValidDsn);
         SentrySdk.AddBreadcrumb("test", "category");
         first.Dispose();
         var called = false;
@@ -401,7 +391,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     public async Task ConfigureScope_OnTask_PropagatedToCaller()
     {
         const string expected = "test";
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        using (SentrySdk.Init(ValidDsn))
         {
             await ModifyScope();
 
@@ -431,7 +421,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     [Fact]
     public void WithScope_InvokedWithNewScope()
     {
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        using (SentrySdk.Init(ValidDsn))
         {
             Scope expected = null;
             SentrySdk.ConfigureScope(s => expected = s);
@@ -454,7 +444,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         using (SentrySdk.Init(o =>
                {
-                   o.Dsn = ValidDsnWithoutSecret;
+                   o.Dsn = ValidDsn;
                    o.BackgroundWorker = worker;
                }))
         {
@@ -476,7 +466,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     [Fact]
     public void CaptureEvent_WithConfiguredScope_ScopeOnlyAppliesOnlyOnce()
     {
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        using (SentrySdk.Init(ValidDsn))
         {
             var callbackCounter = 0;
             SentrySdk.CaptureEvent(new SentryEvent(), _ => callbackCounter++);
@@ -493,7 +483,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         var options = new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             Debug = true
         };
@@ -514,7 +504,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     public void CaptureEvent_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         var scopeCallbackWasInvoked = false;
-        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
         {
             SentrySdk.CaptureEvent(new SentryEvent(), _ => scopeCallbackWasInvoked = true);
 
@@ -526,7 +516,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         var scopeCallbackWasInvoked = false;
-        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
         {
             SentrySdk.CaptureException(new Exception(), _ => scopeCallbackWasInvoked = true);
 
@@ -538,7 +528,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         var scopeCallbackWasInvoked = false;
-        using (SentrySdk.Init(o => o.Dsn = ValidDsnWithoutSecret))
+        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
         {
             SentrySdk.CaptureMessage("TestMessage", _ => scopeCallbackWasInvoked = true);
 
@@ -577,7 +567,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         const string expected = "test";
         using (SentrySdk.Init(o =>
                {
-                   o.Dsn = ValidDsnWithSecret;
+                   o.Dsn = ValidDsn;
                    o.BackgroundWorker = worker;
                }))
         {
@@ -654,7 +644,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         // Act
         var sut = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             IsGlobalModeEnabled = false
         });
 
@@ -670,7 +660,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         // Act
         var sut = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             IsGlobalModeEnabled = true
         });
 
@@ -688,7 +678,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         _ = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
             Debug = true
@@ -715,7 +705,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         _ = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = false,
             Debug = true
@@ -742,7 +732,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         _ = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
             Debug = true

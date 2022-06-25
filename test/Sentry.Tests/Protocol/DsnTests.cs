@@ -11,17 +11,10 @@ public class DsnTests
     }
 
     [Fact]
-    public void Ctor_SampleValidDsnWithoutSecret_CorrectlyConstructs()
+    public void Ctor_SampleValidDsn_CorrectlyConstructs()
     {
-        var dsn = Dsn.Parse(DsnSamples.ValidDsnWithoutSecret);
-        Assert.Equal(DsnSamples.ValidDsnWithoutSecret, dsn.ToString());
-    }
-
-    [Fact]
-    public void Ctor_SampleValidDsnWithSecret_CorrectlyConstructs()
-    {
-        var dsn = Dsn.Parse(DsnSamples.ValidDsnWithSecret);
-        Assert.Equal(DsnSamples.ValidDsnWithSecret, dsn.ToString());
+        var dsn = Dsn.Parse(ValidDsn);
+        Assert.Equal(ValidDsn, dsn.ToString());
     }
 
     [Fact]
@@ -133,21 +126,15 @@ public class DsnTests
     }
 
     [Fact]
-    public void TryParse_SampleValidDsnWithoutSecret_Succeeds()
+    public void TryParse_SampleValidDsn_Succeeds()
     {
-        Assert.NotNull(Dsn.TryParse(DsnSamples.ValidDsnWithoutSecret));
-    }
-
-    [Fact]
-    public void TryParse_SampleValidDsnWithSecret_Succeeds()
-    {
-        Assert.NotNull(Dsn.TryParse(DsnSamples.ValidDsnWithSecret));
+        Assert.NotNull(Dsn.TryParse(ValidDsn));
     }
 
     [Fact]
     public void TryParse_SampleInvalidDsn_Fails()
     {
-        Assert.Null(Dsn.TryParse(DsnSamples.InvalidDsn));
+        Assert.Null(Dsn.TryParse(InvalidDsn));
     }
 
     [Fact]
@@ -254,10 +241,10 @@ public class DsnTests
     }
 
     [Fact]
-    public void IsDisabled_ValidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.ValidDsnWithSecret));
+    public void IsDisabled_ValidDsn_False() => Assert.False(Dsn.IsDisabled(ValidDsn));
 
     [Fact]
-    public void IsDisabled_InvalidDsn_False() => Assert.False(Dsn.IsDisabled(DsnSamples.InvalidDsn));
+    public void IsDisabled_InvalidDsn_False() => Assert.False(Dsn.IsDisabled(InvalidDsn));
 
     [Fact]
     public void IsDisabled_NullDsn_False() => Assert.False(Dsn.IsDisabled(null));
