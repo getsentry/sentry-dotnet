@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+
+- Dont allow SentryDiagnosticListenerIntegration to be added multiple times ([#1748](https://github.com/getsentry/sentry-dotnet/pull/1748))
+
+
 ### Features
 
 - Expose EnumerateChainedExceptions ([#1733](https://github.com/getsentry/sentry-dotnet/pull/1733))
