@@ -87,9 +87,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="integration">The integration.</param>
         public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
-            => options.Integrations = options.Integrations != null
-                ? options.Integrations.Concat(new[] { integration }).ToArray()
-                : new[] { integration };
+        {
+            if (options.Integrations == null)
+            {
+                options.Integrations = new[] {integration};
+            }
+            else
+            {
+                options.Integrations = options.Integrations.Concat(new[] {integration}).ToArray();
+            }
+        }
 
         /// <summary>
         /// Removes all integrations of type <typeparamref name="TIntegration"/>.
