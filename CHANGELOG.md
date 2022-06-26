@@ -8,6 +8,7 @@
 - Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
 - Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
 - Catch permission exceptions on Android ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
+- Enable offline caching in MAUI ([#1753](https://github.com/getsentry/sentry-dotnet/pull/1753))
 
 ## Sentry.Maui 3.18.0-preview.1
 
