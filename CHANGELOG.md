@@ -5,6 +5,7 @@
 ### Fixes
 
 - Detect MVC versioning in route ([#1731](https://github.com/getsentry/sentry-dotnet/pull/1731))
+
 ## Unreleased
 
 ### Features
