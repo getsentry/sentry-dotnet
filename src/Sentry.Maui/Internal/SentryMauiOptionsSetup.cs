@@ -22,6 +22,13 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
         // We'll use an event processor to set things like SDK name
         options.AddEventProcessor(new SentryMauiEventProcessor(options));
 
+        // Everything below here is only valid on real devices, not in unit tests.
+        // We have to check this at runtime, as we don't compile for every possible platform.
+        if (DeviceInfo.Current.Platform == DevicePlatform.Unknown)
+        {
+            return;
+        }
+
         // Set a default cache path on the device.
         // NOTE: We move the Android SDK's cache path one level below this, in src/Sentry/Android/SentrySdk.cs
         //       We'll want to do something similar when we add iOS support,
