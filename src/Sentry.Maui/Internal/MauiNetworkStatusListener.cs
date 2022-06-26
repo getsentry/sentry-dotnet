@@ -28,7 +28,7 @@ internal class MauiNetworkStatusListener : INetworkStatusListener
 
     public async Task WaitForNetworkOnlineAsync(CancellationToken cancellationToken)
     {
-        if (!_hasNetworkStatusPermission)
+        if (!_hasNetworkStatusPermission || cancellationToken.IsCancellationRequested)
         {
             return;
         }
