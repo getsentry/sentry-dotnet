@@ -17,8 +17,7 @@ namespace Sentry
         /// <param name="options">The Sentry options.</param>
         public static void AddDiagnosticSourceIntegration(this SentryOptions options)
         {
-            if (options.Integrations != null &&
-                options.Integrations.OfType<SentryDiagnosticListenerIntegration>().Any())
+            if (options.Integrations?.OfType<SentryDiagnosticListenerIntegration>().Any() is true)
             {
                 options.LogWarning($"{nameof(SentryDiagnosticListenerIntegration)} has already been added. The second call to {nameof(AddDiagnosticSourceIntegration)} will be ignored.");
                 return;
