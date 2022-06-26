@@ -27,5 +27,8 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
         //       We'll want to do something similar when we add iOS support,
         //       but that's blocked by https://github.com/getsentry/sentry-cocoa/issues/1051
         options.CacheDirectoryPath = Path.Combine(FileSystem.CacheDirectory, "sentry");
+
+        // We can use MAUI's network connectivity information to inform the CachingTransport when we're offline.
+        options.NetworkStatusListener = new MauiNetworkStatusListener(Connectivity.Current, options);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
@@ -605,6 +606,18 @@ namespace Sentry
         /// Set KeepAggregateException to true to include the root <see cref="AggregateException"/>.
         /// </summary>
         public bool KeepAggregateException { get; set; }
+
+        /// <summary>
+        /// Provides a mechanism to convey network status to the caching transport, so that it does not attempt
+        /// to send cached events to Sentry when the network is offline. Used internally by some integrations.
+        /// Not intended for public usage.
+        /// </summary>
+        /// <remarks>
+        /// This must be public because we use it in Sentry.Maui, which can't use InternalsVisibleTo
+        /// because MAUI assemblies are not strong-named.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public INetworkStatusListener? NetworkStatusListener { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
