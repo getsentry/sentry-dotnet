@@ -20,7 +20,7 @@ namespace Sentry
             if (options.Integrations != null &&
                 options.Integrations.OfType<SentryDiagnosticListenerIntegration>().Any())
             {
-                options.LogInfo($"{nameof(SentryDiagnosticListenerIntegration)} has already been added. The second call to {nameof(AddDiagnosticSourceIntegration)} will be ignored.");
+                options.LogWarning($"{nameof(SentryDiagnosticListenerIntegration)} has already been added. The second call to {nameof(AddDiagnosticSourceIntegration)} will be ignored.");
                 return;
             }
 
