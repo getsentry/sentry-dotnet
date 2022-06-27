@@ -59,13 +59,13 @@ jobs:
 
         - name: Install .NET Workloads (Ubuntu)
           if: startsWith(matrix.os, 'ubuntu')
-          run: dotnet workload install maui-android
+          run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
         - name: Install .NET Workloads (Windows)
           if: startsWith(matrix.os, 'windows')
-          run: dotnet workload install maui-android maui-windows
+          run: 'dotnet workload install maui-android maui-windows --temp-dir "${{ runner.temp }}"'
         - name: Install .NET Workloads (macOS)
           if: startsWith(matrix.os, 'macos')
-          run: dotnet workload install maui-android maui-ios maui-maccatalyst
+          run: 'dotnet workload install maui-android maui-ios maui-maccatalyst --temp-dir "${{ runner.temp }}"'
 
         - name: Build
           run: dotnet build -c Release /p:CopyLocalLockFileAssemblies=true

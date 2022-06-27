@@ -37,7 +37,7 @@ jobs:
         restore-keys: ${{ runner.os }}-nuget+workloads3
 
     - name: Install .NET Workloads (Ubuntu)
-      run: dotnet workload install maui-android
+      run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
