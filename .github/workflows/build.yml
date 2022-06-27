@@ -54,8 +54,8 @@ jobs:
             path: ~/.nuget/packages
             # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
             # Workloads also get installed in the nuget packages cache, so if you modify workloads below, increment the number in the cache keys
-            key: ${{ runner.os }}-nuget+workloads2-${{ hashFiles('**/*.*proj', '**/*.props') }}
-            restore-keys: ${{ runner.os }}-nuget+workloads2
+            key: ${{ runner.os }}-nuget+workloads3-${{ hashFiles('**/*.*proj', '**/*.props') }}
+            restore-keys: ${{ runner.os }}-nuget+workloads3
 
         - name: Install .NET Workloads (Ubuntu)
           if: startsWith(matrix.os, 'ubuntu')

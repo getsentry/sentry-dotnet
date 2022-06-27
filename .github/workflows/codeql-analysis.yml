@@ -31,9 +31,13 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
-        ## we don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
-        restore-keys: ${{ runner.os }}-nuget
+        # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
+        # Workloads also get installed in the nuget packages cache, so if you modify workloads below, increment the number in the cache keys
+        key: ${{ runner.os }}-nuget+workloads3-${{ hashFiles('**/*.*proj', '**/*.props') }}
+        restore-keys: ${{ runner.os }}-nuget+workloads3
+
+    - name: Install .NET Workloads (Ubuntu)
+      run: dotnet workload install maui-android
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
