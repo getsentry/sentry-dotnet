@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Sentry.Extensibility;
 
 namespace Sentry.Infrastructure
@@ -25,15 +26,15 @@ namespace Sentry.Infrastructure
         /// </summary>
         public void Log(SentryLevel logLevel, string message, Exception? exception = null, params object?[] args)
         {
-            // Note, newlines are removed to guard against log injection attacks.
+            // Note, linefeed and newline chars are removed to guard against log injection attacks.
             // See https://github.com/getsentry/sentry-dotnet/security/code-scanning/5
 
-            var formattedMessage = string.Format(message, args)
-                .Replace(Environment.NewLine, "");
+            var formattedMessage = new string(string.Format(message, args)
+                .Where(c => c != '\r' && c != '\n').ToArray());
 
             var completeMessage = exception == null
                 ? $"{logLevel,7}: {formattedMessage}"
-                : $"{logLevel,7}: {formattedMessage}\n{exception}";
+                : $"{logLevel,7}: {formattedMessage}{Environment.NewLine}{exception}";
 
             LogMessage(completeMessage);
         }
