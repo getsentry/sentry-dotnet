@@ -172,7 +172,7 @@ public class RuntimeInfoTests
         {
             Raw = "Mono 6.13.0 (explicit/88268f9e785)",
             ExpectedName = "Mono",
-            ExpectedVersion = "6,.13.0"
+            ExpectedVersion = "6.13.0"
         }};
         yield return new object[] { new ParseTestCase
         {
