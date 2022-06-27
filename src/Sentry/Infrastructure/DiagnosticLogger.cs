@@ -38,6 +38,10 @@ namespace Sentry.Infrastructure
             LogMessage(completeMessage);
         }
 
+        /// <summary>
+        /// Writes a formatted message to the log.
+        /// </summary>
+        /// <param name="message">The complete message, ready to be logged.</param>
         protected abstract void LogMessage(string message);
     }
 }
