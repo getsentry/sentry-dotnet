@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
-    <!-- .NET Android Workload doesn't support Linux -->
-    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net6.0-android</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461;net6.0-android</TargetFrameworks>
     <!-- We'll pin to C# 9 and ImplicitUsings false to allow us to compile within Unity -->
     <LangVersion>9</LangVersion>
     <ImplicitUsings>false</ImplicitUsings>
