@@ -42,10 +42,9 @@ jobs:
         languages: ${{ matrix.language }}
 
     - name: Build
-      # TODO: Won't run over code specific to Windows or macOS
-      # Prob best to use reusable workflows to have the setup shared with build.yml
+      # TODO: Prob best to use reusable workflows to have the setup shared with build.yml
       # https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow
-      run: dotnet build SentryLinux.slnf
+      run: dotnet build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

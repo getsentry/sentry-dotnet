@@ -23,13 +23,6 @@ jobs:
       matrix:
         # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
         os: [ubuntu-latest, windows-latest, macos-12]
-        include:
-          - os: ubuntu-latest
-            slnf: SentryLinux.slnf
-          - os: windows-latest
-            slnf: SentryWindows.slnf
-          - os: macos-12
-            slnf: SentryMac.slnf
 
     steps:
         - name: Checkout
@@ -64,7 +57,9 @@ jobs:
             key: ${{ runner.os }}-nuget+workloads2-${{ hashFiles('**/*.*proj', '**/*.props') }}
             restore-keys: ${{ runner.os }}-nuget+workloads2
 
-        # .NET Android workloads don't support Linux https://github.com/dotnet/sdk/issues/22411
+        - name: Install .NET Workloads (Ubuntu)
+          if: startsWith(matrix.os, 'ubuntu')
+          run: dotnet workload install maui-android
         - name: Install .NET Workloads (Windows)
           if: startsWith(matrix.os, 'windows')
           run: dotnet workload install maui-android maui-windows
@@ -73,26 +68,15 @@ jobs:
           run: dotnet workload install maui-android maui-ios maui-maccatalyst
 
         - name: Build
-          run: dotnet build ${{ matrix.slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l GitHubActions -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
-
-        # - name: Create Test Report
-        #   uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
-        #   # run this step even if previous step failed
-        #   if: success() || failure()
-        #   with:
-        #     name: Unit Test Results (${{ matrix.os }})
-        #     path: '**/*.trx'
-        #     reporter: dotnet-trx
-        #     list-suites: 'failed'
-        #     list-tests: 'failed'
+          run: dotnet test -c Release --no-build -l GitHubActions -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Pack
           # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
           if: startsWith(matrix.os, 'macos')
-          run: dotnet pack ${{ matrix.slnf }} -c Release --no-build
+          run: dotnet pack -c Release --no-build
 
         - name: Upload Verify Results
           if: failure()
