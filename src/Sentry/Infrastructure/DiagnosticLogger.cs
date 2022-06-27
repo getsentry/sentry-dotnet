@@ -3,6 +3,9 @@ using Sentry.Extensibility;
 
 namespace Sentry.Infrastructure
 {
+    /// <summary>
+    /// Base class for diagnostic loggers.
+    /// </summary>
     public abstract class DiagnosticLogger : IDiagnosticLogger
     {
         private readonly SentryLevel _minimalLevel;
