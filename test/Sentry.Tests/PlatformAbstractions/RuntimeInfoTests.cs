@@ -177,7 +177,7 @@ public class RuntimeInfoTests
         yield return new object[] { new ParseTestCase
         {
             Raw = "Mono Unity IL2CPP (Jun 22 2022 18:13:02)",
-            ExpectedName = "IL2CPP",
+            ExpectedName = "Mono Unity IL2CPP",
             ExpectedVersion = null
         }};
     }
