@@ -1100,19 +1100,24 @@ namespace Sentry.Http
 }
 namespace Sentry.Infrastructure
 {
-    public class ConsoleDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    public class ConsoleDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public ConsoleDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
-        public bool IsEnabled(Sentry.SentryLevel level) { }
-        public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
+        protected override void LogMessage(string message) { }
     }
     [System.Obsolete("Logger doesn\'t work outside of Sentry SDK. Please use TraceDiagnosticLogger inste" +
         "ad")]
-    public class DebugDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    public class DebugDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public DebugDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
+        protected override void LogMessage(string message) { }
+    }
+    public abstract class DiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    {
+        protected DiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
         public bool IsEnabled(Sentry.SentryLevel level) { }
         public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
+        protected abstract void LogMessage(string message);
     }
     public interface ISystemClock
     {
@@ -1124,11 +1129,10 @@ namespace Sentry.Infrastructure
         public SystemClock() { }
         public System.DateTimeOffset GetUtcNow() { }
     }
-    public class TraceDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    public class TraceDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public TraceDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
-        public bool IsEnabled(Sentry.SentryLevel level) { }
-        public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
+        protected override void LogMessage(string message) { }
     }
 }
 namespace Sentry.Integrations
