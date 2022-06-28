@@ -44,9 +44,10 @@ internal class MauiNetworkStatusListener : INetworkStatusListener
             }
         }
 
+        _connectivity.ConnectivityChanged += OnConnectivityChanged;
+
         try
         {
-            _connectivity.ConnectivityChanged += OnConnectivityChanged;
             cancellationToken.Register(() => tcs.TrySetCanceled());
             await tcs.Task.ConfigureAwait(false);
         }
