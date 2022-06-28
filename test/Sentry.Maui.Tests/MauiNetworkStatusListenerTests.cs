@@ -86,4 +86,18 @@ public class MauiNetworkStatusListenerTests
         {
         }
     }
+
+    [Fact]
+    public async Task WaitForNetworkOnlineWhenAlreadyCancelled()
+    {
+        var connectivity = Substitute.For<IConnectivity>();
+
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var listener = new MauiNetworkStatusListener(connectivity, _options);
+
+        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            await listener.WaitForNetworkOnlineAsync(cts.Token));
+    }
 }

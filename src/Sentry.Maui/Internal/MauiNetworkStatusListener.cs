@@ -28,12 +28,21 @@ internal class MauiNetworkStatusListener : INetworkStatusListener
 
     public async Task WaitForNetworkOnlineAsync(CancellationToken cancellationToken)
     {
-        if (!_hasNetworkStatusPermission || cancellationToken.IsCancellationRequested)
+        if (!_hasNetworkStatusPermission)
         {
             return;
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var tcs = new TaskCompletionSource();
+        _connectivity.ConnectivityChanged += OnConnectivityChanged;
+
+        cancellationToken.Register(() =>
+        {
+            _connectivity.ConnectivityChanged -= OnConnectivityChanged;
+            tcs.TrySetCanceled();
+        });
 
         void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs args)
         {
@@ -44,13 +53,6 @@ internal class MauiNetworkStatusListener : INetworkStatusListener
             }
         }
 
-        cancellationToken.Register(() =>
-        {
-            _connectivity.ConnectivityChanged -= OnConnectivityChanged;
-            tcs.TrySetCanceled();
-        });
-
-        _connectivity.ConnectivityChanged += OnConnectivityChanged;
         await tcs.Task.ConfigureAwait(false);
     }
 
