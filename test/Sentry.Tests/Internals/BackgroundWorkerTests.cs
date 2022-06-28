@@ -7,7 +7,7 @@ public class BackgroundWorkerTests
 {
     private class Fixture
     {
-        public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
+        public IClientReportRecorder ClientReportRecorder { get; private set; } = Substitute.For<IClientReportRecorder>();
         public ITransport Transport { get; set; } = Substitute.For<ITransport>();
         public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
         public ConcurrentQueue<Envelope> Queue { get; set; } = new();
@@ -28,6 +28,13 @@ public class BackgroundWorkerTests
                 SentryOptions,
                 CancellationTokenSource,
                 Queue);
+
+        public IClientReportRecorder UseRealClientReportRecorder()
+        {
+            ClientReportRecorder = new ClientReportRecorder(SentryOptions);
+            SentryOptions.ClientReportRecorder = ClientReportRecorder;
+            return ClientReportRecorder;
+        }
     }
 
     private readonly Fixture _fixture = new();
@@ -424,5 +431,86 @@ public class BackgroundWorkerTests
 
         _fixture.Logger.Received().Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
         _ = Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
+    }
+
+    [Fact]
+    public async Task FlushAsync_EmptyQueueWithReport_SendsFinalClientReport()
+    {
+        // Arrange
+        _fixture.UseRealClientReportRecorder()
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Internal);
+        var sut = _fixture.GetSut();
+
+        // Act
+        await sut.FlushAsync(TimeSpan.MaxValue);
+
+        // Assert
+        _fixture.Logger.Received().Log(SentryLevel.Debug, "Sending client report after flushing queue.");
+        await _fixture.Transport.Received(1).SendEnvelopeAsync(
+            Arg.Is<Envelope>(e => e.Items.Count == 1 && e.Items[0].TryGetType() == "client_report"),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task FlushAsync_EmptyQueueWithNoReport_DoesntSendFinalClientReport()
+    {
+        // Arrange
+        _fixture.UseRealClientReportRecorder();
+        var sut = _fixture.GetSut();
+
+        // Act
+        await sut.FlushAsync(TimeSpan.MaxValue);
+
+        // Assert
+        _fixture.Logger.DidNotReceive().Log(SentryLevel.Debug, "Sending client report after flushing queue.");
+        await _fixture.Transport.DidNotReceive().SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task FlushAsync_ItemInQueueWithReport_SendsFinalClientReport()
+    {
+        // Arrange
+        _fixture.UseRealClientReportRecorder()
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Internal);
+
+        var sut = _fixture.GetSut();
+        sut.EnqueueEnvelope(Envelope.FromEvent(new SentryEvent()));
+
+        // Act
+        await sut.FlushAsync(TimeSpan.MaxValue);
+
+        // Assert
+        _fixture.Logger.Received().Log(SentryLevel.Debug, "Sending client report after flushing queue.");
+        await _fixture.Transport.Received(1).SendEnvelopeAsync(
+            Arg.Is<Envelope>(e => e.Items.Count == 1 && e.Items[0].TryGetType() == "client_report"),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task FlushAsync_ItemInQueueGetsRateLimited_SendsFinalClientReport()
+    {
+        // Arrange
+        var recorder = _fixture.UseRealClientReportRecorder();
+        _fixture.Transport
+            .When(t => t.SendEnvelopeAsync(
+                Arg.Is<Envelope>(e => e.Items.Any(i => i.TryGetType() == "event")),
+                Arg.Any<CancellationToken>()))
+            .Do(_ =>
+            {
+                // Simulate rate limiting for all events
+                recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Error);
+            });
+
+        var sut = _fixture.GetSut();
+        sut.EnqueueEnvelope(Envelope.FromEvent(new SentryEvent()));
+
+        // Act
+        await sut.FlushAsync(TimeSpan.MaxValue);
+
+        // Assert
+        _fixture.Logger.Received().Log(SentryLevel.Debug, "Sending client report after flushing queue.");
+        await _fixture.Transport.Received(1).SendEnvelopeAsync(
+            Arg.Is<Envelope>(e => e.Items.Count == 1 && e.Items[0].TryGetType() == "client_report"),
+            Arg.Any<CancellationToken>());
     }
 }

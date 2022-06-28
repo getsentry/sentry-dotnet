@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading;
 
 namespace Sentry.Internal.Extensions
 {
@@ -15,5 +16,8 @@ namespace Sentry.Internal.Extensions
 
         public static string ToHexString(this long l) =>
             "0x" + l.ToString("x", CultureInfo.InvariantCulture);
+
+        public static TimeSpan AdjustForMaxTimeout(this TimeSpan timeout) =>
+            timeout.TotalMilliseconds > int.MaxValue ? Timeout.InfiniteTimeSpan : timeout;
     }
 }

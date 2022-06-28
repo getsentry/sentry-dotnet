@@ -11,6 +11,7 @@
 - Log Warning when secret is detected in DSN ([#1749](https://github.com/getsentry/sentry-dotnet/pull/1749))
 - Catch permission exceptions on Android ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
 - Enable offline caching in MAUI ([#1753](https://github.com/getsentry/sentry-dotnet/pull/1753))
+- Send client report when flushing queue ([#1757](https://github.com/getsentry/sentry-dotnet/pull/1757))
 
 ### Fixes
 

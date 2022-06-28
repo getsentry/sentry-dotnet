@@ -175,9 +175,35 @@ namespace Sentry.Internal
 
         public async Task FlushAsync(TimeSpan timeout)
         {
+            // Start timer from here.
+            using var timeoutSource = new CancellationTokenSource(timeout.AdjustForMaxTimeout());
+            using var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
+                timeoutSource.Token, _shutdownSource.Token);
+
+            try
+            {
+                await DoFlushAsync(timeoutWithShutdown.Token).ConfigureAwait(false);
+            }
+            finally
+            {
+                // Send a final client report, if there is one.  We do this after flushing the queue, because sending
+                // the queued envelopes might encounter situations such as rate limiting, and we want to report those.
+                // (Client reports themselves are never rate limited.)
+                await SendFinalClientReportAsync(timeoutWithShutdown.Token).ConfigureAwait(false);
+            }
+        }
+
+        private async Task DoFlushAsync(CancellationToken cancellationToken)
+        {
             if (_disposed)
             {
                 _options.LogDebug("Worker disposed. Nothing to flush.");
+                return;
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                _options.LogDebug("Timeout or shutdown already requested. Exiting.");
                 return;
             }
 
@@ -187,15 +213,8 @@ namespace Sentry.Internal
                 return;
             }
 
-            // Start timer from here.
-            var timeoutSource = new CancellationTokenSource();
-            timeoutSource.CancelAfter(timeout);
-            var flushSuccessSource = new CancellationTokenSource();
-
-            var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
-                timeoutSource.Token,
-                _shutdownSource.Token,
-                flushSuccessSource.Token);
+            var completionSource = new TaskCompletionSource<bool>();
+            cancellationToken.Register(() => completionSource.TrySetCanceled());
 
             var counter = 0;
             var depth = int.MaxValue;
@@ -205,50 +224,67 @@ namespace Sentry.Internal
                 // ReSharper disable once AccessToModifiedClosure
                 if (Interlocked.Increment(ref counter) >= depth)
                 {
-                    try
-                    {
-                        _options.LogDebug("Signaling flush completed.");
-                        // ReSharper disable once AccessToDisposedClosure
-                        flushSuccessSource.Cancel();
-                    }
-                    catch // Timeout or Shutdown might have been called so this token was disposed.
-                    {
-                        // Flush will release when timeout is hit.
-                    }
+                    _options.LogDebug("Signaling flush completed.");
+                    completionSource.TrySetResult(true);
                 }
             }
 
             OnFlushObjectReceived += EventFlushedCallback; // Started counting events
+
+            var trackedDepth = _queue.Count;
+            if (trackedDepth == 0) // now we're subscribed and counting, make sure it's not already empty.
+            {
+                return;
+            }
+
+            _ = Interlocked.Exchange(ref depth, trackedDepth);
+            _options.LogDebug("Tracking depth: {0}.", trackedDepth);
+
+            if (counter >= depth) // When the worker finished flushing before we set the depth
+            {
+                return;
+            }
+
             try
             {
-                var trackedDepth = _queue.Count;
-                if (trackedDepth == 0) // now we're subscribed and counting, make sure it's not already empty.
-                {
-                    return;
-                }
-
-                _ = Interlocked.Exchange(ref depth, trackedDepth);
-                _options.LogDebug("Tracking depth: {0}.", trackedDepth);
-
-                if (counter >= depth) // When the worker finished flushing before we set the depth
-                {
-                    return;
-                }
-
-                // Await until event is flushed or one of the tokens triggers
-                await Task.Delay(timeout, timeoutWithShutdown.Token).ConfigureAwait(false);
-                _options.LogDebug("Timeout when trying to flush queue.");
+                // Await until event is flushed (or we have cancelled)
+                await completionSource.Task.ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
-                _options.LogDebug(flushSuccessSource.IsCancellationRequested
-                    ? "Successfully flushed all events up to call to FlushAsync."
-                    : "Timeout when trying to flush queue.");
+                // timeout occured. We'll log it below.
             }
             finally
             {
                 OnFlushObjectReceived -= EventFlushedCallback;
-                timeoutWithShutdown.Dispose();
+
+                _options.LogDebug(completionSource.Task.Status == TaskStatus.RanToCompletion
+                    ? "Successfully flushed all events up to call to FlushAsync."
+                    : "Timeout when trying to flush queue.");
+            }
+        }
+
+        private async Task SendFinalClientReportAsync(CancellationToken cancellationToken)
+        {
+            var clientReport = _options.ClientReportRecorder.GenerateClientReport();
+            if (clientReport != null)
+            {
+                _options.LogDebug("Sending client report after flushing queue.");
+                using var envelope = Envelope.FromClientReport(clientReport);
+
+                try
+                {
+                    await _transport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    _options.LogInfo("Timeout or shutdown while trying to send final client report. Exiting.");
+                }
+                catch (Exception exception)
+                {
+                    _options.LogError("Error while sending final client report (event ID: '{0}').",
+                        exception, envelope.TryGetEventId());
+                }
             }
         }
 
