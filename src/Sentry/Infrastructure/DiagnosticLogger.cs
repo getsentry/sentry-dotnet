@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using System.Text;
 using Sentry.Extensibility;
 
 namespace Sentry.Infrastructure
@@ -29,8 +29,7 @@ namespace Sentry.Infrastructure
             // Note, linefeed and newline chars are removed to guard against log injection attacks.
             // See https://github.com/getsentry/sentry-dotnet/security/code-scanning/5
 
-            var formattedMessage = new string(string.Format(message, args)
-                .Where(c => c != '\r' && c != '\n').ToArray());
+            var formattedMessage = ScrubNewlines(string.Format(message, args));
 
             var completeMessage = exception == null
                 ? $"{logLevel,7}: {formattedMessage}"
@@ -44,5 +43,42 @@ namespace Sentry.Infrastructure
         /// </summary>
         /// <param name="message">The complete message, ready to be logged.</param>
         protected abstract void LogMessage(string message);
+
+        private static string ScrubNewlines(string s)
+        {
+            // Replaces "\r", "\n", or "\r\n" with a single space in one pass (and trims the end result)
+
+            var sb = new StringBuilder(s.Length);
+
+            for (var i = 0; i < s.Length; i++)
+            {
+                var c = s[i];
+                switch (c)
+                {
+                    case '\r':
+                        sb.Append(' ');
+                        if (i < s.Length - 1 && s[i + 1] == '\n')
+                        {
+                            i++; // to prevent two consecutive spaces from "\r\n"
+                        }
+                        break;
+                    case '\n':
+                        sb.Append(' ');
+                        break;
+                    default:
+                        sb.Append(c);
+                        break;
+                }
+            }
+
+            // trim end and return
+            var len = sb.Length;
+            while (sb[len - 1] == ' ')
+            {
+                len--;
+            }
+
+            return sb.ToString(0, len);
+        }
     }
 }

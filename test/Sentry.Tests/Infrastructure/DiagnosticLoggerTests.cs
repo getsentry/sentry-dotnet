@@ -6,24 +6,32 @@ public class DiagnosticLoggerTests
     public void StripsEnvironmentNewlineFromMessage()
     {
         var logger = new FakeLogger(SentryLevel.Debug);
-        logger.LogDebug("Foo" + Environment.NewLine + "Bar");
-        Assert.Equal("  Debug: FooBar", logger.LastMessageLogged);
+        logger.LogDebug("Foo" + Environment.NewLine + "Bar" + Environment.NewLine);
+        Assert.Equal("  Debug: Foo Bar", logger.LastMessageLogged);
     }
 
     [Fact]
     public void StripsNewlineCharsFromMessage()
     {
         var logger = new FakeLogger(SentryLevel.Debug);
-        logger.LogDebug("Foo\nBar");
-        Assert.Equal("  Debug: FooBar", logger.LastMessageLogged);
+        logger.LogDebug("Foo\nBar\n");
+        Assert.Equal("  Debug: Foo Bar", logger.LastMessageLogged);
     }
 
     [Fact]
     public void StripsLinefeedCharsFromMessage()
     {
         var logger = new FakeLogger(SentryLevel.Debug);
-        logger.LogDebug("Foo\rBar");
-        Assert.Equal("  Debug: FooBar", logger.LastMessageLogged);
+        logger.LogDebug("Foo\rBar\r");
+        Assert.Equal("  Debug: Foo Bar", logger.LastMessageLogged);
+    }
+
+    [Fact]
+    public void StripsComboCharsFromMessage()
+    {
+        var logger = new FakeLogger(SentryLevel.Debug);
+        logger.LogDebug("Foo\r\nBar\r\n");
+        Assert.Equal("  Debug: Foo Bar", logger.LastMessageLogged);
     }
 
     private class FakeLogger : DiagnosticLogger
