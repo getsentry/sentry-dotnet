@@ -9,6 +9,7 @@
 - Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
 - Support IntPtr and UIntPtr serialization ([#1746](https://github.com/getsentry/sentry-dotnet/pull/1746))
 - Catch permission exceptions on Android ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
+- Send client report when flushing queue ([#1757](https://github.com/getsentry/sentry-dotnet/pull/1757))
 
 ### Fixes
 
