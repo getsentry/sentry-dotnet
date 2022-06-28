@@ -36,24 +36,24 @@ internal class MauiNetworkStatusListener : INetworkStatusListener
         cancellationToken.ThrowIfCancellationRequested();
 
         var tcs = new TaskCompletionSource();
-        _connectivity.ConnectivityChanged += OnConnectivityChanged;
-
-        cancellationToken.Register(() =>
-        {
-            _connectivity.ConnectivityChanged -= OnConnectivityChanged;
-            tcs.TrySetCanceled();
-        });
-
         void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs args)
         {
             if (TreatAsOnline(args.NetworkAccess))
             {
-                _connectivity.ConnectivityChanged -= OnConnectivityChanged;
                 tcs.TrySetResult();
             }
         }
 
-        await tcs.Task.ConfigureAwait(false);
+        try
+        {
+            _connectivity.ConnectivityChanged += OnConnectivityChanged;
+            cancellationToken.Register(() => tcs.TrySetCanceled());
+            await tcs.Task.ConfigureAwait(false);
+        }
+        finally
+        {
+            _connectivity.ConnectivityChanged -= OnConnectivityChanged;
+        }
     }
 
     private bool TreatAsOnline(NetworkAccess access) => access switch
