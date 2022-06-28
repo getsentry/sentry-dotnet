@@ -10,6 +10,10 @@
 - Support IntPtr and UIntPtr serialization ([#1746](https://github.com/getsentry/sentry-dotnet/pull/1746))
 - Catch permission exceptions on Android ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
 
+### Fixes
+
+- Don't allow newlines in diagnostic logger messages ([#1756](https://github.com/getsentry/sentry-dotnet/pull/1756))
+
 ## Sentry.Maui 3.18.0-preview.1
 
 ### Features
