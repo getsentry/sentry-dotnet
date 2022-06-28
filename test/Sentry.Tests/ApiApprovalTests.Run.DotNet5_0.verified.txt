@@ -484,6 +484,7 @@ namespace Sentry
         public int MaxBreadcrumbs { get; set; }
         public int MaxCacheItems { get; set; }
         public int MaxQueueItems { get; set; }
+        public Sentry.Extensibility.INetworkStatusListener? NetworkStatusListener { get; set; }
         public string? Release { get; set; }
         [System.Obsolete("Use ReportAssembliesMode instead", false)]
         public bool ReportAssemblies { get; set; }
@@ -1026,6 +1027,11 @@ namespace Sentry.Extensibility
         long? ContentLength { get; }
         string? ContentType { get; }
         System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Collections.Generic.IEnumerable<string>>>? Form { get; }
+    }
+    public interface INetworkStatusListener
+    {
+        bool Online { get; }
+        System.Threading.Tasks.Task WaitForNetworkOnlineAsync(System.Threading.CancellationToken cancellationToken);
     }
     public interface IRequestPayloadExtractor
     {
