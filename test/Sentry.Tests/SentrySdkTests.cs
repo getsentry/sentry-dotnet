@@ -182,6 +182,25 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
+    public void Init_DsnWithSecret_LogsWarning()
+    {
+        var logger = Substitute.For<IDiagnosticLogger>();
+        _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
+
+        var options = new SentryOptions
+        {
+            DiagnosticLogger = logger,
+            Debug = true,
+            Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647"
+        };
+
+        using (SentrySdk.Init(options))
+        {
+            logger.Received(1).Log(SentryLevel.Warning, "The provided DSN that contains a secret key. This is not required and will be ignored.");
+        }
+    }
+
+    [Fact]
     public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogWarning()
     {
         var logger = Substitute.For<IDiagnosticLogger>();
