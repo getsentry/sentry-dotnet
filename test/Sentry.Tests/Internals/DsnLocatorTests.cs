@@ -22,7 +22,7 @@ public class DsnLocatorTests
     [Fact]
     public void FindDsnOrDisable_DsnOnEnvironmentVariable_ReturnsTheDsn()
     {
-        const string expected = DsnSamples.ValidDsnWithoutSecret;
+        const string expected = ValidDsn;
 
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
@@ -36,14 +36,14 @@ public class DsnLocatorTests
     [Fact]
     public void FindDsnOrDisable_DsnOnEnvironmentVariableAndAttribute_ReturnsTheDsnFromEnvironmentVariable()
     {
-        const string expected = DsnSamples.ValidDsnWithoutSecret;
+        const string expected = ValidDsn;
 
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
             expected,
             () =>
             {
-                var asm = AssemblyCreationHelper.CreateAssemblyWithDsnAttribute(DsnSamples.ValidDsnWithSecret);
+                var asm = AssemblyCreationHelper.CreateAssemblyWithDsnAttribute(ValidDsn);
                 Assert.Equal(expected, DsnLocator.FindDsnStringOrDisable(asm));
             });
     }
@@ -60,7 +60,7 @@ public class DsnLocatorTests
     [Fact]
     public void FindDsn_ValidDsnInAsm_FindsTheDsnString()
     {
-        const string expected = DsnSamples.ValidDsnWithoutSecret;
+        const string expected = ValidDsn;
 
         var asm = AssemblyCreationHelper.CreateAssemblyWithDsnAttribute(expected);
         var actual = DsnLocator.FindDsn(asm);
@@ -82,7 +82,7 @@ public class DsnLocatorTests
     [Fact]
     public void FindDsn_InvalidDsnInAsm_ReturnsInvalidDsn()
     {
-        const string expected = DsnSamples.InvalidDsn;
+        const string expected = InvalidDsn;
 
         var asm = AssemblyCreationHelper.CreateAssemblyWithDsnAttribute(expected);
 

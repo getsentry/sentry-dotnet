@@ -17,7 +17,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = new FakeBackgroundWorker()
         });
 
@@ -37,7 +37,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = new FakeBackgroundWorker()
         });
 
@@ -60,7 +60,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = worker
         });
 
@@ -81,7 +81,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = worker
         });
 
@@ -101,7 +101,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
 
@@ -129,7 +129,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
 
@@ -158,7 +158,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0
         }, client);
 
@@ -187,7 +187,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
 
@@ -210,7 +210,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -232,7 +232,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
         var scope = new Scope();
@@ -283,7 +283,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             // To go through a round trip serialization of cached envelope
             CacheDirectoryPath = tempDirectory?.Path,
             // So we don't need to deal with gzip'ed payload
@@ -344,7 +344,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -366,7 +366,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         };
         var client = new SentryClient(options, worker);
@@ -401,7 +401,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         };
         var client = new SentryClient(options, worker);
@@ -435,7 +435,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         });
 
         // Act
@@ -453,7 +453,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         });
 
@@ -477,7 +477,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0
         });
 
@@ -499,7 +499,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = _ => 0,
             TracesSampleRate = 1
         });
@@ -522,7 +522,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         });
 
@@ -539,7 +539,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0
         });
 
@@ -559,7 +559,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0.5
         });
 
@@ -591,7 +591,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0.25
         });
 
@@ -623,7 +623,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0.75
         });
 
@@ -652,7 +652,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
         });
 
@@ -669,7 +669,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
         });
 
@@ -686,7 +686,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
         });
 
@@ -705,7 +705,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
         });
 
@@ -724,7 +724,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = _ => null,
             TracesSampleRate = 1
         });
@@ -742,7 +742,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = _ => null,
             TracesSampleRate = 0
         });
@@ -760,7 +760,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         });
 
         var transaction = hub.StartTransaction("foo", "bar");
@@ -788,7 +788,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         }, client);
 
         var transaction = hub.StartTransaction("foo", "bar");
@@ -808,7 +808,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         });
 
         hub.IsEnabled.Should().BeTrue();
@@ -826,7 +826,7 @@ public class HubTests
         var client = Substitute.For<ISentryClient, IDisposable>();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         };
         var hub = new Hub(options, client);
 
@@ -846,7 +846,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -871,7 +871,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client, sessionManager);
 
@@ -891,7 +891,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -913,7 +913,7 @@ public class HubTests
         // Act
         _ = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTracking = true,
             Release = "release"
         }, client);
@@ -932,7 +932,7 @@ public class HubTests
         _ = new Hub(new SentryOptions
         {
             IsGlobalModeEnabled = true,
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
         }, scopeManager: scopeManager);
 
         // Assert
@@ -949,7 +949,7 @@ public class HubTests
         _ = new Hub(new SentryOptions
         {
             IsGlobalModeEnabled = false,
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
         }, scopeManager: scopeManager);
 
         // Assert
@@ -964,7 +964,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
         }, client);
 
@@ -987,7 +987,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10),
             Release = "release"
         };
@@ -1022,7 +1022,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
         };
 
@@ -1053,7 +1053,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
         };
 
@@ -1088,7 +1088,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
         var scope = new Scope();

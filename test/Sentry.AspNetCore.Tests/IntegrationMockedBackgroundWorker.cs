@@ -26,7 +26,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         {
             _ = builder.UseSentry(options =>
             {
-                options.Dsn = DsnSamples.ValidDsnWithSecret;
+                options.Dsn = ValidDsn;
                 options.BackgroundWorker = Worker;
 
                 Configure?.Invoke(options);

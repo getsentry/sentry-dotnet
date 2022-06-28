@@ -261,7 +261,7 @@ public class TransactionTests
     {
         // Arrange
         var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret };
+        var options = new SentryOptions { Dsn = ValidDsn };
         var hub = new Hub(options, client);
 
         var transaction = new TransactionTracer(hub, "my name", "my op");
@@ -278,7 +278,7 @@ public class TransactionTests
     {
         // Arrange
         var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret };
+        var options = new SentryOptions { Dsn = ValidDsn };
         var hub = new Hub(options, client);
 
         var exception = new InvalidOperationException();

@@ -8,6 +8,7 @@
 - Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
 - Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
 - Support IntPtr and UIntPtr serialization ([#1746](https://github.com/getsentry/sentry-dotnet/pull/1746))
+- Log Warning when secret is detected in DSN ([#1749](https://github.com/getsentry/sentry-dotnet/pull/1749))
 - Catch permission exceptions on Android ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
 - Enable offline caching in MAUI ([#1753](https://github.com/getsentry/sentry-dotnet/pull/1753))
 

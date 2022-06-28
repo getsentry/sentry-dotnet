@@ -24,7 +24,7 @@ public class GlobalSessionManagerTests : IDisposable
 
             Options = new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                Dsn = ValidDsn,
                 CacheDirectoryPath = _cacheDirectory.Path,
                 Release = "test",
                 Debug = true,

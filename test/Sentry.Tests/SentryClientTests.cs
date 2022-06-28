@@ -331,7 +331,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             SampleRate = 0.5f,
             MaxQueueItems = int.MaxValue
         });
@@ -364,7 +364,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             SampleRate = 0.25f,
             MaxQueueItems = int.MaxValue
         });
@@ -397,7 +397,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             SampleRate = 0.75f,
             MaxQueueItems = int.MaxValue
         });
@@ -504,7 +504,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
         });
 
         // Act
@@ -702,7 +702,7 @@ public class SentryClientTests
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.ConfigureClient = _ => invoked = true;
 
         using (_fixture.GetSut())
@@ -716,7 +716,7 @@ public class SentryClientTests
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.CreateHttpClientHandler = () =>
         {
             invoked = true;
@@ -732,7 +732,7 @@ public class SentryClientTests
     [Fact]
     public void Ctor_NullBackgroundWorker_ConcreteBackgroundWorker()
     {
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
 
         using var sut = new SentryClient(_fixture.SentryOptions);
         _ = Assert.IsType<BackgroundWorker>(sut.Worker);
@@ -741,7 +741,7 @@ public class SentryClientTests
     [Fact]
     public void Ctor_SetsTransportOnOptions()
     {
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
 
         using var sut = new SentryClient(_fixture.SentryOptions);
 
@@ -751,7 +751,7 @@ public class SentryClientTests
     [Fact]
     public void Ctor_KeepsCustomTransportOnOptions()
     {
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.Transport = new FakeTransport();
 
         using var sut = new SentryClient(_fixture.SentryOptions);
@@ -764,7 +764,7 @@ public class SentryClientTests
     {
         using var cacheDirectory = new TempDirectory();
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.Transport = new FakeTransport();
 
         using var sut = new SentryClient(_fixture.SentryOptions);
@@ -778,7 +778,7 @@ public class SentryClientTests
     {
         using var cacheDirectory = new TempDirectory();
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
 
         var innerTransport = Substitute.For<ITransport>();
         var cachingTransport = CachingTransport.Create(innerTransport, _fixture.SentryOptions);
