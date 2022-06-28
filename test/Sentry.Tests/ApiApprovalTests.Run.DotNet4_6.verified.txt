@@ -357,8 +357,8 @@ namespace Sentry
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
-        [System.Obsolete("Sentry client should no be explicitly disposed of. This method will be removed in" +
-            " version 4.")]
+        [System.Obsolete("Sentry client should not be explicitly disposed of. This method will be removed i" +
+            "n version 4.")]
         public void Dispose() { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
     }
