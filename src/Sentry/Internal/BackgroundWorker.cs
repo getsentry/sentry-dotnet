@@ -214,7 +214,7 @@ namespace Sentry.Internal
             }
 
             var completionSource = new TaskCompletionSource<bool>();
-            cancellationToken.Register(() => completionSource.SetCanceled());
+            cancellationToken.Register(() => completionSource.TrySetCanceled());
 
             var counter = 0;
             var depth = int.MaxValue;
@@ -256,11 +256,11 @@ namespace Sentry.Internal
             }
             finally
             {
+                OnFlushObjectReceived -= EventFlushedCallback;
+
                 _options.LogDebug(completionSource.Task.Status == TaskStatus.RanToCompletion
                     ? "Successfully flushed all events up to call to FlushAsync."
                     : "Timeout when trying to flush queue.");
-
-                OnFlushObjectReceived -= EventFlushedCallback;
             }
         }
 
