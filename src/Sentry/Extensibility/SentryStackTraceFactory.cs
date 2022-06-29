@@ -15,6 +15,9 @@ namespace Sentry.Extensibility
     {
         private readonly SentryOptions _options;
 
+        private static readonly Regex RegexAsyncReturn = new(@"^(System.Threading.Tasks.Task`[0-9]+)\[\[",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
         /// <summary>
         /// Creates an instance of <see cref="SentryStackTraceFactory"/>.
         /// </summary>
@@ -191,6 +194,7 @@ namespace Sentry.Extensibility
             {
                 DemangleAsyncFunctionName(frame);
                 DemangleAnonymousFunction(frame);
+                RemoveTaskReturnType(frame);
             }
 
             if (_options.StackTraceMode == StackTraceMode.Enhanced)
@@ -265,6 +269,33 @@ namespace Sentry.Extensibility
             if (match.Success && match.Groups.Count == 2)
             {
                 frame.Function = match.Groups[1].Value + " { <lambda> }";
+            }
+        }
+
+        /// <summary>
+        /// Remove return type from module in a Task with a Lambda with a return value.
+        /// This was seen in Unity, see https://github.com/getsentry/sentry-unity/issues/845
+        /// </summary>
+        internal static void RemoveTaskReturnType(SentryStackFrame frame)
+        {
+            if (frame.Module == null)
+            {
+                return;
+            }
+
+            // First check for a prefix to make this as fast as possible. Only then check a regex
+            //
+            // Change:
+            //   System.Threading.Tasks.Task`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]] in InnerInvoke
+            // to:
+            //   System.Threading.Tasks.Task`1 in InnerInvoke
+            if (frame.Module.StartsWith("System.Threading.Tasks.Task`"))
+            {
+                var match = RegexAsyncReturn.Match(frame.Module);
+                if (match.Success && match.Groups.Count == 2)
+                {
+                    frame.Module = match.Groups[1].Value;
+                }
             }
         }
     }
