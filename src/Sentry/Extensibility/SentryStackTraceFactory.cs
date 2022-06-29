@@ -15,6 +15,12 @@ namespace Sentry.Extensibility
     {
         private readonly SentryOptions _options;
 
+        private static readonly Regex RegexAsyncFunctionName = new(@"^(.*)\+<(\w*)>d__\d*$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static readonly Regex RegexAnonymousFunction = new(@"^<(\w*)>b__\w+$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
         private static readonly Regex RegexAsyncReturn = new(@"^(System.Threading.Tasks.Task`[0-9]+)\[\[",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
@@ -240,7 +246,7 @@ namespace Sentry.Extensibility
             // to:
             //   RemotePrinterService in UpdateNotification at line 457:13
 
-            var match = Regex.Match(frame.Module, @"^(.*)\+<(\w*)>d__\d*$");
+            var match = RegexAsyncFunctionName.Match(frame.Module);
             if (match.Success && match.Groups.Count == 3)
             {
                 frame.Module = match.Groups[1].Value;
@@ -265,7 +271,7 @@ namespace Sentry.Extensibility
             // to:
             //   BeginInvokeAsynchronousActionMethod { <lambda> }
 
-            var match = Regex.Match(frame.Function, @"^<(\w*)>b__\w+$");
+            var match = RegexAnonymousFunction.Match(frame.Function);
             if (match.Success && match.Groups.Count == 2)
             {
                 frame.Function = match.Groups[1].Value + " { <lambda> }";
