@@ -2,49 +2,33 @@
 
 ## 3.19.0
 
-### Fixes
-
-- Dont allow SentryDiagnosticListenerIntegration to be added multiple times ([#1748](https://github.com/getsentry/sentry-dotnet/pull/1748))
-
-
 ### Features
 
-- Expose EnumerateChainedExceptions ([#1733](https://github.com/getsentry/sentry-dotnet/pull/1733))
+- Expose `EnumerateChainedExceptions` ([#1733](https://github.com/getsentry/sentry-dotnet/pull/1733))
 - Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
-- Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
-- Support IntPtr and UIntPtr serialization ([#1746](https://github.com/getsentry/sentry-dotnet/pull/1746))
+- Support `IntPtr` and `UIntPtr` serialization ([#1746](https://github.com/getsentry/sentry-dotnet/pull/1746))
 - Log Warning when secret is detected in DSN ([#1749](https://github.com/getsentry/sentry-dotnet/pull/1749))
 - Catch permission exceptions on Android ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
-- Enable offline caching in MAUI ([#1753](https://github.com/getsentry/sentry-dotnet/pull/1753))
 - Send client report when flushing queue ([#1757](https://github.com/getsentry/sentry-dotnet/pull/1757))
 
 ### Fixes
 
+- Don't allow `SentryDiagnosticListenerIntegration` to be added multiple times ([#1748](https://github.com/getsentry/sentry-dotnet/pull/1748))
 - Don't allow newlines in diagnostic logger messages ([#1756](https://github.com/getsentry/sentry-dotnet/pull/1756))
 
-## Sentry.Maui 3.18.0-preview.1
+## Sentry.Maui 3.19.0-preview.2
 
 ### Features
 
-- Added a new `Sentry.Maui` integration library for the [.NET MAUI](https://dotnet.microsoft.com/apps/maui) platform:
-  - Initial MAUI support ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
-  - Continue with adding MAUI support ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
-  - MAUI events become extra context in Sentry events ([#1706](https://github.com/getsentry/sentry-dotnet/pull/1706))
-  - Add options for PII breadcrumbs from MAUI events ([#1709](https://github.com/getsentry/sentry-dotnet/pull/1709))
-  - Add device information to the event context ([#1713](https://github.com/getsentry/sentry-dotnet/pull/1713))
-  - Add platform OS information to the event context ([#1717](https://github.com/getsentry/sentry-dotnet/pull/1717))
-
-## 3.18.0
+- Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
+- Enable offline caching in MAUI ([#1753](https://github.com/getsentry/sentry-dotnet/pull/1753))
 
 ### Fixes
 
-- Improve timestamp precision of transactions and spans ([#1680](https://github.com/getsentry/sentry-dotnet/pull/1680))
-- Flatten AggregateException ([#1672](https://github.com/getsentry/sentry-dotnet/pull/1672))
-  - NOTE: This can affect grouping. You can keep the original behavior by setting the option `KeepAggregateException` to `true`.
-- Serialize stack frame addresses as strings. ([#1692](https://github.com/getsentry/sentry-dotnet/pull/1692))
-- Improve serialization perf and fix memory leak in `SentryEvent` ([#1693](https://github.com/getsentry/sentry-dotnet/pull/1693))
-- Add type checking in contexts TryGetValue ([#1700](https://github.com/getsentry/sentry-dotnet/pull/1700))
-- Restore serialization of the `Platform` name ([#1702](https://github.com/getsentry/sentry-dotnet/pull/1702))
+- Set MAUI minimum version ([#1728](https://github.com/getsentry/sentry-dotnet/pull/1728))
+- Catch permission exceptions for MAUI ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
+
+## 3.18.0
 
 ### Features
 
@@ -65,6 +49,25 @@
 - Remove IInternalSdkIntegration ([#1656](https://github.com/getsentry/sentry-dotnet/pull/1656))
 - On async Main, dont unregister unhandled exception before capturing crash  ([#321](https://github.com/getsentry/sentry-dotnet/issues/321))
 - Handle BadHttpRequestException from Kestrel inside SentryTunnelMiddleware ([#1673](https://github.com/getsentry/sentry-dotnet/pull/1673))
+- Improve timestamp precision of transactions and spans ([#1680](https://github.com/getsentry/sentry-dotnet/pull/1680))
+- Flatten AggregateException ([#1672](https://github.com/getsentry/sentry-dotnet/pull/1672))
+  - NOTE: This can affect grouping. You can keep the original behavior by setting the option `KeepAggregateException` to `true`.
+- Serialize stack frame addresses as strings. ([#1692](https://github.com/getsentry/sentry-dotnet/pull/1692))
+- Improve serialization perf and fix memory leak in `SentryEvent` ([#1693](https://github.com/getsentry/sentry-dotnet/pull/1693))
+- Add type checking in contexts TryGetValue ([#1700](https://github.com/getsentry/sentry-dotnet/pull/1700))
+- Restore serialization of the `Platform` name ([#1702](https://github.com/getsentry/sentry-dotnet/pull/1702))
+
+## Sentry.Maui 3.18.0-preview.1
+
+### Features
+
+- Added a new `Sentry.Maui` integration library for the [.NET MAUI](https://dotnet.microsoft.com/apps/maui) platform:
+  - Initial MAUI support ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
+  - Continue with adding MAUI support ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
+  - MAUI events become extra context in Sentry events ([#1706](https://github.com/getsentry/sentry-dotnet/pull/1706))
+  - Add options for PII breadcrumbs from MAUI events ([#1709](https://github.com/getsentry/sentry-dotnet/pull/1709))
+  - Add device information to the event context ([#1713](https://github.com/getsentry/sentry-dotnet/pull/1713))
+  - Add platform OS information to the event context ([#1717](https://github.com/getsentry/sentry-dotnet/pull/1717))
 
 ## 3.17.1
 
