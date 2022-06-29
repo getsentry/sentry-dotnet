@@ -66,8 +66,8 @@ public static partial class SentrySdk
 
                 if (options.CacheDirectoryPath is { } cacheDirectoryPath)
                 {
-                    // Set a separate cache path for the native SDK so we don't step on the managed one
-                    o.CacheDirPath = Path.Combine(cacheDirectoryPath, "native");
+                    // Set a separate cache path for the Android SDK so we don't step on the managed one
+                    o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
                 }
 
                 var javaTags = o.Tags;
@@ -162,6 +162,10 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
+
+        // "Best" mode throws permission exception on Android
+        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
+
         // TODO: Pause/Resume
 
         // Init the managed SDK

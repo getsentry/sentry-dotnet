@@ -38,7 +38,7 @@ namespace Sentry.AspNetCore.Tests
 
             var hub = new Internal.Hub(new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret
+                Dsn = ValidDsn
             });
 
             var server = new TestServer(new WebHostBuilder()

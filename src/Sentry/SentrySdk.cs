@@ -35,18 +35,22 @@ namespace Sentry
 
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.
-            var dsn = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
+            var dsnString = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
 
             // If it's either explicitly disabled or we couldn't resolve the DSN
             // from anywhere else, return a disabled hub.
-            if (Dsn.IsDisabled(dsn))
+            if (Dsn.IsDisabled(dsnString))
             {
                 options.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
                 return DisabledHub.Instance;
             }
 
             // Validate DSN for an early exception in case it's malformed
-            _ = Dsn.Parse(dsn);
+            var dsn = Dsn.Parse(dsnString);
+            if (dsn.SecretKey != null)
+            {
+                options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
+            }
 
             return new Hub(options);
         }

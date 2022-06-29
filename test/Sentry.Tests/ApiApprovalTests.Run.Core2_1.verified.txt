@@ -358,8 +358,8 @@ namespace Sentry
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
-        [System.Obsolete("Sentry client should no be explicitly disposed of. This method will be removed in" +
-            " version 4.")]
+        [System.Obsolete("Sentry client should not be explicitly disposed of. This method will be removed i" +
+            "n version 4.")]
         public void Dispose() { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
     }
@@ -484,6 +484,7 @@ namespace Sentry
         public int MaxBreadcrumbs { get; set; }
         public int MaxCacheItems { get; set; }
         public int MaxQueueItems { get; set; }
+        public Sentry.Extensibility.INetworkStatusListener? NetworkStatusListener { get; set; }
         public string? Release { get; set; }
         [System.Obsolete("Use ReportAssembliesMode instead", false)]
         public bool ReportAssemblies { get; set; }
@@ -1026,6 +1027,11 @@ namespace Sentry.Extensibility
         string? ContentType { get; }
         System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Collections.Generic.IEnumerable<string>>>? Form { get; }
     }
+    public interface INetworkStatusListener
+    {
+        bool Online { get; }
+        System.Threading.Tasks.Task WaitForNetworkOnlineAsync(System.Threading.CancellationToken cancellationToken);
+    }
     public interface IRequestPayloadExtractor
     {
         object? ExtractPayload(Sentry.Extensibility.IHttpRequest request);
@@ -1093,19 +1099,24 @@ namespace Sentry.Http
 }
 namespace Sentry.Infrastructure
 {
-    public class ConsoleDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    public class ConsoleDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public ConsoleDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
-        public bool IsEnabled(Sentry.SentryLevel level) { }
-        public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
+        protected override void LogMessage(string message) { }
     }
     [System.Obsolete("Logger doesn\'t work outside of Sentry SDK. Please use TraceDiagnosticLogger inste" +
         "ad")]
-    public class DebugDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    public class DebugDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public DebugDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
+        protected override void LogMessage(string message) { }
+    }
+    public abstract class DiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    {
+        protected DiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
         public bool IsEnabled(Sentry.SentryLevel level) { }
         public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
+        protected abstract void LogMessage(string message);
     }
     public interface ISystemClock
     {
@@ -1117,11 +1128,10 @@ namespace Sentry.Infrastructure
         public SystemClock() { }
         public System.DateTimeOffset GetUtcNow() { }
     }
-    public class TraceDiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
+    public class TraceDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public TraceDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
-        public bool IsEnabled(Sentry.SentryLevel level) { }
-        public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
+        protected override void LogMessage(string message) { }
     }
 }
 namespace Sentry.Integrations

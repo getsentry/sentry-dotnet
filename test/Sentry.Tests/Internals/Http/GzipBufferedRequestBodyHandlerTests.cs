@@ -18,7 +18,7 @@ public class GzipBufferedRequestBodyHandlerTests
 
         public Fixture()
         {
-            var uri = Dsn.Parse(DsnSamples.ValidDsnWithSecret).GetStoreEndpointUri();
+            var uri = Dsn.Parse(ValidDsn).GetStoreEndpointUri();
 
             Message = new HttpRequestMessage(HttpMethod.Post, uri)
             {
