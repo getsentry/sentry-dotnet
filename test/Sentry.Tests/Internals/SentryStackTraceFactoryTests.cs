@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 // ReSharper disable once CheckNamespace
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
-
+[UsesVerify]
 public class SentryStackTraceFactoryTests
 {
     private class Fixture
@@ -127,6 +127,29 @@ public class SentryStackTraceFactoryTests
         frame.Function.Should().Be(method);
     }
 
+    [Theory]
+    [InlineData(StackTraceMode.Original)]
+    [InlineData(StackTraceMode.Enhanced)]
+    public Task GenericMethod(StackTraceMode mode)
+    {
+        _fixture.SentryOptions.StackTraceMode = mode;
+
+        // Arrange
+        var i = 5;
+        var exception = Record.Exception(() => GenericMethodThatThrows(i));
+
+        _fixture.SentryOptions.AttachStacktrace = true;
+        var factory = _fixture.GetSut();
+
+        // Act
+        var stackTrace = factory.Create(exception);
+
+        // Assert
+        var frame = stackTrace!.Frames.Last();
+        return Verify(frame)
+            .UseParameters(mode);
+    }
+
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
     {
@@ -190,5 +213,8 @@ public class SentryStackTraceFactoryTests
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static (Fixture f, int b) ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut) =>
+        throw new Exception();
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void GenericMethodThatThrows<T>(T value) =>
         throw new Exception();
 }
