@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
 
+[UsesVerify]
 public class SentryStackTraceFactoryTests
 {
     private class Fixture
@@ -106,7 +107,7 @@ public class SentryStackTraceFactoryTests
     }
 
     [Fact]
-    public void FileNameShouldBeRelative()
+    public Task FileNameShouldBeRelative()
     {
         _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
@@ -120,7 +121,7 @@ public class SentryStackTraceFactoryTests
         catch (Exception e) { exception = e; }
 
         var stackTrace = sut.Create(exception);
-        Assert.Equal(@"Internals\SentryStackTraceFactoryTests.cs", stackTrace!.Frames.First().FileName);
+        return Verify(stackTrace!.Frames.Select(x=>x.FileName));
     }
 
     [Theory]

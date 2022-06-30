@@ -1,0 +1,4 @@
+﻿[
+  Internals\SentryStackTraceFactoryTests.cs,
+  Internals\SentryStackTraceFactoryTests.cs
+]
