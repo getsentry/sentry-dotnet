@@ -1,4 +1,3 @@
-﻿using Microsoft.Maui.Hosting;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
 namespace Sentry.Maui.Device.TestApp
@@ -13,7 +12,8 @@ namespace Sentry.Maui.Device.TestApp
                 {
                     Assemblies =
                     {
-                        typeof(MauiProgram).Assembly
+                        typeof(MauiProgram).Assembly,
+                        typeof(Sentry.Tests.SentrySdkTests).Assembly
                     },
                 })
                 .UseHeadlessRunner(new HeadlessRunnerOptions
