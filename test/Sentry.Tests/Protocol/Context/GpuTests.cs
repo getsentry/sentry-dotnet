@@ -1,8 +1,18 @@
 // ReSharper disable once CheckNamespace
+
+using Sentry.Testing;
+
 namespace Sentry.Protocol.Tests.Context;
 
 public class GpuTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public GpuTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -25,7 +35,7 @@ public class GpuTests
             SupportsGeometryShaders = true
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"type\":\"gpu\"," +
@@ -91,7 +101,7 @@ public class GpuTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((Gpu gpu, string serialized) @case)
     {
-        var actual = @case.gpu.ToJsonString();
+        var actual = @case.gpu.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

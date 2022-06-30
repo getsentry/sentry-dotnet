@@ -36,7 +36,7 @@ public class SentryWebHostBuilderExtensionsTests
     [Theory, MemberData(nameof(ExpectedServices))]
     public void UseSentry_ValidDsnString_ServicesRegistered(Action<IServiceCollection> assert)
     {
-        _ = WebHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
+        _ = WebHostBuilder.UseSentry(ValidDsn);
         assert(Services);
     }
 

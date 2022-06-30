@@ -22,7 +22,10 @@ namespace Sentry.Internal
 #endif
             {
                 await serializable.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-                return Encoding.UTF8.GetString(stream.ToArray());
+
+                stream.Seek(0, SeekOrigin.Begin);
+                using var reader = new StreamReader(stream);
+                return await reader.ReadToEndAsync().ConfigureAwait(false);
             }
         }
 
@@ -30,7 +33,10 @@ namespace Sentry.Internal
         {
             using var stream = new MemoryStream();
             serializable.Serialize(stream, logger);
-            return Encoding.UTF8.GetString(stream.ToArray());
+
+            stream.Seek(0, SeekOrigin.Begin);
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

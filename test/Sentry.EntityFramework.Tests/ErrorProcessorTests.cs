@@ -31,7 +31,7 @@ public class ErrorProcessorTests
             SentryClient = new SentryClient(new SentryOptions
             {
                 BeforeSend = _beforeSend,
-                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                Dsn = ValidDsn,
             }.AddEntityFramework());
         }
     }

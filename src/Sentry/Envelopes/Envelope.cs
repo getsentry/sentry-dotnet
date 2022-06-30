@@ -212,6 +212,21 @@ namespace Sentry.Protocol.Envelopes
             return new Envelope(header, items);
         }
 
+        /// <summary>
+        /// Creates an envelope that contains a client report.
+        /// </summary>
+        internal static Envelope FromClientReport(ClientReport clientReport)
+        {
+            var header = CreateHeader();
+
+            var items = new[]
+            {
+                EnvelopeItem.FromClientReport(clientReport)
+            };
+
+            return new Envelope(header, items);
+        }
+
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)

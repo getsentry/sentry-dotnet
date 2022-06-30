@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol.Context;
 
 public class TraceTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public TraceTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void Ctor_NoPropertyFilled_SerializesEmptyObject()
     {
@@ -9,7 +18,7 @@ public class TraceTests
         var trace = new Trace();
 
         // Act
-        var actual = trace.ToJsonString();
+        var actual = trace.ToJsonString(_testOutputLogger);
 
         // Assert
         Assert.Equal("{\"type\":\"trace\"}", actual);
@@ -30,7 +39,7 @@ public class TraceTests
         };
 
         // Act
-        var actual = trace.ToJsonString();
+        var actual = trace.ToJsonString(_testOutputLogger);
 
         // Assert
         Assert.Equal(

@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol;
 
 public class TransactionTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public TransactionTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -73,7 +82,7 @@ public class TransactionTests
 
         // Act
         var finalTransaction = new Transaction(transaction);
-        var actualString = finalTransaction.ToJsonString();
+        var actualString = finalTransaction.ToJsonString(_testOutputLogger);
         var actual = Json.Parse(actualString, Transaction.FromJson);
 
         // Assert
@@ -252,7 +261,7 @@ public class TransactionTests
     {
         // Arrange
         var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret };
+        var options = new SentryOptions { Dsn = ValidDsn };
         var hub = new Hub(options, client);
 
         var transaction = new TransactionTracer(hub, "my name", "my op");
@@ -269,7 +278,7 @@ public class TransactionTests
     {
         // Arrange
         var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret };
+        var options = new SentryOptions { Dsn = ValidDsn };
         var hub = new Hub(options, client);
 
         var exception = new InvalidOperationException();
