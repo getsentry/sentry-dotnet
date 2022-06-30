@@ -21,7 +21,7 @@ namespace Sentry.Extensibility
         private static readonly Regex RegexAnonymousFunction = new(@"^<(\w*)>b__\w+$",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private static readonly Regex RegexAsyncReturn = new(@"^(System.Threading.Tasks.Task`[0-9]+)\[\[",
+        private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Sentry.Extensibility
             {
                 DemangleAsyncFunctionName(frame);
                 DemangleAnonymousFunction(frame);
-                RemoveTaskReturnType(frame);
+                DemangleLambdaReturnType(frame);
             }
 
             if (_options.StackTraceMode == StackTraceMode.Enhanced)
@@ -282,26 +282,23 @@ namespace Sentry.Extensibility
         /// Remove return type from module in a Task with a Lambda with a return value.
         /// This was seen in Unity, see https://github.com/getsentry/sentry-unity/issues/845
         /// </summary>
-        internal static void RemoveTaskReturnType(SentryStackFrame frame)
+        internal static void DemangleLambdaReturnType(SentryStackFrame frame)
         {
             if (frame.Module == null)
             {
                 return;
             }
 
-            // First check for a prefix to make this as fast as possible. Only then check a regex
-            //
             // Change:
             //   System.Threading.Tasks.Task`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]] in InnerInvoke
+            //   or System.Collections.Generic.List`1[[UnityEngine.Events.PersistentCall, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]] in get_Item
             // to:
-            //   System.Threading.Tasks.Task`1 in InnerInvoke
-            if (frame.Module.StartsWith("System.Threading.Tasks.Task`"))
+            //   System.Threading.Tasks.Task`1 in InnerInvoke`
+            //   or System.Collections.Generic.List`1 in get_Item
+            var match = RegexAsyncReturn.Match(frame.Module);
+            if (match.Success && match.Groups.Count == 2)
             {
-                var match = RegexAsyncReturn.Match(frame.Module);
-                if (match.Success && match.Groups.Count == 2)
-                {
-                    frame.Module = match.Groups[1].Value;
-                }
+                frame.Module = match.Groups[1].Value;
             }
         }
     }

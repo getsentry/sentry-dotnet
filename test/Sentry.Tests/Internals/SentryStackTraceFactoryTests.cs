@@ -60,6 +60,11 @@ public class SentryStackTraceFactoryTests
         Assert.NotNull(stackTrace);
 
         Assert.Equal(method, stackTrace.Frames.Last().Function);
+
+        if (_fixture.SentryOptions.StackTraceMode == StackTraceMode.Original)
+        {
+            Assert.Equal("System.Threading.Tasks.Task`1", stackTrace.Frames[stackTrace.Frames.Count - 2].Module);
+        }
     }
 
     [Fact]
