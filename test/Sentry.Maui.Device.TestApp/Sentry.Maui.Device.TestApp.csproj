@@ -4,9 +4,10 @@
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">net6.0-android;net6.0-windows10.0.19041.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
-    <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
+    <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
+    <AssemblyName>Sentry.Maui.Device.TestApp</AssemblyName>
+    <UseMaui>true</UseMaui>
     <ImplicitUsings>enable</ImplicitUsings>
 
     <!-- Display name -->
@@ -54,10 +55,7 @@
   <!-- Workaround for https://github.com/dotnet/maui/issues/7272 -->
   <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
     <ItemGroup>
-      <ResolvedFileToPublish
-        Update="@(ResolvedFileToPublish)"
-        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
-        PublishFolderType="None" />
+      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''" PublishFolderType="None" />
     </ItemGroup>
   </Target>
 
