@@ -4,10 +4,70 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="@string/app_text"
-    />
+
+    <ScrollView android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/scroll_content"
+                android:layout_below="@+id/intro"
+                android:layout_above="@+id/footer">
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+                <Button android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/captureException"
+                        android:text="@string/capture_exception"
+                        android:layout_weight="0.5"
+                        android:layout_marginTop="10dp"
+                        android:enabled="true"/>
+
+                <Button android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/throwUnhandledException"
+                        android:text="@string/throw_unhandled_exception"
+                        android:layout_weight="0.5"
+                        android:layout_marginTop="10dp"/>
+
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+            <Button android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/throwKotlinException"
+                    android:text="@string/throw_kotlin_exception"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="10dp"/>
+
+            <Button android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/throwKotlinExceptionBackgroundThread"
+                    android:text="@string/throw_kotlin_exception_background_thread"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="10dp"/>
+
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+            <Button android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/crashInC"
+                    android:text="@string/crash_in_c"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="10dp"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </RelativeLayout>

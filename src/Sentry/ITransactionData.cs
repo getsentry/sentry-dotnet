@@ -1,4 +1,4 @@
-﻿namespace Sentry
+namespace Sentry
 {
     /// <summary>
     /// Immutable data belonging to a transaction.

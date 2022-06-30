@@ -1,643 +1,1114 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using NSubstitute;
-using Sentry;
-using Sentry.Extensibility;
-using Sentry.Internal;
-using Sentry.Protocol.Envelopes;
-using Xunit;
+using System.IO.Compression;
+using System.Net.Http;
+using Sentry.Internal.Http;
+using Sentry.Testing;
 
-// ReSharper disable once CheckNamespace
-// Tests code path which excludes frames with namespace Sentry
-namespace NotSentry.Tests
+#if NETCOREAPP2_1
+using System.Reflection;
+#endif
+
+namespace Sentry.Tests;
+
+public class HubTests
 {
-    public class HubTests
+    [Fact]
+    public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
-        private class FakeBackgroundWorker : IBackgroundWorker
+        // Arrange
+        var hub = new Hub(new SentryOptions
         {
-            public List<Envelope> Queue { get; } = new();
+            Dsn = ValidDsn,
+            BackgroundWorker = new FakeBackgroundWorker()
+        });
 
-            public int QueuedItems => Queue.Count;
+        // Act & assert
+        using (hub.PushScope())
+        {
+            hub.ConfigureScope(s => s.AddBreadcrumb("test"));
+            Assert.Single(hub.ScopeManager.GetCurrent().Key.Breadcrumbs);
+        }
 
-            public bool EnqueueEnvelope(Envelope envelope)
+        Assert.Empty(hub.ScopeManager.GetCurrent().Key.Breadcrumbs);
+    }
+
+    [Fact]
+    public void PushAndLockScope_DoesNotAffectOuterScope()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            BackgroundWorker = new FakeBackgroundWorker()
+        });
+
+        // Act & assert
+        hub.ConfigureScope(s => Assert.False(s.Locked));
+        using (hub.PushAndLockScope())
+        {
+            hub.ConfigureScope(s => Assert.True(s.Locked));
+        }
+
+        hub.ConfigureScope(s => Assert.False(s.Locked));
+    }
+
+    [Fact]
+    public void CaptureMessage_FailedQueue_LastEventIdSetToEmpty()
+    {
+        // Arrange
+        var worker = Substitute.For<IBackgroundWorker>();
+        worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(false);
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            BackgroundWorker = worker
+        });
+
+        // Act
+        var actualId = hub.CaptureMessage("test");
+
+        // Assert
+        Assert.Equal(Guid.Empty, (Guid)actualId);
+        Assert.Equal(Guid.Empty, (Guid)hub.LastEventId);
+    }
+
+    [Fact]
+    public void CaptureMessage_SuccessQueued_LastEventIdSetToReturnedId()
+    {
+        // Arrange
+        var worker = Substitute.For<IBackgroundWorker>();
+        worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            BackgroundWorker = worker
+        });
+
+        // Act
+        var actualId = hub.CaptureMessage("test");
+
+        // Assert
+        Assert.NotEqual(default, actualId);
+        Assert.Equal(actualId, hub.LastEventId);
+    }
+
+    [Fact]
+    public void CaptureException_FinishedSpanBoundToSameExceptionExists_EventIsLinkedToSpan()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        }, client);
+
+        var exception = new Exception("error");
+
+        var transaction = hub.StartTransaction("foo", "bar");
+        transaction.Finish(exception);
+
+        // Act
+        hub.CaptureException(exception);
+
+        // Assert
+        client.Received(1).CaptureEvent(
+            Arg.Is<SentryEvent>(evt =>
+                evt.Contexts.Trace.TraceId == transaction.TraceId &&
+                evt.Contexts.Trace.SpanId == transaction.SpanId),
+            Arg.Any<Scope>());
+    }
+
+    [Fact]
+    public void CaptureException_ActiveSpanExistsOnScope_EventIsLinkedToSpan()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        }, client);
+
+        var exception = new Exception("error");
+
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        hub.CaptureException(exception);
+
+        // Assert
+        client.Received(1).CaptureEvent(
+            Arg.Is<SentryEvent>(evt =>
+                evt.Contexts.Trace.TraceId == transaction.TraceId &&
+                evt.Contexts.Trace.SpanId == transaction.SpanId),
+            Arg.Any<Scope>());
+    }
+
+    [Fact]
+    public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0
+        }, client);
+
+        var exception = new Exception("error");
+
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        hub.CaptureException(exception);
+
+        // Assert
+        client.Received(1).CaptureEvent(
+            Arg.Is<SentryEvent>(evt =>
+                evt.Contexts.Trace.TraceId == default &&
+                evt.Contexts.Trace.SpanId == default),
+            Arg.Any<Scope>());
+    }
+
+    [Fact]
+    public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        }, client);
+
+        // Act
+        hub.CaptureException(new Exception("error"));
+
+        // Assert
+        client.Received(1).CaptureEvent(
+            Arg.Is<SentryEvent>(evt =>
+                evt.Contexts.Trace.TraceId == default &&
+                evt.Contexts.Trace.SpanId == default),
+            Arg.Any<Scope>());
+    }
+
+    [Fact]
+    public void CaptureEvent_SessionActive_NoExceptionDoesNotReportError()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "release"
+        }, client);
+
+        hub.StartSession();
+
+        // Act
+        hub.CaptureEvent(new SentryEvent());
+        hub.EndSession();
+
+        // Assert
+        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 0));
+    }
+
+    [Fact]
+    public void CaptureEvent_ExceptionWithOpenSpan_SpanLinkedToEventContext()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        }, client);
+        var scope = new Scope();
+        var evt = new SentryEvent(new Exception());
+        scope.Transaction = hub.StartTransaction("transaction", "operation");
+
+        var child = scope.Transaction.StartChild("child", "child");
+
+        // Act
+        hub.CaptureEvent(evt, scope);
+
+        // Assert
+        Assert.Equal(child.SpanId, evt.Contexts.Trace.SpanId);
+        Assert.Equal(child.TraceId, evt.Contexts.Trace.TraceId);
+        Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
+    }
+
+    private class EvilContext
+    {
+        // This property will throw an exception during serialization.
+        // ReSharper disable once UnusedMember.Local
+        public string Thrower => throw new InvalidDataException();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
+    {
+        var tcs = new TaskCompletionSource<object>();
+        var expectedMessage = Guid.NewGuid().ToString();
+
+        var requests = new List<string>();
+        async Task VerifyAsync(HttpRequestMessage message)
+        {
+            var payload = await message.Content!.ReadAsStringAsync();
+            requests.Add(payload);
+            if (payload.Contains(expectedMessage))
             {
-                Queue.Add(envelope);
-                return true;
+                tcs.SetResult(null);
             }
-
-            public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
         }
 
-        [Fact]
-        public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                BackgroundWorker = new FakeBackgroundWorker()
-            });
+        using var tempDirectory = offlineCaching ? new TempDirectory() : null;
 
-            // Act & assert
-            using (hub.PushScope())
+        var logger = Substitute.For<IDiagnosticLogger>();
+        logger.IsEnabled(SentryLevel.Error).Returns(true);
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            // To go through a round trip serialization of cached envelope
+            CacheDirectoryPath = tempDirectory?.Path,
+            // So we don't need to deal with gzip'ed payload
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
+            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            // Not to send some session envelope
+            AutoSessionTracking = false,
+            Debug = true,
+            DiagnosticLevel = SentryLevel.Error,
+            DiagnosticLogger = logger
+        };
+
+        try
+        {
+            var hub = new Hub(options);
+
+            var expectedContextKey = Guid.NewGuid().ToString();
+            var evt = new SentryEvent
             {
-                hub.ConfigureScope(s => s.AddBreadcrumb("test"));
-                Assert.Single(hub.ScopeManager.GetCurrent().Key.Breadcrumbs);
+                Contexts = {[expectedContextKey] = new EvilContext()},
+                Message = new SentryMessage {Formatted = expectedMessage}
+            };
+
+            hub.CaptureEvent(evt);
+
+            // Synchronizing in the tests to go through the caching and http transports
+            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+            Assert.True(tcs.Task.IsCompleted, "Event not captured");
+            Assert.True(requests.All(p => p.Contains(expectedContextKey)),
+                "Un-serializable context key should exist");
+
+            logger.Received().Log(SentryLevel.Error,
+                "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+#if NETCOREAPP2_1
+            Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
+#else
+                Arg.Any<InvalidDataException>(),
+#endif
+                Arg.Any<object[]>());
+
+        }
+        finally
+        {
+            if (options.Transport is CachingTransport cachingTransport)
+            {
+                // Disposing the caching transport will ensure its worker
+                // is shut down before we try to dispose and delete the temp folder
+                await cachingTransport.DisposeAsync();
             }
-
-            Assert.Empty(hub.ScopeManager.GetCurrent().Key.Breadcrumbs);
         }
+    }
 
-        [Fact]
-        public void PushAndLockScope_DoesNotAffectOuterScope()
+    [Fact]
+    public void CaptureEvent_SessionActive_ExceptionReportsError()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
         {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                BackgroundWorker = new FakeBackgroundWorker()
-            });
+            Dsn = ValidDsn,
+            Release = "release"
+        }, client);
 
-            // Act & assert
-            hub.ConfigureScope(s => Assert.False(s.Locked));
-            using (hub.PushAndLockScope())
-            {
-                hub.ConfigureScope(s => Assert.True(s.Locked));
-            }
+        hub.StartSession();
 
-            hub.ConfigureScope(s => Assert.False(s.Locked));
-        }
+        // Act
+        hub.CaptureEvent(new SentryEvent(new Exception()));
+        hub.EndSession();
 
-        [Fact(Skip = "Flaky")]
-        public void CaptureMessage_AttachStacktraceFalse_DoesNotIncludeStackTrace()
+        // Assert
+        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 1));
+    }
+
+    [Fact]
+    public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+    {
+        // Arrange
+        var worker = Substitute.For<IBackgroundWorker>();
+
+        var options = new SentryOptions
         {
-            // Arrange
-            var worker = new FakeBackgroundWorker();
+            Dsn = ValidDsn,
+            Release = "release"
+        };
+        var client = new SentryClient(options, worker);
+        var hub = new Hub(options, client);
 
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                BackgroundWorker = worker,
-                AttachStacktrace = true
-            });
+        hub.StartSession();
 
-            // Act
-            hub.CaptureMessage("test");
+        // Act
+        hub.CaptureEvent(new SentryEvent
+        {
+            SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
+        });
+
+        // Assert
+        worker.Received().EnqueueEnvelope(
+            Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
+                    .OfType<SessionUpdate>()
+                    .Single()
+                    .EndStatus == SessionEndStatus.Crashed
+            ));
+    }
+
+    [Fact]
+    public void AppDomainUnhandledExceptionIntegration_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+    {
+        // Arrange
+        var worker = Substitute.For<IBackgroundWorker>();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "release"
+        };
+        var client = new SentryClient(options, worker);
+        var hub = new Hub(options, client);
+
+        var integration = new AppDomainUnhandledExceptionIntegration(Substitute.For<IAppDomain>());
+        integration.Register(hub, options);
+
+        hub.StartSession();
+
+        // Act
+        // Simulate a terminating exception
+        integration.Handle(this, new UnhandledExceptionEventArgs(new Exception("test"), true));
+
+        // Assert
+        worker.Received().EnqueueEnvelope(
+            Arg.Is<Envelope>(e =>
+                e.Items
+                    .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
+                    .OfType<SessionUpdate>()
+                    .Single()
+                    .EndStatus == SessionEndStatus.Crashed
+            ));
+    }
+
+    [Fact]
+    public void StartTransaction_NameOpDescription_Works()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn
+        });
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation", "description");
+
+        // Assert
+        transaction.Name.Should().Be("name");
+        transaction.Operation.Should().Be("operation");
+        transaction.Description.Should().Be("description");
+    }
+
+    [Fact]
+    public void StartTransaction_FromTraceHeader_CopiesContext()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        });
+
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            true);
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation", traceHeader);
+
+        // Assert
+        transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
+        transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_FromTraceHeader_SampledInheritedFromParentRegardlessOfSampleRate()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0
+        });
+
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            true);
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation", traceHeader);
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_FromTraceHeader_CustomSamplerCanSampleOutTransaction()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampler = _ => 0,
+            TracesSampleRate = 1
+        });
+
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            true);
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_StaticSampling_SampledIn()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        });
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_StaticSampling_SampledOut()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0
+        });
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_StaticSampling_50PercentDistribution()
+    {
+        // 15% deviation is ok
+        const double allowedRelativeDeviation = 0.15;
+
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0.5
+        });
+
+        // Act
+        var transactions = Enumerable
+            .Range(0, 1_000)
+            .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
+            .ToArray();
+
+        var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
+        var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
+
+        // Assert
+        transactionsSampledIn.Length.Should().BeCloseTo(
+            (int)(0.5 * transactions.Length),
+            (uint)(allowedRelativeDeviation * transactions.Length));
+
+        transactionsSampledOut.Length.Should().BeCloseTo(
+            (int)(0.5 * transactions.Length),
+            (uint)(allowedRelativeDeviation * transactions.Length));
+    }
+
+    [Fact]
+    public void StartTransaction_StaticSampling_25PercentDistribution()
+    {
+        // 15% deviation is ok
+        const double allowedRelativeDeviation = 0.15;
+
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0.25
+        });
+
+        // Act
+        var transactions = Enumerable
+            .Range(0, 1_000)
+            .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
+            .ToArray();
+
+        var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
+        var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
+
+        // Assert
+        transactionsSampledIn.Length.Should().BeCloseTo(
+            (int)(0.25 * transactions.Length),
+            (uint)(allowedRelativeDeviation * transactions.Length));
+
+        transactionsSampledOut.Length.Should().BeCloseTo(
+            (int)(0.75 * transactions.Length),
+            (uint)(allowedRelativeDeviation * transactions.Length));
+    }
+
+    [Fact]
+    public void StartTransaction_StaticSampling_75PercentDistribution()
+    {
+        // 15% deviation is ok
+        const double allowedRelativeDeviation = 0.15;
+
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0.75
+        });
+
+        // Act
+        var transactions = Enumerable
+            .Range(0, 1_000)
+            .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
+            .ToArray();
+
+        var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
+        var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
+
+        // Assert
+        transactionsSampledIn.Length.Should().BeCloseTo(
+            (int)(0.75 * transactions.Length),
+            (uint)(allowedRelativeDeviation * transactions.Length));
+
+        transactionsSampledOut.Length.Should().BeCloseTo(
+            (int)(0.25 * transactions.Length),
+            (uint)(allowedRelativeDeviation * transactions.Length));
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSampling_SampledIn()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
+        });
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "op");
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSampling_SampledOut()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
+        });
+
+        // Act
+        var transaction = hub.StartTransaction("bar", "op");
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSampling_WithCustomContext_SampledIn()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
+        });
+
+        // Act
+        var transaction = hub.StartTransaction(
+            new TransactionContext("foo", "op"),
+            new Dictionary<string, object> { ["xxx"] = "zzz" });
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSampling_WithCustomContext_SampledOut()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
+        });
+
+        // Act
+        var transaction = hub.StartTransaction(
+            new TransactionContext("foo", "op"),
+            new Dictionary<string, object> { ["xxx"] = "yyy" });
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSampling_FallbackToStatic_SampledIn()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampler = _ => null,
+            TracesSampleRate = 1
+        });
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSampling_FallbackToStatic_SampledOut()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampler = _ => null,
+            TracesSampleRate = 0
+        });
+
+        // Act
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void GetTraceHeader_ReturnsHeaderForActiveSpan()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn
+        });
+
+        var transaction = hub.StartTransaction("foo", "bar");
+
+        // Act
+        hub.WithScope(scope =>
+        {
+            scope.Transaction = transaction;
+
+            var header = hub.GetTraceHeader();
 
             // Assert
-            var envelope = worker.Queue.Single();
+            header.Should().NotBeNull();
+            header?.SpanId.Should().Be(transaction.SpanId);
+            header?.TraceId.Should().Be(transaction.TraceId);
+            header?.IsSampled.Should().Be(transaction.IsSampled);
+        });
+    }
 
-            var stackTrace = envelope.Items
-                .Select(i => i.Payload)
-                .OfType<JsonSerializable>()
-                .Select(i => i.Source)
-                .OfType<SentryEvent>()
-                .Single()
-                .SentryExceptionValues;
+    [Fact]
+    public void CaptureTransaction_AfterTransactionFinishes_ResetsTransactionOnScope()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
 
-            stackTrace.Should().BeNull();
-        }
-
-        [Fact]
-        public void CaptureMessage_FailedQueue_LastEventIdSetToEmpty()
+        var hub = new Hub(new SentryOptions
         {
-            // Arrange
-            var worker = Substitute.For<IBackgroundWorker>();
-            worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(false);
+            Dsn = ValidDsn
+        }, client);
 
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                BackgroundWorker = worker
-            });
+        var transaction = hub.StartTransaction("foo", "bar");
 
-            // Act
-            var actualId = hub.CaptureMessage("test");
+        hub.WithScope(scope => scope.Transaction = transaction);
 
-            // Assert
-            Assert.Equal(Guid.Empty, (Guid)actualId);
-            Assert.Equal(Guid.Empty, (Guid)hub.LastEventId);
-        }
+        // Act
+        transaction.Finish();
 
-        [Fact]
-        public void CaptureMessage_SuccessQueued_LastEventIdSetToReturnedId()
+        // Assert
+        hub.WithScope(scope => scope.Transaction.Should().BeNull());
+    }
+
+    [Fact]
+    public void Dispose_IsEnabled_SetToFalse()
+    {
+        // Arrange
+        var hub = new Hub(new SentryOptions
         {
-            // Arrange
-            var worker = Substitute.For<IBackgroundWorker>();
-            worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
+            Dsn = ValidDsn
+        });
 
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                BackgroundWorker = worker
-            });
+        hub.IsEnabled.Should().BeTrue();
 
-            // Act
-            var actualId = hub.CaptureMessage("test");
+        // Act
+        hub.Dispose();
 
-            // Assert
-            Assert.NotEqual(default, actualId);
-            Assert.Equal(actualId, hub.LastEventId);
-        }
+        // Assert
+        hub.IsEnabled.Should().BeFalse();
+    }
 
-        [Fact]
-        public void CaptureException_FinishedSpanBoundToSameExceptionExists_EventIsLinkedToSpan()
+    [Fact]
+    public void Dispose_CalledSecondTime_ClientDisposedOnce()
+    {
+        var client = Substitute.For<ISentryClient, IDisposable>();
+        var options = new SentryOptions
         {
-            // Arrange
-            var client = Substitute.For<ISentryClient>();
+            Dsn = ValidDsn
+        };
+        var hub = new Hub(options, client);
 
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 1
-            });
+        // Act
+        hub.Dispose();
+        hub.Dispose();
 
-            var exception = new Exception("error");
+        // Assert
+        client.Received(1).FlushAsync(options.ShutdownTimeout);
+    }
 
-            var transaction = hub.StartTransaction("foo", "bar");
-            transaction.Finish(exception);
+    [Fact]
+    public void StartSession_CapturesUpdate()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
 
-            // Act
-            hub.CaptureException(exception);
-
-            // Assert
-            client.Received(1).CaptureEvent(
-                Arg.Is<SentryEvent>(evt =>
-                    evt.Contexts.Trace.TraceId == transaction.TraceId &&
-                    evt.Contexts.Trace.SpanId == transaction.SpanId),
-                Arg.Any<Scope>()
-            );
-        }
-
-        [Fact]
-        public void CaptureException_ActiveSpanExistsOnScope_EventIsLinkedToSpan()
+        var hub = new Hub(new SentryOptions
         {
-            // Arrange
-            var client = Substitute.For<ISentryClient>();
+            Dsn = ValidDsn,
+            Release = "release"
+        }, client);
 
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 1
-            });
+        // Act
+        hub.StartSession();
 
-            var exception = new Exception("error");
+        // Assert
+        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+    }
 
-            var transaction = hub.StartTransaction("foo", "bar");
+    [Fact]
+    public void StartSession_GlobalSessionManager_ExceptionOnCrashLastRun_CapturesUpdate()
+    {
+        // Arrange
+        var sessionUpdate = new GlobalSessionManagerTests().TryRecoverPersistedSessionWithExceptionOnLastRun();
+        var newSession = new SessionUpdate(Substitute.For<ISession>(), false, default, 0, null);
 
-            hub.ConfigureScope(scope => scope.Transaction = transaction);
+        var client = Substitute.For<ISentryClient>();
+        var sessionManager = Substitute.For<ISessionManager>();
+        sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
+        sessionManager.StartSession().Returns(newSession);
 
-            // Act
-            hub.CaptureException(exception);
-
-            // Assert
-            client.Received(1).CaptureEvent(
-                Arg.Is<SentryEvent>(evt =>
-                    evt.Contexts.Trace.TraceId == transaction.TraceId &&
-                    evt.Contexts.Trace.SpanId == transaction.SpanId),
-                Arg.Any<Scope>()
-            );
-        }
-
-        [Fact]
-        public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
+        var hub = new Hub(new SentryOptions
         {
-            // Arrange
-            var client = Substitute.For<ISentryClient>();
+            Dsn = ValidDsn,
+            Release = "release"
+        }, client, sessionManager);
 
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 0
-            });
+        // Act
+        hub.StartSession();
 
-            var exception = new Exception("error");
+        // Assert
+        client.Received().CaptureSession(Arg.Is(sessionUpdate));
+        client.Received().CaptureSession(Arg.Is(newSession));
+    }
 
-            var transaction = hub.StartTransaction("foo", "bar");
+    [Fact]
+    public void EndSession_CapturesUpdate()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
 
-            hub.ConfigureScope(scope => scope.Transaction = transaction);
-
-            // Act
-            hub.CaptureException(exception);
-
-            // Assert
-            client.Received(1).CaptureEvent(
-                Arg.Is<SentryEvent>(evt =>
-                    evt.Contexts.Trace.TraceId == default &&
-                    evt.Contexts.Trace.SpanId == default),
-                Arg.Any<Scope>()
-            );
-        }
-
-        [Fact]
-        public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
+        var hub = new Hub(new SentryOptions
         {
-            // Arrange
-            var client = Substitute.For<ISentryClient>();
+            Dsn = ValidDsn,
+            Release = "release"
+        }, client);
 
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 1
-            });
+        hub.StartSession();
 
-            // Act
-            hub.CaptureException(new Exception("error"));
+        // Act
+        hub.EndSession();
 
-            // Assert
-            client.Received(1).CaptureEvent(
-                Arg.Is<SentryEvent>(evt =>
-                    evt.Contexts.Trace.TraceId == default &&
-                    evt.Contexts.Trace.SpanId == default),
-                Arg.Any<Scope>()
-            );
-        }
+        // Assert
+        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
+    }
 
-        [Fact]
-        public void StartTransaction_NameOpDescription_Works()
+    [Fact]
+    public void Ctor_AutoSessionTrackingEnabled_StartsSession()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        // Act
+        _ = new Hub(new SentryOptions
         {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
+            Dsn = ValidDsn,
+            AutoSessionTracking = true,
+            Release = "release"
+        }, client);
 
-            // Act
-            var transaction = hub.StartTransaction("name", "operation", "description");
+        // Assert
+        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+    }
 
-            // Assert
-            transaction.Name.Should().Be("name");
-            transaction.Operation.Should().Be("operation");
-            transaction.Description.Should().Be("description");
-        }
+    [Fact]
+    public void Ctor_GlobalModeTrue_DoesNotPushScope()
+    {
+        // Arrange
+        var scopeManager = Substitute.For<IInternalScopeManager>();
 
-        [Fact]
-        public void StartTransaction_FromTraceHeader_CopiesContext()
+        // Act
+        _ = new Hub(new SentryOptions
         {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 1
-            });
+            IsGlobalModeEnabled = true,
+            Dsn = ValidDsn,
+        }, scopeManager: scopeManager);
 
-            var traceHeader = new SentryTraceHeader(
-                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
-                SpanId.Parse("2000000000000000"),
-                true
-            );
+        // Assert
+        scopeManager.DidNotReceiveWithAnyArgs().PushScope();
+    }
 
-            // Act
-            var transaction = hub.StartTransaction("name", "operation", traceHeader);
+    [Fact]
+    public void Ctor_GlobalModeFalse_DoesPushScope()
+    {
+        // Arrange
+        var scopeManager = Substitute.For<IInternalScopeManager>();
 
-            // Assert
-            transaction.TraceId.Should().Be(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"));
-            transaction.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
-            transaction.IsSampled.Should().BeTrue();
-        }
-
-        [Fact]
-        public void StartTransaction_FromTraceHeader_SampledInheritedFromParentRegardlessOfSampleRate()
+        // Act
+        _ = new Hub(new SentryOptions
         {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 0
-            });
+            IsGlobalModeEnabled = false,
+            Dsn = ValidDsn,
+        }, scopeManager: scopeManager);
 
-            var traceHeader = new SentryTraceHeader(
-                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
-                SpanId.Parse("2000000000000000"),
-                true
-            );
+        // Assert
+        scopeManager.Received(1).PushScope();
+    }
 
-            // Act
-            var transaction = hub.StartTransaction("name", "operation", traceHeader);
+    [Fact]
+    public void ResumeSession_WithinAutoTrackingInterval_ContinuesSameSession()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
 
-            // Assert
-            transaction.IsSampled.Should().BeTrue();
-        }
-
-        [Fact]
-        public void StartTransaction_FromTraceHeader_CustomSamplerCanSampleOutTransaction()
+        var hub = new Hub(new SentryOptions
         {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = _ => 0,
-                TracesSampleRate = 1
-            });
+            Dsn = ValidDsn,
+            AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
+        }, client);
 
-            var traceHeader = new SentryTraceHeader(
-                SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
-                SpanId.Parse("2000000000000000"),
-                true
-            );
+        hub.StartSession();
+        hub.PauseSession();
 
-            // Act
-            var transaction = hub.StartTransaction("foo", "bar", traceHeader);
+        // Act
+        hub.ResumeSession();
 
-            // Assert
-            transaction.IsSampled.Should().BeFalse();
-        }
+        // Assert
+        client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+    }
 
-        [Fact]
-        public void StartTransaction_StaticSampling_SampledIn()
+    [Fact]
+    public void ResumeSession_BeyondAutoTrackingInterval_EndsPreviousSessionAndStartsANewOne()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var clock = Substitute.For<ISystemClock>();
+
+        var options = new SentryOptions
         {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 1
-            });
+            Dsn = ValidDsn,
+            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10),
+            Release = "release"
+        };
 
-            // Act
-            var transaction = hub.StartTransaction("name", "operation");
+        var hub = new Hub(
+            options,
+            client,
+            clock: clock,
+            sessionManager: new GlobalSessionManager(options, clock));
 
-            // Assert
-            transaction.IsSampled.Should().BeTrue();
-        }
+        clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
-        [Fact]
-        public void StartTransaction_StaticSampling_SampledOut()
+        hub.StartSession();
+        hub.PauseSession();
+
+        clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+        // Act
+        hub.ResumeSession();
+
+        // Assert
+        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
+        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+    }
+
+    [Fact]
+    public void ResumeSession_NoActiveSession_DoesNothing()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var clock = Substitute.For<ISystemClock>();
+
+        var options = new SentryOptions
         {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 0
-            });
+            Dsn = ValidDsn,
+            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+        };
 
-            // Act
-            var transaction = hub.StartTransaction("name", "operation");
+        var hub = new Hub(
+            options,
+            clock: clock,
+            sessionManager: new GlobalSessionManager(options, clock));
 
-            // Assert
-            transaction.IsSampled.Should().BeFalse();
-        }
+        clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
-        [Fact]
-        public void StartTransaction_StaticSampling_50PercentDistribution()
+        hub.PauseSession();
+
+        clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+
+        // Act
+        hub.ResumeSession();
+
+        // Assert
+        client.DidNotReceive().CaptureSession(Arg.Any<SessionUpdate>());
+    }
+
+    [Fact]
+    public void ResumeSession_NoPausedSession_DoesNothing()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var clock = Substitute.For<ISystemClock>();
+
+        var options = new SentryOptions
         {
-            // 15% deviation is ok
-            const double allowedRelativeDeviation = 0.15;
+            Dsn = ValidDsn,
+            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
+        };
 
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 0.5
-            });
+        var hub = new Hub(
+            options,
+            clock: clock,
+            sessionManager: new GlobalSessionManager(options, clock));
 
-            // Act
-            var transactions = Enumerable
-                .Range(0, 1_000)
-                .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
-                .ToArray();
+        clock.GetUtcNow().Returns(DateTimeOffset.Now);
 
-            var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
-            var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
+        hub.StartSession();
 
-            // Assert
-            transactionsSampledIn.Length.Should().BeCloseTo(
-                (int)(0.5 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
+        clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
 
-            transactionsSampledOut.Length.Should().BeCloseTo(
-                (int)(0.5 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
-        }
+        // Act
+        hub.ResumeSession();
 
-        [Fact]
-        public void StartTransaction_StaticSampling_25PercentDistribution()
+        // Assert
+        client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+    }
+
+    [Theory]
+    [InlineData(SentryLevel.Warning)]
+    [InlineData(SentryLevel.Info)]
+    [InlineData(SentryLevel.Debug)]
+    [InlineData(SentryLevel.Error)]
+    [InlineData(SentryLevel.Fatal)]
+    public void CaptureEvent_MessageOnlyEvent_SpanLinkedToEventContext(SentryLevel level)
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions
         {
-            // 15% deviation is ok
-            const double allowedRelativeDeviation = 0.15;
-
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 0.25
-            });
-
-            // Act
-            var transactions = Enumerable
-                .Range(0, 1_000)
-                .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
-                .ToArray();
-
-            var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
-            var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
-
-            // Assert
-            transactionsSampledIn.Length.Should().BeCloseTo(
-                (int)(0.25 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
-
-            transactionsSampledOut.Length.Should().BeCloseTo(
-                (int)(0.75 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
-        }
-
-        [Fact]
-        public void StartTransaction_StaticSampling_75PercentDistribution()
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        }, client);
+        var scope = new Scope();
+        var evt = new SentryEvent
         {
-            // 15% deviation is ok
-            const double allowedRelativeDeviation = 0.15;
+            Message = "Logger error",
+            Level = level
+        };
+        scope.Transaction = hub.StartTransaction("transaction", "operation");
 
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampleRate = 0.75
-            });
+        var child = scope.Transaction.StartChild("child", "child");
 
-            // Act
-            var transactions = Enumerable
-                .Range(0, 1_000)
-                .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
-                .ToArray();
+        // Act
+        hub.CaptureEvent(evt, scope);
 
-            var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
-            var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
-
-            // Assert
-            transactionsSampledIn.Length.Should().BeCloseTo(
-                (int)(0.75 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
-
-            transactionsSampledOut.Length.Should().BeCloseTo(
-                (int)(0.25 * transactions.Length),
-                (uint)(allowedRelativeDeviation * transactions.Length)
-            );
-        }
-
-        [Fact]
-        public void StartTransaction_DynamicSampling_SampledIn()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
-            });
-
-            // Act
-            var transaction = hub.StartTransaction("foo", "op");
-
-            // Assert
-            transaction.IsSampled.Should().BeTrue();
-        }
-
-        [Fact]
-        public void StartTransaction_DynamicSampling_SampledOut()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
-            });
-
-            // Act
-            var transaction = hub.StartTransaction("bar", "op");
-
-            // Assert
-            transaction.IsSampled.Should().BeFalse();
-        }
-
-        [Fact]
-        public void StartTransaction_DynamicSampling_WithCustomContext_SampledIn()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
-            });
-
-            // Act
-            var transaction = hub.StartTransaction(
-                new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "zzz"}
-            );
-
-            // Assert
-            transaction.IsSampled.Should().BeTrue();
-        }
-
-        [Fact]
-        public void StartTransaction_DynamicSampling_WithCustomContext_SampledOut()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
-            });
-
-            // Act
-            var transaction = hub.StartTransaction(
-                new TransactionContext("foo", "op"),
-                new Dictionary<string, object> {["xxx"] = "yyy"}
-            );
-
-            // Assert
-            transaction.IsSampled.Should().BeFalse();
-        }
-
-        [Fact]
-        public void StartTransaction_DynamicSampling_FallbackToStatic_SampledIn()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = _ => null,
-                TracesSampleRate = 1
-            });
-
-            // Act
-            var transaction = hub.StartTransaction("foo", "bar");
-
-            // Assert
-            transaction.IsSampled.Should().BeTrue();
-        }
-
-        [Fact]
-        public void StartTransaction_DynamicSampling_FallbackToStatic_SampledOut()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                TracesSampler = _ => null,
-                TracesSampleRate = 0
-            });
-
-            // Act
-            var transaction = hub.StartTransaction("foo", "bar");
-
-            // Assert
-            transaction.IsSampled.Should().BeFalse();
-        }
-
-        [Fact]
-        public void GetTraceHeader_ReturnsHeaderForActiveSpan()
-        {
-            // Arrange
-            var hub = new Hub(new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
-
-            var transaction = hub.StartTransaction("foo", "bar");
-
-            // Act
-            hub.WithScope(scope =>
-            {
-                scope.Transaction = transaction;
-
-                var header = hub.GetTraceHeader();
-
-                // Assert
-                header.Should().NotBeNull();
-                header?.SpanId.Should().Be(transaction.SpanId);
-                header?.TraceId.Should().Be(transaction.TraceId);
-                header?.IsSampled.Should().Be(transaction.IsSampled);
-            });
-        }
-
-        [Fact]
-        public void CaptureTransaction_AfterTransactionFinishes_ResetsTransactionOnScope()
-        {
-            // Arrange
-            var client = Substitute.For<ISentryClient>();
-
-            var hub = new Hub(client, new SentryOptions
-            {
-                Dsn = DsnSamples.ValidDsnWithSecret
-            });
-
-            var transaction = hub.StartTransaction("foo", "bar");
-
-            hub.WithScope(scope => scope.Transaction = transaction);
-
-            // Act
-            transaction.Finish();
-
-            // Assert
-            hub.WithScope(scope => scope.Transaction.Should().BeNull());
-        }
+        // Assert
+        Assert.Equal(child.SpanId, evt.Contexts.Trace.SpanId);
+        Assert.Equal(child.TraceId, evt.Contexts.Trace.TraceId);
+        Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
+        Assert.False(child.IsFinished);
+        Assert.Null(child.Status);
     }
 }

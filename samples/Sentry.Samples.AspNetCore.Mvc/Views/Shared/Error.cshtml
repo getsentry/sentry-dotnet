@@ -1,4 +1,8 @@
-﻿@model Samples.AspNetCore.Mvc.Models.ErrorViewModel
+﻿@using Sentry
+@using Sentry.AspNetCore
+@inject Microsoft.Extensions.Options.IOptions<SentryAspNetCoreOptions> SentryOptions
+
+@model Samples.AspNetCore.Mvc.Models.ErrorViewModel
 @{
     ViewData["Title"] = "Error";
 }
@@ -9,14 +13,24 @@
 @if (Model.ShowRequestId)
 {
     <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        <strong>Request ID:</strong> <code>@Model.RequestId</code><br/>
+        <strong>Sentry Event ID: <code>@SentrySdk.LastEventId</code></strong>
     </p>
 }
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>Development environment should not be enabled in deployed applications</strong>, as it can result in sensitive information from exceptions being displayed to end users. For local debugging, development environment can be enabled by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>, and restarting the application.
-</p>
+@if (SentrySdk.LastEventId != SentryId.Empty)
+{
+    <script
+        src="https://browser.sentry-cdn.com/6.19.4/bundle.min.js"
+        integrity="sha384-l+UQ7KbPIcq6l4DoWCwMvaOJ0pdJ+oTVGD6GyROFzSriOH1F1f6dl90fOgcigkMX"
+        crossorigin="anonymous"></script>
+    <script>
+        Sentry.init({
+          dsn: "@(SentryOptions.Value.Dsn)",
+          tunnel: "/tunnel"
+        });
+        Sentry.showReportDialog({
+            eventId: "@SentrySdk.LastEventId",
+            subtitle2: "Event ID: @SentrySdk.LastEventId"
+        });
+    </script>
+}

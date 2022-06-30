@@ -1,40 +1,42 @@
-using System.Collections.Generic;
-using Sentry.Protocol;
-using Sentry.Tests.Helpers;
-using Xunit;
+using Sentry.Testing;
 
-namespace Sentry.Tests.Protocol
+namespace Sentry.Tests.Protocol;
+
+public class PackageTests
 {
-    public class PackageTests
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public PackageTests(ITestOutputHelper output)
     {
-        [Fact]
-        public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
-        {
-            var sut = new Package("nuget:Sentry", "1.0.0-preview");
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
 
-            var actual = sut.ToJsonString();
+    [Fact]
+    public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
+    {
+        var sut = new Package("nuget:Sentry", "1.0.0-preview");
 
-            Assert.Equal(
-                "{\"name\":\"nuget:Sentry\"," +
-                "\"version\":\"1.0.0-preview\"}",
-                actual
-            );
-        }
+        var actual = sut.ToJsonString(_testOutputLogger);
 
-        [Theory]
-        [MemberData(nameof(TestCases))]
-        public void SerializeObject_TestCase_SerializesAsExpected((Package msg, string serialized) @case)
-        {
-            var actual = @case.msg.ToJsonString();
+        Assert.Equal(
+            "{\"name\":\"nuget:Sentry\"," +
+            "\"version\":\"1.0.0-preview\"}",
+            actual);
+    }
 
-            Assert.Equal(@case.serialized, actual);
-        }
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void SerializeObject_TestCase_SerializesAsExpected((Package msg, string serialized) @case)
+    {
+        var actual = @case.msg.ToJsonString(_testOutputLogger);
 
-        public static IEnumerable<object[]> TestCases()
-        {
-            yield return new object[] { (new Package(null, null), "{}") };
-            yield return new object[] { (new Package("nuget:Sentry", null), "{\"name\":\"nuget:Sentry\"}") };
-            yield return new object[] { (new Package(null, "0.0.0-alpha"), "{\"version\":\"0.0.0-alpha\"}") };
-        }
+        Assert.Equal(@case.serialized, actual);
+    }
+
+    public static IEnumerable<object[]> TestCases()
+    {
+        yield return new object[] { (new Package(null, null), "{}") };
+        yield return new object[] { (new Package("nuget:Sentry", null), "{\"name\":\"nuget:Sentry\"}") };
+        yield return new object[] { (new Package(null, "0.0.0-alpha"), "{\"version\":\"0.0.0-alpha\"}") };
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Sentry.PlatformAbstractions
 {
@@ -21,13 +21,19 @@ namespace Sentry.PlatformAbstractions
             runtime ??= GetFromMonoRuntime();
 
             runtime ??= GetFromEnvironmentVariable();
+            return runtime;
+        }
 
-#if NETFX
+        internal static void SetAdditionalParameters(Runtime runtime)
+        {
+#if NET461
             SetNetFxReleaseAndVersion(runtime);
-#elif NETSTANDARD || NETCOREAPP // Possibly .NET Core
+#else
             SetNetCoreVersion(runtime);
 #endif
-            return runtime;
+#if NET5_0_OR_GREATER
+            SetRuntimeIdentifier(runtime);
+#endif
         }
 
         internal static Runtime? Parse(string rawRuntimeDescription, string? name = null)
@@ -45,14 +51,13 @@ namespace Sentry.PlatformAbstractions
                 return new Runtime(
                     name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                     match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
-                    raw: rawRuntimeDescription
-                );
+                    raw: rawRuntimeDescription);
             }
 
             return new Runtime(name, raw: rawRuntimeDescription);
         }
 
-#if NETFX
+#if NET461
         internal static void SetNetFxReleaseAndVersion(Runtime runtime)
         {
             if (runtime?.IsNetFx() == true)
@@ -75,7 +80,7 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
-#if NETSTANDARD || NETCOREAPP // Possibly .NET Core
+#if !NET461
         // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
         internal static void SetNetCoreVersion(Runtime runtime)
         {
@@ -98,13 +103,36 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
+#if NET5_0_OR_GREATER
+        internal static void SetRuntimeIdentifier(Runtime runtime)
+        {
+            try
+            {
+                runtime.Identifier = RuntimeInformation.RuntimeIdentifier;
+            }
+            catch
+            {
+                return;
+            }
+        }
+#endif
+
         internal static Runtime? GetFromRuntimeInformation()
         {
-            // Prefered API: netstandard2.0
-            // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
-            // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs
-            // e.g: .NET Framework 4.7.2633.0, .NET Native, WebAssembly
-            var frameworkDescription = RuntimeInformation.FrameworkDescription;
+            string frameworkDescription;
+            try
+            {
+                // Preferred API: netstandard2.0
+                // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
+                // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs
+                // e.g: .NET Framework 4.7.2633.0, .NET Native, WebAssembly
+                // Note: this throws on some Unity IL2CPP versions
+                frameworkDescription = RuntimeInformation.FrameworkDescription;
+            }
+            catch
+            {
+                return null;
+            }
 
             return Parse(frameworkDescription);
         }

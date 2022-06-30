@@ -66,6 +66,8 @@ namespace Sentry.Extensibility
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
         /// </summary>
+        [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+                  "that provide a callback to a configurable scope.")]
         [DebuggerStepThrough]
         public void WithScope(Action<Scope> scopeCallback)
             => SentrySdk.WithScope(scopeCallback);
@@ -99,6 +101,34 @@ namespace Sentry.Extensibility
         [DebuggerStepThrough]
         public SentryTraceHeader? GetTraceHeader()
             => SentrySdk.GetTraceHeader();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public void StartSession()
+            => SentrySdk.StartSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public void PauseSession()
+            => SentrySdk.PauseSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public void ResumeSession()
+            => SentrySdk.ResumeSession();
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+            => SentrySdk.EndSession(status);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>.
@@ -166,8 +196,24 @@ namespace Sentry.Extensibility
         /// </summary>
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+            => SentrySdk.CaptureEvent(evt, configureScope);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void CaptureTransaction(Transaction transaction)
             => SentrySdk.CaptureTransaction(transaction);
+
+        /// <summary>
+        /// Forwards the call to <see cref="SentrySdk"/>.
+        /// </summary>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void CaptureSession(SessionUpdate sessionUpdate)
+            => SentrySdk.CaptureSession(sessionUpdate);
 
         /// <summary>
         /// Forwards the call to <see cref="SentrySdk"/>

@@ -12,7 +12,18 @@ namespace Sentry.PlatformAbstractions
         /// <value>
         /// The current runtime.
         /// </value>
-        public static Runtime Current => _runtime ??= RuntimeInfo.GetRuntime();
+        public static Runtime Current
+        {
+            get
+            {
+                if (_runtime is null)
+                {
+                    _runtime = RuntimeInfo.GetRuntime();
+                    RuntimeInfo.SetAdditionalParameters(_runtime);
+                }
+                return _runtime;
+            }
+        }
         /// <summary>
         /// The name of the runtime
         /// </summary>
@@ -27,7 +38,7 @@ namespace Sentry.PlatformAbstractions
         /// 4.7.2633.0
         /// </example>
         public string? Version { get; internal set; }
-#if NETFX
+#if NET461
         /// <summary>
         /// The .NET Framework installation which is running the process
         /// </summary>
@@ -46,19 +57,27 @@ namespace Sentry.PlatformAbstractions
         public string? Raw { get; }
 
         /// <summary>
+        /// The .NET Runtime Identifier of the runtime
+        /// </summary>
+        /// <remarks>
+        /// This property will be populated for .NET 5 and newer, or <c>null</c> otherwise.
+        /// </remarks>
+        public string? Identifier { get; set; }
+
+        /// <summary>
         /// Creates a new Runtime instance
         /// </summary>
         public Runtime(
             string? name = null,
             string? version = null,
-            #if NETFX
+#if NET461
             FrameworkInstallation? frameworkInstallation = null,
-            #endif
+#endif
             string? raw = null)
         {
             Name = name;
             Version = version;
-#if NETFX
+#if NET461
             FrameworkInstallation = frameworkInstallation;
 #endif
             Raw = raw;
@@ -91,11 +110,13 @@ namespace Sentry.PlatformAbstractions
         /// <returns>True if the instances are equal by reference or its state.</returns>
         public bool Equals(Runtime other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
             return string.Equals(Name, other.Name)
                    && string.Equals(Version, other.Version)
-#if NETFX
+#if NET461
                    && Equals(FrameworkInstallation, other.FrameworkInstallation)
 #endif
                    && string.Equals(Raw, other.Raw);
@@ -108,10 +129,13 @@ namespace Sentry.PlatformAbstractions
         /// <returns>True if the instances are equal by reference or its state.</returns>
         public override bool Equals(object? obj)
         {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Runtime) obj);
+            if (obj is null)
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != GetType())
+                return false;
+            return Equals((Runtime)obj);
         }
 
         /// <summary>
@@ -124,7 +148,7 @@ namespace Sentry.PlatformAbstractions
             {
                 var hashCode = Name != null ? Name.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (Version != null ? Version.GetHashCode() : 0);
-#if NETFX
+#if NET461
                 hashCode = (hashCode * 397) ^ (FrameworkInstallation != null ? FrameworkInstallation.GetHashCode() : 0);
 #endif
                 hashCode = (hashCode * 397) ^ (Raw != null ? Raw.GetHashCode() : 0);

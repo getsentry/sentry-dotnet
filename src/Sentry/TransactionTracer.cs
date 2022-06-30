@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -11,6 +12,7 @@ namespace Sentry
     public class TransactionTracer : ITransaction
     {
         private readonly IHub _hub;
+        private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
         /// <inheritdoc />
         public SpanId SpanId
@@ -39,6 +41,9 @@ namespace Sentry
         /// <inheritdoc cref="ITransaction.Name" />
         public string Name { get; set; }
 
+        /// <inheritdoc cref="ITransaction.IsParentSampled" />
+        public bool? IsParentSampled { get; set; }
+
         /// <inheritdoc />
         public string? Platform { get; set; } = Constants.Platform;
 
@@ -46,7 +51,7 @@ namespace Sentry
         public string? Release { get; set; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; internal set; }
@@ -87,13 +92,13 @@ namespace Sentry
             set => _request = value;
         }
 
-        private Contexts? _contexts;
+        private readonly Contexts _contexts = new();
 
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ??= new Contexts();
-            set => _contexts = value;
+            get => _contexts;
+            set => _contexts.ReplaceWith(value);
         }
 
         private User? _user;
@@ -166,8 +171,10 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public TransactionTracer(IHub hub, ITransactionContext context)
-            : this(hub, context.Name, context.Operation)
         {
+            _hub = hub;
+            Name = context.Name;
+            Operation = context.Operation;
             SpanId = context.SpanId;
             ParentSpanId = context.ParentSpanId;
             TraceId = context.TraceId;
@@ -219,19 +226,22 @@ namespace Sentry
         /// <inheritdoc />
         public void Finish()
         {
-            try
-            {
-                Status ??= SpanStatus.UnknownError;
-                EndTimestamp = DateTimeOffset.UtcNow;
+            Status ??= SpanStatus.UnknownError;
+            EndTimestamp = _stopwatch.CurrentDateTimeOffset;
 
-                // Client decides whether to discard this transaction based on sampling
-                _hub.CaptureTransaction(new Transaction(this));
-            }
-            finally
+            foreach (var span in _spans)
             {
-                // Clear the transaction from the scope
-                _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+                if (!span.IsFinished)
+                {
+                    span.Finish(SpanStatus.DeadlineExceeded);
+                }
             }
+
+            // Clear the transaction from the scope
+            _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+
+            // Client decides whether to discard this transaction based on sampling
+            _hub.CaptureTransaction(new Transaction(this));
         }
 
         /// <inheritdoc />
@@ -253,13 +263,14 @@ namespace Sentry
             Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
-        public ISpan? GetLastActiveSpan() => Spans.LastOrDefault(s => !s.IsFinished);
+        public ISpan? GetLastActiveSpan() =>
+            // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
+            Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
         /// <inheritdoc />
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
     }
 }

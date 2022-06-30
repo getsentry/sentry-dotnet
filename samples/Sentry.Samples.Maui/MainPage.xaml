@@ -1,28 +1,55 @@
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Sentry.Samples.Maui.MainPage"
-             BackgroundColor="White">
+             x:Class="Sentry.Samples.Maui.MainPage">
 
-    <StackLayout Padding="{OnPlatform iOS='30,60,30,30', Default='30'}">
+    <ScrollView>
+        <VerticalStackLayout
+            Spacing="25"
+            Padding="30,0"
+            VerticalOptions="Center">
 
-        <Label Text="Welcome to"
-               FontSize="32"
-               TextColor="Black"
-               HorizontalOptions="Center" />
-        <Label Text=".NET Multi-platform App UI"
-               FontSize="24"
-               TextColor="Black"
-               HorizontalOptions="Center" />
+            <Image
+                Source="dotnet_bot.png"
+                SemanticProperties.Description="Cute dot net bot waving hi to you!"
+                HeightRequest="200"
+                HorizontalOptions="Center" />
 
-        <Button Text="Click Me!"
-                HorizontalOptions="Center"
-                Clicked="OnButtonClicked"/>
-        <Label x:Name="CountLabel"
-               Text="Click the button above!"
-               FontSize="20"
-               TextColor="Black"
-               HorizontalOptions="Center" />
+            <Label
+                Text="Hello, World!"
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="32"
+                HorizontalOptions="Center" />
 
-    </StackLayout>
+            <Label
+                Text="Welcome to .NET Multi-platform App UI"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Welcome to dot net Multi platform App U I"
+                FontSize="18"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="CounterBtn"
+                Text="Click me"
+                SemanticProperties.Hint="Counts the number of times you click"
+                Clicked="OnCounterClicked"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="ExceptionBtn1"
+                Text="Throw Unhandled Exception (Crash)"
+                SemanticProperties.Hint="Throws an unhandled exception, crashing the app"
+                Clicked="OnUnhandledExceptionClicked"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="ExceptionBtn2"
+                Text="Throw and Capture Exception"
+                SemanticProperties.Hint="Throws an exception and captures it"
+                Clicked="OnCapturedExceptionClicked"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

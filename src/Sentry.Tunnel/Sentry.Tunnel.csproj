@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
+    <PackageTags>$(PackageTags);Sentry Proxy;Envelopes</PackageTags>
+    <Description>This package is obsolete.  The functionality has been incorporated into Sentry.AspNetCore.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-#if NETFX
+#if NET461
 using Microsoft.Win32;
 
 namespace Sentry.PlatformAbstractions

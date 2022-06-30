@@ -1,71 +1,71 @@
-using System;
-using System.Collections.Generic;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Sentry.Tests.Helpers;
-using Xunit;
+using Sentry.Testing;
 
-namespace Sentry.Tests.Protocol
+namespace Sentry.Tests.Protocol;
+
+public class BreadcrumbTests : ImmutableTests<Breadcrumb>
 {
-    public class BreadcrumbTests : ImmutableTests<Breadcrumb>
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public BreadcrumbTests(ITestOutputHelper output)
     {
-        [Fact]
-        public void SerializeObject_ParameterlessConstructor_IncludesTimestamp()
-        {
-            var sut = new Breadcrumb("test", "unit");
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
 
-            var actualJson = sut.ToJsonString();
-            var actual = Breadcrumb.FromJson(Json.Parse(actualJson));
+    [Fact]
+    public void SerializeObject_ParameterlessConstructor_IncludesTimestamp()
+    {
+        var sut = new Breadcrumb("test", "unit");
 
-            Assert.NotEqual(default, actual.Timestamp);
-        }
+        var actualJson = sut.ToJsonString(_testOutputLogger);
+        var actual = Json.Parse(actualJson, Breadcrumb.FromJson);
 
-        [Fact]
-        public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
-        {
-            var sut =  new Breadcrumb(
-                DateTimeOffset.MaxValue,
-                "message1",
-                "type1",
-                new Dictionary<string, string> { {"key", "val"} },
-                "category1",
-                BreadcrumbLevel.Warning);
+        Assert.NotEqual(default, actual.Timestamp);
+    }
 
-            var actual = sut.ToJsonString();
+    [Fact]
+    public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
+    {
+        var sut = new Breadcrumb(
+            DateTimeOffset.MaxValue,
+            "message1",
+            "type1",
+            new Dictionary<string, string> { { "key", "val" } },
+            "category1",
+            BreadcrumbLevel.Warning);
 
-            Assert.Equal(
-                "{\"timestamp\":\"9999-12-31T23:59:59.999Z\"," +
-                "\"message\":\"message1\"," +
-                "\"type\":\"type1\"," +
-                "\"data\":{\"key\":\"val\"}," +
-                "\"category\":\"category1\"," +
-                "\"level\":\"warning\"}",
-                actual
-            );
-        }
+        var actual = sut.ToJsonString(_testOutputLogger);
 
-        [Theory]
-        [MemberData(nameof(TestCases))]
-        public void SerializeObject_TestCase_SerializesAsExpected((Breadcrumb breadcrumb, string serialized) @case)
-        {
-            var actual = @case.breadcrumb.ToJsonString();
+        Assert.Equal(
+            "{\"timestamp\":\"9999-12-31T23:59:59.999Z\"," +
+            "\"message\":\"message1\"," +
+            "\"type\":\"type1\"," +
+            "\"data\":{\"key\":\"val\"}," +
+            "\"category\":\"category1\"," +
+            "\"level\":\"warning\"}",
+            actual);
+    }
 
-            Assert.Equal(@case.serialized, actual);
-        }
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void SerializeObject_TestCase_SerializesAsExpected((Breadcrumb breadcrumb, string serialized) @case)
+    {
+        var actual = @case.breadcrumb.ToJsonString(_testOutputLogger);
 
-        public static IEnumerable<object[]> TestCases()
-        {
-            // Timestamp is included in every breadcrumb
-            var expectedTimestamp = DateTimeOffset.MaxValue;
-            var expectedTimestampString = "9999-12-31T23:59:59.999Z";
-            var timestampString = $"\"timestamp\":\"{expectedTimestampString}\"";
+        Assert.Equal(@case.serialized, actual);
+    }
 
-            yield return new object[] { (new Breadcrumb (expectedTimestamp), $"{{{timestampString}}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, "message"), $"{{{timestampString},\"message\":\"message\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, type: "type"), $"{{{timestampString},\"type\":\"type\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, data: new Dictionary<string, string> { { "key", "val" }}), $"{{{timestampString},\"data\":{{\"key\":\"val\"}}}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, category: "category"), $"{{{timestampString},\"category\":\"category\"}}") };
-            yield return new object[] { (new Breadcrumb (expectedTimestamp, level: BreadcrumbLevel.Critical), $"{{{timestampString},\"level\":\"critical\"}}") };
-        }
+    public static IEnumerable<object[]> TestCases()
+    {
+        // Timestamp is included in every breadcrumb
+        var expectedTimestamp = DateTimeOffset.MaxValue;
+        var expectedTimestampString = "9999-12-31T23:59:59.999Z";
+        var timestampString = $"\"timestamp\":\"{expectedTimestampString}\"";
+
+        yield return new object[] { (new Breadcrumb(expectedTimestamp), $"{{{timestampString}}}") };
+        yield return new object[] { (new Breadcrumb(expectedTimestamp, "message"), $"{{{timestampString},\"message\":\"message\"}}") };
+        yield return new object[] { (new Breadcrumb(expectedTimestamp, type: "type"), $"{{{timestampString},\"type\":\"type\"}}") };
+        yield return new object[] { (new Breadcrumb(expectedTimestamp, data: new Dictionary<string, string> { { "key", "val" } }), $"{{{timestampString},\"data\":{{\"key\":\"val\"}}}}") };
+        yield return new object[] { (new Breadcrumb(expectedTimestamp, category: "category"), $"{{{timestampString},\"category\":\"category\"}}") };
+        yield return new object[] { (new Breadcrumb(expectedTimestamp, level: BreadcrumbLevel.Critical), $"{{{timestampString},\"level\":\"critical\"}}") };
     }
 }

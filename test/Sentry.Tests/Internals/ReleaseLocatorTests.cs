@@ -1,52 +1,43 @@
 using System.Reflection;
-using Sentry.Internal;
-#if NET461
-using Sentry.PlatformAbstractions;
-#endif
-using Sentry.Reflection;
 using Sentry.Testing;
-using Xunit;
 
-namespace Sentry.Tests.Internals
+namespace Sentry.Tests.Internals;
+
+public class ReleaseLocatorTests
 {
-    public class ReleaseLocatorTests
+    [Fact]
+    public void ResolveFromEnvironment_WithEnvironmentVariable_VersionOfEnvironmentVariable()
     {
-        [Fact]
-        public void GetCurrent_WithEnvironmentVariable_VersionOfEnvironmentVariable()
-        {
-            const string expectedVersion = "the version";
-            EnvironmentVariableGuard.WithVariable(
-                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
-                expectedVersion,
-                () =>
-                {
-                    Assert.Equal(expectedVersion, ReleaseLocator.GetCurrent());
-                });
-        }
-
+        const string expectedVersion = "the version";
+        EnvironmentVariableGuard.WithVariable(
+            Internal.Constants.ReleaseEnvironmentVariable,
+            expectedVersion,
+            () =>
+            {
+                Assert.Equal(expectedVersion, ReleaseLocator.LocateFromEnvironment());
+            });
+    }
 
 #if NET461
-        [SkippableFact]
+    [SkippableFact]
 #else
-        [Fact]
+    [Fact]
 #endif
-        public void GetCurrent_WithoutEnvironmentVariable_VersionOfEntryAssembly()
-        {
+    public void ResolveFromEnvironment_WithoutEnvironmentVariable_VersionOfEntryAssembly()
+    {
+        var ass = Assembly.GetEntryAssembly();
 #if NET461
-            Skip.If(Runtime.Current.IsMono(), "GetEntryAssembly returning null on Mono.");
+        Skip.If(ass == null, "GetEntryAssembly can return null on net461. eg on Mono or in certain test runners.");
 #endif
-            var ass = Assembly.GetEntryAssembly();
 
-            EnvironmentVariableGuard.WithVariable(
-                Sentry.Internal.Constants.ReleaseEnvironmentVariable,
-                null,
-                () =>
-                {
-                    Assert.Equal(
-                        $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
-                        ReleaseLocator.GetCurrent()
-                    );
-                });
-        }
+        EnvironmentVariableGuard.WithVariable(
+            Internal.Constants.ReleaseEnvironmentVariable,
+            null,
+            () =>
+            {
+                Assert.Equal(
+                    $"{ass!.GetName().Name}@{ass!.GetNameAndVersion().Version}",
+                    ReleaseLocator.LocateFromEnvironment());
+            });
     }
 }

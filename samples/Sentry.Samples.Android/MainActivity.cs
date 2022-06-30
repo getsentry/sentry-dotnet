@@ -8,6 +8,7 @@ using Microsoft.DotNet.XHarness.DefaultAndroidEntryPoint.Xunit;
 using Microsoft.DotNet.XHarness.TestRunners.Common;
 using Sentry.Protocol.Tests.Context;
 using Sentry.Tests;
+using Sentry.Samples.Android.Kotlin;
 
 namespace Sentry.Samples.Android
 {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
@@ -8,25 +9,58 @@ using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
-using static Sentry.Internal.Constants;
+using Sentry.Internal.Http;
+using Sentry.Internal.ScopeStack;
 using static Sentry.Constants;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
+#if HAS_DIAGNOSTIC_INTEGRATION
+using Sentry.Internals.DiagnosticSource;
+#endif
 
 namespace Sentry
 {
     /// <summary>
     /// Sentry SDK options
     /// </summary>
-    public class SentryOptions
+    public partial class SentryOptions
     {
         private Dictionary<string, string>? _defaultTags;
 
-        // Override for tests
-        internal ITransport? Transport { get; set; }
+        internal IScopeStackContainer? ScopeStackContainer { get; set; }
+
+        /// <summary>
+        /// Specifies whether to use global scope management mode.
+        /// </summary>
+        public bool IsGlobalModeEnabled
+        {
+            get => ScopeStackContainer is GlobalScopeStackContainer;
+            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
+        }
+
+        /// <summary>
+        /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
+        /// NOTE: EnableScopeSync must be set true for the scope to be synced.
+        /// </summary>
+        public IScopeObserver? ScopeObserver { get; set; }
+
+        /// <summary>
+        /// If true, the SDK's scope will be synced with the observed scope.
+        /// </summary>
+        public bool EnableScopeSync { get; set; }
+
+        /// <summary>
+        /// This holds a reference to the current transport, when one is active.
+        /// If set manually before initialization, the provided transport will be used instead of the default transport.
+        /// </summary>
+        /// <remarks>
+        /// If <seealso cref="CacheDirectoryPath"/> is set, any transport set here will be wrapped in a
+        /// <seealso cref="CachingTransport"/> and used as its inner transport.
+        /// </remarks>
+        public ITransport? Transport { get; set; }
+
+        internal IClientReportRecorder ClientReportRecorder { get; set; }
 
         internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
-
-        internal string ClientVersion { get; } = SdkName;
 
         internal int SentryVersion { get; } = ProtocolVersion;
 
@@ -57,7 +91,10 @@ namespace Sentry
 
         internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
 
-        internal IBackgroundWorker? BackgroundWorker { get; set; }
+        /// <summary>
+        /// The worker used by the client to pass envelopes.
+        /// </summary>
+        public IBackgroundWorker? BackgroundWorker { get; set; }
 
         internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
@@ -107,7 +144,7 @@ namespace Sentry
         /// Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event.
         /// </summary>
         /// <remarks>
-        /// This configuration is only relevant is <see cref="SendDefaultPii"/> is set to true.
+        /// This configuration is only relevant if <see cref="SendDefaultPii"/> is set to true.
         /// In environments like server applications this is set to false in order to not report server account names as user names.
         /// </remarks>
         public bool IsEnvironmentUser { get; set; } = true;
@@ -180,7 +217,7 @@ namespace Sentry
         /// <remarks>
         /// This value will generally be something along the lines of the git SHA for the given project.
         /// If not explicitly defined via configuration or environment variable (SENTRY_RELEASE).
-        /// It will attempt o read it from:
+        /// It will attempt to read it from:
         /// <see cref="System.Reflection.AssemblyInformationalVersionAttribute"/>
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
@@ -305,6 +342,12 @@ namespace Sentry
         public bool RequestBodyCompressionBuffered { get; set; } = true;
 
         /// <summary>
+        /// Whether to send client reports, which contain statistics about discarded events.
+        /// </summary>
+        /// <see href="https://develop.sentry.dev/sdk/client-reports/"/>
+        public bool SendClientReports { get; set; } = true;
+
+        /// <summary>
         /// An optional web proxy
         /// </summary>
         public IWebProxy? HttpProxy { get; set; }
@@ -372,7 +415,18 @@ namespace Sentry
         /// <summary>
         /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
         /// </summary>
-        public bool ReportAssemblies { get; set; } = true;
+        [Obsolete("Use ReportAssembliesMode instead", error: false)]
+        public bool ReportAssemblies
+        {
+            // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode
+            get => ReportAssembliesMode != ReportAssembliesMode.None;
+            set => ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None;
+        }
+
+        /// <summary>
+        /// What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/>.
+        /// </summary>
+        public ReportAssembliesMode ReportAssembliesMode { get; set; } = ReportAssembliesMode.Version;
 
         /// <summary>
         /// What modes to use for event automatic deduplication
@@ -390,7 +444,7 @@ namespace Sentry
 
         /// <summary>
         /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
-        /// You can set it to <code>TimeSpan.Zero</code> to disable this feature.
+        /// Set to <see cref="TimeSpan.Zero"/> to disable this feature.
         /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
         /// </summary>
         /// <remarks>
@@ -412,10 +466,10 @@ namespace Sentry
 
         /// <summary>
         /// Indicates the percentage of the tracing data that is collected.
-        /// Setting this to <code>0</code> discards all trace data.
-        /// Setting this to <code>1.0</code> collects all trace data.
+        /// Setting this to <c>0</c> discards all trace data.
+        /// Setting this to <c>1.0</c> collects all trace data.
         /// Values outside of this range are invalid.
-        /// Default value is <code>0</code>, which means tracing is disabled.
+        /// Default value is <c>0</c>, which means tracing is disabled.
         /// </summary>
         /// <remarks>
         /// Random sampling rate is only applied to transactions that don't already
@@ -430,8 +484,7 @@ namespace Sentry
                 if (value < 0 || value > 1)
                 {
                     throw new InvalidOperationException(
-                        $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1."
-                    );
+                        $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1.");
                 }
 
                 _tracesSampleRate = value;
@@ -442,13 +495,15 @@ namespace Sentry
         /// Custom delegate that returns sample rate dynamically for a specific transaction context.
         /// </summary>
         /// <remarks>
-        /// Returning <code>null</code> signals that the sampler did not reach a sampling decision.
+        /// Returning <c>null</c> signals that the sampler did not reach a sampling decision.
         /// In such case, if the transaction already has a sampling decision (for example, if it's
         /// started from a trace header) that decision is retained.
         /// Otherwise sampling decision is determined by applying the static sampling rate
         /// set in <see cref="TracesSampleRate"/>.
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
+
+        private StackTraceMode? _stackTraceMode;
 
         /// <summary>
         /// ATTENTION: This option will change how issues are grouped in Sentry!
@@ -457,7 +512,33 @@ namespace Sentry
         /// Sentry groups events by stack traces. If you change this mode and you have thousands of groups,
         /// you'll get thousands of new groups. So use this setting with care.
         /// </remarks>
-        public StackTraceMode StackTraceMode { get; set; }
+        public StackTraceMode StackTraceMode
+        {
+            get
+            {
+                if (_stackTraceMode is not null)
+                {
+                    return _stackTraceMode.Value;
+                }
+
+                try
+                {
+                    // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
+                    // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
+                    _stackTraceMode = Runtime.Current.Name == ".NET Native"
+                        ? StackTraceMode.Original
+                        : StackTraceMode.Enhanced;
+                }
+                catch (Exception ex)
+                {
+                    _stackTraceMode = StackTraceMode.Enhanced;
+                    DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
+                }
+
+                return _stackTraceMode.Value;
+            }
+            set => _stackTraceMode = value;
+        }
 
         /// <summary>
         /// Maximum allowed file size of attachments, in bytes.
@@ -478,16 +559,71 @@ namespace Sentry
         public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
 
         /// <summary>
+        /// Determines the duration of time a session can stay paused before it's considered ended.
+        /// </summary>
+        /// <remarks>
+        /// Note: This interval is only taken into account when integrations support Pause and Resume.
+        /// </remarks>
+        public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+#if ANDROID
+        /// <summary>
+        /// Whether the SDK should start a session automatically when it's initialized and
+        /// end the session when it's closed.
+        /// </summary>
+        public bool AutoSessionTracking { get; set; } = true;
+#else
+        /// <summary>
+        /// Whether the SDK should start a session automatically when it's initialized and
+        /// end the session when it's closed.
+        /// </summary>
+        /// <remarks>
+        /// Note: this is disabled by default in the current version, but will become
+        /// enabled by default in the next major version.
+        /// Currently this only works for release health in client mode
+        /// (desktop, mobile applications, but not web servers).
+        /// </remarks>
+        public bool AutoSessionTracking { get; set; } = false;
+#endif
+
+        /// <summary>
+        /// Whether the SDK should attempt to use asynchronous file I/O.
+        /// For example, when reading a file to use as an attachment.
+        /// </summary>
+        /// <remarks>
+        /// This option should rarely be disabled, but is necessary in some environments such as Unity WebGL.
+        /// </remarks>
+        public bool UseAsyncFileIO { get; set; } = true;
+
+        /// <summary>
+        /// Delegate which is used to check whether the application crashed during last run.
+        /// </summary>
+        public Func<bool>? CrashedLastRun { get; set; }
+
+        /// <summary>
+        /// Keep <see cref="AggregateException"/> in sentry logging.
+        /// The default behaviour is to only log <see cref="AggregateException.InnerExceptions"/> and not include the root <see cref="AggregateException"/>.
+        /// Set KeepAggregateException to true to include the root <see cref="AggregateException"/>.
+        /// </summary>
+        public bool KeepAggregateException { get; set; }
+
+        /// <summary>
+        /// Provides a mechanism to convey network status to the caching transport, so that it does not attempt
+        /// to send cached events to Sentry when the network is offline. Used internally by some integrations.
+        /// Not intended for public usage.
+        /// </summary>
+        /// <remarks>
+        /// This must be public because we use it in Sentry.Maui, which can't use InternalsVisibleTo
+        /// because MAUI assemblies are not strong-named.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public INetworkStatusListener? NetworkStatusListener { get; set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
-            // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
-            // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-            StackTraceMode = Runtime.Current.Name == ".NET Native"
-                ? StackTraceMode.Original
-                : StackTraceMode.Enhanced;
-
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
@@ -496,14 +632,16 @@ namespace Sentry
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
+            ClientReportRecorder = new ClientReportRecorder(this);
+
             SentryStackTraceFactory = new SentryStackTraceFactory(this);
 
             ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
             EventProcessors = new ISentryEventProcessor[] {
-                    // de-dupe to be the first to run
-                    new DuplicateEventDetectionEventProcessor(this),
-                    new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor),
+                // De-dupe to be the first to run
+                new DuplicateEventDetectionEventProcessor(this),
+                new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
             };
 
             ExceptionProcessors = new ISentryEventExceptionProcessor[] {
@@ -511,11 +649,16 @@ namespace Sentry
             };
 
             Integrations = new ISdkIntegration[] {
+                // Auto-session tracking to be the first to run
+                new AutoSessionTrackingIntegration(),
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
                 new TaskUnobservedTaskExceptionIntegration(),
-#if NETFX
+#if NET461
                 new NetFxInstallationsIntegration(),
+#endif
+#if HAS_DIAGNOSTIC_INTEGRATION
+                new SentryDiagnosticListenerIntegration(),
 #endif
             };
 
@@ -546,6 +689,7 @@ namespace Sentry
                     "IdentityModel",
                     "SqlitePclRaw",
                     "Xamarin",
+                    "Android.", // Ex: Android.Runtime.JNINativeWrapper...
                     "Google.",
                     "MongoDB.",
                     "Remotion.Linq",
@@ -558,7 +702,15 @@ namespace Sentry
                     "ServiceStack"
             };
 
+#if DEBUG
+            InAppInclude = new[]
+            {
+                "Sentry.Samples."
+            };
+#else
             InAppInclude = Array.Empty<string>();
+#endif
+
         }
     }
 }

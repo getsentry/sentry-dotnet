@@ -109,8 +109,7 @@ namespace Sentry
                 path,
                 secretKey,
                 publicKey,
-                apiBaseUri
-            );
+                apiBaseUri);
         }
 
         public static Dsn? TryParse(string? dsn)

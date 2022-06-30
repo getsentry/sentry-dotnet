@@ -59,7 +59,7 @@ namespace Sentry.Extensibility
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext) =>
             // Transactions from DisabledHub are always sampled out
-            new TransactionTracer(this, context) {IsSampled = false};
+            new TransactionTracer(this, context) { IsSampled = false };
 
         /// <summary>
         /// No-Op.
@@ -81,6 +81,34 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
+        public void StartSession()
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void PauseSession()
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void ResumeSession()
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
         public void BindClient(ISentryClient client)
         {
         }
@@ -93,7 +121,19 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) => SentryId.Empty;
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
         public void CaptureTransaction(Transaction transaction)
+        {
+        }
+
+        /// <summary>
+        /// No-Op.
+        /// </summary>
+        public void CaptureSession(SessionUpdate sessionUpdate)
         {
         }
 

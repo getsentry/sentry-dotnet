@@ -1,44 +1,19 @@
-minVersion: '0.13.2'
-github:
-  owner: getsentry
-  repo: sentry-dotnet
+minVersion: 0.23.1
 changelogPolicy: auto
-statusProvider:
-  name: github
-artifactProvider:
-  name: github
 targets:
   - name: nuget
   - name: github
   - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry"
-  - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry.Extensions.Logging"
-  - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry.AspNetCore"
-  - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry.AspNetCore.Grpc"
-  - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry.AspNet"
-  - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry.Log4Net"
-  - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry.Serilog"
-  - name: registry
-    type: sdk
-    config:
-      canonical: "nuget:Sentry.NLog"
+    sdks:
+      nuget:Sentry:
+      nuget:Sentry.Extensions.Logging:
+      nuget:Sentry.AspNetCore:
+      nuget:Sentry.AspNetCore.Grpc:
+      nuget:Sentry.AspNet:
+      nuget:Sentry.EntityFramework:
+      nuget:Sentry.DiagnosticSource:
+      nuget:Sentry.Log4Net:
+      nuget:Sentry.Serilog:
+      nuget:Sentry.NLog:
+      nuget:Sentry.Google.Cloud.Functions:
+      nuget:Sentry.Maui:

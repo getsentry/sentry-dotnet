@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+using System.ComponentModel;
+using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
@@ -14,7 +12,7 @@ namespace Sentry.AspNetCore
     /// </summary>
     internal class SentryTracingMiddleware
     {
-        private const string UnknownRouteTransactionName = "Unknown Route";
+        internal const string UnknownRouteTransactionName = "Unknown Route";
         private const string OperationName = "http.server";
 
         private readonly RequestDelegate _next;
@@ -39,7 +37,7 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
-            _options.DiagnosticLogger?.LogDebug("Received Sentry trace header '{0}'.", value);
+            _options.LogDebug("Received Sentry trace header '{0}'.", value);
 
             try
             {
@@ -47,7 +45,7 @@ namespace Sentry.AspNetCore
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+                _options.LogError("Invalid Sentry trace header '{0}'.", ex, value);
                 return null;
             }
         }
@@ -68,33 +66,32 @@ namespace Sentry.AspNetCore
                 // again, to account for the other middlewares that may have
                 // ran after ours.
                 var transactionName =
-                    context.TryGetTransactionName() ??
-                    UnknownRouteTransactionName;
+                    context.TryGetTransactionName();
 
                 var transactionContext = traceHeader is not null
-                    ? new TransactionContext(transactionName, OperationName, traceHeader)
-                    : new TransactionContext(transactionName, OperationName);
+                    ? new TransactionContext(transactionName ?? string.Empty, OperationName, traceHeader)
+                    : new TransactionContext(transactionName ?? string.Empty, OperationName);
 
-                var customSamplingContext = new Dictionary<string, object?>(StringComparer.Ordinal)
+                var customSamplingContext = new Dictionary<string, object?>(4, StringComparer.Ordinal)
                 {
                     [SamplingExtensions.KeyForHttpMethod] = context.Request.Method,
                     [SamplingExtensions.KeyForHttpRoute] = context.TryGetRouteTemplate(),
-                    [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value
+                    [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value,
+                    [SamplingExtensions.KeyForHttpContext] = context,
                 };
 
                 var transaction = hub.StartTransaction(transactionContext, customSamplingContext);
 
-                _options.DiagnosticLogger?.LogInfo(
+                _options.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",
                     transaction.SpanId,
-                    transaction.TraceId
-                );
+                    transaction.TraceId);
 
                 return transaction;
             }
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.LogError("Failed to start transaction.", ex);
+                _options.LogError("Failed to start transaction.", ex);
                 return null;
             }
         }
@@ -112,56 +109,103 @@ namespace Sentry.AspNetCore
                 return;
             }
 
+            if (_options.TransactionNameProvider is { } route)
+            {
+                context.Features.Set(route);
+            }
+
             var transaction = TryStartTransaction(context);
+            var initialName = transaction?.Name;
 
             // Expose the transaction on the scope so that the user
             // can retrieve it and start child spans off of it.
             hub.ConfigureScope(scope =>
             {
                 scope.Transaction = transaction;
-                scope.OnEvaluating += (_, _) => scope.Populate(context, _options);
             });
 
+            Exception? exception = null;
             try
             {
                 await _next(context).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                exception = e;
             }
             finally
             {
                 if (transaction is not null)
                 {
-                    // The routing middleware may have ran after ours, so
-                    // try to get the transaction name again.
-                    if (context.TryGetTransactionName() is { } transactionName)
+                    // The Transaction name was altered during the pipeline execution,
+                    // That could be done by user interference or by some Event Capture
+                    // That triggers ScopeExtensions.Populate.
+                    if (transaction.Name != initialName)
                     {
-                        if (!string.Equals(transaction.Name, transactionName, StringComparison.Ordinal))
-                        {
-                            _options.DiagnosticLogger?.LogDebug(
-                                "Changed transaction name from '{0}' to '{1}' after request pipeline executed.",
-                                transaction.Name,
-                                transactionName
-                            );
-                        }
+                        _options.LogDebug(
+                            "transaction name set from '{0}' to '{1}' during request pipeline execution.",
+                            initialName,
+                            transaction.Name);
+                    }
+                    // try to get the transaction name.
+                    else if (context.TryGetTransactionName() is { } transactionName &&
+                             !string.IsNullOrEmpty(transactionName))
+                    {
+                        _options.LogDebug(
+                            "Changed transaction '{0}', name set to '{1}' after request pipeline executed.",
+                            transaction.SpanId,
+                            transactionName);
 
                         transaction.Name = transactionName;
                     }
 
-                    transaction.Finish(
-                        SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode)
-                    );
+                    var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
+
+                    // If no Name was found for Transaction, fallback to UnknownRoute name.
+                    if (transaction.Name == string.Empty)
+                    {
+                        transaction.Name = UnknownRouteTransactionName;
+                    }
+
+                    if (exception is null)
+                    {
+                        transaction.Finish(status);
+                    }
+                    // Status code not yet changed to 500 but an exception does exist
+                    // so lets avoid passing the misleading 200 down and close only with
+                    // the exception instance that will be inferred as errored.
+                    else if (status == SpanStatus.Ok)
+                    {
+                        transaction.Finish(exception);
+                    }
+                    else
+                    {
+                        transaction.Finish(exception, status);
+                    }
+                }
+
+                if (exception is not null)
+                {
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
             }
         }
     }
+}
+
+namespace Microsoft.AspNetCore.Builder
+{
+    using Sentry.AspNetCore;
 
     /// <summary>
     /// Extensions for enabling <see cref="SentryTracingMiddleware"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryTracingMiddlewareExtensions
     {
         /// <summary>
         /// Adds Sentry's tracing middleware to the pipeline.
-        /// Make sure to place this middleware after <code>UseRouting(...)</code>.
+        /// Make sure to place this middleware after <c>UseRouting(...)</c>.
         /// </summary>
         public static IApplicationBuilder UseSentryTracing(this IApplicationBuilder builder)
         {

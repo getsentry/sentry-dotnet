@@ -1,6 +1,7 @@
 // ReSharper disable once CheckNamespace
 
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -39,6 +40,11 @@ namespace Sentry.Protocol
         public string? RawDescription { get; set; }
 
         /// <summary>
+        /// An optional .NET Runtime Identifier string.
+        /// </summary>
+        public string? Identifier { get; set; }
+
+        /// <summary>
         /// An optional build number.
         /// </summary>
         /// <see href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed"/>
@@ -47,42 +53,27 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance
         /// </summary>
-        /// <returns></returns>
         public Runtime Clone()
             => new()
             {
                 Name = Name,
                 Version = Version,
+                Identifier = Identifier,
                 Build = Build,
                 RawDescription = RawDescription
             };
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
         {
             writer.WriteStartObject();
 
             writer.WriteString("type", Type);
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
-
-            if (!string.IsNullOrWhiteSpace(RawDescription))
-            {
-                writer.WriteString("raw_description", RawDescription);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Build))
-            {
-                writer.WriteString("build", Build);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
+            writer.WriteStringIfNotWhiteSpace("raw_description", RawDescription);
+            writer.WriteStringIfNotWhiteSpace("identifier", Identifier);
+            writer.WriteStringIfNotWhiteSpace("build", Build);
 
             writer.WriteEndObject();
         }
@@ -95,6 +86,7 @@ namespace Sentry.Protocol
             var name = json.GetPropertyOrNull("name")?.GetString();
             var version = json.GetPropertyOrNull("version")?.GetString();
             var rawDescription = json.GetPropertyOrNull("raw_description")?.GetString();
+            var identifier = json.GetPropertyOrNull("identifier")?.GetString();
             var build = json.GetPropertyOrNull("build")?.GetString();
 
             return new Runtime
@@ -102,6 +94,7 @@ namespace Sentry.Protocol
                 Name = name,
                 Version = version,
                 RawDescription = rawDescription,
+                Identifier = identifier,
                 Build = build
             };
         }

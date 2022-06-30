@@ -1,20 +1,11 @@
-﻿using Microsoft.Maui;
-using Microsoft.Maui.Controls;
+namespace Sentry.Samples.Maui;
 
-namespace Sentry.Samples.Maui
+public partial class App : Application
 {
-	public partial class App : Application
-	{
-		public App()
-		{
-			InitializeComponent();
-		}
+    public App()
+    {
+        InitializeComponent();
 
-		public override IWindow CreateWindow(IActivationState activationState)
-		{
-			Microsoft.Maui.Controls.Compatibility.Forms.Init(activationState);
-
-			return new MainWindow();
-		}
-	}
+        MainPage = new AppShell();
+    }
 }

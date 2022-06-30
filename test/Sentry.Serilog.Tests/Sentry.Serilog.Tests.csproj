@@ -5,8 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/Sentry.Serilog/Sentry.Serilog.csproj" />
     <ProjectReference Include="../../test/Sentry.Testing/Sentry.Testing.csproj" />
+    <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
   </ItemGroup>
 
 </Project>

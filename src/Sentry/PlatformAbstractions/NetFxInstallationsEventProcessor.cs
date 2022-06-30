@@ -1,4 +1,4 @@
-#if NETFX
+#if NET461
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +45,7 @@ namespace Sentry.PlatformAbstractions
                     }
                     catch (Exception ex)
                     {
-                        _options.DiagnosticLogger?.LogError("Failed to add NetFxInstallations into event.", ex);
+                        _options.LogError("Failed to add NetFxInstallations into event.", ex);
                         //In case of any failure, this process function will be disabled to avoid throwing exceptions for future events.
                         _netFxInstallationEnabled = false;
                     }

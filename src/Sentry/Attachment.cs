@@ -14,7 +14,7 @@ namespace Sentry
 
         /// <summary>
         /// Minidump file that creates an error event and is symbolicated.
-        /// The file should start with the <code>MDMP</code> magic bytes.
+        /// The file should start with the <c>MDMP</c> magic bytes.
         /// </summary>
         Minidump,
 

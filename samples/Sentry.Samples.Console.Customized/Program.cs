@@ -1,11 +1,6 @@
-using System;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Xml.Xsl;
-using Sentry;
-using Sentry.Extensibility;
-using Sentry.Protocol;
 
 // One of the ways to set your DSN is via an attribute:
 // It could be set via AssemblyInfo.cs and patched via CI.
@@ -98,15 +93,12 @@ internal static class Program
             // Example customizing the HttpClientHandlers created
             o.CreateHttpClientHandler = () => new HttpClientHandler
             {
-                ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+                ServerCertificateCustomValidationCallback = (_, certificate, _, _) =>
                     !certificate.Archived
             };
 
             // Access to the HttpClient created to serve the SentryClint
-            o.ConfigureClient = client =>
-            {
-                client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
-            };
+            o.ConfigureClient = client => client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
 
             // Control/override how to apply the State object into the scope
             o.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
@@ -136,7 +128,7 @@ internal static class Program
             });
 
             // Configures a scope which is only valid within the callback
-            SentrySdk.WithScope(s =>
+            SentrySdk.CaptureMessage("Fatal message!", s =>
             {
                 s.Level = SentryLevel.Fatal;
                 s.TransactionName = "main";
@@ -144,8 +136,6 @@ internal static class Program
 
                 // Add a file attachment for upload
                 s.AddAttachment(typeof(Program).Assembly.Location);
-
-                SentrySdk.CaptureMessage("Fatal message!");
             });
 
             var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
@@ -166,7 +156,6 @@ internal static class Program
                 // This is useful, for example, when multiple loggers log the same exception. Or exception is re-thrown and recaptured.
                 SentrySdk.CaptureException(error);
             }
-
 
             var count = 10;
             for (var i = 0; i < count; i++)
@@ -190,12 +179,14 @@ internal static class Program
             // A custom made client, that could be registered with DI,
             // would get disposed by the container on app shutdown
 
-            var evt = new SentryEvent();
-            evt.Message = "Starting new client";
+            var evt = new SentryEvent
+            {
+                Message = "Starting new client"
+            };
             evt.AddBreadcrumb("Breadcrumb directly to the event");
             evt.User.Username = "some@user";
             // Group all events with the following fingerprint:
-            evt.SetFingerprint(new [] { "NewClientDebug"});
+            evt.SetFingerprint("NewClientDebug");
             evt.Level = SentryLevel.Debug;
             SentrySdk.CaptureEvent(evt);
 
@@ -206,12 +197,10 @@ internal static class Program
                 var middleware = new AdminPartMiddleware(adminClient, null);
                 var request = new { Path = "/admin" }; // made up request
                 middleware.Invoke(request);
-
             } // Dispose the client which flushes any queued events
 
             SentrySdk.CaptureException(
                 new Exception("Error outside of the admin section: Goes to the default DSN"));
-
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
@@ -244,7 +233,6 @@ internal static class Program
                 // Else it uses the default client
 
                 _middleware?.Invoke(request);
-
             } // Scope is disposed.
         }
     }

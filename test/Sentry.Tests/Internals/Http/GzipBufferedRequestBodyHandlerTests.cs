@@ -1,106 +1,100 @@
-using System;
 using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
-using NSubstitute;
 using Sentry.Internal.Http;
-using Xunit;
 using static System.Threading.CancellationToken;
 
-namespace Sentry.Tests.Internals.Http
+namespace Sentry.Tests.Internals.Http;
+
+public class GzipBufferedRequestBodyHandlerTests
 {
-    public class GzipBufferedRequestBodyHandlerTests
+    private class Fixture
     {
-        private class Fixture
+        public HttpMessageHandler Handler { get; set; } = Substitute.For<HttpMessageHandler>();
+        public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Optimal;
+
+        public HttpRequestMessage Message { get; set; }
+
+        public const int MessageCharCount = 1000;
+
+        public Fixture()
         {
-            public HttpMessageHandler Handler { get; set; } = Substitute.For<HttpMessageHandler>();
-            public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Optimal;
+            var uri = Dsn.Parse(ValidDsn).GetStoreEndpointUri();
 
-            public HttpRequestMessage Message { get; set; }
-
-            public const int MessageCharCount = 1000;
-
-            public Fixture()
+            Message = new HttpRequestMessage(HttpMethod.Post, uri)
             {
-                var uri = Dsn.Parse(DsnSamples.ValidDsnWithSecret).GetStoreEndpointUri();
-
-                Message = new HttpRequestMessage(HttpMethod.Post, uri)
-                {
-                    Content = new StringContent(new string('a', MessageCharCount))
-                };
-            }
-
-            public HttpMessageInvoker GetSut()
-                => new(new GzipBufferedRequestBodyHandler(Handler, CompressionLevel));
+                Content = new StringContent(new string('a', MessageCharCount))
+            };
         }
 
-        private readonly Fixture _fixture = new();
+        public HttpMessageInvoker GetSut()
+            => new(new GzipBufferedRequestBodyHandler(Handler, CompressionLevel));
+    }
 
-        [Fact]
-        public async Task SendAsync_ContentLength_Set()
-        {
-            var sut = _fixture.GetSut();
+    private readonly Fixture _fixture = new();
 
-            _ = await sut.SendAsync(_fixture.Message, None);
+    [Fact]
+    public async Task SendAsync_ContentLength_Set()
+    {
+        var sut = _fixture.GetSut();
 
-            var gzippedContent = await _fixture.Message.Content.ReadAsByteArrayAsync();
-            var contentLength = ((GzipBufferedRequestBodyHandler.BufferedStreamContent)_fixture.Message.Content)
-                .ContentLength;
+        _ = await sut.SendAsync(_fixture.Message, None);
 
-            Assert.Equal(gzippedContent.Length, contentLength);
-        }
+        var gzippedContent = await _fixture.Message.Content.ReadAsByteArrayAsync();
+        var contentLength = ((GzipBufferedRequestBodyHandler.BufferedStreamContent)_fixture.Message.Content)
+            .ContentLength;
 
-        [Fact]
-        public async Task SendAsync_Content_Compressed()
-        {
-            var sut = _fixture.GetSut();
+        Assert.Equal(gzippedContent.Length, contentLength);
+    }
 
-            _ = await sut.SendAsync(_fixture.Message, None);
+    [Fact]
+    public async Task SendAsync_Content_Compressed()
+    {
+        var sut = _fixture.GetSut();
 
-            var gzippedContent = await _fixture.Message.Content.ReadAsByteArrayAsync();
-            Assert.True(gzippedContent.Length < 100);
-        }
+        _ = await sut.SendAsync(_fixture.Message, None);
 
-        [Fact]
-        public async Task SendAsync_Content_ReplacedWithBufferedStreamContent()
-        {
-            var sut = _fixture.GetSut();
+        var gzippedContent = await _fixture.Message.Content.ReadAsByteArrayAsync();
+        Assert.True(gzippedContent.Length < 100);
+    }
 
-            _ = await sut.SendAsync(_fixture.Message, None);
+    [Fact]
+    public async Task SendAsync_Content_ReplacedWithBufferedStreamContent()
+    {
+        var sut = _fixture.GetSut();
 
-            _ = Assert.IsType<GzipBufferedRequestBodyHandler.BufferedStreamContent>(_fixture.Message.Content);
-        }
+        _ = await sut.SendAsync(_fixture.Message, None);
 
-        [Fact]
-        public async Task SendAsync_Headers_CopiedOver()
-        {
-            _fixture.Message.Content.Headers.Add("test", new[] { "val1", "val2" });
+        _ = Assert.IsType<GzipBufferedRequestBodyHandler.BufferedStreamContent>(_fixture.Message.Content);
+    }
 
-            var sut = _fixture.GetSut();
+    [Fact]
+    public async Task SendAsync_Headers_CopiedOver()
+    {
+        _fixture.Message.Content.Headers.Add("test", new[] { "val1", "val2" });
 
-            _ = await sut.SendAsync(_fixture.Message, None);
+        var sut = _fixture.GetSut();
 
-            Assert.Contains(_fixture.Message.Content.Headers,
-                p => p.Key == "test" && p.Value.Count() == 2);
-        }
+        _ = await sut.SendAsync(_fixture.Message, None);
 
-        [Fact]
-        public async Task SendAsync_ContentType_Gzip()
-        {
-            var sut = _fixture.GetSut();
+        Assert.Contains(_fixture.Message.Content.Headers,
+            p => p.Key == "test" && p.Value.Count() == 2);
+    }
 
-            _ = await sut.SendAsync(_fixture.Message, None);
+    [Fact]
+    public async Task SendAsync_ContentType_Gzip()
+    {
+        var sut = _fixture.GetSut();
 
-            Assert.Equal("gzip", _fixture.Message.Content.Headers.ContentEncoding.First());
-        }
+        _ = await sut.SendAsync(_fixture.Message, None);
 
-        [Fact]
-        public void Ctor_NoCompression_ThrowsInvalidOperationException()
-        {
-            _ = Assert.Throws<InvalidOperationException>(
-                    () => new GzipRequestBodyHandler(Substitute.For<HttpMessageHandler>(),
-                        CompressionLevel.NoCompression));
-        }
+        Assert.Equal("gzip", _fixture.Message.Content.Headers.ContentEncoding.First());
+    }
+
+    [Fact]
+    public void Ctor_NoCompression_ThrowsInvalidOperationException()
+    {
+        _ = Assert.Throws<InvalidOperationException>(
+            () => new GzipRequestBodyHandler(Substitute.For<HttpMessageHandler>(),
+                CompressionLevel.NoCompression));
     }
 }

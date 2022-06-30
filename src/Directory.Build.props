@@ -22,6 +22,7 @@
     <PackageIcon>sentry-nuget.png</PackageIcon>
     <PackageProjectUrl>https://sentry.io</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- Prop required by Microsoft.SourceLink.GitHub -->
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
@@ -33,6 +34,8 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <Nullable>annotations</Nullable>
+
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <!-- Use nullability analysis only on frameworks that have annotated BCL -->
@@ -41,7 +44,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <ChangelogFile>$(SolutionDir)/CHANGELOG.md</ChangelogFile>
+    <!-- Used by SIL.ReleaseTasks below -->
+    <ChangelogFile>$(MSBuildThisFileDirectory)../CHANGELOG.md</ChangelogFile>
     <AppendToReleaseNotesProperty>
       <![CDATA[-->
       See full changelog at https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md]]>
@@ -50,23 +54,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="../../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SIL.ReleaseTasks" Version="2.3.4" PrivateAssets="All"/>
-    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="4.0.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Release'"/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--    To uncomment when Sentry.Protocol is added in-->
-    <!--    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="2.9.3" PrivateAssets="All" />-->
-
-    <!-- To add files to the PublicAPI.Unshipped file, use a VS quick action. Once shipped, move to PublicAPI.Shipped.txt -->
-    <None Remove="PublicAPI.Shipped.txt"/>
-    <None Remove="PublicAPI.Unshipped.txt"/>
-    <AdditionalFiles Include="PublicAPI.Shipped.txt"/>
-    <AdditionalFiles Include="PublicAPI.Unshipped.txt"/>
+    <!-- Used to pull the CHANGELOG.md into the NuGet package Release Notes section -->
+    <PackageReference Include="SIL.ReleaseTasks" Version="2.5.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 </Project>

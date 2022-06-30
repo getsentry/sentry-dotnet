@@ -1,0 +1,29 @@
+name: API Docs
+
+on:
+  create:
+    tags:
+      - '*'
+
+jobs:
+  docs:
+    name: DocFX
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nikeee/docfx-action@c2413c359a30494b894e30db268c5504478ff50a
+        name: Build Documentation
+        with:
+          args: docs/docfx.json
+      - uses: peaceiris/actions-gh-pages@v3
+        name: Publish to GitHub Pages
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_site
+          force_orphan: true
+      - name: Archive Docs
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs
+          path: docs/_site
+

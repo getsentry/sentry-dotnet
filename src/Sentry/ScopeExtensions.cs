@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -114,10 +115,9 @@ namespace Sentry
             var length = stream.TryGetLength();
             if (length is null)
             {
-                scope.Options.DiagnosticLogger?.LogWarning(
+                scope.Options.LogWarning(
                     "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
-                    fileName
-                );
+                    fileName);
 
                 return;
             }
@@ -129,8 +129,7 @@ namespace Sentry
                     type,
                     new StreamAttachmentContent(stream),
                     fileName,
-                    contentType)
-            );
+                    contentType));
         }
 
         /// <summary>
@@ -142,7 +141,12 @@ namespace Sentry
             string fileName,
             AttachmentType type = AttachmentType.Default,
             string? contentType = null) =>
-            scope.AddAttachment(new MemoryStream(data), fileName, type, contentType);
+            scope.AddAttachment(
+                new Attachment(
+                    type,
+                    new ByteAttachmentContent(data),
+                    fileName,
+                    contentType));
 
         /// <summary>
         /// Adds an attachment.
@@ -155,9 +159,16 @@ namespace Sentry
             scope.AddAttachment(
                 new Attachment(
                     type,
-                    new FileAttachmentContent(filePath),
+                    new FileAttachmentContent(filePath, scope.Options.UseAsyncFileIO),
                     Path.GetFileName(filePath),
-                    contentType)
-            );
+                    contentType));
+
+        /// <summary>
+        /// Gets the last opened span.
+        /// </summary>
+        /// <param name="scope">The scope.</param>
+        /// <returns>The last span not finished or null.</returns>
+        internal static ISpan? LastCreatedSpan(this Scope scope)
+            => scope.Transaction?.Spans.LastOrDefault(s => !s.IsFinished);
     }
 }

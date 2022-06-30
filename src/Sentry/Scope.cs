@@ -90,22 +90,40 @@ namespace Sentry
             set => _request = value;
         }
 
-        private Contexts? _contexts;
+        private readonly Contexts _contexts = new();
 
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ??= new Contexts();
-            set => _contexts = value;
+            get => _contexts;
+            set => _contexts.ReplaceWith(value);
         }
+
+        // Internal for testing.
+        internal Action<User?> UserChanged => user =>
+        {
+            if (Options.EnableScopeSync &&
+                Options.ScopeObserver is { } observer)
+            {
+                observer.SetUser(user);
+            }
+        };
 
         private User? _user;
 
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User();
-            set => _user = value;
+            get => _user ??= new User { PropertyChanged = UserChanged };
+            set
+            {
+                _user = value;
+                if (_user is not null)
+                {
+                    _user.PropertyChanged = UserChanged;
+                }
+                UserChanged.Invoke(_user);
+            }
         }
 
         /// <inheritdoc />
@@ -161,6 +179,8 @@ namespace Sentry
             set => _transaction = value;
         }
 
+        internal SessionUpdate? SessionUpdate { get; set; }
+
         /// <inheritdoc />
         public SdkVersion Sdk { get; } = new();
 
@@ -182,7 +202,12 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags;
 
+#if NETSTANDARD2_0 || NET461
+        private ConcurrentBag<Attachment> _attachments = new();
+#else
         private readonly ConcurrentBag<Attachment> _attachments = new();
+
+#endif
 
         /// <summary>
         /// Attachments.
@@ -219,29 +244,69 @@ namespace Sentry
                 }
             }
 
-            var overflow = Breadcrumbs.Count - Options.MaxBreadcrumbs + 1;
-
-            if (overflow > 0)
+            if (Options.MaxBreadcrumbs <= 0)
+            {
+                //Always drop the breadcrumb.
+                return;
+            }
+            else if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
             {
                 _breadcrumbs.TryDequeue(out _);
             }
 
             _breadcrumbs.Enqueue(breadcrumb);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
+            }
         }
 
         /// <inheritdoc />
-        public void SetExtra(string key, object? value) => _extra[key] = value;
+        public void SetExtra(string key, object? value)
+        {
+            _extra[key] = value;
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.SetExtra(key, value);
+            }
+        }
 
         /// <inheritdoc />
-        public void SetTag(string key, string value) => _tags[key] = value;
+        public void SetTag(string key, string value)
+        {
+            _tags[key] = value;
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.SetTag(key, value);
+            }
+        }
 
         /// <inheritdoc />
-        public void UnsetTag(string key) => _tags.TryRemove(key, out _);
+        public void UnsetTag(string key)
+        {
+            _tags.TryRemove(key, out _);
+            if (Options.EnableScopeSync)
+            {
+                Options.ScopeObserver?.UnsetTag(key);
+            }
+        }
 
         /// <summary>
         /// Adds an attachment.
         /// </summary>
         public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
+
+        /// <summary>
+        /// Clear all Attachments.
+        /// </summary>
+        public void ClearAttachments()
+        {
+#if NETSTANDARD2_0 || NET461
+            Interlocked.Exchange(ref _attachments, new());
+#else
+            _attachments.Clear();
+#endif
+        }
 
         /// <summary>
         /// Applies the data from this scope to another event-like object.
@@ -328,6 +393,7 @@ namespace Sentry
             Apply((IEventLike)other);
 
             other.Transaction ??= Transaction;
+            other.SessionUpdate ??= SessionUpdate;
 
             foreach (var attachment in Attachments)
             {
@@ -384,8 +450,7 @@ namespace Sentry
                 {
                     Options.DiagnosticLogger?.LogError(
                         "Failed invoking event handler.",
-                        ex
-                    );
+                        ex);
                 }
                 finally
                 {
@@ -395,7 +460,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
+        /// Gets the currently ongoing (not finished) span or <c>null</c> if none available.
         /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
         /// </summary>
         public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;

@@ -18,11 +18,16 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0-preview.3.21201.4" />
+=======
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+>>>>>>> main
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

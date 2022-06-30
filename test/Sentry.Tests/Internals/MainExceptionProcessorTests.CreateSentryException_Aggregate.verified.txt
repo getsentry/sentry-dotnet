@@ -1,0 +1,12 @@
+[
+  {
+    Type: System.Exception,
+    Value: Inner message1,
+    Mechanism: {}
+  },
+  {
+    Type: System.Exception,
+    Value: Inner message2,
+    Mechanism: {}
+  }
+]

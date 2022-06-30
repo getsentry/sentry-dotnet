@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 
@@ -9,7 +8,6 @@ namespace Sentry.Internal
 {
     internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
-
         internal static readonly string ExceptionDataTagKey = "sentry:tag:";
         internal static readonly string ExceptionDataContextKey = "sentry:context:";
 
@@ -24,7 +22,7 @@ namespace Sentry.Internal
 
         public void Process(Exception exception, SentryEvent sentryEvent)
         {
-            _options.DiagnosticLogger?.LogDebug("Running processor on exception: {0}", exception.Message);
+            _options.LogDebug("Running processor on exception: {0}", exception.Message);
 
             var sentryExceptions = CreateSentryException(exception)
                 // Otherwise realization happens on the worker thread before sending event.
@@ -84,44 +82,34 @@ namespace Sentry.Internal
 
         internal IEnumerable<SentryException> CreateSentryException(Exception exception)
         {
-            if (exception is AggregateException ae)
-            {
-                foreach (var inner in ae.InnerExceptions.SelectMany(CreateSentryException))
-                {
-                    yield return inner;
-                }
-            }
-            else if (exception.InnerException != null)
-            {
-                foreach (var inner in CreateSentryException(exception.InnerException))
-                {
-                    yield return inner;
-                }
-            }
+            return exception.EnumerateChainedExceptions(_options)
+                .Select(BuildSentryException);
+        }
 
+        private SentryException BuildSentryException(Exception innerException)
+        {
             var sentryEx = new SentryException
             {
-                Type = exception.GetType()?.FullName,
-                Module = exception.GetType()?.Assembly?.FullName,
-                Value = exception.Message,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                Mechanism = GetMechanism(exception)
+                Type = innerException.GetType()?.FullName,
+                Module = innerException.GetType()?.Assembly?.FullName,
+                Value = innerException.Message,
+                ThreadId = Environment.CurrentManagedThreadId,
+                Mechanism = GetMechanism(innerException)
             };
 
-            if (exception.Data.Count != 0)
+            if (innerException.Data.Count != 0)
             {
-                foreach (var key in exception.Data.Keys)
+                foreach (var key in innerException.Data.Keys)
                 {
                     if (key is string keyString)
                     {
-                        sentryEx.Data[keyString] = exception.Data[key];
+                        sentryEx.Data[keyString] = innerException.Data[key];
                     }
                 }
             }
 
-            sentryEx.Stacktrace = SentryStackTraceFactoryAccessor().Create(exception);
-
-            yield return sentryEx;
+            sentryEx.Stacktrace = SentryStackTraceFactoryAccessor().Create(innerException);
+            return sentryEx;
         }
 
         internal static Mechanism GetMechanism(Exception exception)

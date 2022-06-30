@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -24,9 +24,10 @@ namespace Sentry
     /// <summary>
     /// Extensions for <see cref="IHasBreadcrumbs"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HasBreadcrumbsExtensions
     {
-#if HAS_VALUE_TUPLE
+#if !NET461
         /// <summary>
         /// Adds a breadcrumb to the object.
         /// </summary>
@@ -85,7 +86,7 @@ namespace Sentry
             string message,
             string? category = null,
             string? type = null,
-            Dictionary<string, string>? data = null,
+            IReadOnlyDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
         {
             // Not to throw on code that ignores nullability warnings.

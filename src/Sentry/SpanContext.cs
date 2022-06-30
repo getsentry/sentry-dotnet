@@ -1,4 +1,4 @@
-﻿namespace Sentry
+namespace Sentry
 {
     /// <summary>
     /// Span metadata used for sampling.

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -11,18 +12,19 @@ namespace Sentry
     {
         private readonly IHub _hub;
         private readonly TransactionTracer _transaction;
+        private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
         /// <inheritdoc />
         public SpanId SpanId { get; }
 
         /// <inheritdoc />
-        public SpanId? ParentSpanId { get; }
+        public SpanId? ParentSpanId { get; internal set; }
 
         /// <inheritdoc />
         public SentryId TraceId { get; }
 
         /// <inheritdoc />
-        public DateTimeOffset StartTimestamp { get; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
 
         /// <inheritdoc />
         public DateTimeOffset? EndTimestamp { get; private set; }
@@ -55,14 +57,14 @@ namespace Sentry
         public void UnsetTag(string key) =>
             (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
-        private ConcurrentDictionary<string, object?>? _data;
+        private ConcurrentDictionary<string, object?> _data = new();
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _data ??= new ConcurrentDictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => _data;
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value) =>
-            (_data ??= new ConcurrentDictionary<string, object?>())[key] = value;
+            _data[key] = value;
 
         /// <summary>
         /// Initializes an instance of <see cref="SpanTracer"/>.
@@ -91,7 +93,7 @@ namespace Sentry
         public void Finish()
         {
             Status ??= SpanStatus.UnknownError;
-            EndTimestamp = DateTimeOffset.UtcNow;
+            EndTimestamp = _stopwatch.CurrentDateTimeOffset;
         }
 
         /// <inheritdoc />
@@ -116,7 +118,6 @@ namespace Sentry
         public SentryTraceHeader GetTraceHeader() => new(
             TraceId,
             SpanId,
-            IsSampled
-        );
+            IsSampled);
     }
 }

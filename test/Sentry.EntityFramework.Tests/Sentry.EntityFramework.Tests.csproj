@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+  </PropertyGroup>
+
+  <!-- Running these tests on Mono fail -->
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <TargetFrameworks>net461;$(TargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Effort.EF6" Version="2.2.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Sentry.EntityFramework/Sentry.EntityFramework.csproj" />
+    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+  </ItemGroup>
+
+</Project>

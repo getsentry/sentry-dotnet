@@ -1,13 +1,12 @@
-using System;
-using Sentry.Internal;
 using System.Runtime.ExceptionServices;
 using System.Security;
-using Sentry.Protocol;
 using System.Threading.Tasks;
+using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry.Integrations
 {
-    internal class TaskUnobservedTaskExceptionIntegration : IInternalSdkIntegration
+    internal class TaskUnobservedTaskExceptionIntegration : ISdkIntegration
     {
         private readonly IAppDomain _appDomain;
         private IHub? _hub;
@@ -21,18 +20,16 @@ namespace Sentry.Integrations
             _appDomain.UnobservedTaskException += Handle;
         }
 
-        public void Unregister(IHub hub)
-        {
-            _appDomain.UnobservedTaskException -= Handle;
-            _hub = null;
-        }
-
         // Internal for testability
-        [HandleProcessCorruptedStateExceptions, SecurityCritical]
+#if !NET6_0_OR_GREATER
+        [HandleProcessCorruptedStateExceptions]
+#endif
+        [SecurityCritical]
         internal void Handle(object? sender, UnobservedTaskExceptionEventArgs e)
         {
             if (e.Exception != null)
             {
+                e.Exception.Data[Mechanism.HandledKey] = false;
                 e.Exception.Data[Mechanism.MechanismKey] = "UnobservedTaskException";
                 _ = _hub?.CaptureException(e.Exception);
             }

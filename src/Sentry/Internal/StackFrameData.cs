@@ -7,7 +7,7 @@ namespace Sentry.Internal
     // https://github.com/mono/mono/blob/d336d6be307dfea8b7a07268270c6d885db9d399/mcs/tools/mono-symbolicate/StackFrameData.cs
     internal class StackFrameData
     {
-        static readonly Regex _regex = new(
+        private static readonly Regex _regex = new(
             @"\w*at (?<Method>.+) *(\[0x(?<IL>.+)\]|<0x.+ \+ 0x(?<NativeOffset>.+)>( (?<MethodIndex>\d+)|)) in <(?<MVID>[^>#]+)(#(?<AOTID>[^>]+)|)>:0");
 
         public string TypeFullName { get; }
@@ -42,7 +42,13 @@ namespace Sentry.Internal
         public StackFrameData Relocate(string typeName, string methodName)
             => new(Line, typeName, methodName, Offset, IsILOffset, MethodIndex, Mvid, Aotid);
 
-        public static bool TryParse(string line, [NotNullWhen(true)] out StackFrameData? stackFrame)
+        public static bool TryParse(
+            string line,
+#if NET461 || NETSTANDARD2_0
+            out StackFrameData? stackFrame)
+#else
+            [NotNullWhen(true)] out StackFrameData? stackFrame)
+#endif
         {
             stackFrame = default;
 
@@ -86,8 +92,13 @@ namespace Sentry.Internal
 
         private static bool ExtractSignatures(
             string str,
+#if NET461 || NETSTANDARD2_0
+            out string? typeFullName,
+            out string? methodSignature)
+#else
             [NotNullWhen(true)] out string? typeFullName,
             [NotNullWhen(true)] out string? methodSignature)
+#endif
         {
             typeFullName = null;
             methodSignature = null;

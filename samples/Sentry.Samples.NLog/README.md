@@ -40,7 +40,9 @@ The following options are available for the NLog Sentry Target:
         <user
             id="${mdlc:item=id}" 
             username="${mdlc:item=username}"
-            email="${mdlc:item=email}">
+            email="${mdlc:item=email}"
+            ipAddress="${mdlc:item=ipAddress}"
+            >
             <other name="mood" layout="joyous"/>    <!-- You can also apply additional user properties here-->
         </user>
 </target>
@@ -61,9 +63,11 @@ The following options are available for the NLog Sentry Target:
 * **ignoreEventsWithNoException** - Ignore NLog LogEvents without an exception. Default: _False_
 * **flushTimeoutSeconds** - Flush timeout in seconds before aborting flush to Sentry. Default: _15_
 * **user**
-   * **id** -
-   * **username** -
-   * **email** -
+   * **id**
+   * **username**
+   * **email**
+   * **ipAddress**
+   * **other** - Any arbitrary key-value pairs to be included as properties for a user on every event.
 * **options**
    * **sendDefaultPii** - Whether to include default Personal Identifiable information (UserName / IP-Address). Default: _False_
    * **isEnvironmentUser** - Lookup Environment.User if having enabled **sendDefaultPii**. Default: _True_

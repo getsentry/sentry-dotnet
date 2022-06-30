@@ -22,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.0-preview.3.21201.13" />
+=======
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.0" />
+>>>>>>> main
   </ItemGroup>
 </Project>

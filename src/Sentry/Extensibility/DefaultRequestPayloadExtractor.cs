@@ -18,7 +18,7 @@ namespace Sentry.Extensibility
         /// </summary>
         protected override object? DoExtractPayLoad(IHttpRequest request)
         {
-            if(request.Body is null)
+            if (request.Body is null)
             {
                 return null;
             }

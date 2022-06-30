@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
+using Sentry.Reflection;
 
 namespace Sentry
 {
@@ -14,6 +16,15 @@ namespace Sentry
     /// <remarks>Requires Sentry version 8.4 or higher.</remarks>
     public sealed class SdkVersion : IJsonSerializable
     {
+        private static readonly Lazy<SdkVersion> InstanceLazy = new(
+            () => new SdkVersion
+            {
+                Name = "sentry.dotnet",
+                Version = typeof(ISentryClient).Assembly.GetVersion()
+            });
+
+        internal static SdkVersion Instance => InstanceLazy.Value;
+
         internal ConcurrentBag<Package> InternalPackages { get; set; } = new();
 
         /// <summary>
@@ -56,35 +67,13 @@ namespace Sentry
             => InternalPackages.Add(package);
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            // Packages
-            var packages = InternalPackages.ToArray();
-            if (packages.Any())
-            {
-                writer.WriteStartArray("packages");
-
-                foreach (var package in packages)
-                {
-                    writer.WriteSerializableValue(package);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            // Name
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            // Version
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
+            writer.WriteArrayIfNotEmpty("packages", InternalPackages.Distinct(), logger);
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
 
             writer.WriteEndObject();
         }

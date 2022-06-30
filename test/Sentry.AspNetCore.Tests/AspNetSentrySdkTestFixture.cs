@@ -1,30 +1,28 @@
-using System;
 using Microsoft.AspNetCore.Hosting;
 using Sentry.AspNetCore.Tests.Utils;
 using Sentry.Testing;
 
-namespace Sentry.AspNetCore.Tests
+namespace Sentry.AspNetCore.Tests;
+
+// Allows integration tests the include the background worker and mock only the HTTP bits
+public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
 {
-    // Allows integration tests the include the background worker and mock only the HTTP bits
-    public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
+    protected Action<SentryAspNetCoreOptions> Configure;
+
+    protected Action<WebHostBuilder> AfterConfigureBuilder;
+
+    protected override void ConfigureBuilder(WebHostBuilder builder)
     {
-        protected Action<SentryAspNetCoreOptions> Configure;
-
-        protected Action<WebHostBuilder> AfterConfigureBuilder;
-
-        protected override void ConfigureBuilder(WebHostBuilder builder)
+        var sentry = FakeSentryServer.CreateServer();
+        var sentryHttpClient = sentry.CreateClient();
+        _ = builder.UseSentry(options =>
         {
-            var sentry = FakeSentryServer.CreateServer();
-            var sentryHttpClient = sentry.CreateClient();
-            _ = builder.UseSentry(options =>
-            {
-                options.Dsn = DsnSamples.ValidDsnWithSecret;
-                options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
+            options.Dsn = ValidDsn;
+            options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
 
-                Configure?.Invoke(options);
-            });
+            Configure?.Invoke(options);
+        });
 
-            AfterConfigureBuilder?.Invoke(builder);
-        }
+        AfterConfigureBuilder?.Invoke(builder);
     }
 }

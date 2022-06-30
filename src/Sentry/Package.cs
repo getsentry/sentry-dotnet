@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -37,21 +38,12 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            // Name
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            // Version
-            if (!string.IsNullOrWhiteSpace(Version))
-            {
-                writer.WriteString("version", Version);
-            }
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteStringIfNotWhiteSpace("version", Version);
 
             writer.WriteEndObject();
         }
@@ -65,6 +57,31 @@ namespace Sentry
             var version = json.GetProperty("version").GetStringOrThrow();
 
             return new Package(name, version);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Name.GetHashCode() * 397) ^ Version.GetHashCode();
+            }
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj is Package package)
+            {
+                return Name == package.Name && Version == package.Version;
+            }
+
+            return false;
         }
     }
 }

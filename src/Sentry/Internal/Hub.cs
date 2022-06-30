@@ -1,63 +1,76 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
-using Sentry.Integrations;
+using Sentry.Infrastructure;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
 {
     internal class Hub : IHub, IDisposable
     {
+        private readonly object _sessionPauseLock = new();
+
         private readonly ISentryClient _ownedClient;
+        private readonly ISystemClock _clock;
+        private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
-        private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
-        private readonly ConditionalWeakTable<Exception, ISpan> _exceptionToSpanMap = new();
+        private int _isPersistedSessionRecovered;
 
-        internal SentryScopeManager ScopeManager { get; }
+        // Internal for testability
+        internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
-        public bool IsEnabled => true;
+        internal IInternalScopeManager ScopeManager { get; }
 
-        internal Hub(ISentryClient client, SentryOptions options)
+        private int _isEnabled = 1;
+        public bool IsEnabled => _isEnabled == 1;
+
+        internal Hub(
+            SentryOptions options,
+            ISentryClient? client = null,
+            ISessionManager? sessionManager = null,
+            ISystemClock? clock = null,
+            IInternalScopeManager? scopeManager = null)
         {
-            _ownedClient = client;
-
-            _options = options;
-
-            if (Dsn.TryParse(options.Dsn) is null)
+            if (string.IsNullOrWhiteSpace(options.Dsn))
             {
                 const string msg = "Attempt to instantiate a Hub without a DSN.";
-                options.DiagnosticLogger?.LogFatal(msg);
+                options.LogFatal(msg);
                 throw new InvalidOperationException(msg);
             }
+            options.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
-            options.DiagnosticLogger?.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
+            _options = options;
+            _ownedClient = client ?? new SentryClient(options);
+            _clock = clock ?? SystemClock.Clock;
+            _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
-            ScopeManager = new SentryScopeManager(options, _ownedClient);
+            ScopeManager = scopeManager ?? new SentryScopeManager(
+                options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
+                options,
+                _ownedClient);
 
-            _integrations = options.Integrations;
+            _rootScope = options.IsGlobalModeEnabled
+                ? DisabledHub.Instance
+                // Push the first scope so the async local starts from here
+                : PushScope();
 
-            if (_integrations?.Length > 0)
+            _enricher = new Enricher(options);
+
+            var integrations = options.Integrations;
+            if (integrations?.Length > 0)
             {
-                foreach (var integration in _integrations)
+                foreach (var integration in integrations)
                 {
-                    options.DiagnosticLogger?.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
+                    options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
                     integration.Register(this, options);
                 }
             }
-
-            // Push the first scope so the async local starts from here
-            _rootScope = PushScope();
-
-            _enricher = new Enricher(options);
-        }
-
-        public Hub(SentryOptions options)
-            : this(new SentryClient(options), options)
-        {
         }
 
         public void ConfigureScope(Action<Scope> configureScope)
@@ -68,7 +81,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to ConfigureScope", e);
+                _options.LogError("Failure to ConfigureScope", e);
             }
         }
 
@@ -80,7 +93,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to ConfigureScopeAsync", e);
+                _options.LogError("Failure to ConfigureScopeAsync", e);
             }
         }
 
@@ -96,7 +109,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to run callback WithScope", e);
+                _options.LogError("Failure to run callback WithScope", e);
             }
         }
 
@@ -114,8 +127,7 @@ namespace Sentry.Internal
             {
                 var samplingContext = new TransactionSamplingContext(
                     context,
-                    customSamplingContext
-                );
+                    customSamplingContext);
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
@@ -142,7 +154,7 @@ namespace Sentry.Internal
             }
 
             // Don't overwrite existing pair in the unlikely event that it already exists
-            _ = _exceptionToSpanMap.GetValue(exception, _ => span);
+            _ = ExceptionToSpanMap.GetValue(exception, _ => span);
         }
 
         public ISpan? GetSpan()
@@ -153,22 +165,124 @@ namespace Sentry.Internal
 
         public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
+        public void StartSession()
+        {
+            // Attempt to recover persisted session left over from previous run
+            if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
+            {
+                try
+                {
+                    var recoveredSessionUpdate = _sessionManager.TryRecoverPersistedSession();
+                    if (recoveredSessionUpdate is not null)
+                    {
+                        CaptureSession(recoveredSessionUpdate);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _options.LogError("Failed to recover persisted session.", ex);
+                }
+            }
+
+            // Start a new session
+            try
+            {
+                var sessionUpdate = _sessionManager.StartSession();
+                if (sessionUpdate is not null)
+                {
+                    CaptureSession(sessionUpdate);
+                }
+            }
+            catch (Exception ex)
+            {
+                _options.LogError("Failed to start a session.", ex);
+            }
+        }
+
+        public void PauseSession()
+        {
+            lock (_sessionPauseLock)
+            {
+                try
+                {
+                    _sessionManager.PauseSession();
+                }
+                catch (Exception ex)
+                {
+                    _options.LogError("Failed to pause a session.", ex);
+                }
+            }
+        }
+
+        public void ResumeSession()
+        {
+            lock (_sessionPauseLock)
+            {
+                try
+                {
+                    foreach (var update in _sessionManager.ResumeSession())
+                    {
+                        CaptureSession(update);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _options.LogError("Failed to resume a session.", ex);
+                }
+            }
+        }
+
+        private void EndSession(DateTimeOffset timestamp, SessionEndStatus status)
+        {
+            try
+            {
+                var sessionUpdate = _sessionManager.EndSession(timestamp, status);
+                if (sessionUpdate is not null)
+                {
+                    CaptureSession(sessionUpdate);
+                }
+            }
+            catch (Exception ex)
+            {
+                _options.LogError("Failed to end a session.", ex);
+            }
+        }
+
+        public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
+            EndSession(_clock.GetUtcNow(), status);
+
         private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
         {
             // Find the span which is bound to the same exception
             if (evt.Exception is { } exception &&
-                _exceptionToSpanMap.TryGetValue(exception, out var spanBoundToException))
+                ExceptionToSpanMap.TryGetValue(exception, out var spanBoundToException))
             {
                 return spanBoundToException;
             }
 
             // Otherwise just get the currently active span on the scope (unless it's sampled out)
-            if (scope.GetSpan() is {IsSampled: not false} span)
+            if (scope.GetSpan() is { IsSampled: not false } span)
             {
                 return span;
             }
 
             return null;
+        }
+
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+        {
+            try
+            {
+                var clonedScope = ScopeManager.GetCurrent().Key.Clone();
+                configureScope(clonedScope);
+
+                return CaptureEvent(evt, clonedScope);
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+                return SentryId.Empty;
+            }
         }
 
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
@@ -186,14 +300,30 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
+                actualScope.SessionUpdate = evt switch
+                {
+                    // Event contains a terminal exception -> end session as crashed
+                    var e when e.HasUnhandledException =>
+                        _sessionManager.EndSession(SessionEndStatus.Crashed),
+
+                    // Event contains a non-terminal exception -> report error
+                    // (this might return null if the session has already reported errors before)
+                    var e when e.HasException =>
+                        _sessionManager.ReportError(),
+
+                    // Event doesn't contain any kind of exception -> no reason to attach session update
+                    _ => null
+                };
+
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
+                actualScope.SessionUpdate = null;
 
                 return id;
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture event: {0}", e, evt.EventId);
+                _options.LogError("Failure to capture event: {0}", e, evt.EventId);
                 return SentryId.Empty;
             }
         }
@@ -206,7 +336,7 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+                _options.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
             }
         }
 
@@ -226,7 +356,19 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+                _options.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+            }
+        }
+
+        public void CaptureSession(SessionUpdate sessionUpdate)
+        {
+            try
+            {
+                _ownedClient.CaptureSession(sessionUpdate);
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
             }
         }
 
@@ -239,28 +381,21 @@ namespace Sentry.Internal
             }
             catch (Exception e)
             {
-                _options.DiagnosticLogger?.LogError("Failure to Flush events", e);
+                _options.LogError("Failure to Flush events", e);
             }
         }
 
         public void Dispose()
         {
-            _options.DiagnosticLogger?.LogInfo("Disposing the Hub.");
+            _options.LogInfo("Disposing the Hub.");
 
-            if (_integrations?.Length > 0)
+            if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
             {
-                foreach (var integration in _integrations)
-                {
-                    if (integration is IInternalSdkIntegration internalIntegration)
-                    {
-                        internalIntegration.Unregister(this);
-                    }
-                }
+                return;
             }
 
-            (_ownedClient as IDisposable)?.Dispose();
-            _rootScope.Dispose();
-            ScopeManager.Dispose();
+            _ownedClient.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+            //Dont dispose of _rootScope and ScopeManager since we want dangling transactions to still be able to access tags.
         }
 
         public SentryId LastEventId

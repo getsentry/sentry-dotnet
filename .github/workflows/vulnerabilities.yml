@@ -1,0 +1,21 @@
+name: List vulnerable packages
+
+on:
+  schedule:
+    # once a day
+    - cron:  '0 0 * * *'
+jobs:
+  List-vulnerable-packages:
+    runs-on: windows-latest
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+          with:
+            submodules: recursive
+            fetch-depth: 2
+
+        - name: Build
+          run: dotnet build
+
+        - name: List vulnerable packages
+          run: dotnet list package --vulnerable --include-transitive

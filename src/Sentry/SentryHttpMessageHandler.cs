@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
@@ -33,13 +35,13 @@ namespace Sentry
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
         /// </summary>
         public SentryHttpMessageHandler(HttpMessageHandler innerHandler)
-            : this(innerHandler, HubAdapter.Instance) {}
+            : this(innerHandler, HubAdapter.Instance) { }
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
         /// </summary>
         public SentryHttpMessageHandler()
-            : this(HubAdapter.Instance) {}
+            : this(HubAdapter.Instance) { }
 
         /// <inheritdoc />
         protected override async Task<HttpResponseMessage> SendAsync(
@@ -48,43 +50,48 @@ namespace Sentry
         {
             // Set trace header if it hasn't already been set
             if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) &&
-                _hub.GetTraceHeader() is {} traceHeader)
+                _hub.GetTraceHeader() is { } traceHeader)
             {
                 request.Headers.Add(
                     SentryTraceHeader.HttpHeaderName,
-                    traceHeader.ToString()
-                );
+                    traceHeader.ToString());
             }
 
             // Prevent null reference exception in the following call
             // in case the user didn't set an inner handler.
             InnerHandler ??= new HttpClientHandler();
 
+            var requestMethod = request.Method.Method.ToUpperInvariant();
+            var url = request.RequestUri?.ToString() ?? string.Empty;
+
             // Start a span that tracks this request
             // (may be null if transaction is not set on the scope)
             var span = _hub.GetSpan()?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
-                $"{request.Method.Method.ToUpperInvariant()} {request.RequestUri}"
-            );
+                $"{requestMethod} {url}");
 
             try
             {
                 var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
+                var breadcrumbData = new Dictionary<string, string>
+                {
+                    { "url", url },
+                    { "method", requestMethod },
+                    { "status_code", ((int)response.StatusCode).ToString() }
+                };
+                _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
+
                 // This will handle unsuccessful status codes as well
                 span?.Finish(
-                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode)
-                );
+                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode));
 
                 return response;
             }
-            catch
+            catch (Exception ex)
             {
-                // TODO: attach the exception to the span, once
-                // that API is available.
-                span?.Finish(SpanStatus.UnknownError);
-
+                span?.Finish(ex);
                 throw;
             }
         }

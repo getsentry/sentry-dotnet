@@ -1,4 +1,4 @@
-#if !NETFX
+#if !NET461
 
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +14,11 @@ namespace Sentry.PlatformAbstractions
         /// No-op version for netstandard targets
         /// </summary>
         /// <param name="clr"></param>
-        /// <returns></returns>
         public static FrameworkInstallation? GetLatest(int clr) => null;
 
         /// <summary>
         /// No-op version for netstandard targets
         /// </summary>
-        /// <returns></returns>
         public static IEnumerable<FrameworkInstallation> GetInstallations()
             => Enumerable.Empty<FrameworkInstallation>();
     }

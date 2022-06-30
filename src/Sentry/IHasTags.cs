@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Sentry
 {
@@ -26,6 +27,7 @@ namespace Sentry
     /// <summary>
     /// Extensions for <see cref="IHasTags"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HasTagsExtensions
     {
         /// <summary>

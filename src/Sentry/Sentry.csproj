@@ -1,14 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+<<<<<<< HEAD
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <PackageId>Sentry</PackageId>
     <AssemblyName>Sentry</AssemblyName>
     <RootNamespace>Sentry</RootNamespace>
+=======
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461;net6.0-android</TargetFrameworks>
+    <!-- We'll pin to C# 9 and ImplicitUsings false to allow us to compile within Unity -->
+    <LangVersion>9</LangVersion>
+    <ImplicitUsings>false</ImplicitUsings>
+>>>>>>> main
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
+    <!-- Files under Android are included below when TFM ends with android -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/Android/**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android/Sentry.Android.props" />
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">
@@ -19,22 +30,21 @@
       <Link>%(RecursiveDir)/%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcoreapp')) or '$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
   <!-- Ben.Demystifier -->
 
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
-    <DefineConstants>$(DefineConstants);HAS_VALUE_TUPLE</DefineConstants>
+  <!-- DiagnosticSource -->
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
+    <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
-
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
-    <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
-  </PropertyGroup>
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
+    <Compile Include="../Sentry.DiagnosticSource/Internals/**/*.cs">
+      <Link>Internal/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- DiagnosticSource -->
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
@@ -49,7 +59,7 @@
 
   <!-- Prefer bundled version of System.Text.Json to avoid extra dependencies -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
-    <PackageReference Include="System.Text.Json" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
 </Project>

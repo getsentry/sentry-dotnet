@@ -3,9 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.0</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;Microsoft.Extensions.Logging</PackageTags>
-    <PackageId>Sentry.Extensions.Logging</PackageId>
-    <AssemblyName>Sentry.Extensions.Logging</AssemblyName>
-    <RootNamespace>Sentry.Extensions.Logging</RootNamespace>
     <Description>Official Microsoft.Extensions.Logging integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 
@@ -29,8 +26,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0-preview.3.21201.4" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0-preview.3.21201.4" />
+=======
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+>>>>>>> main
   </ItemGroup>
 
 </Project>

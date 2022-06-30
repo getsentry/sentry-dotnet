@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -36,39 +37,15 @@ namespace Sentry
         public SentryStackTrace? Stacktrace { get; set; }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer)
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
-            // Id
-            if (Id is {} id)
-            {
-                writer.WriteNumber("id", id);
-            }
-
-            // Name
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                writer.WriteString("name", Name);
-            }
-
-            // Crashed
-            if (Crashed is {} crashed)
-            {
-                writer.WriteBoolean("crashed", crashed);
-            }
-
-            // Current
-            if (Current is {} current)
-            {
-                writer.WriteBoolean("current", current);
-            }
-
-            // Stacktrace
-            if (Stacktrace is {} stacktrace)
-            {
-                writer.WriteSerializable("stacktrace", stacktrace);
-            }
+            writer.WriteNumberIfNotNull("id", Id);
+            writer.WriteStringIfNotWhiteSpace("name", Name);
+            writer.WriteBooleanIfNotNull("crashed", Crashed);
+            writer.WriteBooleanIfNotNull("current", Current);
+            writer.WriteSerializableIfNotNull("stacktrace", Stacktrace, logger);
 
             writer.WriteEndObject();
         }

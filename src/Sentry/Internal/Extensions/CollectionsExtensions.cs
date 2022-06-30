@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Sentry.Internal.Extensions
@@ -10,7 +11,16 @@ namespace Sentry.Internal.Extensions
             this ConcurrentDictionary<string, object> dictionary,
             string key)
             where TValue : class, new()
-            => (TValue) dictionary.GetOrAdd(key, _ => new TValue());
+        {
+            var value = dictionary.GetOrAdd(key, _ => new TValue());
+
+            if (value is TValue casted)
+            {
+                return casted;
+            }
+
+            throw new($"Expected a type of {typeof(TValue)} to exist for the key '{key}'. Instead found a {value.GetType()}. The likely cause of this is that the value for '{key}' has been incorrectly set to an instance of a different type.");
+        }
 
         public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
             where TKey : notnull
@@ -24,8 +34,25 @@ namespace Sentry.Internal.Extensions
             }
         }
 
-        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source)
-                where TKey : notnull =>
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+            this IEnumerable<KeyValuePair<TKey, TValue>> source) where TKey : notnull =>
             source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        public static IEnumerable<KeyValuePair<TKey, TValue>> WhereNotNullValue<TKey, TValue>(
+            this IEnumerable<KeyValuePair<TKey, TValue?>> source) where TKey : notnull
+        {
+            foreach (var kvp in source)
+            {
+                if (kvp.Value is not null)
+                {
+                    yield return kvp!;
+                }
+            }
+        }
+
+        public static IReadOnlyList<T> AsReadOnly<T>(this IList<T> list) =>
+            list is IReadOnlyList<T> readOnlyList
+                ? readOnlyList
+                : new ReadOnlyCollection<T>(list);
     }
 }

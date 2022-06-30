@@ -1,138 +1,136 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Sentry.Internal;
 using Sentry.Testing;
-using Xunit;
 
-namespace Sentry.Tests.Internals
+namespace Sentry.Tests.Internals;
+
+public class PartialStreamTests
 {
-    public class PartialStreamTests
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_Length_ReturnsPartialLength()
     {
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_Length_ReturnsPartialLength()
-        {
-            // Arrange
-            using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        // Arrange
+        using var originalStream = new MemoryStream();
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            const int offset = 10;
-            const int length = 100;
-            using var partialStream = new PartialStream(originalStream, offset, length);
+        const int offset = 10;
+        const int length = 100;
 
-            // Act & assert
-            partialStream.Length.Should().Be(length);
-        }
+        using var partialStream = new PartialStream(originalStream, offset, length);
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_ReadToEnd_ReturnsOnlyDataInRange()
-        {
-            // Arrange
-            using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        // Act & assert
+        partialStream.Length.Should().Be(length);
+    }
 
-            const int offset = 10;
-            const int length = 100;
-            using var partialStream = new PartialStream(originalStream, offset, length);
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_ReadToEnd_ReturnsOnlyDataInRange()
+    {
+        // Arrange
+        using var originalStream = new MemoryStream();
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            // Act
-            using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+        const int offset = 10;
+        const int length = 100;
 
-            // Assert
-            var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
+        using var partialStream = new PartialStream(originalStream, offset, length);
 
-            outputStream.Length.Should().Be(length);
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+        // Act
+        using var outputStream = new MemoryStream();
+        await partialStream.CopyToAsync(outputStream);
 
-        [Fact]
-        public async Task PartialStream_WithOffset_ReadToEnd_ReturnsOnlyDataInRange()
-        {
-            // Arrange
-            using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        // Assert
+        var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
 
-            const int offset = 10;
-            using var partialStream = new PartialStream(originalStream, offset, null);
+        outputStream.Length.Should().Be(length);
+        outputStream.ToArray().Should().Equal(originalPortion);
+    }
 
-            // Act
-            using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+    [Fact]
+    public async Task PartialStream_WithOffset_ReadToEnd_ReturnsOnlyDataInRange()
+    {
+        // Arrange
+        using var originalStream = new MemoryStream();
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            // Assert
-            var originalPortion = originalStream.ToArray().Skip(offset).ToArray();
+        const int offset = 10;
 
-            outputStream.Length.Should().Be(originalStream.Length - offset);
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+        using var partialStream = new PartialStream(originalStream, offset, null);
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_Seek_WorksCorrectly()
-        {
-            // Arrange
-            using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        // Act
+        using var outputStream = new MemoryStream();
+        await partialStream.CopyToAsync(outputStream);
 
-            const int offset = 10;
-            const int length = 100;
-            using var partialStream = new PartialStream(originalStream, offset, length);
+        // Assert
+        var originalPortion = originalStream.ToArray().Skip(offset).ToArray();
 
-            // Act
-            const int additionalOffset = 40;
-            partialStream.Seek(additionalOffset, SeekOrigin.Begin);
+        outputStream.Length.Should().Be(originalStream.Length - offset);
+        outputStream.ToArray().Should().Equal(originalPortion);
+    }
 
-            // Assert
-            using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_Seek_WorksCorrectly()
+    {
+        // Arrange
+        using var originalStream = new MemoryStream();
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            var originalPortion = originalStream
-                .ToArray()
-                .Skip(offset + additionalOffset)
-                .Take(length - additionalOffset)
-                .ToArray();
+        const int offset = 10;
+        const int length = 100;
 
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+        using var partialStream = new PartialStream(originalStream, offset, length);
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_SettingInvalidPosition_Throws()
-        {
-            // Arrange
-            using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        // Act
+        const int additionalOffset = 40;
+        partialStream.Seek(additionalOffset, SeekOrigin.Begin);
 
-            const int offset = 10;
-            const int length = 100;
-            using var partialStream = new PartialStream(originalStream, offset, length);
+        // Assert
+        using var outputStream = new MemoryStream();
+        await partialStream.CopyToAsync(outputStream);
 
-            // Act & assert
-            Assert.Throws<InvalidOperationException>(() => partialStream.Position = 200);
-        }
+        var originalPortion = originalStream
+            .ToArray()
+            .Skip(offset + additionalOffset)
+            .Take(length - additionalOffset)
+            .ToArray();
 
-        [Fact]
-        public async Task PartialStream_WithOffsetAndLength_InnerPositionChanged_StillReadsCorrectly()
-        {
-            // Arrange
-            using var originalStream = new MemoryStream();
-            await originalStream.FillWithRandomBytesAsync(1024);
+        outputStream.ToArray().Should().Equal(originalPortion);
+    }
 
-            const int offset = 10;
-            const int length = 100;
-            using var partialStream = new PartialStream(originalStream, offset, length);
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_SettingInvalidPosition_Throws()
+    {
+        // Arrange
+        using var originalStream = new MemoryStream();
+        await originalStream.FillWithRandomBytesAsync(1024);
 
-            // Act
-            originalStream.Position = 1000;
+        const int offset = 10;
+        const int length = 100;
 
-            // Assert
-            using var outputStream = new MemoryStream();
-            await partialStream.CopyToAsync(outputStream);
+        using var partialStream = new PartialStream(originalStream, offset, length);
 
-            var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
+        // Act & assert
+        Assert.Throws<InvalidOperationException>(() => partialStream.Position = 200);
+    }
 
-            outputStream.ToArray().Should().Equal(originalPortion);
-        }
+    [Fact]
+    public async Task PartialStream_WithOffsetAndLength_InnerPositionChanged_StillReadsCorrectly()
+    {
+        // Arrange
+        using var originalStream = new MemoryStream();
+        await originalStream.FillWithRandomBytesAsync(1024);
+
+        const int offset = 10;
+        const int length = 100;
+
+        using var partialStream = new PartialStream(originalStream, offset, length);
+
+        // Act
+        originalStream.Position = 1000;
+
+        // Assert
+        using var outputStream = new MemoryStream();
+        await partialStream.CopyToAsync(outputStream);
+
+        var originalPortion = originalStream.ToArray().Skip(offset).Take(length).ToArray();
+
+        outputStream.ToArray().Should().Equal(originalPortion);
     }
 }
