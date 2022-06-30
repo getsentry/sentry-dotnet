@@ -105,6 +105,24 @@ public class SentryStackTraceFactoryTests
         Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace?.Frames.Count);
     }
 
+    [Fact]
+    public void FileNameShouldBeRelative()
+    {
+        _fixture.SentryOptions.AttachStacktrace = true;
+        var sut = _fixture.GetSut();
+
+        Exception exception;
+        try
+        {
+            Throw();
+            void Throw() => throw new();
+        }
+        catch (Exception e) { exception = e; }
+
+        var stackTrace = sut.Create(exception);
+        Assert.Equal(@"Internals\SentryStackTraceFactoryTests.cs", stackTrace!.Frames.First().FileName);
+    }
+
     [Theory]
     [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
     [InlineData(StackTraceMode.Enhanced, "(Fixture f, int b) SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]

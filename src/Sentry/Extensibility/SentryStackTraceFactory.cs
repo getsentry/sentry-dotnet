@@ -133,7 +133,7 @@ namespace Sentry.Extensibility
         protected SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
         {
             const string unknownRequiredField = "(unknown)";
-
+            string? projectPath = null;
             var frame = new SentryStackFrame();
             if (GetMethod(stackFrame) is { } method)
             {
@@ -162,11 +162,20 @@ namespace Sentry.Extensibility
                 {
                     frame.InApp = false;
                 }
+
+                AttributeReader.TryGetProjectDirectory(method.Module.Assembly, out projectPath);
             }
 
             frame.ConfigureAppFrame(_options);
 
-            frame.FileName = stackFrame.GetFileName();
+            var frameFileName = stackFrame.GetFileName();
+            if (projectPath != null &&
+                frameFileName != null)
+            {
+                frameFileName = frameFileName.Replace(projectPath, "");
+            }
+
+            frame.FileName = frameFileName;
 
             // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
             var ilOffset = stackFrame.GetILOffset();
