@@ -8,15 +8,13 @@ using Target = NLog.Targets.Target;
 
 namespace Sentry.NLog.Tests;
 
-using static DsnSamples;
-
 public class SentryTargetTests
 {
     private const string DefaultMessage = "This is a logged message";
 
     private class Fixture
     {
-        public SentryNLogOptions Options { get; set; } = new() { Dsn = ValidDsnWithSecret };
+        public SentryNLogOptions Options { get; set; } = new() { Dsn = ValidDsn };
 
         public IHub Hub { get; set; } = Substitute.For<IHub>();
 
@@ -86,7 +84,7 @@ public class SentryTargetTests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' dsn='{ValidDsnWithoutSecret}' release='1.2.3' environment='test'>
+                        <target type='Sentry' name='sentry' dsn='{ValidDsn}' release='1.2.3' environment='test'>
                             <options>
                                 <attachStacktrace>True</attachStacktrace>
                             </options>
@@ -103,7 +101,7 @@ public class SentryTargetTests
         Assert.NotNull(t);
         if (t.Options.Dsn != null)
         {
-            Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn);
+            Assert.Equal(ValidDsn, t.Options.Dsn);
         }
 
         Assert.Equal("test", t.Options.Environment);
@@ -120,7 +118,7 @@ public class SentryTargetTests
                         <add type='{typeof(SentryTarget).AssemblyQualifiedName}' />
                     </extensions>
                     <targets>
-                        <target type='Sentry' name='sentry' dsn='{ValidDsnWithoutSecret}'>
+                        <target type='Sentry' name='sentry' dsn='{ValidDsn}'>
                             <user username=""myUser"">
                                 <other name='mood' layout='joyous'/>
                             </user>
@@ -135,7 +133,7 @@ public class SentryTargetTests
 
         var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
         Assert.NotNull(t);
-        Assert.Equal(ValidDsnWithoutSecret, t.Options.Dsn);
+        Assert.Equal(ValidDsn, t.Options.Dsn);
         Assert.Equal("'myUser'", t.User.Username.ToString());
         Assert.NotEmpty(t.User.Other);
         Assert.Equal("mood", t.User.Other[0].Name);

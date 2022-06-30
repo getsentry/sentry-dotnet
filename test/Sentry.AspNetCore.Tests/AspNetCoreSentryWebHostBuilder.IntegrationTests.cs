@@ -12,7 +12,7 @@ public class SentryWebHostBuilderExtensionsIntegrationTests : AspNetSentrySdkTes
     [Fact]
     public void UseSentry_ValidDsnString_EnablesSdk()
     {
-        _ = _webHostBuilder.UseSentry(DsnSamples.ValidDsnWithoutSecret)
+        _ = _webHostBuilder.UseSentry(ValidDsn)
             .Build();
 
         try

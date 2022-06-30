@@ -21,7 +21,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         {
             TracesSampleRate = 1,
             Transport = transport,
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLevel = SentryLevel.Debug
         };
 
@@ -62,7 +62,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         {
             TracesSampleRate = 1,
             Transport = transport,
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLevel = SentryLevel.Debug
         };
 

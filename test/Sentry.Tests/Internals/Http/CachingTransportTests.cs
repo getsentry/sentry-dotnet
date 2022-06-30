@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using NSubstitute.ExceptionExtensions;
@@ -22,7 +23,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -73,7 +74,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -106,7 +107,7 @@ public class CachingTransportTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             CacheDirectoryPath = cacheDirectory.Path,
             Debug = true
@@ -160,7 +161,7 @@ public class CachingTransportTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             CacheDirectoryPath = cacheDirectory.Path,
             Debug = true
@@ -195,7 +196,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -222,7 +223,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path,
@@ -250,7 +251,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -289,7 +290,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -325,7 +326,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -370,7 +371,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path,
@@ -402,7 +403,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -449,7 +450,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -489,6 +490,7 @@ public class CachingTransportTests
         new List<object[]>
         {
             new object[] {new HttpRequestException(null)},
+            new object[] {new WebException(null)},
             new object[] {new IOException(null)},
             new object[] {new SocketException()}
         };
@@ -501,7 +503,7 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
@@ -538,5 +540,128 @@ public class CachingTransportTests
         // Assert
         Assert.Equal(exception, receivedException);
         Assert.True(Directory.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
+    }
+
+    [Fact]
+    public async Task TransportSendsWithoutWaitingWhenNetworkIsOnline()
+    {
+        // Arrange
+        var listener = Substitute.For<INetworkStatusListener>();
+        listener.Online.Returns(true);
+        listener.WaitForNetworkOnlineAsync(Arg.Any<CancellationToken>())
+            .Throws(new Exception("We should not be waiting for the network status if we know it's online."));
+
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path,
+            NetworkStatusListener = listener
+        };
+
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+
+        // Act
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
+        await transport.FlushAsync();
+
+        // Assert
+        var envelopes = innerTransport.GetSentEnvelopes();
+        envelopes.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task TransportPausesWhenNetworkIsOffline()
+    {
+        // Arrange
+        var waitingForNetwork = new TaskCompletionSource<bool>();
+        var listener = Substitute.For<INetworkStatusListener>();
+        listener.Online.Returns(false);
+        listener.WaitForNetworkOnlineAsync(Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                waitingForNetwork.SetResult(true);
+                return Task.Delay(Timeout.Infinite, callInfo.Arg<CancellationToken>());
+            });
+
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path,
+            NetworkStatusListener = listener
+        };
+
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        using var cts = new CancellationTokenSource();
+        try
+        {
+            _ = Task.Run(async () =>
+            {
+                // Wait for the caching transport to pause waiting for a network connection.
+                // Then do the assertions while we're paused.
+                await waitingForNetwork.Task;
+
+                // Assert
+                // ReSharper disable AccessToDisposedClosure
+                var envelopes = innerTransport.GetSentEnvelopes();
+                envelopes.Should().BeEmpty();
+                cts.Cancel();
+                // ReSharper restore AccessToDisposedClosure
+            }, cts.Token);
+
+            // Act
+            using var envelope = Envelope.FromEvent(new SentryEvent());
+            await transport.SendEnvelopeAsync(envelope, cts.Token);
+            await transport.FlushAsync(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // This is anticipated but caused by the test, so no need to assert it.
+        }
+    }
+
+    [Fact]
+    public async Task TransportResumesWhenNetworkComesBackOnline()
+    {
+        // Arrange
+        var online = false;
+        var listener = Substitute.For<INetworkStatusListener>();
+        listener.Online.Returns(_ => online);
+        listener.WaitForNetworkOnlineAsync(Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                online = true;
+                return Task.CompletedTask;
+            });
+
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path,
+            NetworkStatusListener = listener
+        };
+
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+
+        // Act
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+        await transport.SendEnvelopeAsync(envelope);
+        await transport.FlushAsync();
+
+        // Assert
+        var envelopes = innerTransport.GetSentEnvelopes();
+        envelopes.Should().NotBeEmpty();
     }
 }

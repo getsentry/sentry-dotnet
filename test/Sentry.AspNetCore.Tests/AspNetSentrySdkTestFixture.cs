@@ -17,7 +17,7 @@ public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
         var sentryHttpClient = sentry.CreateClient();
         _ = builder.UseSentry(options =>
         {
-            options.Dsn = DsnSamples.ValidDsnWithSecret;
+            options.Dsn = ValidDsn;
             options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
 
             Configure?.Invoke(options);

@@ -40,6 +40,7 @@
     <Using Include="Java.IO.InputStreamReader" Alias="JavaInputStreamReader" />
     <Using Include="Java.IO.OutputStreamWriter" Alias="JavaOutputStreamWriter" />
     <Using Include="Java.Util.Date" Alias="JavaDate" />
+    <Using Include="Java.Util.HashMap" Alias="JavaHashMap" />
   </ItemGroup>
 
   <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">

@@ -26,7 +26,7 @@ public class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder;
         builder.Services.Configure<SentryMauiOptions>(options =>
         {
-            options.Dsn = DsnSamples.ValidDsnWithoutSecret;
+            options.Dsn = ValidDsn;
         });
 
         // Act
@@ -38,7 +38,7 @@ public class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.Same(builder, chainedBuilder);
         Assert.True(SentrySdk.IsEnabled);
-        Assert.Equal(DsnSamples.ValidDsnWithoutSecret, options.Dsn);
+        Assert.Equal(ValidDsn, options.Dsn);
         Assert.False(options.Debug);
     }
 
@@ -49,7 +49,7 @@ public class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder;
 
         // Act
-        var chainedBuilder = builder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
+        var chainedBuilder = builder.UseSentry(ValidDsn);
 
         using var app = builder.Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
@@ -57,7 +57,7 @@ public class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.Same(builder, chainedBuilder);
         Assert.True(SentrySdk.IsEnabled);
-        Assert.Equal(DsnSamples.ValidDsnWithoutSecret, options.Dsn);
+        Assert.Equal(ValidDsn, options.Dsn);
         Assert.False(options.Debug);
     }
 
@@ -70,7 +70,7 @@ public class SentryMauiAppBuilderExtensionsTests
         // Act
         var chainedBuilder = builder.UseSentry(options =>
         {
-            options.Dsn = DsnSamples.ValidDsnWithoutSecret;
+            options.Dsn = ValidDsn;
         });
 
         using var app = builder.Build();
@@ -79,7 +79,7 @@ public class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.Same(builder, chainedBuilder);
         Assert.True(SentrySdk.IsEnabled);
-        Assert.Equal(DsnSamples.ValidDsnWithoutSecret, options.Dsn);
+        Assert.Equal(ValidDsn, options.Dsn);
         Assert.False(options.Debug);
     }
 
@@ -90,7 +90,7 @@ public class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder;
         builder.Services.Configure<SentryMauiOptions>(options =>
         {
-            options.Dsn = DsnSamples.ValidDsnWithoutSecret;
+            options.Dsn = ValidDsn;
         });
 
         // Act
@@ -105,7 +105,7 @@ public class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.Same(builder, chainedBuilder);
         Assert.True(SentrySdk.IsEnabled);
-        Assert.Equal(DsnSamples.ValidDsnWithoutSecret, options.Dsn);
+        Assert.Equal(ValidDsn, options.Dsn);
         Assert.True(options.Debug);
     }
 
@@ -116,7 +116,7 @@ public class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder;
 
         // Act
-        _ = builder.UseSentry(DsnSamples.ValidDsnWithoutSecret);
+        _ = builder.UseSentry(ValidDsn);
 
         using var app = builder.Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
@@ -133,7 +133,7 @@ public class SentryMauiAppBuilderExtensionsTests
         var builder = _fixture.Builder
             .UseSentry(options =>
             {
-                options.Dsn = DsnSamples.ValidDsnWithoutSecret;
+                options.Dsn = ValidDsn;
                 options.BeforeSend = e =>
                 {
                     // capture the event
@@ -160,7 +160,7 @@ public class SentryMauiAppBuilderExtensionsTests
     {
         // Arrange
         var builder = _fixture.Builder
-            .UseSentry(DsnSamples.ValidDsnWithoutSecret);
+            .UseSentry(ValidDsn);
 
         // Act
         using var app = builder.Build();
@@ -179,7 +179,7 @@ public class SentryMauiAppBuilderExtensionsTests
 
         // Arrange
         var builder = _fixture.Builder
-            .UseSentry(DsnSamples.ValidDsnWithoutSecret);
+            .UseSentry(ValidDsn);
 
         // Act
         IHub hub;

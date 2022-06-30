@@ -1,14 +1,24 @@
 // ReSharper disable once CheckNamespace
+
+using Sentry.Testing;
+
 namespace Sentry.Protocol.Tests.Context;
 
 public class ContextsTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public ContextsTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_NoPropertyFilled_SerializesEmptyObject()
     {
         var sut = new Contexts();
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
@@ -26,7 +36,7 @@ public class ContextsTests
             [expectedKey] = os
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
@@ -45,7 +55,7 @@ public class ContextsTests
             }
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
@@ -64,7 +74,7 @@ public class ContextsTests
             }
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
@@ -83,7 +93,7 @@ public class ContextsTests
             }
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
@@ -102,7 +112,7 @@ public class ContextsTests
             }
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
@@ -120,7 +130,7 @@ public class ContextsTests
         };
 
         // Act
-        var json = contexts.ToJsonString();
+        var json = contexts.ToJsonString(_testOutputLogger);
         var roundtrip = Json.Parse(json, Contexts.FromJson);
 
         // Assert
@@ -144,7 +154,7 @@ public class ContextsTests
             }
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
@@ -163,7 +173,7 @@ public class ContextsTests
             }
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
