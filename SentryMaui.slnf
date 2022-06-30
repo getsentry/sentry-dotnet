@@ -7,7 +7,6 @@
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry.Maui\\Sentry.Maui.csproj",
       "src\\Sentry\\Sentry.csproj",
-      "test\\MauiTestUtils\\samples\\DeviceTests.Sample\\TestUtils.DeviceTests.Sample.csproj",
       "test\\MauiTestUtils\\src\\DeviceTests.Runners.SourceGen\\TestUtils.DeviceTests.Runners.SourceGen.csproj",
       "test\\MauiTestUtils\\src\\DeviceTests.Runners\\TestUtils.DeviceTests.Runners.csproj",
       "test\\MauiTestUtils\\src\\DeviceTests\\TestUtils.DeviceTests.csproj",
