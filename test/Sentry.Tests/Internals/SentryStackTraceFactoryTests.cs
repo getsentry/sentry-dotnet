@@ -46,9 +46,9 @@ public class SentryStackTraceFactoryTests
     }
 
     [Theory]
-    [InlineData(StackTraceMode.Original, "Create_Async_CurrentStackTrace { <lambda> }")]
-    [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.Create_Async_CurrentStackTrace(StackTraceMode mode, string method)+() => { }")]
-    public void Create_Async_CurrentStackTrace(StackTraceMode mode, string method)
+    [InlineData(StackTraceMode.Original, "AsyncWithWait_StackTrace { <lambda> }")]
+    [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
+    public void AsyncWithWait_StackTrace(StackTraceMode mode, string method)
     {
         _fixture.SentryOptions.AttachStacktrace = true;
         _fixture.SentryOptions.StackTraceMode = mode;
@@ -65,6 +65,26 @@ public class SentryStackTraceFactoryTests
         {
             Assert.Equal("System.Threading.Tasks.Task`1", stackTrace.Frames[stackTrace.Frames.Count - 2].Module);
         }
+    }
+
+    [Theory]
+    [InlineData(StackTraceMode.Original, "MoveNext")] // TODO fixme: "AsyncWithAwait_StackTrace { <lambda> }"
+    [InlineData(StackTraceMode.Enhanced, "async Task SentryStackTraceFactoryTests.AsyncWithAwait_StackTrace(StackTraceMode mode, string method)+(?) => { }")]
+    public async Task AsyncWithAwait_StackTrace(StackTraceMode mode, string method)
+    {
+        _fixture.SentryOptions.AttachStacktrace = true;
+        _fixture.SentryOptions.StackTraceMode = mode;
+        var sut = _fixture.GetSut();
+
+        var stackTrace = await Task.Run(async () =>
+        {
+            await Task.Yield();
+            return sut.Create();
+        });
+
+        Assert.NotNull(stackTrace);
+
+        Assert.Equal(method, stackTrace.Frames.Last().Function);
     }
 
     [Fact]
