@@ -2,7 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
+    <!-- Currently fails with "Error	APPX1101	Payload contains two or more files with the same destination path 'xunit.runner.utility.netcoreapp10.dll'. Source files:"
+        ~\.nuget\packages\xunit.runner.visualstudio\2.4.5\build\netcoreapp3.1\xunit.runner.utility.netcoreapp10.dll
+        ~\.nuget\packages\xunit.runner.utility\2.4.1\lib\netcoreapp1.0\xunit.runner.utility.netcoreapp10.dll	Sentry.Maui.Device.TestApp	C:\Users\dlugo\.nuget\packages\microsoft.windowsappsdk\1.1.0\buildTransitive\Microsoft.Build.Msix.Packaging.targets	1479
+      <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks> -->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <SingleProject>true</SingleProject>
@@ -15,7 +18,7 @@
     <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>
 
     <!-- App Identifier -->
-    <ApplicationId>com.companyname.sentry.maui.device.testapp</ApplicationId>
+    <ApplicationId>io.sentry.maui.device.testapp</ApplicationId>
     <ApplicationIdGuid>4A534873-8D78-46AE-AE75-0F8F00152A2F</ApplicationIdGuid>
 
     <!-- Versions -->
