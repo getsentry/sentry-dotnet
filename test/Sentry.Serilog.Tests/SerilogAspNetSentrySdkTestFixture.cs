@@ -1,21 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Sentry.AspNetCore;
-using Sentry.Serilog.Tests.Utils;
-using Sentry.Testing;
+using Sentry.AspNetCore.Tests;
 using Serilog;
 
 namespace Sentry.Serilog.Tests;
 
-// Allows integration tests the include the background worker and mock only the HTTP bits
-public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
+public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
 {
-    protected SentryEvent LastEvent;
     protected List<SentryEvent> Events;
-
-    protected Action<SentryAspNetCoreOptions> Configure;
-
-    protected Action<WebHostBuilder> AfterConfigureBuilder;
 
     protected override void ConfigureBuilder(WebHostBuilder builder)
     {
@@ -25,14 +17,12 @@ public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
             options.BeforeSend = @event =>
             {
                 Events.Add(@event);
-                LastEvent = @event;
                 return @event;
             };
         };
 
         ConfigureApp = app =>
         {
-#if NETCOREAPP3_1_OR_GREATER
             app.UseExceptionHandler(new ExceptionHandlerOptions
             {
 #if NET6_0_OR_GREATER
@@ -40,18 +30,7 @@ public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
 #endif
                 ExceptionHandlingPath = "/error"
             });
-#endif
         };
-
-        var sentry = FakeSentryServer.CreateServer();
-        var sentryHttpClient = sentry.CreateClient();
-        _ = builder.UseSentry(options =>
-        {
-            options.Dsn = ValidDsn;
-            options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
-
-            Configure?.Invoke(options);
-        });
 
         builder.ConfigureLogging(loggingBuilder =>
         {
@@ -61,6 +40,6 @@ public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
             loggingBuilder.AddSerilog(logger);
         });
 
-        AfterConfigureBuilder?.Invoke(builder);
+        base.ConfigureBuilder(builder);
     }
 }

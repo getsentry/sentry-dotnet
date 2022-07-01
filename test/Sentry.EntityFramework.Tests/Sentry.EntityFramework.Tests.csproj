@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <!-- Running these tests on Mono fail -->
-  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
     <TargetFrameworks>net461;$(TargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Effort.EF6" Version="2.2.15" />
+    <PackageReference Include="Effort.EF6" Version="2.2.16" />
   </ItemGroup>
 
   <ItemGroup>
