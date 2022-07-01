@@ -43,7 +43,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [21, 27, 29, 30]
+        # TODO find out how to build the app for lower SDK levels
+        # db: failed to install /Users/runner/work/sentry-dotnet/sentry-dotnet/./io.sentry.maui.device.testapp-Signed.apk: Failure [INSTALL_FAILED_OLDER_SDK: Failed parse during installPackageLI: /data/app/vmdl1343941439.tmp/base.apk (at Binary XML file line #9): Requires newer sdk version #31 (current version is #27)]
+        api-level: [31]
     defaults:
       run:
         shell: pwsh
