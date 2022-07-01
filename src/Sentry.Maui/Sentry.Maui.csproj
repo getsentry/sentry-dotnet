@@ -21,7 +21,7 @@
         dotnet workload install maui
     -->
     <UseMaui>true</UseMaui>
-    <MauiVersion>6.0.312</MauiVersion>
+    <MauiVersion>6.0.400</MauiVersion>
 
     <!--
       MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749
