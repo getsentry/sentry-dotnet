@@ -35,3 +35,47 @@ jobs:
             name: device-test-android
             if-no-files-found: error
             path: test/Sentry.Maui.Device.TestApp/bin/Release/net6.0-android/io.sentry.maui.device.testapp-Signed.apk
+
+  android:
+    needs: [build]
+    name: Run Android API-${{ matrix.api-level }} Test
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [21, 27, 29, 30]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download test app artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: device-test-android
+          path: .
+
+      - name: Test
+        # id: test
+        # continue-on-error: true
+        timeout-minutes: 30
+        uses: reactivecircus/android-emulator-runner@e790971012b979513b4e2fe70d4079bc0ca8a1ae
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          ram-size: 2048M
+          arch: x86
+          cores: 2
+          disk-size: 4096M
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: xharness android test --output-directory=./test_output --app=./io.sentry.maui.device.testapp-Signed.apk --package-name=io.sentry.maui.device.testapp
+
+      - name: Upload test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: device-test-android-${{ matrix.api-level }}-results
+          path: test_output
