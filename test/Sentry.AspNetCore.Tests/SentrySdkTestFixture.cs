@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sentry.Testing;
+namespace Sentry.AspNetCore.Tests;
 
 public abstract class SentrySdkTestFixture : IDisposable
 {

@@ -8,7 +8,7 @@ using static Sentry.Internal.Constants;
 namespace Sentry.Tests;
 
 [Collection(nameof(SentrySdkCollection))]
-public class SentrySdkTests : SentrySdkTestFixture
+public class SentrySdkTests : IDisposable
 {
     private readonly IDiagnosticLogger _logger;
 
@@ -762,5 +762,10 @@ public class SentrySdkTests : SentrySdkTestFixture
             Arg.Any<string>(),
             Arg.Any<Exception>(),
             Arg.Any<object[]>());
+    }
+
+    public void Dispose()
+    {
+        SentrySdk.Close();
     }
 }
