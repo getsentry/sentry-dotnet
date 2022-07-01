@@ -1,0 +1,37 @@
+name: Device tests
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+          with:
+            submodules: recursive
+
+        - name: Install .NET Workloads (Ubuntu)
+          run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
+
+        - name: Build
+          run: |
+            dotnet restore ./test/Sentry.Maui.Device.TestApp
+            dotnet msbuild  /p:Configuration=Release ./test/Sentry.Maui.Device.TestApp
+
+        - name: Upload test app
+          uses: actions/upload-artifact@v3
+          with:
+            name: device-test-android
+            if-no-files-found: error
+            path: test/Sentry.Maui.Device.TestApp/bin/Release/net6.0-android/io.sentry.maui.device.testapp-Signed.apk
