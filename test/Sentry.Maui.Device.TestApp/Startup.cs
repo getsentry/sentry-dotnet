@@ -13,7 +13,7 @@ namespace Sentry.Maui.Device.TestApp
                     Assemblies =
                     {
                         typeof(MauiProgram).Assembly,
-                        // typeof(Sentry.Tests.SentrySdkTests).Assembly
+                        typeof(Sentry.Tests.SentrySdkTests).Assembly,
                         typeof(Sentry.Maui.Tests.ApiApprovalTests).Assembly
                     },
                 })
