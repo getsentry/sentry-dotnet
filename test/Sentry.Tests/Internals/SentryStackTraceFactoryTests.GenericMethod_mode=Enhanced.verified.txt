@@ -1,9 +1,17 @@
-﻿{
-  FileName: {ProjectDirectory}Internals\SentryStackTraceFactoryTests.cs,
-  Function: void SentryStackTraceFactoryTests.GenericMethodThatThrows<T>(T value),
-  LineNumber: 219,
-  ColumnNumber: 9,
-  InApp: true,
-  Package: Sentry.Tests, Version=3.19.0.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0,
-  InstructionOffset: 5
-}
+[
+  {
+    FileName: C:\Dev\xunit\xunit\src\xunit.core\Record.cs,
+    Function: Exception Record.Exception(Action testCode),
+    InApp: true
+  },
+  {
+    FileName: {ProjectDirectory}Internals\SentryStackTraceFactoryTests.cs,
+    Function: Task SentryStackTraceFactoryTests.GenericMethod(StackTraceMode mode)+() => { },
+    InApp: true
+  },
+  {
+    FileName: {ProjectDirectory}Internals\SentryStackTraceFactoryTests.cs,
+    Function: void SentryStackTraceFactoryTests.GenericMethodThatThrows<T>(T value),
+    InApp: true
+  }
+]

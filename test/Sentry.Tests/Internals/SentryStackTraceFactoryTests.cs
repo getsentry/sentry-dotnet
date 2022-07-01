@@ -145,8 +145,12 @@ public class SentryStackTraceFactoryTests
         var stackTrace = factory.Create(exception);
 
         // Assert
-        var frame = stackTrace!.Frames.Last();
-        return Verify(frame)
+        return Verify(stackTrace!.Frames)
+            .IgnoreMembers<SentryStackFrame>(
+                x => x.Package,
+                x => x.LineNumber,
+                x => x.ColumnNumber,
+                x => x.InstructionOffset)
             .UseParameters(mode);
     }
 

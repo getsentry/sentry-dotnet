@@ -1,1 +1,20 @@
-﻿
+[
+  {
+    FileName: C:\Dev\xunit\xunit\src\xunit.core\Record.cs,
+    Function: Exception,
+    Module: Xunit.Record,
+    InApp: true
+  },
+  {
+    FileName: {ProjectDirectory}Internals\SentryStackTraceFactoryTests.cs,
+    Function: GenericMethod { <lambda> },
+    Module: Other.Tests.Internals.SentryStackTraceFactoryTests+<>c__DisplayClass8_0,
+    InApp: true
+  },
+  {
+    FileName: {ProjectDirectory}Internals\SentryStackTraceFactoryTests.cs,
+    Function: GenericMethodThatThrows,
+    Module: Other.Tests.Internals.SentryStackTraceFactoryTests,
+    InApp: true
+  }
+]
