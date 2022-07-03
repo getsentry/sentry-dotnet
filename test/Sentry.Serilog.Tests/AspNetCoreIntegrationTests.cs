@@ -1,11 +1,10 @@
-using Sentry.Testing;
+using Sentry.AspNetCore.Tests;
 
 namespace Sentry.Serilog.Tests;
 
 [Collection(nameof(SentrySdkCollection))]
-public class AspNetCoreIntegrationTests : AspNetSentrySdkTestFixture
+public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
 {
-#if NETCOREAPP3_1_OR_GREATER
     [Fact]
     public async Task UnhandledException_MarkedAsUnhandled()
     {
@@ -22,5 +21,4 @@ public class AspNetCoreIntegrationTests : AspNetSentrySdkTestFixture
         Assert.Contains(Events, e => e.Logger == "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware");
         Assert.Collection(Events, @event => Assert.Collection(@event.SentryExceptions, x => Assert.False(x.Mechanism?.Handled)));
     }
-#endif
 }
