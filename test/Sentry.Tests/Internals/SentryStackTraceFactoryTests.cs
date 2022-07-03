@@ -130,7 +130,7 @@ public class SentryStackTraceFactoryTests
     [Theory]
     [InlineData(StackTraceMode.Original)]
     [InlineData(StackTraceMode.Enhanced)]
-    public Task GenericMethod(StackTraceMode mode)
+    public Task MethodGeneric(StackTraceMode mode)
     {
         _fixture.SentryOptions.StackTraceMode = mode;
 
@@ -144,13 +144,14 @@ public class SentryStackTraceFactoryTests
         // Act
         var stackTrace = factory.Create(exception);
 
-        // Assert
-        return Verify(stackTrace!.Frames)
+        // Assert;
+        var frame = stackTrace!.Frames.Single(x => x.Function!.Contains("GenericMethodThatThrows"));
+        return Verify(frame)
             .IgnoreMembers<SentryStackFrame>(
                 x => x.Package,
                 x => x.LineNumber,
                 x => x.ColumnNumber,
-                x => x.InstructionOffset)
+                x => x.InstructionOffset).AddScrubber(x => x.Replace("/", @"\"))
             .UseParameters(mode);
     }
 
