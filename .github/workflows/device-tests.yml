@@ -83,8 +83,16 @@ jobs:
           disable-animations: false
           script: xharness android test --output-directory=./test_output --app=./io.sentry.maui.device.testapp-Signed.apk --package-name=io.sentry.maui.device.testapp
 
-      - name: Upload test results
-        if: ${{ always() }}
+      - name: Test Report
+        uses: dorny/test-reporter@0d00bb14cb0cc2c9b8985df6e81dd333188224e1
+        if: success() || failure()
+        with:
+          name: Android Tests
+          path: test_output/*.xml
+          reporter: dotnet-trx
+
+      - name: Upload results
+        if:  success() || failure()
         uses: actions/upload-artifact@v3
         with:
           name: device-test-android-${{ matrix.api-level }}-results
