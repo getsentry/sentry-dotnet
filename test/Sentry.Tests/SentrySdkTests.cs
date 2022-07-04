@@ -326,7 +326,7 @@ public class SentrySdkTests : IDisposable
         finally
         {
             // cleanup to avoid disposing/deleting the temp directory while the cache worker is still running
-            var cachingTransport = (CachingTransport) options!.Transport;
+            var cachingTransport = (CachingTransport)options!.Transport;
             await cachingTransport!.StopWorkerAsync();
         }
     }
@@ -700,7 +700,8 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
-            Debug = true
+            Debug = true,
+            DetectStartupTime = StartupTimeDetectionMode.Fast // `.Best` would actually trigger a warning log on Android
         });
 
         logger.DidNotReceive().Log(

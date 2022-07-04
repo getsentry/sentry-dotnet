@@ -11,7 +11,7 @@ public class TempDirectory : IDisposable
     }
 
     public TempDirectory()
-        : this(System.IO.Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString()))
+        : this(System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString()))
     { }
 
     public void Dispose()
