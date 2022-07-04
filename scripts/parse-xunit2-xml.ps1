@@ -4,6 +4,11 @@ Set-StrictMode -Version Latest
 
 [xml]$xml = Get-Content $File
 
+function ElementText([System.Xml.XmlElement] $element)
+{
+    $element.InnerText.Replace('\n', "`n").Replace('\t', "`t").Replace('\"', '"').Trim()
+}
+
 $summary = "## Summary`n`n"
 $summary += "| Assembly | Passed | Failed | Skipped |`n"
 $summary += "| -------- | -----: | -----: | ------: |`n"
@@ -22,17 +27,22 @@ foreach ($assembly in $xml.assemblies.assembly)
                 continue
             }
 
+            $failures += "#### $($test.name.Replace('\"', '"'))"
             if ($test.result -eq "Skip")
             {
-                $failures += "#### $($test.name) - Skipped`n"
-                $failures += "$($test.reason.InnerText)"
+                $failures += " - Skipped`n"
+                $failures += "$(ElementText $test.reason)"
             }
             else
             {
-                $failures += "#### $($test.name) - $($test.result)ed`n"
+                $failures += " - $($test.result)ed`n"
+                if ($test.PSobject.Properties.name -match "output")
+                {
+                    $failures += "$(ElementText $test.output)`n"
+                }
                 $failures += '```' + "`n"
-                $failures += "$($test.failure.message.InnerText)`n"
-                $failures += "$($test.failure['stack-trace'].InnerText)`n"
+                $failures += "$(ElementText $test.failure.message)`n"
+                $failures += "$(ElementText $test.failure['stack-trace'])`n"
                 $failures += '```'
             }
             $failures += "`n"
