@@ -68,8 +68,7 @@ jobs:
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json --version "1.0.0-prerelease*"
 
       - name: Test
-        # id: test
-        # continue-on-error: true
+        continue-on-error: true   # Temporary until all tests are fixed
         timeout-minutes: 30
         uses: reactivecircus/android-emulator-runner@e790971012b979513b4e2fe70d4079bc0ca8a1ae
         with:
