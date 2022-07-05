@@ -6,6 +6,7 @@
     <RootNamespace>Microsoft.Maui.TestUtils</RootNamespace>
     <AssemblyName>Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen</AssemblyName>
     <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
