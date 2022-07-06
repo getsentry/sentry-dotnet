@@ -10,11 +10,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
-
+    defaults:
+      run:
+        shell: pwsh
     steps:
         - name: Checkout
           uses: actions/checkout@v3
@@ -26,15 +27,16 @@ jobs:
 
         - name: Build
           run: |
-            dotnet restore ./test/Sentry.Maui.Device.TestApp
-            dotnet msbuild  /p:Configuration=Release ./test/Sentry.Maui.Device.TestApp
+            $project = 'test/Sentry.Maui.Device.TestApp'
+            dotnet restore $project
+            dotnet build -c Release $project -o bin/
 
         - name: Upload test app
           uses: actions/upload-artifact@v3
           with:
             name: device-test-android
             if-no-files-found: error
-            path: test/Sentry.Maui.Device.TestApp/bin/Release/net6.0-android/io.sentry.maui.device.testapp-Signed.apk
+            path: bin/io.sentry.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
@@ -57,7 +59,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: device-test-android
-          path: .
+          path: bin
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v2
@@ -81,7 +83,7 @@ jobs:
           disk-size: 4096M
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
-          script: xharness android test --output-directory=./test_output --app=./io.sentry.maui.device.testapp-Signed.apk --package-name=io.sentry.maui.device.testapp
+          script: xharness android test --output-directory=./test_output --app=bin/io.sentry.maui.device.testapp-Signed.apk --package-name=io.sentry.maui.device.testapp
 
       - name: Test Report
         if: success() || failure()
