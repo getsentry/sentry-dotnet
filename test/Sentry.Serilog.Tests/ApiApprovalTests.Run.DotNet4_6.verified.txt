@@ -1,5 +1,4 @@
 [assembly: System.CLSCompliant(true)]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.6.1", FrameworkDisplayName=".NET Framework 4.6.1")]
 namespace Sentry.Serilog
 {
     public class SentrySerilogOptions : Sentry.SentryOptions
