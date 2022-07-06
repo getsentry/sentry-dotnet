@@ -1,22 +1,33 @@
 using System.Collections.Concurrent;
 using NSubstitute.ExceptionExtensions;
+using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
 
 public class BackgroundWorkerTests
 {
+    private readonly Fixture _fixture;
+
+    public BackgroundWorkerTests(ITestOutputHelper outputHelper)
+    {
+        _fixture = new Fixture(outputHelper);
+    }
+
     private class Fixture
     {
         public IClientReportRecorder ClientReportRecorder { get; private set; } = Substitute.For<IClientReportRecorder>();
         public ITransport Transport { get; set; } = Substitute.For<ITransport>();
-        public IDiagnosticLogger Logger { get; set; } = Substitute.For<IDiagnosticLogger>();
+        public IDiagnosticLogger Logger { get; set; }
         public ConcurrentQueue<Envelope> Queue { get; set; } = new();
         public CancellationTokenSource CancellationTokenSource { get; set; } = new();
         public SentryOptions SentryOptions { get; set; } = new();
 
-        public Fixture()
+        public Fixture(ITestOutputHelper outputHelper)
         {
-            _ = Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+            // Use the test output logger, but spy on it so we can check received calls.
+            // See "Test spies" at https://nsubstitute.github.io/help/partial-subs/
+            Logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(outputHelper, SentryLevel.Debug);
+
             SentryOptions.Debug = true;
             SentryOptions.DiagnosticLogger = Logger;
             SentryOptions.ClientReportRecorder = ClientReportRecorder;
@@ -36,8 +47,6 @@ public class BackgroundWorkerTests
             return ClientReportRecorder;
         }
     }
-
-    private readonly Fixture _fixture = new();
 
     [Fact]
     public void Ctor_Task_Created()
