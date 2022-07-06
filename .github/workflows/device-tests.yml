@@ -65,7 +65,7 @@ jobs:
           dotnet-version: 6.0.x
 
       - name: Install xharness
-        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json --version "1.0.0-prerelease*"
+        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.0.0-prerelease*"
 
       - name: Test
         continue-on-error: true   # Temporary until all tests are fixed
