@@ -1,5 +1,4 @@
 ﻿[assembly: System.CLSCompliant(true)]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.1", FrameworkDisplayName="")]
 namespace Sentry.Log4Net
 {
     public class SentryAppender : log4net.Appender.AppenderSkeleton

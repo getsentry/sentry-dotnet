@@ -1,4 +1,3 @@
-[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v3.0", FrameworkDisplayName="")]
 namespace Microsoft.AspNetCore.Builder
 {
     public static class SentryTracingMiddlewareExtensions { }

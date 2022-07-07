@@ -17,6 +17,7 @@ public static class ApiExtensions
             .ScrubLines(l =>
                 l.StartsWith("[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(") ||
                 l.StartsWith("[assembly: AssemblyVersion(") ||
+                l.StartsWith("[assembly: System.Runtime.Versioning.TargetFramework(") ||
                 l.StartsWith("[assembly: AssemblyFileVersion(") ||
                 l.StartsWith("[assembly: AssemblyInformationalVersion(") ||
                 l.StartsWith("[assembly: System.Reflection.AssemblyMetadata("));

@@ -5,6 +5,11 @@
 ### Fixes
 
 - Detect MVC versioning in route ([#1731](https://github.com/getsentry/sentry-dotnet/pull/1731))
+## Unreleased
+
+### Fixes
+
+- Fix error with `ConcurrentHashMap` on Android <= 9 ([#1761](https://github.com/getsentry/sentry-dotnet/pull/1761))
 
 ## 3.19.0
 
