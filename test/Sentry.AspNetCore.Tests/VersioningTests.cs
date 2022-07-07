@@ -18,7 +18,7 @@ public class VersioningTests
         {
             _.TracesSampleRate = 1;
             _.Transport = transport;
-            _.Dsn = DsnSamples.ValidDsnWithoutSecret;
+            _.Dsn = ValidDsn;
         });
         var services = builder.Services;
         var controllers = services.AddControllers();
