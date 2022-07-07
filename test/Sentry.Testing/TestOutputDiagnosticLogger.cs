@@ -44,9 +44,20 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         };
         _entries.Enqueue(entry);
 
-        _testOutputHelper.WriteLine($@"
+        if (exception == null)
+        {
+            _testOutputHelper.WriteLine($@"
 [{logLevel}]: {formattedMessage}
-    Exception: {exception?.ToString() ?? "<none>"}
 ".Trim());
+        }
+        else
+        {
+            _testOutputHelper.WriteLine($@"
+[{logLevel}]: {formattedMessage}
+    Exception: {exception}
+".Trim());
+        }
+
+
     }
 }
