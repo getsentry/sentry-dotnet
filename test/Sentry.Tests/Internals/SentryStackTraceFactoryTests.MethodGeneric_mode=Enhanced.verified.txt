@@ -1,5 +1,5 @@
-﻿{
-  FileName: {ProjectDirectory}Internals\SentryStackTraceFactoryTests.cs,
+{
+  FileName: {ProjectDirectory}Internals/SentryStackTraceFactoryTests.cs,
   Function: void SentryStackTraceFactoryTests.GenericMethodThatThrows<T>(T value),
   InApp: true
 }

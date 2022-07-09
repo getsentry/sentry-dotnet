@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 // ReSharper disable once CheckNamespace
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
+
 [UsesVerify]
 public class SentryStackTraceFactoryTests
 {
@@ -151,7 +152,7 @@ public class SentryStackTraceFactoryTests
                 x => x.Package,
                 x => x.LineNumber,
                 x => x.ColumnNumber,
-                x => x.InstructionOffset).AddScrubber(x => x.Replace("/", @"\"))
+                x => x.InstructionOffset).AddScrubber(x => x.Replace(@"\", @"/"))
             .UseParameters(mode);
     }
 
