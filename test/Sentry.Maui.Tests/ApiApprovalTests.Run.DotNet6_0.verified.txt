@@ -1,5 +1,4 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v6.0", FrameworkDisplayName="")]
-namespace Microsoft.Maui.Hosting
+﻿namespace Microsoft.Maui.Hosting
 {
     public static class SentryMauiAppBuilderExtensions { }
 }
