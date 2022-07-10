@@ -120,8 +120,9 @@ public class SentryStackTraceFactoryTests
         }
         catch (Exception e) { exception = e; }
 
-        var stackTrace = sut.Create(exception);
-        return Verify(stackTrace!.Frames.Select(x=>x.FileName));
+        var fileName = sut.Create(exception)!.Frames.First().FileName;
+
+        return Verify(fileName);
     }
 
     [Theory]
