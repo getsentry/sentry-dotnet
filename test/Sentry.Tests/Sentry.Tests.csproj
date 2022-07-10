@@ -32,10 +32,6 @@
     <Compile Include="../Sentry.Diagnostics.DiagnosticSource.Tests/Integration/**/*.cs">
       <Link>Internals/DiagnosticSource/Integration/%(RecursiveDir)/%(Filename)%(Extension)</Link>
     </Compile>
-
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.11" />
   </ItemGroup>
 
   <Import Project="$(ProjectDir)..\..\src\Sentry\buildTransitive\Sentry.props" />
