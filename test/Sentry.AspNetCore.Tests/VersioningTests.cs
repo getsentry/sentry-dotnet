@@ -1,4 +1,3 @@
-
 #if NET6_0
 using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
@@ -48,6 +47,8 @@ public class VersioningTests
             .IgnoreStandardSentryMembers()
             .ScrubLinesContaining("Message: Executed action ")
             .IgnoreMembers("ConnectionId", "RequestId");
+
+        await app.StopAsync();
     }
 
     [ApiController]
