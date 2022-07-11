@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 // ReSharper disable once CheckNamespace
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
 
-[UsesVerify]
 public class SentryStackTraceFactoryTests
 {
     private class Fixture
@@ -107,8 +107,9 @@ public class SentryStackTraceFactoryTests
     }
 
     [Fact]
-    public Task FileNameShouldBeRelative()
+    public void FileNameShouldBeRelative()
     {
+        Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
 
@@ -120,9 +121,7 @@ public class SentryStackTraceFactoryTests
         }
         catch (Exception e) { exception = e; }
 
-        var fileName = sut.Create(exception)!.Frames.First().FileName;
-
-        return Verify(fileName);
+        Assert.Equal(@"Internals\SentryStackTraceFactoryTests.cs", sut.Create(exception)!.Frames.First().FileName);
     }
 
     [Theory]
