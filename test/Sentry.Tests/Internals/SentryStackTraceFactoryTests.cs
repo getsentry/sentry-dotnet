@@ -68,7 +68,7 @@ public class SentryStackTraceFactoryTests
     }
 
     [Theory]
-    [InlineData(StackTraceMode.Original, "AsyncWithAwait_StackTrace { <lambda> }")]
+    [InlineData(StackTraceMode.Original, "MoveNext")] // Should be "AsyncWithAwait_StackTrace { <lambda> }", but see note in SentryStackTraceFactory
     [InlineData(StackTraceMode.Enhanced, "async Task SentryStackTraceFactoryTests.AsyncWithAwait_StackTrace(StackTraceMode mode, string method)+(?) => { }")]
     public async Task AsyncWithAwait_StackTrace(StackTraceMode mode, string method)
     {
