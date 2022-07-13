@@ -15,7 +15,7 @@ namespace Sentry.Extensibility
     {
         private readonly SentryOptions _options;
 
-        private static readonly Regex RegexAsyncFunctionName = new(@"^(.*)\+(?:<\w*>c__.*\+)?<(\w*|<\w*>b__\d*)>d(?:__\d*)?$",
+        private static readonly Regex RegexAsyncFunctionName = new(@"^(.*)\+<(\w*|<\w*>b__\d*)>d(?:__\d*)?$",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private static readonly Regex RegexAnonymousFunction = new(@"^<(\w*)>b__\w+$",
