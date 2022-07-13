@@ -109,7 +109,6 @@ public class SentryStackTraceFactoryTests
     [Fact]
     public void FileNameShouldBeRelative()
     {
-        Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
 
@@ -121,7 +120,8 @@ public class SentryStackTraceFactoryTests
         }
         catch (Exception e) { exception = e; }
 
-        Assert.Equal(@"Internals\SentryStackTraceFactoryTests.cs", sut.Create(exception)!.Frames.First().FileName);
+        var expected = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
+        Assert.Equal(expected, sut.Create(exception)!.Frames[0].FileName);
     }
 
     [Theory]
