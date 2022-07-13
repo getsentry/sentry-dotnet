@@ -9,7 +9,7 @@ namespace Sentry
         public static bool TryGetProjectDirectory(Assembly assembly, out string? projectDirectory)
         {
             projectDirectory = assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
-                .SingleOrDefault(x => x.Key == "Sentry.ProjectDirectory")
+                .FirstOrDefault(x => x.Key == "Sentry.ProjectDirectory")
                 ?.Value;
             return projectDirectory != null;
         }
