@@ -15,7 +15,7 @@ namespace Sentry.Extensibility
     {
         private readonly SentryOptions _options;
 
-        private static readonly Regex RegexAsyncFunctionName = new(@"^(.*)\+<(\w*)>d__\d*$",
+        private static readonly Regex RegexAsyncFunctionName = new(@"^(.*)\+(?:<\w*>c__.*\+)?<(\w*|<\w*>b__\d*)>d(?:__\d*)?$",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private static readonly Regex RegexAnonymousFunction = new(@"^<(\w*)>b__\w+$",
@@ -239,12 +239,18 @@ namespace Sentry.Extensibility
                 return;
             }
 
-            //  Search for the function name in angle brackets followed by d__<digits>.
+            //  Search for the function name in angle brackets in either of the following forms
             //
             // Change:
             //   RemotePrinterService+<UpdateNotification>d__24 in MoveNext at line 457:13
             // to:
             //   RemotePrinterService in UpdateNotification at line 457:13
+            //
+            // Also will change:
+            //   RemotePrinterService+<>c__DisplayClass5_0+<<UpdateNotificationAsync>b__0>d in MoveNext at line 457:13
+            // to:
+            //   RemotePrinterService in <UpdateNotificationAsync>b__0 at line 457:13
+            //  (The second part will be demangled later by DemangleAnonymousFunction)
 
             var match = RegexAsyncFunctionName.Match(frame.Module);
             if (match.Success && match.Groups.Count == 3)
