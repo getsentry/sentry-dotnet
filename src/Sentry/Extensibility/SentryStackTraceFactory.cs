@@ -140,16 +140,17 @@ namespace Sentry.Extensibility
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
 
-                if (_options.StackTraceMode == StackTraceMode.Enhanced && stackFrame is EnhancedStackFrame enhancedStackFrame)
+                if (_options.StackTraceMode == StackTraceMode.Enhanced &&
+                    stackFrame is EnhancedStackFrame enhancedStackFrame)
                 {
-                    var sb = new StringBuilder();
-                    frame.Function = enhancedStackFrame.MethodInfo.Append(sb, false).ToString();
+                    var stringBuilder = new StringBuilder();
+                    frame.Function = enhancedStackFrame.MethodInfo.Append(stringBuilder, false).ToString();
 
                     if (enhancedStackFrame.MethodInfo.DeclaringType is { } declaringType)
                     {
-                        sb.Clear();
-                        sb.AppendTypeDisplayName(declaringType);
-                        frame.Module = sb.ToString();
+                        stringBuilder.Clear();
+                        stringBuilder.AppendTypeDisplayName(declaringType);
+                        frame.Module = stringBuilder.ToString();
                     }
                 }
                 else
