@@ -71,7 +71,7 @@ namespace Sentry.Internal
             {
                 Interlocked.Decrement(ref _currentItems);
                 _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
-                _options.LogDebug("Discarding envelope {0} because the queue is full.", envelope.TryGetEventId());
+                _options.LogInfo("Discarding envelope {0} because the queue is full.", envelope.TryGetEventId());
                 return false;
             }
 
