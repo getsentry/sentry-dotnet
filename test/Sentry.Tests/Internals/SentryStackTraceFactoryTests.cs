@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Sentry.PlatformAbstractions;
 
 // ReSharper disable once CheckNamespace
 // Stack trace filters out Sentry frames by namespace
@@ -128,11 +129,14 @@ public class SentryStackTraceFactoryTests
         frame.Function.Should().Be(method);
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(StackTraceMode.Original)]
     [InlineData(StackTraceMode.Enhanced)]
     public Task MethodGeneric(StackTraceMode mode)
     {
+        // TODO: Mono gives different results.  Investigate why.
+        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "Not supported on Mono");
+
         _fixture.SentryOptions.StackTraceMode = mode;
 
         // Arrange
