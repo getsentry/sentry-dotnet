@@ -131,7 +131,7 @@ public class SentryDiagnosticListenerTests
             commands.Add(i * 2);
         }
         // Save before the Transaction creation to avoid storing junk.
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
