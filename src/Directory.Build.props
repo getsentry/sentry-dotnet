@@ -45,7 +45,7 @@
 
   <PropertyGroup>
     <!-- Used by SIL.ReleaseTasks below -->
-    <ChangelogFile>$(MSBuildThisFileDirectory)../CHANGELOG.md</ChangelogFile>
+    <ChangelogFile>$(MSBuildThisFileDirectory)..\CHANGELOG.md</ChangelogFile>
     <AppendToReleaseNotesProperty>
       <![CDATA[-->
       See full changelog at https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md]]>
@@ -54,8 +54,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
-    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)..\.assets\sentry-nuget.png" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>

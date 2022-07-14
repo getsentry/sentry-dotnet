@@ -17,14 +17,14 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.26" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net48' OR '$(TargetFramework)' == 'net461' ">
-    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.26" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.26" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
     <PackageReference Include="LocalDb" Version="13.8.0" />
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
 
 </Project>

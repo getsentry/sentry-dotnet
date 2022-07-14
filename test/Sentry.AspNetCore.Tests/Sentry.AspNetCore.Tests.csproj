@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
-    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
