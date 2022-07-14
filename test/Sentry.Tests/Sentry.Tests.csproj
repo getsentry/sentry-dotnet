@@ -34,4 +34,6 @@
     </Compile>
   </ItemGroup>
 
+  <Import Project="..\..\src\Sentry\buildTransitive\Sentry.props" />
+
 </Project>

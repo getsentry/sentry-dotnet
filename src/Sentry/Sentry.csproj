@@ -55,4 +55,9 @@
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="buildTransitive\Sentry.props" />
+    <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
+  </ItemGroup>
+
 </Project>
