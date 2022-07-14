@@ -48,6 +48,48 @@ public class SentryStackTraceFactoryTests
             ) == true);
     }
 
+    [Theory]
+    [InlineData(StackTraceMode.Original, "AsyncWithWait_StackTrace { <lambda> }")]
+    [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
+    public void AsyncWithWait_StackTrace(StackTraceMode mode, string method)
+    {
+        _fixture.SentryOptions.AttachStacktrace = true;
+        _fixture.SentryOptions.StackTraceMode = mode;
+        var sut = _fixture.GetSut();
+
+        SentryStackTrace stackTrace = null!;
+        Task.Run(() => stackTrace = sut.Create()).Wait();
+
+        Assert.NotNull(stackTrace);
+
+        Assert.Equal(method, stackTrace.Frames.Last().Function);
+
+        if (_fixture.SentryOptions.StackTraceMode == StackTraceMode.Original)
+        {
+            Assert.Equal("System.Threading.Tasks.Task`1", stackTrace.Frames[stackTrace.Frames.Count - 2].Module);
+        }
+    }
+
+    [Theory]
+    [InlineData(StackTraceMode.Original, "MoveNext")] // Should be "AsyncWithAwait_StackTrace { <lambda> }", but see note in SentryStackTraceFactory
+    [InlineData(StackTraceMode.Enhanced, "async Task SentryStackTraceFactoryTests.AsyncWithAwait_StackTrace(StackTraceMode mode, string method)+(?) => { }")]
+    public async Task AsyncWithAwait_StackTrace(StackTraceMode mode, string method)
+    {
+        _fixture.SentryOptions.AttachStacktrace = true;
+        _fixture.SentryOptions.StackTraceMode = mode;
+        var sut = _fixture.GetSut();
+
+        var stackTrace = await Task.Run(async () =>
+        {
+            await Task.Yield();
+            return sut.Create();
+        });
+
+        Assert.NotNull(stackTrace);
+
+        Assert.Equal(method, stackTrace.Frames.Last().Function);
+    }
+
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace()
     {

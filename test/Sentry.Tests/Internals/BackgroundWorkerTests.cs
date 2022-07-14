@@ -384,7 +384,9 @@ public class BackgroundWorkerTests
 
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
         Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
-        sw.Elapsed.Should().BeGreaterThanOrEqualTo(flushTimeout);
+
+        // Test the timeout, with a bit of tolerance on the lower bound
+        sw.Elapsed.Should().BeGreaterThan(flushTimeout - TimeSpan.FromMilliseconds(10));
     }
 
     [Fact]
