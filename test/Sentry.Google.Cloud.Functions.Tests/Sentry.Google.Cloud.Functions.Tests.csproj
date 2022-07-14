@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Google.Cloud.Functions/Sentry.Google.Cloud.Functions.csproj" />
-    <ProjectReference Include="../Sentry.AspNetCore.Tests/Sentry.AspNetCore.Tests.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj" />
+    <ProjectReference Include="..\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj" />
   </ItemGroup>
 
 </Project>

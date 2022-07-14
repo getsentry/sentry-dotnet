@@ -9,18 +9,18 @@
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
     <!-- Files under Android are included below when TFM ends with android -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/Android/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\Android\**</DefaultItemExcludes>
   </PropertyGroup>
 
-  <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android/Sentry.Android.props" />
+  <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android\Sentry.Android.props" />
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);HAS_ASYNC_ENUMERATOR</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../modules/Ben.Demystifier/src/**/*.cs">
-      <Link>%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcoreapp')) or '$(TargetFramework)' == 'net461'">
@@ -33,8 +33,8 @@
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
-    <Compile Include="../Sentry.DiagnosticSource/Internals/**/*.cs">
-      <Link>Internal/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Compile Include="..\Sentry.DiagnosticSource\Internals\**\*.cs">
+      <Link>Internal\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
   <!-- DiagnosticSource -->

@@ -13,7 +13,7 @@
   <ItemGroup>
     <!-- An attempt to use run netfx tests with Mono and .NET Core CLI https://github.com/xunit/xunit/issues/1357 -->
     <!-- After strong name signing assemblies, only net462 target stopped working. Again xunit -noshadow seems to solve it: https://github.com/Microsoft/vstest/issues/1684 -->
-    <Content Include="../xunit.runner.json">
+    <Content Include="..\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
