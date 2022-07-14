@@ -56,8 +56,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="buildTransitive\Sentry.props" PackagePath="buildTransitive\Sentry.props" />
-    <Content Include="buildTransitive\Sentry.props" PackagePath="build\Sentry.props" />
+    <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="buildTransitive\Sentry.props" />
+    <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
   </ItemGroup>
 
 </Project>
