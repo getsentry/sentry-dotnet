@@ -1,4 +1,4 @@
-﻿using AttributeReader = Sentry.AttributeReader;
+﻿namespace Sentry.Tests;
 
 public class AttributeReaderTests
 {

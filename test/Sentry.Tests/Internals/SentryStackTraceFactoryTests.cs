@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
 
 // ReSharper disable once CheckNamespace
@@ -154,6 +153,7 @@ public class SentryStackTraceFactoryTests
     public void FileNameShouldBeRelative()
     {
         Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
 
@@ -163,7 +163,10 @@ public class SentryStackTraceFactoryTests
             Throw();
             void Throw() => throw new();
         }
-        catch (Exception e) { exception = e; }
+        catch (Exception e)
+        {
+            exception = e;
+        }
 
         var expected = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
         Assert.Equal(expected, sut.Create(exception)!.Frames[0].FileName);

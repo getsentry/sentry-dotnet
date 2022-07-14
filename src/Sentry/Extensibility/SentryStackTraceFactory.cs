@@ -185,8 +185,7 @@ namespace Sentry.Extensibility
             frame.ConfigureAppFrame(_options);
 
             var frameFileName = stackFrame.GetFileName();
-            if (projectPath != null &&
-                frameFileName != null)
+            if (projectPath != null && frameFileName != null)
             {
                 frameFileName = frameFileName.Replace(projectPath, "");
             }
