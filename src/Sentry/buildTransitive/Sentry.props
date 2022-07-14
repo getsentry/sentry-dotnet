@@ -17,7 +17,7 @@
         <_Parameter2>$(ProjectDir)</_Parameter2>
       </SentryAttributes>
       <SentryAttributes Include="System.Reflection.AssemblyMetadata"
-                  Condition="'$(SolutionDir)' != '' And '$(SolutionDir)' != '*Undefined*'">
+                        Condition="'$(SolutionDir)' != '' And '$(SolutionDir)' != '*Undefined*'">
         <_Parameter1>Sentry.SolutionDirectory</_Parameter1>
         <_Parameter2>$(SolutionDir)</_Parameter2>
       </SentryAttributes>
@@ -27,9 +27,14 @@
     <WriteCodeFragment AssemblyAttributes="@(SentryAttributes)"
                        Language="$(Language)"
                        OutputFile="$(SentryAttributesFilePath)">
-      <Output TaskParameter="OutputFile" ItemName="Compile" Condition="$(Language) != 'F#'" />
-      <Output TaskParameter="OutputFile" ItemName="CompileBefore" Condition="$(Language) == 'F#'" />
-      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+      <Output Condition="$(Language) != 'F#'"
+              TaskParameter="OutputFile"
+              ItemName="Compile"/>
+      <Output Condition="$(Language) == 'F#'"
+              TaskParameter="OutputFile"
+              ItemName="CompileBefore"/>
+      <Output TaskParameter="OutputFile"
+              ItemName="FileWrites" />
     </WriteCodeFragment>
   </Target>
 </Project>
