@@ -108,9 +108,10 @@ public class SentryStackTraceFactoryTests
         Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace?.Frames.Count);
     }
 
-    [Fact]
+    [SkippableFact]
     public void FileNameShouldBeRelative()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
         _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
 
