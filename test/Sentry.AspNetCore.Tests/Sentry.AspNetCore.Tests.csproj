@@ -1,23 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Running these tests on Mono just hangs -->
-  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-    <TargetFrameworks>net461;$(TargetFrameworks)</TargetFrameworks>
-  </PropertyGroup>
-
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
-    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.1' OR $(TargetFramework) == 'net461'">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.26" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net5.0'">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.17" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.6" />
   </ItemGroup>
 
   <ItemGroup>

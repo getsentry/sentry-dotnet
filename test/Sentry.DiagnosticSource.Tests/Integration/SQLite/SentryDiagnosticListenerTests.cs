@@ -131,6 +131,10 @@ public class SentryDiagnosticListenerTests
             commands.Add(i * 2);
         }
         // Save before the Transaction creation to avoid storing junk.
+        //Dont async here since it will fail in mac+linux with
+        // The type initializer for 'System.Data.Common.DbConnectionExtensions' threw an exception.
+        // Expression of type 'ValueTask[System.Data.Common.DbTransaction]' cannot be used...
+        // ReSharper disable once MethodHasAsyncOverload
         context.SaveChanges();
 
         var hub = _fixture.Hub;

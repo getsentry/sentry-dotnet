@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

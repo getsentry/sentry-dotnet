@@ -9,9 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Serilog/Sentry.Serilog.csproj" />
-    <ProjectReference Include="../../test/Sentry.Testing/Sentry.Testing.csproj" />
-    <ProjectReference Include="../../src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
+    <ProjectReference Include="..\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj" />
   </ItemGroup>
 
 </Project>

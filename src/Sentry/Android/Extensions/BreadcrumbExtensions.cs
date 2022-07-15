@@ -4,7 +4,9 @@ internal static class BreadcrumbExtensions
 {
     public static Breadcrumb ToBreadcrumb(this Java.Breadcrumb breadcrumb)
     {
-        var data = breadcrumb.Data.ToDictionary(x => x.Key, x => x.Value?.ToString() ?? "");
+        var data = breadcrumb.Data
+            .WorkaroundKeyIteratorBug()
+            .ToDictionary(x => x.Key, x => x.Value?.ToString() ?? "");
 
         return new(breadcrumb.Timestamp.ToDateTimeOffset(),
             breadcrumb.Message,
