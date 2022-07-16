@@ -41,7 +41,8 @@ namespace Sentry.Internal.Http
         private readonly CancellationTokenSource _workerCts = new();
         private Task _worker = null!;
 
-        private ManualResetEventSlim? _initCacheResetEvent;
+        private ManualResetEventSlim? _initCacheResetEvent = new ManualResetEventSlim();
+        private ManualResetEventSlim? _preInitCacheResetEvent = new ManualResetEventSlim();
 
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
@@ -97,11 +98,15 @@ namespace Sentry.Internal.Http
             {
                 _options.LogDebug("Blocking initialization to flush the cache.");
 
-                using (_initCacheResetEvent = new ManualResetEventSlim())
+                try
                 {
+                    // This will complete just before processing starts in the worker.
+                    // It ensures that we don't start the timeout period prematurely.
+                    _preInitCacheResetEvent!.Wait(_workerCts.Token);
+  
                     // This will complete either when the first round of processing is done,
                     // or on timeout, whichever comes first.
-                    var completed = _initCacheResetEvent.Wait(_options.InitCacheFlushTimeout);
+                    var completed = _initCacheResetEvent!.Wait(_options.InitCacheFlushTimeout, _workerCts.Token);
                     if (completed)
                     {
                         _options.LogDebug("Completed flushing the cache. Resuming initialization.");
@@ -113,9 +118,16 @@ namespace Sentry.Internal.Http
                             "Resuming initialization. Cache will continue flushing in the background.");
                     }
                 }
+                finally
+                {
+                    // We're done with these.  Dispose them.
+                    _preInitCacheResetEvent!.Dispose();
+                    _initCacheResetEvent!.Dispose();
 
-                // We're done with this. Set null to avoid object disposed exceptions on future processing calls.
-                _initCacheResetEvent = null;
+                    //Set null to avoid object disposed exceptions on future processing calls.
+                    _preInitCacheResetEvent = null;
+                    _initCacheResetEvent = null;
+                }
             }
         }
 
@@ -246,6 +258,10 @@ namespace Sentry.Internal.Http
 
         private async Task ProcessCacheAsync(CancellationToken cancellation)
         {
+            // Signal that we can start waiting for _options.InitCacheFlushTimeout
+            _preInitCacheResetEvent?.Set();
+
+            // Process the cache
             while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
             {
                 await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
@@ -479,6 +495,8 @@ namespace Sentry.Internal.Http
             _workerCts.Dispose();
             _worker.Dispose();
             _cacheDirectoryLock.Dispose();
+            _preInitCacheResetEvent?.Dispose();
+            _initCacheResetEvent?.Dispose();
 
             (_innerTransport as IDisposable)?.Dispose();
         }
