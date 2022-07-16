@@ -152,7 +152,7 @@ public class CachingTransportTests
         _logger
             .When(l =>
                 l.Log(SentryLevel.Error,
-                    "Exception in background worker of CachingTransport.",
+                    "Exception in CachingTransport worker.",
                     Arg.Any<OperationCanceledException>(),
                     Arg.Any<object[]>()))
             .Do(_ => loggerCompletionSource.SetResult(null));

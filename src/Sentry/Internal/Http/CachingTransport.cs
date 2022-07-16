@@ -82,7 +82,15 @@ namespace Sentry.Internal.Http
             Directory.CreateDirectory(_processingDirectoryPath);
 
             // Start a worker, if one is needed
-            _worker = startWorker ? Task.Run(CachedTransportBackgroundTaskAsync) : Task.CompletedTask;
+            if (startWorker)
+            {
+                _options.LogDebug("Starting CachingTransport worker.");
+                _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+            }
+            else
+            {
+                _worker = Task.CompletedTask;
+            }
 
             // Wait for init timeout, if configured.  (Can't do this without a worker.)
             if (startWorker && _options.InitCacheFlushTimeout > TimeSpan.Zero)
@@ -113,6 +121,8 @@ namespace Sentry.Internal.Http
 
         private async Task CachedTransportBackgroundTaskAsync()
         {
+            _options.LogDebug("CachingTransport worker has started.");
+
             while (!_workerCts.IsCancellationRequested)
             {
                 try
@@ -128,7 +138,7 @@ namespace Sentry.Internal.Http
                 }
                 catch (Exception ex)
                 {
-                    _options.LogError("Exception in background worker of CachingTransport.", ex);
+                    _options.LogError("Exception in CachingTransport worker.", ex);
 
                     try
                     {
@@ -141,7 +151,7 @@ namespace Sentry.Internal.Http
                     }
                 }
             }
-            _options.LogDebug("Background worker of CachingTransport has shutdown.");
+            _options.LogDebug("CachingTransport worker stopped.");
         }
 
         private void MoveUnprocessedFilesBackToCache()
@@ -434,6 +444,7 @@ namespace Sentry.Internal.Http
         public async Task StopWorkerAsync()
         {
             // Stop worker and wait until it finishes
+            _options.LogDebug("Stopping CachingTransport worker.");
             _workerCts.Cancel();
             await _worker.ConfigureAwait(false);
         }
