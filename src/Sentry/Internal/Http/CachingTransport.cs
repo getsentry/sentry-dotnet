@@ -273,7 +273,7 @@ namespace Sentry.Internal.Http
 
         private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
         {
-            if (_options.NetworkStatusListener is {Online: false} listener)
+            if (_options.NetworkStatusListener is { Online: false } listener)
             {
                 _options.LogDebug("The network is offline. Pausing processing.");
                 await listener.WaitForNetworkOnlineAsync(cancellation).ConfigureAwait(false);
