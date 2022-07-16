@@ -443,6 +443,12 @@ namespace Sentry.Internal.Http
 
         public async Task StopWorkerAsync()
         {
+            if (_worker.IsCompleted)
+            {
+                // already stopped
+                return;
+            }
+
             // Stop worker and wait until it finishes
             _options.LogDebug("Stopping CachingTransport worker.");
             _workerCts.Cancel();
