@@ -290,6 +290,9 @@ namespace Sentry.Internal.Http
 #endif
             using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
             {
+                // Don't even try to send it if we are requesting cancellation.
+                cancellation.ThrowIfCancellationRequested();
+
                 try
                 {
                     _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
