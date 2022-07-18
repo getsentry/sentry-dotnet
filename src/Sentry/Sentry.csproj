@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461;net6.0-android</TargetFrameworks>
     <!-- We'll pin to C# 9 and ImplicitUsings false to allow us to compile within Unity -->
     <LangVersion>9</LangVersion>
     <ImplicitUsings>false</ImplicitUsings>
@@ -10,6 +9,14 @@
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
     <!-- Files under Android are included below when TFM ends with android -->
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\Android\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461;net6.0-android</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android\Sentry.Android.props" />
