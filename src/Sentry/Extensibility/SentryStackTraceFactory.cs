@@ -186,9 +186,9 @@ namespace Sentry.Extensibility
 
             // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
             var ilOffset = stackFrame.GetILOffset();
-            if (ilOffset != 0)
+            if (ilOffset != StackFrame.OFFSET_UNKNOWN)
             {
-                frame.InstructionOffset = stackFrame.GetILOffset();
+                frame.InstructionOffset = ilOffset;
             }
 
             var lineNo = stackFrame.GetFileLineNumber();
