@@ -271,7 +271,7 @@ public class SentrySdkTests : IDisposable
         }
 
         // Set the delay for the transport here.  If the test becomes flaky, increase the timeout.
-        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(100);
+        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(500);
 
         var transport = Substitute.For<ITransport>();
         transport.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
