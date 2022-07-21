@@ -96,7 +96,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+        sentEnvelope.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -212,8 +212,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope,
-            o => o.Excluding(x => x.Items[0].Header));
+        sentEnvelope.Should().BeEquivalentTo(envelope);;
     }
 
     [Fact]

@@ -8,10 +8,13 @@ public class EnvelopeTests
     // https://develop.sentry.dev/sdk/envelopes/#full-examples
 
     private readonly IDiagnosticLogger _testOutputLogger;
+    private readonly ISystemClock _fakeClock;
 
     public EnvelopeTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
+        _fakeClock = Substitute.For<ISystemClock>();
+        _fakeClock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
     }
 
     [Fact]
@@ -23,11 +26,11 @@ public class EnvelopeTests
             Array.Empty<EnvelopeItem>());
 
         // Act
-        var output = await envelope.SerializeToStringAsync(_testOutputLogger);
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n");
+            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
     }
 
     [Fact]
@@ -39,11 +42,11 @@ public class EnvelopeTests
             Array.Empty<EnvelopeItem>());
 
         // Act
-        var output = envelope.SerializeToString(_testOutputLogger);
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n");
+            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
     }
 
     [Fact]
@@ -79,11 +82,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(_testOutputLogger);
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{}\n" +
+            "{\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"session\",\"length\":75}\n" +
             "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n");
     }
@@ -104,11 +107,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(_testOutputLogger);
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{}\n" +
+            "{\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"session\",\"length\":75}\n" +
             "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n");
     }
@@ -177,11 +180,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(_testOutputLogger);
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
             "\xef\xbb\xbfHello\r\n\n" +
             "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
@@ -224,11 +227,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(_testOutputLogger);
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
             "\xef\xbb\xbfHello\r\n\n" +
             "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
@@ -312,11 +315,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(_testOutputLogger);
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":0}\n" +
             "\n" +
             "{\"type\":\"attachment\",\"length\":0}\n" +
@@ -351,11 +354,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(_testOutputLogger);
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":0}\n" +
             "\n" +
             "{\"type\":\"attachment\",\"length\":0}\n" +
@@ -419,11 +422,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(_testOutputLogger);
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":10}\n" +
             "helloworld\n");
     }
@@ -443,11 +446,11 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = envelope.SerializeToString(_testOutputLogger);
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":10}\n" +
             "helloworld\n");
     }
@@ -523,14 +526,7 @@ public class EnvelopeTests
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
 
         // Assert
-
-        // Can't compare the entire object graph because output envelope contains evaluated length,
-        // which original envelope doesn't have.
-        envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
-        envelopeRoundtrip.Items.Should().ContainSingle();
-
-        var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
-        payloadContent.Should().BeEquivalentTo(@event, o => o.Excluding(x => x.Exception));
+        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -629,13 +625,7 @@ public class EnvelopeTests
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
 
         // Assert
-
-        // Can't compare the entire object graph because output envelope contains evaluated length,
-        // which original envelope doesn't have.
-        envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
-        envelopeRoundtrip.Items.Should().ContainSingle();
-        envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
-            .Which.Source.Should().BeEquivalentTo(feedback);
+        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -655,13 +645,7 @@ public class EnvelopeTests
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
 
         // Assert
-
-        // Can't compare the entire object graph because output envelope contains evaluated length,
-        // which original envelope doesn't have.
-        envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
-        envelopeRoundtrip.Items.Should().ContainSingle();
-        envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
-            .Which.Source.Should().BeEquivalentTo(sessionUpdate);
+        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
