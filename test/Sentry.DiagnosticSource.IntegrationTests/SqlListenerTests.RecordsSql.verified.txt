@@ -50,7 +50,7 @@
           Description:
 
 insert into MyTable (Value)
-values (0);,
+values (@value);,
           Status: Ok,
           IsSampled: true,
           Extra: {

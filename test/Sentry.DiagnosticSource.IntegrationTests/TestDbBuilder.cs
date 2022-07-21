@@ -1,3 +1,4 @@
+using System.Data;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -40,11 +41,11 @@ public static class TestDbBuilder
     public static async Task AddData(SqlConnection connection)
     {
         using var command = connection.CreateCommand();
-        var addData = intData;
+        command.Parameters.AddWithValue("value", intData);
         intData++;
         command.CommandText = $@"
 insert into MyTable (Value)
-values ({addData});";
+values (@value);";
         await command.ExecuteNonQueryAsync();
     }
 
