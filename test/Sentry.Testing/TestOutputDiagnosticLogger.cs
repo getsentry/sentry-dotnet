@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Sentry.Testing;
 
@@ -7,6 +8,7 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly SentryLevel _minimumLevel;
     private readonly ConcurrentQueue<LogEntry> _entries = new();
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
 
     public IEnumerable<LogEntry> Entries => _entries;
 
@@ -47,13 +49,13 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         if (exception == null)
         {
             _testOutputHelper.WriteLine($@"
-[{logLevel}]: {formattedMessage}
+[{logLevel} {_stopwatch.Elapsed:hh\:mm\:ss\.ff}]: {formattedMessage}
 ".Trim());
         }
         else
         {
             _testOutputHelper.WriteLine($@"
-[{logLevel}]: {formattedMessage}
+[{logLevel} {_stopwatch.Elapsed:hh\:mm\:ss\.ff}]: {formattedMessage}
     Exception: {exception}
 ".Trim());
         }
