@@ -12,6 +12,7 @@
 - Minor improvements to `BackgroundWorker` ([#1773](https://github.com/getsentry/sentry-dotnet/pull/1773))
 - Make GzipRequestBodyHandler respect async ([#1776](https://github.com/getsentry/sentry-dotnet/pull/1776))
 - Fix race condition in handling of `InitCacheFlushTimeout` ([#1784](https://github.com/getsentry/sentry-dotnet/pull/1784))
+- Fix exceptions on background thread not reported in Unity ([#1794](https://github.com/getsentry/sentry-dotnet/pull/1794))
 
 ## 3.19.0
 
