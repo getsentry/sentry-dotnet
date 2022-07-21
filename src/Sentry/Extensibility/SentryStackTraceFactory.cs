@@ -15,6 +15,21 @@ namespace Sentry.Extensibility
     {
         private readonly SentryOptions _options;
 
+        /*
+         *  NOTE: While we could improve these regexes, doing so might break exception grouping on the backend.
+         *        Specifically, RegexAsyncFunctionName would be better as:  @"^(.*)\+<(\w*|<\w*>b__\d*)>d(?:__\d*)?$"
+         *        But we cannot make this change without consequences of ignored events coming back to life in Sentry.
+         */
+
+        private static readonly Regex RegexAsyncFunctionName = new(@"^(.*)\+<(\w*)>d__\d*$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static readonly Regex RegexAnonymousFunction = new(@"^<(\w*)>b__\w+$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
         /// <summary>
         /// Creates an instance of <see cref="SentryStackTraceFactory"/>.
         /// </summary>
@@ -133,23 +148,24 @@ namespace Sentry.Extensibility
         protected SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
         {
             const string unknownRequiredField = "(unknown)";
-
+            string? projectPath = null;
             var frame = new SentryStackFrame();
             if (GetMethod(stackFrame) is { } method)
             {
                 frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
                 frame.Package = method.DeclaringType?.Assembly.FullName;
 
-                if (_options.StackTraceMode == StackTraceMode.Enhanced && stackFrame is EnhancedStackFrame enhancedStackFrame)
+                if (_options.StackTraceMode == StackTraceMode.Enhanced &&
+                    stackFrame is EnhancedStackFrame enhancedStackFrame)
                 {
-                    var sb = new StringBuilder();
-                    frame.Function = enhancedStackFrame.MethodInfo.Append(sb, false).ToString();
+                    var stringBuilder = new StringBuilder();
+                    frame.Function = enhancedStackFrame.MethodInfo.Append(stringBuilder, false).ToString();
 
                     if (enhancedStackFrame.MethodInfo.DeclaringType is { } declaringType)
                     {
-                        sb.Clear();
-                        sb.AppendTypeDisplayName(declaringType);
-                        frame.Module = sb.ToString();
+                        stringBuilder.Clear();
+                        stringBuilder.AppendTypeDisplayName(declaringType);
+                        frame.Module = stringBuilder.ToString();
                     }
                 }
                 else
@@ -162,17 +178,28 @@ namespace Sentry.Extensibility
                 {
                     frame.InApp = false;
                 }
+
+                AttributeReader.TryGetProjectDirectory(method.Module.Assembly, out projectPath);
             }
 
             frame.ConfigureAppFrame(_options);
 
-            frame.FileName = stackFrame.GetFileName();
+            var frameFileName = stackFrame.GetFileName();
+            if (projectPath != null && frameFileName != null)
+            {
+                if (frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    frameFileName = frameFileName.Substring(projectPath.Length);
+                }
+            }
+
+            frame.FileName = frameFileName;
 
             // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
             var ilOffset = stackFrame.GetILOffset();
-            if (ilOffset != 0)
+            if (ilOffset != StackFrame.OFFSET_UNKNOWN)
             {
-                frame.InstructionOffset = stackFrame.GetILOffset();
+                frame.InstructionOffset = ilOffset;
             }
 
             var lineNo = stackFrame.GetFileLineNumber();
@@ -191,6 +218,7 @@ namespace Sentry.Extensibility
             {
                 DemangleAsyncFunctionName(frame);
                 DemangleAnonymousFunction(frame);
+                DemangleLambdaReturnType(frame);
             }
 
             if (_options.StackTraceMode == StackTraceMode.Enhanced)
@@ -236,7 +264,7 @@ namespace Sentry.Extensibility
             // to:
             //   RemotePrinterService in UpdateNotification at line 457:13
 
-            var match = Regex.Match(frame.Module, @"^(.*)\+<(\w*)>d__\d*$");
+            var match = RegexAsyncFunctionName.Match(frame.Module);
             if (match.Success && match.Groups.Count == 3)
             {
                 frame.Module = match.Groups[1].Value;
@@ -261,10 +289,34 @@ namespace Sentry.Extensibility
             // to:
             //   BeginInvokeAsynchronousActionMethod { <lambda> }
 
-            var match = Regex.Match(frame.Function, @"^<(\w*)>b__\w+$");
+            var match = RegexAnonymousFunction.Match(frame.Function);
             if (match.Success && match.Groups.Count == 2)
             {
                 frame.Function = match.Groups[1].Value + " { <lambda> }";
+            }
+        }
+
+        /// <summary>
+        /// Remove return type from module in a Task with a Lambda with a return value.
+        /// This was seen in Unity, see https://github.com/getsentry/sentry-unity/issues/845
+        /// </summary>
+        internal static void DemangleLambdaReturnType(SentryStackFrame frame)
+        {
+            if (frame.Module == null)
+            {
+                return;
+            }
+
+            // Change:
+            //   System.Threading.Tasks.Task`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]] in InnerInvoke
+            //   or System.Collections.Generic.List`1[[UnityEngine.Events.PersistentCall, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]] in get_Item
+            // to:
+            //   System.Threading.Tasks.Task`1 in InnerInvoke`
+            //   or System.Collections.Generic.List`1 in get_Item
+            var match = RegexAsyncReturn.Match(frame.Module);
+            if (match.Success && match.Groups.Count == 2)
+            {
+                frame.Module = match.Groups[1].Value;
             }
         }
     }

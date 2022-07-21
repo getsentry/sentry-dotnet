@@ -31,7 +31,8 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
 
     public bool IsEnabled(SentryLevel level) => level >= _minimumLevel;
 
-    public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
+    // Note: Log must be declared virtual so we can use it with NSubstitute spies.
+    public virtual void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
     {
         var formattedMessage = string.Format(message, args);
         var entry = new LogEntry
@@ -43,9 +44,20 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         };
         _entries.Enqueue(entry);
 
-        _testOutputHelper.WriteLine($@"
+        if (exception == null)
+        {
+            _testOutputHelper.WriteLine($@"
 [{logLevel}]: {formattedMessage}
-    Exception: {exception?.ToString() ?? "<none>"}
 ".Trim());
+        }
+        else
+        {
+            _testOutputHelper.WriteLine($@"
+[{logLevel}]: {formattedMessage}
+    Exception: {exception}
+".Trim());
+        }
+
+
     }
 }

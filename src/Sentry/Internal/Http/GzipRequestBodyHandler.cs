@@ -82,13 +82,13 @@ namespace Sentry.Internal.Http
             protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
             {
                 var gzipStream = new GZipStream(stream, _compressionLevel, leaveOpen: true);
-                try
+#if NET461 || NETSTANDARD2_0
+                using (gzipStream)
+#else
+                await using (gzipStream.ConfigureAwait(false))
+#endif
                 {
                     await _content.CopyToAsync(gzipStream).ConfigureAwait(false);
-                }
-                finally
-                {
-                    gzipStream.Dispose();
                 }
             }
         }
