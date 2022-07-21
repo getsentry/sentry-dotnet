@@ -1,5 +1,7 @@
 #if NET6_0
 using System.Net.Http;
+using System.Runtime.InteropServices;
+using DiffEngine;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -8,9 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 [UsesVerify]
 public class VersioningTests
 {
-    [Fact]
+    [SkippableFact]
     public async Task Simple()
     {
+        //this test times out on mac on build server
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && BuildServerDetector.Detected);
         var transport = new RecordingTransport();
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseSentry(_ =>
