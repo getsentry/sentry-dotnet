@@ -184,9 +184,8 @@ namespace Sentry.Http
             var authHeader =
                 $"Sentry sentry_version={_options.SentryVersion}," +
                 $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
-                $"sentry_key={dsn.PublicKey}," +
-                (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
-                $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
+                $"sentry_key={dsn.PublicKey}" +
+                (dsn.SecretKey is { } secretKey ? $",sentry_secret={secretKey}" : null);
 
             return new HttpRequestMessage
             {
