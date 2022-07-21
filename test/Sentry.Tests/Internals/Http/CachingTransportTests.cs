@@ -13,7 +13,7 @@ public class CachingTransportTests
 
     public CachingTransportTests(ITestOutputHelper testOutputHelper)
     {
-        _logger = new TestOutputDiagnosticLogger(testOutputHelper);
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(testOutputHelper, SentryLevel.Debug);
     }
 
     [Fact]
@@ -149,12 +149,10 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var loggerCompletionSource = new TaskCompletionSource<object>();
 
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-        logger
+        _logger
             .When(l =>
                 l.Log(SentryLevel.Error,
-                    "Exception in background worker of CachingTransport.",
+                    "Exception in CachingTransport worker.",
                     Arg.Any<OperationCanceledException>(),
                     Arg.Any<object[]>()))
             .Do(_ => loggerCompletionSource.SetResult(null));
@@ -162,7 +160,7 @@ public class CachingTransportTests
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             CacheDirectoryPath = cacheDirectory.Path,
             Debug = true
         };
