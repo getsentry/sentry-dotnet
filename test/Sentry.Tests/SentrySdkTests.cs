@@ -244,15 +244,15 @@ public class SentrySdkTests : IDisposable
         second.Dispose();
     }
 
-#if !CI_BUILD
-    // This test is just a bit too flaky in CI.  We'll keep running it locally though.
-
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]  // InitCacheFlushTimeout is more than enough time to process all messages
     [InlineData(false)] // InitCacheFlushTimeout is less time than needed to process all messages
     [InlineData(null)]  // InitCacheFlushTimeout is not set
     public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed(bool? testDelayWorking)
     {
+        // This test is just a bit too flaky in CI.  We'll keep running it locally though.
+        Skip.If(Environment.GetEnvironmentVariable("GITHUB_ACTIONS").Equals("true", StringComparison.OrdinalIgnoreCase));
+
         // Arrange
         using var cacheDirectory = new TempDirectory();
         var cachePath = cacheDirectory.Path;
@@ -340,7 +340,6 @@ public class SentrySdkTests : IDisposable
             await cachingTransport!.StopWorkerAsync();
         }
     }
-#endif
 
     [Fact]
     public void Disposable_MultipleCalls_NoOp()
