@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
-    <!-- .NET Android Workload doesn't support Linux -->
-    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net6.0-android</TargetFrameworks>
     <!-- We'll pin to C# 9 and ImplicitUsings false to allow us to compile within Unity -->
     <LangVersion>9</LangVersion>
     <ImplicitUsings>false</ImplicitUsings>
@@ -11,18 +8,26 @@
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
     <!-- Files under Android are included below when TFM ends with android -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/Android/**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\Android\**</DefaultItemExcludes>
   </PropertyGroup>
 
-  <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android/Sentry.Android.props" />
+  <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461;net6.0-android</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android\Sentry.Android.props" />
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);HAS_ASYNC_ENUMERATOR</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../modules/Ben.Demystifier/src/**/*.cs">
-      <Link>%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcoreapp')) or '$(TargetFramework)' == 'net461'">
@@ -35,8 +40,8 @@
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
-    <Compile Include="../Sentry.DiagnosticSource/Internals/**/*.cs">
-      <Link>Internal/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Compile Include="..\Sentry.DiagnosticSource\Internals\**\*.cs">
+      <Link>Internal\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
   <!-- DiagnosticSource -->
@@ -55,6 +60,11 @@
   <!-- Prefer bundled version of System.Text.Json to avoid extra dependencies -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="buildTransitive\Sentry.props" />
+    <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
   </ItemGroup>
 
 </Project>

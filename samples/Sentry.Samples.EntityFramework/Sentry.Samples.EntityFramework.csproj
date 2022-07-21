@@ -7,8 +7,8 @@
 
   <ItemGroup>
     <PackageReference Include="Effort.EF6" Version="2.2.13" />
-    <ProjectReference Include="../../src/Sentry.EntityFramework/Sentry.EntityFramework.csproj" />
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
 
 </Project>

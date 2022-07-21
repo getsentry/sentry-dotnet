@@ -1,11 +1,17 @@
+using Microsoft.Extensions.Logging;
+
 namespace Sentry.Samples.Maui;
 
 public partial class MainPage : ContentPage
 {
+    private readonly ILogger<MainPage> _logger;
+
     int count = 0;
 
-    public MainPage()
+    // NOTE: You can only inject an ILogger<T>, not a plain ILogger
+    public MainPage(ILogger<MainPage> logger)
     {
+        _logger = logger;
         InitializeComponent();
     }
 
@@ -19,11 +25,25 @@ public partial class MainPage : ContentPage
             CounterBtn.Text = $"Clicked {count} times";
 
         SemanticScreenReader.Announce(CounterBtn.Text);
+
+        _logger.LogInformation("The button has been clicked {ClickCount} times", count);
     }
 
-    private void OnExceptionClicked(object sebnder, EventArgs e)
+    private void OnUnhandledExceptionClicked(object sender, EventArgs e)
     {
-        throw new Exception("This is a test exception, thrown from managed code in a MAUI app!");
+        throw new Exception("This is an unhanded test exception, thrown from managed code in a MAUI app!");
+    }
+
+    private void OnCapturedExceptionClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            throw new Exception("This is a captured test exception, thrown from managed code in a MAUI app!");
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+        }
     }
 }
 

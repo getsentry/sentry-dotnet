@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net461' or $(TargetFramework) == 'netstandard2.0'">

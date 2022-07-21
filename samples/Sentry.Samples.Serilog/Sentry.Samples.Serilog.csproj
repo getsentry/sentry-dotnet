@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Serilog/Sentry.Serilog.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
   </ItemGroup>
 
 </Project>

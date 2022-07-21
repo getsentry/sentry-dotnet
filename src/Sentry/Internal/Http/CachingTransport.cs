@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
@@ -246,6 +247,13 @@ namespace Sentry.Internal.Http
 
         private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
         {
+            if (_options.NetworkStatusListener is {Online: false} listener)
+            {
+                _options.LogDebug("The network is offline. Pausing processing.");
+                await listener.WaitForNetworkOnlineAsync(cancellation).ConfigureAwait(false);
+                _options.LogDebug("The network is back online. Resuming processing.");
+            }
+
             _options.LogDebug("Reading cached envelope: {0}", file);
 
             var stream = File.OpenRead(file);
@@ -269,7 +277,7 @@ namespace Sentry.Internal.Http
                     // Let the worker catch, log, wait a bit and retry.
                     throw;
                 }
-                catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
+                catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException or IOException)
                 {
                     _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
                     // Let the worker catch, log, wait a bit and retry.
@@ -319,8 +327,7 @@ namespace Sentry.Internal.Http
         }
 
         // Gets the next cache file and moves it to "processing"
-        private async Task<string?> TryPrepareNextCacheFileAsync(
-            CancellationToken cancellationToken = default)
+        private async Task<string?> TryPrepareNextCacheFileAsync(CancellationToken cancellationToken = default)
         {
             using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 

@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol;
 
 public class SentryThreadTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryThreadTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -20,7 +29,7 @@ public class SentryThreadTests
             }
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"id\":0," +
@@ -35,7 +44,7 @@ public class SentryThreadTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((SentryThread thread, string serialized) @case)
     {
-        var actual = @case.thread.ToJsonString();
+        var actual = @case.thread.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

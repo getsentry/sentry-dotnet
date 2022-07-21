@@ -21,7 +21,7 @@ public class SentrySerilogSinkExtensionsTests
         public float SampleRate { get; } = 0.4f;
         public string Release { get; } = nameof(ConfigureSentrySerilogOptions_WithAllParameters_MakesAppropriateChangesToObject);
         public string Environment { get; } = nameof(ConfigureSentrySerilogOptions_WithAllParameters_MakesAppropriateChangesToObject);
-        public string Dsn { get; } = DsnSamples.ValidDsnWithSecret;
+        public string Dsn { get; } = ValidDsn;
         public int MaxQueueItems { get; } = 17;
         public TimeSpan ShutdownTimeout { get; } = TimeSpan.FromDays(1.3);
         public DecompressionMethods DecompressionMethods { get; } = DecompressionMethods.Deflate & DecompressionMethods.GZip;

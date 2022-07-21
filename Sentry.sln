@@ -29,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{9D7E2F87
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		README.md = README.md
+		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{77454495-55EE-4B40-A089-71B9E8F82E89}"
@@ -137,13 +138,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.Tests", "test\Sentry.DiagnosticSource.Tests\Sentry.DiagnosticSource.Tests.csproj", "{D870B028-16ED-4551-8B0F-5529479D04C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Android", "samples\Sentry.Samples.Android\Sentry.Samples.Android.csproj", "{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.DiagnosticSource.IntegrationTests", "test\Sentry.DiagnosticSource.IntegrationTests\Sentry.DiagnosticSource.IntegrationTests.csproj", "{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Maui", "samples\Sentry.Samples.Maui\Sentry.Samples.Maui.csproj", "{EBCCABF9-F670-4C8D-AABC-4EB132961929}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Maui", "samples\Sentry.Samples.Maui\Sentry.Samples.Maui.csproj", "{EBCCABF9-F670-4C8D-AABC-4EB132961929}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui", "src\Sentry.Maui\Sentry.Maui.csproj", "{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui", "src\Sentry.Maui\Sentry.Maui.csproj", "{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui.Tests", "test\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj", "{143076C0-8D6B-4054-9F45-06B21655F417}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui.Tests", "test\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj", "{143076C0-8D6B-4054-9F45-06B21655F417}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -327,8 +329,10 @@ Global
 		{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBCCABF9-F670-4C8D-AABC-4EB132961929}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6}.Release|Any CPU.ActiveCfg = Release|Any CPU

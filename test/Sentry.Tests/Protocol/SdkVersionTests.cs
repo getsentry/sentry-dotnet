@@ -1,7 +1,15 @@
 using System.Text.RegularExpressions;
+using Sentry.Testing;
 
 public class SdkVersionTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SdkVersionTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void InstanceIsCorrect()
     {
@@ -33,7 +41,7 @@ public class SdkVersionTests
         sut.AddPackage("Sentry.AspNetCore", "2.0");
         sut.AddPackage("Sentry", "1.0");
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"packages\":[{\"name\":\"Sentry\",\"version\":\"1.0\"},{\"name\":\"Sentry.AspNetCore\",\"version\":\"2.0\"}]," +
@@ -46,7 +54,7 @@ public class SdkVersionTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((SdkVersion sdkVersion, string serialized) @case)
     {
-        var actual = @case.sdkVersion.ToJsonString();
+        var actual = @case.sdkVersion.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }
@@ -74,7 +82,7 @@ public class SdkVersionTests
         sdkVersion.AddPackage("Bar", "Beta");
         sdkVersion.AddPackage("Foo", "Alpha");
         sdkVersion.AddPackage("Bar", "Beta");
-        var actual = sdkVersion.ToJsonString();
+        var actual = sdkVersion.ToJsonString(_testOutputLogger);
         var expected = TrimJson(@"
 {
    ""packages"": [

@@ -45,7 +45,6 @@ namespace Sentry
         public bool? IsParentSampled { get; set; }
 
         /// <inheritdoc />
-        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
         public string? Platform { get; set; } = Constants.Platform;
 
         /// <inheritdoc />

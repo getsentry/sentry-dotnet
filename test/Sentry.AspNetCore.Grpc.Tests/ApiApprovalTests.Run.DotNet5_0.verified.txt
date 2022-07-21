@@ -1,5 +1,4 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
-namespace Sentry.AspNetCore.Grpc
+﻿namespace Sentry.AspNetCore.Grpc
 {
     public class DefaultProtobufRequestPayloadExtractor : Sentry.AspNetCore.Grpc.IProtobufRequestPayloadExtractor
     {

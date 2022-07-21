@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
 using Sentry.AspNetCore.Tests.Utils;
-using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -17,7 +16,7 @@ public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
         var sentryHttpClient = sentry.CreateClient();
         _ = builder.UseSentry(options =>
         {
-            options.Dsn = DsnSamples.ValidDsnWithSecret;
+            options.Dsn = ValidDsn;
             options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
 
             Configure?.Invoke(options);

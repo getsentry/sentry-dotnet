@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol;
 
 public class SentryMessageTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryMessageTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -12,7 +21,7 @@ public class SentryMessageTests
             Formatted = "Message 100 test-name"
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"message\":\"Message {eventId} {name}\"," +
@@ -25,7 +34,7 @@ public class SentryMessageTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((SentryMessage msg, string serialized) @case)
     {
-        var actual = @case.msg.ToJsonString();
+        var actual = @case.msg.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

@@ -2,11 +2,13 @@
 
   <PropertyGroup>
     <!--
-      On Mac, we'll build for Android, iOS, and MacCatalyst.
-      On Windows, we'll build for Android and Windows 10
+      We can build for Android from all build platforms.
+      On Mac, we'll also build for iOS and MacCatalyst.
+      On Windows, we'll also build for Windows 10.
     -->
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">net6.0-android;net6.0-windows10.0.19041.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>net6.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Samples.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -63,7 +65,10 @@
   <!-- Workaround for https://github.com/dotnet/maui/issues/7272 -->
   <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
     <ItemGroup>
-      <ResolvedFileToPublish Update="@(DocFileItem)" PublishFolderType="None" />
+      <ResolvedFileToPublish
+        Update="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+        PublishFolderType="None" />
     </ItemGroup>
   </Target>
 

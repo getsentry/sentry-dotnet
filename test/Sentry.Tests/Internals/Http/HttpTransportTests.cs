@@ -11,6 +11,13 @@ namespace Sentry.Tests.Internals.Http;
 [UsesVerify]
 public class HttpTransportTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public HttpTransportTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public async Task SendEnvelopeAsync_CancellationToken_PassedToClient()
     {
@@ -25,7 +32,7 @@ public class HttpTransportTests
             .Returns(_ => SentryResponses.GetOkResponse());
 
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient(httpHandler));
 
         var envelope = Envelope.FromEvent(
@@ -63,7 +70,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -106,7 +113,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -168,7 +175,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -205,7 +212,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -243,7 +250,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -278,8 +285,8 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                Dsn = ValidDsn,
+                DiagnosticLogger = _testOutputLogger,
                 SendClientReports = false,
                 Debug = true
             },
@@ -318,7 +325,7 @@ public class HttpTransportTests
                     new EmptySerializable())
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -345,8 +352,8 @@ public class HttpTransportTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
             SendClientReports = true,
             Debug = true
         };
@@ -403,7 +410,7 @@ public class HttpTransportTests
                 EnvelopeItem.FromClientReport(expectedClientReport)
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -425,8 +432,8 @@ public class HttpTransportTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
             SendClientReports = true,
             Debug = true
         };
@@ -469,8 +476,8 @@ public class HttpTransportTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
             SendClientReports = true,
             Debug = true
         };
@@ -506,7 +513,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 MaxAttachmentSize = 1,
                 DiagnosticLogger = logger,
                 Debug = true
@@ -552,7 +559,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 MaxAttachmentSize = 1,
                 DiagnosticLogger = logger,
                 Debug = true
@@ -605,7 +612,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = ValidDsn
             },
             new HttpClient(httpHandler));
 
@@ -647,7 +654,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = ValidDsn
             },
             new HttpClient(httpHandler));
 
@@ -683,7 +690,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
@@ -701,7 +708,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
@@ -720,7 +727,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
@@ -737,12 +744,12 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
 
-        var uri = Dsn.Parse(DsnSamples.ValidDsnWithSecret).GetEnvelopeEndpointUri();
+        var uri = Dsn.Parse(ValidDsn).GetEnvelopeEndpointUri();
 
         // Act
         var request = httpTransport.CreateRequest(envelope);
@@ -756,7 +763,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());

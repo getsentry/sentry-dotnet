@@ -10,13 +10,15 @@ namespace Sentry.Integrations
     {
         private readonly IAppDomain _appDomain;
         private IHub? _hub;
+        private SentryOptions? _options;
 
         internal AppDomainUnhandledExceptionIntegration(IAppDomain? appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
-        public void Register(IHub hub, SentryOptions _)
+        public void Register(IHub hub, SentryOptions options)
         {
             _hub = hub;
+            _options = options;
             _appDomain.UnhandledException += Handle;
         }
 
@@ -36,7 +38,7 @@ namespace Sentry.Integrations
 
             if (e.IsTerminating)
             {
-                (_hub as IDisposable)?.Dispose();
+                _hub?.FlushAsync(_options!.ShutdownTimeout).GetAwaiter().GetResult();
             }
         }
     }

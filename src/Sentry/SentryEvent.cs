@@ -63,11 +63,10 @@ namespace Sentry
         public string? Logger { get; set; }
 
         /// <inheritdoc />
-        [Obsolete("Platform is always csharp, and should not be set by consuming code. This property will be removed in version 4.")]
-        public string? Platform { get; set; } = Constants.Platform;
+        public string? Platform { get; set; }
 
         /// <summary>
-        /// Identifies the host SDK from which the event was recorded.
+        /// Identifies the computer from which the event was recorded.
         /// </summary>
         public string? ServerName { get; set; }
 
@@ -203,6 +202,7 @@ namespace Sentry
             Exception = exception;
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
             EventId = eventId != default ? eventId : SentryId.Create();
+            Platform = Constants.Platform;
         }
 
         /// <inheritdoc />
@@ -232,7 +232,7 @@ namespace Sentry
             writer.WriteString("sent_at", DateTimeOffset.UtcNow);
             writer.WriteSerializableIfNotNull("logentry", Message, logger);
             writer.WriteStringIfNotWhiteSpace("logger", Logger);
-            writer.WriteString("platform", Constants.Platform);
+            writer.WriteStringIfNotWhiteSpace("platform", Platform);
             writer.WriteStringIfNotWhiteSpace("server_name", ServerName);
             writer.WriteStringIfNotWhiteSpace("release", Release);
             writer.WriteSerializableIfNotNull("exception", SentryExceptionValues, logger);
@@ -274,6 +274,7 @@ namespace Sentry
             var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var message = json.GetPropertyOrNull("logentry")?.Pipe(SentryMessage.FromJson);
             var logger = json.GetPropertyOrNull("logger")?.GetString();
+            var platform = json.GetPropertyOrNull("platform")?.GetString();
             var serverName = json.GetPropertyOrNull("server_name")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
             var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).ToList().Pipe(v => new SentryValues<SentryException>(v));
@@ -298,6 +299,7 @@ namespace Sentry
                 _modules = modules?.WhereNotNullValue().ToDictionary(),
                 Message = message,
                 Logger = logger,
+                Platform = platform,
                 ServerName = serverName,
                 Release = release,
                 SentryExceptionValues = exceptionValues,

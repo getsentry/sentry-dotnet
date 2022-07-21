@@ -20,3 +20,4 @@ docs/docfx/*
 docs/docfx.zip
 /samples/Sentry.Samples.Aws.Lambda.AspNetCoreServer/Properties/launchSettings.json
 *.received.*
+mono_crash.*.json

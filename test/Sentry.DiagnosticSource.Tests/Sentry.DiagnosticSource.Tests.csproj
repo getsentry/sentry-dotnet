@@ -14,49 +14,49 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.0" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.6" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.11" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.17" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.20" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.26" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.20" />
+    <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.26" />
     <!-- NET Core 3.0's built-in STJ is lower version which causes conflicts, so we have to explicitly reference it -->
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=netstandard2.0" />
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.20" />
+    <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=netstandard2.0" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.26" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <ProjectReference Include="../../src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=net461" />
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=net461" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.20" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.20" />
+    <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" SetTargetFramework="TargetFramework=net461" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" SetTargetFramework="TargetFramework=net461" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.26" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="3.1.26" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
 </Project>

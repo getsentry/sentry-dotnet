@@ -1,8 +1,18 @@
+using Sentry.Testing;
+using Sentry.Tests.Helpers;
+
 namespace Sentry.Tests.Protocol;
 
 [UsesVerify]
 public class SentryEventTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryEventTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public async Task SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -58,7 +68,7 @@ public class SentryEventTests
         sut.Fingerprint = new[] { "fingerprint" };
         sut.SetTag("tag_key", "tag_value");
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
         await VerifyJson(actualString);
 
@@ -82,6 +92,13 @@ public class SentryEventTests
 
             return o;
         });
+    }
+
+    [Fact]
+    public void Ctor_Platform_CSharp()
+    {
+        var evt = new SentryEvent();
+        Assert.Equal(Constants.Platform, evt.Platform);
     }
 
     [Fact]

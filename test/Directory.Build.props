@@ -13,7 +13,7 @@
   <ItemGroup>
     <!-- An attempt to use run netfx tests with Mono and .NET Core CLI https://github.com/xunit/xunit/issues/1357 -->
     <!-- After strong name signing assemblies, only net462 target stopped working. Again xunit -noshadow seems to solve it: https://github.com/Microsoft/vstest/issues/1684 -->
-    <Content Include="../xunit.runner.json">
+    <Content Include="..\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -35,16 +35,26 @@
     <Using Include="NSubstitute"/>
     <Using Include="NSubstitute.Core"/>
     <Using Include="NSubstitute.ReturnsExtensions"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <Using Include="Sentry.DsnSamples" Static="True" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <PackageReference Include="NSubstitute" Version="4.3.0" />
-    <PackageReference Include="FluentAssertions" Version="6.6.0" />
+    <PackageReference Include="FluentAssertions" Version="6.7.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
-    <PackageReference Include="Verify.Xunit" Version="16.8.2" />
-    <PackageReference Include="Verify.DiffPlex" Version="1.2.0" />
+    <PackageReference Include="Verify.Xunit" Version="17.2.1" />
+    <PackageReference Include="Verify.DiffPlex" Version="1.3.0" />
     <PackageReference Include="PublicApiGenerator" Version="10.3.0" />
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.0.0" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461' And '$(TargetFramework)' != 'netcoreapp3.0' And '$(TargetFramework)' != 'netcoreapp2.1'">
+    <!-- This should be the current version -->
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'netcoreapp3.0' Or '$(TargetFramework)' == 'netcoreapp2.1'">
+    <!-- This is the last version compatible with these targets -->
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
   </ItemGroup>
 
 </Project>

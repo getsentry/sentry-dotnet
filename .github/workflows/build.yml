@@ -23,13 +23,6 @@ jobs:
       matrix:
         # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
         os: [ubuntu-latest, windows-latest, macos-12]
-        include:
-          - os: ubuntu-latest
-            slnf: SentryLinux.slnf
-          - os: windows-latest
-            slnf: SentryWindows.slnf
-          - os: macos-12
-            slnf: SentryMac.slnf
 
     steps:
         - name: Checkout
@@ -61,43 +54,29 @@ jobs:
             path: ~/.nuget/packages
             # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
             # Workloads also get installed in the nuget packages cache, so if you modify workloads below, increment the number in the cache keys
-            key: ${{ runner.os }}-nuget+workloads2-${{ hashFiles('**/*.*proj', '**/*.props') }}
-            restore-keys: ${{ runner.os }}-nuget+workloads2
+            key: ${{ runner.os }}-nuget+workloads3-${{ hashFiles('**/*.*proj', '**/*.props') }}
+            restore-keys: ${{ runner.os }}-nuget+workloads3
 
-        # .NET Android workloads don't support Linux https://github.com/dotnet/sdk/issues/22411
+        - name: Install .NET Workloads (Ubuntu)
+          if: startsWith(matrix.os, 'ubuntu')
+          run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
         - name: Install .NET Workloads (Windows)
           if: startsWith(matrix.os, 'windows')
-          run: dotnet workload install maui-android maui-windows
+          run: 'dotnet workload install maui-android maui-windows --temp-dir "${{ runner.temp }}"'
         - name: Install .NET Workloads (macOS)
           if: startsWith(matrix.os, 'macos')
-          run: dotnet workload install maui-android maui-ios maui-maccatalyst
+          run: 'dotnet workload install maui-android maui-ios maui-maccatalyst --temp-dir "${{ runner.temp }}"'
 
         - name: Build
-          run: dotnet build ${{ matrix.slnf }} -c Release /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test ${{ matrix.slnf }} -c Release --no-build -l GitHubActions -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
-
-        # - name: Create Test Report
-        #   uses: phoenix-actions/test-reporting@4b942144e31c4039ac808d9b29945864b628a574
-        #   # run this step even if previous step failed
-        #   if: success() || failure()
-        #   with:
-        #     name: Unit Test Results (${{ matrix.os }})
-        #     path: '**/*.trx'
-        #     reporter: dotnet-trx
-        #     list-suites: 'failed'
-        #     list-tests: 'failed'
+          run: dotnet test -c Release --no-build -l GitHubActions -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
 
         - name: Pack
-          # only pack on windows since we need classic .net assemblies
-          if: startsWith(matrix.os, 'windows')
-          run: dotnet pack ${{ matrix.slnf }} -c Release --no-build
-
-        - name: Pack (MAUI)
-          # only pack on macos since we need ios native targets included
+          # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
           if: startsWith(matrix.os, 'macos')
-          run: dotnet pack src/Sentry.Maui -c Release --no-build
+          run: dotnet pack -c Release --no-build
 
         - name: Upload Verify Results
           if: failure()
@@ -108,21 +87,11 @@ jobs:
               **/*.received.*
 
         - name: Archive Artifacts
-          # only archive on windows since we only pack on windows. See Pack step.
-          if: startsWith(matrix.os, 'windows')
-          uses: actions/upload-artifact@v3
-          with:
-            name: ${{ github.sha }}
-            if-no-files-found: error
-            path: |
-              ${{ github.workspace }}/src/**/Release/*.nupkg
-
-        - name: Archive Artifacts (MAUI)
-          # only archive MAUI on macos since we only pack MAUI on macos. See Pack step.
+          # only archive on macos since we only pack on macos. See Pack step.
           if: startsWith(matrix.os, 'macos')
           uses: actions/upload-artifact@v3
           with:
             name: ${{ github.sha }}
             if-no-files-found: error
             path: |
-              ${{ github.workspace }}/src/Sentry.Maui/bin/Release/*.nupkg
+              ${{ github.workspace }}/src/**/Release/*.nupkg

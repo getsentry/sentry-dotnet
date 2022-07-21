@@ -40,6 +40,11 @@ namespace Sentry.Protocol
         public string? RawDescription { get; set; }
 
         /// <summary>
+        /// An optional .NET Runtime Identifier string.
+        /// </summary>
+        public string? Identifier { get; set; }
+
+        /// <summary>
         /// An optional build number.
         /// </summary>
         /// <see href="https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed"/>
@@ -53,6 +58,7 @@ namespace Sentry.Protocol
             {
                 Name = Name,
                 Version = Version,
+                Identifier = Identifier,
                 Build = Build,
                 RawDescription = RawDescription
             };
@@ -66,6 +72,7 @@ namespace Sentry.Protocol
             writer.WriteStringIfNotWhiteSpace("name", Name);
             writer.WriteStringIfNotWhiteSpace("version", Version);
             writer.WriteStringIfNotWhiteSpace("raw_description", RawDescription);
+            writer.WriteStringIfNotWhiteSpace("identifier", Identifier);
             writer.WriteStringIfNotWhiteSpace("build", Build);
 
             writer.WriteEndObject();
@@ -79,6 +86,7 @@ namespace Sentry.Protocol
             var name = json.GetPropertyOrNull("name")?.GetString();
             var version = json.GetPropertyOrNull("version")?.GetString();
             var rawDescription = json.GetPropertyOrNull("raw_description")?.GetString();
+            var identifier = json.GetPropertyOrNull("identifier")?.GetString();
             var build = json.GetPropertyOrNull("build")?.GetString();
 
             return new Runtime
@@ -86,6 +94,7 @@ namespace Sentry.Protocol
                 Name = name,
                 Version = version,
                 RawDescription = rawDescription,
+                Identifier = identifier,
                 Build = build
             };
         }
