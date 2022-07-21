@@ -1,9 +1,10 @@
 using System.Data.Common;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 public static class TestDbBuilder
 {
-    public static async Task CreateTable(DbConnection connection)
+    public static async Task CreateTable(SqlConnection connection)
     {
         using var dbContext = GetDbContext(connection);
         await dbContext.Database.EnsureCreatedAsync();
@@ -14,7 +15,7 @@ public static class TestDbBuilder
 
     private static int intData;
 
-    private static TestDbContext GetDbContext(DbConnection connection)
+    private static TestDbContext GetDbContext(SqlConnection connection)
     {
         var builder = new DbContextOptionsBuilder<TestDbContext>();
         builder.UseSqlServer(connection);
@@ -23,20 +24,20 @@ public static class TestDbBuilder
         return dbContext;
     }
 
-    public static async Task AddEfData(DbConnection connection)
+    public static async Task AddEfData(SqlConnection connection)
     {
         using var dbContext = GetDbContext(connection);
         dbContext.TestEntities.Add(new TestEntity { Property = "Value" });
         await dbContext.SaveChangesAsync();
     }
 
-    public static async Task GetEfData(DbConnection connection)
+    public static async Task GetEfData(SqlConnection connection)
     {
         using var dbContext = GetDbContext(connection);
         await dbContext.TestEntities.ToListAsync();
     }
 
-    public static async Task AddData(DbConnection connection)
+    public static async Task AddData(SqlConnection connection)
     {
         using var command = connection.CreateCommand();
         var addData = intData;
@@ -47,7 +48,7 @@ values ({addData});";
         await command.ExecuteNonQueryAsync();
     }
 
-    public static async Task GetData(DbConnection connection)
+    public static async Task GetData(SqlConnection connection)
     {
         var values = new List<int>();
         using var command = connection.CreateCommand();
