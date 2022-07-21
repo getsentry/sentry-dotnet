@@ -229,7 +229,6 @@ namespace Sentry
             writer.WriteStringDictionaryIfNotEmpty("modules", _modules!);
             writer.WriteSerializable("event_id", EventId, logger);
             writer.WriteString("timestamp", Timestamp);
-            writer.WriteString("sent_at", DateTimeOffset.UtcNow);
             writer.WriteSerializableIfNotNull("logentry", Message, logger);
             writer.WriteStringIfNotWhiteSpace("logger", Logger);
             writer.WriteStringIfNotWhiteSpace("platform", Platform);
