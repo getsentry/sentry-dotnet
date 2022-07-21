@@ -10,11 +10,9 @@ public static class TestDbBuilder
         using var dbContext = GetDbContext(connection);
         await dbContext.Database.EnsureCreatedAsync();
         using var command = connection.CreateCommand();
-        command.CommandText = "create table MyTable (Value int);";
+        command.CommandText = "create table MyTable (Value nvarchar(100));";
         await command.ExecuteNonQueryAsync();
     }
-
-    private static int intData;
 
     private static TestDbContext GetDbContext(SqlConnection connection)
     {
@@ -28,7 +26,7 @@ public static class TestDbBuilder
     public static async Task AddEfData(SqlConnection connection)
     {
         using var dbContext = GetDbContext(connection);
-        dbContext.TestEntities.Add(new TestEntity { Property = "Value" });
+        dbContext.TestEntities.Add(new TestEntity { Property = "SHOULD NOT APPEAR IN PAYLOAD" });
         await dbContext.SaveChangesAsync();
     }
 
@@ -41,9 +39,8 @@ public static class TestDbBuilder
     public static async Task AddData(SqlConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.Parameters.AddWithValue("value", intData);
-        intData++;
-        command.CommandText = $@"
+        command.Parameters.AddWithValue("value", "SHOULD NOT APPEAR IN PAYLOAD");
+        command.CommandText = @"
 insert into MyTable (Value)
 values (@value);";
         await command.ExecuteNonQueryAsync();
@@ -51,13 +48,13 @@ values (@value);";
 
     public static async Task GetData(SqlConnection connection)
     {
-        var values = new List<int>();
+        var values = new List<string>();
         using var command = connection.CreateCommand();
         command.CommandText = "select Value from MyTable";
         using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            values.Add(reader.GetInt32(0));
+            values.Add(reader.GetString(0));
         }
     }
 }
