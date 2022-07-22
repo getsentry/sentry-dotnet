@@ -48,6 +48,9 @@ public class VersioningTests
         // Act
         var result = await client.GetStringAsync("/v1.1/Target");
 
+        // dispose will ultimately trigger the background worker to flush
+        server.Dispose();
+
         // Assert
         var payloads = transport.Envelopes
             .SelectMany(x => x.Items)
