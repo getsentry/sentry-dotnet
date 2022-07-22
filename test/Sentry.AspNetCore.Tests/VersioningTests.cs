@@ -4,12 +4,20 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 
 [UsesVerify]
 public class VersioningTests
 {
+    private readonly TestOutputDiagnosticLogger _logger;
+
+    public VersioningTests(ITestOutputHelper output)
+    {
+        _logger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public async Task Simple()
     {
@@ -21,6 +29,8 @@ public class VersioningTests
                 o.Dsn = ValidDsn;
                 o.TracesSampleRate = 1;
                 o.Transport = transport;
+                o.Debug = true;
+                o.DiagnosticLogger = _logger;
             })
             .ConfigureServices(services =>
             {
