@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.Testing;
@@ -134,7 +135,7 @@ public class SentrySdkTests : IDisposable
             InvalidDsn,
             () =>
             {
-                var ex = Assert.Throws<ArgumentException>(() => SentrySdk.Init());
+                var ex = Assert.Throws<ArgumentException>(SentrySdk.Init);
                 Assert.Equal("Invalid DSN: A Project Id is required.", ex.Message);
             });
     }
@@ -245,13 +246,13 @@ public class SentrySdkTests : IDisposable
     }
 
     [SkippableTheory]
-    [InlineData(true)]  // InitCacheFlushTimeout is more than enough time to process all messages
+    [InlineData(true)] // InitCacheFlushTimeout is more than enough time to process all messages
     [InlineData(false)] // InitCacheFlushTimeout is less time than needed to process all messages
-    [InlineData(null)]  // InitCacheFlushTimeout is not set
+    [InlineData(null)] // InitCacheFlushTimeout is not set
     public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed(bool? testDelayWorking)
     {
         // This test is just a bit too flaky in CI.  We'll keep running it locally though.
-        Skip.If(Environment.GetEnvironmentVariable("GITHUB_ACTIONS").Equals("true", StringComparison.OrdinalIgnoreCase));
+        Skip.If(BuildServerDetector.Detected);
 
         // Arrange
         using var cacheDirectory = new TempDirectory();
@@ -259,14 +260,19 @@ public class SentrySdkTests : IDisposable
 
         // Pre-populate cache
         var initialInnerTransport = Substitute.For<ITransport>();
-        await using var initialTransport = CachingTransport.Create(initialInnerTransport, new SentryOptions
-        {
-            Debug = true,
-            DiagnosticLogger = _logger,
-            Dsn = ValidDsn,
-            CacheDirectoryPath = cachePath
-        }, startWorker: false);
-        const int numEnvelopes = 5;  // Not too many, or this will be slow.  Not too few or this will be flaky.
+        await using var initialTransport = CachingTransport.Create(
+            initialInnerTransport,
+            new SentryOptions
+            {
+                Debug = true,
+                DiagnosticLogger = _logger,
+                Dsn = ValidDsn,
+                CacheDirectoryPath = cachePath
+            },
+            startWorker: false);
+
+        // Not too many, or this will be slow.  Not too few or this will be flaky.
+        const int numEnvelopes = 5;
         for (var i = 0; i < numEnvelopes; i++)
         {
             using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -287,9 +293,12 @@ public class SentrySdkTests : IDisposable
         // Set the timeout for the desired result
         var initFlushTimeout = testDelayWorking switch
         {
-            true => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes * 10)), // more than enough
-            false => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes - 1)), // enough for at least one, but not all
-            null => TimeSpan.Zero // none at all
+            // more than enough
+            true => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes * 10)),
+            // enough for at least one, but not all
+            false => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes - 1)),
+            // none at all
+            null => TimeSpan.Zero
         };
 
         // Act
@@ -336,7 +345,7 @@ public class SentrySdkTests : IDisposable
         finally
         {
             // cleanup to avoid disposing/deleting the temp directory while the cache worker is still running
-            var cachingTransport = (CachingTransport) options!.Transport;
+            var cachingTransport = (CachingTransport)options!.Transport;
             await cachingTransport!.StopWorkerAsync();
         }
     }
@@ -368,7 +377,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public async Task FlushAsync_NotInit_NoOp() => await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+    public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
 
     [Fact]
     public void PushScope_InstanceOf_DisabledClient()
