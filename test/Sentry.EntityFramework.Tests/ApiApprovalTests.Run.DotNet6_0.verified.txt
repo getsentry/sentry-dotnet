@@ -1,4 +1,4 @@
-namespace Sentry.EntityFramework.ErrorProcessors
+﻿namespace Sentry.EntityFramework.ErrorProcessors
 {
     public class DbConcurrencyExceptionProcessor : Sentry.Extensibility.SentryEventExceptionProcessor<System.Data.DBConcurrencyException>
     {
