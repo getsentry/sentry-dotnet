@@ -11,10 +11,6 @@ jobs:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
-
     strategy:
       fail-fast: false
       matrix:
@@ -28,7 +24,6 @@ jobs:
             submodules: recursive
 
         - uses: ./.github/actions/sentry-setup-dotnet
-
 
 # Everything above here is the same as the main build.
 # We only need to restore to check for vulnerable packages
