@@ -9,6 +9,7 @@
 
 ### Fixes
 
+- Detect MVC versioning in route ([#1731](https://github.com/getsentry/sentry-dotnet/pull/1731))
 - Fix error with `ConcurrentHashMap` on Android <= 9 ([#1761](https://github.com/getsentry/sentry-dotnet/pull/1761))
 - Minor improvements to `BackgroundWorker` ([#1773](https://github.com/getsentry/sentry-dotnet/pull/1773))
 - Make GzipRequestBodyHandler respect async ([#1776](https://github.com/getsentry/sentry-dotnet/pull/1776))

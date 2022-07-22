@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 
 namespace Sentry.AspNetCore.Tests;
-
+[UsesVerify]
 public class ScopeExtensionsTests
 {
     private readonly Scope _sut = new(new SentryOptions());
@@ -317,14 +317,23 @@ public class ScopeExtensionsTests
     }
 
     [Fact]
-    public void Populate_RouteData_SetToScope()
+    public Task Populate_RouteData_SetToScope()
     {
         // Arrange
         const string controller = "Ctrl";
         const string action = "Actn";
+        const string version = "1.1";
         var routeFeature = new RoutingFeature
         {
-            RouteData = new RouteData { Values = { { "controller", controller }, { "action", action }, } }
+            RouteData = new RouteData
+            {
+                Values =
+                {
+                    { "controller", controller },
+                    { "action", action },
+                    { "version", version },
+                }
+            }
         };
         var features = new FeatureCollection();
         features.Set<IRoutingFeature>(routeFeature);
@@ -334,8 +343,8 @@ public class ScopeExtensionsTests
         // Act
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        // Assert
-        Assert.Equal($"GET {controller}.{action}", _sut.TransactionName);
+        return Verify(_sut)
+            .IgnoreStandardSentryMembers();
     }
 
     public static IEnumerable<object[]> InvalidRequestBodies()
