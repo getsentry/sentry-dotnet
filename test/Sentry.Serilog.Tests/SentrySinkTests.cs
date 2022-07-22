@@ -1,4 +1,5 @@
 using System.Collections;
+using Sentry.Testing;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Parsing;
@@ -13,7 +14,6 @@ public class SentrySinkTests
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public Func<IHub> HubAccessor { get; set; }
         public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
-        public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
         public Scope Scope { get; } = new(new SentryOptions());
 
         public Fixture()
@@ -28,7 +28,7 @@ public class SentrySinkTests
                 Options,
                 HubAccessor,
                 SdkDisposeHandle,
-                Clock);
+                new MockClock());
     }
 
     private readonly Fixture _fixture = new();
@@ -64,7 +64,7 @@ public class SentrySinkTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(b.Message, expectedException.Message);
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Null(b.Category);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Null(b.Type);

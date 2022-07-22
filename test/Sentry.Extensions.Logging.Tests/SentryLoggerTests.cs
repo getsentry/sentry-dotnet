@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Sentry.Testing;
 
 namespace Sentry.Extensions.Logging.Tests;
 
@@ -7,7 +8,6 @@ public class SentryLoggerTests
     private class Fixture
     {
         public string CategoryName { get; set; } = "SomeApp";
-        public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public SentryLoggingOptions Options { get; set; } = new();
         public Scope Scope { get; } = new(new SentryOptions());
@@ -15,11 +15,10 @@ public class SentryLoggerTests
         public Fixture()
         {
             _ = Hub.IsEnabled.Returns(true);
-            _ = Clock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
             Hub.ConfigureScope(Arg.Invoke(Scope));
         }
 
-        public SentryLogger GetSut() => new(CategoryName, Options, Clock, Hub);
+        public SentryLogger GetSut() => new(CategoryName, Options, new MockClock(), Hub);
     }
 
     private readonly Fixture _fixture = new();
@@ -46,7 +45,7 @@ public class SentryLoggerTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(b.Message, expectedException.Message);
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Equal(b.Category, _fixture.CategoryName);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Equal(b.Type, BreadcrumbType);
@@ -121,7 +120,7 @@ public class SentryLoggerTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(b.Data![EventIdExtensions.DataKey], expectedEventId.ToString());
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Equal(b.Category, _fixture.CategoryName);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Equal(b.Type, BreadcrumbType);
@@ -270,7 +269,7 @@ public class SentryLoggerTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(b.Message, expectedMessage);
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Equal(b.Category, _fixture.CategoryName);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Equal(b.Type, BreadcrumbType);
@@ -326,7 +325,7 @@ public class SentryLoggerTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(b.Message, expectedMessage);
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Equal(b.Category, _fixture.CategoryName);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Equal(b.Type, BreadcrumbType);
@@ -345,7 +344,7 @@ public class SentryLoggerTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(b.Message, expectedMessage);
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Equal(b.Category, _fixture.CategoryName);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Equal(b.Type, BreadcrumbType);
@@ -364,7 +363,7 @@ public class SentryLoggerTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(b.Message, expectedMessage);
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Equal(b.Category, _fixture.CategoryName);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Equal(b.Type, BreadcrumbType);

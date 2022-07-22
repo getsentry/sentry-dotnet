@@ -407,8 +407,7 @@ public class CachingTransportTests
         };
 
         var timestamp = DateTimeOffset.UtcNow;
-        var clock = Substitute.For<ISystemClock>();
-        clock.GetUtcNow().Returns(timestamp);
+        var clock = new MockClock(timestamp);
         var recorder = new ClientReportRecorder(options, clock);
         options.ClientReportRecorder = recorder;
 

@@ -13,8 +13,7 @@ public class EnvelopeTests
     public EnvelopeTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
-        _fakeClock = Substitute.For<ISystemClock>();
-        _fakeClock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
+        _fakeClock = new MockClock(DateTimeOffset.MaxValue);
     }
 
     [Fact]

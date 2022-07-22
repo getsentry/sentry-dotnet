@@ -18,8 +18,7 @@ public class HttpTransportTests
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
 
-        _fakeClock = Substitute.For<ISystemClock>();
-        _fakeClock.GetUtcNow().Returns(DateTimeOffset.UtcNow);
+        _fakeClock = new MockClock(DateTimeOffset.UtcNow);
     }
 
     [Fact]
