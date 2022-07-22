@@ -14,8 +14,6 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
-      # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs on Ubuntu and Windows (doesn't happen on macOS)
-      DOTNET_INSTALL_DIR: ${{ startsWith(matrix.os, 'ubuntu') && '/usr/share/dotnet' || startsWith(matrix.os, 'windows') && 'C:\Program Files\dotnet' || '' }}
 
     strategy:
       fail-fast: false
@@ -29,29 +27,7 @@ jobs:
           with:
             submodules: recursive
 
-        - name: Install .NET 2.1 SDK
-          uses: actions/setup-dotnet@v2
-          with:
-            dotnet-version: 2.1.818
-            # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
-
-        - name: Dependency Caching
-          uses: actions/cache@v3
-          with:
-            path: ~/.nuget/packages
-            # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.
-            key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
-            restore-keys: ${{ runner.os }}-nuget
-
-        - name: Install .NET Workloads (Ubuntu)
-          if: startsWith(matrix.os, 'ubuntu')
-          run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
-        - name: Install .NET Workloads (Windows)
-          if: startsWith(matrix.os, 'windows')
-          run: 'dotnet workload install maui-android maui-windows --temp-dir "${{ runner.temp }}"'
-        - name: Install .NET Workloads (macOS)
-          if: startsWith(matrix.os, 'macos')
-          run: 'dotnet workload install maui-android maui-ios maui-maccatalyst --temp-dir "${{ runner.temp }}"'
+        - uses: ./.github/workflows/setup-dotnet.yml
 
 
 # Everything above here is the same as the main build.
