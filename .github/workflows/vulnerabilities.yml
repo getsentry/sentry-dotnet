@@ -29,32 +29,19 @@ jobs:
           with:
             submodules: recursive
 
-        - name: Setup .NET SDK (Windows)
-          if: startsWith(matrix.os, 'windows')
+        - name: Install .NET 2.1 SDK
           uses: actions/setup-dotnet@v2
           with:
             dotnet-version: 2.1.818
-        - name: Setup .NET SDK (macOS)
-          if: startsWith(matrix.os, 'macos')
-          uses: actions/setup-dotnet@v2
-          with:
-            dotnet-version: |
-              2.1.818
-              6.0.x
-        - name: Setup .NET SDK (Ubuntu)
-          if: startsWith(matrix.os, 'ubuntu')
-          uses: actions/setup-dotnet@v2
-          with:
-            dotnet-version: 2.1.818
+            # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
 
         - name: Dependency Caching
           uses: actions/cache@v3
           with:
             path: ~/.nuget/packages
-            # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
-            # Workloads also get installed in the nuget packages cache, so if you modify workloads below, increment the number in the cache keys
-            key: ${{ runner.os }}-nuget+workloads3-${{ hashFiles('**/*.*proj', '**/*.props') }}
-            restore-keys: ${{ runner.os }}-nuget+workloads3
+            # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.
+            key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
+            restore-keys: ${{ runner.os }}-nuget
 
         - name: Install .NET Workloads (Ubuntu)
           if: startsWith(matrix.os, 'ubuntu')
