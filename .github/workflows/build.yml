@@ -24,7 +24,8 @@ jobs:
           with:
             submodules: recursive
 
-        - uses: ./.github/actions/sentry-setup-dotnet
+        - name: Setup .NET Environment
+          uses: ./.github/actions/sentry-setup-dotnet
 
         - name: Build
           run: dotnet build -c Release /p:CopyLocalLockFileAssemblies=true

@@ -28,12 +28,12 @@ runs:
         restore-keys: ${{ runner.os }}-nuget
 
     # TODO: Figure out how to cache workloads, as they're not quite the same as nuget packages.
-    - name: Install .NET Workloads (Linux)
-      if: startsWith(runner.os, 'Linux')
-      run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
-    - name: Install .NET Workloads (Windows)
-      if: startsWith(runner.os, 'Windows')
-      run: 'dotnet workload install maui-android maui-windows --temp-dir "${{ runner.temp }}"'
-    - name: Install .NET Workloads (macOS)
+    - name: Install .NET Workloads
       if: startsWith(runner.os, 'macOS')
-      run: 'dotnet workload install maui-android maui-ios maui-maccatalyst --temp-dir "${{ runner.temp }}"'
+      shell: bash
+      run: |
+        dotnet workload install \
+          maui-android
+          {{ startsWith(runner.os, 'macOS') && 'maui-ios maui-maccatalyst' || '' }}\
+          {{ startsWith(runner.os, 'Windows') && 'maui-windows' || '' }}\
+          --temp-dir "${{ runner.temp }}"

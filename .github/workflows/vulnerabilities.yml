@@ -23,7 +23,8 @@ jobs:
           with:
             submodules: recursive
 
-        - uses: ./.github/actions/sentry-setup-dotnet
+        - name: Setup .NET Environment
+          uses: ./.github/actions/sentry-setup-dotnet
 
 # Everything above here is the same as the main build.
 # We only need to restore to check for vulnerable packages
