@@ -8,13 +8,17 @@ using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Internals.Http;
 
+[UsesVerify]
 public class HttpTransportTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
+    private readonly ISystemClock _fakeClock;
 
     public HttpTransportTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
+
+        _fakeClock = new MockClock(DateTimeOffset.UtcNow);
     }
 
     [Fact]
@@ -289,7 +293,8 @@ public class HttpTransportTests
                 SendClientReports = false,
                 Debug = true
             },
-            new HttpClient(httpHandler));
+            new HttpClient(httpHandler),
+            clock: _fakeClock);
 
         // First request always goes through
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -324,7 +329,7 @@ public class HttpTransportTests
                     new EmptySerializable())
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger);
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -345,10 +350,6 @@ public class HttpTransportTests
                 () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
             ));
 
-        var timestamp = DateTimeOffset.UtcNow;
-        var fakeClock = Substitute.For<ISystemClock>();
-        fakeClock.GetUtcNow().Returns(timestamp);
-
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -357,13 +358,13 @@ public class HttpTransportTests
             Debug = true
         };
 
-        var recorder = new ClientReportRecorder(options, fakeClock);
+        var recorder = new ClientReportRecorder(options, _fakeClock);
         options.ClientReportRecorder = recorder;
 
         var httpTransport = new HttpTransport(
             options,
             new HttpClient(httpHandler),
-            clock: fakeClock
+            clock: _fakeClock
         );
 
         // First request always goes through
@@ -392,7 +393,7 @@ public class HttpTransportTests
 
         // The client report should contain rate limit discards only.
         var expectedClientReport =
-            new ClientReport(timestamp,
+            new ClientReport(_fakeClock.GetUtcNow(),
                 new Dictionary<DiscardReasonWithCategory, int>
                 {
                     {DiscardReason.RateLimitBackoff.WithCategory(DataCategory.Error), 2},
@@ -409,7 +410,7 @@ public class HttpTransportTests
                 EnvelopeItem.FromClientReport(expectedClientReport)
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger);
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -776,20 +777,16 @@ public class HttpTransportTests
     }
 
     [Fact]
-    public void ProcessEnvelope_ShouldAttachClientReport()
+    public Task ProcessEnvelope_ShouldAttachClientReport()
     {
         var options = new SentryOptions();
 
-        var expectedTimestamp = DateTimeOffset.MaxValue;
-        var clock = Substitute.For<ISystemClock>();
-        clock.GetUtcNow().Returns(expectedTimestamp);
-
-        var recorder = new ClientReportRecorder(options, clock);
+        var recorder = new ClientReportRecorder(options);
         options.ClientReportRecorder = recorder;
 
         var logger = Substitute.For<IDiagnosticLogger>();
 
-        var httpTransport = Substitute.For<HttpTransportBase>(options, null, clock);
+        var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
 
         // add some fake discards for the report
         recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Internal);
@@ -801,7 +798,6 @@ public class HttpTransportTests
         recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
 
         var sentryEvent = new SentryEvent();
-        var expectedEventJson = EnvelopeItem.FromEvent(sentryEvent).Payload.SerializeToString(logger);
 
         var envelope = Envelope.FromEvent(sentryEvent);
         var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
@@ -815,21 +811,13 @@ public class HttpTransportTests
         Assert.Equal("event", eventItem.TryGetType());
         Assert.Equal("client_report", clientReportItem.TryGetType());
 
-        // The event should be unmodified
-        Assert.Equal(expectedEventJson, eventItem.Payload.SerializeToString(logger));
-
-        // The client report should contain the counts of the fake discards
-        const string expectedClientReportJson =
-            "{\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-            "\"discarded_events\":[" +
-            "{\"reason\":\"network_error\",\"category\":\"internal\",\"quantity\":1}," +
-            "{\"reason\":\"network_error\",\"category\":\"security\",\"quantity\":1}," +
-            "{\"reason\":\"queue_overflow\",\"category\":\"error\",\"quantity\":2}," +
-            "{\"reason\":\"ratelimit_backoff\",\"category\":\"transaction\",\"quantity\":3}" +
-            "]}";
-
+        var eventItemJson = eventItem.Payload.SerializeToString(logger);
         var clientReportJson = clientReportItem.Payload.SerializeToString(logger);
-        Assert.Equal(expectedClientReportJson, clientReportJson);
+        Assert.Contains("timestamp", clientReportJson);
+        Assert.Contains("timestamp", eventItemJson);
+
+        return VerifyJson($"{{eventItemJson:{eventItemJson},clientReportJson:{clientReportJson}}}")
+            .IgnoreMembers("timestamp");
     }
 
     [Fact]

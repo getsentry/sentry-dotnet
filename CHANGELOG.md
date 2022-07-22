@@ -4,6 +4,7 @@
 
 ### Features
 
+- Use `sent_at` instead of `sentry_timestamp` to reduce clock skew ([#1690](https://github.com/getsentry/sentry-dotnet/pull/1690)) 
 - Send project root path with events ([#1739](https://github.com/getsentry/sentry-dotnet/pull/1739))
 
 ### Fixes
