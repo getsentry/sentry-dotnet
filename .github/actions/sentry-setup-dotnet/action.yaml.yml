@@ -1,4 +1,4 @@
-name: Setup .NET
+name: Setup .NET for Sentry
 runs:
   using: composite
 

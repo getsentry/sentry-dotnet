@@ -29,7 +29,7 @@ jobs:
       with:
         submodules: recursive
 
-    - uses: ./.github/workflows/setup-dotnet.yml
+    - uses: ./.github/actions/sentry-setup-dotnet
 
     - name: Build
       run: dotnet build

@@ -27,7 +27,7 @@ jobs:
           with:
             submodules: recursive
 
-        - uses: ./.github/workflows/setup-dotnet.yml
+        - uses: ./.github/actions/sentry-setup-dotnet
 
 
 # Everything above here is the same as the main build.
