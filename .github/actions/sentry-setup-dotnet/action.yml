@@ -7,8 +7,8 @@ runs:
     - name: Set Global Environment Variables
       shell: bash
       run: |
-        echo "{DOTNET_CLI_TELEMETRY_OPTOUT=1}" >> $GITHUB_ENV
-        echo "{DOTNET_NOLOGO=1}" >> $GITHUB_ENV
+        echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
+        echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
     - name: Install .NET 2.1 SDK
       uses: actions/setup-dotnet@v2
@@ -29,11 +29,10 @@ runs:
 
     # TODO: Figure out how to cache workloads, as they're not quite the same as nuget packages.
     - name: Install .NET Workloads
-      if: startsWith(runner.os, 'macOS')
       shell: bash
       run: |
         dotnet workload install \
-          maui-android
-          {{ startsWith(runner.os, 'macOS') && 'maui-ios maui-maccatalyst' || '' }}\
-          {{ startsWith(runner.os, 'Windows') && 'maui-windows' || '' }}\
+          maui-android \
+          {{ startsWith(runner.os, 'macOS') && 'maui-ios maui-maccatalyst' || '' }} \
+          {{ startsWith(runner.os, 'Windows') && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}"
