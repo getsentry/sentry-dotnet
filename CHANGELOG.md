@@ -4,6 +4,7 @@
 
 ### Features
 
+- Use `sent_at` instead of `sentry_timestamp` to reduce clock skew ([#1690](https://github.com/getsentry/sentry-dotnet/pull/1690)) 
 - Send project root path with events ([#1739](https://github.com/getsentry/sentry-dotnet/pull/1739))
 
 ### Fixes
@@ -12,6 +13,7 @@
 - Fix error with `ConcurrentHashMap` on Android <= 9 ([#1761](https://github.com/getsentry/sentry-dotnet/pull/1761))
 - Minor improvements to `BackgroundWorker` ([#1773](https://github.com/getsentry/sentry-dotnet/pull/1773))
 - Make GzipRequestBodyHandler respect async ([#1776](https://github.com/getsentry/sentry-dotnet/pull/1776))
+- Fix race condition in handling of `InitCacheFlushTimeout` ([#1784](https://github.com/getsentry/sentry-dotnet/pull/1784))
 - Fix exceptions on background thread not reported in Unity ([#1794](https://github.com/getsentry/sentry-dotnet/pull/1794))
 
 ## 3.19.0

@@ -1,0 +1,89 @@
+{
+  breadcrumbs: [
+    {
+      message: crumb,
+      timestamp: Date_MaxValue
+    },
+    {
+      category: category,
+      data: {
+        data-key: data-value
+      },
+      level: warning,
+      message: message,
+      timestamp: Date_MaxValue,
+      type: type
+    }
+  ],
+  contexts: {
+    .NET Framework: {
+      .NET Framework: "v2.0.50727", "v3.0", "v3.5",
+      .NET Framework Client: "v4.8", "v4.0.0.0",
+      .NET Framework Full: "v4.8"
+    },
+    context_key: context_value
+  },
+  debug_meta: {
+    images: [
+      {
+        debug_id: Guid_1,
+        type: wasm
+      }
+    ]
+  },
+  environment: environment,
+  event_id: Guid_2,
+  exception: {
+    values: [
+      {
+        value: exception_value
+      }
+    ]
+  },
+  extra: {
+    extra_key: extra_value
+  },
+  fingerprint: [
+    fingerprint
+  ],
+  level: fatal,
+  logentry: {
+    formatted: structured_message,
+    message: message
+  },
+  logger: logger,
+  modules: {
+    module_key: module_value
+  },
+  platform: csharp,
+  release: release,
+  request: {
+    method: POST
+  },
+  sdk: {
+    name: SDK-test,
+    packages: [
+      {
+        name: name,
+        version: version
+      }
+    ],
+    version: 1.1.1
+  },
+  server_name: server_name,
+  tags: {
+    tag_key: tag_value
+  },
+  threads: {
+    values: [
+      {
+        crashed: true
+      }
+    ]
+  },
+  timestamp: Date_MaxValue,
+  transaction: transaction,
+  user: {
+    id: user-id
+  }
+}

@@ -17,7 +17,7 @@ namespace Sentry.Internal
         public ClientReportRecorder(SentryOptions options, ISystemClock? clock = default)
         {
             _options = options;
-            _clock = clock ?? new SystemClock();
+            _clock = clock ?? SystemClock.Clock;
         }
 
         public void RecordDiscardedEvent(DiscardReason reason, DataCategory category)

@@ -13,7 +13,7 @@ public class CachingTransportTests
 
     public CachingTransportTests(ITestOutputHelper testOutputHelper)
     {
-        _logger = new TestOutputDiagnosticLogger(testOutputHelper);
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(testOutputHelper, SentryLevel.Debug);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+        sentEnvelope.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -149,12 +149,10 @@ public class CachingTransportTests
         using var cacheDirectory = new TempDirectory();
         var loggerCompletionSource = new TaskCompletionSource<object>();
 
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-        logger
+        _logger
             .When(l =>
                 l.Log(SentryLevel.Error,
-                    "Exception in background worker of CachingTransport.",
+                    "Exception in CachingTransport worker.",
                     Arg.Any<OperationCanceledException>(),
                     Arg.Any<object[]>()))
             .Do(_ => loggerCompletionSource.SetResult(null));
@@ -162,7 +160,7 @@ public class CachingTransportTests
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             CacheDirectoryPath = cacheDirectory.Path,
             Debug = true
         };
@@ -212,8 +210,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope,
-            o => o.Excluding(x => x.Items[0].Header));
+        sentEnvelope.Should().BeEquivalentTo(envelope);;
     }
 
     [Fact]
@@ -410,8 +407,7 @@ public class CachingTransportTests
         };
 
         var timestamp = DateTimeOffset.UtcNow;
-        var clock = Substitute.For<ISystemClock>();
-        clock.GetUtcNow().Returns(timestamp);
+        var clock = new MockClock(timestamp);
         var recorder = new ClientReportRecorder(options, clock);
         options.ClientReportRecorder = recorder;
 

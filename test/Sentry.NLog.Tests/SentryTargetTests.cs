@@ -4,6 +4,7 @@ using NLog.Common;
 using NLog.Config;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
+using Sentry.Testing;
 using Target = NLog.Targets.Target;
 
 namespace Sentry.NLog.Tests;
@@ -19,8 +20,6 @@ public class SentryTargetTests
         public IHub Hub { get; set; } = Substitute.For<IHub>();
 
         public Func<IHub> HubAccessor { get; set; }
-
-        public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
 
         public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
 
@@ -40,7 +39,7 @@ public class SentryTargetTests
                 Options,
                 HubAccessor,
                 SdkDisposeHandle,
-                Clock)
+                new MockClock())
             {
                 Name = "sentry",
                 Dsn = Options.Dsn ?? Options.DsnLayout,
@@ -198,7 +197,7 @@ public class SentryTargetTests
         var b = _fixture.Scope.Breadcrumbs.First();
 
         Assert.Equal(b.Message, $"{expectedException.GetType()}: {expectedException.Message}");
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
         Assert.Equal(b.Category, logger.Name);
         Assert.Equal(b.Level, expectedLevel);
         Assert.Null(b.Type);
