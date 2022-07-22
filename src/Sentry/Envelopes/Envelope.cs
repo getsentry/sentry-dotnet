@@ -50,14 +50,17 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : null;
 
-        private async Task SerializeHeaderAsync(Stream stream, IDiagnosticLogger? logger, ISystemClock clock,
+        private async Task SerializeHeaderAsync(
+            Stream stream,
+            IDiagnosticLogger? logger,
+            ISystemClock clock,
             CancellationToken cancellationToken)
         {
             var headerItems = Header.Append(SentAtKey, clock.GetUtcNow());
             var writer = new Utf8JsonWriter(stream);
 
 #if NET461 || NETSTANDARD2_0
-            using (writer)
+            await using (writer)
 #else
             await using (writer.ConfigureAwait(false))
 #endif
@@ -78,11 +81,16 @@ namespace Sentry.Protocol.Envelopes
         // Gets the header and adds a sent_at timestamp
 
         /// <inheritdoc />
-        public Task SerializeAsync(Stream stream, IDiagnosticLogger? logger,
+        public Task SerializeAsync(
+            Stream stream,
+            IDiagnosticLogger? logger,
             CancellationToken cancellationToken = default) =>
             SerializeAsync(stream, logger, SystemClock.Clock, cancellationToken);
 
-        internal async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, ISystemClock clock,
+        internal async Task SerializeAsync(
+            Stream stream,
+            IDiagnosticLogger? logger,
+            ISystemClock clock,
             CancellationToken cancellationToken = default)
         {
             // Header

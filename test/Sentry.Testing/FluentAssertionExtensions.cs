@@ -27,8 +27,9 @@ public class EnvelopeAssertions : ReferenceTypeAssertions<Envelope, EnvelopeAsse
 
     public AndConstraint<EnvelopeAssertions> BeEquivalentTo(Envelope expectation)
     {
-        if ((Subject.Header.ContainsKey(SentAtKey) && expectation.Header.ContainsKey(SentAtKey)) ||
-            !Subject.Header.ContainsKey(SentAtKey) && !expectation.Header.ContainsKey(SentAtKey))
+        var subjectHasKey = Subject.Header.ContainsKey(SentAtKey);
+        var expectationHasKey = expectation.Header.ContainsKey(SentAtKey);
+        if (subjectHasKey == expectationHasKey)
         {
             // We can check the header directly
             Subject.Header.Should().BeEquivalentTo(expectation.Header);
@@ -64,8 +65,9 @@ public class EnvelopeItemAssertions : ReferenceTypeAssertions<EnvelopeItem, Enve
 
     public AndConstraint<EnvelopeItemAssertions> BeEquivalentTo(EnvelopeItem expectation)
     {
-        if ((Subject.Header.ContainsKey(LengthKey) && expectation.Header.ContainsKey(LengthKey)) ||
-            !Subject.Header.ContainsKey(LengthKey) && !expectation.Header.ContainsKey(LengthKey))
+        var subjectHasKey = Subject.Header.ContainsKey(LengthKey);
+        var expectationHasKey = expectation.Header.ContainsKey(LengthKey);
+        if (subjectHasKey == expectationHasKey)
         {
             // We can check the entire object directly
             AssertionExtensions.Should(Subject).BeEquivalentTo(expectation);
