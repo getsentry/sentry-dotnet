@@ -154,7 +154,9 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                if (value.Key is SqlMicrosoftWriteConnectionCloseAfterCommand or SqlDataWriteConnectionCloseAfterCommand &&
+                if (value.Key is
+                        SqlMicrosoftWriteConnectionCloseAfterCommand or
+                        SqlDataWriteConnectionCloseAfterCommand &&
                     value.GetProperty<Guid>(ConnectionKey) is { } id &&
                     TryGetConnectionSpan(scope, id) is { } connectionSpan)
                 {
