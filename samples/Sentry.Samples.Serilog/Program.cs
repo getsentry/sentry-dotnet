@@ -21,7 +21,7 @@ internal static class Program
                 o.AttachStacktrace = true;
                 o.SendDefaultPii = true; // send PII like the username of the user logged in to the device
                 // Optional Serilog text formatter used to format LogEvent to string. If TextFormatter is set, FormatProvider is ignored.
-                o.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}", null);
+                o.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
                 // Other configuration
             })
             .CreateLogger();

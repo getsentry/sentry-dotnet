@@ -231,7 +231,7 @@ public class SentryQueryPerformanceListenerTests
         var options = new SentryOptions
         {
             Debug = true,
-            DiagnosticLogger = new TestOutputDiagnosticLogger(logger, SentryLevel.Debug)
+            DiagnosticLogger = new TestOutputDiagnosticLogger(logger)
         };
 
         var listener = new SentryQueryPerformanceListener(hub, options);
