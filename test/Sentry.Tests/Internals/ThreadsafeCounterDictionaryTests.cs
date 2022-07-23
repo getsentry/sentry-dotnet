@@ -92,8 +92,10 @@ public class ThreadsafeCounterDictionaryTests
     [Fact]
     public void CanAddValue()
     {
-        var counters = new ThreadsafeCounterDictionary<string>();
-        counters.Add("foo", 2);
+        var counters = new ThreadsafeCounterDictionary<string>
+        {
+            {"foo", 2}
+        };
         Assert.Equal(2, counters["foo"]);
     }
 
