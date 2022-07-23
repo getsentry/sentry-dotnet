@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.46.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.46.0" />
+    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.47.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.47.0" />
     <PackageReference Include="Grpc.Tools" Version="2.47.0" PrivateAssets="All" />
   </ItemGroup>
 
