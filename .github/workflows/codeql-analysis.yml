@@ -25,8 +25,8 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup .NET Environment
-      uses: ./.github/actions/sentry-setup-dotnet
+    - name: Setup Environment
+      uses: ./.github/actions/environment
 
     - name: Build
       run: dotnet build
