@@ -1,6 +1,5 @@
 {
   "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
-  "appDomain": "denied",
 
   "// TODO:": "Re-enable parallelization (disabled due to test flakiness)",
   "parallelizeAssembly": false,
