@@ -14,7 +14,7 @@ runs:
       uses: actions/setup-dotnet@v2
       env:
         # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs on Ubuntu and Windows (doesn't happen on macOS)
-        DOTNET_INSTALL_DIR: ${{ startsWith(runner.os, 'Linux') && '/usr/share/dotnet' || startsWith(runner.os, 'Windows') && 'C:\Program Files\dotnet' || '' }}
+        DOTNET_INSTALL_DIR: ${{ runner.os == 'Linux' && '/usr/share/dotnet' || runner.os == 'Windows' && 'C:\Program Files\dotnet' || '' }}
       with:
         dotnet-version: 2.1.818
         # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
@@ -33,6 +33,6 @@ runs:
       run: >
         dotnet workload install \
           maui-android \
-          ${{ startsWith(runner.os, 'macOS') && 'maui-ios maui-maccatalyst' || '' }} \
-          ${{ startsWith(runner.os, 'Windows') && 'maui-windows' || '' }} \
+          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst' || '' }} \
+          ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}"

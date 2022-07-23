@@ -31,7 +31,7 @@ jobs:
           run: dotnet build -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test -c Release --no-build -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ matrix.os }}"
+          run: dotnet test -c Release --no-build -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
         - name: Pack
           # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
