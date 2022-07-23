@@ -16,8 +16,6 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        language: [ 'csharp' ]
 
     steps:
     - name: Checkout repository
@@ -27,6 +25,11 @@ jobs:
 
     - name: Setup Environment
       uses: ./.github/actions/environment
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: csharp
 
     - name: Build
       run: dotnet build
