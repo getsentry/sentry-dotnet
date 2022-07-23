@@ -95,7 +95,7 @@ namespace Sentry.PlatformAbstractions
 
             foreach (var versionKeyName in ndpKey.GetSubKeyNames())
             {
-                if (!versionKeyName.StartsWith("v") || !(ndpKey.OpenSubKey(versionKeyName) is { } versionKey))
+                if (!versionKeyName.StartsWith("v") || ndpKey.OpenSubKey(versionKeyName) is not { } versionKey)
                 {
                     continue;
                 }
