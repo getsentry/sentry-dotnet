@@ -59,8 +59,7 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
         {
             if (!_options.SendDefaultPii
                 // Don't add headers which might contain PII
-                && (key == "Cookie"
-                    || key == "Authorization"))
+                && key is "Cookie" or "Authorization")
             {
                 continue;
             }

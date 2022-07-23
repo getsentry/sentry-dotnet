@@ -53,7 +53,7 @@ namespace Sentry.PlatformAbstractions
                 if (clrVersion == 2)
                 {
                     // CLR 2 runs .NET 2 to 3.5
-                    if ((installation.Version.Major == 2 || installation.Version.Major == 3)
+                    if (installation.Version.Major is 2 or 3
                         && installation.Version >= latest.Version)
                     {
                         latest = installation;

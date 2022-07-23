@@ -128,8 +128,7 @@ public static class ScopeExtensions
         {
             if (!options.SendDefaultPii
                 // Don't add headers which might contain PII
-                && (requestHeader.Key == HeaderNames.Cookie
-                    || requestHeader.Key == HeaderNames.Authorization))
+                && requestHeader.Key is HeaderNames.Cookie or HeaderNames.Authorization)
             {
                 continue;
             }

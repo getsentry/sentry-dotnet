@@ -199,7 +199,7 @@ namespace Sentry
             get => _sampleRate;
             set
             {
-                if (value > 1 || value <= 0)
+                if (value is > 1 or <= 0)
                 {
                     throw new InvalidOperationException($"The value {value} is not valid. Use null to disable or values between 0.01 (inclusive) and 1.0 (exclusive) ");
                 }
@@ -481,7 +481,7 @@ namespace Sentry
             get => _tracesSampleRate;
             set
             {
-                if (value < 0 || value > 1)
+                if (value is < 0 or > 1)
                 {
                     throw new InvalidOperationException(
                         $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1.");
