@@ -132,14 +132,12 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
     {
         if (_options.TextFormatter is { } formatter)
         {
-            using var stringWriter = new StringWriter();
-            formatter.Format(logEvent, stringWriter);
-            return stringWriter.ToString();
+            using var writer = new StringWriter();
+            formatter.Format(logEvent, writer);
+            return writer.ToString();
         }
-        else
-        {
-            return logEvent.RenderMessage(_options.FormatProvider);
-        }
+
+        return logEvent.RenderMessage(_options.FormatProvider);
     }
 
     private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LogEvent logEvent)
