@@ -41,8 +41,8 @@ namespace Sentry.Internal.Http
         private readonly CancellationTokenSource _workerCts = new();
         private Task _worker = null!;
 
-        private ManualResetEventSlim? _initCacheResetEvent = new ManualResetEventSlim();
-        private ManualResetEventSlim? _preInitCacheResetEvent = new ManualResetEventSlim();
+        private ManualResetEventSlim? _initCacheResetEvent = new();
+        private ManualResetEventSlim? _preInitCacheResetEvent = new();
 
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
@@ -103,7 +103,7 @@ namespace Sentry.Internal.Http
                     // This will complete just before processing starts in the worker.
                     // It ensures that we don't start the timeout period prematurely.
                     _preInitCacheResetEvent!.Wait(_workerCts.Token);
-  
+
                     // This will complete either when the first round of processing is done,
                     // or on timeout, whichever comes first.
                     var completed = _initCacheResetEvent!.Wait(_options.InitCacheFlushTimeout, _workerCts.Token);
