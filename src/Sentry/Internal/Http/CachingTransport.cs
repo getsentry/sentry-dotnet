@@ -103,7 +103,7 @@ namespace Sentry.Internal.Http
                     // This will complete just before processing starts in the worker.
                     // It ensures that we don't start the timeout period prematurely.
                     _preInitCacheResetEvent!.Wait(_workerCts.Token);
-  
+
                     // This will complete either when the first round of processing is done,
                     // or on timeout, whichever comes first.
                     var completed = _initCacheResetEvent!.Wait(_options.InitCacheFlushTimeout, _workerCts.Token);
@@ -460,24 +460,24 @@ namespace Sentry.Internal.Http
             }
         }
 
-        public async Task StopWorkerAsync()
+        public Task StopWorkerAsync()
         {
             if (_worker.IsCompleted)
             {
                 // already stopped
-                return;
+                return Task.CompletedTask;
             }
 
             // Stop worker and wait until it finishes
             _options.LogDebug("Stopping CachingTransport worker.");
             _workerCts.Cancel();
-            await _worker.ConfigureAwait(false);
+            return _worker;
         }
 
-        public async Task FlushAsync(CancellationToken cancellationToken = default)
+        public Task FlushAsync(CancellationToken cancellationToken = default)
         {
             _options.LogDebug("External FlushAsync invocation: flushing cached envelopes.");
-            await ProcessCacheAsync(cancellationToken).ConfigureAwait(false);
+            return ProcessCacheAsync(cancellationToken);
         }
 
         public async ValueTask DisposeAsync()
