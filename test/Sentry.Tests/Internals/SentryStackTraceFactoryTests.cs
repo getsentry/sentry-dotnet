@@ -101,7 +101,7 @@ public class SentryStackTraceFactoryTests
         Assert.NotNull(stackTrace);
 
         Assert.Equal(
-            $"void " +
+            "void " +
             $"{GetType().Name}" +
             $".{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}" +
             "()",
