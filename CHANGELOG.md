@@ -1,11 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### Features
-
-- Remove redundant state machines ([#1802](https://github.com/getsentry/sentry-dotnet/pull/1802))
-
 ## 3.20.0
 
 ### Features
