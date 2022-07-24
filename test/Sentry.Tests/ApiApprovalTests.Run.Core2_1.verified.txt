@@ -1308,7 +1308,7 @@ namespace Sentry.Protocol
     }
     public sealed class OperatingSystem : Sentry.IJsonSerializable
     {
-        public const string Type = "os";
+        public const string Type = "client-os";
         public OperatingSystem() { }
         public string? Build { get; set; }
         public string? KernelVersion { get; set; }

@@ -100,11 +100,6 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
             @event.Contexts["server-runtime"] = runtime;
         }
 
-        if (@event.Contexts.TryRemove(Protocol.OperatingSystem.Type, out var os))
-        {
-            @event.Contexts["server-os"] = os;
-        }
-
         var body = PayloadExtractor.ExtractPayload(new SystemWebHttpRequest(context.Request));
         if (body != null)
         {

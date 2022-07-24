@@ -18,7 +18,7 @@ namespace Sentry.Protocol
         /// <summary>
         /// Tells Sentry which type of context this is.
         /// </summary>
-        public const string Type = "os";
+        public const string Type = "client-os";
 
         /// <summary>
         /// The name of the operating system.

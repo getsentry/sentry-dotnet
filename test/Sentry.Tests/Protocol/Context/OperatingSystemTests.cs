@@ -29,7 +29,7 @@ public class OperatingSystemTests
         var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
-            "{\"type\":\"os\"," +
+            "{\"type\":\"client-os\"," +
             "\"name\":\"Windows\"," +
             "\"version\":\"2016\"," +
             "\"raw_description\":\"Windows 2016\"," +
@@ -73,11 +73,11 @@ public class OperatingSystemTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new OperatingSystem(), "{\"type\":\"os\"}") };
-        yield return new object[] { (new OperatingSystem { Name = "some name" }, "{\"type\":\"os\",\"name\":\"some name\"}") };
-        yield return new object[] { (new OperatingSystem { RawDescription = "some Name, some version" }, "{\"type\":\"os\",\"raw_description\":\"some Name, some version\"}") };
-        yield return new object[] { (new OperatingSystem { Build = "some build" }, "{\"type\":\"os\",\"build\":\"some build\"}") };
-        yield return new object[] { (new OperatingSystem { KernelVersion = "some kernel version" }, "{\"type\":\"os\",\"kernel_version\":\"some kernel version\"}") };
-        yield return new object[] { (new OperatingSystem { Rooted = false }, "{\"type\":\"os\",\"rooted\":false}") };
+        yield return new object[] { (new OperatingSystem(), "{\"type\":\"client-os\"}") };
+        yield return new object[] { (new OperatingSystem { Name = "some name" }, "{\"type\":\"client-os\",\"name\":\"some name\"}") };
+        yield return new object[] { (new OperatingSystem { RawDescription = "some Name, some version" }, "{\"type\":\"client-os\",\"raw_description\":\"some Name, some version\"}") };
+        yield return new object[] { (new OperatingSystem { Build = "some build" }, "{\"type\":\"client-os\",\"build\":\"some build\"}") };
+        yield return new object[] { (new OperatingSystem { KernelVersion = "some kernel version" }, "{\"type\":\"client-os\",\"kernel_version\":\"some kernel version\"}") };
+        yield return new object[] { (new OperatingSystem { Rooted = false }, "{\"type\":\"client-os\",\"rooted\":false}") };
     }
 }

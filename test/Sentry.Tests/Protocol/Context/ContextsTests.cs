@@ -41,7 +41,7 @@ public class ContextsTests
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
-        Assert.Equal("{\"server\":{\"type\":\"os\",\"name\":\"Linux\"}}", actualString);
+        Assert.Equal("{\"server\":{\"type\":\"client-os\",\"name\":\"Linux\"}}", actualString);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class ContextsTests
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
-        Assert.Equal("{\"os\":{\"type\":\"os\",\"name\":\"BeOS 1\"}}", actualString);
+        Assert.Equal("{\"client-os\":{\"type\":\"client-os\",\"name\":\"BeOS 1\"}}", actualString);
     }
 
     [Fact]

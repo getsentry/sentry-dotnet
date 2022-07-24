@@ -40,7 +40,7 @@ public class AspNetCoreEventProcessorTests
 
         _ = _sut.Process(target);
 
-        Assert.Same(expected, target.Contexts["server-os"]);
+        Assert.Same(expected, target.Contexts["client-os"]);
     }
 
     [Fact]
