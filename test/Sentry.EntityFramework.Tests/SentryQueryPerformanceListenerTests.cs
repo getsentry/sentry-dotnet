@@ -225,7 +225,7 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        hub.GetSpan().Returns(_ => null);
+        hub.GetSpan().ReturnsNull();
         var logger = Substitute.For<ITestOutputHelper>();
 
         var options = new SentryOptions

@@ -101,10 +101,7 @@ public class SentryStackTraceFactoryTests
         Assert.NotNull(stackTrace);
 
         Assert.Equal(
-            "void " +
-            $"{GetType().Name}" +
-            $".{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}" +
-            "()",
+            $"void {GetType().Name}.{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}()",
             stackTrace.Frames.Last().Function);
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
