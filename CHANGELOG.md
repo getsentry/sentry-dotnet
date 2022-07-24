@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix null ref in aspnet TryGetTraceHeader ([#1807](https://github.com/getsentry/sentry-dotnet/pull/1807))
+
+
 ## 3.20.0
 
 ### Features
