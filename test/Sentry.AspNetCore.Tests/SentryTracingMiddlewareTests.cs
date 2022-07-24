@@ -11,6 +11,7 @@ using Sentry.AspNetCore.Tests.Utils.Extensions;
 
 namespace Sentry.AspNetCore.Tests;
 
+[Collection(nameof(SentrySdkCollection))]
 public class SentryTracingMiddlewareTests
 {
     [Fact]

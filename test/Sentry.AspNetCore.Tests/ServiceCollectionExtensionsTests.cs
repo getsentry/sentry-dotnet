@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.AspNetCore.Tests;
 
+[Collection(nameof(SentrySdkCollection))]
 public class ServiceCollectionExtensionsTests
 {
     private IServiceCollection _sut = Substitute.For<IServiceCollection>();

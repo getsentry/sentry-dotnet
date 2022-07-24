@@ -11,6 +11,7 @@ using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests
 {
+    [Collection(nameof(SentrySdkCollection))]
     public class SentryHttpMessageHandlerBuilderFilterTests
     {
         // Inserts a recorder into pipeline
