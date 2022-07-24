@@ -96,7 +96,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope, o => o.Excluding(x => x.Items[0].Header));
+        sentEnvelope.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -210,8 +210,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope,
-            o => o.Excluding(x => x.Items[0].Header));
+        sentEnvelope.Should().BeEquivalentTo(envelope);;
     }
 
     [Fact]
@@ -408,8 +407,7 @@ public class CachingTransportTests
         };
 
         var timestamp = DateTimeOffset.UtcNow;
-        var clock = Substitute.For<ISystemClock>();
-        clock.GetUtcNow().Returns(timestamp);
+        var clock = new MockClock(timestamp);
         var recorder = new ClientReportRecorder(options, clock);
         options.ClientReportRecorder = recorder;
 

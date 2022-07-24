@@ -65,23 +65,26 @@ public static class ScopeExtensions
         try
         {
             var routeData = context.GetRouteData();
-            var controller = routeData.Values["controller"]?.ToString();
-            var action = routeData.Values["action"]?.ToString();
-            var area = routeData.Values["area"]?.ToString();
+            var values = routeData.Values;
 
-            if (controller != null)
+            if (values["controller"] is string controller)
             {
                 scope.SetTag("route.controller", controller);
             }
 
-            if (action != null)
+            if (values["action"] is string action)
             {
                 scope.SetTag("route.action", action);
             }
 
-            if (area != null)
+            if (values["area"] is string area)
             {
                 scope.SetTag("route.area", area);
+            }
+
+            if (values["version"] is string version)
+            {
+                scope.SetTag("route.version", version);
             }
 
             // Transaction Name may only be available afterward the creation of the Transaction.

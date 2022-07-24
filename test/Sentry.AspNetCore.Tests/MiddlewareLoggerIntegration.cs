@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
+using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -20,7 +21,6 @@ public class MiddlewareLoggerIntegration : IDisposable
         public IHub Hub { get; set; }
         public Func<IHub> HubAccessor { get; set; }
         public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
-        public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
         public SentryAspNetCoreOptions Options { get; set; } = new();
         public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
         public ILogger<SentryMiddleware> MiddlewareLogger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
@@ -44,7 +44,7 @@ public class MiddlewareLoggerIntegration : IDisposable
             var hub = new Hub(new SentryOptions { Dsn = ValidDsn });
             hub.BindClient(Client);
             Hub = hub;
-            var provider = new SentryLoggerProvider(hub, Clock, loggingOptions);
+            var provider = new SentryLoggerProvider(hub, new MockClock(), loggingOptions);
             _disposable = provider;
             SentryLogger = provider.CreateLogger(nameof(SentryLogger));
             _ = HttpContext.Features.Returns(FeatureCollection);

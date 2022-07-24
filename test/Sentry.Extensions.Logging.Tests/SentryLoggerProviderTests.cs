@@ -1,3 +1,5 @@
+using Sentry.Testing;
+
 namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggerProviderTests
@@ -5,9 +7,8 @@ public class SentryLoggerProviderTests
     private class Fixture
     {
         public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
         public SentryLoggingOptions SentryLoggingOptions { get; set; } = new();
-        public SentryLoggerProvider GetSut() => new(Hub, Clock, SentryLoggingOptions);
+        public SentryLoggerProvider GetSut() => new(Hub, new MockClock(), SentryLoggingOptions);
     }
 
     private readonly Fixture _fixture = new();

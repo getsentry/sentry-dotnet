@@ -12,12 +12,6 @@ jobs:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
-      # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs on Ubuntu and Windows (doesn't happen on macOS)
-      DOTNET_INSTALL_DIR: ${{ startsWith(matrix.os, 'ubuntu') && '/usr/share/dotnet' || startsWith(matrix.os, 'windows') && 'C:\Program Files\dotnet' || '' }}
-
     strategy:
       fail-fast: false
       matrix:
@@ -30,48 +24,14 @@ jobs:
           with:
             submodules: recursive
 
-        - name: Setup .NET SDK (Windows)
-          if: startsWith(matrix.os, 'windows')
-          uses: actions/setup-dotnet@v2
-          with:
-            dotnet-version: 2.1.818
-        - name: Setup .NET SDK (macOS)
-          if: startsWith(matrix.os, 'macos')
-          uses: actions/setup-dotnet@v2
-          with:
-            dotnet-version: |
-              2.1.818
-              6.0.x
-        - name: Setup .NET SDK (Ubuntu)
-          if: startsWith(matrix.os, 'ubuntu')
-          uses: actions/setup-dotnet@v2
-          with:
-            dotnet-version: 2.1.818
-
-        - name: Dependency Caching
-          uses: actions/cache@v3
-          with:
-            path: ~/.nuget/packages
-            # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags
-            # Workloads also get installed in the nuget packages cache, so if you modify workloads below, increment the number in the cache keys
-            key: ${{ runner.os }}-nuget+workloads3-${{ hashFiles('**/*.*proj', '**/*.props') }}
-            restore-keys: ${{ runner.os }}-nuget+workloads3
-
-        - name: Install .NET Workloads (Ubuntu)
-          if: startsWith(matrix.os, 'ubuntu')
-          run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
-        - name: Install .NET Workloads (Windows)
-          if: startsWith(matrix.os, 'windows')
-          run: 'dotnet workload install maui-android maui-windows --temp-dir "${{ runner.temp }}"'
-        - name: Install .NET Workloads (macOS)
-          if: startsWith(matrix.os, 'macos')
-          run: 'dotnet workload install maui-android maui-ios maui-maccatalyst --temp-dir "${{ runner.temp }}"'
+        - name: Setup Environment
+          uses: ./.github/actions/environment
 
         - name: Build
           run: dotnet build -c Release /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test -c Release --no-build -l GitHubActions -l "trx;LogFileName=${{ matrix.os }}-test-results.trx"
+          run: dotnet test -c Release --no-build -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
         - name: Pack
           # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
