@@ -6,6 +6,10 @@
 
 - Remove server_os in favor of only client_os ([#1808](https://github.com/getsentry/sentry-dotnet/pull/1808))
 
+### Fixes
+
+- Fix null ref in aspnet TryGetTraceHeader ([#1807](https://github.com/getsentry/sentry-dotnet/pull/1807))
+
 ## 3.20.0
 
 ### Features

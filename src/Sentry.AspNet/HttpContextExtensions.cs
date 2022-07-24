@@ -14,9 +14,14 @@ public static class HttpContextExtensions
 
     private static SentryTraceHeader? TryGetTraceHeader(NameValueCollection headers)
     {
+        var traceHeader = headers.Get(SentryTraceHeader.HttpHeaderName);
+        if (traceHeader == null)
+        {
+            return null;
+        }
+
         try
         {
-            var traceHeader = headers.Get(SentryTraceHeader.HttpHeaderName);
             return SentryTraceHeader.Parse(traceHeader);
         }
         catch
