@@ -2,7 +2,7 @@ namespace Sentry.Tests.Protocol;
 
 public class DsnTests
 {
-    private const string ValidDsnWithSecret = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647";
+    internal const string ValidDsnWithSecret = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647";
 
     [Fact]
     public void ToString_SameAsInput()
@@ -138,15 +138,6 @@ public class DsnTests
     public void TryParse_SampleValidDsn_Succeeds()
     {
         Assert.NotNull(Dsn.TryParse(ValidDsn));
-    }
-
-    [Fact]
-    public void Init_ValidDsnWithSecret_EnablesSdk()
-    {
-        using (SentrySdk.Init(ValidDsnWithSecret))
-        {
-            Assert.True(SentrySdk.IsEnabled);
-        }
     }
 
     [Fact]
