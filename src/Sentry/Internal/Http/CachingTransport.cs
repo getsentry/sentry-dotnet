@@ -41,8 +41,8 @@ namespace Sentry.Internal.Http
         private readonly CancellationTokenSource _workerCts = new();
         private Task _worker = null!;
 
-        private ManualResetEventSlim? _initCacheResetEvent = new ManualResetEventSlim();
-        private ManualResetEventSlim? _preInitCacheResetEvent = new ManualResetEventSlim();
+        private ManualResetEventSlim? _initCacheResetEvent = new();
+        private ManualResetEventSlim? _preInitCacheResetEvent = new();
 
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;

@@ -53,8 +53,13 @@ public class BaseScopeTests
     {
         _sut.Contexts.App.Name = "Foo";
 
-        var expected = new Contexts();
-        expected.App.Name = "Bar";
+        var expected = new Contexts
+        {
+            App =
+            {
+                Name = "Bar"
+            }
+        };
 
         _sut.Contexts = expected;
 

@@ -225,13 +225,13 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        hub.GetSpan().Returns((_) => null);
+        hub.GetSpan().ReturnsNull();
         var logger = Substitute.For<ITestOutputHelper>();
 
         var options = new SentryOptions
         {
             Debug = true,
-            DiagnosticLogger = new TestOutputDiagnosticLogger(logger, SentryLevel.Debug)
+            DiagnosticLogger = new TestOutputDiagnosticLogger(logger)
         };
 
         var listener = new SentryQueryPerformanceListener(hub, options);

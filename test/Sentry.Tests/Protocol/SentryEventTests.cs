@@ -48,9 +48,13 @@ public class SentryEventTests
             SentryThreads = new[] { new SentryThread { Crashed = true } },
             ServerName = "server_name",
             TransactionName = "transaction",
-            DebugImages = new List<DebugImage>()
+            DebugImages = new List<DebugImage>
             {
-                new DebugImage { Type = "wasm", DebugId = "900f7d1b868432939de4457478f34720" }
+                new()
+                {
+                    Type = "wasm",
+                    DebugId = "900f7d1b868432939de4457478f34720"
+                }
             },
         };
 

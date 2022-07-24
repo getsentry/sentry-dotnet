@@ -2,21 +2,16 @@ using Sentry.AspNet.Internal;
 
 public class SentryScopeManagerTests
 {
-    private class Fixture
-    {
-        public SentryScopeManager GetSut() => new(
-            new HttpContextScopeStackContainer(),
-            new SentryOptions(),
-            Substitute.For<ISentryClient>());
-    }
-
-    private Fixture _fixture => new();
+    static SentryScopeManager GetSut() => new(
+        new HttpContextScopeStackContainer(),
+        new SentryOptions(),
+        Substitute.For<ISentryClient>());
 
     [Fact]
     public void SetScopeStack_NoHttpContext_FallbackSet()
     {
         // Arrange
-        var scopeManager = _fixture.GetSut();
+        var scopeManager = GetSut();
 
         // Act
         scopeManager.PushScope();
@@ -29,7 +24,7 @@ public class SentryScopeManagerTests
     public void GetScopeStack_NoHttpContext_Null()
     {
         // Arrange
-        var scopeManager = _fixture.GetSut();
+        var scopeManager = GetSut();
 
         // Assert
         Assert.Null(scopeManager.ScopeStackContainer.Stack);
