@@ -11,7 +11,7 @@ public class TempDirectory : IDisposable
 
     internal TempDirectory(IFileSystem fileSystem, string path = default)
     {
-        _fileSystem = fileSystem ?? new FileSystem();
+        _fileSystem = fileSystem ?? FileSystem.Instance;
         Path = path ?? System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString());
         _fileSystem.CreateDirectory(Path);
     }

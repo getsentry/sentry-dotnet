@@ -6,6 +6,12 @@ namespace Sentry.Internal
 {
     internal class FileSystem : IFileSystem
     {
+        public static IFileSystem Instance { get; } = new FileSystem();
+
+        private FileSystem()
+        {
+        }
+
         public IEnumerable<string> EnumerateFiles(string path) => Directory.EnumerateFiles(path);
 
         public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>
