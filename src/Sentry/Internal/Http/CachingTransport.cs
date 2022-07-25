@@ -63,7 +63,7 @@ namespace Sentry.Internal.Http
             _innerTransport = innerTransport;
             _options = options;
             _failStorage = failStorage; // For testing
-            _fileSystem = options.FileSystem ?? FileSystem.Instance;
+            _fileSystem = options.FileSystem;
 
             _keepCount = _options.MaxCacheItems >= 1
                 ? _options.MaxCacheItems - 1

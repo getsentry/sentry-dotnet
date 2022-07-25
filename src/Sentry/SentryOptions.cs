@@ -446,7 +446,7 @@ namespace Sentry
         /// Sets the filesystem instance to use. Defaults to the actual <see cref="FileSystem"/>.
         /// Used for testing.
         /// </summary>
-        internal IFileSystem? FileSystem { get; set; }
+        internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;
 
         /// <summary>
         /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
