@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Reflection;
-using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.Testing;
@@ -245,49 +244,59 @@ public class SentrySdkTests : IDisposable
         second.Dispose();
     }
 
-    [SkippableTheory]
+    [Theory]
     [InlineData(true)] // InitCacheFlushTimeout is more than enough time to process all messages
     [InlineData(false)] // InitCacheFlushTimeout is less time than needed to process all messages
     [InlineData(null)] // InitCacheFlushTimeout is not set
     public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed(bool? testDelayWorking)
     {
-        // This test is just a bit too flaky in CI.  We'll keep running it locally though.
-        Skip.If(BuildServerDetector.Detected);
+        // Note: We use a fake filesystem for this test, which uses only memory instead of disk.
+        //       This keeps file IO access time out of the test.
+
+        // Not too many, or this will be slow.  Not too few or this will be flaky.
+        const int numEnvelopes = 5;
+
+        // Set the delay for the transport here.  If the test becomes flaky, increase the timeout.
+        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(100);
 
         // Arrange
-        using var cacheDirectory = new TempDirectory();
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
         var cachePath = cacheDirectory.Path;
 
         // Pre-populate cache
         var initialInnerTransport = Substitute.For<ITransport>();
-        await using var initialTransport = CachingTransport.Create(
+        var initialTransport = CachingTransport.Create(
             initialInnerTransport,
             new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = _logger,
                 Dsn = ValidDsn,
-                CacheDirectoryPath = cachePath
+                CacheDirectoryPath = cachePath,
+                FileSystem = fileSystem
             },
             startWorker: false);
-
-        // Not too many, or this will be slow.  Not too few or this will be flaky.
-        const int numEnvelopes = 5;
-        for (var i = 0; i < numEnvelopes; i++)
+        await using (initialTransport)
         {
-            using var envelope = Envelope.FromEvent(new SentryEvent());
-            await initialTransport.SendEnvelopeAsync(envelope);
+            for (var i = 0; i < numEnvelopes; i++)
+            {
+                using var envelope = Envelope.FromEvent(new SentryEvent());
+                await initialTransport.SendEnvelopeAsync(envelope);
+            }
         }
 
-        // Set the delay for the transport here.  If the test becomes flaky, increase the timeout.
-        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(100);
+        _logger.Log(SentryLevel.Debug, "Done adding to cache directory.");
 
+        var countCompleted = 0;
         var transport = Substitute.For<ITransport>();
         transport.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
+            .Returns(async callInfo =>
             {
                 var token = callInfo.Arg<CancellationToken>();
-                return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.Delay(processingDelayPerEnvelope);
+                await Task.Delay(processingDelayPerEnvelope, token);
+                Interlocked.Increment(ref countCompleted);
+                _logger.Log(SentryLevel.Debug, $"Sent envelope {countCompleted}.");
             });
 
         // Set the timeout for the desired result
@@ -313,6 +322,7 @@ public class SentrySdkTests : IDisposable
                 o.Debug = true;
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cachePath;
+                o.FileSystem = fileSystem;
                 o.InitCacheFlushTimeout = initFlushTimeout;
                 o.Transport = transport;
                 options = o;
@@ -325,20 +335,18 @@ public class SentrySdkTests : IDisposable
             {
                 case true:
                     // We waited long enough to have them all
-                    await transport.ReceivedWithAnyArgs(numEnvelopes).SendEnvelopeAsync(default);
+                    Assert.Equal(numEnvelopes, countCompleted);
 
                     // But we should not have waited longer than we needed to
                     Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
                     break;
                 case false:
                     // We only waited long enough to have at least one, but not all of them
-                    var actualCount = transport.ReceivedCalls()
-                        .Count(c => c.GetMethodInfo().Name == nameof(transport.SendEnvelopeAsync));
-                    Assert.InRange(actualCount, 1, numEnvelopes - 1);
+                    Assert.InRange(countCompleted, 1, numEnvelopes - 1);
                     break;
                 case null:
                     // We shouldn't have any, as we didn't ask to flush the cache on init
-                    await transport.DidNotReceiveWithAnyArgs().SendEnvelopeAsync(default);
+                    Assert.Equal(0, countCompleted);
                     break;
             }
         }

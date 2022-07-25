@@ -47,6 +47,8 @@ namespace Sentry.Internal.Http
         // Inner transport exposed internally primarily for testing
         internal ITransport InnerTransport => _innerTransport;
 
+        private readonly IFileSystem _fileSystem;
+
         public static CachingTransport Create(ITransport innerTransport, SentryOptions options,
             bool startWorker = true,
             bool failStorage = false)
@@ -61,6 +63,7 @@ namespace Sentry.Internal.Http
             _innerTransport = innerTransport;
             _options = options;
             _failStorage = failStorage; // For testing
+            _fileSystem = options.FileSystem;
 
             _keepCount = _options.MaxCacheItems >= 1
                 ? _options.MaxCacheItems - 1
@@ -79,8 +82,8 @@ namespace Sentry.Internal.Http
             MoveUnprocessedFilesBackToCache();
 
             // Ensure directories exist
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
-            Directory.CreateDirectory(_processingDirectoryPath);
+            _fileSystem.CreateDirectory(_isolatedCacheDirectoryPath);
+            _fileSystem.CreateDirectory(_processingDirectoryPath);
 
             // Start a worker, if one is needed
             if (startWorker)
@@ -172,13 +175,13 @@ namespace Sentry.Internal.Http
             // if the cache was working when the process terminated unexpectedly.
             // Move everything from that directory back to cache directory.
 
-            if (!Directory.Exists(_processingDirectoryPath))
+            if (!_fileSystem.DirectoryExists(_processingDirectoryPath))
             {
                 // nothing to do
                 return;
             }
 
-            foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
+            foreach (var filePath in _fileSystem.EnumerateFiles(_processingDirectoryPath))
             {
                 var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
                 _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.", filePath, destinationPath);
@@ -188,12 +191,12 @@ namespace Sentry.Internal.Http
                 {
                     try
                     {
-                        File.Move(filePath, destinationPath);
+                        _fileSystem.MoveFile(filePath, destinationPath);
                         break;
                     }
                     catch (Exception ex)
                     {
-                        if (!File.Exists(filePath))
+                        if (!_fileSystem.FileExists(filePath))
                         {
                             _options.LogDebug(
                                 "Failed to move unprocessed file back to cache (attempt {0}), " +
@@ -238,7 +241,7 @@ namespace Sentry.Internal.Http
             {
                 try
                 {
-                    File.Delete(filePath);
+                    _fileSystem.DeleteFile(filePath);
                     _options.LogDebug("Deleted cached file {0}.", filePath);
                 }
                 catch (FileNotFoundException)
@@ -252,9 +255,8 @@ namespace Sentry.Internal.Http
         }
 
         private IEnumerable<string> GetCacheFilePaths() =>
-            Directory
-                .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
-                .OrderBy(f => new FileInfo(f).CreationTimeUtc);
+            _fileSystem.EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                .OrderBy(f => _fileSystem.GetFileCreationTime(f));
 
         private async Task ProcessCacheAsync(CancellationToken cancellation)
         {
@@ -282,7 +284,7 @@ namespace Sentry.Internal.Http
 
             _options.LogDebug("Reading cached envelope: {0}", file);
 
-            var stream = File.OpenRead(file);
+            var stream = _fileSystem.OpenFileForReading(file);
 #if NET461 || NETSTANDARD2_0
             using (stream)
 #else
@@ -327,7 +329,7 @@ namespace Sentry.Internal.Http
             // Envelope & file stream must be disposed prior to reaching this point
 
             // Delete the envelope file and move on to the next one
-            File.Delete(file);
+            _fileSystem.DeleteFile(file);
         }
 
         private void LogFailureWithDiscard(string file, Exception ex)
@@ -335,9 +337,9 @@ namespace Sentry.Internal.Http
             string? envelopeContents = null;
             try
             {
-                if (File.Exists(file))
+                if (_fileSystem.FileExists(file))
                 {
-                    envelopeContents = File.ReadAllText(file);
+                    envelopeContents = _fileSystem.ReadAllTextFromFile(file);
                 }
             }
             // ReSharper disable once EmptyGeneralCatchClause
@@ -370,16 +372,9 @@ namespace Sentry.Internal.Http
             var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
 
             // Move the file to processing.
-            // We move with overwrite just in case a file with the same name
-            // already exists in the output directory.
-            // That should never happen under normal workflows because the filenames
-            // have high variance.
-#if NETCOREAPP3_0_OR_GREATER
-            File.Move(filePath, targetFilePath, true);
-#else
-            File.Copy(filePath, targetFilePath, true);
-            File.Delete(filePath);
-#endif
+            // We move with overwrite just in case a file with the same name already exists in the output directory.
+            // That should never happen under normal workflows because the filenames have high variance.
+            _fileSystem.MoveFile(filePath, targetFilePath, overwrite: true);
 
             return targetFilePath;
         }
@@ -411,7 +406,7 @@ namespace Sentry.Internal.Http
 
             EnsureFreeSpaceInCache();
 
-            var stream = File.Create(envelopeFilePath);
+            var stream = _fileSystem.CreateFileForWriting(envelopeFilePath);
 #if NET461 || NETSTANDARD2_0
             using(stream)
 #else

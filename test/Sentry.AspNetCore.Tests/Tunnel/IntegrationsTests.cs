@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.Tunnel.Tests;
 
-public class IntegrationsTests
+public class IntegrationsTests : IDisposable
 {
     private readonly TestServer _server;
     private HttpClient _httpClient;
@@ -83,5 +83,12 @@ public class IntegrationsTests
         await _server.CreateClient().SendAsync(requestMessage);
 
         Assert.Equal(1, _httpMessageHandler.NumberOfCalls);
+    }
+
+    public void Dispose()
+    {
+        _httpClient.Dispose();
+        _httpMessageHandler.Dispose();
+        _server.Dispose();
     }
 }
