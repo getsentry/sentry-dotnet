@@ -276,7 +276,8 @@ public class HubTests
             }
         }
 
-        using var tempDirectory = offlineCaching ? new TempDirectory() : null;
+        var fileSystem = new FakeFileSystem();
+        using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
 
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(SentryLevel.Error).Returns(true);
@@ -286,6 +287,7 @@ public class HubTests
             Dsn = ValidDsn,
             // To go through a round trip serialization of cached envelope
             CacheDirectoryPath = tempDirectory?.Path,
+            FileSystem = fileSystem,
             // So we don't need to deal with gzip'ed payload
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),

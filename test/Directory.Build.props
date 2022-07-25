@@ -10,10 +10,15 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- An attempt to use run netfx tests with Mono and .NET Core CLI https://github.com/xunit/xunit/issues/1357 -->
-    <!-- After strong name signing assemblies, only net462 target stopped working. Again xunit -noshadow seems to solve it: https://github.com/Microsoft/vstest/issues/1684 -->
+  <!-- configure xunit -->
+  <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('windows'))">
     <Content Include="..\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
+    <Content Include="..\xunit.runner.windows.json">
+      <Link>xunit.runner.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -45,6 +50,7 @@
     <PackageReference Include="Verify.DiffPlex" Version="1.3.0" />
     <PackageReference Include="PublicApiGenerator" Version="10.3.0" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.0.1" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="17.0.24" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461' And '$(TargetFramework)' != 'netcoreapp3.0' And '$(TargetFramework)' != 'netcoreapp2.1'">
