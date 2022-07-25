@@ -4,12 +4,16 @@ namespace Sentry.Testing;
 
 public class FakeFileSystem : IFileSystem
 {
+    // This is an in-memory implementation provided by https://github.com/TestableIO/System.IO.Abstractions
     private readonly MockFileSystem _mockFileSystem = new();
 
     public IEnumerable<string> EnumerateFiles(string path) => _mockFileSystem.Directory.EnumerateFiles(path);
 
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>
         _mockFileSystem.Directory.EnumerateFiles(path, searchPattern);
+
+    public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
+        _mockFileSystem.Directory.EnumerateFiles(path, searchPattern, searchOption);
 
     public void CreateDirectory(string path) => _mockFileSystem.Directory.CreateDirectory(path);
 

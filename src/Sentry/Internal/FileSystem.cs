@@ -11,6 +11,9 @@ namespace Sentry.Internal
         public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>
             Directory.EnumerateFiles(path, searchPattern);
 
+        public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
+            Directory.EnumerateFiles(path, searchPattern, searchOption);
+
         public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
         public void DeleteDirectory(string path, bool recursive = false) => Directory.Delete(path, recursive);
