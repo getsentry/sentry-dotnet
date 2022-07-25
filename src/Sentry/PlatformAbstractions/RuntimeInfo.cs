@@ -112,7 +112,6 @@ namespace Sentry.PlatformAbstractions
             }
             catch
             {
-                return;
             }
         }
 #endif

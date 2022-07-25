@@ -225,8 +225,7 @@ namespace Sentry.Http
         /// <param name="response">The response message received from Sentry.</param>
         /// <param name="envelope">The envelope that was being sent.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
-        protected async Task HandleResponseAsync(HttpResponseMessage response, Envelope envelope,
-            CancellationToken cancellationToken)
+        protected Task HandleResponseAsync(HttpResponseMessage response, Envelope envelope, CancellationToken cancellationToken)
         {
             // Read & set rate limits for future requests
             ExtractRateLimits(response.Headers);
@@ -234,12 +233,10 @@ namespace Sentry.Http
             // Handle results
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                await HandleSuccessAsync(envelope, cancellationToken).ConfigureAwait(false);
+                return HandleSuccessAsync(envelope, cancellationToken);
             }
-            else
-            {
-                await HandleFailureAsync(response, envelope, cancellationToken).ConfigureAwait(false);
-            }
+
+            return HandleFailureAsync(response, envelope, cancellationToken);
         }
 
         /// <summary>

@@ -16,6 +16,7 @@ public class SentryStackTraceFactoryTests
     }
 
     private readonly Fixture _fixture = new();
+    private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace;
 
     [Fact]
     public void Create_NoExceptionAndDefaultAttachStackTraceOption_NullResult()
@@ -101,10 +102,7 @@ public class SentryStackTraceFactoryTests
         Assert.NotNull(stackTrace);
 
         Assert.Equal(
-            $"void " +
-            $"{GetType().Name}" +
-            $".{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}" +
-            "()",
+            $"void {GetType().Name}.{nameof(Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace)}()",
             stackTrace.Frames.Last().Function);
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
@@ -123,7 +121,7 @@ public class SentryStackTraceFactoryTests
         try
         {
             Throw();
-            void Throw() => throw null;
+            void Throw() => throw null!;
         }
         catch (Exception e) { exception = e; }
 
@@ -140,7 +138,7 @@ public class SentryStackTraceFactoryTests
         try
         {
             Throw();
-            void Throw() => throw null;
+            void Throw() => throw null!;
         }
         catch (Exception e) { exception = e; }
 
@@ -239,7 +237,7 @@ public class SentryStackTraceFactoryTests
     [Fact]
     public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
     {
-        _fixture.SentryOptions.AddInAppExclude(GetType().Namespace);
+        _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
         var sut = _fixture.GetSut();
         var frame = new StackFrame();
 
@@ -251,8 +249,8 @@ public class SentryStackTraceFactoryTests
     [Fact]
     public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
     {
-        _fixture.SentryOptions.AddInAppExclude(GetType().Namespace);
-        _fixture.SentryOptions.AddInAppInclude(GetType().Namespace);
+        _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
+        _fixture.SentryOptions.AddInAppInclude(ThisNamespace);
         var sut = _fixture.GetSut();
         var frame = new StackFrame();
 
@@ -286,10 +284,13 @@ public class SentryStackTraceFactoryTests
         Assert.Null(stackFrame.Module);
     }
 
+    // ReSharper disable UnusedParameter.Local
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static (Fixture f, int b) ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut) =>
         throw new Exception();
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void GenericMethodThatThrows<T>(T value) =>
         throw new Exception();
+    // ReSharper restore UnusedParameter.Local
 }

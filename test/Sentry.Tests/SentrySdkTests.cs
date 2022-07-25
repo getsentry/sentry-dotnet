@@ -325,7 +325,7 @@ public class SentrySdkTests : IDisposable
             {
                 case true:
                     // We waited long enough to have them all
-                    await transport.ReceivedWithAnyArgs(numEnvelopes).SendEnvelopeAsync(default, default);
+                    await transport.ReceivedWithAnyArgs(numEnvelopes).SendEnvelopeAsync(default);
 
                     // But we should not have waited longer than we needed to
                     Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
@@ -338,7 +338,7 @@ public class SentrySdkTests : IDisposable
                     break;
                 case null:
                     // We shouldn't have any, as we didn't ask to flush the cache on init
-                    await transport.DidNotReceiveWithAnyArgs().SendEnvelopeAsync(default, default);
+                    await transport.DidNotReceiveWithAnyArgs().SendEnvelopeAsync(default);
                     break;
             }
         }

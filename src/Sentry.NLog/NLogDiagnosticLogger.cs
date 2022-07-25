@@ -10,7 +10,7 @@ internal class NLogDiagnosticLogger : IDiagnosticLogger
 
     public NLogDiagnosticLogger(IDiagnosticLogger? extraLogger = null)
     {
-        if (!InternalLogger.LogToConsole || !(extraLogger is ConsoleDiagnosticLogger))
+        if (!InternalLogger.LogToConsole || extraLogger is not ConsoleDiagnosticLogger)
         {
             _extraLogger = extraLogger;
         }

@@ -116,9 +116,6 @@ public class SentryStartup : FunctionsStartup
         /// <summary>
         /// Handles the <see cref="HttpContext"/>.
         /// </summary>
-        public async Task InvokeAsync(HttpContext httpContext)
-        {
-            await _next(httpContext).ConfigureAwait(false);
-        }
+        public Task InvokeAsync(HttpContext httpContext) => _next(httpContext);
     }
 }
