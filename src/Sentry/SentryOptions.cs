@@ -443,6 +443,12 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
+        /// Sets the filesystem instance to use. Defaults to the actual <see cref="Internal.FileSystem"/>.
+        /// Used for testing.
+        /// </summary>
+        internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;
+
+        /// <summary>
         /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
         /// Set to <see cref="TimeSpan.Zero"/> to disable this feature.
         /// This option only works if <see cref="CacheDirectoryPath"/> is configured as well.
