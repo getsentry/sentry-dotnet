@@ -443,7 +443,7 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
-        /// Sets the filesystem instance to use. Defaults to the actual <see cref="FileSystem"/>.
+        /// Sets the filesystem instance to use. Defaults to the actual <see cref="Internal.FileSystem"/>.
         /// Used for testing.
         /// </summary>
         internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;
