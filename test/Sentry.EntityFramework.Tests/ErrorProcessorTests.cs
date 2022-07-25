@@ -13,7 +13,7 @@ public class ErrorProcessorTests
 
         public ISentryClient SentryClient;
 
-        public Func<SentryEvent, SentryEvent> BeforeSend = null;
+        public Func<SentryEvent, SentryEvent> BeforeSend;
 
         private SentryEvent _beforeSend(SentryEvent arg)
         {
