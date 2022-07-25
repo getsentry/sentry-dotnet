@@ -28,11 +28,13 @@ public class ErrorProcessorTests
         {
             DbConnection = Effort.DbConnectionFactory.CreateTransient();
             DbContext = new TestDbContext(DbConnection, true);
-            SentryClient = new SentryClient(new SentryOptions
-            {
-                BeforeSend = _beforeSend,
-                Dsn = ValidDsn,
-            }.AddEntityFramework());
+            SentryClient = new SentryClient(
+                new SentryOptions
+                {
+                    BeforeSend = _beforeSend,
+                    Dsn = ValidDsn,
+                }
+                .AddEntityFramework());
         }
     }
 
@@ -64,7 +66,7 @@ public class ErrorProcessorTests
     }
 
     /// <summary>
-    /// Integration test to ensure that the processor is also called and operated successfully inside an actual Sentry Client
+    /// Ensure that the processor is also called and operated successfully inside an actual Sentry Client
     /// This should help avoid regression in case the underlying API changes in an unusual way
     /// </summary>
     [Fact]
