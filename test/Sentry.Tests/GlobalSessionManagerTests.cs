@@ -6,7 +6,7 @@ public class GlobalSessionManagerTests : IDisposable
 {
     private class Fixture : IDisposable
     {
-        private readonly TempDirectory _cacheDirectory = new();
+        private readonly TempDirectory _cacheDirectory;
 
         public InMemoryDiagnosticLogger Logger { get; }
 
@@ -19,13 +19,16 @@ public class GlobalSessionManagerTests : IDisposable
         public Fixture(Action<SentryOptions> configureOptions = null)
         {
             Clock.GetUtcNow().Returns(DateTimeOffset.Now);
-
             Logger = new InMemoryDiagnosticLogger();
+
+            var fileSystem = new FakeFileSystem();
+            _cacheDirectory = new TempDirectory(fileSystem);
 
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
                 CacheDirectoryPath = _cacheDirectory.Path,
+                FileSystem = fileSystem,
                 Release = "test",
                 Debug = true,
                 DiagnosticLogger = Logger
