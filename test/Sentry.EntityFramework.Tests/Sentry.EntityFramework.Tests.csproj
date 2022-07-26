@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Effort.EF6" Version="2.2.16" />
-    <PackageReference Include="LocalDb" Version="13.8.2" />
+    <PackageReference Include="EfClassicLocalDb" Version="13.8.3" />
   </ItemGroup>
 
   <ItemGroup>

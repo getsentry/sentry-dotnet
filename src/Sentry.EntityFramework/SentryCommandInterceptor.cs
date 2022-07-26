@@ -59,13 +59,13 @@ public class SentryCommandInterceptor : IDbCommandInterceptor
             return;
         }
 
-        if (interceptionContext.Exception != null)
+        if (interceptionContext.Exception == null)
         {
-            _queryLogger.Log(command.CommandText, BreadcrumbLevel.Error);
+            _queryLogger.Log(command.CommandText);
         }
         else
         {
-            _queryLogger.Log(command.CommandText);
+            _queryLogger.Log(command.CommandText, BreadcrumbLevel.Error);
         }
     }
 }
