@@ -270,9 +270,14 @@ namespace Sentry.Protocol.Envelopes
                 prevByte = curByte;
             }
 
-            return
+            var header =
                 Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
+
+            // The sent_at header should not be included in the result
+            header.Remove(SentAtKey);
+
+            return header;
         }
 
         /// <summary>
