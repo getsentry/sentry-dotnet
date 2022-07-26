@@ -269,7 +269,7 @@ public class HubTests
     [InlineData(false)]
     public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
-        var tcs = new TaskCompletionSource<object>();
+        var tcs = new TaskCompletionSource<bool>();
         var expectedMessage = Guid.NewGuid().ToString();
 
         var requests = new List<string>();
@@ -279,9 +279,12 @@ public class HubTests
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
-                tcs.SetResult(null);
+                tcs.TrySetResult(true);
             }
         }
+
+        var cts = new CancellationTokenSource();
+        cts.Token.Register(() => tcs.TrySetCanceled());
 
         var fileSystem = new FakeFileSystem();
         using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
@@ -305,7 +308,7 @@ public class HubTests
 
         try
         {
-            var hub = new Hub(options);
+            using var hub = new Hub(options);
 
             var expectedContextKey = Guid.NewGuid().ToString();
             var evt = new SentryEvent
@@ -318,15 +321,19 @@ public class HubTests
             await hub.FlushAsync(options.ShutdownTimeout);
 
             // Synchronizing in the tests to go through the caching and http transports
-            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
-            Assert.True(tcs.Task.IsCompleted, "Event not captured");
+
+            cts.CancelAfter(TimeSpan.FromSeconds(3));
+            var ex = await Record.ExceptionAsync(() => tcs.Task);
+            Assert.False(ex is OperationCanceledException || !tcs.Task.Result, "Event not captured");
+            Assert.Null(ex);
+
             Assert.True(requests.All(p => p.Contains(expectedContextKey)),
                 "Un-serializable context key should exist");
 
             logger.Received().Log(SentryLevel.Error,
                 "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
-            Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
+                Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
 #else
                 Arg.Any<InvalidDataException>(),
 #endif
@@ -335,6 +342,10 @@ public class HubTests
         }
         finally
         {
+            // ensure the task is complete before leaving the test
+            tcs.TrySetResult(false);
+            await tcs.Task;
+
             if (options.Transport is CachingTransport cachingTransport)
             {
                 // Disposing the caching transport will ensure its worker
