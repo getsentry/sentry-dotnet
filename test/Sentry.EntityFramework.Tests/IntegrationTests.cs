@@ -12,20 +12,15 @@ public class IntegrationTests
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
         var transport = new RecordingTransport();
-        var options = new SentryOptions
-        {
-            TracesSampleRate = 1,
-            Transport = transport,
-            Dsn = ValidDsn,
-            DiagnosticLevel = SentryLevel.Debug
-        };
+        var options = new SentryOptions {TracesSampleRate = 1, Transport = transport, Dsn = ValidDsn, DiagnosticLevel = SentryLevel.Debug};
 
         options.AddEntityFramework();
 
         var sqlInstance = new SqlInstance<TestDbContext>(
-            connection => new(connection, true));
+            constructInstance: connection => new(connection, true),
+            storage: Storage.FromSuffix<TestDbContext>(Namer.RuntimeAndVersion));
 
-        using (var database =await sqlInstance.Build())
+        using (var database = await sqlInstance.Build())
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
