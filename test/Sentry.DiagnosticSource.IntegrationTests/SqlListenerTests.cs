@@ -48,8 +48,9 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             .Select(x => x.Payload)
             .ToList();
 
-        await Verify(payloads)
+        var result = await Verify(payloads)
             .IgnoreStandardSentryMembers();
+        Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
 #endif
 
@@ -88,8 +89,9 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             .SelectMany(x => x.Items)
             .Select(x => x.Payload)
             .ToList();
-        await Verify(payloads)
+        var result = await Verify(payloads)
             .IgnoreStandardSentryMembers()
             .UniqueForRuntimeAndVersion();
+        Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
 }
