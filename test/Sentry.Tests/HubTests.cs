@@ -315,6 +315,7 @@ public class HubTests
             };
 
             hub.CaptureEvent(evt);
+            await hub.FlushAsync(options.ShutdownTimeout);
 
             // Synchronizing in the tests to go through the caching and http transports
             await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
