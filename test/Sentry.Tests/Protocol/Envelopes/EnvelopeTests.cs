@@ -8,7 +8,7 @@ public class EnvelopeTests
     // https://develop.sentry.dev/sdk/envelopes/#full-examples
 
     private readonly IDiagnosticLogger _testOutputLogger;
-    private readonly ISystemClock _fakeClock;
+    private readonly MockClock _fakeClock;
 
     public EnvelopeTests(ITestOutputHelper output)
     {
@@ -697,5 +697,32 @@ public class EnvelopeTests
                 nested["name"] == SdkVersion.Instance.Name &&
                 nested["version"] == SdkVersion.Instance.Version;
         }).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Serialization_RoundTrip_ReplacesSentAtHeader()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
+            Array.Empty<EnvelopeItem>());
+
+        // Act
+        _fakeClock.SetUtcNow(DateTimeOffset.MinValue);
+        var serialized = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(serialized);
+        await writer.FlushAsync();
+        stream.Seek(0, SeekOrigin.Begin);
+        var deserialized = await Envelope.DeserializeAsync(stream);
+
+        _fakeClock.SetUtcNow(DateTimeOffset.MaxValue);
+        var output = await deserialized.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
     }
 }
