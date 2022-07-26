@@ -11,6 +11,13 @@ namespace Sentry.Tests;
 
 public class HubTests
 {
+    private readonly ITestOutputHelper _output;
+
+    public HubTests(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
     [Fact]
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
@@ -279,8 +286,7 @@ public class HubTests
         var fileSystem = new FakeFileSystem();
         using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
 
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(SentryLevel.Error).Returns(true);
+        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output, SentryLevel.Debug);
 
         var options = new SentryOptions
         {
@@ -294,7 +300,6 @@ public class HubTests
             // Not to send some session envelope
             AutoSessionTracking = false,
             Debug = true,
-            DiagnosticLevel = SentryLevel.Error,
             DiagnosticLogger = logger
         };
 
@@ -310,6 +315,7 @@ public class HubTests
             };
 
             hub.CaptureEvent(evt);
+            await hub.FlushAsync(options.ShutdownTimeout);
 
             // Synchronizing in the tests to go through the caching and http transports
             await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
