@@ -257,7 +257,7 @@ public class SentrySdkTests : IDisposable
         const int numEnvelopes = 5;
 
         // Set the delay for the transport here.  If the test becomes flaky, increase the timeout.
-        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(100);
+        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(200);
 
         // Arrange
         var fileSystem = new FakeFileSystem();

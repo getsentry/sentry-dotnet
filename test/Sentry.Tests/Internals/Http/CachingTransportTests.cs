@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -676,5 +677,36 @@ public class CachingTransportTests
         // Assert
         var envelopes = innerTransport.GetSentEnvelopes();
         envelopes.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task DoesntWriteSentAtHeaderToCacheFile()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory(_fileSystem);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path,
+            FileSystem = _fileSystem
+        };
+
+        var innerTransport = Substitute.For<ITransport>();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        await transport.SendEnvelopeAsync(envelope);
+
+        // Assert
+        var filePath = _fileSystem
+            .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
+            .Single();
+
+        var contents = _fileSystem.ReadAllTextFromFile(filePath);
+        Assert.DoesNotContain("sent_at", contents);
     }
 }

@@ -60,5 +60,8 @@ namespace Sentry.Internal.Extensions
                 return null;
             }
         }
+
+        public static bool IsFileStream(this Stream? stream) =>
+            stream is FileStream || stream?.GetType().Name == "MockFileStream";
     }
 }

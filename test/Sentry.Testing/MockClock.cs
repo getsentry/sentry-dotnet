@@ -2,7 +2,7 @@
 
 public class MockClock : ISystemClock
 {
-    private readonly DateTimeOffset _value;
+    private DateTimeOffset _value;
 
     public MockClock(DateTimeOffset value) => _value = value;
 
@@ -11,4 +11,6 @@ public class MockClock : ISystemClock
     }
 
     public DateTimeOffset GetUtcNow() => _value;
+
+    public void SetUtcNow(DateTimeOffset value) => _value = value;
 }

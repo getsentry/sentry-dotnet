@@ -1,11 +1,11 @@
 # Changelog
 
-## Unreleased
+## 3.20.1
 
 ### Fixes
 
+- URGENT: Fix events rejected due to duplicate `sent_at` header when offline caching is enabled through `CacheDirectoryPath` ([#1818](https://github.com/getsentry/sentry-dotnet/pull/1818))
 - Fix null ref in aspnet TryGetTraceHeader ([#1807](https://github.com/getsentry/sentry-dotnet/pull/1807))
-
 
 ## 3.20.0
 
