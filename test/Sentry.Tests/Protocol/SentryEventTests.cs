@@ -59,6 +59,7 @@ public class SentryEventTests
         };
 
         sut.Sdk.AddPackage(new Package("name", "version"));
+        sut.Sdk.AddIntegration("integration");
         sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
         sut.AddBreadcrumb(new Breadcrumb(
             timestamp,

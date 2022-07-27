@@ -1,3 +1,5 @@
+// Only generate/test API approvals for targets where DiagnosticSource isn't integrated with the Sentry assembly
+#if !NETCOREAPP3_1_OR_GREATER
 using Sentry.Internals.DiagnosticSource;
 using Sentry.Tests;
 
@@ -12,3 +14,4 @@ public class ApiApprovalTests
         return typeof(SentryDiagnosticListenerIntegration).Assembly.CheckApproval();
     }
 }
+#endif
