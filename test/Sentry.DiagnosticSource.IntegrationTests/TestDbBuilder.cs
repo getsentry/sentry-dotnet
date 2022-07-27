@@ -50,7 +50,8 @@ values (@value);";
     {
         var values = new List<string>();
         using var command = connection.CreateCommand();
-        command.CommandText = "select Value from MyTable";
+        command.Parameters.AddWithValue("value", "SHOULD NOT APPEAR IN PAYLOAD");
+        command.CommandText = "select Value from MyTable where Value = @value";
         using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {

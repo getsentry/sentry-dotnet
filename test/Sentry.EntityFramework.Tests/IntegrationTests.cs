@@ -16,7 +16,13 @@ public class IntegrationTests
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
         var transport = new RecordingTransport();
-        var options = new SentryOptions {TracesSampleRate = 1, Transport = transport, Dsn = ValidDsn, DiagnosticLevel = SentryLevel.Debug};
+        var options = new SentryOptions
+        {
+            TracesSampleRate = 1,
+            Transport = transport,
+            Dsn = ValidDsn,
+            DiagnosticLevel = SentryLevel.Debug
+        };
 
         options.AddEntityFramework();
 
