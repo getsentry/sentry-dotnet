@@ -36,13 +36,25 @@
       Spans: [
         {
           IsFinished: true,
+          Operation: db.query.scalar,
+          Description:
+
+SELECT Count(*)
+FROM INFORMATION_SCHEMA.TABLES AS t
+WHERE t.TABLE_SCHEMA + '.' + t.TABLE_NAME IN ('dbo.TestDatas')
+    OR t.TABLE_NAME = 'EdmMetadata',
+          Status: Ok,
+          IsSampled: true
+        },
+        {
+          IsFinished: true,
           Operation: db.query,
           Description:
-SELECT 
-    [Extent1].[Id] AS [Id], 
-    [Extent1].[AColumn] AS [AColumn], 
-    [Extent1].[RequiredColumn] AS [RequiredColumn]
-    FROM [dbo].[TestDatas] AS [Extent1],
+
+SELECT Count(*)
+FROM INFORMATION_SCHEMA.TABLES AS t
+WHERE t.TABLE_SCHEMA + '.' + t.TABLE_NAME IN ('dbo.TestDatas')
+    OR t.TABLE_NAME = 'EdmMetadata',
           Status: Ok,
           IsSampled: true,
           Extra: {
@@ -55,10 +67,12 @@ SELECT
           Operation: db.query,
           Description:
 SELECT 
-    [Extent1].[Id] AS [Id], 
-    [Extent1].[AColumn] AS [AColumn], 
-    [Extent1].[RequiredColumn] AS [RequiredColumn]
-    FROM [dbo].[TestDatas] AS [Extent1],
+    [GroupBy1].[A1] AS [C1]
+    FROM ( SELECT 
+        COUNT(1) AS [A1]
+        FROM [dbo].[__MigrationHistory] AS [Extent1]
+        WHERE [Extent1].[ContextKey] = @p__linq__0
+    )  AS [GroupBy1],
           Status: Ok,
           IsSampled: true
         },
@@ -66,11 +80,13 @@ SELECT
           IsFinished: true,
           Operation: db.query,
           Description:
-INSERT [dbo].[TestDatas]([AColumn], [RequiredColumn])
-VALUES (@0, @1)
-SELECT [Id]
-FROM [dbo].[TestDatas]
-WHERE @@ROWCOUNT > 0 AND [Id] = scope_identity(),
+SELECT 
+    [GroupBy1].[A1] AS [C1]
+    FROM ( SELECT 
+        COUNT(1) AS [A1]
+        FROM [dbo].[__MigrationHistory] AS [Extent1]
+        WHERE [Extent1].[ContextKey] = @p__linq__0
+    )  AS [GroupBy1],
           Status: Ok,
           IsSampled: true,
           Extra: {
@@ -82,11 +98,20 @@ WHERE @@ROWCOUNT > 0 AND [Id] = scope_identity(),
           IsFinished: true,
           Operation: db.query,
           Description:
-INSERT [dbo].[TestDatas]([AColumn], [RequiredColumn])
-VALUES (@0, @1)
-SELECT [Id]
-FROM [dbo].[TestDatas]
-WHERE @@ROWCOUNT > 0 AND [Id] = scope_identity(),
+SELECT TOP (1) 
+    [Project1].[C1] AS [C1], 
+    [Project1].[MigrationId] AS [MigrationId], 
+    [Project1].[Model] AS [Model], 
+    [Project1].[ProductVersion] AS [ProductVersion]
+    FROM ( SELECT 
+        [Extent1].[MigrationId] AS [MigrationId], 
+        [Extent1].[Model] AS [Model], 
+        [Extent1].[ProductVersion] AS [ProductVersion], 
+        1 AS [C1]
+        FROM [dbo].[__MigrationHistory] AS [Extent1]
+        WHERE [Extent1].[ContextKey] = @p__linq__0
+    )  AS [Project1]
+    ORDER BY [Project1].[MigrationId] DESC,
           Status: Ok,
           IsSampled: true
         },
@@ -119,20 +144,11 @@ SELECT TOP (1)
           IsFinished: true,
           Operation: db.query,
           Description:
-SELECT TOP (1) 
-    [Project1].[C1] AS [C1], 
-    [Project1].[MigrationId] AS [MigrationId], 
-    [Project1].[Model] AS [Model], 
-    [Project1].[ProductVersion] AS [ProductVersion]
-    FROM ( SELECT 
-        [Extent1].[MigrationId] AS [MigrationId], 
-        [Extent1].[Model] AS [Model], 
-        [Extent1].[ProductVersion] AS [ProductVersion], 
-        1 AS [C1]
-        FROM [dbo].[__MigrationHistory] AS [Extent1]
-        WHERE [Extent1].[ContextKey] = @p__linq__0
-    )  AS [Project1]
-    ORDER BY [Project1].[MigrationId] DESC,
+INSERT [dbo].[TestDatas]([AColumn], [RequiredColumn])
+VALUES (@0, @1)
+SELECT [Id]
+FROM [dbo].[TestDatas]
+WHERE @@ROWCOUNT > 0 AND [Id] = scope_identity(),
           Status: Ok,
           IsSampled: true
         },
@@ -140,13 +156,11 @@ SELECT TOP (1)
           IsFinished: true,
           Operation: db.query,
           Description:
-SELECT 
-    [GroupBy1].[A1] AS [C1]
-    FROM ( SELECT 
-        COUNT(1) AS [A1]
-        FROM [dbo].[__MigrationHistory] AS [Extent1]
-        WHERE [Extent1].[ContextKey] = @p__linq__0
-    )  AS [GroupBy1],
+INSERT [dbo].[TestDatas]([AColumn], [RequiredColumn])
+VALUES (@0, @1)
+SELECT [Id]
+FROM [dbo].[TestDatas]
+WHERE @@ROWCOUNT > 0 AND [Id] = scope_identity(),
           Status: Ok,
           IsSampled: true,
           Extra: {
@@ -158,13 +172,12 @@ SELECT
           IsFinished: true,
           Operation: db.query,
           Description:
-SELECT 
-    [GroupBy1].[A1] AS [C1]
-    FROM ( SELECT 
-        COUNT(1) AS [A1]
-        FROM [dbo].[__MigrationHistory] AS [Extent1]
-        WHERE [Extent1].[ContextKey] = @p__linq__0
-    )  AS [GroupBy1],
+SELECT TOP (1) 
+    [Extent1].[Id] AS [Id], 
+    [Extent1].[AColumn] AS [AColumn], 
+    [Extent1].[RequiredColumn] AS [RequiredColumn]
+    FROM [dbo].[TestDatas] AS [Extent1]
+    WHERE ([Extent1].[AColumn] = @p__linq__0) OR (([Extent1].[AColumn] IS NULL) AND (@p__linq__0 IS NULL)),
           Status: Ok,
           IsSampled: true
         },
@@ -172,29 +185,18 @@ SELECT
           IsFinished: true,
           Operation: db.query,
           Description:
-
-SELECT Count(*)
-FROM INFORMATION_SCHEMA.TABLES AS t
-WHERE t.TABLE_SCHEMA + '.' + t.TABLE_NAME IN ('dbo.TestDatas')
-    OR t.TABLE_NAME = 'EdmMetadata',
+SELECT TOP (1) 
+    [Extent1].[Id] AS [Id], 
+    [Extent1].[AColumn] AS [AColumn], 
+    [Extent1].[RequiredColumn] AS [RequiredColumn]
+    FROM [dbo].[TestDatas] AS [Extent1]
+    WHERE ([Extent1].[AColumn] = @p__linq__0) OR (([Extent1].[AColumn] IS NULL) AND (@p__linq__0 IS NULL)),
           Status: Ok,
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
             db.operation_id: Guid_6
           }
-        },
-        {
-          IsFinished: true,
-          Operation: db.query.scalar,
-          Description:
-
-SELECT Count(*)
-FROM INFORMATION_SCHEMA.TABLES AS t
-WHERE t.TABLE_SCHEMA + '.' + t.TABLE_NAME IN ('dbo.TestDatas')
-    OR t.TABLE_NAME = 'EdmMetadata',
-          Status: Ok,
-          IsSampled: true
         }
       ],
       IsFinished: true

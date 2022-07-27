@@ -1,3 +1,5 @@
+#if NET6_0
+
 using System.Data.Entity;
 using System.Runtime.InteropServices;
 
@@ -6,6 +8,8 @@ namespace Sentry.EntityFramework.Tests;
 [UsesVerify]
 public class IntegrationTests
 {
+    static string shouldNotAppearInPayload = "SHOULD NOT APPEAR IN PAYLOAD";
+
     [SkippableFact]
     public async Task Simple()
     {
@@ -17,8 +21,7 @@ public class IntegrationTests
         options.AddEntityFramework();
 
         var sqlInstance = new SqlInstance<TestDbContext>(
-            constructInstance: connection => new(connection, true),
-            storage: Storage.FromSuffix<TestDbContext>(Namer.RuntimeAndVersion));
+            constructInstance: connection => new(connection, true));
 
         using (var database = await sqlInstance.Build())
         using (var hub = new Hub(options))
@@ -30,10 +33,11 @@ public class IntegrationTests
                 new TestDbContext.TestData
                 {
                     Id = 1,
-                    AColumn = "SHOULD NOT APPEAR IN PAYLOAD",
+                    AColumn = shouldNotAppearInPayload,
                     RequiredColumn = "Value"
                 });
-            await database.Context.TestTable.ToListAsync();
+            await database.Context.TestTable
+                .FirstAsync(_ => _.AColumn == shouldNotAppearInPayload);
             transaction.Finish();
         }
 
@@ -43,9 +47,9 @@ public class IntegrationTests
             .ToList();
         var result = await Verify(payloads)
             .IgnoreStandardSentryMembers()
-            .UniqueForRuntimeAndVersion()
-            //ignore sql version check
             .IgnoreInstance<Span>(_ => _.Description == "select cast(serverproperty('EngineEdition') as int)");
-        Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
+        Assert.DoesNotContain(shouldNotAppearInPayload, result.Text);
     }
 }
+
+#endif
