@@ -30,21 +30,27 @@ public class IntegrationTests
             constructInstance: connection => new(connection, true));
 
         using (var database = await sqlInstance.Build())
-        using (var hub = new Hub(options))
         {
-            var transaction = hub.StartTransaction("my transaction", "my operation");
-            hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureException(new Exception("my exception"));
-            await database.AddData(
-                new TestDbContext.TestData
-                {
-                    Id = 1,
-                    AColumn = shouldNotAppearInPayload,
-                    RequiredColumn = "Value"
-                });
-            await database.Context.TestTable
-                .FirstAsync(_ => _.AColumn == shouldNotAppearInPayload);
-            transaction.Finish();
+            // forcing a query means EF performs it startup version checks against sql.
+            // so we dont include that noise in assert
+            await database.Context.TestTable.ToListAsync();
+
+            using (var hub = new Hub(options))
+            {
+                var transaction = hub.StartTransaction("my transaction", "my operation");
+                hub.ConfigureScope(scope => scope.Transaction = transaction);
+                hub.CaptureException(new Exception("my exception"));
+                await database.AddData(
+                    new TestDbContext.TestData
+                    {
+                        Id = 1,
+                        AColumn = shouldNotAppearInPayload,
+                        RequiredColumn = "Value"
+                    });
+                await database.Context.TestTable
+                    .FirstAsync(_ => _.AColumn == shouldNotAppearInPayload);
+                transaction.Finish();
+            }
         }
 
         var payloads = transport.Envelopes
@@ -52,8 +58,7 @@ public class IntegrationTests
             .Select(x => x.Payload)
             .ToList();
         var result = await Verify(payloads)
-            .IgnoreStandardSentryMembers()
-            .IgnoreInstance<Span>(_ => _.Description == "select cast(serverproperty('EngineEdition') as int)");
+            .IgnoreStandardSentryMembers();
         Assert.DoesNotContain(shouldNotAppearInPayload, result.Text);
     }
 }

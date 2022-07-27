@@ -6,7 +6,7 @@
 
   <!-- Running these tests on Mono fail -->
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
-    <TargetFrameworks>net48;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
