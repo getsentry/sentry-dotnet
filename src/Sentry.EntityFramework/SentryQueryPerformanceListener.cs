@@ -12,8 +12,8 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     internal const string DbNonQueryKey = "db.execute";
     internal const string DbScalarKey = "db.query.scalar";
 
-    private SentryOptions _options { get; }
-    private IHub _hub { get; }
+    private SentryOptions _options;
+    private IHub _hub;
 
     internal SentryQueryPerformanceListener(IHub hub, SentryOptions options)
     {
