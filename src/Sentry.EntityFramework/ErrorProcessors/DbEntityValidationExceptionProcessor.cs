@@ -8,8 +8,6 @@ namespace Sentry.EntityFramework.ErrorProcessors;
 /// </summary>
 public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcessor<DbEntityValidationException>
 {
-    internal const string EntityValidationErrors = "EntityValidationErrors";
-
     /// <summary>
     /// Extracts details from <see cref="DbEntityValidationException"/> into the <see cref="SentryEvent"/>.
     /// </summary>
@@ -29,6 +27,6 @@ public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcesso
             }
         }
 
-        sentryEvent.SetExtra(EntityValidationErrors, errorList);
+        sentryEvent.SetExtra("EntityValidationErrors", errorList);
     }
 }
