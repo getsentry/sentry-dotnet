@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+## Features
+
+- Added 'integrations' to SdkVersion ([#1820](https://github.com/getsentry/sentry-dotnet/pull/1820))
+
 ## 3.20.1
 
 ### Fixes
