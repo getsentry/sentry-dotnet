@@ -61,6 +61,9 @@
     method: POST
   },
   sdk: {
+    integrations: [
+      integration
+    ],
     name: SDK-test,
     packages: [
       {
