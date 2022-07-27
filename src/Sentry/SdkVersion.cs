@@ -26,6 +26,7 @@ namespace Sentry
         internal static SdkVersion Instance => InstanceLazy.Value;
 
         internal ConcurrentBag<Package> InternalPackages { get; set; } = new();
+        internal ConcurrentBag<string> Integrations { get; set; } = new();
 
         /// <summary>
         /// SDK packages.
@@ -66,12 +67,20 @@ namespace Sentry
         internal void AddPackage(Package package)
             => InternalPackages.Add(package);
 
+        /// <summary>
+        /// Add an integration used in the SDK.
+        /// </summary>
+        /// <param name="integration">The integrations name.</param>
+        public void AddIntegration(string integration)
+            => Integrations.Add(integration);
+
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
             writer.WriteArrayIfNotEmpty("packages", InternalPackages.Distinct(), logger);
+            writer.WriteArrayIfNotEmpty("integrations", Integrations.Distinct(), logger);
             writer.WriteStringIfNotWhiteSpace("name", Name);
             writer.WriteStringIfNotWhiteSpace("version", Version);
 
@@ -88,6 +97,11 @@ namespace Sentry
                 json.GetPropertyOrNull("packages")?.EnumerateArray().Select(Package.FromJson).ToArray()
                 ?? Array.Empty<Package>();
 
+            // Integrations
+            var integrations =
+                json.GetPropertyOrNull("integrations")?.EnumerateArray().Select(element => element.ToString()).ToArray()
+                ?? Array.Empty<string>();
+
             // Name
             var name = json.GetPropertyOrNull("name")?.GetString() ?? "dotnet.unknown";
 
@@ -97,6 +111,7 @@ namespace Sentry
             return new SdkVersion
             {
                 InternalPackages = new ConcurrentBag<Package>(packages),
+                Integrations = new ConcurrentBag<string>(integrations),
                 Name = name,
                 Version = version
             };
