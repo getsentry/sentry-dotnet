@@ -99,7 +99,7 @@ namespace Sentry
 
             // Integrations
             var integrations =
-                json.GetPropertyOrNull("integrations")?.EnumerateArray().Select(element => element.ToString()).ToArray()
+                json.GetPropertyOrNull("integrations")?.EnumerateArray().Select(element => element.ToString() ?? "").ToArray()
                 ?? Array.Empty<string>();
 
             // Name
