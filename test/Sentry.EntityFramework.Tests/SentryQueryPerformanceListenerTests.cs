@@ -8,10 +8,6 @@ namespace Sentry.EntityFramework.Tests;
 
 public class SentryQueryPerformanceListenerTests
 {
-    internal const string DbReaderKey = SentryQueryPerformanceListener.DbReaderKey;
-    internal const string DbNonQueryKey = SentryQueryPerformanceListener.DbNonQueryKey;
-    internal const string DbScalarKey = SentryQueryPerformanceListener.DbScalarKey;
-
     private class Fixture
     {
         public DbConnection DbConnection { get; }
@@ -46,9 +42,9 @@ public class SentryQueryPerformanceListenerTests
     private readonly Fixture _fixture = new();
 
     [Theory]
-    [InlineData(DbScalarKey)]
-    [InlineData(DbNonQueryKey)]
-    [InlineData(DbReaderKey)]
+    [InlineData(SentryQueryPerformanceListener.DbScalarKey)]
+    [InlineData(SentryQueryPerformanceListener.DbNonQueryKey)]
+    [InlineData(SentryQueryPerformanceListener.DbReaderKey)]
     public void interceptorInvoked_WithException_StartsSpan(string expectedOperation)
     {
         // Arrange
@@ -67,13 +63,13 @@ public class SentryQueryPerformanceListenerTests
         // Act
         switch (expectedOperation)
         {
-            case DbScalarKey:
+            case SentryQueryPerformanceListener.DbScalarKey:
                 interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new Exception() });
                 break;
-            case DbNonQueryKey:
+            case SentryQueryPerformanceListener.DbNonQueryKey:
                 interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new Exception() });
                 break;
-            case DbReaderKey:
+            case SentryQueryPerformanceListener.DbReaderKey:
                 interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() });
                 break;
             default:
@@ -88,9 +84,9 @@ public class SentryQueryPerformanceListenerTests
     }
 
     [Theory]
-    [InlineData(DbScalarKey)]
-    [InlineData(DbNonQueryKey)]
-    [InlineData(DbReaderKey)]
+    [InlineData(SentryQueryPerformanceListener.DbScalarKey)]
+    [InlineData(SentryQueryPerformanceListener.DbNonQueryKey)]
+    [InlineData(SentryQueryPerformanceListener.DbReaderKey)]
     public void InterceptorInvokeExecuted_WithException_CloseSpanWithError(string expectedOperation)
     {
         // Arrange
@@ -109,21 +105,21 @@ public class SentryQueryPerformanceListenerTests
         // Act
         switch (expectedOperation)
         {
-            case DbScalarKey:
+            case SentryQueryPerformanceListener.DbScalarKey:
                 {
                     var context = new DbCommandInterceptionContext<object> { Exception = new Exception() };
                     interceptor.ScalarExecuting(command, context);
                     interceptor.ScalarExecuted(command, context);
                 }
                 break;
-            case DbNonQueryKey:
+            case SentryQueryPerformanceListener.DbNonQueryKey:
                 {
                     var context = new DbCommandInterceptionContext<int> { Exception = new Exception() };
                     interceptor.NonQueryExecuting(command, context);
                     interceptor.NonQueryExecuted(command, context);
                 }
                 break;
-            case DbReaderKey:
+            case SentryQueryPerformanceListener.DbReaderKey:
                 {
                     var context = new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() };
                     interceptor.ReaderExecuting(command, context);
@@ -142,9 +138,9 @@ public class SentryQueryPerformanceListenerTests
     }
 
     [Theory]
-    [InlineData(DbScalarKey)]
-    [InlineData(DbNonQueryKey)]
-    [InlineData(DbReaderKey)]
+    [InlineData(SentryQueryPerformanceListener.DbScalarKey)]
+    [InlineData(SentryQueryPerformanceListener.DbNonQueryKey)]
+    [InlineData(SentryQueryPerformanceListener.DbReaderKey)]
     public void InterceptorInvokeExecuted_WithoutException_CloseSpanWithOk(string expectedOperation)
     {
         // Arrange
@@ -163,21 +159,21 @@ public class SentryQueryPerformanceListenerTests
         // Act
         switch (expectedOperation)
         {
-            case DbScalarKey:
+            case SentryQueryPerformanceListener.DbScalarKey:
                 {
                     var context = new DbCommandInterceptionContext<object>();
                     interceptor.ScalarExecuting(command, context);
                     interceptor.ScalarExecuted(command, context);
                 }
                 break;
-            case DbNonQueryKey:
+            case SentryQueryPerformanceListener.DbNonQueryKey:
                 {
                     var context = new DbCommandInterceptionContext<int>();
                     interceptor.NonQueryExecuting(command, context);
                     interceptor.NonQueryExecuted(command, context);
                 }
                 break;
-            case DbReaderKey:
+            case SentryQueryPerformanceListener.DbReaderKey:
                 {
                     var context = new DbCommandInterceptionContext<DbDataReader>();
                     interceptor.ReaderExecuting(command, context);
@@ -210,11 +206,11 @@ public class SentryQueryPerformanceListenerTests
         _fixture.Hub.Received(3).GetSpan();
         // In-memory database doesn't have a CommandText so Description is expected to be null
         Assert.NotEmpty(_fixture.Spans.Where(
-            span => DbNonQueryKey == span.Operation && span.Description is "CREATE SCHEMA (CodeFirstDatabase(dbo.__MigrationHistory(ContextKey(Effort.string)MigrationId(Effort.string)Model(Effort.binary)ProductVersion(Effort.string))))"));
+            span => SentryQueryPerformanceListener.DbNonQueryKey == span.Operation && span.Description is "CREATE SCHEMA (CodeFirstDatabase(dbo.__MigrationHistory(ContextKey(Effort.string)MigrationId(Effort.string)Model(Effort.binary)ProductVersion(Effort.string))))"));
         Assert.NotEmpty(_fixture.Spans.Where(
-            span => DbNonQueryKey == span.Operation && span.Description is null));
+            span => SentryQueryPerformanceListener.DbNonQueryKey == span.Operation && span.Description is null));
         Assert.NotEmpty(_fixture.Spans.Where(
-            span => DbReaderKey == span.Operation && span.Description is null));
+            span => SentryQueryPerformanceListener.DbReaderKey == span.Operation && span.Description is null));
 
         Assert.All(_fixture.Spans, span => span.Received(1).Finish(Arg.Is<SpanStatus>(status => SpanStatus.Ok == status)));
         integration.Unregister();
