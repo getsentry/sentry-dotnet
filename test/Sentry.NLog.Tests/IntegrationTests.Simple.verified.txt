@@ -1,4 +1,4 @@
-﻿[
+[
   {
     Header: {
       event_id: Guid_1,
@@ -17,8 +17,7 @@
             Exception: {
               $type: Exception,
               Type: Exception,
-              Message: Exception message,
-              StackTrace: at Sentry.NLog.Tests.IntegrationTests.Simple()
+              Message: Exception message
             },
             Message: {
               Message: message = {arg},
@@ -35,7 +34,7 @@
                     {
                       FileName: {ProjectDirectory}IntegrationTests.cs,
                       Function: async Task IntegrationTests.Simple(),
-                      LineNumber: 48,
+                      LineNumber: 51,
                       ColumnNumber: 17,
                       InApp: false,
                       Package: Sentry.NLog.Tests, Version=3.20.1.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0,

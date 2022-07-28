@@ -1,8 +1,7 @@
 ﻿using NLog;
-using NLog.Common;
 using NLog.Config;
-using NLog.Filters;
 using NLog.Targets;
+using Sentry.Testing;
 
 namespace Sentry.NLog.Tests;
 
@@ -16,29 +15,30 @@ public class IntegrationTests
 
         var configuration = new LoggingConfiguration();
 
-        configuration.AddSentry(o =>
-        {
-            o.TracesSampleRate = 1;
-            o.Layout = "${message}";
-            o.Transport = transport;
-            o.DiagnosticLevel = SentryLevel.Debug;
-            o.IncludeEventDataOnBreadcrumbs = true;
-            o.MinimumBreadcrumbLevel = LogLevel.Debug;
-            o.Dsn = ValidDsn;
-            o.User = new SentryNLogUser
+        configuration.AddSentry(
+            options =>
             {
-                Id = "${mdlc:item=id}",
-                Username = "${mdlc:item=username}",
-                Email = "${mdlc:item=email}",
-                IpAddress = "${mdlc:item=ipAddress}",
-                Other =
+                options.TracesSampleRate = 1;
+                options.Layout = "${message}";
+                options.Transport = transport;
+                options.DiagnosticLevel = SentryLevel.Debug;
+                options.IncludeEventDataOnBreadcrumbs = true;
+                options.MinimumBreadcrumbLevel = LogLevel.Debug;
+                options.Dsn = ValidDsn;
+                options.User = new SentryNLogUser
                 {
-                    new TargetPropertyWithContext("mood", "joyous")
-                },
-            };
+                    Id = "${mdlc:item=id}",
+                    Username = "${mdlc:item=username}",
+                    Email = "${mdlc:item=email}",
+                    IpAddress = "${mdlc:item=ipAddress}",
+                    Other =
+                    {
+                        new TargetPropertyWithContext("mood", "joyous")
+                    },
+                };
 
-            o.AddTag("logger", "${logger}");
-        });
+                options.AddTag("logger", "${logger}");
+            });
 
         LogManager.Configuration = configuration;
 
@@ -59,7 +59,8 @@ public class IntegrationTests
         LogManager.Flush();
 
         await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
+            .IgnoreStandardSentryMembers()
+            .IgnoreStackTrace();
     }
 
     [Fact]
@@ -69,28 +70,38 @@ public class IntegrationTests
 
         var configuration = new LoggingConfiguration();
 
-        configuration.AddSentry(o =>
-        {
-            o.TracesSampleRate = 1;
-            o.Layout = "${message}";
-            o.Transport = transport;
-            o.MinimumBreadcrumbLevel = LogLevel.Debug;
-            o.Dsn = ValidDsn;
-        });
+        var diagnosticLogger = new InMemoryDiagnosticLogger();
+        configuration.AddSentry(
+            options =>
+            {
+                options.TracesSampleRate = 1;
+                options.Debug = true;
+                options.DiagnosticLogger = diagnosticLogger;
+                options.Transport = transport;
+                options.Dsn = ValidDsn;
+            });
 
         LogManager.Configuration = configuration;
 
         var log = LogManager.GetCurrentClassLogger();
 
-        SentrySdk.ConfigureScope(scope =>
-        {
-            scope.OnEvaluating += (_, _) => log.Error("message from OnEvaluating");
-            log.Error("messag");
-        });
+        SentrySdk.ConfigureScope(
+            scope =>
+            {
+                scope.OnEvaluating += (_, _) => log.Error("message from OnEvaluating");
+                log.Error("messag");
+            });
         LogManager.Flush();
 
-        await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
+        await Verify(
+                new
+                {
+                    diagnosticLoggerEntries = diagnosticLogger
+                        .Entries
+                        .Where(_ => _.Level == SentryLevel.Error),
+                    transport.Envelopes
+                })
+            .IgnoreStandardSentryMembers()
+            .IgnoreStackTrace();
     }
-
 }
