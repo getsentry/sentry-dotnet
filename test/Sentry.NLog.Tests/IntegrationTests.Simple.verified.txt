@@ -1,57 +1,73 @@
 ﻿[
   {
-    Source: {
-      Exception: {
-        $type: Exception,
-        Type: Exception,
-        Message: Exception message,
-        StackTrace: at Sentry.NLog.Tests.IntegrationTests.Simple()
-      },
-      Message: {
-        Message: message = {arg},
-        Formatted: message = "arg value"
-      },
-      Logger: Sentry.NLog.Tests.IntegrationTests,
-      Platform: csharp,
-      SentryExceptions: [
-        {
-          Type: System.Exception,
-          Value: Exception message,
-          Stacktrace: {
-            Frames: [
-              {
-                FileName: {ProjectDirectory}IntegrationTests.cs,
-                Function: async Task IntegrationTests.Simple(),
-                LineNumber: 48,
-                ColumnNumber: 17,
-                InApp: false,
-                Package: Sentry.NLog.Tests, Version=3.20.1.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0,
-                InstructionOffset: 141
-              }
-            ]
-          },
-          Mechanism: {}
-        }
-      ],
-      SentryThreads: [],
-      Level: error,
-      Request: {},
-      User: {
-        Email: ,
-        Id: myId,
-        IpAddress: ,
-        Username: ,
-        Other: {
-          mood: joyous
-        }
-      },
-      Environment: production,
-      Extra: {
-        arg: arg value
-      },
-      Tags: {
-        logger: Sentry.NLog.Tests.IntegrationTests
+    Header: {
+      event_id: Guid_1,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
       }
-    }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Exception: {
+              $type: Exception,
+              Type: Exception,
+              Message: Exception message,
+              StackTrace: at Sentry.NLog.Tests.IntegrationTests.Simple()
+            },
+            Message: {
+              Message: message = {arg},
+              Formatted: message = "arg value"
+            },
+            Logger: Sentry.NLog.Tests.IntegrationTests,
+            Platform: csharp,
+            SentryExceptions: [
+              {
+                Type: System.Exception,
+                Value: Exception message,
+                Stacktrace: {
+                  Frames: [
+                    {
+                      FileName: {ProjectDirectory}IntegrationTests.cs,
+                      Function: async Task IntegrationTests.Simple(),
+                      LineNumber: 48,
+                      ColumnNumber: 17,
+                      InApp: false,
+                      Package: Sentry.NLog.Tests, Version=3.20.1.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0,
+                      InstructionOffset: 141
+                    }
+                  ]
+                },
+                Mechanism: {}
+              }
+            ],
+            SentryThreads: [],
+            Level: error,
+            Request: {},
+            User: {
+              Email: ,
+              Id: myId,
+              IpAddress: ,
+              Username: ,
+              Other: {
+                mood: joyous
+              }
+            },
+            Environment: production,
+            Extra: {
+              arg: arg value
+            },
+            Tags: {
+              logger: Sentry.NLog.Tests.IntegrationTests
+            }
+          }
+        }
+      }
+    ]
   }
 ]

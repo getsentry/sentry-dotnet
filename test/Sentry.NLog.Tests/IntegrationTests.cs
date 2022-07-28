@@ -37,6 +37,7 @@ public class IntegrationTests
 
             o.AddTag("logger", "${logger}");
         });
+
         LogManager.Configuration = nlogConfiguration;
 
         var log = LogManager.GetCurrentClassLogger();
@@ -52,12 +53,12 @@ public class IntegrationTests
                 log.Error(exception, "message = {arg}", "arg value");
             }
         }
+
         LogManager.Flush();
 
-        var payloads = transport.Envelopes
-            .SelectMany(x => x.Items)
-            .Select(x => x.Payload)
-            .ToList();
+        await Verify(transport.Envelopes)
+            .IgnoreStandardSentryMembers();
+    }
 
         await Verify(payloads)
             .IgnoreStandardSentryMembers();
