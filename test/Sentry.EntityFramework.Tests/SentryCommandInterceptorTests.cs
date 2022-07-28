@@ -134,7 +134,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new Exception() });
+        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 

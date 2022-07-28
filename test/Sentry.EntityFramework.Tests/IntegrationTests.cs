@@ -38,7 +38,7 @@ public class IntegrationTests
             {
                 var transaction = hub.StartTransaction("my transaction", "my operation");
                 hub.ConfigureScope(scope => scope.Transaction = transaction);
-                hub.CaptureException(new Exception("my exception"));
+                hub.CaptureException(new("my exception"));
                 await database.AddData(
                     new TestDbContext.TestData
                     {
