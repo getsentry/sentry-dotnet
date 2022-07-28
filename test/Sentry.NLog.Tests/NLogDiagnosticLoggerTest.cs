@@ -1,6 +1,3 @@
-using NLog;
-using NLog.Common;
-
 namespace Sentry.NLog.Tests;
 
 public class NLogDiagnosticLoggerTest
@@ -14,7 +11,7 @@ public class NLogDiagnosticLoggerTest
             InternalLogger.LogLevel = LogLevel.Debug;
             foreach (SentryLevel level in Enum.GetValues(typeof(SentryLevel)))
             {
-                var logWriter = new System.IO.StringWriter();
+                var logWriter = new StringWriter();
                 InternalLogger.LogWriter = logWriter;
                 if (logger.IsEnabled(level))
                 {

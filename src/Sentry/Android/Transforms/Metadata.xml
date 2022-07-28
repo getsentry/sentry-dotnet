@@ -44,7 +44,7 @@
 
   <!-- These constants need a different name than their class to avoid CS0542 compilation errors. -->
   <attr path="/api/package[@name='io.sentry']/class[@name='SentryTraceHeader']/field[@name='SENTRY_TRACE_HEADER']" name="managedName">SentryTraceHeaderName</attr>
-  <attr path="/api/package[@name='io.sentry']/class[@name='TraceStateHeader']/field[@name='TRACE_STATE_HEADER']" name="managedName">TraceStateHeaderName</attr>
+  <attr path="/api/package[@name='io.sentry']/class[@name='BaggageHeader']/field[@name='BAGGAGE_HEADER']" name="managedName">BaggageHeaderName</attr>
 
   <!-- Fix visibility of this type, for use in AndroidEventProcessor.cs -->
   <attr path="/api/package[@name='io.sentry.android.core']/class[@name='DefaultAndroidEventProcessor']" name="visibility">internal</attr>
