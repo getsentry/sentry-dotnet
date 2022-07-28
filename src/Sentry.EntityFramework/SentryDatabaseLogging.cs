@@ -8,7 +8,7 @@ namespace Sentry.EntityFramework;
 /// </summary>
 public static class SentryDatabaseLogging
 {
-    private static int initialized;
+    private static int Init;
 
     /// <summary>
     /// Adds an instance of <see cref="SentryCommandInterceptor"/> to <see cref="DbInterception"/>
@@ -21,10 +21,10 @@ public static class SentryDatabaseLogging
 
     internal static SentryCommandInterceptor? UseBreadcrumbs(
         IQueryLogger? queryLogger = null,
-        bool initializeOnce = true,
+        bool initOnce = true,
         IDiagnosticLogger? diagnosticLogger = null)
     {
-        if (initializeOnce && Interlocked.Exchange(ref initialized, 1) != 0)
+        if (initOnce && Interlocked.Exchange(ref Init, 1) != 0)
         {
             diagnosticLogger?.LogWarning("{0}.{1} was already executed.",
                 nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
