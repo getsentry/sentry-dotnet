@@ -1,6 +1,3 @@
-using Serilog.Events;
-using Serilog.Formatting;
-
 namespace Sentry.Serilog;
 
 /// <summary>

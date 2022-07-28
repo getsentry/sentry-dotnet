@@ -1,8 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Sentry.AspNetCore.Tests;
-using Serilog;
-
 namespace Sentry.Serilog.Tests;
 
 public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
