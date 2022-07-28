@@ -4,8 +4,8 @@
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>6.0.0</SentryAndroidSdkVersion>
-    <AndroidLibsDirectory>$(BaseIntermediateOutputPath)\libs\Android\</AndroidLibsDirectory>
+    <SentryAndroidSdkVersion>6.3.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <LangVersion>10</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
@@ -14,9 +14,9 @@
     <None Remove="Android\Transforms\*.xml" />
     <TransformFile Include="Android\Transforms\*.xml" />
     <!-- TODO: How to add JavaDocPaths for each package? -->
-    <AndroidLibrary Include="$(AndroidLibsDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
-    <AndroidLibrary Include="$(AndroidLibsDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
-    <AndroidLibrary Include="$(AndroidLibsDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
+    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
+    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
+    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,21 +44,24 @@
   </ItemGroup>
 
   <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">
-    <DownloadFile SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar"
-      DestinationFolder="$(AndroidLibsDirectory)"
-      Condition="!Exists('$(AndroidLibsDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar')">
-      <Output TaskParameter="DownloadedFile" ItemName="None" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
-      DestinationFolder="$(AndroidLibsDirectory)"
-      Condition="!Exists('$(AndroidLibsDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar')">
-      <Output TaskParameter="DownloadedFile" ItemName="None" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar"
-      DestinationFolder="$(AndroidLibsDirectory)"
-      Condition="!Exists('$(AndroidLibsDirectory)sentry-$(SentryAndroidSdkVersion).jar')">
-      <Output TaskParameter="DownloadedFile" ItemName="None" />
-    </DownloadFile>
+    <DownloadFile
+      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar')"
+      Retries="3"
+    />
+    <DownloadFile
+      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar')"
+      Retries="3"
+    />
+    <DownloadFile
+      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar')"
+      Retries="3"
+    />
   </Target>
 
 </Project>

@@ -1,13 +1,3 @@
-using NLog;
-using NLog.Common;
-using NLog.Config;
-using NLog.Layouts;
-using NLog.Targets;
-
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Reflection;
-
 namespace Sentry.NLog;
 
 /// <summary>

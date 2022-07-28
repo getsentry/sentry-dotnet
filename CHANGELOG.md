@@ -5,6 +5,7 @@
 ## Features
 
 - Added 'integrations' to SdkVersion ([#1820](https://github.com/getsentry/sentry-dotnet/pull/1820))
+- Updated Sentry Android SDK to version 6.3.0 ([#1826](https://github.com/getsentry/sentry-dotnet/pull/1826))
 
 ### Fixes
 
