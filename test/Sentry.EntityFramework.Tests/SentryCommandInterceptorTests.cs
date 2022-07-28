@@ -4,6 +4,7 @@ using Effort.Provider;
 
 namespace Sentry.EntityFramework.Tests;
 
+[Collection("Sequential")]
 public class SentryCommandInterceptorTests
 {
     private class Fixture

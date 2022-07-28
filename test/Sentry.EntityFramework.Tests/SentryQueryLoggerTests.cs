@@ -1,5 +1,6 @@
 namespace Sentry.EntityFramework.Tests;
 
+[Collection("Sequential")]
 public class SentryQueryLoggerTests
 {
     [Fact]

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 namespace Sentry.EntityFramework.Tests;
 
 [UsesVerify]
+[Collection("Sequential")]
 public class IntegrationTests
 {
     // needs to be a variable to stop EF from inlining it as a constant
@@ -61,6 +62,7 @@ public class IntegrationTests
         var result = await Verify(payloads)
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain(shouldNotAppearInPayload, result.Text);
+        options.DisableDbInterceptionIntegration();
     }
 }
 

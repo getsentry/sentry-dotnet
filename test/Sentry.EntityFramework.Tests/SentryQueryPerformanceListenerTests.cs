@@ -6,6 +6,7 @@ using Sentry.Testing;
 
 namespace Sentry.EntityFramework.Tests;
 
+[Collection("Sequential")]
 public class SentryQueryPerformanceListenerTests
 {
     internal const string DbReaderKey = SentryQueryPerformanceListener.DbReaderKey;

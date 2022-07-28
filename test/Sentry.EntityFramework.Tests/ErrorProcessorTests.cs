@@ -4,6 +4,7 @@ using Sentry.EntityFramework.ErrorProcessors;
 
 namespace Sentry.EntityFramework.Tests;
 
+[Collection("Sequential")]
 public class ErrorProcessorTests
 {
     private class Fixture
