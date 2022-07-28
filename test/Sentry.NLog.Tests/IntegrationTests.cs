@@ -14,9 +14,9 @@ public class IntegrationTests
     {
         var transport = new RecordingTransport();
 
-        var nlogConfiguration = new LoggingConfiguration();
+        var configuration = new LoggingConfiguration();
 
-        nlogConfiguration.AddSentry(o =>
+        configuration.AddSentry(o =>
         {
             o.TracesSampleRate = 1;
             o.Layout = "${message}";
@@ -40,7 +40,7 @@ public class IntegrationTests
             o.AddTag("logger", "${logger}");
         });
 
-        LogManager.Configuration = nlogConfiguration;
+        LogManager.Configuration = configuration;
 
         var log = LogManager.GetCurrentClassLogger();
 
@@ -67,9 +67,9 @@ public class IntegrationTests
     {
         var transport = new RecordingTransport();
 
-        var nlogConfiguration = new LoggingConfiguration();
+        var configuration = new LoggingConfiguration();
 
-        nlogConfiguration.AddSentry(o =>
+        configuration.AddSentry(o =>
         {
             o.TracesSampleRate = 1;
             o.Layout = "${message}";
@@ -90,7 +90,7 @@ public class IntegrationTests
             o.AddTag("logger", "${logger}");
         });
 
-        LogManager.Configuration = nlogConfiguration;
+        LogManager.Configuration = configuration;
 
         var log = LogManager.GetCurrentClassLogger();
 
