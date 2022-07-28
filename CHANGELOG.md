@@ -6,6 +6,10 @@
 
 - Added 'integrations' to SdkVersion ([#1820](https://github.com/getsentry/sentry-dotnet/pull/1820))
 
+### Fixes
+
+- Fix logging loop with NLog sentry ([#1824](https://github.com/getsentry/sentry-dotnet/pull/1824))
+
 ## 3.20.1
 
 ### Fixes
