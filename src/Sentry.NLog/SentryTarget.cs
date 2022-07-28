@@ -276,8 +276,6 @@ public sealed class SentryTarget : TargetWithContext
             .ContinueWith(t => asyncContinuation(t.Exception));
     }
 
-    static AsyncLocal<bool> isReentrant = new();
-
     /// <summary>
     /// <para>
     /// If the event level &gt;= the <see cref="MinimumEventLevel"/>, the
@@ -302,13 +300,14 @@ public sealed class SentryTarget : TargetWithContext
             return;
         }
 
-        if (isReentrant.Value)
+        const string sentryContext = "__sentry__";
+        if (GetContextNdlc(logEvent)?.Contains(sentryContext) is true)
         {
             Options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message:{logEvent.Message}");
             return;
         }
 
-        isReentrant.Value = true;
+        using var _ = NestedDiagnosticsLogicalContext.Push(sentryContext);
 
         try
         {
@@ -318,10 +317,6 @@ public sealed class SentryTarget : TargetWithContext
         {
             Options.DiagnosticLogger?.LogError("Failed to write log event", exception);
             throw;
-        }
-        finally
-        {
-            isReentrant.Value = false;
         }
     }
 
