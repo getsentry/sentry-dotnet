@@ -1,5 +1,7 @@
 ﻿using NLog;
+using NLog.Common;
 using NLog.Config;
+using NLog.Filters;
 using NLog.Targets;
 
 namespace Sentry.NLog.Tests;
@@ -60,7 +62,38 @@ public class IntegrationTests
             .IgnoreStandardSentryMembers();
     }
 
-        await Verify(payloads)
+    [Fact]
+    public async Task LoggingInsideTheContextOfLogging()
+    {
+        var transport = new RecordingTransport();
+
+        var nlogConfiguration = new LoggingConfiguration();
+
+        nlogConfiguration.AddSentry(o =>
+        {
+            o.TracesSampleRate = 1;
+            o.Layout = "${message}";
+            o.Transport = transport;
+            o.DiagnosticLevel = SentryLevel.Debug;
+            o.IncludeEventDataOnBreadcrumbs = true;
+            o.MinimumBreadcrumbLevel = LogLevel.Debug;
+            o.Dsn = ValidDsn;
+        });
+
+        var rule = new LoggingRule("*", LogLevel.Debug, nlogConfiguration.AllTargets.Single());
+        rule.Filters.Add(new FilterThatLogs());
+
+        nlogConfiguration.LoggingRules.Add(rule);
+
+        LogManager.Configuration = nlogConfiguration;
+
+        var log = LogManager.GetCurrentClassLogger();
+
+        log.Error("message");
+
+        LogManager.Flush();
+
+        await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 }
