@@ -74,20 +74,8 @@ public class IntegrationTests
             o.TracesSampleRate = 1;
             o.Layout = "${message}";
             o.Transport = transport;
-            o.DiagnosticLevel = SentryLevel.Debug;
-            o.IncludeEventDataOnBreadcrumbs = true;
             o.MinimumBreadcrumbLevel = LogLevel.Debug;
             o.Dsn = ValidDsn;
-            o.User = new SentryNLogUser
-            {
-                Id = "${mdlc:item=id}",
-                Username = "${mdlc:item=username}",
-                Email = "${mdlc:item=email}",
-                IpAddress = "${mdlc:item=ipAddress}",
-                Other = {new TargetPropertyWithContext("mood", "joyous")},
-            };
-
-            o.AddTag("logger", "${logger}");
         });
 
         LogManager.Configuration = configuration;
@@ -96,28 +84,8 @@ public class IntegrationTests
 
         SentrySdk.ConfigureScope(scope =>
         {
-            scope.SetTag("my-tag", "my value");
-            scope.OnEvaluating += (sender, args) =>
-            {
-                var log = LogManager.GetCurrentClassLogger();
-                log.Error("message from filter");
-            };
-            scope.User = new User
-            {
-                Id = "42",
-                Email = "john.doe@example.com"
-            };
-            using (MappedDiagnosticsLogicalContext.SetScoped("id", "myId"))
-            {
-                try
-                {
-                    throw new("Exception message");
-                }
-                catch (Exception exception)
-                {
-                    log.Error(exception, "message = {arg}", "arg value");
-                }
-            }
+            scope.OnEvaluating += (_, _) => log.Error("message from OnEvaluating");
+            log.Error("messag");
         });
         LogManager.Flush();
 
