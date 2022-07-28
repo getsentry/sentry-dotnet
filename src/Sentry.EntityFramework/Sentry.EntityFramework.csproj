@@ -8,6 +8,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
+    
+    <Using Include="System.ComponentModel" />
+    <Using Include="System.Data" />
+    <Using Include="System.Data.Common" />
+    <Using Include="System.Data.Entity.Infrastructure.Interception" />
+    <Using Include="System.Data.Entity.Validation" />
+    <Using Include="Sentry.EntityFramework" />
+    <Using Include="Sentry.EntityFramework.ErrorProcessors" />
+    <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Integrations" />
+
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">

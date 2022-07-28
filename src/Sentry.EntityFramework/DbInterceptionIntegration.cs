@@ -1,7 +1,3 @@
-using System.Data.Entity.Infrastructure.Interception;
-using Sentry.Extensibility;
-using Sentry.Integrations;
-
 namespace Sentry.EntityFramework;
 
 internal class DbInterceptionIntegration : ISdkIntegration

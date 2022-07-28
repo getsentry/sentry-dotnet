@@ -1,0 +1,9 @@
+{
+  "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
+  "shadowCopy": false,
+
+  "// TODO:": "Re-enable parallelization (disabled due to test flakiness)",
+  "parallelizeAssembly": false,
+  "parallelizeTestCollections": false,
+  "maxParallelThreads": 1
+}

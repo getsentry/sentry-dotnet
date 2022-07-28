@@ -132,7 +132,7 @@ public class SentryAppender : AppenderSkeleton
             {
                 var value = properties[key];
                 if (value != null
-                    && (!(value is string stringValue) || !string.IsNullOrWhiteSpace(stringValue)))
+                    && (value is not string stringValue || !string.IsNullOrWhiteSpace(stringValue)))
                 {
                     yield return new KeyValuePair<string, object?>(key, value);
                 }

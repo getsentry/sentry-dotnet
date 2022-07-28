@@ -8,6 +8,19 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    
+    <Using Include="System.ComponentModel" />
+    <Using Include="System.IO.Compression" />
+    <Using Include="System.Net" />
+    <Using Include="Sentry" />
+    <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Infrastructure" />
+    <Using Include="Sentry.Reflection" />
+    <Using Include="Sentry.Serilog" />
+    <Using Include="Serilog.Configuration" />
+    <Using Include="Serilog.Core" />
+    <Using Include="Serilog.Events" />
+    <Using Include="Serilog.Formatting" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net461' or $(TargetFramework) == 'netstandard2.0'">

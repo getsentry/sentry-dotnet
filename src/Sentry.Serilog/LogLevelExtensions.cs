@@ -1,5 +1,3 @@
-using Serilog.Events;
-
 namespace Sentry.Serilog;
 
 internal static class LogLevelExtensions

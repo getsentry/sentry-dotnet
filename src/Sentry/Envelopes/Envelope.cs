@@ -56,7 +56,11 @@ namespace Sentry.Protocol.Envelopes
             ISystemClock clock,
             CancellationToken cancellationToken)
         {
-            var headerItems = Header.Append(SentAtKey, clock.GetUtcNow());
+            // Append the sent_at header, except when writing to disk
+            var headerItems = !stream.IsFileStream()
+                ? Header.Append(SentAtKey, clock.GetUtcNow())
+                : Header;
+
             var writer = new Utf8JsonWriter(stream);
 
 #if NET461 || NETSTANDARD2_0
@@ -72,13 +76,15 @@ namespace Sentry.Protocol.Envelopes
 
         private void SerializeHeader(Stream stream, IDiagnosticLogger? logger, ISystemClock clock)
         {
-            var headerItems = Header.Append(SentAtKey, clock.GetUtcNow());
+            // Append the sent_at header, except when writing to disk
+            var headerItems = !stream.IsFileStream()
+                ? Header.Append(SentAtKey, clock.GetUtcNow())
+                : Header;
+
             using var writer = new Utf8JsonWriter(stream);
             writer.WriteDictionaryValue(headerItems, logger);
             writer.Flush();
         }
-
-        // Gets the header and adds a sent_at timestamp
 
         /// <inheritdoc />
         public Task SerializeAsync(
@@ -270,9 +276,14 @@ namespace Sentry.Protocol.Envelopes
                 prevByte = curByte;
             }
 
-            return
+            var header =
                 Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
+
+            // The sent_at header should not be included in the result
+            header.Remove(SentAtKey);
+
+            return header;
         }
 
         /// <summary>

@@ -1,13 +1,3 @@
-using NLog;
-using NLog.Common;
-using NLog.Config;
-using NLog.Layouts;
-using NLog.Targets;
-
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Reflection;
-
 namespace Sentry.NLog;
 
 /// <summary>
@@ -293,7 +283,36 @@ public sealed class SentryTarget : TargetWithContext
     /// <inheritdoc />
     protected override void Write(LogEventInfo logEvent)
     {
-        if (logEvent?.Message == null)
+        //TODO: check if can really be null
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (logEvent == null)
+        {
+            return;
+        }
+
+        const string sentryContext = "__sentry__";
+        if (GetContextNdlc(logEvent)?.Contains(sentryContext) is true)
+        {
+            Options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message:{logEvent.Message}");
+            return;
+        }
+
+        using var _ = NestedDiagnosticsLogicalContext.Push(sentryContext);
+
+        try
+        {
+            InnerWrite(logEvent);
+        }
+        catch (Exception exception)
+        {
+            Options.DiagnosticLogger?.LogError("Failed to write log event", exception);
+            throw;
+        }
+    }
+
+    private void InnerWrite(LogEventInfo logEvent)
+    {
+        if (logEvent.Message == null)
         {
             return;
         }
@@ -357,6 +376,7 @@ public sealed class SentryTarget : TargetWithContext
                     {
                         overridenFingerprint.Add("{{ default }}");
                     }
+
                     overridenFingerprint.Add(groupingKey);
 
                     evt.SetFingerprint(overridenFingerprint);
@@ -387,8 +407,8 @@ public sealed class SentryTarget : TargetWithContext
                 // Exception won't be used as Breadcrumb message. Avoid losing it by adding as data:
                 data = new Dictionary<string, string>
                 {
-                    { "exception_type", exception.GetType().ToString() },
-                    { "exception_message", exception.Message },
+                    {"exception_type", exception.GetType().ToString()},
+                    {"exception_message", exception.Message},
                 };
             }
 

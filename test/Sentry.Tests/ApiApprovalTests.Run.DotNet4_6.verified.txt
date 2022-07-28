@@ -344,6 +344,7 @@ namespace Sentry
         public string? Name { get; set; }
         public System.Collections.Generic.IEnumerable<Sentry.Package> Packages { get; }
         public string? Version { get; set; }
+        public void AddIntegration(string integration) { }
         public void AddPackage(string name, string version) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SdkVersion FromJson(System.Text.Json.JsonElement json) { }

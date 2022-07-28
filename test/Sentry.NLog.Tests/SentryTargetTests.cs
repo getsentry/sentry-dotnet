@@ -1,10 +1,3 @@
-using System.Collections;
-using NLog;
-using NLog.Common;
-using NLog.Config;
-using NLog.Targets;
-using NLog.Targets.Wrappers;
-using Sentry.Testing;
 using Target = NLog.Targets.Target;
 
 namespace Sentry.NLog.Tests;
@@ -15,9 +8,9 @@ public class SentryTargetTests
 
     private class Fixture
     {
-        public SentryNLogOptions Options { get; set; } = new() { Dsn = ValidDsn };
+        public SentryNLogOptions Options { get; } = new() { Dsn = ValidDsn };
 
-        public IHub Hub { get; set; } = Substitute.For<IHub>();
+        public IHub Hub { get; } = Substitute.For<IHub>();
 
         public Func<IHub> HubAccessor { get; set; }
 
@@ -27,7 +20,7 @@ public class SentryTargetTests
 
         public Fixture()
         {
-            _ = Hub.IsEnabled.Returns(true);
+            Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
             Scope = new Scope(new SentryOptions());
             Hub.ConfigureScope(Arg.Invoke(Scope));
@@ -35,7 +28,7 @@ public class SentryTargetTests
 
         public Target GetTarget(bool asyncTarget = false)
         {
-            Target target = new SentryTarget(
+            var target = new SentryTarget(
                 Options,
                 HubAccessor,
                 SdkDisposeHandle,
@@ -47,7 +40,7 @@ public class SentryTargetTests
 
             if (asyncTarget)
             {
-                target = new AsyncTargetWrapper(target)
+                return new AsyncTargetWrapper(target)
                 {
                     Name = "sentry_async"
                 };
@@ -91,8 +84,8 @@ public class SentryTargetTests
                     </targets>
                 </nlog>";
 
-        var stringReader = new System.IO.StringReader(configXml);
-        var xmlReader = System.Xml.XmlReader.Create(stringReader);
+        var stringReader = new StringReader(configXml);
+        var xmlReader = XmlReader.Create(stringReader);
         var logFactory = new LogFactory();
         logFactory.Configuration = new XmlLoggingConfiguration(xmlReader, null, logFactory);
 
@@ -125,8 +118,8 @@ public class SentryTargetTests
                     </targets>
                 </nlog>";
 
-        var stringReader = new System.IO.StringReader(configXml);
-        var xmlReader = System.Xml.XmlReader.Create(stringReader);
+        var stringReader = new StringReader(configXml);
+        var xmlReader = XmlReader.Create(stringReader);
         var logFactory = new LogFactory();
         logFactory.Configuration = new XmlLoggingConfiguration(xmlReader, null, logFactory);
 
@@ -178,7 +171,7 @@ public class SentryTargetTests
 
         logger.Error(expected, DefaultMessage);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
     }
 
@@ -215,7 +208,7 @@ public class SentryTargetTests
         var expected = typeof(SentryTarget).Assembly.GetNameAndVersion();
         logger.Info(DefaultMessage);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
                                                    && e.Sdk.Version == expected.Version));
     }
@@ -258,7 +251,7 @@ public class SentryTargetTests
 
         logger.Log(evt);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == sentryLevel));
     }
 
@@ -277,7 +270,7 @@ public class SentryTargetTests
 
         manager.GetLogger("sentry").Log(evt);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Formatted == expected));
     }
 
@@ -292,23 +285,23 @@ public class SentryTargetTests
     [Fact]
     public void Log_DisabledHub_CaptureNotCalled()
     {
-        _ = _fixture.Hub.IsEnabled.Returns(false);
+        _fixture.Hub.IsEnabled.Returns(false);
         var sut = _fixture.GetLogger();
 
         sut.Error(DefaultMessage);
 
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
     public void Log_EnabledHub_CaptureCalled()
     {
-        _ = _fixture.Hub.IsEnabled.Returns(true);
+        _fixture.Hub.IsEnabled.Returns(true);
         var sut = _fixture.GetLogger();
 
         sut.Error(DefaultMessage);
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -319,7 +312,7 @@ public class SentryTargetTests
         // ReSharper disable once AssignNullToNotNullAttribute
         sut.Error((string)null);
 
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -331,7 +324,7 @@ public class SentryTargetTests
 
         sut.Error("Something happened: {IPAddress}", expectedIp);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra["IPAddress"].ToString() == expectedIp));
     }
 
@@ -372,7 +365,7 @@ public class SentryTargetTests
 
         sut.Error(expectedMessage, param);
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
             p.Message.Formatted == $"Test {param} log"
             && p.Message.Message == expectedMessage));
     }
@@ -420,8 +413,7 @@ public class SentryTargetTests
     [Fact]
     public async Task LogManager_WhenFlushCalled_CallsSentryFlushAsync()
     {
-        const int NLogTimeout = 2;
-        var timeout = TimeSpan.FromSeconds(NLogTimeout);
+        var timeout = TimeSpan.FromSeconds(2);
 
         _fixture.Options.FlushTimeout = timeout;
         var factory = _fixture.GetLoggerFactory(asyncTarget: true);
@@ -463,14 +455,14 @@ public class SentryTargetTests
         _fixture.SdkDisposeHandle = null;
         _fixture.Options.InitializeSdk = true;
 
-        var logWriter = new System.IO.StringWriter();
+        var logWriter = new StringWriter();
 
         try
         {
             InternalLogger.LogWriter = logWriter;
             InternalLogger.LogLevel = LogLevel.Debug;
 
-            _ = _fixture.GetLoggerFactory();
+            _fixture.GetLoggerFactory();
 
             var logOutput = logWriter.ToString();
             Assert.Contains("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.", logOutput);
@@ -708,7 +700,7 @@ public class SentryTargetTests
         var logger = factory.GetLogger("sentry");
         logger.Fatal(DefaultMessage);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["Logger"] == "sentry"));
     }
 
@@ -722,7 +714,7 @@ public class SentryTargetTests
         var logger = factory.GetLogger("sentry");
         logger.Fatal("{a}", "b");
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Tags["a"] == "b"));
     }
 
@@ -740,7 +732,7 @@ public class SentryTargetTests
         var logger = factory.GetLogger("sentry");
         logger.Fatal(DefaultMessage);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.User.Username == "sentry" && e.User.Other["mood"] == "joyous"));
     }
 

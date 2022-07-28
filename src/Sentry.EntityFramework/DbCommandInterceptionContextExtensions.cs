@@ -1,6 +1,4 @@
-using System.Data.Entity.Infrastructure.Interception;
-
-namespace Sentry.EntityFramework.Internals.Extensions;
+namespace Sentry.EntityFramework;
 
 internal static class DbCommandInterceptionContextExtensions
 {

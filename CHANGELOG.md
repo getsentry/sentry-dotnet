@@ -5,9 +5,20 @@
 ### Features
 
 - Remove server_os in favor of only client_os ([#1808](https://github.com/getsentry/sentry-dotnet/pull/1808))
+## Features
+
+- Added 'integrations' to SdkVersion ([#1820](https://github.com/getsentry/sentry-dotnet/pull/1820))
+- Updated Sentry Android SDK to version 6.3.0 ([#1826](https://github.com/getsentry/sentry-dotnet/pull/1826))
 
 ### Fixes
 
+- Fix logging loop with NLog sentry ([#1824](https://github.com/getsentry/sentry-dotnet/pull/1824))
+
+## 3.20.1
+
+### Fixes
+
+- URGENT: Fix events rejected due to duplicate `sent_at` header when offline caching is enabled through `CacheDirectoryPath` ([#1818](https://github.com/getsentry/sentry-dotnet/pull/1818))
 - Fix null ref in aspnet TryGetTraceHeader ([#1807](https://github.com/getsentry/sentry-dotnet/pull/1807))
 
 ## 3.20.0

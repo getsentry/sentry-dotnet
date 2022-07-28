@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.Maui;
 
-public partial class MainPage : ContentPage
+public partial class MainPage
 {
     private readonly ILogger<MainPage> _logger;
 

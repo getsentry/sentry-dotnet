@@ -6,7 +6,7 @@ using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
 {
-    internal sealed class SentryScopeManager : IInternalScopeManager, IDisposable
+    internal sealed class SentryScopeManager : IInternalScopeManager
     {
         // Internal for testing
         public IScopeStackContainer ScopeStackContainer { get; }

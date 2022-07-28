@@ -1,7 +1,3 @@
-using NLog.Common;
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-
 namespace Sentry.NLog;
 
 internal class NLogDiagnosticLogger : IDiagnosticLogger
@@ -10,7 +6,7 @@ internal class NLogDiagnosticLogger : IDiagnosticLogger
 
     public NLogDiagnosticLogger(IDiagnosticLogger? extraLogger = null)
     {
-        if (!InternalLogger.LogToConsole || !(extraLogger is ConsoleDiagnosticLogger))
+        if (!InternalLogger.LogToConsole || extraLogger is not ConsoleDiagnosticLogger)
         {
             _extraLogger = extraLogger;
         }
