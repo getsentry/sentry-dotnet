@@ -1,7 +1,3 @@
-using System.Data.Common;
-using System.Data.Entity.Validation;
-using Sentry.EntityFramework.ErrorProcessors;
-
 namespace Sentry.EntityFramework.Tests;
 
 [Collection("Sequential")]

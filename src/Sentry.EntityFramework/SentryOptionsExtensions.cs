@@ -1,8 +1,3 @@
-using System.ComponentModel;
-using Sentry.EntityFramework;
-using Sentry.EntityFramework.ErrorProcessors;
-using Sentry.Extensibility;
-
 // ReSharper disable once CheckNamespace - Make it visible without: using Sentry.EntityFramework
 namespace Sentry;
 

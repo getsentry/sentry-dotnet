@@ -1,8 +1,5 @@
 #if NET48
 
-using System.Data.Entity;
-using System.Runtime.InteropServices;
-
 namespace Sentry.EntityFramework.Tests;
 
 [UsesVerify]

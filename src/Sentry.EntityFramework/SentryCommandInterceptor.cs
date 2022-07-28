@@ -1,6 +1,3 @@
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-
 namespace Sentry.EntityFramework;
 
 /// <summary>

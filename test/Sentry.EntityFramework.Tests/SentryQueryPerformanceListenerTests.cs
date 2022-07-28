@@ -1,9 +1,3 @@
-using System.Collections.Concurrent;
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-using Effort.Provider;
-using Sentry.Testing;
-
 namespace Sentry.EntityFramework.Tests;
 
 [Collection("Sequential")]

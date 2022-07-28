@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.EntityFramework.Tests;
 
 [Collection("Sequential")]

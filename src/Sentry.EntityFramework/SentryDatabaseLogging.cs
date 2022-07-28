@@ -1,6 +1,3 @@
-using System.Data.Entity.Infrastructure.Interception;
-using Sentry.Extensibility;
-
 namespace Sentry.EntityFramework;
 
 /// <summary>

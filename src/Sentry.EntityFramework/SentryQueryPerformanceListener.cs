@@ -1,8 +1,3 @@
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-using Sentry.EntityFramework.Internals.Extensions;
-using Sentry.Extensibility;
-
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryPerformanceListener : IDbCommandInterceptor
