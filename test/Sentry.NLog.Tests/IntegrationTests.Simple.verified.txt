@@ -32,13 +32,8 @@
                 Stacktrace: {
                   Frames: [
                     {
-                      FileName: {ProjectDirectory}IntegrationTests.cs,
-                      Function: async Task IntegrationTests.Simple(),
-                      LineNumber: 51,
-                      ColumnNumber: 17,
-                      InApp: false,
-                      Package: Sentry.NLog.Tests, Version=3.20.1.0, Culture=neutral, PublicKeyToken=fba2ec45388e2af0,
-                      InstructionOffset: 141
+                      Function: Task IntegrationTests.Simple(),
+                      InApp: false
                     }
                   ]
                 },

@@ -9,7 +9,7 @@ namespace Sentry.NLog.Tests;
 public class IntegrationTests
 {
     [Fact]
-    public async Task Simple()
+    public Task Simple()
     {
         var transport = new RecordingTransport();
 
@@ -58,13 +58,12 @@ public class IntegrationTests
 
         LogManager.Flush();
 
-        await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers()
-            .IgnoreStackTrace();
+        return Verify(transport.Envelopes)
+            .IgnoreStandardSentryMembers();
     }
 
     [Fact]
-    public async Task LoggingInsideTheContextOfLogging()
+    public Task LoggingInsideTheContextOfLogging()
     {
         var transport = new RecordingTransport();
 
@@ -93,7 +92,7 @@ public class IntegrationTests
             });
         LogManager.Flush();
 
-        await Verify(
+        return Verify(
                 new
                 {
                     diagnosticLoggerEntries = diagnosticLogger
@@ -101,7 +100,6 @@ public class IntegrationTests
                         .Where(_ => _.Level == SentryLevel.Error),
                     transport.Envelopes
                 })
-            .IgnoreStandardSentryMembers()
-            .IgnoreStackTrace();
+            .IgnoreStandardSentryMembers();
     }
 }
