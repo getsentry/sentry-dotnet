@@ -1,27 +1,28 @@
 using Sentry.Testing;
 
-namespace Sentry.EntityFramework.Tests;
-
-public class DbInterceptionIntegrationTests
+namespace Sentry.EntityFramework.Tests
 {
-    [Fact]
-    public void Register_TraceSAmpleRateZero_IntegrationNotRegistered()
+    public class DbInterceptionIntegrationTests
     {
-        // Arrange
-        var logger = Substitute.For<ITestOutputHelper>();
-        var options = new SentryOptions
+        [Fact]
+        public void Register_TraceSAmpleRateZero_IntegrationNotRegistered()
         {
-            Debug = true,
-            DiagnosticLogger = new TestOutputDiagnosticLogger(logger),
-            TracesSampleRate = 0
-        };
-        var integration = new DbInterceptionIntegration();
+            // Arrange
+            var logger = Substitute.For<ITestOutputHelper>();
+            var options = new SentryOptions
+            {
+                Debug = true,
+                DiagnosticLogger = new TestOutputDiagnosticLogger(logger),
+                TracesSampleRate = 0
+            };
+            var integration = new DbInterceptionIntegration();
 
-        // Act
-        integration.Register(Substitute.For<IHub>(), options);
+            // Act
+            integration.Register(Substitute.For<IHub>(), options);
 
-        // Assert
-        logger.Received(1).WriteLine(Arg.Is<string>(message => message.Contains(DbInterceptionIntegration.SampleRateDisabledMessage)));
-        Assert.Null(integration.SqlInterceptor);
+            // Assert
+            logger.Received(1).WriteLine(Arg.Is<string>(message => message.Contains(DbInterceptionIntegration.SampleRateDisabledMessage)));
+            Assert.Null(integration.SqlInterceptor);
+        }
     }
 }
