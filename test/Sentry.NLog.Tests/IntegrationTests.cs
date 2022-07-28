@@ -88,7 +88,7 @@ public class IntegrationTests
             scope =>
             {
                 scope.OnEvaluating += (_, _) => log.Error("message from OnEvaluating");
-                log.Error("messag");
+                log.Error("message");
             });
         LogManager.Flush();
 

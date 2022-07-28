@@ -22,8 +22,8 @@
           Payload: {
             Source: {
               Message: {
-                Message: messag,
-                Formatted: messag
+                Message: message,
+                Formatted: message
               },
               Logger: Sentry.NLog.Tests.IntegrationTests,
               Platform: csharp,
