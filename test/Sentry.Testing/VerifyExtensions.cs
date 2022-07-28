@@ -9,10 +9,25 @@ public static class VerifyExtensions
             .IgnoreMembersWithType<DateTimeOffset>()
             .IgnoreMembersWithType<SpanId>()
             .IgnoreMembersWithType<SentryId>()
-            .IgnoreMembers<SentryEvent>(e => e.Modules, e => e.Release)
-            .IgnoreMembers<Request>(e => e.Env, e => e.Url, e => e.Headers)
-            .IgnoreMembers<Transaction>(t => t.Release)
-            .IgnoreMembers<SentryException>(e => e.Module, e => e.ThreadId);
+            .IgnoreMembers<SentryEvent>(
+                _ => _.Modules,
+                _ => _.Release)
+            .IgnoreMembers<Request>(
+                _ => _.Env,
+                _ => _.Url,
+                _ => _.Headers)
+            .IgnoreMembers<Transaction>(
+                _ => _.Release)
+            .IgnoreMembers<SentryException>(
+                _ => _.Module,
+                _ => _.ThreadId)
+            .IgnoreMembers<SentryStackFrame>(
+                _ => _.FileName,
+                _ => _.LineNumber,
+                _ => _.ColumnNumber,
+                _ => _.InstructionOffset,
+                _ => _.Package)
+            .IgnoreStackTrace();
     }
 
     class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
