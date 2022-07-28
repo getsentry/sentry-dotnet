@@ -1,7 +1,3 @@
-using NLog.Common;
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-
 namespace Sentry.NLog;
 
 internal class NLogDiagnosticLogger : IDiagnosticLogger
