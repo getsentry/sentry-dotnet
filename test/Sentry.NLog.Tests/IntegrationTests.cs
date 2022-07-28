@@ -96,4 +96,19 @@ public class IntegrationTests
         await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
+
+    public class FilterThatLogs : Filter
+    {
+        public FilterThatLogs()
+        {
+            Action = FilterResult.Log;
+        }
+
+        protected override FilterResult Check(LogEventInfo logEvent)
+        {
+            var log = LogManager.GetCurrentClassLogger();
+            log.Error("message from filter");
+            return FilterResult.Log;
+        }
+    }
 }
