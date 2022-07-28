@@ -8,8 +8,7 @@ public class TestDbContext : DbContext
 {
     public TestDbContext(DbConnection connection, bool ownsConnection)
         : base(connection, ownsConnection)
-    {
-    }
+    { }
 
     public virtual DbSet<TestData> TestTable { get; set; }
 
