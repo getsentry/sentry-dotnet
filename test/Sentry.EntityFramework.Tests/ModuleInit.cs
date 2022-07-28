@@ -6,6 +6,6 @@ public static class ModuleInit
     public static void Init()
     {
         VerifyDiffPlex.Initialize();
-        Effort.Provider.EffortProviderConfiguration.RegisterProvider();
+        EffortProviderConfiguration.RegisterProvider();
     }
 }
