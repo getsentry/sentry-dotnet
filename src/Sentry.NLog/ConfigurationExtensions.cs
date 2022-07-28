@@ -20,7 +20,8 @@ public static class ConfigurationExtensions
     /// <param name="configuration">The NLog configuration.</param>
     /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
     /// <returns>The configuration.</returns>
-    public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
+    public static LoggingConfiguration AddSentry(
+        this LoggingConfiguration configuration,
         Action<SentryNLogOptions>? optionsConfig = null)
     {
         // Not to throw on code that ignores nullability warnings.
@@ -43,7 +44,8 @@ public static class ConfigurationExtensions
     /// </param>
     /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
     /// <returns>The configuration.</returns>
-    public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
+    public static LoggingConfiguration AddSentry(
+        this LoggingConfiguration configuration,
         string? dsn,
         Action<SentryNLogOptions>? optionsConfig = null)
     {
@@ -65,7 +67,8 @@ public static class ConfigurationExtensions
     /// <param name="targetName">The name to give the new target.</param>
     /// <param name="optionsConfig">An optional action for configuring the Sentry target options.</param>
     /// <returns>The configuration.</returns>
-    public static LoggingConfiguration AddSentry(this LoggingConfiguration configuration,
+    public static LoggingConfiguration AddSentry(
+        this LoggingConfiguration configuration,
         string? dsn,
         string targetName,
         Action<SentryNLogOptions>? optionsConfig = null)
