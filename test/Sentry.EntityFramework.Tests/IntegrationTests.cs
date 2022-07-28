@@ -1,4 +1,4 @@
-#if NET6_0
+#if NET48
 
 using System.Data.Entity;
 using System.Runtime.InteropServices;
@@ -8,6 +8,7 @@ namespace Sentry.EntityFramework.Tests;
 [UsesVerify]
 public class IntegrationTests
 {
+    // needs to be a variable to stop EF from inlining it as a constant
     static string shouldNotAppearInPayload = "SHOULD NOT APPEAR IN PAYLOAD";
 
     [SkippableFact]
