@@ -1,9 +1,6 @@
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-using Effort.Provider;
-
 namespace Sentry.EntityFramework.Tests;
 
+[Collection("Sequential")]
 public class SentryCommandInterceptorTests
 {
     private class Fixture
@@ -61,7 +58,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new Exception() });
+        interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 
@@ -99,7 +96,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() });
+        interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 
@@ -137,7 +134,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new Exception() });
+        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 

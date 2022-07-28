@@ -38,12 +38,11 @@
           IsFinished: true,
           Operation: db.query,
           Description:
-SET NOCOUNT ON;
-INSERT INTO [TestEntities] ([Property])
-VALUES (@p0);
+INSERT [dbo].[TestDatas]([AColumn], [RequiredColumn])
+VALUES (@0, @1)
 SELECT [Id]
-FROM [TestEntities]
-WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
+FROM [dbo].[TestDatas]
+WHERE @@ROWCOUNT > 0 AND [Id] = scope_identity(),
           Status: Ok,
           IsSampled: true
         },
@@ -51,8 +50,12 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           IsFinished: true,
           Operation: db.query,
           Description:
-SELECT [t].[Id], [t].[Property]
-FROM [TestEntities] AS [t],
+SELECT TOP (1) 
+    [Extent1].[Id] AS [Id], 
+    [Extent1].[AColumn] AS [AColumn], 
+    [Extent1].[RequiredColumn] AS [RequiredColumn]
+    FROM [dbo].[TestDatas] AS [Extent1]
+    WHERE ([Extent1].[AColumn] = @p__linq__0) OR (([Extent1].[AColumn] IS NULL) AND (@p__linq__0 IS NULL)),
           Status: Ok,
           IsSampled: true
         }

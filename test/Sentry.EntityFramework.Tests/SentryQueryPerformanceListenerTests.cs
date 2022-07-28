@@ -1,11 +1,6 @@
-using System.Collections.Concurrent;
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-using Effort.Provider;
-using Sentry.Testing;
-
 namespace Sentry.EntityFramework.Tests;
 
+[Collection("Sequential")]
 public class SentryQueryPerformanceListenerTests
 {
     internal const string DbReaderKey = SentryQueryPerformanceListener.DbReaderKey;
@@ -68,13 +63,13 @@ public class SentryQueryPerformanceListenerTests
         switch (expectedOperation)
         {
             case DbScalarKey:
-                interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new Exception() });
+                interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new() });
                 break;
             case DbNonQueryKey:
-                interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new Exception() });
+                interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new() });
                 break;
             case DbReaderKey:
-                interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() });
+                interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new() });
                 break;
             default:
                 throw new NotImplementedException();
@@ -111,21 +106,21 @@ public class SentryQueryPerformanceListenerTests
         {
             case DbScalarKey:
                 {
-                    var context = new DbCommandInterceptionContext<object> { Exception = new Exception() };
+                    var context = new DbCommandInterceptionContext<object> { Exception = new() };
                     interceptor.ScalarExecuting(command, context);
                     interceptor.ScalarExecuted(command, context);
                 }
                 break;
             case DbNonQueryKey:
                 {
-                    var context = new DbCommandInterceptionContext<int> { Exception = new Exception() };
+                    var context = new DbCommandInterceptionContext<int> { Exception = new() };
                     interceptor.NonQueryExecuting(command, context);
                     interceptor.NonQueryExecuted(command, context);
                 }
                 break;
             case DbReaderKey:
                 {
-                    var context = new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() };
+                    var context = new DbCommandInterceptionContext<DbDataReader> { Exception = new() };
                     interceptor.ReaderExecuting(command, context);
                     interceptor.ReaderExecuted(command, context);
                 }
