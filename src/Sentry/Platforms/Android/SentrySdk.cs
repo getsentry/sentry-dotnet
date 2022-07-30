@@ -44,6 +44,9 @@ public static partial class SentrySdk
         // "Best" mode throws permission exception on Android
         options.DetectStartupTime = StartupTimeDetectionMode.Fast;
 
+        // Make sure we capture managed exceptions from the Android environment
+        AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+
         // Now initialize the Android SDK if we have been given an AndroidContext
         var context = AndroidContext;
         if (context == null)
@@ -175,9 +178,6 @@ public static partial class SentrySdk
                 // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
                 o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
             }));
-
-        // Make sure we capture managed exceptions from the Android environment
-        AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 
         // Set options for the managed SDK that depend on the Android SDK
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
