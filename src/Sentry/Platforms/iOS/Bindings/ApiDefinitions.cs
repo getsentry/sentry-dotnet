@@ -1,9 +1,8 @@
 using System;
 using Foundation;
 using ObjCRuntime;
-using Sentry;
 
-namespace Sentry.Cocoa;
+namespace SentryCocoa;
 
 [Static]
 [Internal]

@@ -1,9 +1,6 @@
-using System.Runtime.InteropServices;
-using Foundation;
 using ObjCRuntime;
-using Sentry;
 
-namespace Sentry.Cocoa;
+namespace SentryCocoa;
 
 [Native]
 internal enum SentryLogLevel : long
