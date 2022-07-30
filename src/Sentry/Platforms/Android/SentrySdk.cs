@@ -1,13 +1,15 @@
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
-using Sentry.Internal;
+using Sentry.Extensibility;
 using Sentry.Protocol;
 
 namespace Sentry;
 
 public static partial class SentrySdk
 {
+    private static AndroidContext? AndroidContext;
+
     /// <summary>
     /// Initializes the SDK for Android, with an optional configuration options callback.
     /// </summary>
@@ -29,7 +31,29 @@ public static partial class SentrySdk
     /// <returns>An object that should be disposed when the application terminates.</returns>
     public static IDisposable Init(AndroidContext context, SentryOptions options)
     {
-        // Init the Java Android SDK first
+        AndroidContext = context;
+        return Init(options);
+    }
+
+    private static void InitSentryAndroidSdk(SentryOptions options)
+    {
+        // Set options for the managed SDK that don't depend on the Android SDK
+        options.AutoSessionTracking = true;
+        options.IsGlobalModeEnabled = true;
+
+        // "Best" mode throws permission exception on Android
+        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
+
+        // Now initialize the Android SDK if we have been given an AndroidContext
+        var context = AndroidContext;
+        if (context == null)
+        {
+            options.LogWarning("Running on Android, but did not initialize Sentry with an AndroidContext. " +
+                               "Call SentrySdk.Init(AndroidContext, SentryOptions) instead. " +
+                               "The Sentry Android SDK is disabled.");
+            return;
+        }
+
         SentryAndroidOptions? androidOptions = null;
         SentryAndroid.Init(context, new JavaLogger(options),
             new OptionsConfigurationCallback(o =>
@@ -155,21 +179,13 @@ public static partial class SentrySdk
         // Make sure we capture managed exceptions from the Android environment
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 
-        // Set options for the managed SDK
-        options.AutoSessionTracking = true;
-        options.IsGlobalModeEnabled = true;
+        // Set options for the managed SDK that depend on the Android SDK
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
         options.CrashedLastRun = () => Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
 
-        // "Best" mode throws permission exception on Android
-        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
-
         // TODO: Pause/Resume
-
-        // Init the managed SDK
-        return Init(options);
     }
 
     private static void AndroidEnvironment_UnhandledExceptionRaiser(object? _, RaiseThrowableEventArgs e)
