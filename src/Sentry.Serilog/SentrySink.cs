@@ -56,7 +56,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
     {
         if (logEvent.TryGetSourceContext(out var context))
         {
-            if (context.StartsWith("Sentry.") || string.Equals(context, "Sentry", StringComparison.Ordinal))
+            if (IsSentryContext(context))
             {
                 return;
             }
@@ -102,29 +102,35 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         }
 
         // Even if it was sent as event, add breadcrumb so next event includes it
-        if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
+        if (logEvent.Level < _options.MinimumBreadcrumbLevel)
         {
-            Dictionary<string, string>? data = null;
-            if (exception != null && !string.IsNullOrWhiteSpace(formatted))
-            {
-                // Exception.Message won't be used as Breadcrumb message
-                // Avoid losing it by adding as data:
-                data = new Dictionary<string, string>
-                {
-                    {"exception_message", exception.Message}
-                };
-            }
-
-            hub.AddBreadcrumb(
-                _clock,
-                string.IsNullOrWhiteSpace(formatted)
-                    ? exception?.Message ?? ""
-                    : formatted,
-                context,
-                data: data,
-                level: logEvent.Level.ToBreadcrumbLevel());
+            return;
         }
+
+        Dictionary<string, string>? data = null;
+        if (exception != null && !string.IsNullOrWhiteSpace(formatted))
+        {
+            // Exception.Message won't be used as Breadcrumb message
+            // Avoid losing it by adding as data:
+            data = new Dictionary<string, string>
+            {
+                {"exception_message", exception.Message}
+            };
+        }
+
+        hub.AddBreadcrumb(
+            _clock,
+            string.IsNullOrWhiteSpace(formatted)
+                ? exception?.Message ?? ""
+                : formatted,
+            context,
+            data: data,
+            level: logEvent.Level.ToBreadcrumbLevel());
     }
+
+    private static bool IsSentryContext(string context) =>
+        context.StartsWith("Sentry.") ||
+        string.Equals(context, "Sentry", StringComparison.Ordinal);
 
     private string FormatLogEvent(LogEvent logEvent)
     {

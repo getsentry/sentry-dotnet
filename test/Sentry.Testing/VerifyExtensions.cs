@@ -3,6 +3,8 @@ public static class VerifyExtensions
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
     {
         return settings
+            .ScrubMachineName()
+            .ScrubUserName()
             .AddExtraSettings(x => x.Converters.Add(new SpansConverter()))
             .IgnoreMembersWithType<Contexts>()
             .IgnoreMembersWithType<SdkVersion>()

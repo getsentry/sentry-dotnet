@@ -1,4 +1,4 @@
-﻿[
+[
   {
     Header: {
       event_id: Guid_1,
@@ -19,14 +19,14 @@
               Formatted: [42] Debug message stored as breadcrumb.
             },
             Platform: csharp,
-            ServerName: DESKTOP,
+            ServerName: TheMachineName,
             SentryExceptions: [],
             SentryThreads: [],
             Level: debug,
             Request: {},
             User: {
               IpAddress: {{auto}},
-              Username: simon
+              Username: TheUserName
             },
             Environment: production,
             Extra: {
@@ -58,14 +58,14 @@
               Formatted: [65] Message with a different MyTaskId
             },
             Platform: csharp,
-            ServerName: DESKTOP,
+            ServerName: TheMachineName,
             SentryExceptions: [],
             SentryThreads: [],
             Level: debug,
             Request: {},
             User: {
               IpAddress: {{auto}},
-              Username: simon
+              Username: TheUserName
             },
             Environment: production,
             Breadcrumbs: [
@@ -103,14 +103,14 @@
               Formatted: [42] Some event that includes the previous breadcrumbs
             },
             Platform: csharp,
-            ServerName: DESKTOP,
+            ServerName: TheMachineName,
             SentryExceptions: [],
             SentryThreads: [],
             Level: error,
             Request: {},
             User: {
               IpAddress: {{auto}},
-              Username: simon
+              Username: TheUserName
             },
             Environment: production,
             Breadcrumbs: [
@@ -160,7 +160,7 @@
               Formatted: [42] Error: with exception
             },
             Platform: csharp,
-            ServerName: DESKTOP,
+            ServerName: TheMachineName,
             SentryExceptions: [
               {
                 Type: System.Exception,
@@ -184,7 +184,7 @@
             Request: {},
             User: {
               IpAddress: {{auto}},
-              Username: simon
+              Username: TheUserName
             },
             Environment: production,
             Breadcrumbs: [
