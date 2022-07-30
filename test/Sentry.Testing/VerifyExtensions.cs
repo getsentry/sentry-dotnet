@@ -21,6 +21,7 @@ public static class VerifyExtensions
             .IgnoreMembers<SentryException>(
                 _ => _.Module,
                 _ => _.ThreadId)
+            .IgnoreMembers<SentryThread>(_ => _.Id)
             .IgnoreMembers<SentryStackFrame>(
                 _ => _.FileName,
                 _ => _.LineNumber,
