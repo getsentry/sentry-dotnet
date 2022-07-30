@@ -1,0 +1,21 @@
+[
+  {
+    Message: {
+      Message: The message
+    },
+    Logger: IntegrationTests,
+    Platform: csharp,
+    SentryExceptions: [],
+    SentryThreads: [],
+    Level: debug,
+    Request: {},
+    User: {},
+    Extra: {
+      ClassName: IntegrationTests,
+      FileName: {ProjectDirectory}IntegrationTests.cs,
+      LineNumber: 41,
+      log4net-level: DEBUG,
+      MethodName: Simple
+    }
+  }
+]

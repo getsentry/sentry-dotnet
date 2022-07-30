@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace Sentry.Testing;
 
 public class InMemoryDiagnosticLogger : IDiagnosticLogger

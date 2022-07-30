@@ -1,0 +1,42 @@
+{
+  diagnosticLoggerEntries: [
+    {
+      Level: error,
+      Message: Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message:message from OnEvaluating
+    }
+  ],
+  Envelopes: [
+    {
+      Header: {
+        event_id: Guid_1,
+        sdk: {
+          name: sentry.dotnet,
+          version: 3.20.1
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: event
+          },
+          Payload: {
+            Source: {
+              Message: {
+                Message: message,
+                Formatted: message
+              },
+              Logger: Sentry.NLog.Tests.IntegrationTests,
+              Platform: csharp,
+              SentryExceptions: [],
+              SentryThreads: [],
+              Level: error,
+              Request: {},
+              User: {},
+              Environment: production
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
