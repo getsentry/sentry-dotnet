@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     
     <Using Include="System.ComponentModel" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
     <Using Include="System.IO.Compression" />
     <Using Include="System.Net" />
     <Using Include="Sentry" />
