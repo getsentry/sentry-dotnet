@@ -19,6 +19,11 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentrySink).Assembly.GetNameAndVersion();
 
+    /// <summary>
+    /// Serilog SDK name.
+    /// </summary>
+    public const string SdkName = "sentry.dotnet.serilog";
+
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
     private readonly Func<IHub> _hubAccessor;
@@ -49,19 +54,12 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
     public void Emit(LogEvent logEvent)
     {
-        string? context = null;
-
-        if (logEvent.Properties.TryGetValue("SourceContext", out var prop)
-            && prop is ScalarValue scalar
-            && scalar.Value is string sourceContextValue)
+        if (logEvent.TryGetSourceContext(out var context))
         {
-            if (sourceContextValue.StartsWith("Sentry.")
-                || string.Equals(sourceContextValue, "Sentry", StringComparison.Ordinal))
+            if (context.StartsWith("Sentry.") || string.Equals(context, "Sentry", StringComparison.Ordinal))
             {
                 return;
             }
-
-            context = sourceContextValue;
         }
 
         var hub = _hubAccessor();
@@ -89,7 +87,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
             if (evt.Sdk is { } sdk)
             {
-                sdk.Name = Constants.SdkName;
+                sdk.Name = SdkName;
                 sdk.Version = NameAndVersion.Version;
 
                 if (NameAndVersion.Version is { } version)
