@@ -1,3 +1,4 @@
+// ReSharper disable once CheckNamespace
 namespace Sentry;
 
 public partial class SentryOptions
