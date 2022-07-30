@@ -1,14 +1,16 @@
 namespace Sentry.Samples.Ios;
 
-[Register ("AppDelegate")]
-public class AppDelegate : UIApplicationDelegate {
-	public override UIWindow? Window {
-		get;
-		set;
-	}
+[Register("AppDelegate")]
+public class AppDelegate : UIApplicationDelegate
+{
+    public override UIWindow? Window
+    {
+        get;
+        set;
+    }
 
-	public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
-	{
+    public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+    {
         // Init the Sentry SDK
         SentrySdk.Init(o =>
         {
@@ -17,20 +19,21 @@ public class AppDelegate : UIApplicationDelegate {
         });
 
         // create a new window instance based on the screen size
-		Window = new UIWindow (UIScreen.MainScreen.Bounds);
+        Window = new UIWindow(UIScreen.MainScreen.Bounds);
 
-		// create a UIViewController with a single UILabel
-		var vc = new UIViewController ();
-		vc.View!.AddSubview (new UILabel (Window!.Frame) {
-			BackgroundColor = UIColor.SystemBackground,
-			TextAlignment = UITextAlignment.Center,
-			Text = "Hello, iOS!",
-			AutoresizingMask = UIViewAutoresizing.All,
-		});
-		Window.RootViewController = vc;
+        // create a UIViewController with a single UILabel
+        var vc = new UIViewController();
+        vc.View!.AddSubview(new UILabel(Window!.Frame)
+        {
+            BackgroundColor = UIColor.SystemBackground,
+            TextAlignment = UITextAlignment.Center,
+            Text = "Hello, iOS!",
+            AutoresizingMask = UIViewAutoresizing.All,
+        });
+        Window.RootViewController = vc;
 
-		// make the window visible
-		Window.MakeKeyAndVisible ();
+        // make the window visible
+        Window.MakeKeyAndVisible();
 
 
         // Try out the Sentry SDK
@@ -40,6 +43,6 @@ public class AppDelegate : UIApplicationDelegate {
         // throw new Exception("Test Unhandled Managed Exception");
         // SentrySdk.CauseNativeCrash();
 
-		return true;
-	}
+        return true;
+    }
 }
