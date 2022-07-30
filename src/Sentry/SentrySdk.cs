@@ -55,6 +55,8 @@ namespace Sentry
             // Initialize bundled platform SDKs here
 #if ANDROID
             InitSentryAndroidSdk(options);
+#elif IOS || MACCATALYST
+            InitSentryCocoaSdk(options);
 #endif
 
             return new Hub(options);

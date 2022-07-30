@@ -2,5 +2,9 @@ namespace Sentry;
 
 public static partial class SentrySdk
 {
-    // TODO
+    private static void InitSentryCocoaSdk(SentryOptions options)
+    {
+        //TODO
+
+    }
 }
