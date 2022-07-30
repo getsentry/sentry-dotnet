@@ -4,6 +4,7 @@ using Sentry.Android.Extensions;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry;
 
 public static partial class SentrySdk
