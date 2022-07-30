@@ -36,6 +36,9 @@ public class AppDelegate : UIApplicationDelegate {
         // Try out the Sentry SDK
         SentrySdk.CaptureMessage("From iOS");
 
+        // Uncomment to try these
+        // throw new Exception("Test Unhandled Managed Exception");
+        // SentrySdk.CauseNativeCrash();
 
 		return true;
 	}
