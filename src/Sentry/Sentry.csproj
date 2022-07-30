@@ -7,8 +7,8 @@
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
-    <!-- Files under Android are included below when TFM ends with android -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\Android\**</DefaultItemExcludes>
+    <!-- Files under Platforms are excluded by default, but included below as appropriate for each platform -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\Platforms\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
@@ -19,7 +19,8 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
-  <Import Condition="$(TargetFramework.EndsWith('android'))" Project="Android\Sentry.Android.props" />
+  <!-- Platform-specific code included here -->
+  <Import Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" Project="Platforms\Android\Sentry.Android.props" />
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">
