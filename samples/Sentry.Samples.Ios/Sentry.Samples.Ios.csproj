@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-ios</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <!-- Workaround for https://github.com/dotnet/maui/issues/7272 (also happens for iOS without MAUI) -->
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
+    <ItemGroup>
+      <ResolvedFileToPublish
+        Update="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+        PublishFolderType="None" />
+    </ItemGroup>
+  </Target>
+
+</Project>
