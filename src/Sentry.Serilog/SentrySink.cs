@@ -1,9 +1,3 @@
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Reflection;
-using Serilog.Core;
-using Serilog.Events;
-
 namespace Sentry.Serilog;
 
 /// <summary>
@@ -52,7 +46,28 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         _sdkDisposable = sdkDisposable;
     }
 
+    static AsyncLocal<bool> isReentrant = new();
+
     public void Emit(LogEvent logEvent)
+    {
+        if (isReentrant.Value)
+        {
+            _options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
+            return;
+        }
+
+        isReentrant.Value = true;
+        try
+        {
+            InnerEmit(logEvent);
+        }
+        finally
+        {
+            isReentrant.Value = false;
+        }
+    }
+
+    private void InnerEmit(LogEvent logEvent)
     {
         if (logEvent.TryGetSourceContext(out var context))
         {

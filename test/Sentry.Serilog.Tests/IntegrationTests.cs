@@ -60,24 +60,19 @@ public class IntegrationTests
         var transport = new RecordingTransport();
 
         var configuration = new LoggerConfiguration();
-        configuration.Enrich.FromLogContext();
-        configuration.MinimumLevel.Debug();
 
         var diagnosticLogger = new InMemoryDiagnosticLogger();
         configuration.WriteTo.Sentry(
             _ =>
             {
                 _.TracesSampleRate = 1;
-                _.MinimumBreadcrumbLevel = LogEventLevel.Debug;
-                _.MinimumEventLevel = LogEventLevel.Debug;
                 _.Transport = transport;
+                _.DiagnosticLogger = diagnosticLogger;
                 _.Dsn = ValidDsn;
-                _.SendDefaultPii = true;
-                _.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
+                _.Debug = true;
             });
 
         Log.Logger = configuration.CreateLogger();
-
 
         SentrySdk.ConfigureScope(
             scope =>
