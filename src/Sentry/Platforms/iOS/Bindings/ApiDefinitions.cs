@@ -831,7 +831,7 @@ interface SentryOptions
 
     // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
     [NullAllowed, Export ("beforeBreadcrumb", ArgumentSemantic.Copy)]
-    Func<SentryBreadcrumb, SentryBreadcrumb> BeforeBreadcrumb { get; set; }
+    Func<SentryBreadcrumb, SentryBreadcrumb?> BeforeBreadcrumb { get; set; }
 
     // @property (copy, nonatomic) SentryOnCrashedLastRunCallback _Nullable onCrashedLastRun;
     [NullAllowed, Export ("onCrashedLastRun", ArgumentSemantic.Copy)]
