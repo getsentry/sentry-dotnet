@@ -11,6 +11,7 @@
     <Using Include="log4net" />
     <Using Include="log4net.Core" />
     <Using Include="Sentry.Tests" />
+    <Using Include="Sentry.Testing" />
     <Using Include="log4net.Appender" />
     <Using Include="log4net.Layout" />
     <Using Include="log4net.Repository.Hierarchy" />

@@ -1,21 +1,40 @@
-[
+﻿[
   {
-    Message: {
-      Message: The message
+    Header: {
+      event_id: Guid_1,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
     },
-    Logger: IntegrationTests,
-    Platform: csharp,
-    SentryExceptions: [],
-    SentryThreads: [],
-    Level: debug,
-    Request: {},
-    User: {},
-    Extra: {
-      ClassName: IntegrationTests,
-      FileName: {ProjectDirectory}IntegrationTests.cs,
-      LineNumber: 41,
-      log4net-level: DEBUG,
-      MethodName: Simple
-    }
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Message: {
+              Message: The message
+            },
+            Logger: IntegrationTests,
+            Platform: csharp,
+            SentryExceptions: [],
+            SentryThreads: [],
+            Level: debug,
+            Request: {},
+            User: {},
+            Environment: production,
+            Extra: {
+              ClassName: IntegrationTests,
+              FileName: {ProjectDirectory}IntegrationTests.cs,
+              LineNumber: 23,
+              log4net-level: DEBUG,
+              MethodName: Simple
+            }
+          }
+        }
+      }
+    ]
   }
 ]
