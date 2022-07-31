@@ -47,16 +47,15 @@ public class IntegrationTests
 
         SetupLogging(hub);
 
+        var log = LogManager.GetLogger(typeof(IntegrationTests));
         SentrySdk.ConfigureScope(
             scope =>
             {
-                var log = LogManager.GetLogger(typeof(IntegrationTests));
                 scope.OnEvaluating += (_, _) =>
                     log.Error("message from OnEvaluating");
                 log.Error("message");
             });
 
-        var log = LogManager.GetLogger(typeof(IntegrationTests));
         log.Error("The message");
 
         LogManager.Flush(1000);
