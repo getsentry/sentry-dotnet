@@ -58,7 +58,6 @@ namespace Sentry
 #elif IOS || MACCATALYST
             InitSentryCocoaSdk(options);
 #endif
-
             return new Hub(options);
         }
 

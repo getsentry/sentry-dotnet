@@ -53,8 +53,8 @@ public static partial class SentrySdk
         if (context == null)
         {
             options.LogWarning("Running on Android, but did not initialize Sentry with an AndroidContext. " +
-                               "Call SentrySdk.Init(AndroidContext, SentryOptions) instead. " +
-                               "The Sentry Android SDK is disabled.");
+                               "The embedded Sentry Android SDK is disabled. " +
+                               "Call SentrySdk.Init(AndroidContext, SentryOptions) instead.");
             return;
         }
 
