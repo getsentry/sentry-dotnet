@@ -28,7 +28,6 @@
             Extra: {
               ClassName: IntegrationTests+<>c__DisplayClass1_0,
               FileName: {ProjectDirectory}IntegrationTests.cs,
-              LineNumber: 56,
               log4net-level: ERROR,
               MethodName: <LoggingInsideTheContextOfLogging>b__0
             }
@@ -66,7 +65,6 @@
             Extra: {
               ClassName: IntegrationTests,
               FileName: {ProjectDirectory}IntegrationTests.cs,
-              LineNumber: 59,
               log4net-level: ERROR,
               MethodName: LoggingInsideTheContextOfLogging
             }

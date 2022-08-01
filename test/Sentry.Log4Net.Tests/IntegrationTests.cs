@@ -24,7 +24,7 @@ public class IntegrationTests
         LogManager.Flush(1000);
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain");
+            .IgnoreMembers("ThreadName", "Domain", "LineNumber");
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class IntegrationTests
 
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain");
+            .IgnoreMembers("ThreadName", "Domain", "LineNumber");
     }
 
     private static void SetupLogging(IHub hub)
