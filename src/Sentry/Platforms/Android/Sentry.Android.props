@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Android\Transforms\*.xml" />
-    <TransformFile Include="Android\Transforms\*.xml" />
+    <None Remove="$(MSBuildThisFileDirectory)Transforms\*.xml" />
+    <TransformFile Include="$(MSBuildThisFileDirectory)Transforms\*.xml" />
     <!-- TODO: How to add JavaDocPaths for each package? -->
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Android\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
