@@ -11,6 +11,9 @@ public partial class MainPage
     // NOTE: You can only inject an ILogger<T>, not a plain ILogger
     public MainPage(ILogger<MainPage> logger)
     {
+#if !IOS // TODO: enable for Mac Catalyst and Android
+        CrashBtn.IsVisible = false;
+#endif
         _logger = logger;
         InitializeComponent();
     }
@@ -44,6 +47,13 @@ public partial class MainPage
         {
             SentrySdk.CaptureException(ex);
         }
+    }
+
+    private void OnNativeCrashClicked(object sender, EventArgs e)
+    {
+#if IOS // TODO: enable for Mac Catalyst and Android
+        SentrySdk.CauseNativeCrash();
+#endif
     }
 }
 
