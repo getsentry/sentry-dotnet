@@ -62,7 +62,7 @@ public class IntegrationTests
 
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain", "LineNumber");
+            .IgnoreMembers("Extra");
     }
 
     private static void SetupLogging(IHub hub)
