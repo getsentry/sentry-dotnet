@@ -13,6 +13,13 @@
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461;net6.0-android</TargetFrameworks>
+
+    <!-- 
+      On macOS, build the iOS target also.
+      TODO: Add net6.0-maccatalyst back after we have a variant for it in the Sentry Cocoa xcframework.
+            See https://github.com/getsentry/sentry-cocoa/issues/2031
+     -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
@@ -21,6 +28,8 @@
 
   <!-- Platform-specific code included here -->
   <Import Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" Project="Platforms\Android\Sentry.Android.props" />
+  <Import Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" Project="Platforms\iOS\Sentry.iOS.props" />
+  <Import Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" Project="Platforms\iOS\Sentry.iOS.props" />
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">

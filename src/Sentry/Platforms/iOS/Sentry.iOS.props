@@ -1,0 +1,57 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>10</LangVersion>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">10.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+    <IsBindingProject>true</IsBindingProject>
+    <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Foundation" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <SentryCocoaSdkVersion>7.23.0</SentryCocoaSdkVersion>
+    <SentryCocoaSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Cocoa\$(SentryCocoaSdkVersion)\</SentryCocoaSdkDirectory>
+    <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ObjcBindingApiDefinition Include="$(MSBuildThisFileDirectory)Bindings\ApiDefinitions.cs" />
+    <ObjcBindingCoreSource Include="$(MSBuildThisFileDirectory)Bindings\StructsAndEnums.cs" />
+    <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
+  </ItemGroup>
+
+  <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences">
+    <DownloadFile
+      SourceUrl="https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaSdkVersion)/Sentry.xcframework.zip"
+      DestinationFolder="$(SentryCocoaSdkDirectory)"
+      Condition="!Exists('$(SentryCocoaSdkDirectory)Sentry.xcframework.zip')"
+      Retries="3"
+    />
+    <Unzip
+      SourceFiles="$(SentryCocoaSdkDirectory)Sentry.xcframework.zip"
+      DestinationFolder="$(SentryCocoaSdkDirectory)"
+      Condition="Exists('$(SentryCocoaSdkDirectory)Sentry.xcframework.zip') AND !Exists('$(SentryCocoaFramework)')"
+    />
+  </Target>
+
+  <!--
+    Workaround for https://github.com/dotnet/msbuild/issues/4584 needed when packing in 6.0.3xx
+    Remove when 6.0.4xx is released, and bump SDK version global.json.
+  -->
+  <Target Name="RemoveInvalidManifest" AfterTargets="BuiltProjectOutputGroup">
+    <ItemGroup Condition="!Exists('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)')">
+      <BuiltProjectOutputGroupOutput Remove="$([System.IO.Path]::GetFullPath('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)'))" />
+    </ItemGroup>
+  </Target>
+
+
+</Project>
