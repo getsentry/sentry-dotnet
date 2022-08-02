@@ -68,10 +68,6 @@ public static partial class SentrySdk
                 // TODO: Should we set the DistinctId to match the one used by GlobalSessionManager?
                 //o.DistinctId = ?
 
-                // TODO: Should we just copy EnableScopeSync, or should we always set it true for Android?
-                //       And also, Do we need to pass a scope observer?
-                //o.EnableScopeSync = options.EnableScopeSync; ??
-
                 // These options are copied over from our SentryOptions
                 o.AttachStacktrace = options.AttachStacktrace;
                 o.Debug = options.Debug;
