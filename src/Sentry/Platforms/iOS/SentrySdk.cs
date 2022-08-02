@@ -1,3 +1,4 @@
+using Sentry.iOS;
 using Sentry.iOS.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -126,8 +127,8 @@ public static partial class SentrySdk
         // Set options for the managed SDK that depend on the Cocoa SDK
         // options.AddEventProcessor(new CocoaEventProcessor(cocoaOptions!));
         options.CrashedLastRun = () => SentryCocoa.SentrySDK.CrashedLastRun;
-        // options.EnableScopeSync = true;
-        // options.ScopeObserver = new CocoaScopeObserver(options);
+        options.EnableScopeSync = true;
+        options.ScopeObserver = new IosScopeObserver(options);
 
         // TODO: Pause/Resume
 
