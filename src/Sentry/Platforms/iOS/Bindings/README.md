@@ -1,4 +1,4 @@
-This files in this folder aren't "normal" C# files, but rather they are [Xamarin Objective-C bindings][1].  They were originally generated with [Objective Sharpie][2].  However, they are not purely auto-generated.  Several modifications have been made:
+The files in this folder aren't "normal" C# files, but rather they are [Xamarin Objective-C bindings][1].  They were originally generated with [Objective Sharpie][2].  However, they are not purely auto-generated.  Several modifications have been made:
 
 - Everything has been made internal, either via the `internal` keyword, or the `[Internal]` binding attribute.
 - Named delegates have been replaced with `Func<T>` or `Action<T>` to work around https://github.com/xamarin/xamarin-macios/issues/15299
