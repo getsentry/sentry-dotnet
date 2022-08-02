@@ -88,7 +88,11 @@ internal static class CocoaExtensions
         var result = new NSDictionary<NSString, NSObject>();
         foreach (var item in dict)
         {
-            result[item.Key] = NSObject.FromObject(item.Value);
+            // skip null values, but add others as NSObject
+            if (item.Value is { } value)
+            {
+                result[item.Key] = NSObject.FromObject(value);
+            }
         }
 
         return result;
