@@ -85,17 +85,20 @@ internal static class CocoaExtensions
     public static NSDictionary<NSString, NSObject> ToNSDictionary<TValue>(
         this IEnumerable<KeyValuePair<string, TValue>> dict)
     {
-        var result = new NSDictionary<NSString, NSObject>();
+        var d = new Dictionary<NSString, NSObject>();
         foreach (var item in dict)
         {
             // skip null values, but add others as NSObject
             if (item.Value is { } value)
             {
-                result[item.Key] = NSObject.FromObject(value);
+                d.Add((NSString)item.Key, NSObject.FromObject(value));
             }
         }
 
-        return result;
+        return NSDictionary<NSString, NSObject>
+            .FromObjectsAndKeys(
+                d.Values.ToArray(),
+                d.Keys.ToArray());
     }
 
     public static NSDictionary<NSString, NSObject>? ToNullableNSDictionary<TValue>(
