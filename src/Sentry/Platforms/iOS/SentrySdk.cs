@@ -58,7 +58,8 @@ public static partial class SentrySdk
             if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
             {
                 // Note: Nullable return is allowed but delegate is generated incorrectly
-                o.BeforeBreadcrumb = b => beforeBreadcrumb(b.ToBreadcrumb())?.ToCocoaBreadcrumb()!;
+                o.BeforeBreadcrumb = b => beforeBreadcrumb(b.ToBreadcrumb(options.DiagnosticLogger))?
+                    .ToCocoaBreadcrumb()!;
             }
 
             // TOOD: Work on below (copied from Android)
