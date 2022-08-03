@@ -78,7 +78,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         }
 
         var hub = _hubAccessor();
-        if (hub is null || !hub.IsEnabled)
+        if (!hub.IsEnabled)
         {
             return;
         }
