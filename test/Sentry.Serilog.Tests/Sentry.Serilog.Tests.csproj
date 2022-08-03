@@ -21,6 +21,7 @@
     <Using Include="Sentry.Tests" />
     <Using Include="Serilog" />
     <Using Include="Serilog.Events" />
+    <Using Include="Serilog.Context" />
     <Using Include="Serilog.Formatting.Display" />
     <Using Include="Serilog.Parsing" />
   </ItemGroup>

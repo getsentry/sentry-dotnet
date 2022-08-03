@@ -3,6 +3,8 @@ public static class VerifyExtensions
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
     {
         return settings
+            .ScrubMachineName()
+            .ScrubUserName()
             .AddExtraSettings(x => x.Converters.Add(new SpansConverter()))
             .IgnoreMembersWithType<Contexts>()
             .IgnoreMembersWithType<SdkVersion>()
@@ -21,6 +23,7 @@ public static class VerifyExtensions
             .IgnoreMembers<SentryException>(
                 _ => _.Module,
                 _ => _.ThreadId)
+            .IgnoreMembers<SentryThread>(_ => _.Id)
             .IgnoreMembers<SentryStackFrame>(
                 _ => _.FileName,
                 _ => _.LineNumber,
