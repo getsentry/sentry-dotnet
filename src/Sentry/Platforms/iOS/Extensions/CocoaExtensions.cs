@@ -78,7 +78,7 @@ internal static class CocoaExtensions
         IDiagnosticLogger? logger = null)
         where TValue : NSObject
     {
-        if (dict is null || dict.Length == 0)
+        if (dict is null || dict.Count == 0)
         {
             return null;
         }
