@@ -31,9 +31,10 @@ using System.Runtime.CompilerServices;
 // This attribute automatically adds the metadata to the final AndroidManifest.xml
 [assembly: Android.App.MetaData("io.sentry.auto-init", Value = "false")]
 
-#else
+#endif
 
-// The Android target is not CLS Compliant
+
+// The targets for these platforms are not CLS Compliant
+#if !(ANDROID || IOS || MACCATALYST)
 [assembly: CLSCompliant(true)]
-
 #endif

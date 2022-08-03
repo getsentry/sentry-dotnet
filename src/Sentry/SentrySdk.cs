@@ -52,6 +52,12 @@ namespace Sentry
                 options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
             }
 
+            // Initialize bundled platform SDKs here
+#if ANDROID
+            InitSentryAndroidSdk(options);
+#elif IOS || MACCATALYST
+            InitSentryCocoaSdk(options);
+#endif
             return new Hub(options);
         }
 

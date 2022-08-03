@@ -49,6 +49,13 @@
                 Clicked="OnCapturedExceptionClicked"
                 HorizontalOptions="Center" />
 
+            <Button
+                x:Name="CrashBtn"
+                Text="Cause Native Crash"
+                SemanticProperties.Hint="Causes a native crash in the application"
+                Clicked="OnNativeCrashClicked"
+                HorizontalOptions="Center" />
+
         </VerticalStackLayout>
     </ScrollView>
 
