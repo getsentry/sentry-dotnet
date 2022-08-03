@@ -106,9 +106,13 @@ internal static class CocoaExtensions
     }
 
     public static NSDictionary<NSString, NSObject>? ToNullableNSDictionary<TValue>(
-        this IEnumerable<KeyValuePair<string, TValue>> dict)
+        this ICollection<KeyValuePair<string, TValue>> dict)
     {
-        var d = dict.ToNSDictionary();
-        return d.Count == 0 ? null : d;
+        if (dict.Count == 0)
+        {
+            return null;
+        }
+
+        return dict.ToNSDictionary();
     }
 }
