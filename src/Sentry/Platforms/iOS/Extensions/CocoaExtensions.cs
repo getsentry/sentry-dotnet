@@ -78,8 +78,12 @@ internal static class CocoaExtensions
         IDiagnosticLogger? logger = null)
         where TValue : NSObject
     {
-        var d = dict?.ToStringDictionary(logger);
-        return d?.Count is null or 0 ? null : d;
+        if (dict is null || dict.Length == 0)
+        {
+            return null;
+        }
+
+        return dict.ToStringDictionary(logger);
     }
 
     public static NSDictionary<NSString, NSObject> ToNSDictionary<TValue>(
