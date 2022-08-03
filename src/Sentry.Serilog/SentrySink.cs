@@ -113,7 +113,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
             evt.SetExtras(GetLoggingEventProperties(logEvent));
 
-            _ = hub.CaptureEvent(evt);
+            hub.CaptureEvent(evt);
         }
 
         // Even if it was sent as event, add breadcrumb so next event includes it
