@@ -306,6 +306,9 @@ public class HubTests
             DiagnosticLogger = logger
         };
 
+        // Disable process exit flush to resolve "There is no currently active test." errors.
+        options.DisableAppDomainProcessExitFlush();
+
         try
         {
             using var hub = new Hub(options);

@@ -31,6 +31,9 @@ public class VersioningTests
                 o.Transport = transport;
                 o.Debug = true;
                 o.DiagnosticLogger = _logger;
+
+                // Disable process exit flush to resolve "There is no currently active test." errors.
+                o.DisableAppDomainProcessExitFlush();
             })
             .ConfigureServices(services =>
             {
