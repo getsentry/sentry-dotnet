@@ -13,6 +13,9 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
     private readonly string _testName;
 
+    private static readonly FieldInfo TestFieldInfo = typeof(TestOutputHelper)
+        .GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
+
     public IEnumerable<LogEntry> Entries => _entries;
 
     public bool HasErrorOrFatal => _entries
@@ -33,11 +36,7 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         _testOutputHelper = testOutputHelper;
         _minimumLevel = minimumLevel;
 
-        var test = _testOutputHelper
-            .GetType()
-            .GetField("test", BindingFlags.Instance | BindingFlags.NonPublic)?
-            .GetValue(_testOutputHelper)
-            as ITest;
+        var test = TestFieldInfo.GetValue(_testOutputHelper) as ITest;
         _testName = test?.DisplayName;
     }
 
