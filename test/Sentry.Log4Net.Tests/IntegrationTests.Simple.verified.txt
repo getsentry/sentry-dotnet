@@ -21,14 +21,14 @@
             Platform: csharp,
             SentryExceptions: [],
             SentryThreads: [],
-            Level: debug,
+            Level: error,
             Request: {},
             User: {},
             Environment: production,
             Extra: {
               ClassName: IntegrationTests,
               FileName: {ProjectDirectory}IntegrationTests.cs,
-              log4net-level: DEBUG,
+              log4net-level: ERROR,
               MethodName: Simple
             }
           }

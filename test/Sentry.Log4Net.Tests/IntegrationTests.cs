@@ -5,11 +5,10 @@ public class IntegrationTests
     public Task Simple()
     {
         var transport = new RecordingTransport();
-        var diagnosticLogger = new InMemoryDiagnosticLogger();
-        var options = new SentryOptions {
+        var options = new SentryOptions
+        {
             TracesSampleRate = 1,
             Debug = true,
-            DiagnosticLogger = diagnosticLogger,
             Transport = transport,
             Dsn = ValidDsn
         };
@@ -20,7 +19,7 @@ public class IntegrationTests
         var hierarchy = SetupLogging(hub);
 
         var log = LogManager.GetLogger(typeof(IntegrationTests));
-        log.Debug("The message");
+        log.Error("The message");
 
         hierarchy.Flush(10000);
 
