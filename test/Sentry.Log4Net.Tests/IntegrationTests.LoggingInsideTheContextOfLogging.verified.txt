@@ -22,9 +22,12 @@
             SentryExceptions: [],
             SentryThreads: [],
             Level: error,
-            Request: {},
-            User: {},
-            Environment: production
+            Environment: production,
+            Extra: {
+              ClassName: Sentry.Internal.SentryScopeManager,
+              log4net-level: ERROR,
+              MethodName: ConfigureScope
+            }
           }
         }
       }
@@ -53,9 +56,12 @@
             SentryExceptions: [],
             SentryThreads: [],
             Level: error,
-            Request: {},
-            User: {},
-            Environment: production
+            Environment: production,
+            Extra: {
+              ClassName: IntegrationTests,
+              log4net-level: ERROR,
+              MethodName: LoggingInsideTheContextOfLogging
+            }
           }
         }
       }
