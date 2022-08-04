@@ -77,7 +77,7 @@ public class SentrySinkTests
 
         var expected = typeof(SentrySink).Assembly.GetNameAndVersion();
         _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == SentrySink.SdkName
                                                    && e.Sdk.Version == expected.Version));
     }
 

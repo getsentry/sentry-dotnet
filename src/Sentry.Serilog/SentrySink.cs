@@ -1,9 +1,3 @@
-using Sentry.Extensibility;
-using Sentry.Infrastructure;
-using Sentry.Reflection;
-using Serilog.Core;
-using Serilog.Events;
-
 namespace Sentry.Serilog;
 
 /// <summary>
@@ -18,6 +12,11 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentrySink).Assembly.GetNameAndVersion();
+
+    /// <summary>
+    /// Serilog SDK name.
+    /// </summary>
+    public const string SdkName = "sentry.dotnet.serilog";
 
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
@@ -47,21 +46,35 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         _sdkDisposable = sdkDisposable;
     }
 
+    static AsyncLocal<bool> isReentrant = new();
+
     public void Emit(LogEvent logEvent)
     {
-        string? context = null;
-
-        if (logEvent.Properties.TryGetValue("SourceContext", out var prop)
-            && prop is ScalarValue scalar
-            && scalar.Value is string sourceContextValue)
+        if (isReentrant.Value)
         {
-            if (sourceContextValue.StartsWith("Sentry.")
-                || string.Equals(sourceContextValue, "Sentry", StringComparison.Ordinal))
+            _options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
+            return;
+        }
+
+        isReentrant.Value = true;
+        try
+        {
+            InnerEmit(logEvent);
+        }
+        finally
+        {
+            isReentrant.Value = false;
+        }
+    }
+
+    private void InnerEmit(LogEvent logEvent)
+    {
+        if (logEvent.TryGetSourceContext(out var context))
+        {
+            if (IsSentryContext(context))
             {
                 return;
             }
-
-            context = sourceContextValue;
         }
 
         var hub = _hubAccessor();
@@ -89,7 +102,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
             if (evt.Sdk is { } sdk)
             {
-                sdk.Name = Constants.SdkName;
+                sdk.Name = SdkName;
                 sdk.Version = NameAndVersion.Version;
 
                 if (NameAndVersion.Version is { } version)
@@ -100,33 +113,39 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
             evt.SetExtras(GetLoggingEventProperties(logEvent));
 
-            _ = hub.CaptureEvent(evt);
+            hub.CaptureEvent(evt);
         }
 
         // Even if it was sent as event, add breadcrumb so next event includes it
-        if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
+        if (logEvent.Level < _options.MinimumBreadcrumbLevel)
         {
-            Dictionary<string, string>? data = null;
-            if (exception != null && !string.IsNullOrWhiteSpace(formatted))
-            {
-                // Exception.Message won't be used as Breadcrumb message
-                // Avoid losing it by adding as data:
-                data = new Dictionary<string, string>
-                {
-                    {"exception_message", exception.Message}
-                };
-            }
-
-            hub.AddBreadcrumb(
-                _clock,
-                string.IsNullOrWhiteSpace(formatted)
-                    ? exception?.Message ?? ""
-                    : formatted,
-                context,
-                data: data,
-                level: logEvent.Level.ToBreadcrumbLevel());
+            return;
         }
+
+        Dictionary<string, string>? data = null;
+        if (exception != null && !string.IsNullOrWhiteSpace(formatted))
+        {
+            // Exception.Message won't be used as Breadcrumb message
+            // Avoid losing it by adding as data:
+            data = new Dictionary<string, string>
+            {
+                {"exception_message", exception.Message}
+            };
+        }
+
+        hub.AddBreadcrumb(
+            _clock,
+            string.IsNullOrWhiteSpace(formatted)
+                ? exception?.Message ?? ""
+                : formatted,
+            context,
+            data: data,
+            level: logEvent.Level.ToBreadcrumbLevel());
     }
+
+    private static bool IsSentryContext(string context) =>
+        context.StartsWith("Sentry.") ||
+        string.Equals(context, "Sentry", StringComparison.Ordinal);
 
     private string FormatLogEvent(LogEvent logEvent)
     {
