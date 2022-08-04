@@ -25,7 +25,7 @@ public class IntegrationTests
 
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain", "LineNumber", "FileName")
+            .IgnoreMembers("ThreadName", "Domain", "Extra")
             .ScrubLinesContaining(" {},");
     }
 
@@ -64,7 +64,7 @@ public class IntegrationTests
 
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain", "LineNumber", "FileName")
+            .IgnoreMembers("ThreadName", "Domain", "Extra")
             .ScrubLinesContaining(" {},");
     }
 

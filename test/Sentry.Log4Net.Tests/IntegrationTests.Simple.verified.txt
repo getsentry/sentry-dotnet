@@ -22,12 +22,7 @@
             SentryExceptions: [],
             SentryThreads: [],
             Level: error,
-            Environment: production,
-            Extra: {
-              ClassName: IntegrationTests,
-              log4net-level: ERROR,
-              MethodName: Simple
-            }
+            Environment: production
           }
         }
       }
