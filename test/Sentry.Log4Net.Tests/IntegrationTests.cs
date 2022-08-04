@@ -68,7 +68,7 @@ public class IntegrationTests
 
     private static Hierarchy SetupLogging(IHub hub)
     {
-        var hierarchy = (Hierarchy) LogManager.GetRepository();
+        var hierarchy = (Hierarchy) LogManager.GetRepository(typeof(IntegrationTests).Assembly);
         var layout = new PatternLayout
         {
             ConversionPattern = "%message%"
