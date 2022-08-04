@@ -24,6 +24,7 @@
             SentryThreads: [],
             Level: debug,
             Request: {},
+            Contexts: {},
             User: {
               IpAddress: {{auto}},
               Username: TheUserName
@@ -63,6 +64,7 @@
             SentryThreads: [],
             Level: debug,
             Request: {},
+            Contexts: {},
             User: {
               IpAddress: {{auto}},
               Username: TheUserName
@@ -108,6 +110,7 @@
             SentryThreads: [],
             Level: error,
             Request: {},
+            Contexts: {},
             User: {
               IpAddress: {{auto}},
               Username: TheUserName
@@ -182,6 +185,7 @@
             SentryThreads: [],
             Level: fatal,
             Request: {},
+            Contexts: {},
             User: {
               IpAddress: {{auto}},
               Username: TheUserName

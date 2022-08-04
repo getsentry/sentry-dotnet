@@ -5,8 +5,11 @@ public static class VerifyExtensions
         return settings
             .ScrubMachineName()
             .ScrubUserName()
-            .AddExtraSettings(x => x.Converters.Add(new SpansConverter()))
-            .IgnoreMembersWithType<Contexts>()
+            .AddExtraSettings(_ =>
+            {
+                _.Converters.Add(new SpansConverter());
+                _.Converters.Add(new ContextsConverter());
+            })
             .IgnoreMembersWithType<SdkVersion>()
             .IgnoreMembersWithType<DateTimeOffset>()
             .IgnoreMembersWithType<SpanId>()
@@ -49,6 +52,27 @@ public static class VerifyExtensions
             }
 
             writer.WriteEndArray();
+        }
+    }
+
+    class ContextsConverter : WriteOnlyJsonConverter<Contexts>
+    {
+        public override void Write(VerifyJsonWriter writer, Contexts contexts)
+        {
+            var items = contexts
+                .Where(_ => _.Key != "os" &&
+                            _.Key != "Current Culture" &&
+                            _.Key != "ThreadPool Info" &&
+                            _.Key != "runtime" &&
+                            _.Key != "Current UI Culture" &&
+                            _.Key != "device" &&
+                            _.Key != ".NET Framework" &&
+                            _.Key != "app" &&
+                            _.Key != "Memory Info" &&
+                            _.Key != "Dynamic Code")
+                .OrderBy(x => x.Key)
+                .ToDictionary();
+            writer.Serialize(items);
         }
     }
 }

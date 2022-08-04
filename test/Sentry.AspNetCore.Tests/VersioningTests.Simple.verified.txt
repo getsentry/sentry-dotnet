@@ -13,6 +13,14 @@
           Method: GET,
           QueryString: 
         },
+        Contexts: {
+          trace: {
+            Operation: http.server,
+            Description: ,
+            Status: Ok,
+            IsSampled: true
+          }
+        },
         User: {},
         Environment: production,
         Breadcrumbs: [
