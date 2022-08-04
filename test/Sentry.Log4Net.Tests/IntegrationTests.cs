@@ -17,11 +17,13 @@ public class IntegrationTests
         var hub = SentrySdk.InitHub(options);
         using var sdk = SentrySdk.UseHub(hub);
 
-        SetupLogging(hub);
+        var hierarchy = SetupLogging(hub);
 
         var log = LogManager.GetLogger(typeof(IntegrationTests));
         log.Debug("The message");
-        LogManager.Flush(1000);
+
+        hierarchy.Flush(10000);
+
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "LineNumber");
@@ -45,7 +47,7 @@ public class IntegrationTests
         var hub = SentrySdk.InitHub(options);
         using var sdk = SentrySdk.UseHub(hub);
 
-        SetupLogging(hub);
+        var hierarchy = SetupLogging(hub);
 
         var log = LogManager.GetLogger(typeof(IntegrationTests));
         SentrySdk.ConfigureScope(
@@ -58,14 +60,14 @@ public class IntegrationTests
 
         log.Error("The message");
 
-        LogManager.Flush(1000);
+        hierarchy.Flush(10000);
 
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("Extra");
     }
 
-    private static void SetupLogging(IHub hub)
+    private static Hierarchy SetupLogging(IHub hub)
     {
         var hierarchy = (Hierarchy) LogManager.GetRepository();
         var layout = new PatternLayout
@@ -96,5 +98,6 @@ public class IntegrationTests
 
         hierarchy.Root.Level = Level.All;
         hierarchy.Configured = true;
+        return hierarchy;
     }
 }
