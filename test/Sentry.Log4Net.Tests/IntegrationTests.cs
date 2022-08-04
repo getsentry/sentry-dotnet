@@ -5,11 +5,13 @@ public class IntegrationTests
     public Task Simple()
     {
         var transport = new RecordingTransport();
+        var diagnosticLogger = new InMemoryDiagnosticLogger();
         var options = new SentryOptions
         {
             TracesSampleRate = 1,
             Debug = true,
             Transport = transport,
+            DiagnosticLogger = diagnosticLogger,
             Dsn = ValidDsn
         };
 
@@ -23,7 +25,12 @@ public class IntegrationTests
 
         hierarchy.Flush(10000);
 
-        return Verify(transport.Envelopes)
+        return Verify(
+                new
+                {
+                    transport.Envelopes,
+                    diagnosticLogger=diagnosticLogger.Entries.Where(x => !x.Message.Contains("Initializing Hub for Dsn"))
+                })
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
     }
@@ -61,7 +68,12 @@ public class IntegrationTests
 
         hierarchy.Flush(10000);
 
-        return Verify(transport.Envelopes)
+        return Verify(
+                new
+                {
+                    transport.Envelopes,
+                    diagnosticLogger=diagnosticLogger.Entries.Where(x => !x.Message.Contains("Initializing Hub for Dsn"))
+                })
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
     }

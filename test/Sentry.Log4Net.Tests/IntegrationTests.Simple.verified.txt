@@ -1,33 +1,115 @@
-[
-  {
-    Header: {
-      event_id: Guid_1,
-      sdk: {
-        name: sentry.dotnet,
-        version: 3.20.1
-      }
-    },
-    Items: [
-      {
-        Header: {
-          type: event
-        },
-        Payload: {
-          Source: {
-            Message: {
-              Message: The message
-            },
-            Logger: IntegrationTests,
-            Platform: csharp,
-            SentryExceptions: [],
-            SentryThreads: [],
-            Level: error,
-            Request: {},
-            User: {},
-            Environment: production
+{
+  Envelopes: [
+    {
+      Header: {
+        event_id: Guid_1,
+        sdk: {
+          name: sentry.dotnet,
+          version: 3.20.1
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: event
+          },
+          Payload: {
+            Source: {
+              Message: {
+                Message: The message
+              },
+              Logger: IntegrationTests,
+              Platform: csharp,
+              SentryExceptions: [],
+              SentryThreads: [],
+              Level: error,
+              Request: {},
+              User: {},
+              Environment: production
+            }
           }
         }
-      }
-    ]
-  }
-]
+      ]
+    }
+  ],
+  diagnosticLogger: [
+    {
+      Message: Starting BackgroundWorker.
+    },
+    {
+      Message: BackgroundWorker Started.
+    },
+    {
+      Message: New scope pushed.
+    },
+    {
+      Message: Registering integration: '{0}'.,
+      Args: [
+        AutoSessionTrackingIntegration
+      ]
+    },
+    {
+      Message: Registering integration: '{0}'.,
+      Args: [
+        AppDomainUnhandledExceptionIntegration
+      ]
+    },
+    {
+      Message: Registering integration: '{0}'.,
+      Args: [
+        AppDomainProcessExitIntegration
+      ]
+    },
+    {
+      Message: Registering integration: '{0}'.,
+      Args: [
+        TaskUnobservedTaskExceptionIntegration
+      ]
+    },
+    {
+      Message: Registering integration: '{0}'.,
+      Args: [
+        NetFxInstallationsIntegration
+      ]
+    },
+    {
+      Level: info,
+      Message: Capturing event.
+    },
+    {
+      Message: Running main event processor on: Event {0},
+      Args: [
+        {}
+      ]
+    },
+    {
+      Message: No Exception and AttachStacktrace is off. No stack trace will be collected.
+    },
+    {
+      Message: Enqueuing envelope {0},
+      Args: [
+        {}
+      ]
+    },
+    {
+      Level: info,
+      Message: Envelope queued up: '{0}',
+      Args: [
+        {}
+      ]
+    },
+    {
+      Message: Envelope {0} handed off to transport. #{1} in queue.,
+      Args: [
+        {},
+        1
+      ]
+    },
+    {
+      Message: De-queueing event {0},
+      Args: [
+        {}
+      ]
+    }
+  ]
+}
