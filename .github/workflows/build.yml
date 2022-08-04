@@ -28,15 +28,15 @@ jobs:
           uses: ./.github/actions/environment
 
         - name: Build
-          run: dotnet build -c Release /p:CopyLocalLockFileAssemblies=true
+          run: dotnet build -c Release --nologo /p:CopyLocalLockFileAssemblies=true
 
         - name: Test
-          run: dotnet test -c Release --no-build -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+          run: dotnet test -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
         - name: Pack
           # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
           if: startsWith(matrix.os, 'macos')
-          run: dotnet pack -c Release --no-build
+          run: dotnet pack -c Release --no-build --nologo
 
         - name: Upload Verify Results
           if: failure()
