@@ -22,6 +22,8 @@
             SentryExceptions: [],
             SentryThreads: [],
             Level: error,
+            Request: {},
+            User: {},
             Environment: production
           }
         }

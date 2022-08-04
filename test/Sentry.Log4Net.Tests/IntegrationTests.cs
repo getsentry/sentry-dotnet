@@ -25,8 +25,7 @@ public class IntegrationTests
 
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain", "Extra")
-            .ScrubLinesContaining(" {},");
+            .IgnoreMembers("ThreadName", "Domain", "Extra");
     }
 
     [Fact]
@@ -64,8 +63,7 @@ public class IntegrationTests
 
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain", "Extra")
-            .ScrubLinesContaining(" {},");
+            .IgnoreMembers("ThreadName", "Domain", "Extra");
     }
 
     private static Hierarchy SetupLogging(IHub hub)
