@@ -24,22 +24,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Sentry"/>
-    <Using Include="Sentry.Extensibility"/>
-    <Using Include="Sentry.Infrastructure"/>
-    <Using Include="Sentry.Internal"/>
-    <Using Include="Sentry.Reflection"/>
-    <Using Include="Sentry.Protocol"/>
-    <Using Include="Sentry.Protocol.Envelopes"/>
-    <Using Include="Sentry.Integrations"/>
-    <Using Include="Sentry.Internal.Extensions"/>
-    <Using Include="System.Text"/>
-    <Using Include="Xunit"/>
-    <Using Include="Xunit.Abstractions"/>
-    <Using Include="FluentAssertions"/>
-    <Using Include="NSubstitute"/>
-    <Using Include="NSubstitute.Core"/>
-    <Using Include="NSubstitute.ReturnsExtensions"/>
+    <Using Include="Sentry" />
+    <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Infrastructure" />
+    <Using Include="Sentry.Internal" />
+    <Using Include="Sentry.Reflection" />
+    <Using Include="Sentry.Protocol" />
+    <Using Include="Sentry.Protocol.Envelopes" />
+    <Using Include="Sentry.Integrations" />
+    <Using Include="Sentry.Internal.Extensions" />
+    <Using Include="System.Text" />
+    <Using Include="Xunit" />
+    <Using Include="Xunit.Abstractions" />
+    <Using Include="FluentAssertions" />
+    <Using Include="NSubstitute" />
+    <Using Include="NSubstitute.Core" />
+    <Using Include="NSubstitute.ReturnsExtensions" />
     <Using Include="Sentry.DsnSamples" Static="True" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <PackageReference Include="NSubstitute" Version="4.4.0" />
