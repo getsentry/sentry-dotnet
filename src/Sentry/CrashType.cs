@@ -19,11 +19,6 @@ namespace Sentry
         /// </summary>
         ManagedBackgroundThread,
 
-        /// <summary>
-        /// A managed <see cref="ApplicationException"/> will be thrown from .NET on an unobserved <see cref="Task"/>.
-        /// </summary>
-        ManagedUnobservedTask,
-
 #if ANDROID
         /// <summary>
         /// A <see cref="global::Java.Lang.RuntimeException"/> will be thrown from Java.

@@ -486,10 +486,6 @@ namespace Sentry
                     thread.Start();
                     break;
 
-                case CrashType.ManagedUnobservedTask:
-                    Task.Run(() => throw new ApplicationException(msg));
-                    break;
-
 #if ANDROID
                 case CrashType.Java:
                     Sentry.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
