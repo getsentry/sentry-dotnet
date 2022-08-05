@@ -461,5 +461,60 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void ResumeSession()
             => _hub.ResumeSession();
+
+        /// <summary>
+        /// Deliberately crashes an application, which is useful for testing and demonstration purposes.
+        /// </summary>
+        /// <remarks>
+        /// The method is marked obsolete only to discourage accidental misuse.
+        /// We do not intend to remove it.
+        /// </remarks>
+        [Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a real application.")]
+        public static void CauseCrash(CrashType crashType)
+        {
+            var msg =
+                "This exception was caused deliberately by " +
+                $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType}).";
+
+            switch (crashType)
+            {
+                case CrashType.Managed:
+                    throw new ApplicationException(msg);
+
+                case CrashType.ManagedBackgroundThread:
+                    var thread = new Thread(() => throw new ApplicationException(msg));
+                    thread.Start();
+                    break;
+
+                case CrashType.ManagedUnobservedTask:
+                    Task.Run(() => throw new ApplicationException(msg));
+                    break;
+
+#if ANDROID
+                case CrashType.Java:
+                    Sentry.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
+                    break;
+
+                case CrashType.JavaBackgroundThread:
+                    Sentry.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
+                    break;
+
+                case CrashType.Native:
+                    NativeCrash();
+                    break;
+#elif IOS || MACCATALYST
+                case CrashType.Native:
+                    SentryCocoa.SentrySDK.Crash();
+                    break;
+#endif
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(crashType), crashType, null);
+            }
+        }
+
+#if ANDROID
+    [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
+    private static extern void NativeCrash();
+#endif
     }
 }

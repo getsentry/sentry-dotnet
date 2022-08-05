@@ -69,6 +69,12 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Contexts FromJson(System.Text.Json.JsonElement json) { }
     }
+    public enum CrashType
+    {
+        Managed = 0,
+        ManagedBackgroundThread = 1,
+        ManagedUnobservedTask = 2,
+    }
     public sealed class DebugImage : Sentry.IJsonSerializable
     {
         public DebugImage() { }
@@ -549,6 +555,9 @@ namespace Sentry
         public static void CaptureTransaction(Sentry.Transaction transaction) { }
         public static void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public static void CaptureUserFeedback(Sentry.SentryId eventId, string email, string comments, string? name = null) { }
+        [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
+            "l application.")]
+        public static void CauseCrash(Sentry.CrashType crashType) { }
         public static void Close() { }
         public static void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
