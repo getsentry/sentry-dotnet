@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 namespace Sentry
 {
@@ -7,6 +6,7 @@ namespace Sentry
     /// A type of application crash.
     /// Used exclusively by <see cref="SentrySdk.CauseCrash"/>.
     /// </summary>
+    [Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a real application.")]
     public enum CrashType
     {
         /// <summary>
