@@ -69,6 +69,8 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Contexts FromJson(System.Text.Json.JsonElement json) { }
     }
+    [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
+        "l application.")]
     public enum CrashType
     {
         Managed = 0,
