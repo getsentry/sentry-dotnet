@@ -13,10 +13,14 @@
   <ItemGroup>
     <None Remove="$(MSBuildThisFileDirectory)Transforms\*.xml" />
     <TransformFile Include="$(MSBuildThisFileDirectory)Transforms\*.xml" />
-    <!-- TODO: How to add JavaDocPaths for each package? -->
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
+    <AndroidLibrary Include="$(MSBuildThisFileDirectory)Java\bin\sentry-android-supplemental.jar" />
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\arm64-v8a\libsentrysupplemental.so" Abi="arm64-v8a" />
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\armeabi-v7a\libsentrysupplemental.so" Abi="armeabi-v7a" />
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\x86\libsentrysupplemental.so" Abi="x86" />
+    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\x86_64\libsentrysupplemental.so" Abi="x86_64" />
   </ItemGroup>
 
   <ItemGroup>

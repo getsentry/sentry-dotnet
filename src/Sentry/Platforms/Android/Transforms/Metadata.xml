@@ -19,6 +19,7 @@
   <attr path="/api/package[@name='io.sentry.android.core.internal.gestures']" name="managedName">Sentry.Android.Internal.Gestures</attr>
   <attr path="/api/package[@name='io.sentry.android.core.internal.util']" name="managedName">Sentry.Android.Internal.Util</attr>
   <attr path="/api/package[@name='io.sentry.android.ndk']" name="managedName">Sentry.Android.Ndk</attr>
+  <attr path="/api/package[@name='io.sentry.android.supplemental']" name="managedName">Sentry.Android.Supplemental</attr>
   <attr path="/api/package[@name='io.sentry.cache']" name="managedName">Sentry.Java.Cache</attr>
   <attr path="/api/package[@name='io.sentry.clientreport']" name="managedName">Sentry.Java.ClientReport</attr>
   <attr path="/api/package[@name='io.sentry.config']" name="managedName">Sentry.Java.Configuration</attr>

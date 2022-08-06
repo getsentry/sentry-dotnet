@@ -6,11 +6,6 @@ namespace Sentry;
 
 public static partial class SentrySdk
 {
-    /// <summary>
-    /// Causes a native crash.  Use for testing purposes only.
-    /// </summary>
-    public static void CauseNativeCrash() => SentryCocoa.SentrySDK.Crash();
-
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
         // Set options for the managed SDK that don't depend on the Cocoa SDK
