@@ -72,8 +72,8 @@ public class VersioningTests
 
         await Verify(new {result, payloads})
             .IgnoreStandardSentryMembers()
-            .ScrubLinesContaining("Message: Executed action ")
-            .IgnoreMembers("ConnectionId", "RequestId");
+            .IgnoreMembers("ConnectionId", "RequestId")
+            .ScrubLinesWithReplace(_=>_.Split(new []{" (Sentry.AspNetCore.Tests) "},StringSplitOptions.None)[0]);
     }
 
     [ApiController]
