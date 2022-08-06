@@ -149,6 +149,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Maui.Tests", "test\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Ios", "samples\Sentry.Samples.Ios\Sentry.Samples.Ios.csproj", "{C2876321-A612-4E66-AF33-D3928FA6366F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Testing.CrashableApp", "test\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj", "{DA3CECBB-83BE-441A-852C-077809C48307}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -349,6 +351,10 @@ Global
 		{C2876321-A612-4E66-AF33-D3928FA6366F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2876321-A612-4E66-AF33-D3928FA6366F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C2876321-A612-4E66-AF33-D3928FA6366F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{DA3CECBB-83BE-441A-852C-077809C48307}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA3CECBB-83BE-441A-852C-077809C48307}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA3CECBB-83BE-441A-852C-077809C48307}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA3CECBB-83BE-441A-852C-077809C48307}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -404,6 +410,7 @@ Global
 		{FFFC74C5-680B-43E3-9C42-A7A23B589CB6} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{143076C0-8D6B-4054-9F45-06B21655F417} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{C2876321-A612-4E66-AF33-D3928FA6366F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{DA3CECBB-83BE-441A-852C-077809C48307} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
