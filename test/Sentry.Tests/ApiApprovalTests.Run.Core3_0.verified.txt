@@ -73,7 +73,6 @@ namespace Sentry
     {
         Managed = 0,
         ManagedBackgroundThread = 1,
-        ManagedUnobservedTask = 2,
     }
     public sealed class DebugImage : Sentry.IJsonSerializable
     {
