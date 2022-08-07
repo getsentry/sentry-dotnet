@@ -189,14 +189,14 @@ public class SentryTargetTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
 
-        Assert.Equal(b.Message, $"{expectedException.GetType()}: {expectedException.Message}");
-        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
-        Assert.Equal(b.Category, logger.Name);
-        Assert.Equal(b.Level, expectedLevel);
+        Assert.Equal($"{expectedException.GetType()}: {expectedException.Message}", b.Message);
+        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
+        Assert.Equal(logger.Name, b.Category);
+        Assert.Equal(expectedLevel, b.Level);
         Assert.Null(b.Type);
         Assert.NotNull(b.Data);
-        Assert.Equal(expectedException.GetType().ToString(), b.Data["exception_type"]);
-        Assert.Equal(expectedException.Message, b.Data["exception_message"]);
+        Assert.Equal(b.Data["exception_type"], expectedException.GetType().ToString());
+        Assert.Equal(b.Data["exception_message"], expectedException.Message);
     }
 
     [Fact]

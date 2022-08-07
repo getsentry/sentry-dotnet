@@ -24,10 +24,10 @@
                        OutputFile="$(SentryAttributesFilePath)">
       <Output Condition="$(Language) != 'F#'"
               TaskParameter="OutputFile"
-              ItemName="Compile"/>
+              ItemName="Compile" />
       <Output Condition="$(Language) == 'F#'"
               TaskParameter="OutputFile"
-              ItemName="CompileBefore"/>
+              ItemName="CompileBefore" />
       <Output TaskParameter="OutputFile"
               ItemName="FileWrites" />
     </WriteCodeFragment>

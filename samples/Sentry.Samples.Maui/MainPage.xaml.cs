@@ -1,3 +1,5 @@
+#pragma warning disable CS0618
+
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.Maui;
@@ -11,8 +13,12 @@ public partial class MainPage
     // NOTE: You can only inject an ILogger<T>, not a plain ILogger
     public MainPage(ILogger<MainPage> logger)
     {
-#if !IOS // TODO: enable for Mac Catalyst and Android
-        CrashBtn.IsVisible = false;
+#if !ANDROID
+        JavaCrashBtn.IsVisible = false;
+#endif
+
+#if !(ANDROID || IOS) // TODO: Enable for MACCATALYST
+        NativeCrashBtn.IsVisible = false;
 #endif
         _logger = logger;
         InitializeComponent();
@@ -34,14 +40,14 @@ public partial class MainPage
 
     private void OnUnhandledExceptionClicked(object sender, EventArgs e)
     {
-        throw new Exception("This is an unhanded test exception, thrown from managed code in a MAUI app!");
+        SentrySdk.CauseCrash(CrashType.Managed);
     }
 
     private void OnCapturedExceptionClicked(object sender, EventArgs e)
     {
         try
         {
-            throw new Exception("This is a captured test exception, thrown from managed code in a MAUI app!");
+            SentrySdk.CauseCrash(CrashType.Managed);
         }
         catch (Exception ex)
         {
@@ -49,10 +55,17 @@ public partial class MainPage
         }
     }
 
+    private void OnJavaCrashClicked(object sender, EventArgs e)
+    {
+#if ANDROID
+        SentrySdk.CauseCrash(CrashType.Java);
+#endif
+    }
+
     private void OnNativeCrashClicked(object sender, EventArgs e)
     {
-#if IOS // TODO: enable for Mac Catalyst and Android
-        SentrySdk.CauseNativeCrash();
+#if ANDROID || IOS // TODO: Enable for MACCATALYST
+        SentrySdk.CauseCrash(CrashType.Native);
 #endif
     }
 }

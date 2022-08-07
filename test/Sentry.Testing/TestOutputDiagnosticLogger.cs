@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Reflection;
+using Xunit.Sdk;
 
 namespace Sentry.Testing;
 
@@ -8,6 +10,10 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
     private readonly SentryLevel _minimumLevel;
     private readonly ConcurrentQueue<LogEntry> _entries = new();
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+    private readonly string _testName;
+
+    private static readonly FieldInfo TestFieldInfo = typeof(TestOutputHelper)
+        .GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
 
     public IEnumerable<LogEntry> Entries => _entries;
 
@@ -28,6 +34,9 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
     {
         _testOutputHelper = testOutputHelper;
         _minimumLevel = minimumLevel;
+
+        var test = TestFieldInfo.GetValue(_testOutputHelper) as ITest;
+        _testName = test?.DisplayName;
     }
 
     public bool IsEnabled(SentryLevel level) => level >= _minimumLevel;
@@ -45,20 +54,24 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         };
         _entries.Enqueue(entry);
 
-        if (exception == null)
+        string msg = $@"[{logLevel} {_stopwatch.Elapsed:hh\:mm\:ss\.ff}]: {formattedMessage}".Trim();
+
+        if (exception != null)
         {
-            _testOutputHelper.WriteLine($@"
-[{logLevel} {_stopwatch.Elapsed:hh\:mm\:ss\.ff}]: {formattedMessage}
-".Trim());
-        }
-        else
-        {
-            _testOutputHelper.WriteLine($@"
-[{logLevel} {_stopwatch.Elapsed:hh\:mm\:ss\.ff}]: {formattedMessage}
-    Exception: {exception}
-".Trim());
+            msg += $"{Environment.NewLine}    Exception: {exception}";
         }
 
-
+        try
+        {
+            _testOutputHelper.WriteLine(msg);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Handle "System.InvalidOperationException: There is no currently active test."
+            Console.Error.WriteLine(
+                $"Error: {ex.Message}{Environment.NewLine}" +
+                $"    Test: {_testName}{Environment.NewLine}" +
+                $"    Message: {msg}");
+        }
     }
 }

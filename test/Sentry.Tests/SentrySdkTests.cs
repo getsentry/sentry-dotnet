@@ -322,6 +322,9 @@ public class SentrySdkTests : IDisposable
 
             using var _ = SentrySdk.Init(o =>
             {
+                // Disable process exit flush to resolve "There is no currently active test." errors.
+                o.DisableAppDomainProcessExitFlush();
+
                 o.Dsn = ValidDsn;
                 o.Debug = true;
                 o.DiagnosticLogger = _logger;

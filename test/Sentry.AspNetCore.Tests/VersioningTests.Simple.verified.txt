@@ -45,6 +45,7 @@
             Category: Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor
           },
           {
+            Message: Executed action Sentry.AspNetCore.Tests.VersioningTests+TargetController.Method,
             Data: {
               eventId: ActionExecuted
             },
