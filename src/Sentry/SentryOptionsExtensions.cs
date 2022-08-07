@@ -74,7 +74,8 @@ namespace Sentry
 #endif
 
         /// <summary>
-        /// Disables the capture of errors through <see cref="AppDomain.ProcessExit"/>
+        /// By default, any queued events (i.e: captures errors) are flushed on <see cref="AppDomain.ProcessExit"/>.
+        /// This method disables that behaviour.
         /// </summary>
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableAppDomainProcessExitFlush(this SentryOptions options) =>
@@ -86,16 +87,23 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="integration">The integration.</param>
         public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
-            => options.Integrations = options.Integrations != null
-                ? options.Integrations.Concat(new[] { integration }).ToArray()
-                : new[] { integration };
+        {
+            if (options.Integrations == null)
+            {
+                options.Integrations = new[] {integration};
+            }
+            else
+            {
+                options.Integrations = options.Integrations.Concat(new[] {integration}).ToArray();
+            }
+        }
 
         /// <summary>
         /// Removes all integrations of type <typeparamref name="TIntegration"/>.
         /// </summary>
         /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
         /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
-        internal static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
+        public static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
             => options.Integrations = options.Integrations?.Where(p => p.GetType() != typeof(TIntegration)).ToArray();
 
         /// <summary>
@@ -117,16 +125,36 @@ namespace Sentry
             => options.AddExceptionFilter(new ExceptionTypeFilter<TException>());
 
         /// <summary>
-        /// Add prefix to exclude from 'InApp' stack trace list.
+        /// Add prefix to exclude from 'InApp' stacktrace list.
         /// </summary>
+        /// <param name="options">The SentryOptions which holds the stacktrace list.</param>
+        /// <param name="prefix">The string used to filter the stacktrace to be excluded from InApp.</param>
+        /// <remarks>
+        /// Sentry by default filters the stacktrace to display only application code.
+        /// A user can optionally click to see all which will include framework and libraries.
+        /// A <see cref="string.StartsWith(string)"/> is executed
+        /// </remarks>
+        /// <example>
+        /// 'System.', 'Microsoft.'
+        /// </example>
         public static void AddInAppExclude(this SentryOptions options, string prefix)
             => options.InAppExclude = options.InAppExclude != null
                 ? options.InAppExclude.Concat(new[] { prefix }).ToArray()
                 : new[] { prefix };
 
         /// <summary>
-        /// Add prefix to include as in 'InApp' stack trace.
+        /// Add prefix to include as in 'InApp' stacktrace.
         /// </summary>
+        /// <param name="options">The SentryOptions which holds the stacktrace list.</param>
+        /// <param name="prefix">The string used to filter the stacktrace to be included in InApp.</param>
+        /// <remarks>
+        /// Sentry by default filters the stacktrace to display only application code.
+        /// A user can optionally click to see all which will include framework and libraries.
+        /// A <see cref="string.StartsWith(string)"/> is executed
+        /// </remarks>
+        /// <example>
+        /// 'System.CustomNamespace', 'Microsoft.Azure.App'
+        /// </example>
         public static void AddInAppInclude(this SentryOptions options, string prefix)
             => options.InAppInclude = options.InAppInclude != null
                 ? options.InAppInclude.Concat(new[] { prefix }).ToArray()

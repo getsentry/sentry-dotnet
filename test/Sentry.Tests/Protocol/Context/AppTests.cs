@@ -1,10 +1,18 @@
-using Sentry.Tests.Helpers;
-
 // ReSharper disable once CheckNamespace
+
+using Sentry.Testing;
+
 namespace Sentry.Protocol.Tests.Context;
 
 public class AppTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public AppTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -18,9 +26,9 @@ public class AppTests
             StartTime = DateTimeOffset.MaxValue
         };
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = App.FromJson(Json.Parse(actualString));
+        var actual = Json.Parse(actualString, App.FromJson);
         actual.Should().BeEquivalentTo(sut);
     }
 
@@ -53,7 +61,7 @@ public class AppTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((App app, string serialized) @case)
     {
-        var actual = @case.app.ToJsonString();
+        var actual = @case.app.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

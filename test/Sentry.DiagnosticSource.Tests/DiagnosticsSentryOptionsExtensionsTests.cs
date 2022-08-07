@@ -4,13 +4,33 @@ namespace Sentry.DiagnosticSource.Internals;
 
 public class DiagnosticsSentryOptionsExtensionsTests
 {
-    public SentryOptions Sut { get; set; } = new();
+    [Fact]
+    public void DisableDiagnosticListenerIntegration_RemovesDiagnosticSourceIntegration()
+    {
+        var options = new SentryOptions();
+        options.DisableDiagnosticSourceIntegration();
+        Assert.DoesNotContain(options.Integrations!,
+            p => p is SentryDiagnosticListenerIntegration);
+    }
+
+#if NETCOREAPP3_0 || NETCOREAPP2_1 || NET461
+    [Fact]
+    public void AddDiagnosticSourceIntegration()
+    {
+        var options = new SentryOptions();
+        options.AddDiagnosticSourceIntegration();
+        Assert.Contains(options.Integrations!,
+            p => p is SentryDiagnosticListenerIntegration);
+    }
 
     [Fact]
-    public void DisableDiagnosticListnerIntegration_RemovesDiagnosticSourceIntegration()
+    public void AddDiagnosticSourceIntegration_NoDuplicates()
     {
-        Sut.DisableDiagnosticSourceIntegration();
-        Assert.DoesNotContain(Sut.Integrations!,
-            p => p.GetType() == typeof(SentryDiagnosticListenerIntegration));
+        var options = new SentryOptions();
+        options.AddDiagnosticSourceIntegration();
+        options.AddDiagnosticSourceIntegration();
+        Assert.Single(options.Integrations!,
+            p => p is SentryDiagnosticListenerIntegration);
     }
+#endif
 }

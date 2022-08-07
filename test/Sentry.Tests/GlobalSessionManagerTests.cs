@@ -2,28 +2,33 @@ using Sentry.Testing;
 
 namespace Sentry.Tests;
 
-public class GlobalSessionManagerTests
+public class GlobalSessionManagerTests : IDisposable
 {
     private class Fixture : IDisposable
     {
-        private readonly TempDirectory _cacheDirectory = new();
+        private readonly TempDirectory _cacheDirectory;
 
         public InMemoryDiagnosticLogger Logger { get; }
 
         public SentryOptions Options { get; }
 
-        public ISystemClock Clock { get; }
+        public ISystemClock Clock { get; } = Substitute.For<ISystemClock>();
 
         public Func<string, PersistedSessionUpdate> PersistedSessionProvider { get; set; }
 
         public Fixture(Action<SentryOptions> configureOptions = null)
         {
+            Clock.GetUtcNow().Returns(DateTimeOffset.Now);
             Logger = new InMemoryDiagnosticLogger();
+
+            var fileSystem = new FakeFileSystem();
+            _cacheDirectory = new TempDirectory(fileSystem);
 
             Options = new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithoutSecret,
+                Dsn = ValidDsn,
                 CacheDirectoryPath = _cacheDirectory.Path,
+                FileSystem = fileSystem,
                 Release = "test",
                 Debug = true,
                 DiagnosticLogger = Logger
@@ -291,13 +296,21 @@ public class GlobalSessionManagerTests
         // Arrange
         var sut = _fixture.GetSut();
 
+        var timeOffset = DateTimeOffset.Now;
+        _fixture.Clock.GetUtcNow().Returns(_ =>
+        {
+            timeOffset = timeOffset.AddSeconds(1);
+            return timeOffset;
+        });
+
         var sessionUpdate = sut.StartSession();
 
         // Act
-        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession()!;
 
         // Assert
         sessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate.EndStatus.Should().Be(SessionEndStatus.Abnormal);
         persistedSessionUpdate.Should().NotBeNull();
         persistedSessionUpdate.Should().BeEquivalentTo(sessionUpdate, o =>
         {
@@ -309,10 +322,10 @@ public class GlobalSessionManagerTests
 
             return o;
         });
-        persistedSessionUpdate!.IsInitial.Should().BeFalse();
-        persistedSessionUpdate!.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
-        persistedSessionUpdate!.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
-        persistedSessionUpdate!.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
+        persistedSessionUpdate.IsInitial.Should().BeFalse();
+        persistedSessionUpdate.Timestamp.Should().BeAfter(sessionUpdate!.Timestamp);
+        persistedSessionUpdate.Duration.Should().BeGreaterThan(sessionUpdate!.Duration);
+        persistedSessionUpdate.SequenceNumber.Should().Be(sessionUpdate!.SequenceNumber + 1);
     }
 
     [Fact]
@@ -466,6 +479,32 @@ public class GlobalSessionManagerTests
         persistedSessionUpdate.Should().BeNull();
     }
 
+    [Fact]
+    public SessionUpdate TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured()
+    {
+        // Arrange
+        var expectedCrashMessage = "Invoking CrashedLastRun failed.";
+        var expectedException = new Exception();
+
+        var sut = _fixture.GetSut();
+        _fixture.Options.CrashedLastRun = () => throw expectedException;
+        sut.StartSession();
+
+        // Act
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+        // Assert
+        persistedSessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate.EndStatus.Should().BeNull();
+        _fixture.Logger.Entries.Should().Contain(entry =>
+            entry.Level == SentryLevel.Error &&
+            entry.Message == expectedCrashMessage &&
+            entry.Exception == expectedException);
+        return persistedSessionUpdate;
+    }
+
+    public SessionUpdate TryRecoverPersistedSessionWithExceptionOnLastRun() => TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured();
+
     // A session update (of which the state doesn't matter for the test):
     private static SessionUpdate AnySessionUpdate()
         => new(
@@ -481,4 +520,9 @@ public class GlobalSessionManagerTests
             DateTimeOffset.Now,
             1,
             null);
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
+    }
 }

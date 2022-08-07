@@ -1,52 +1,24 @@
-using System.Data.Common;
-using System.Data.Entity.Validation;
-using Sentry.EntityFramework.ErrorProcessors;
-
 namespace Sentry.EntityFramework.Tests;
 
 public class ErrorProcessorTests
 {
-    private class Fixture
-    {
-        public DbConnection DbConnection { get; }
-        public TestDbContext DbContext { get; }
-
-        public ISentryClient SentryClient;
-
-        public Func<SentryEvent, SentryEvent> BeforeSend = null;
-
-        private SentryEvent _beforeSend(SentryEvent arg)
-        {
-            if (BeforeSend != null)
-            {
-                return BeforeSend(arg);
-            }
-            return arg;
-        }
-
-        public Fixture()
-        {
-            DbConnection = Effort.DbConnectionFactory.CreateTransient();
-            DbContext = new TestDbContext(DbConnection, true);
-            SentryClient = new SentryClient(new SentryOptions
-            {
-                BeforeSend = _beforeSend,
-                Dsn = DsnSamples.ValidDsnWithoutSecret,
-            }.AddEntityFramework());
-        }
-    }
-
-    private readonly Fixture _fixture = new();
-
     [Fact]
     public async Task EntityValidationExceptions_Extra_EntityValidationErrorsNotNullAsync()
     {
+        using var connection = Effort.DbConnectionFactory.CreateTransient();
+        using var context = new TestDbContext(connection, true);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+        };
+        options.AddEntityFramework();
+        using var client = new SentryClient(options);
         // We use an actual Entity Framework instance since manually generating any EF related data is highly inaccurate
-        _fixture.DbContext.TestTable.Add(new TestDbContext.TestData());
+        context.TestTable.Add(new TestDbContext.TestData());
         try
         {
             // This will throw a validation exception since TestData has a Required column which we didn't set
-            await _fixture.DbContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
         catch (DbEntityValidationException e)
         {
@@ -64,24 +36,32 @@ public class ErrorProcessorTests
     }
 
     /// <summary>
-    /// Integration test to ensure that the processor is also called and operated successfully inside an actual Sentry Client
+    /// Ensure that the processor is also called and operated successfully inside an actual Sentry Client
     /// This should help avoid regression in case the underlying API changes in an unusual way
     /// </summary>
     [Fact]
     public async Task Integration_DbEntityValidationExceptionProcessorAsync()
     {
+        using var connection = Effort.DbConnectionFactory.CreateTransient();
+        using var context = new TestDbContext(connection, true);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+        };
+        options.AddEntityFramework();
+        using var client = new SentryClient(options);
         // We use an actual Entity Framework instance since manually generating any EF related data is highly inaccurate
-        _fixture.DbContext.TestTable.Add(new TestDbContext.TestData());
+        context.TestTable.Add(new TestDbContext.TestData());
         try
         {
             // This will throw a validation exception since TestData has a Required column which we didn't set
-            await _fixture.DbContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
         catch (DbEntityValidationException e)
         {
             Exception assertError = null;
             // SaveChanges will throw an exception
-            _fixture.BeforeSend = evt =>
+            options.BeforeSend = evt =>
             {
                 // We use a try-catch here as we cannot assert directly since SentryClient itself would catch the thrown assertion errors
                 try
@@ -98,7 +78,7 @@ public class ErrorProcessorTests
 
                 return null;
             };
-            _fixture.SentryClient.CaptureException(e);
+            client.CaptureException(e);
             Assert.Null(assertError);
         }
     }

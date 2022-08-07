@@ -1,10 +1,9 @@
 using System.Collections.Immutable;
-using Sentry.Testing;
 
 namespace Sentry.Tests.Extensibility;
 
 [Collection(nameof(SentrySdkCollection))]
-public class HubAdapterTests : SentrySdkTestFixture
+public class HubAdapterTests : IDisposable
 {
     public IHub Hub { get; set; }
 
@@ -81,6 +80,7 @@ public class HubAdapterTests : SentrySdkTestFixture
         Hub.Received(1).ConfigureScope(Expected);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_MockInvoked()
     {
@@ -168,5 +168,10 @@ public class HubAdapterTests : SentrySdkTestFixture
         Assert.Equal(level, crumb.Level);
         Assert.Equal(data.Count, crumb.Data.Count);
         Assert.Equal(data.ToImmutableDictionary(), crumb.Data);
+    }
+
+    public void Dispose()
+    {
+        SentrySdk.Close();
     }
 }

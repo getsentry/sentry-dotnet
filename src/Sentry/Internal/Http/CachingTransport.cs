@@ -8,16 +8,18 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http
 {
-    internal class CachingTransport : IFlushableTransport, IAsyncDisposable, IDisposable
+    internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
     {
         private const string EnvelopeFileExt = "envelope";
 
         private readonly ITransport _innerTransport;
         private readonly SentryOptions _options;
+        private readonly bool _failStorage;
         private readonly string _isolatedCacheDirectoryPath;
         private readonly int _keepCount;
 
@@ -37,12 +39,31 @@ namespace Sentry.Internal.Http
         private readonly Lock _cacheDirectoryLock = new();
 
         private readonly CancellationTokenSource _workerCts = new();
-        private readonly Task _worker;
+        private Task _worker = null!;
 
-        public CachingTransport(ITransport innerTransport, SentryOptions options)
+        private ManualResetEventSlim? _initCacheResetEvent = new();
+        private ManualResetEventSlim? _preInitCacheResetEvent = new();
+
+        // Inner transport exposed internally primarily for testing
+        internal ITransport InnerTransport => _innerTransport;
+
+        private readonly IFileSystem _fileSystem;
+
+        public static CachingTransport Create(ITransport innerTransport, SentryOptions options,
+            bool startWorker = true,
+            bool failStorage = false)
+        {
+            var transport = new CachingTransport(innerTransport, options, failStorage);
+            transport.Initialize(startWorker);
+            return transport;
+        }
+
+        private CachingTransport(ITransport innerTransport, SentryOptions options, bool failStorage)
         {
             _innerTransport = innerTransport;
             _options = options;
+            _failStorage = failStorage; // For testing
+            _fileSystem = options.FileSystem;
 
             _keepCount = _options.MaxCacheItems >= 1
                 ? _options.MaxCacheItems - 1
@@ -53,33 +74,69 @@ namespace Sentry.Internal.Http
                 throw new InvalidOperationException("Cache directory or DSN is not set.");
 
             _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+        }
 
-            _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+        private void Initialize(bool startWorker)
+        {
+            // Restore any abandoned files from a previous session
+            MoveUnprocessedFilesBackToCache();
+
+            // Ensure directories exist
+            _fileSystem.CreateDirectory(_isolatedCacheDirectoryPath);
+            _fileSystem.CreateDirectory(_processingDirectoryPath);
+
+            // Start a worker, if one is needed
+            if (startWorker)
+            {
+                _options.LogDebug("Starting CachingTransport worker.");
+                _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+            }
+            else
+            {
+                _worker = Task.CompletedTask;
+            }
+
+            // Wait for init timeout, if configured.  (Can't do this without a worker.)
+            if (startWorker && _options.InitCacheFlushTimeout > TimeSpan.Zero)
+            {
+                _options.LogDebug("Blocking initialization to flush the cache.");
+
+                try
+                {
+                    // This will complete just before processing starts in the worker.
+                    // It ensures that we don't start the timeout period prematurely.
+                    _preInitCacheResetEvent!.Wait(_workerCts.Token);
+
+                    // This will complete either when the first round of processing is done,
+                    // or on timeout, whichever comes first.
+                    var completed = _initCacheResetEvent!.Wait(_options.InitCacheFlushTimeout, _workerCts.Token);
+                    if (completed)
+                    {
+                        _options.LogDebug("Completed flushing the cache. Resuming initialization.");
+                    }
+                    else
+                    {
+                        _options.LogDebug(
+                            $"InitCacheFlushTimeout of {_options.InitCacheFlushTimeout} reached. " +
+                            "Resuming initialization. Cache will continue flushing in the background.");
+                    }
+                }
+                finally
+                {
+                    // We're done with these.  Dispose them.
+                    _preInitCacheResetEvent!.Dispose();
+                    _initCacheResetEvent!.Dispose();
+
+                    //Set null to avoid object disposed exceptions on future processing calls.
+                    _preInitCacheResetEvent = null;
+                    _initCacheResetEvent = null;
+                }
+            }
         }
 
         private async Task CachedTransportBackgroundTaskAsync()
         {
-            try
-            {
-                // Processing directory may already contain some files left from previous session
-                // if the worker has been terminated unexpectedly.
-                // Move everything from that directory back to cache directory.
-                if (Directory.Exists(_processingDirectoryPath))
-                {
-                    foreach (var filePath in Directory.EnumerateFiles(_processingDirectoryPath))
-                    {
-                        var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                        _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.",
-                            filePath, destinationPath);
-
-                        File.Move(filePath, destinationPath);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _options.LogError("Failed to move unprocessed files back to cache.", e);
-            }
+            _options.LogDebug("CachingTransport worker has started.");
 
             while (!_workerCts.IsCancellationRequested)
             {
@@ -89,15 +146,14 @@ namespace Sentry.Internal.Http
                     _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
                     await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException) when
-                    (_workerCts.IsCancellationRequested)
+                catch (OperationCanceledException) when (_workerCts.IsCancellationRequested)
                 {
                     // Swallow if IsCancellationRequested as it'll get out of the loop
-                    // Other exceptions will be handled by generic catch
+                    break;
                 }
                 catch (Exception ex)
                 {
-                    _options.LogError("Exception in background worker of CachingTransport.", ex);
+                    _options.LogError("Exception in CachingTransport worker.", ex);
 
                     try
                     {
@@ -110,7 +166,64 @@ namespace Sentry.Internal.Http
                     }
                 }
             }
-            _options.LogDebug("Background worker of CachingTransport has shutdown.");
+            _options.LogDebug("CachingTransport worker stopped.");
+        }
+
+        private void MoveUnprocessedFilesBackToCache()
+        {
+            // Processing directory may already contain some files left from previous session
+            // if the cache was working when the process terminated unexpectedly.
+            // Move everything from that directory back to cache directory.
+
+            if (!_fileSystem.DirectoryExists(_processingDirectoryPath))
+            {
+                // nothing to do
+                return;
+            }
+
+            foreach (var filePath in _fileSystem.EnumerateFiles(_processingDirectoryPath))
+            {
+                var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.", filePath, destinationPath);
+
+                const int maxAttempts = 3;
+                for (var attempt = 1; attempt <= maxAttempts; attempt++)
+                {
+                    try
+                    {
+                        _fileSystem.MoveFile(filePath, destinationPath);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (!_fileSystem.FileExists(filePath))
+                        {
+                            _options.LogDebug(
+                                "Failed to move unprocessed file back to cache (attempt {0}), " +
+                                "but the file no longer exists so it must have been handled by another process: {1}",
+                                attempt, filePath);
+                            break;
+                        }
+
+                        if (attempt < maxAttempts)
+                        {
+                            _options.LogDebug(
+                                "Failed to move unprocessed file back to cache (attempt {0}, retrying.): {1}",
+                                attempt, filePath);
+
+                            Thread.Sleep(200); // give a small bit of time before retry
+                        }
+                        else
+                        {
+                            _options.LogError(
+                                "Failed to move unprocessed file back to cache (attempt {0}, done.): {1}", ex,
+                                attempt, filePath);
+                        }
+
+                        // note: we do *not* want to re-throw the exception
+                    }
+                }
+            }
         }
 
         private void EnsureFreeSpaceInCache()
@@ -128,7 +241,7 @@ namespace Sentry.Internal.Http
             {
                 try
                 {
-                    File.Delete(filePath);
+                    _fileSystem.DeleteFile(filePath);
                     _options.LogDebug("Deleted cached file {0}.", filePath);
                 }
                 catch (FileNotFoundException)
@@ -141,103 +254,111 @@ namespace Sentry.Internal.Http
             }
         }
 
-        private IEnumerable<string> GetCacheFilePaths()
+        private IEnumerable<string> GetCacheFilePaths() =>
+            _fileSystem.EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
+                .OrderBy(f => _fileSystem.GetFileCreationTime(f));
+
+        private async Task ProcessCacheAsync(CancellationToken cancellation)
         {
-            try
+            // Signal that we can start waiting for _options.InitCacheFlushTimeout
+            _preInitCacheResetEvent?.Set();
+
+            // Process the cache
+            while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
             {
-                return Directory
-                    .EnumerateFiles(_isolatedCacheDirectoryPath, $"*.{EnvelopeFileExt}")
-                    .OrderBy(f => new FileInfo(f).CreationTimeUtc);
+                await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
             }
-            catch (DirectoryNotFoundException)
-            {
-                _options.LogWarning("Cache directory is empty.");
-                return Array.Empty<string>();
-            }
+
+            // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
+            _initCacheResetEvent?.Set();
         }
 
-        private async Task ProcessCacheAsync(CancellationToken cancellationToken = default)
+        private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
         {
-            while (await TryPrepareNextCacheFileAsync(cancellationToken).ConfigureAwait(false) is { } envelopeFilePath)
+            if (_options.NetworkStatusListener is { Online: false } listener)
             {
-                _options.LogDebug(
-                    "Reading cached envelope: {0}",
-                    envelopeFilePath);
+                _options.LogDebug("The network is offline. Pausing processing.");
+                await listener.WaitForNetworkOnlineAsync(cancellation).ConfigureAwait(false);
+                _options.LogDebug("The network is back online. Resuming processing.");
+            }
+
+            _options.LogDebug("Reading cached envelope: {0}", file);
+
+            var stream = _fileSystem.OpenFileForReading(file);
+#if NET461 || NETSTANDARD2_0
+            using (stream)
+#else
+            await using (stream.ConfigureAwait(false))
+#endif
+            using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
+            {
+                // Don't even try to send it if we are requesting cancellation.
+                cancellation.ThrowIfCancellationRequested();
 
                 try
                 {
-                    await InnerProcessCacheAsync(envelopeFilePath, cancellationToken).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException ex) // OperationCancel should not log an error
-                {
-                    _options.LogDebug(
-                        "Canceled sending cached envelope: {0}, retrying after a delay.",
-                        ex,
-                        envelopeFilePath);
+                    _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
 
+                    await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
+                }
+                // OperationCancel should not log an error
+                catch (OperationCanceledException ex)
+                {
+                    _options.LogDebug("Canceled sending cached envelope: {0}, retrying after a delay.", ex, file);
                     // Let the worker catch, log, wait a bit and retry.
                     throw;
                 }
-                catch (Exception ex) when (IsNetworkRelated(ex))
+                catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException or IOException)
                 {
-                    _options.LogError(
-                        "Failed to send cached envelope: {0}, retrying after a delay.",
-                        ex,
-                        envelopeFilePath);
-
+                    _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
                     // Let the worker catch, log, wait a bit and retry.
                     throw;
+                }
+                catch (Exception ex) when (ex.Source == "FakeFailingTransport")
+                {
+                    // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
+                    return;
                 }
                 catch (Exception ex)
                 {
-                    _options.LogError(
-                        "Failed to send cached envelope: {0}, discarding cached envelope.",
-                        ex,
-                        envelopeFilePath);
+                    _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
+                    LogFailureWithDiscard(file, ex);
                 }
-
-                // Envelope & file stream must be disposed prior to reaching this point
-
-                // Delete the envelope file and move on to the next one
-                File.Delete(envelopeFilePath);
             }
+
+            // Envelope & file stream must be disposed prior to reaching this point
+
+            // Delete the envelope file and move on to the next one
+            _fileSystem.DeleteFile(file);
         }
 
-        private async Task InnerProcessCacheAsync(string envelopeFilePath, CancellationToken cancellationToken)
+        private void LogFailureWithDiscard(string file, Exception ex)
         {
-            var envelopeFile = File.OpenRead(envelopeFilePath);
-#if NET461 || NETSTANDARD2_0
-            using (envelopeFile)
-#else
-            await using (envelopeFile.ConfigureAwait(false))
-#endif
+            string? envelopeContents = null;
+            try
             {
-                using var envelope = await Envelope.DeserializeAsync(envelopeFile, cancellationToken)
-                    .ConfigureAwait(false);
+                if (_fileSystem.FileExists(file))
+                {
+                    envelopeContents = _fileSystem.ReadAllTextFromFile(file);
+                }
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch
+            {
+            }
 
-                _options.LogDebug(
-                    "Sending cached envelope: {0}",
-                    envelope.TryGetEventId());
-
-                await _innerTransport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
-
-                _options.LogDebug(
-                    "Successfully sent cached envelope: {0}",
-                    envelope.TryGetEventId());
+            if (envelopeContents == null)
+            {
+                _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope.", ex, file);
+            }
+            else
+            {
+                _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", ex, file, envelopeContents);
             }
         }
-
-        // Loading an Envelope only reads the headers. The payload is read lazily, so we do Disk -> Network I/O
-        // via stream directly instead of loading the whole file in memory. For that reason capturing an envelope
-        // from disk could raise an IOException related to Disk I/O.
-        // For that reason, we're not retrying IOException, to avoid any disk related exception from retrying.
-        private static bool IsNetworkRelated(Exception exception) =>
-            exception is HttpRequestException
-                or SocketException;
 
         // Gets the next cache file and moves it to "processing"
-        private async Task<string?> TryPrepareNextCacheFileAsync(
-            CancellationToken cancellationToken = default)
+        private async Task<string?> TryPrepareNextCacheFileAsync(CancellationToken cancellationToken = default)
         {
             using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
@@ -250,20 +371,10 @@ namespace Sentry.Internal.Http
 
             var targetFilePath = Path.Combine(_processingDirectoryPath, Path.GetFileName(filePath));
 
-            // Ensure that the processing directory exists
-            Directory.CreateDirectory(_processingDirectoryPath);
-
             // Move the file to processing.
-            // We move with overwrite just in case a file with the same name
-            // already exists in the output directory.
-            // That should never happen under normal workflows because the filenames
-            // have high variance.
-#if NETCOREAPP3_0_OR_GREATER
-            File.Move(filePath, targetFilePath, true);
-#else
-            File.Copy(filePath, targetFilePath, true);
-            File.Delete(filePath);
-#endif
+            // We move with overwrite just in case a file with the same name already exists in the output directory.
+            // That should never happen under normal workflows because the filenames have high variance.
+            _fileSystem.MoveFile(filePath, targetFilePath, overwrite: true);
 
             return targetFilePath;
         }
@@ -272,6 +383,11 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
+            if (_failStorage)
+            {
+                throw new("Simulated failure writing to storage (for testing).");
+            }
+
             // Envelope file name can be either:
             // 1604679692_2035_b2495755f67e4bb8a75504e5ce91d6c1_17754019.envelope
             // 1604679692_2035__17754019_2035660868.envelope
@@ -290,8 +406,7 @@ namespace Sentry.Internal.Http
 
             EnsureFreeSpaceInCache();
 
-            Directory.CreateDirectory(_isolatedCacheDirectoryPath);
-            var stream = File.Create(envelopeFilePath);
+            var stream = _fileSystem.CreateFileForWriting(envelopeFilePath);
 #if NET461 || NETSTANDARD2_0
             using(stream)
 #else
@@ -314,22 +429,50 @@ namespace Sentry.Internal.Http
             Envelope envelope,
             CancellationToken cancellationToken = default)
         {
-            // Store the envelope in a file without actually sending it anywhere.
-            // The envelope will get picked up by the background thread eventually.
-            await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
+            // Client reports should be generated here so they get included in the cached data
+            var clientReport = _options.ClientReportRecorder.GenerateClientReport();
+            if (clientReport != null)
+            {
+                envelope = envelope.WithItem(EnvelopeItem.FromClientReport(clientReport));
+                _options.LogDebug("Attached client report to envelope {0}.", envelope.TryGetEventId());
+            }
+
+            try
+            {
+                // Store the envelope in a file without actually sending it anywhere.
+                // The envelope will get picked up by the background thread eventually.
+                await StoreToCacheAsync(envelope, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // On any failure writing to the cache, recover the client report.
+                if (clientReport != null)
+                {
+                    _options.ClientReportRecorder.Load(clientReport);
+                }
+
+                throw;
+            }
         }
 
-        public async Task StopWorkerAsync()
+        public Task StopWorkerAsync()
         {
+            if (_worker.IsCompleted)
+            {
+                // already stopped
+                return Task.CompletedTask;
+            }
+
             // Stop worker and wait until it finishes
+            _options.LogDebug("Stopping CachingTransport worker.");
             _workerCts.Cancel();
-            await _worker.ConfigureAwait(false);
+            return _worker;
         }
 
-        public async Task FlushAsync(CancellationToken cancellationToken = default)
+        public Task FlushAsync(CancellationToken cancellationToken = default)
         {
             _options.LogDebug("External FlushAsync invocation: flushing cached envelopes.");
-            await ProcessCacheAsync(cancellationToken).ConfigureAwait(false);
+            return ProcessCacheAsync(cancellationToken);
         }
 
         public async ValueTask DisposeAsync()
@@ -350,6 +493,8 @@ namespace Sentry.Internal.Http
             _workerCts.Dispose();
             _worker.Dispose();
             _cacheDirectoryLock.Dispose();
+            _preInitCacheResetEvent?.Dispose();
+            _initCacheResetEvent?.Dispose();
 
             (_innerTransport as IDisposable)?.Dispose();
         }

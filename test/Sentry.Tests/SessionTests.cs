@@ -1,10 +1,17 @@
 using System.Globalization;
-using Sentry.Tests.Helpers;
+using Sentry.Testing;
 
 namespace Sentry.Tests;
 
 public class SessionTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SessionTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void Serialization_Session_Success()
     {
@@ -30,7 +37,7 @@ public class SessionTests
             SessionEndStatus.Crashed);
 
         // Act
-        var json = sessionUpdate.ToJsonString();
+        var json = sessionUpdate.ToJsonString(_testOutputLogger);
 
         // Assert
         json.Should().Be(

@@ -14,14 +14,17 @@ internal static class Program
             // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
             .WriteTo.Sentry(o =>
             {
-                o.MinimumBreadcrumbLevel = LogEventLevel.Debug; // Debug and higher are stored as breadcrumbs (default os Information)
-                o.MinimumEventLevel = LogEventLevel.Error; // Error and higher is sent as event (default is Error)
+                // Debug and higher are stored as breadcrumbs (default os Information)
+                o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
+                // Error and higher is sent as event (default is Error)
+                o.MinimumEventLevel = LogEventLevel.Error;
                 // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If nothing is found, SDK is disabled.
                 o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
                 o.AttachStacktrace = true;
-                o.SendDefaultPii = true; // send PII like the username of the user logged in to the device
+                // send PII like the username of the user logged in to the device
+                o.SendDefaultPii = true;
                 // Optional Serilog text formatter used to format LogEvent to string. If TextFormatter is set, FormatProvider is ignored.
-                o.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}", null);
+                o.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
                 // Other configuration
             })
             .CreateLogger();

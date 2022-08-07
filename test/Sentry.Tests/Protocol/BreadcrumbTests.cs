@@ -1,16 +1,23 @@
-using Sentry.Tests.Helpers;
+using Sentry.Testing;
 
 namespace Sentry.Tests.Protocol;
 
 public class BreadcrumbTests : ImmutableTests<Breadcrumb>
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public BreadcrumbTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_ParameterlessConstructor_IncludesTimestamp()
     {
         var sut = new Breadcrumb("test", "unit");
 
-        var actualJson = sut.ToJsonString();
-        var actual = Breadcrumb.FromJson(Json.Parse(actualJson));
+        var actualJson = sut.ToJsonString(_testOutputLogger);
+        var actual = Json.Parse(actualJson, Breadcrumb.FromJson);
 
         Assert.NotEqual(default, actual.Timestamp);
     }
@@ -26,7 +33,7 @@ public class BreadcrumbTests : ImmutableTests<Breadcrumb>
             "category1",
             BreadcrumbLevel.Warning);
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"timestamp\":\"9999-12-31T23:59:59.999Z\"," +
@@ -42,7 +49,7 @@ public class BreadcrumbTests : ImmutableTests<Breadcrumb>
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((Breadcrumb breadcrumb, string serialized) @case)
     {
-        var actual = @case.breadcrumb.ToJsonString();
+        var actual = @case.breadcrumb.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

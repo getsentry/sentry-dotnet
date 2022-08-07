@@ -10,7 +10,7 @@ public class ReleaseLocatorTests
     {
         const string expectedVersion = "the version";
         EnvironmentVariableGuard.WithVariable(
-            Sentry.Internal.Constants.ReleaseEnvironmentVariable,
+            Internal.Constants.ReleaseEnvironmentVariable,
             expectedVersion,
             () =>
             {
@@ -19,7 +19,7 @@ public class ReleaseLocatorTests
     }
 
 #if NET461
-        [SkippableFact]
+    [SkippableFact]
 #else
     [Fact]
 #endif
@@ -27,11 +27,11 @@ public class ReleaseLocatorTests
     {
         var ass = Assembly.GetEntryAssembly();
 #if NET461
-            Skip.If(ass == null, "GetEntryAssembly can return null on net461. eg on Mono or in certain test runners.");
+        Skip.If(ass == null, "GetEntryAssembly can return null on net461. eg on Mono or in certain test runners.");
 #endif
 
         EnvironmentVariableGuard.WithVariable(
-            Sentry.Internal.Constants.ReleaseEnvironmentVariable,
+            Internal.Constants.ReleaseEnvironmentVariable,
             null,
             () =>
             {

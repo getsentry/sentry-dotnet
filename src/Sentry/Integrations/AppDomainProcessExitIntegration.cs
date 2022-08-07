@@ -4,7 +4,7 @@ using Sentry.Internal;
 
 namespace Sentry.Integrations
 {
-    internal class AppDomainProcessExitIntegration : IInternalSdkIntegration
+    internal class AppDomainProcessExitIntegration : ISdkIntegration
     {
         private readonly IAppDomain _appDomain;
         private IHub? _hub;
@@ -18,13 +18,6 @@ namespace Sentry.Integrations
             _hub = hub;
             _options = options;
             _appDomain.ProcessExit += HandleProcessExit;
-        }
-
-        public void Unregister(IHub hub)
-        {
-            _appDomain.ProcessExit -= HandleProcessExit;
-            _hub = null;
-            _options = null;
         }
 
         internal void HandleProcessExit(object? sender, EventArgs e)

@@ -39,15 +39,14 @@ public class AppDomainUnhandledExceptionIntegrationTests
     }
 
     [Fact]
-    public void Handle_TerminatingTrue_DisposesHub()
+    public void Handle_TerminatingTrue_FlushesHub()
     {
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
         sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
 
-        var disposableHub = _fixture.Hub as IDisposable;
-        disposableHub.Received(1).Dispose();
+        _fixture.Hub.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }
 
     [Fact]
@@ -70,15 +69,14 @@ public class AppDomainUnhandledExceptionIntegrationTests
     }
 
     [Fact]
-    public void Handle_TerminatingTrue_NoException_DisposesHub()
+    public void Handle_TerminatingTrue_NoException_FlushesHub()
     {
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
         sut.Handle(this, new UnhandledExceptionEventArgs(null, true));
 
-        var disposableHub = _fixture.Hub as IDisposable;
-        disposableHub.Received(1).Dispose();
+        _fixture.Hub.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }
 
     [Fact]
@@ -100,15 +98,5 @@ public class AppDomainUnhandledExceptionIntegrationTests
         sut.Register(_fixture.Hub, SentryOptions);
 
         _fixture.AppDomain.Received().UnhandledException += sut.Handle;
-    }
-
-    [Fact]
-    public void Unregister_UnhandledException_Unsubscribes()
-    {
-        var sut = _fixture.GetSut();
-        sut.Register(_fixture.Hub, SentryOptions);
-        sut.Unregister(_fixture.Hub);
-
-        _fixture.AppDomain.Received(1).UnhandledException -= sut.Handle;
     }
 }

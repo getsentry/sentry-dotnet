@@ -80,11 +80,8 @@ internal class SentryMiddleware
 
             if (_options.FlushOnCompletedRequest)
             {
-                context.Response.OnCompleted(async () =>
-                {
-                    // Serverless environments flush the queue at the end of each request
-                    await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
-                });
+                // Serverless environments flush the queue at the end of each request
+                context.Response.OnCompleted(() => hub.FlushAsync(timeout: _options.FlushTimeout));
             }
 
             hub.ConfigureScope(scope =>
@@ -103,6 +100,12 @@ internal class SentryMiddleware
                 };
             });
 
+            // Pre-create the Sentry Event ID and save it on the scope it so it's available throughout the pipeline,
+            // even if there's no event actually being sent to Sentry.  This allows for things like a custom exception
+            // handler page to access the event ID, enabling user feedback, etc.
+            var eventId = SentryId.Create();
+            hub.ConfigureScope(scope => scope.LastEventId = eventId);
+
             try
             {
                 await _next(context).ConfigureAwait(false);
@@ -111,7 +114,7 @@ internal class SentryMiddleware
                 var exceptionFeature = context.Features.Get<IExceptionHandlerFeature?>();
                 if (exceptionFeature?.Error != null)
                 {
-                    CaptureException(exceptionFeature.Error, "IExceptionHandlerFeature");
+                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature");
                 }
                 if (_options.FlushBeforeRequestCompleted)
                 {
@@ -120,7 +123,7 @@ internal class SentryMiddleware
             }
             catch (Exception e)
             {
-                CaptureException(e, "SentryMiddleware.UnhandledException");
+                CaptureException(e, eventId, "SentryMiddleware.UnhandledException");
                 if (_options.FlushBeforeRequestCompleted)
                 {
                     await FlushBeforeCompleted().ConfigureAwait(false);
@@ -129,19 +132,16 @@ internal class SentryMiddleware
                 ExceptionDispatchInfo.Capture(e).Throw();
             }
 
-            async Task FlushBeforeCompleted()
-            {
-                // Some environments disables the application after sending a request,
-                // making the OnCompleted flush to not work.
-                await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
-            }
+            // Some environments disables the application after sending a request,
+            // making the OnCompleted flush to not work.
+             Task FlushBeforeCompleted() => hub.FlushAsync(timeout: _options.FlushTimeout);
 
-            void CaptureException(Exception e, string mechanism)
+            void CaptureException(Exception e, SentryId eventId, string mechanism)
             {
                 e.Data[Mechanism.HandledKey] = false;
                 e.Data[Mechanism.MechanismKey] = mechanism;
 
-                var evt = new SentryEvent(e);
+                var evt = new SentryEvent(e, eventId: eventId);
 
                 _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 

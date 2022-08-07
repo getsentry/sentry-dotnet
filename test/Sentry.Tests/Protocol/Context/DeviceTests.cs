@@ -1,16 +1,24 @@
-using Sentry.Tests.Helpers;
-
 // ReSharper disable once CheckNamespace
+
+using Sentry.Testing;
+
 namespace Sentry.Protocol.Tests.Context;
 
 public class DeviceTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public DeviceTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void Ctor_NoPropertyFilled_SerializesEmptyObject()
     {
         var sut = new Device();
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal("{\"type\":\"device\"}", actual);
     }
@@ -63,7 +71,7 @@ public class DeviceTests
             SupportsLocationService = true
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"type\":\"device\"," +
@@ -193,7 +201,7 @@ public class DeviceTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((Device device, string serialized) @case)
     {
-        var actual = @case.device.ToJsonString();
+        var actual = @case.device.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }
@@ -205,7 +213,7 @@ public class DeviceTests
         const string json = "{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}";
 
         // Act
-        var device = Device.FromJson(Json.Parse(json));
+        var device = Json.Parse(json, Device.FromJson);
 
         // Assert
         device.Timezone.Should().NotBeNull();

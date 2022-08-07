@@ -1,4 +1,7 @@
 using System.Net.Http;
+using Sentry.Internal.Http;
+using Sentry.Testing;
+
 #pragma warning disable CS0618
 
 namespace Sentry.Tests;
@@ -10,6 +13,12 @@ public class SentryClientTests
     {
         public SentryOptions SentryOptions { get; set; } = new();
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
+        public IClientReportRecorder ClientReportRecorder { get; set; } = Substitute.For<IClientReportRecorder>();
+
+        public Fixture()
+        {
+            SentryOptions.ClientReportRecorder = ClientReportRecorder;
+        }
 
         public SentryClient GetSut() => new(SentryOptions, BackgroundWorker);
     }
@@ -168,6 +177,57 @@ public class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_BeforeEvent_RejectEvent_RecordsDiscard()
+    {
+        _fixture.SentryOptions.BeforeSend = _ => null;
+
+        var transport = Substitute.For<ITransport>();
+        _fixture.SentryOptions.Transport = transport;
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+    }
+
+    [Fact]
+    public void CaptureEvent_EventProcessor_RejectEvent_RecordsDiscard()
+    {
+        var processor = Substitute.For<ISentryEventProcessor>();
+        processor.Process(Arg.Any<SentryEvent>()).ReturnsNull();
+
+        _fixture.SentryOptions.AddEventProcessor(processor);
+
+        var transport = Substitute.For<ITransport>();
+        _fixture.SentryOptions.Transport = transport;
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+    }
+
+    [Fact]
+    public void CaptureEvent_ExceptionFilter_RecordsDiscard()
+    {
+        var filter = Substitute.For<IExceptionFilter>();
+        filter.Filter(Arg.Any<Exception>()).Returns(true);
+
+        _fixture.SentryOptions.AddExceptionFilter(filter);
+
+        var transport = Substitute.For<ITransport>();
+        _fixture.SentryOptions.Transport = transport;
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureException(new Exception());
+
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeEvent_ModifyEvent()
     {
         SentryEvent received = null;
@@ -203,8 +263,8 @@ public class SentryClientTests
     [Fact]
     public void CaptureEvent_SamplingLowest_DropsEvent()
     {
-        // Three decimal places longer than what Random returns. Should always drop
-        _fixture.SentryOptions.SampleRate = 0.00000000000000000001f;
+        // Smallest value allowed. Should always drop
+        _fixture.SentryOptions.SampleRate = float.Epsilon;
         var @event = new SentryEvent();
 
         var sut = _fixture.GetSut();
@@ -213,10 +273,27 @@ public class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_SampleDrop_RecordsDiscard()
+    {
+        _fixture.SentryOptions.SampleRate = float.Epsilon;
+
+        var transport = Substitute.For<ITransport>();
+        _fixture.SentryOptions.Transport = transport;
+
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event);
+
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
+    }
+
+    [Fact]
     public void CaptureEvent_SamplingHighest_SendsEvent()
     {
-        // Three decimal places longer than what Random returns. Should always send
-        _fixture.SentryOptions.SampleRate = 0.99999999999999999999f;
+        // Largest value allowed. Should always send
+        _fixture.SentryOptions.SampleRate = 1;
         SentryEvent received = null;
         _fixture.SentryOptions.BeforeSend = e => received = e;
 
@@ -254,7 +331,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             SampleRate = 0.5f,
             MaxQueueItems = int.MaxValue
         });
@@ -287,7 +364,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             SampleRate = 0.25f,
             MaxQueueItems = int.MaxValue
         });
@@ -320,7 +397,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             SampleRate = 0.75f,
             MaxQueueItems = int.MaxValue
         });
@@ -427,7 +504,7 @@ public class SentryClientTests
         // Arrange
         var client = new SentryClient(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
         });
 
         // Act
@@ -625,7 +702,7 @@ public class SentryClientTests
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.ConfigureClient = _ => invoked = true;
 
         using (_fixture.GetSut())
@@ -639,7 +716,7 @@ public class SentryClientTests
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.CreateHttpClientHandler = () =>
         {
             invoked = true;
@@ -655,9 +732,71 @@ public class SentryClientTests
     [Fact]
     public void Ctor_NullBackgroundWorker_ConcreteBackgroundWorker()
     {
-        _fixture.SentryOptions.Dsn = DsnSamples.ValidDsnWithSecret;
+        _fixture.SentryOptions.Dsn = ValidDsn;
 
         using var sut = new SentryClient(_fixture.SentryOptions);
         _ = Assert.IsType<BackgroundWorker>(sut.Worker);
+    }
+
+    [Fact]
+    public void Ctor_SetsTransportOnOptions()
+    {
+        _fixture.SentryOptions.Dsn = ValidDsn;
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+
+        _ = Assert.IsType<HttpTransport>(_fixture.SentryOptions.Transport);
+    }
+
+    [Fact]
+    public void Ctor_KeepsCustomTransportOnOptions()
+    {
+        _fixture.SentryOptions.Dsn = ValidDsn;
+        _fixture.SentryOptions.Transport = new FakeTransport();
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+
+        _ = Assert.IsType<FakeTransport>(_fixture.SentryOptions.Transport);
+    }
+
+    [Fact]
+    public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
+    {
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
+        _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
+        _fixture.SentryOptions.FileSystem = fileSystem;
+        _fixture.SentryOptions.Dsn = ValidDsn;
+        _fixture.SentryOptions.Transport = new FakeTransport();
+
+        using var sut = new SentryClient(_fixture.SentryOptions);
+
+        var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
+        _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
+    }
+
+    [Fact]
+    public async Task SentryClient_WithCachingTransport_RecordsDiscardedEvents()
+    {
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
+        _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
+        _fixture.SentryOptions.FileSystem = fileSystem;
+        _fixture.SentryOptions.Dsn = ValidDsn;
+
+        var innerTransport = Substitute.For<ITransport>();
+        var cachingTransport = CachingTransport.Create(innerTransport, _fixture.SentryOptions);
+        _fixture.SentryOptions.Transport = cachingTransport;
+        await cachingTransport.StopWorkerAsync();
+
+        // This will drop the event and record a discard
+        _fixture.SentryOptions.BeforeSend = _ => null;
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+        await cachingTransport.FlushAsync();
+
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
     }
 }

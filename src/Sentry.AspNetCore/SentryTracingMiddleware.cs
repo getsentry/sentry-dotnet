@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -71,11 +72,12 @@ namespace Sentry.AspNetCore
                     ? new TransactionContext(transactionName ?? string.Empty, OperationName, traceHeader)
                     : new TransactionContext(transactionName ?? string.Empty, OperationName);
 
-                var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+                var customSamplingContext = new Dictionary<string, object?>(4, StringComparer.Ordinal)
                 {
                     [SamplingExtensions.KeyForHttpMethod] = context.Request.Method,
                     [SamplingExtensions.KeyForHttpRoute] = context.TryGetRouteTemplate(),
-                    [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value
+                    [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value,
+                    [SamplingExtensions.KeyForHttpContext] = context,
                 };
 
                 var transaction = hub.StartTransaction(transactionContext, customSamplingContext);
@@ -105,6 +107,11 @@ namespace Sentry.AspNetCore
             {
                 await _next(context).ConfigureAwait(false);
                 return;
+            }
+
+            if (_options.TransactionNameProvider is { } route)
+            {
+                context.Features.Set(route);
             }
 
             var transaction = TryStartTransaction(context);
@@ -193,6 +200,7 @@ namespace Microsoft.AspNetCore.Builder
     /// <summary>
     /// Extensions for enabling <see cref="SentryTracingMiddleware"/>.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class SentryTracingMiddlewareExtensions
     {
         /// <summary>

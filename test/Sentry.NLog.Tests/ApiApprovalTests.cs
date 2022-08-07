@@ -1,5 +1,3 @@
-using Sentry.Tests;
-
 namespace Sentry.NLog.Tests;
 
 [UsesVerify]

@@ -18,6 +18,8 @@ public class Startup
         // You can also register as many ISentryEventProcessor as you need.
         services.AddTransient<ISentryEventProcessor, ExampleEventProcessor>();
 
+        services.AddSentryTunneling();
+
         // To demonstrate taking a request-aware service into the event processor above
         services.AddHttpContextAccessor();
 
@@ -42,6 +44,8 @@ public class Startup
 
         app.UseRouting();
         app.UseSentryTracing();
+
+        app.UseSentryTunneling();
 
         app.UseEndpoints(endpoints =>
         {

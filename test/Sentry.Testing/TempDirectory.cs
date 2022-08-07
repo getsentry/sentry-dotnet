@@ -2,26 +2,25 @@ namespace Sentry.Testing;
 
 public class TempDirectory : IDisposable
 {
+    private readonly IFileSystem _fileSystem;
     public string Path { get; }
 
-    public TempDirectory(string path)
+    public TempDirectory(string path = default) : this(default, path)
     {
-        Path = path;
-        Directory.CreateDirectory(path);
     }
 
-    public TempDirectory()
-        : this(System.IO.Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString()))
-    { }
+    internal TempDirectory(IFileSystem fileSystem, string path = default)
+    {
+        _fileSystem = fileSystem ?? FileSystem.Instance;
+        Path = path ?? System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString());
+        _fileSystem.CreateDirectory(Path);
+    }
 
     public void Dispose()
     {
-        try
+        if (_fileSystem.DirectoryExists(Path))
         {
-            Directory.Delete(Path, true);
-        }
-        catch (DirectoryNotFoundException)
-        {
+            _fileSystem.DeleteDirectory(Path, true);
         }
     }
 }

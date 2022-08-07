@@ -2,24 +2,14 @@ namespace Sentry.EntityFramework.Tests;
 
 public class SentryQueryLoggerTests
 {
-    private class Fixture
-    {
-        public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public Scope Scope { get; } = new(new SentryOptions());
-        public SentryQueryLogger GetSut() => new(Hub);
-
-        public Fixture()
-        {
-            Hub.IsEnabled.Returns(true);
-            Hub.ConfigureScope(Arg.Invoke(Scope));
-        }
-    }
-
-    private readonly Fixture _fixture = new();
-
     [Fact]
     public void Log_QueryLogger_CaptureEvent()
     {
+        var scope = new Scope(new SentryOptions());
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true);
+        hub.ConfigureScope(Arg.Invoke(scope));
+
         var expected = new
         {
             Query = "Expected query string",
@@ -27,11 +17,11 @@ public class SentryQueryLoggerTests
             Category = "Entity Framework"
         };
 
-        var sut = _fixture.GetSut();
+        var logger = new SentryQueryLogger(hub);
 
-        sut.Log(expected.Query);
+        logger.Log(expected.Query);
 
-        var b = _fixture.Scope.Breadcrumbs.First();
+        var b = scope.Breadcrumbs.First();
         Assert.Equal(expected.Query, b.Message);
         Assert.Equal(expected.Category, b.Category);
         Assert.Equal(expected.Level, b.Level);

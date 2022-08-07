@@ -1,10 +1,18 @@
-using Sentry.Tests.Helpers;
-
 // ReSharper disable once CheckNamespace
+
+using Sentry.Testing;
+
 namespace Sentry.Protocol.Tests.Context;
 
 public class OperatingSystemTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public OperatingSystemTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -18,7 +26,7 @@ public class OperatingSystemTests
             Rooted = true
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"type\":\"os\"," +
@@ -58,7 +66,7 @@ public class OperatingSystemTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((OperatingSystem os, string serialized) @case)
     {
-        var actual = @case.os.ToJsonString();
+        var actual = @case.os.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

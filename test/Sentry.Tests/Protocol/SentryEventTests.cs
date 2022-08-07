@@ -1,11 +1,20 @@
+using Sentry.Testing;
 using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Protocol;
 
+[UsesVerify]
 public class SentryEventTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryEventTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
-    public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
+    public async Task SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
         var ex = new Exception("exception message");
         var timestamp = DateTimeOffset.MaxValue;
@@ -39,9 +48,18 @@ public class SentryEventTests
             SentryThreads = new[] { new SentryThread { Crashed = true } },
             ServerName = "server_name",
             TransactionName = "transaction",
+            DebugImages = new List<DebugImage>
+            {
+                new()
+                {
+                    Type = "wasm",
+                    DebugId = "900f7d1b868432939de4457478f34720"
+                }
+            },
         };
 
         sut.Sdk.AddPackage(new Package("name", "version"));
+        sut.Sdk.AddIntegration("integration");
         sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
         sut.AddBreadcrumb(new Breadcrumb(
             timestamp,
@@ -55,9 +73,16 @@ public class SentryEventTests
         sut.Fingerprint = new[] { "fingerprint" };
         sut.SetTag("tag_key", "tag_value");
 
-        var actualString = sut.ToJsonString();
+        var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = SentryEvent.FromJson(Json.Parse(actualString));
+        await VerifyJson(actualString);
+
+        actualString.Should().Contain(
+            "\"debug_meta\":{\"images\":[" +
+            "{\"type\":\"wasm\",\"debug_id\":\"900f7d1b868432939de4457478f34720\"}" +
+            "]}");
+
+        var actual = Json.Parse(actualString, SentryEvent.FromJson);
 
         // Assert
         actual.Should().BeEquivalentTo(sut, o =>

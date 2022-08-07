@@ -1,5 +1,4 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
-namespace Microsoft.AspNetCore.Builder
+﻿namespace Microsoft.AspNetCore.Builder
 {
     public static class SentryTracingMiddlewareExtensions { }
 }
@@ -23,6 +22,7 @@ namespace Sentry.AspNetCore
     }
     public static class SamplingExtensions
     {
+        public static Microsoft.AspNetCore.Http.HttpContext? TryGetHttpContext(this Sentry.TransactionSamplingContext samplingContext) { }
         public static string? TryGetHttpMethod(this Sentry.TransactionSamplingContext samplingContext) { }
         public static string? TryGetHttpPath(this Sentry.TransactionSamplingContext samplingContext) { }
         public static string? TryGetHttpRoute(this Sentry.TransactionSamplingContext samplingContext) { }
@@ -45,6 +45,7 @@ namespace Sentry.AspNetCore
         public System.TimeSpan FlushTimeout { get; set; }
         public bool IncludeActivityData { get; set; }
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
+        public Sentry.AspNetCore.TransactionNameProvider? TransactionNameProvider { get; set; }
     }
     public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.ConfigureFromConfigurationOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
     {
@@ -60,4 +61,10 @@ namespace Sentry.AspNetCore
         public SentryStartupFilter() { }
         public System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> Configure(System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> next) { }
     }
+    public class SentryTunnelMiddleware : Microsoft.AspNetCore.Http.IMiddleware
+    {
+        public SentryTunnelMiddleware(string[] allowedHosts) { }
+        public System.Threading.Tasks.Task InvokeAsync(Microsoft.AspNetCore.Http.HttpContext context, Microsoft.AspNetCore.Http.RequestDelegate next) { }
+    }
+    public delegate string? TransactionNameProvider(Microsoft.AspNetCore.Http.HttpContext context);
 }

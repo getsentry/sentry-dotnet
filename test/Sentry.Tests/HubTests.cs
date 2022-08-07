@@ -1,30 +1,21 @@
-// ReSharper disable once CheckNamespace
-// Tests code path which excludes frames with namespace Sentry
-
 using System.IO.Compression;
 using System.Net.Http;
+using Sentry.Internal.Http;
+using Sentry.Testing;
+
 #if NETCOREAPP2_1
 using System.Reflection;
 #endif
-using Sentry.Testing;
 
-namespace NotSentry.Tests;
+namespace Sentry.Tests;
 
 public class HubTests
 {
-    private class FakeBackgroundWorker : IBackgroundWorker
+    private readonly ITestOutputHelper _output;
+
+    public HubTests(ITestOutputHelper output)
     {
-        public List<Envelope> Queue { get; } = new();
-
-        public int QueuedItems => Queue.Count;
-
-        public bool EnqueueEnvelope(Envelope envelope)
-        {
-            Queue.Add(envelope);
-            return true;
-        }
-
-        public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
+        _output = output;
     }
 
     [Fact]
@@ -33,7 +24,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = new FakeBackgroundWorker()
         });
 
@@ -53,7 +44,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = new FakeBackgroundWorker()
         });
 
@@ -68,36 +59,6 @@ public class HubTests
     }
 
     [Fact]
-    public void CaptureMessage_AttachStacktraceFalse_DoesNotIncludeStackTrace()
-    {
-        // Arrange
-        var worker = new FakeBackgroundWorker();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            BackgroundWorker = worker,
-            AttachStacktrace = true
-        });
-
-        // Act
-        hub.CaptureMessage("test");
-
-        // Assert
-        var envelope = worker.Queue.Single();
-
-        var stackTrace = envelope.Items
-            .Select(i => i.Payload)
-            .OfType<JsonSerializable>()
-            .Select(i => i.Source)
-            .OfType<SentryEvent>()
-            .Single()
-            .SentryExceptionValues;
-
-        stackTrace.Should().BeNull();
-    }
-
-    [Fact]
     public void CaptureMessage_FailedQueue_LastEventIdSetToEmpty()
     {
         // Arrange
@@ -106,7 +67,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = worker
         });
 
@@ -127,7 +88,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             BackgroundWorker = worker
         });
 
@@ -147,7 +108,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
 
@@ -175,7 +136,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
 
@@ -204,7 +165,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0
         }, client);
 
@@ -233,7 +194,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
 
@@ -256,7 +217,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -278,7 +239,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
         var scope = new Scope();
@@ -296,69 +257,105 @@ public class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
-    class EvilContext
+    private class EvilContext
     {
+        // This property will throw an exception during serialization.
+        // ReSharper disable once UnusedMember.Local
         public string Thrower => throw new InvalidDataException();
     }
 
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
+    public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
-        var resetEvent = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<bool>();
         var expectedMessage = Guid.NewGuid().ToString();
 
         var requests = new List<string>();
-        void Verify(HttpRequestMessage message)
+        async Task VerifyAsync(HttpRequestMessage message)
         {
-            var payload = message.Content.ReadAsStringAsync().Result;
+            var payload = await message.Content!.ReadAsStringAsync();
             requests.Add(payload);
             if (payload.Contains(expectedMessage))
             {
-                resetEvent.Set();
+                tcs.TrySetResult(true);
             }
         }
 
-        var cachePath = offlineCaching ? Path.GetTempPath() : null;
+        var cts = new CancellationTokenSource();
+        cts.Token.Register(() => tcs.TrySetCanceled());
 
-        var logger = Substitute.For<IDiagnosticLogger>();
-        var expectedLevel = SentryLevel.Error;
-        logger.IsEnabled(expectedLevel).Returns(true);
+        var fileSystem = new FakeFileSystem();
+        using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
 
-        var hub = new Hub(new SentryOptions
+        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output, SentryLevel.Debug);
+
+        var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            CacheDirectoryPath = cachePath, // To go through a round trip serialization of cached envelope
-            RequestBodyCompressionLevel = CompressionLevel.NoCompression, //  So we don't need to deal with gzip'ed payload
-            CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify),
-            AutoSessionTracking = false, // Not to send some session envelope
+            Dsn = ValidDsn,
+            // To go through a round trip serialization of cached envelope
+            CacheDirectoryPath = tempDirectory?.Path,
+            FileSystem = fileSystem,
+            // So we don't need to deal with gzip'ed payload
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
+            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            // Not to send some session envelope
+            AutoSessionTracking = false,
             Debug = true,
-            DiagnosticLevel = expectedLevel,
             DiagnosticLogger = logger
-        });
-
-        var expectedContextKey = Guid.NewGuid().ToString();
-        var evt = new SentryEvent
-        {
-            Contexts = { [expectedContextKey] = new EvilContext() },
-            Message = new SentryMessage { Formatted = expectedMessage }
         };
 
-        hub.CaptureEvent(evt);
+        // Disable process exit flush to resolve "There is no currently active test." errors.
+        options.DisableAppDomainProcessExitFlush();
 
-        // Synchronizing in the tests to go through the caching and http transports and flushing guarantees persistence only
-        Assert.True(resetEvent.Wait(TimeSpan.FromSeconds(3)), "Event not captured");
-        Assert.True(requests.All(p => p.Contains(expectedContextKey)),
-            "Un-serializable context key should exist");
+        try
+        {
+            using var hub = new Hub(options);
 
-        logger.Received().Log(expectedLevel, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            var expectedContextKey = Guid.NewGuid().ToString();
+            var evt = new SentryEvent
+            {
+                Contexts = {[expectedContextKey] = new EvilContext()},
+                Message = new SentryMessage {Formatted = expectedMessage}
+            };
+
+            hub.CaptureEvent(evt);
+            await hub.FlushAsync(options.ShutdownTimeout);
+
+            // Synchronizing in the tests to go through the caching and http transports
+
+            cts.CancelAfter(TimeSpan.FromSeconds(3));
+            var ex = await Record.ExceptionAsync(() => tcs.Task);
+            Assert.False(ex is OperationCanceledException || !tcs.Task.Result, "Event not captured");
+            Assert.Null(ex);
+
+            Assert.True(requests.All(p => p.Contains(expectedContextKey)),
+                "Un-serializable context key should exist");
+
+            logger.Received().Log(SentryLevel.Error,
+                "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
 #if NETCOREAPP2_1
-            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
+                Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
 #else
-            Arg.Any<InvalidDataException>(),
+                Arg.Any<InvalidDataException>(),
 #endif
-            Arg.Any<object[]>());
+                Arg.Any<object[]>());
+
+        }
+        finally
+        {
+            // ensure the task is complete before leaving the test
+            tcs.TrySetResult(false);
+            await tcs.Task;
+
+            if (options.Transport is CachingTransport cachingTransport)
+            {
+                // Disposing the caching transport will ensure its worker
+                // is shut down before we try to dispose and delete the temp folder
+                await cachingTransport.DisposeAsync();
+            }
+        }
     }
 
     [Fact]
@@ -369,7 +366,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -391,7 +388,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         };
         var client = new SentryClient(options, worker);
@@ -426,7 +423,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         };
         var client = new SentryClient(options, worker);
@@ -460,7 +457,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         });
 
         // Act
@@ -478,7 +475,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         });
 
@@ -502,7 +499,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0
         });
 
@@ -524,7 +521,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = _ => 0,
             TracesSampleRate = 1
         });
@@ -547,7 +544,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         });
 
@@ -564,7 +561,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0
         });
 
@@ -584,7 +581,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0.5
         });
 
@@ -616,7 +613,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0.25
         });
 
@@ -648,7 +645,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 0.75
         });
 
@@ -677,7 +674,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
         });
 
@@ -694,7 +691,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
         });
 
@@ -711,7 +708,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
         });
 
@@ -730,7 +727,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
         });
 
@@ -749,7 +746,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = _ => null,
             TracesSampleRate = 1
         });
@@ -767,7 +764,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampler = _ => null,
             TracesSampleRate = 0
         });
@@ -785,7 +782,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         });
 
         var transaction = hub.StartTransaction("foo", "bar");
@@ -813,7 +810,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         }, client);
 
         var transaction = hub.StartTransaction("foo", "bar");
@@ -833,7 +830,7 @@ public class HubTests
         // Arrange
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         });
 
         hub.IsEnabled.Should().BeTrue();
@@ -851,7 +848,7 @@ public class HubTests
         var client = Substitute.For<ISentryClient, IDisposable>();
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         };
         var hub = new Hub(options, client);
 
@@ -871,7 +868,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -883,6 +880,32 @@ public class HubTests
     }
 
     [Fact]
+    public void StartSession_GlobalSessionManager_ExceptionOnCrashLastRun_CapturesUpdate()
+    {
+        // Arrange
+        var sessionUpdate = new GlobalSessionManagerTests().TryRecoverPersistedSessionWithExceptionOnLastRun();
+        var newSession = new SessionUpdate(Substitute.For<ISession>(), false, default, 0, null);
+
+        var client = Substitute.For<ISentryClient>();
+        var sessionManager = Substitute.For<ISessionManager>();
+        sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
+        sessionManager.StartSession().Returns(newSession);
+
+        var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "release"
+        }, client, sessionManager);
+
+        // Act
+        hub.StartSession();
+
+        // Assert
+        client.Received().CaptureSession(Arg.Is(sessionUpdate));
+        client.Received().CaptureSession(Arg.Is(newSession));
+    }
+
+    [Fact]
     public void EndSession_CapturesUpdate()
     {
         // Arrange
@@ -890,7 +913,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             Release = "release"
         }, client);
 
@@ -912,7 +935,7 @@ public class HubTests
         // Act
         _ = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTracking = true,
             Release = "release"
         }, client);
@@ -931,7 +954,7 @@ public class HubTests
         _ = new Hub(new SentryOptions
         {
             IsGlobalModeEnabled = true,
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
         }, scopeManager: scopeManager);
 
         // Assert
@@ -948,31 +971,11 @@ public class HubTests
         _ = new Hub(new SentryOptions
         {
             IsGlobalModeEnabled = false,
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
         }, scopeManager: scopeManager);
 
         // Assert
         scopeManager.Received(1).PushScope();
-    }
-
-    [Fact]
-    public void Dispose_AutoSessionTrackingEnabled_EndsSession()
-    {
-        // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = DsnSamples.ValidDsnWithSecret,
-            AutoSessionTracking = true,
-            Release = "release"
-        }, client);
-
-        // Act
-        hub.Dispose();
-
-        // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
     }
 
     [Fact]
@@ -983,7 +986,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
         }, client);
 
@@ -1006,7 +1009,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10),
             Release = "release"
         };
@@ -1041,7 +1044,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
         };
 
@@ -1072,7 +1075,7 @@ public class HubTests
 
         var options = new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
         };
 
@@ -1107,7 +1110,7 @@ public class HubTests
 
         var hub = new Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
         var scope = new Scope();

@@ -1,14 +1,26 @@
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using Sentry.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Internals.Http;
 
+[UsesVerify]
 public class HttpTransportTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+    private readonly ISystemClock _fakeClock;
+
+    public HttpTransportTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+
+        _fakeClock = new MockClock(DateTimeOffset.UtcNow);
+    }
+
     [Fact]
     public async Task SendEnvelopeAsync_CancellationToken_PassedToClient()
     {
@@ -23,7 +35,7 @@ public class HttpTransportTests
             .Returns(_ => SentryResponses.GetOkResponse());
 
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient(httpHandler));
 
         var envelope = Envelope.FromEvent(
@@ -61,7 +73,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -104,7 +116,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -166,7 +178,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -203,7 +215,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -241,7 +253,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
@@ -259,7 +271,7 @@ public class HttpTransportTests
             e.Exception == null &&
             e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
             e.Args[1].ToString() == expectedCode.ToString() &&
-            e.Args[2].ToString() == HttpTransport.DefaultErrorMessage &&
+            e.Args[2].ToString() == HttpTransportBase.DefaultErrorMessage &&
             e.Args[3].ToString() == string.Empty
         ).Should().BeTrue();
     }
@@ -276,11 +288,13 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
-                DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Debug),
+                Dsn = ValidDsn,
+                DiagnosticLogger = _testOutputLogger,
+                SendClientReports = false,
                 Debug = true
             },
-            new HttpClient(httpHandler));
+            new HttpClient(httpHandler),
+            clock: _fakeClock);
 
         // First request always goes through
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -315,7 +329,7 @@ public class HttpTransportTests
                     new EmptySerializable())
             });
 
-        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -325,6 +339,166 @@ public class HttpTransportTests
 
         // Assert
         actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_RateLimited_CountsDiscardedEventsCorrectly()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            ));
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var recorder = new ClientReportRecorder(options, _fakeClock);
+        options.ClientReportRecorder = recorder;
+
+        var httpTransport = new HttpTransport(
+            options,
+            new HttpClient(httpHandler),
+            clock: _fakeClock
+        );
+
+        // First request always goes through
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        var envelope = new Envelope(
+            new Dictionary<string, object>(),
+            new[]
+            {
+                // Should be dropped
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "event"},
+                    new EmptySerializable()),
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "event"},
+                    new EmptySerializable()),
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "transaction"},
+                    new EmptySerializable()),
+
+                // Should stay
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "other"},
+                    new EmptySerializable())
+            });
+
+        // The client report should contain rate limit discards only.
+        var expectedClientReport =
+            new ClientReport(_fakeClock.GetUtcNow(),
+                new Dictionary<DiscardReasonWithCategory, int>
+                {
+                    {DiscardReason.RateLimitBackoff.WithCategory(DataCategory.Error), 2},
+                    {DiscardReason.RateLimitBackoff.WithCategory(DataCategory.Transaction), 1}
+                });
+
+        var expectedEnvelope = new Envelope(
+            new Dictionary<string, object>(),
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "other"},
+                    new EmptySerializable()),
+                EnvelopeItem.FromClientReport(expectedClientReport)
+            });
+
+        var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(envelope);
+
+        var lastRequest = httpHandler.GetRequests().Last();
+        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+
+        // Assert
+        actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_Fails_RestoresDiscardedEventCounts()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => new HttpResponseMessage(HttpStatusCode.InternalServerError)));
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+
+        // some arbitrary discarded events ahead of time
+        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        recorder.DiscardedEvents.Should().BeEquivalentTo(new Dictionary<DiscardReasonWithCategory, int>
+        {
+            // These are the original items recorded.  They should still be there.
+            {DiscardReason.BeforeSend.WithCategory(DataCategory.Attachment), 1},
+            {DiscardReason.EventProcessor.WithCategory(DataCategory.Error), 2},
+            {DiscardReason.QueueOverflow.WithCategory(DataCategory.Security), 3},
+
+            // We also expect two new items recorded, due to the forced network failure.
+            {DiscardReason.NetworkError.WithCategory(DataCategory.Error), 1},  // from the event
+            {DiscardReason.NetworkError.WithCategory(DataCategory.Default), 1} // from the client report
+        });
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_RateLimited_DoesNotRestoreDiscardedEventCounts()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => new HttpResponseMessage((HttpStatusCode)429)));
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = true,
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+
+        // some arbitrary discarded events ahead of time
+        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        var totalCounts = recorder.DiscardedEvents.Values.Sum();
+        Assert.Equal(0, totalCounts);
     }
 
     [Fact]
@@ -339,7 +513,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 MaxAttachmentSize = 1,
                 DiagnosticLogger = logger,
                 Debug = true
@@ -370,7 +544,7 @@ public class HttpTransportTests
             e.Message == "Failed to add attachment: {0}." &&
             (string)e.Args[0] == "test1.txt");
 
-        actualEnvelopeSerialized.Should().NotContain("test2.txt");
+        actualEnvelopeSerialized.Should().NotContain("test1.txt");
     }
 
     [Fact]
@@ -385,7 +559,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret,
+                Dsn = ValidDsn,
                 MaxAttachmentSize = 1,
                 DiagnosticLogger = logger,
                 Debug = true
@@ -438,7 +612,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = ValidDsn
             },
             new HttpClient(httpHandler));
 
@@ -480,7 +654,7 @@ public class HttpTransportTests
         var httpTransport = new HttpTransport(
             new SentryOptions
             {
-                Dsn = DsnSamples.ValidDsnWithSecret
+                Dsn = ValidDsn
             },
             new HttpClient(httpHandler));
 
@@ -516,7 +690,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
@@ -534,7 +708,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
@@ -553,7 +727,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
@@ -570,12 +744,12 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
 
-        var uri = Dsn.Parse(DsnSamples.ValidDsnWithSecret).GetEnvelopeEndpointUri();
+        var uri = Dsn.Parse(ValidDsn).GetEnvelopeEndpointUri();
 
         // Act
         var request = httpTransport.CreateRequest(envelope);
@@ -589,7 +763,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = DsnSamples.ValidDsnWithSecret },
+            new SentryOptions { Dsn = ValidDsn },
             new HttpClient());
 
         var envelope = Envelope.FromEvent(new SentryEvent());
@@ -600,5 +774,71 @@ public class HttpTransportTests
 
         // Assert
         requestContent.Should().Contain(envelope.TryGetEventId().ToString());
+    }
+
+    [Fact]
+    public Task ProcessEnvelope_ShouldAttachClientReport()
+    {
+        var options = new SentryOptions();
+
+        var recorder = new ClientReportRecorder(options);
+        options.ClientReportRecorder = recorder;
+
+        var logger = Substitute.For<IDiagnosticLogger>();
+
+        var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
+
+        // add some fake discards for the report
+        recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Internal);
+        recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Security);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
+        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
+
+        var sentryEvent = new SentryEvent();
+
+        var envelope = Envelope.FromEvent(sentryEvent);
+        var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
+
+        // There should be exactly two items in the envelope
+        Assert.Equal(2, processedEnvelope.Items.Count);
+        var eventItem = processedEnvelope.Items[0];
+        var clientReportItem = processedEnvelope.Items[1];
+
+        // Make sure they have the correct types set in their headers
+        Assert.Equal("event", eventItem.TryGetType());
+        Assert.Equal("client_report", clientReportItem.TryGetType());
+
+        var eventItemJson = eventItem.Payload.SerializeToString(logger);
+        var clientReportJson = clientReportItem.Payload.SerializeToString(logger);
+        Assert.Contains("timestamp", clientReportJson);
+        Assert.Contains("timestamp", eventItemJson);
+
+        return VerifyJson($"{{eventItemJson:{eventItemJson},clientReportJson:{clientReportJson}}}")
+            .IgnoreMembers("timestamp");
+    }
+
+    [Fact]
+    public void ProcessEnvelope_ShouldNotAttachClientReportWhenOptionDisabled()
+    {
+        var options = new SentryOptions
+        {
+            // Disable sending of client reports
+            SendClientReports = false
+        };
+
+        var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
+
+        var recorder = options.ClientReportRecorder;
+        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
+
+        var envelope = Envelope.FromEvent(new SentryEvent());
+        var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
+
+        // There should only be the one event in the envelope
+        Assert.Equal(1, processedEnvelope.Items.Count);
+        Assert.Equal("event", processedEnvelope.Items[0].TryGetType());
     }
 }

@@ -1,7 +1,7 @@
 <Project>
   <!--Automatic upward search ends when first file found. From here we need to manually import parent props/targets
         https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
-  <Import Project="..\Directory.Build.props"/>
+  <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
     <!--Generate xml docs for all projects under 'src'-->
@@ -44,7 +44,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <ChangelogFile>$(SolutionDir)/CHANGELOG.md</ChangelogFile>
+    <!-- Used by SIL.ReleaseTasks below -->
+    <ChangelogFile>$(MSBuildThisFileDirectory)..\CHANGELOG.md</ChangelogFile>
     <AppendToReleaseNotesProperty>
       <![CDATA[-->
       See full changelog at https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md]]>
@@ -53,12 +54,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../.assets/sentry-nuget.png" Pack="true" PackagePath=""/>
-    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)..\.assets\sentry-nuget.png" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SIL.ReleaseTasks" Version="2.5.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'"/>
+    <!-- Used to pull the CHANGELOG.md into the NuGet package Release Notes section -->
+    <PackageReference Include="SIL.ReleaseTasks" Version="2.5.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-#if !NETCOREAPP2_1
+#if NETCOREAPP3_1_OR_GREATER
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sentry.AspNetCore.Extensions;
@@ -25,7 +25,8 @@ public class HttpContextExtensionsTests
             string area = null,
             string controller = null,
             string action = null,
-            string pathBase = null)
+            string pathBase = null,
+            string version = null)
         {
             var httpContext = new DefaultHttpContext();
             if (pathBase is not null)
@@ -37,6 +38,7 @@ public class HttpContextExtensionsTests
             AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "controller", controller);
             AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "action", action);
             AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "area", area);
+            AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "version", version);
             return httpContext;
         }
 
@@ -66,7 +68,6 @@ public class HttpContextExtensionsTests
     {
         // Arrange
         var httpContext = Fixture.GetMvcSut(area, controller, action);
-
         // Act
         var filteredRoute = HttpContextExtensions.ReplaceMvcParameters(routeInput, httpContext);
 
@@ -81,6 +82,7 @@ public class HttpContextExtensionsTests
     [InlineData("abc/{controller=}/")]
     [InlineData("{action=Index}/{id?}")]
     [InlineData("{area=Index}/{id?}")]
+    [InlineData("v{version:apiVersion}/Target")]
     public void RouteHasMvcParameters_RouteWithMvcParameters_True(string route)
     {
         // Assert
@@ -122,17 +124,18 @@ public class HttpContextExtensionsTests
     }
 
     [Theory]
-    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "theArea/house/about/{id?}", "house", "about", "theArea")]
-    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "{area=MyArea}/house/about/{id?}", "house", "about", null)]
-    [InlineData("{area=}/{controller=}/{action=}/{id?}", "{area=}/{controller=}/{action=}/{id?}", "house", "about", "theArea")]
-    [InlineData("{controller=Home}/{action=Index}/{id?}", "house/about/{id?}", "house", "about", null)]
-    [InlineData("{controller=Home}/{action=Index}", "house/about", "house", "about", null)]
-    [InlineData("{controller=Home}/{id?}", "house/{id?}", "house", "about", null)]
-    [InlineData("{action=Index}/{id?}", "about/{id?}", null, "about", null)]
-    public void NewRouteFormat_MvcRouteWithoutPathBase_ParsedParameters(string routeInput, string expectedOutput, string controller, string action, string area)
+    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "theArea/house/about/{id?}", "house", "about", "theArea", null)]
+    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "{area=MyArea}/house/about/{id?}", "house", "about", null, null)]
+    [InlineData("{area=}/{controller=}/{action=}/{id?}", "{area=}/{controller=}/{action=}/{id?}", "house", "about", "theArea", null)]
+    [InlineData("{controller=Home}/{action=Index}/{id?}", "house/about/{id?}", "house", "about", null, null)]
+    [InlineData("{controller=Home}/{action=Index}", "house/about", "house", "about", null, null)]
+    [InlineData("{controller=Home}/{id?}", "house/{id?}", "house", "about", null, null)]
+    [InlineData("{action=Index}/{id?}", "about/{id?}", null, "about", null, null)]
+    [InlineData("v{version:apiVersion}/Target", "v1.1/Target", null, "about", null, "1.1")]
+    public void NewRouteFormat_MvcRouteWithoutPathBase_ParsedParameters(string routeInput, string expectedOutput, string controller, string action, string area, string version)
     {
         // Arrange
-        var httpContext = Fixture.GetMvcSut(area, controller, action);
+        var httpContext = Fixture.GetMvcSut(area, controller, action, null, version);
 
         // Act
         var filteredRoute = HttpContextExtensions.NewRouteFormat(routeInput, httpContext);
@@ -163,7 +166,7 @@ public class HttpContextExtensionsTests
     [InlineData("myArea.myController.myAction", null, "myController", "myAction", "myArea")]
     [InlineData("myController.myAction", null, "myController", "myAction", null)]
     [InlineData(null, null, null, null, null)]
-    public void LegacyRouteFormat_WithPathBase_MatchesExcpectedRoute(string expectedRoute, string pathBase, string controller, string action, string area)
+    public void LegacyRouteFormat_WithPathBase_MatchesExpectedRoute(string expectedRoute, string pathBase, string controller, string action, string area)
     {
         // Arrange
         var httpContext = Fixture.GetMvcSut(area, controller, action, pathBase);
@@ -207,10 +210,9 @@ public class HttpContextExtensionsTests
     public void TryGetRouteTemplate_WithSentryRouteName_RouteName()
     {
         // Arrange
-        var sentryRouteName = Substitute.For<ISentryRouteName>();
-        var httpContext = Fixture.GetSut();
         var expectedName = "abc";
-        sentryRouteName.GetRouteName().Returns(expectedName);
+        TransactionNameProvider sentryRouteName = _ => expectedName;
+        var httpContext = Fixture.GetSut();
         httpContext.Features.Set(sentryRouteName);
 
         // Act

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -133,6 +134,14 @@ namespace Sentry
         /// </remarks>
         public long? InstructionOffset { get; set; }
 
+        /// <summary>
+        /// Optionally changes the addressing mode. The default value is the same as
+        /// `"abs"` which means absolute referencing. This can also be set to
+        /// `"rel:DEBUG_ID"` or `"rel:IMAGE_INDEX"` to make addresses relative to an
+        /// object referenced by debug id or index.
+        /// </summary>
+        public string? AddressMode { get; set; }
+
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
@@ -152,12 +161,36 @@ namespace Sentry
             writer.WriteBooleanIfNotNull("in_app", InApp);
             writer.WriteStringIfNotWhiteSpace("package", Package);
             writer.WriteStringIfNotWhiteSpace("platform", Platform);
-            writer.WriteNumberIfNotNull("image_addr", ImageAddress.NullIfDefault());
-            writer.WriteNumberIfNotNull("symbol_addr", SymbolAddress);
+            writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress.NullIfDefault()?.ToHexString());
+            writer.WriteStringIfNotWhiteSpace("symbol_addr", SymbolAddress?.ToHexString());
             writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
             writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
+            writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
 
             writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Configures <see cref="InApp"/> based on the <see cref="SentryOptions.InAppInclude"/> and <see cref="SentryOptions.InAppExclude"/> or <paramref name="options"/>.
+        /// </summary>
+        /// <param name="options">The Sentry options.</param>
+        /// <remarks><see cref="InApp"/> will remain with the same value if previously set.</remarks>
+        public void ConfigureAppFrame(SentryOptions options)
+        {
+            var parameterName = Module ?? Function;
+            if (InApp != null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(parameterName))
+            {
+                InApp = true;
+                return;
+            }
+
+            InApp = options.InAppInclude?.Any(include => parameterName.StartsWith(include, StringComparison.Ordinal)) == true ||
+                    options.InAppExclude?.Any(exclude => parameterName.StartsWith(exclude, StringComparison.Ordinal)) != true;
         }
 
         /// <summary>
@@ -179,10 +212,11 @@ namespace Sentry
             var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
             var package = json.GetPropertyOrNull("package")?.GetString();
             var platform = json.GetPropertyOrNull("platform")?.GetString();
-            var imageAddress = json.GetPropertyOrNull("image_addr")?.GetInt64() ?? 0;
-            var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetInt64();
+            var imageAddress = json.GetPropertyOrNull("image_addr")?.GetAddressAsLong() ?? 0;
+            var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetAddressAsLong();
             var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetString();
             var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
+            var addressMode = json.GetPropertyOrNull("addr_mode")?.GetString();
 
             return new SentryStackFrame
             {
@@ -203,7 +237,8 @@ namespace Sentry
                 ImageAddress = imageAddress,
                 SymbolAddress = symbolAddress,
                 InstructionAddress = instructionAddress,
-                InstructionOffset = instructionOffset
+                InstructionOffset = instructionOffset,
+                AddressMode = addressMode,
             };
         }
     }

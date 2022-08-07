@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Net;
 using System.Net.Http;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Hosting;
@@ -20,13 +19,14 @@ public class IntegrationTests
     [Fact]
     public async Task SentryIntegrationTest_CaptureUnhandledException()
     {
-        var evt = new ManualResetEventSlim();
+        var tcs = new TaskCompletionSource<object>();
 
         var requests = new List<string>();
-        void Verify(HttpRequestMessage message)
+        async Task VerifyAsync(HttpRequestMessage message)
         {
-            requests.Add(message.Content.ReadAsStringAsync().Result);
-            evt.Set();
+            var content = await message.Content.ReadAsStringAsync();
+            requests.Add(content);
+            tcs.SetResult(null);
         }
 
         var host = Host.CreateDefaultBuilder()
@@ -37,7 +37,7 @@ public class IntegrationTests
                     {
                         // So we can assert on the payload without the need to Gzip decompress
                         o.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
-                        o.CreateHttpClientHandler = () => new CallbackHttpClientHandler(Verify);
+                        o.CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync);
                     });
                     services.AddFunctionTarget<FailingFunction>();
                 })
@@ -62,7 +62,8 @@ public class IntegrationTests
         catch (Exception e) when (e.Message == ExpectedMessage)
         {
             // Synchronizing in the tests because `OnCompleted` is not being called with TestServer.
-            Assert.True(evt.Wait(TimeSpan.FromSeconds(3)));
+            await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+            Assert.True(tcs.Task.IsCompleted, "Expected Verify to complete.");
             Assert.True(requests.Any(p => p.Contains(ExpectedMessage)),
                 "Expected error to be captured");
             Assert.True(requests.All(p => p.Contains("sentry.dotnet.google-cloud-function")),

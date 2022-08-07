@@ -28,9 +28,9 @@ namespace Sentry.AspNetCore.Extensions
                 return legacyFormat;
             }
 
-            var sentryRouteName = context.Features.Get<ISentryRouteName>();
+            var sentryRouteName = context.Features.Get<TransactionNameProvider>();
 
-            return sentryRouteName?.GetRouteName();
+            return sentryRouteName?.Invoke(context);
         }
 
         // Internal for testing.
@@ -50,9 +50,16 @@ namespace Sentry.AspNetCore.Extensions
 
             // Skip route pattern if it resembles to a MVC route or null  e.g.
             // {controller=Home}/{action=Index}/{id?}
-            return RouteHasMvcParameters(routePattern)
-                ? builder.Append(ReplaceMvcParameters(routePattern, context)).ToString()
-                : builder.Append(routePattern).ToString();
+            if (RouteHasMvcParameters(routePattern))
+            {
+                builder.Append(ReplaceMvcParameters(routePattern, context));
+            }
+            else
+            {
+                builder.Append(routePattern);
+            }
+
+            return builder.ToString();
         }
 
         // Internal for testing.
@@ -63,56 +70,76 @@ namespace Sentry.AspNetCore.Extensions
             // despite the annotations claiming otherwise.
             var routeData = context.GetRouteData();
 
-            var controller = routeData?.Values["controller"]?.ToString();
-            var action = routeData?.Values["action"]?.ToString();
-            var area = routeData?.Values["area"]?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(action))
+            // GetRouteData can return null on netstandard2
+            if (routeData == null)
             {
-                var builder = new StringBuilder();
-                if (context.Request.PathBase.HasValue)
-                {
-                    builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
-                        .Append('.');
-                }
-
-                if (!string.IsNullOrWhiteSpace(area))
-                {
-                    builder.Append(area)
-                        .Append('.');
-                }
-
-                builder.Append(controller)
-                    .Append('.')
-                    .Append(action);
-                return builder.ToString();
+                return null;
             }
 
-            // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
-            // then there is no way for us to extract anything that resembles a route template.
-            return null;
+            var values = routeData.Values;
+
+            if (values["action"] is not string action)
+            {
+                // If the handler doesn't use routing (i.e. it checks `context.Request.Path` directly),
+                // then there is no way for us to extract anything that resembles a route template.
+                return null;
+            }
+
+            var builder = new StringBuilder();
+            if (context.Request.PathBase.HasValue)
+            {
+                builder.Append(context.Request.PathBase.Value?.TrimStart('/'))
+                    .Append('.');
+            }
+
+            if (values["area"] is string area)
+            {
+                builder.Append(area)
+                    .Append('.');
+            }
+
+            if (values["controller"] is string controller)
+            {
+                builder.Append(controller)
+                    .Append('.');
+            }
+
+            builder.Append(action);
+
+            return builder.ToString();
         }
 
         // Internal for testing.
-        internal static string ReplaceMvcParameters(string route, HttpContext? context)
+        internal static string ReplaceMvcParameters(string route, HttpContext context)
         {
-            // Return RouteData or Null, marking the HttpContext as nullable since the output doesn't
-            // shows the nullable output.
-            var routeData = context?.GetRouteData();
+            var routeData = context.GetRouteData();
 
-            if (routeData?.Values["controller"]?.ToString() is { } controller)
+            // GetRouteData can return null on netstandard2
+            if (routeData == null)
+            {
+                return route;
+            }
+
+            var values = routeData.Values;
+
+            if (values["controller"] is string controller)
             {
                 route = Regex.Replace(route, "{controller=[^}]+}", controller);
             }
 
-            if (routeData?.Values["action"]?.ToString() is { } action)
+            if (values["action"] is string action)
             {
                 route = Regex.Replace(route, "{action=[^}]+}", action);
             }
 
-            if (routeData?.Values["area"]?.ToString() is { } area)
+            if (values["area"] is string area)
             {
                 route = Regex.Replace(route, "{area=[^}]+}", area);
+            }
+
+            if (values["version"] is string version)
+            {
+                route = Regex.Replace(route, "{version:[^}]+}", version);
             }
 
             return route;
@@ -120,7 +147,10 @@ namespace Sentry.AspNetCore.Extensions
 
         // Internal for testing.
         internal static bool RouteHasMvcParameters(string route)
-            => route.Contains("{controller=") || route.Contains("{action=") || route.Contains("{area=");
+            => route.Contains("{controller=") ||
+               route.Contains("{action=") ||
+               route.Contains("{version:") ||
+               route.Contains("{area=");
 
         public static string? TryGetTransactionName(this HttpContext context)
         {

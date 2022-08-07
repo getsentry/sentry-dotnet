@@ -95,18 +95,14 @@ namespace Sentry
         {
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
-                _options.LogWarning(
-                    "Transaction dropped due to empty id.");
-
+                _options.LogWarning("Transaction dropped due to empty id.");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(transaction.Name) ||
                 string.IsNullOrWhiteSpace(transaction.Operation))
             {
-                _options.LogWarning(
-                    "Transaction discarded due to one or more required fields missing.");
-
+                _options.LogWarning("Transaction discarded due to one or more required fields missing.");
                 return;
             }
 
@@ -115,22 +111,19 @@ namespace Sentry
             // We still send these transactions over, but warn the user not to do it.
             if (!transaction.IsFinished)
             {
-                _options.LogWarning(
-                    "Capturing a transaction which has not been finished. " +
-                    "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
-                    "to properly finalize the transaction and send it to Sentry.");
+                _options.LogWarning("Capturing a transaction which has not been finished. " +
+                                    "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
+                                    "to properly finalize the transaction and send it to Sentry.");
             }
 
             // Sampling decision MUST have been made at this point
-            Debug.Assert(
-                transaction.IsSampled != null,
+            Debug.Assert(transaction.IsSampled != null,
                 "Attempt to capture transaction without sampling decision.");
 
             if (transaction.IsSampled != true)
             {
-                _options.LogDebug(
-                    "Transaction dropped by sampling.");
-
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+                _options.LogDebug("Transaction dropped by sampling.");
                 return;
             }
 
@@ -157,6 +150,7 @@ namespace Sentry
             {
                 if (!SynchronizedRandom.NextBool(_options.SampleRate.Value))
                 {
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
                     _options.LogDebug("Event sampled.");
                     return SentryId.Empty;
                 }
@@ -166,8 +160,9 @@ namespace Sentry
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
-                    _options.LogInfo(
-                        "Event with exception of type '{0}' was dropped by an exception filter.", @event.Exception.GetType());
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+                    _options.LogInfo("Event with exception of type '{0}' was dropped by an exception filter.",
+                        @event.Exception.GetType());
                     return SentryId.Empty;
                 }
             }
@@ -194,6 +189,8 @@ namespace Sentry
                 foreach (var processor in scope.GetAllExceptionProcessors())
                 {
                     processor.Process(@event.Exception, @event);
+
+                    // NOTE: Exception processors can't drop events, but exception filters (above) can.
                 }
             }
 
@@ -204,6 +201,7 @@ namespace Sentry
                 processedEvent = processor.Process(processedEvent);
                 if (processedEvent == null)
                 {
+                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
                     _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                     return SentryId.Empty;
                 }
@@ -212,6 +210,7 @@ namespace Sentry
             processedEvent = BeforeSend(processedEvent);
             if (processedEvent == null) // Rejected event
             {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
                 _options.LogInfo("Event dropped by BeforeSend callback.");
                 return SentryId.Empty;
             }
@@ -255,6 +254,9 @@ namespace Sentry
             }
             catch (Exception e)
             {
+                // Attempt to demystify exceptions before adding them as breadcrumbs.
+                e.Demystify();
+
                 _options.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
                 var data = new Dictionary<string, string>
                 {
@@ -278,7 +280,7 @@ namespace Sentry
         /// Disposes this client
         /// </summary>
         /// <inheritdoc />
-        [Obsolete("Sentry client should no be explicitly disposed of. This method will be removed in version 4.")]
+        [Obsolete("Sentry client should not be explicitly disposed of. This method will be removed in version 4.")]
         public void Dispose()
         {
             _options.LogDebug("Flushing SentryClient.");

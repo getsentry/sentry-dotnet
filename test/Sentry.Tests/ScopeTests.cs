@@ -105,10 +105,11 @@ public class ScopeTests
     public void TransactionName_TransactionNotStarted_NameIsSet()
     {
         // Arrange
-        var scope = new Scope();
-
-        // Act
-        scope.TransactionName = "foo";
+        var scope = new Scope
+        {
+            // Act
+            TransactionName = "foo"
+        };
 
         // Assert
         scope.TransactionName.Should().Be("foo");
@@ -119,11 +120,12 @@ public class ScopeTests
     public void TransactionName_TransactionStarted_NameIsSetAndOverwritten()
     {
         // Arrange
-        var scope = new Scope();
-        scope.Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_");
-
-        // Act
-        scope.TransactionName = "foo";
+        var scope = new Scope
+        {
+            Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_"),
+            // Act
+            TransactionName = "foo"
+        };
 
         // Assert
         scope.TransactionName.Should().Be("foo");
@@ -134,11 +136,12 @@ public class ScopeTests
     public void TransactionName_TransactionStarted_NameIsSetToNullCoercedToEmpty()
     {
         // Arrange
-        var scope = new Scope();
-        scope.Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_");
-
-        // Act
-        scope.TransactionName = null;
+        var scope = new Scope
+        {
+            Transaction = new TransactionTracer(DisabledHub.Instance, "bar", "_"),
+            // Act
+            TransactionName = null
+        };
 
         // Assert
         scope.TransactionName.Should().BeNullOrEmpty();
@@ -149,12 +152,12 @@ public class ScopeTests
     public void TransactionName_TransactionStarted_NameReturnsActualTransactionName()
     {
         // Arrange
-        var scope = new Scope();
-
-        scope.TransactionName = "bar";
-
-        // Act
-        scope.Transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var scope = new Scope
+        {
+            TransactionName = "bar",
+            // Act
+            Transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_")
+        };
 
         // Assert
         scope.TransactionName.Should().Be("foo");
@@ -237,7 +240,7 @@ public class ScopeTests
         // Arrange
         var scope = new Scope();
 
-        for (int i = 0; i < 5; i++)
+        for (var i = 0; i < 5; i++)
         {
             scope.AddAttachment(new MemoryStream(1_000), Guid.NewGuid().ToString());
         }
@@ -262,7 +265,7 @@ public class ScopeTests
         // Arrange
         var scope = new Scope(new SentryOptions { MaxBreadcrumbs = maxBreadcrumbs });
 
-        for (int i = 0; i < initialCount; i++)
+        for (var i = 0; i < initialCount; i++)
         {
             scope.AddBreadcrumb(new Breadcrumb());
         }
@@ -291,8 +294,8 @@ public class ScopeTests
             EnableScopeSync = observerEnable
         });
         var expectedEmail = observerEnable ? email : null;
-        var expectedusername = observerEnable ? username : null;
-        var expectedid = observerEnable ? id : null;
+        var expectedUsername = observerEnable ? username : null;
+        var expectedId = observerEnable ? id : null;
         var expectedCount = observerEnable ? 1 : 0;
         // Act
         if (email != null)
@@ -310,8 +313,8 @@ public class ScopeTests
 
         // Assert
         observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Email == expectedEmail));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedid));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedusername));
+        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedId));
+        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedUsername));
     }
 
     [Theory]

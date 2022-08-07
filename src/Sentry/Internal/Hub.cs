@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Integrations;
 using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
@@ -18,7 +17,6 @@ namespace Sentry.Internal
         private readonly ISystemClock _clock;
         private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
-        private readonly ISdkIntegration[]? _integrations;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
@@ -64,10 +62,10 @@ namespace Sentry.Internal
 
             _enricher = new Enricher(options);
 
-            _integrations = options.Integrations;
-            if (_integrations?.Length > 0)
+            var integrations = options.Integrations;
+            if (integrations?.Length > 0)
             {
-                foreach (var integration in _integrations)
+                foreach (var integration in integrations)
                 {
                     options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
                     integration.Register(this, options);
@@ -271,6 +269,22 @@ namespace Sentry.Internal
             return null;
         }
 
+        public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+        {
+            try
+            {
+                var clonedScope = ScopeManager.GetCurrent().Key.Clone();
+                configureScope(clonedScope);
+
+                return CaptureEvent(evt, clonedScope);
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+                return SentryId.Empty;
+            }
+        }
+
         public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
         {
             try
@@ -378,17 +392,6 @@ namespace Sentry.Internal
             if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
             {
                 return;
-            }
-
-            if (_integrations?.Length > 0)
-            {
-                foreach (var integration in _integrations)
-                {
-                    if (integration is IInternalSdkIntegration internalIntegration)
-                    {
-                        internalIntegration.Unregister(this);
-                    }
-                }
             }
 
             _ownedClient.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();

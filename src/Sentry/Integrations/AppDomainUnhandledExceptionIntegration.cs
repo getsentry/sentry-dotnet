@@ -6,24 +6,20 @@ using Sentry.Protocol;
 
 namespace Sentry.Integrations
 {
-    internal class AppDomainUnhandledExceptionIntegration : IInternalSdkIntegration
+    internal class AppDomainUnhandledExceptionIntegration : ISdkIntegration
     {
         private readonly IAppDomain _appDomain;
         private IHub? _hub;
+        private SentryOptions? _options;
 
         internal AppDomainUnhandledExceptionIntegration(IAppDomain? appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
-        public void Register(IHub hub, SentryOptions _)
+        public void Register(IHub hub, SentryOptions options)
         {
             _hub = hub;
+            _options = options;
             _appDomain.UnhandledException += Handle;
-        }
-
-        public void Unregister(IHub hub)
-        {
-            _appDomain.UnhandledException -= Handle;
-            _hub = null;
         }
 
         // Internal for testability
@@ -37,12 +33,12 @@ namespace Sentry.Integrations
             {
                 ex.Data[Mechanism.HandledKey] = false;
                 ex.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
-                _ = (_hub?.CaptureException(ex));
+                _ = _hub?.CaptureException(ex);
             }
 
             if (e.IsTerminating)
             {
-                (_hub as IDisposable)?.Dispose();
+                _hub?.FlushAsync(_options!.ShutdownTimeout).GetAwaiter().GetResult();
             }
         }
     }

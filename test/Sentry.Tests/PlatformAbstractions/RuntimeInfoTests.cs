@@ -50,9 +50,9 @@ public class RuntimeInfoTests
         var input = new Runtime(".NET Framework");
         RuntimeInfo.SetNetFxReleaseAndVersion(input);
 
-        Assert.NotNull(input.Version);
-        Assert.NotNull(input.FrameworkInstallation);
-        Assert.NotNull(input.FrameworkInstallation.Version);
+        input.Version.Should().NotBeNull();
+        input.FrameworkInstallation.Should().NotBeNull();
+        input.FrameworkInstallation.Version.Should().NotBeNull();
     }
 #endif
 
@@ -77,6 +77,16 @@ public class RuntimeInfoTests
 
         Assert.Equal(".NET", input.Name);
         Assert.Null(input.Version);
+    }
+
+    [Fact]
+    public void SetRuntimeIdentifier()
+    {
+        var input = new Runtime(".NET");
+        RuntimeInfo.SetRuntimeIdentifier(input);
+
+        Assert.Equal(".NET", input.Name);
+        Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, input.Identifier);
     }
 #endif
 

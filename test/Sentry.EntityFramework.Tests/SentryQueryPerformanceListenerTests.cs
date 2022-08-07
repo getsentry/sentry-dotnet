@@ -1,10 +1,6 @@
-using System.Collections.Concurrent;
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-using Effort.Provider;
-
 namespace Sentry.EntityFramework.Tests;
 
+[Collection("Sequential")]
 public class SentryQueryPerformanceListenerTests
 {
     internal const string DbReaderKey = SentryQueryPerformanceListener.DbReaderKey;
@@ -43,6 +39,12 @@ public class SentryQueryPerformanceListenerTests
     }
 
     private readonly Fixture _fixture = new();
+    private readonly IDiagnosticLogger _logger;
+
+    public SentryQueryPerformanceListenerTests(ITestOutputHelper output)
+    {
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output, SentryLevel.Debug);
+    }
 
     [Theory]
     [InlineData(DbScalarKey)]
@@ -67,13 +69,13 @@ public class SentryQueryPerformanceListenerTests
         switch (expectedOperation)
         {
             case DbScalarKey:
-                interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new Exception() });
+                interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new() });
                 break;
             case DbNonQueryKey:
-                interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new Exception() });
+                interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new() });
                 break;
             case DbReaderKey:
-                interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() });
+                interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new() });
                 break;
             default:
                 throw new NotImplementedException();
@@ -110,21 +112,21 @@ public class SentryQueryPerformanceListenerTests
         {
             case DbScalarKey:
                 {
-                    var context = new DbCommandInterceptionContext<object> { Exception = new Exception() };
+                    var context = new DbCommandInterceptionContext<object> { Exception = new() };
                     interceptor.ScalarExecuting(command, context);
                     interceptor.ScalarExecuted(command, context);
                 }
                 break;
             case DbNonQueryKey:
                 {
-                    var context = new DbCommandInterceptionContext<int> { Exception = new Exception() };
+                    var context = new DbCommandInterceptionContext<int> { Exception = new() };
                     interceptor.NonQueryExecuting(command, context);
                     interceptor.NonQueryExecuted(command, context);
                 }
                 break;
             case DbReaderKey:
                 {
-                    var context = new DbCommandInterceptionContext<DbDataReader> { Exception = new Exception() };
+                    var context = new DbCommandInterceptionContext<DbDataReader> { Exception = new() };
                     interceptor.ReaderExecuting(command, context);
                     interceptor.ReaderExecuted(command, context);
                 }
@@ -199,7 +201,7 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var integration = new DbInterceptionIntegration();
-        integration.Register(_fixture.Hub, new SentryOptions());
+        integration.Register(_fixture.Hub, new SentryOptions { TracesSampleRate = 1 });
 
         // Act
         _ = _fixture.DbContext.TestTable.FirstOrDefault();
@@ -215,10 +217,29 @@ public class SentryQueryPerformanceListenerTests
         Assert.NotEmpty(_fixture.Spans.Where(
             span => DbReaderKey == span.Operation && span.Description is null));
 
-        Assert.All(_fixture.Spans, span =>
-        {
-            span.Received(1).Finish(Arg.Is<SpanStatus>(status => SpanStatus.Ok == status));
-        });
+        Assert.All(_fixture.Spans, span => span.Received(1).Finish(Arg.Is<SpanStatus>(status => SpanStatus.Ok == status)));
         integration.Unregister();
+    }
+
+    [Fact]
+    public void Finish_NoActiveTransaction_LoggerNotCalled()
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        hub.GetSpan().ReturnsNull();
+
+        var options = new SentryOptions
+        {
+            Debug = true,
+            DiagnosticLogger = _logger
+        };
+
+        var listener = new SentryQueryPerformanceListener(hub, options);
+
+        // Act
+        listener.ScalarExecuted(Substitute.For<DbCommand>(), Substitute.For<DbCommandInterceptionContext<object>>());
+
+        // Assert
+        _logger.DidNotReceiveWithAnyArgs().Log(default, default!);
     }
 }

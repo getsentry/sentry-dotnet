@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Web;
 
 namespace Sentry.AspNet;
@@ -6,15 +7,21 @@ namespace Sentry.AspNet;
 /// <summary>
 /// Sentry extensions for <see cref="HttpContext"/>.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class HttpContextExtensions
 {
     private const string HttpContextTransactionItemName = "__SentryTransaction";
 
     private static SentryTraceHeader? TryGetTraceHeader(NameValueCollection headers)
     {
+        var traceHeader = headers.Get(SentryTraceHeader.HttpHeaderName);
+        if (traceHeader == null)
+        {
+            return null;
+        }
+
         try
         {
-            var traceHeader = headers.Get(SentryTraceHeader.HttpHeaderName);
             return SentryTraceHeader.Parse(traceHeader);
         }
         catch

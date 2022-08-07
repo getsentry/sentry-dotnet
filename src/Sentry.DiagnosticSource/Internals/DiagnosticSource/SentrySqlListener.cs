@@ -15,8 +15,8 @@ namespace Sentry.Internals.DiagnosticSource
             Execution
         };
 
-        internal const string OperationKey = "OperationId";
-        internal const string ConnectionKey = "ConnectionId";
+        private const string OperationKey = "OperationId";
+        private const string ConnectionKey = "ConnectionId";
         internal const string ConnectionExtraKey = "db.connection_id";
         internal const string OperationExtraKey = "db.operation_id";
 
@@ -41,8 +41,8 @@ namespace Sentry.Internals.DiagnosticSource
         internal const string SqlDataWriteCommandError = "System.Data.SqlClient.WriteCommandError";
         internal const string SqlMicrosoftWriteCommandError = "Microsoft.Data.SqlClient.WriteCommandError";
 
-        private IHub _hub { get; }
-        private SentryOptions _options { get; }
+        private readonly IHub _hub;
+        private readonly SentryOptions _options;
 
         public SentrySqlListener(IHub hub, SentryOptions options)
         {
@@ -66,19 +66,23 @@ namespace Sentry.Internals.DiagnosticSource
 
         private static Guid? TryGetOperationId(ISpan span)
         {
-            if (span.Extra.TryGetValue(OperationExtraKey, out var key) && key is Guid guid)
+            if (span.Extra.TryGetValue(OperationExtraKey, out var key) &&
+                key is Guid guid)
             {
                 return guid;
             }
+
             return null;
         }
 
         private static Guid? TryGetConnectionId(ISpan span)
         {
-            if (span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid)
+            if (span.Extra.TryGetValue(ConnectionExtraKey, out var key) &&
+                key is Guid guid)
             {
                 return guid;
             }
+
             return null;
         }
 
@@ -86,24 +90,29 @@ namespace Sentry.Internals.DiagnosticSource
         {
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction is { } transaction)
+                if (scope.Transaction is not { } transaction)
                 {
-                    if (type == SentrySqlSpanType.Connection &&
-                        transaction?.StartChild(operation) is { } connectionSpan)
+                    return;
+                }
+
+                if (type == SentrySqlSpanType.Connection &&
+                    transaction.StartChild(operation) is { } connectionSpan)
+                {
+                    SetOperationId(connectionSpan, value.GetProperty<Guid>(OperationKey));
+                    return;
+                }
+
+                if (type == SentrySqlSpanType.Execution &&
+                    value.GetProperty<Guid>(ConnectionKey) is { } connectionId)
+                {
+                    var span = TryStartChild(
+                        TryGetConnectionSpan(scope, connectionId) ?? transaction,
+                        operation,
+                        null);
+                    if (span is not null)
                     {
-                        SetOperationId(connectionSpan, value.GetProperty<Guid>(OperationKey));
-                    }
-                    else if (type == SentrySqlSpanType.Execution && value.GetProperty<Guid>(ConnectionKey) is { } connectionId)
-                    {
-                        var span = TryStartChild(
-                            TryGetConnectionSpan(scope, connectionId) ?? transaction,
-                            operation,
-                            null);
-                        if (span is not null)
-                        {
-                            SetOperationId(span, value.GetProperty<Guid>(OperationKey));
-                            SetConnectionId(span, connectionId);
-                        }
+                        SetOperationId(span, value.GetProperty<Guid>(OperationKey));
+                        SetConnectionId(span, connectionId);
                     }
                 }
             });
@@ -114,7 +123,8 @@ namespace Sentry.Internals.DiagnosticSource
             ISpan? span = null;
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction == null)
+                var transaction = scope.Transaction;
+                if (transaction == null)
                 {
                     return;
                 }
@@ -126,43 +136,47 @@ namespace Sentry.Internals.DiagnosticSource
                     {
                         span = querySpan;
 
-                        if (span.ParentSpanId == scope.Transaction?.SpanId &&
+                        if (span.ParentSpanId == transaction.SpanId &&
                             TryGetConnectionId(span) is { } spanConnectionId &&
-                            spanConnectionId is Guid spanConnectionGuid &&
                             span is SpanTracer executionTracer &&
-                            TryGetConnectionSpan(scope, spanConnectionGuid) is { } spanConnectionRef)
+                            TryGetConnectionSpan(scope, spanConnectionId) is { } spanConnectionRef)
                         {
                             // Connection Span exist but wasn't set as the parent of the current Span.
                             executionTracer.ParentSpanId = spanConnectionRef.SpanId;
                         }
+
+                        return;
                     }
-                    else
-                    {
-                        _options.DiagnosticLogger?.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
-                            type,
-                            operationId);
-                    }
+
+                    _options.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
+                        type,
+                        operationId);
+                    return;
                 }
-                else if ((value.Key == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                          value.Key == SqlDataWriteConnectionCloseAfterCommand) &&
+
+                if (value.Key is
+                        SqlMicrosoftWriteConnectionCloseAfterCommand or
+                        SqlDataWriteConnectionCloseAfterCommand &&
                     value.GetProperty<Guid>(ConnectionKey) is { } id &&
                     TryGetConnectionSpan(scope, id) is { } connectionSpan)
                 {
                     span = connectionSpan;
+                    return;
                 }
-                else if ((value.Key is SqlMicrosoftWriteTransactionCommitAfter ||
-                          value.Key is SqlDataWriteTransactionCommitAfter) &&
+
+                if (value.Key is
+                        SqlMicrosoftWriteTransactionCommitAfter or
+                        SqlDataWriteTransactionCommitAfter &&
                     value.GetSubProperty<Guid>("Connection", "ClientConnectionId") is { } commitId &&
                     TryGetConnectionSpan(scope, commitId) is { } commitSpan)
                 {
                     span = commitSpan;
+                    return;
                 }
-                else
-                {
-                    _options.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
-                        type,
-                        value.GetProperty<Guid>(OperationKey));
-                }
+
+                _options.LogWarning("Trying to get a span of type {0} with operation id {1}, but it was not found.",
+                    type,
+                    value.GetProperty<Guid>(OperationKey));
             });
             return span;
         }
@@ -171,7 +185,10 @@ namespace Sentry.Internals.DiagnosticSource
             => parent?.StartChild(operation, description);
 
         private static ISpan? TryGetConnectionSpan(Scope scope, Guid connectionId)
-            => scope.Transaction?.Spans.FirstOrDefault(span => !span.IsFinished && span.Operation is "db.connection" && TryGetConnectionId(span) == connectionId);
+            => scope.Transaction?.Spans
+                .FirstOrDefault(span => !span.IsFinished &&
+                                        span.Operation is "db.connection" &&
+                                        TryGetConnectionId(span) == connectionId);
 
         private static ISpan? TryGetQuerySpan(Scope scope, Guid operationId)
             => scope.Transaction?.Spans.FirstOrDefault(span => TryGetOperationId(span) == operationId);
@@ -179,8 +196,15 @@ namespace Sentry.Internals.DiagnosticSource
         private void UpdateConnectionSpan(Guid operationId, Guid connectionId)
             => _hub.ConfigureScope(scope =>
             {
-                var connectionSpans = scope.Transaction?.Spans?.Where(span => span.Operation is "db.connection").ToList();
-                if (connectionSpans?.FirstOrDefault(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } span)
+                var transaction = scope.Transaction;
+                if (transaction is null)
+                {
+                    return;
+                }
+
+                var spans = transaction.Spans.Where(span => span.Operation is "db.connection").ToList();
+                if (spans.FirstOrDefault(span => !span.IsFinished &&
+                                                 TryGetOperationId(span) == operationId) is { } span)
                 {
                     SetConnectionId(span, connectionId);
                 }
@@ -194,46 +218,40 @@ namespace Sentry.Internals.DiagnosticSource
         {
             try
             {
-                // Query.
-                if (value.Key == SqlMicrosoftBeforeExecuteCommand || value.Key == SqlDataBeforeExecuteCommand)
+                switch (value.Key)
                 {
-                    AddSpan(SentrySqlSpanType.Execution, "db.query", value);
-                }
-                else if ((value.Key == SqlMicrosoftAfterExecuteCommand || value.Key == SqlDataAfterExecuteCommand) &&
-                    GetSpan(SentrySqlSpanType.Execution, value) is { } commandSpan)
-                {
-                    commandSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
-                    commandSpan.Finish(SpanStatus.Ok);
-                }
-                else if ((value.Key == SqlMicrosoftWriteCommandError || value.Key == SqlDataWriteCommandError) &&
-                    GetSpan(SentrySqlSpanType.Execution, value) is { } errorSpan)
-                {
-                    errorSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
-                    errorSpan.Finish(SpanStatus.InternalError);
-                }
-
-                // Connection.
-                else if (value.Key == SqlMicrosoftWriteConnectionOpenBeforeCommand || value.Key == SqlDataWriteConnectionOpenBeforeCommand)
-                {
-                    AddSpan(SentrySqlSpanType.Connection, "db.connection", value);
-                }
-                else if (value.Key == SqlMicrosoftWriteConnectionOpenAfterCommand || value.Key == SqlDataWriteConnectionOpenAfterCommand)
-                {
-                    UpdateConnectionSpan(value.GetProperty<Guid>(OperationKey), value.GetProperty<Guid>(ConnectionKey));
-                }
-                else if ((value.Key == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                          value.Key == SqlDataWriteConnectionCloseAfterCommand) &&
-                    GetSpan(SentrySqlSpanType.Connection, value) is { } connectionSpan)
-                {
-                    TrySetConnectionStatistics(connectionSpan, value);
-                    connectionSpan.Finish(SpanStatus.Ok);
-                }
-                else if ((value.Key is SqlMicrosoftWriteTransactionCommitAfter || value.Key is SqlDataWriteTransactionCommitAfter) &&
-                    GetSpan(SentrySqlSpanType.Connection, value) is { } connectionSpan2)
-                {
-                    // If some query makes changes to the Database data, CloseAfterCommand event will not be invoked,
-                    // instead, TransactionCommitAfter is invoked.
-                    connectionSpan2.Finish(SpanStatus.Ok);
+                    // Query.
+                    case SqlMicrosoftBeforeExecuteCommand or SqlDataBeforeExecuteCommand:
+                        AddSpan(SentrySqlSpanType.Execution, "db.query", value);
+                        return;
+                    case SqlMicrosoftAfterExecuteCommand or SqlDataAfterExecuteCommand
+                        when GetSpan(SentrySqlSpanType.Execution, value) is { } commandSpan:
+                        commandSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
+                        commandSpan.Finish(SpanStatus.Ok);
+                        return;
+                    case SqlMicrosoftWriteCommandError or SqlDataWriteCommandError
+                        when GetSpan(SentrySqlSpanType.Execution, value) is { } errorSpan:
+                        errorSpan.Description = value.GetSubProperty<string>("Command", "CommandText");
+                        errorSpan.Finish(SpanStatus.InternalError);
+                        return;
+                    // Connection.
+                    case SqlMicrosoftWriteConnectionOpenBeforeCommand or SqlDataWriteConnectionOpenBeforeCommand:
+                        AddSpan(SentrySqlSpanType.Connection, "db.connection", value);
+                        return;
+                    case SqlMicrosoftWriteConnectionOpenAfterCommand or SqlDataWriteConnectionOpenAfterCommand:
+                        UpdateConnectionSpan(value.GetProperty<Guid>(OperationKey), value.GetProperty<Guid>(ConnectionKey));
+                        return;
+                    case SqlMicrosoftWriteConnectionCloseAfterCommand or SqlDataWriteConnectionCloseAfterCommand
+                        when GetSpan(SentrySqlSpanType.Connection, value) is { } closeSpan:
+                        TrySetConnectionStatistics(closeSpan, value);
+                        closeSpan.Finish(SpanStatus.Ok);
+                        return;
+                    case SqlMicrosoftWriteTransactionCommitAfter or SqlDataWriteTransactionCommitAfter
+                        when GetSpan(SentrySqlSpanType.Connection, value) is { } commitSpan:
+                        // If some query makes changes to the Database data, CloseAfterCommand event will not be invoked,
+                        // instead, TransactionCommitAfter is invoked.
+                        commitSpan.Finish(SpanStatus.Ok);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -244,20 +262,24 @@ namespace Sentry.Internals.DiagnosticSource
 
         private static void TrySetConnectionStatistics(ISpan span, KeyValuePair<string, object?> value)
         {
-            if (value.GetProperty<Dictionary<object, object>>("Statistics") is { } statistics)
+            if (value.GetProperty<Dictionary<object, object>>("Statistics") is not { } statistics)
             {
-                if (statistics["SelectRows"] is long selectRows)
-                {
-                    span.SetExtra("rows_sent", selectRows);
-                }
-                if (statistics["BytesReceived"] is long bytesReceived)
-                {
-                    span.SetExtra("bytes_received", bytesReceived);
-                }
-                if (statistics["BytesSent"] is long bytesSent)
-                {
-                    span.SetExtra("bytes_sent ", bytesSent);
-                }
+                return;
+            }
+
+            if (statistics["SelectRows"] is long selectRows)
+            {
+                span.SetExtra("rows_sent", selectRows);
+            }
+
+            if (statistics["BytesReceived"] is long bytesReceived)
+            {
+                span.SetExtra("bytes_received", bytesReceived);
+            }
+
+            if (statistics["BytesSent"] is long bytesSent)
+            {
+                span.SetExtra("bytes_sent ", bytesSent);
             }
         }
     }

@@ -13,48 +13,26 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
-      DOTNET_MULTILEVEL_LOOKUP: 1
+
     strategy:
       fail-fast: false
-      matrix:
-        language: [ 'csharp' ]
+
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
-    - name: Setup .NET SDK (v2.1)
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '2.1.818'
-    - name: Setup .NET SDK (v3.1)
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '3.1.x'
-    - name: Setup .NET SDK (v5.0)
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '5.0.x'
-    - name: Setup .NET SDK (v6.0)
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.x'
-        include-prerelease: true
 
-    # Initializes the CodeQL tools for scanning.
+    - name: Setup Environment
+      uses: ./.github/actions/environment
+
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
-        languages: ${{ matrix.language }}
+        languages: csharp
 
-    # ℹ️ Command-line programs to run using the OS shell.
-    # 📚 https://git.io/JvXDl
-
-    - run: |
-       dotnet build -c release
+    - name: Build
+      run: dotnet build --nologo
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2

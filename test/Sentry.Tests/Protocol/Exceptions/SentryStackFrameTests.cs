@@ -1,9 +1,16 @@
-using Sentry.Tests.Helpers;
+using Sentry.Testing;
 
 namespace Sentry.Tests.Protocol.Exceptions;
 
 public class SentryStackFrameTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryStackFrameTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -26,10 +33,11 @@ public class SentryStackFrameTests
             ImageAddress = 3,
             SymbolAddress = 4,
             InstructionOffset = 5,
-            InstructionAddress = "0xffffffff"
+            InstructionAddress = "0xffffffff",
+            AddressMode = "rel:0"
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{" +
@@ -42,18 +50,22 @@ public class SentryStackFrameTests
             "\"module\":\"Module\"," +
             "\"lineno\":1," +
             "\"colno\":2," +
-            "\"abs_path\":" +
-            "\"AbsolutePath\"," +
+            "\"abs_path\":\"AbsolutePath\"," +
             "\"context_line\":\"ContextLine\"," +
             "\"in_app\":true," +
             "\"package\":\"Package\"," +
             "\"platform\":\"Platform\"," +
-            "\"image_addr\":3," +
-            "\"symbol_addr\":4," +
+            "\"image_addr\":\"0x3\"," +
+            "\"symbol_addr\":\"0x4\"," +
             "\"instruction_addr\":\"0xffffffff\"," +
-            "\"instruction_offset\":5" +
+            "\"instruction_offset\":5," +
+            "\"addr_mode\":\"rel:0\"" +
             "}",
             actual);
+
+        var parsed = Json.Parse(actual, SentryStackFrame.FromJson);
+
+        parsed.Should().BeEquivalentTo(sut);
     }
 
     [Fact]
@@ -82,5 +94,81 @@ public class SentryStackFrameTests
     {
         var sut = new SentryStackFrame();
         Assert.NotNull(sut.FramesOmitted);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppIncludeMatches_TrueSet()
+    {
+        // Arrange
+        var module = "IncludedModule";
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
+        var options = new SentryOptions();
+        options.AddInAppInclude(module);
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppExcludeMatches_TrueSet()
+    {
+        // Arrange
+        var module = "ExcludedModule";
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
+        var options = new SentryOptions();
+        options.AddInAppExclude(module);
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.False(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppRuleDoesntMatch_TrueSet()
+    {
+        // Arrange
+        var module = "AppModule";
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
+        var options = new SentryOptions();
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_InAppAlreadySet_InAppIgnored()
+    {
+        // Arrange
+        var module = "ExcludedModule";
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
+        var options = new SentryOptions();
+        options.AddInAppExclude(module);
+        sut.InApp = true;
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp, "InApp started as true but ConfigureAppFrame changed it to false.");
     }
 }

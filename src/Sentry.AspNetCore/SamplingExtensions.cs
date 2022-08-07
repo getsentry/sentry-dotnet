@@ -1,13 +1,18 @@
+using System.ComponentModel;
+using Microsoft.AspNetCore.Http;
+
 namespace Sentry.AspNetCore;
 
 /// <summary>
 /// Methods to extract ASP.NET Core specific data from <see cref="TransactionSamplingContext"/>.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SamplingExtensions
 {
     internal const string KeyForHttpMethod = "__HttpMethod";
     internal const string KeyForHttpRoute = "__HttpRoute";
     internal const string KeyForHttpPath = "__HttpPath";
+    internal const string KeyForHttpContext = "__HttpContext";
 
     /// <summary>
     /// Gets the HTTP method associated with the transaction.
@@ -41,4 +46,15 @@ public static class SamplingExtensions
     /// </remarks>
     public static string? TryGetHttpPath(this TransactionSamplingContext samplingContext) =>
         samplingContext.CustomSamplingContext.GetValueOrDefault(KeyForHttpPath) as string;
+
+    /// <summary>
+    /// Gets the <see cref="HttpContext"/> associated with the transaction.
+    /// May return null if the value has not been set by the integration.
+    /// </summary>
+    /// <remarks>
+    /// This method extracts data from <see cref="TransactionSamplingContext.CustomSamplingContext"/>
+    /// which is populated by Sentry's ASP.NET Core integration.
+    /// </remarks>
+    public static HttpContext? TryGetHttpContext(this TransactionSamplingContext samplingContext) =>
+        samplingContext.CustomSamplingContext.GetValueOrDefault(KeyForHttpContext) as HttpContext;
 }

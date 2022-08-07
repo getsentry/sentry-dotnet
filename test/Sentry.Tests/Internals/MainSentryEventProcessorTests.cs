@@ -71,6 +71,20 @@ public class MainSentryEventProcessorTests
     }
 #endif
 
+#if NET5_0_OR_GREATER
+    [Fact]
+    public void EnsureRuntimeIdentifierExists()
+    {
+        var evt = new SentryEvent();
+        var sut = _fixture.GetSut();
+
+        _ = sut.Process(evt);
+
+        var runtime = evt.Contexts.Runtime;
+        Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, runtime.Identifier);
+    }
+#endif
+
     [Fact]
     public void Process_SendDefaultPiiTrueIdEnvironmentTrue_UserNameSet()
     {
@@ -106,7 +120,7 @@ public class MainSentryEventProcessorTests
     {
         //Arrange
         var evt = new SentryEvent();
-        var @ip = "192.0.0.1";
+        var ip = "192.0.0.1";
         evt.User.IpAddress = ip;
 
         _fixture.SentryOptions.SendDefaultPii = true;
@@ -368,7 +382,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         // Don't allow any assembly with a + (sha commit is added to informational version)
-        Assert.DoesNotContain(evt.Modules, x => x.Value.Contains("+"));
+        Assert.DoesNotContain(evt.Modules, x => x.Value.Contains('+'));
     }
 
     [Fact]
@@ -380,7 +394,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         // Ensure at least 1 assembly with a + (sha commit is added to informational version)
-        Assert.Contains(evt.Modules, x => x.Value.Contains("+"));
+        Assert.Contains(evt.Modules, x => x.Value.Contains('+'));
     }
 
     [Fact]
@@ -522,9 +536,9 @@ public class MainSentryEventProcessorTests
             // Assert
             dynamic ret = evt.Contexts[key];
 #pragma warning disable IDE0058 // Expression value is never used, cannot use _ = because it'll affect the test result
-            Assert.Equal(getter().Name, ret["Name"]);
-            Assert.Equal(getter().DisplayName, ret["DisplayName"]);
-            Assert.Equal(getter().Calendar.GetType().Name, ret["Calendar"]);
+            Assert.Equal(getter().Name, ret["name"]);
+            Assert.Equal(getter().DisplayName, ret["display_name"]);
+            Assert.Equal(getter().Calendar.GetType().Name, ret["calendar"]);
 #pragma warning restore IDE0058
         }
         finally

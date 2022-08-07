@@ -18,7 +18,7 @@ namespace Sentry
     /// It allows safe static access to a client and scope management.
     /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
     /// </remarks>
-    public static class SentrySdk
+    public static partial class SentrySdk
     {
         private static IHub _hub = DisabledHub.Instance;
 
@@ -35,21 +35,29 @@ namespace Sentry
 
             // If DSN is null (i.e. not explicitly disabled, just unset), then
             // try to resolve the value from environment.
-            var dsn = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
+            var dsnString = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
 
             // If it's either explicitly disabled or we couldn't resolve the DSN
             // from anywhere else, return a disabled hub.
-            if (Dsn.IsDisabled(dsn))
+            if (Dsn.IsDisabled(dsnString))
             {
-                options.LogWarning(
-                    "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
-
+                options.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
                 return DisabledHub.Instance;
             }
 
             // Validate DSN for an early exception in case it's malformed
-            _ = Dsn.Parse(dsn);
+            var dsn = Dsn.Parse(dsnString);
+            if (dsn.SecretKey != null)
+            {
+                options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
+            }
 
+            // Initialize bundled platform SDKs here
+#if ANDROID
+            InitSentryAndroidSdk(options);
+#elif IOS || MACCATALYST
+            InitSentryCocoaSdk(options);
+#endif
             return new Hub(options);
         }
 
@@ -59,6 +67,7 @@ namespace Sentry
         /// <remarks>
         /// If the DSN is not found, the SDK will not change state.
         /// </remarks>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init() => Init((string?)null);
 
         /// <summary>
@@ -69,6 +78,7 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
         /// <param name="dsn">The dsn.</param>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init(string? dsn) => !Dsn.IsDisabled(dsn)
             ? Init(c => c.Dsn = dsn)
             : DisabledHub.Instance;
@@ -76,7 +86,8 @@ namespace Sentry
         /// <summary>
         /// Initializes the SDK with an optional configuration options callback.
         /// </summary>
-        /// <param name="configureOptions">The configure options.</param>
+        /// <param name="configureOptions">The configuration options callback.</param>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         public static IDisposable Init(Action<SentryOptions>? configureOptions)
         {
             var options = new SentryOptions();
@@ -92,7 +103,7 @@ namespace Sentry
         /// <remarks>
         /// Used by integrations which have their own delegates.
         /// </remarks>
-        /// <returns>A disposable to close the SDK.</returns>
+        /// <returns>An object that should be disposed when the application terminates.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static IDisposable Init(SentryOptions options) => UseHub(InitHub(options));
 
@@ -234,6 +245,8 @@ namespace Sentry
         /// </remarks>
         /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
         /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+        [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+                  "that provide a callback to a configurable scope.")]
         [DebuggerStepThrough]
         public static void WithScope(Action<Scope> scopeCallback)
             => _hub.WithScope(scopeCallback);
@@ -276,6 +289,20 @@ namespace Sentry
             => _hub.CaptureEvent(evt, scope);
 
         /// <summary>
+        /// Captures an event with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="evt">The event.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <returns>The Id of the event.</returns>
+        [DebuggerStepThrough]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+            => _hub.CaptureEvent(evt, configureScope);
+
+        /// <summary>
         /// Captures the exception.
         /// </summary>
         /// <param name="exception">The exception.</param>
@@ -283,6 +310,19 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryId CaptureException(Exception exception)
             => _hub.CaptureException(exception);
+
+        /// <summary>
+        /// Captures the exception with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="exception">The exception.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <returns>The Id of the even.t</returns>
+        [DebuggerStepThrough]
+        public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
+            => _hub.CaptureException(exception, configureScope);
 
         /// <summary>
         /// Captures the message.
@@ -293,6 +333,20 @@ namespace Sentry
         [DebuggerStepThrough]
         public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
             => _hub.CaptureMessage(message, level);
+
+        /// <summary>
+        /// Captures the message with a configurable scope.
+        /// </summary>
+        /// <remarks>
+        /// This allows modifying a scope without affecting other events.
+        /// </remarks>
+        /// <param name="message">The message to send.</param>
+        /// <param name="configureScope">The callback to configure the scope.</param>
+        /// <param name="level">The message level.</param>
+        /// <returns>The Id of the event.</returns>
+        [DebuggerStepThrough]
+        public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
+            => _hub.CaptureMessage(message, configureScope, level);
 
         /// <summary>
         /// Captures a user feedback.
@@ -407,5 +461,56 @@ namespace Sentry
         [DebuggerStepThrough]
         public static void ResumeSession()
             => _hub.ResumeSession();
+
+        /// <summary>
+        /// Deliberately crashes an application, which is useful for testing and demonstration purposes.
+        /// </summary>
+        /// <remarks>
+        /// The method is marked obsolete only to discourage accidental misuse.
+        /// We do not intend to remove it.
+        /// </remarks>
+        [Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a real application.")]
+        public static void CauseCrash(CrashType crashType)
+        {
+            var msg =
+                "This exception was caused deliberately by " +
+                $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType}).";
+
+            switch (crashType)
+            {
+                case CrashType.Managed:
+                    throw new ApplicationException(msg);
+
+                case CrashType.ManagedBackgroundThread:
+                    var thread = new Thread(() => throw new ApplicationException(msg));
+                    thread.Start();
+                    break;
+
+#if ANDROID
+                case CrashType.Java:
+                    Sentry.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
+                    break;
+
+                case CrashType.JavaBackgroundThread:
+                    Sentry.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
+                    break;
+
+                case CrashType.Native:
+                    NativeCrash();
+                    break;
+#elif IOS || MACCATALYST
+                case CrashType.Native:
+                    SentryCocoa.SentrySDK.Crash();
+                    break;
+#endif
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(crashType), crashType, null);
+            }
+        }
+
+#if ANDROID
+    [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
+    private static extern void NativeCrash();
+#endif
     }
 }

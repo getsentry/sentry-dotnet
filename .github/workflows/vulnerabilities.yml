@@ -1,17 +1,36 @@
-name: check vulnerable nuget packages
+name: List vulnerable packages
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  schedule:
+    # once a day
+    - cron:  '0 0 * * *'
 
 jobs:
-  check-vulns:
-    runs-on: ubuntu-latest
+  List-vulnerable-packages:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
+        os: [ubuntu-latest, windows-latest, macos-12]
 
     steps:
         - name: Checkout
-          uses: actions/checkout@v2.3.3
+          uses: actions/checkout@v3
           with:
             submodules: recursive
-            fetch-depth: 2
+
+        - name: Setup Environment
+          uses: ./.github/actions/environment
+
+# Everything above here is the same as the main build.
+# We only need to restore to check for vulnerable packages
+
+        - name: Restore dependencies
+          run: dotnet restore
 
         - name: List vulnerable packages
           run: dotnet list package --vulnerable --include-transitive

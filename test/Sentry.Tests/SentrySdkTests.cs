@@ -1,14 +1,15 @@
+using System.Diagnostics;
 using System.Reflection;
+using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.Testing;
-using static Sentry.DsnSamples;
 using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests;
 
 [Collection(nameof(SentrySdkCollection))]
-public class SentrySdkTests : SentrySdkTestFixture
+public class SentrySdkTests : IDisposable
 {
     private readonly IDiagnosticLogger _logger;
 
@@ -34,7 +35,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init())
@@ -50,7 +51,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init(o => o.TracesSampleRate = 1.0))
@@ -70,18 +71,9 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
-    public void Init_ValidDsnWithSecret_EnablesSdk()
+    public void Init_ValidDsn_EnablesSdk()
     {
-        using (SentrySdk.Init(ValidDsnWithSecret))
-        {
-            Assert.True(SentrySdk.IsEnabled);
-        }
-    }
-
-    [Fact]
-    public void Init_ValidDsnWithoutSecret_EnablesSdk()
-    {
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        using (SentrySdk.Init(ValidDsn))
         {
             Assert.True(SentrySdk.IsEnabled);
         }
@@ -92,7 +84,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init(_ => { }))
@@ -124,7 +116,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     {
         EnvironmentVariableGuard.WithVariable(
             DsnEnvironmentVariable,
-            ValidDsnWithSecret,
+            ValidDsn,
             () =>
             {
                 using (SentrySdk.Init())
@@ -143,7 +135,7 @@ public class SentrySdkTests : SentrySdkTestFixture
             InvalidDsn,
             () =>
             {
-                var ex = Assert.Throws<ArgumentException>(() => SentrySdk.Init());
+                var ex = Assert.Throws<ArgumentException>(SentrySdk.Init);
                 Assert.Equal("Invalid DSN: A Project Id is required.", ex.Message);
             });
     }
@@ -191,6 +183,25 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
+    public void Init_DsnWithSecret_LogsWarning()
+    {
+        var logger = Substitute.For<IDiagnosticLogger>();
+        _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
+
+        var options = new SentryOptions
+        {
+            DiagnosticLogger = logger,
+            Debug = true,
+            Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647"
+        };
+
+        using (SentrySdk.Init(options))
+        {
+            logger.Received(1).Log(SentryLevel.Warning, "The provided DSN that contains a secret key. This is not required and will be ignored.");
+        }
+    }
+
+    [Fact]
     public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogWarning()
     {
         var logger = Substitute.For<IDiagnosticLogger>();
@@ -211,7 +222,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     [Fact]
     public void Init_MultipleCalls_ReplacesHubWithLatest()
     {
-        var first = SentrySdk.Init(ValidDsnWithSecret);
+        var first = SentrySdk.Init(ValidDsn);
         SentrySdk.AddBreadcrumb("test", "category");
         var called = false;
         SentrySdk.ConfigureScope(p =>
@@ -222,7 +233,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         Assert.True(called);
         called = false;
 
-        var second = SentrySdk.Init(ValidDsnWithSecret);
+        var second = SentrySdk.Init(ValidDsn);
         SentrySdk.ConfigureScope(p =>
         {
             called = true;
@@ -234,48 +245,124 @@ public class SentrySdkTests : SentrySdkTestFixture
         second.Dispose();
     }
 
-    [Fact(Skip = "Flaky (after review)")]
-    public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed()
+    [SkippableTheory]
+    [InlineData(true)] // InitCacheFlushTimeout is more than enough time to process all messages
+    [InlineData(false)] // InitCacheFlushTimeout is less time than needed to process all messages
+    [InlineData(null)] // InitCacheFlushTimeout is not set
+    public async Task Init_WithCache_BlocksUntilExistingCacheIsFlushed(bool? testDelayWorking)
     {
+        // Skip in CI.  Still too flaky. :(
+        Skip.If(BuildServerDetector.Detected);
+
+        // Note: We use a fake filesystem for this test, which uses only memory instead of disk.
+        //       This keeps file IO access time out of the test.
+
+        // Not too many, or this will be slow.  Not too few or this will be flaky.
+        const int numEnvelopes = 5;
+
+        // Set the delay for the transport here.  If the test becomes flaky, increase the timeout.
+        var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(200);
+
         // Arrange
-        using var cacheDirectory = new TempDirectory();
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
+        var cachePath = cacheDirectory.Path;
 
-        {
-            // Pre-populate cache
-            var initialInnerTransport = new FakeFailingTransport();
-            await using var initialTransport = new CachingTransport(initialInnerTransport, new SentryOptions
+        // Pre-populate cache
+        var initialInnerTransport = Substitute.For<ITransport>();
+        var initialTransport = CachingTransport.Create(
+            initialInnerTransport,
+            new SentryOptions
             {
+                Debug = true,
                 DiagnosticLogger = _logger,
-                Dsn = ValidDsnWithoutSecret,
-                CacheDirectoryPath = cacheDirectory.Path
-            });
-
-            // Shutdown the worker to make sure nothing gets processed
-            await initialTransport.StopWorkerAsync();
-
-            for (var i = 0; i < 3; i++)
+                Dsn = ValidDsn,
+                CacheDirectoryPath = cachePath,
+                FileSystem = fileSystem
+            },
+            startWorker: false);
+        await using (initialTransport)
+        {
+            for (var i = 0; i < numEnvelopes; i++)
             {
                 using var envelope = Envelope.FromEvent(new SentryEvent());
                 await initialTransport.SendEnvelopeAsync(envelope);
             }
         }
 
-        // Act
-        using var transport = new FakeTransport();
-        using var _ = SentrySdk.Init(o =>
-        {
-            o.Dsn = ValidDsnWithoutSecret;
-            o.DiagnosticLogger = _logger;
-            o.CacheDirectoryPath = cacheDirectory.Path;
-            o.InitCacheFlushTimeout = TimeSpan.FromSeconds(30);
-            o.Transport = transport;
-        });
+        _logger.Log(SentryLevel.Debug, "Done adding to cache directory.");
 
-        // Assert
-        Directory
-            .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
-            .ToArray()
-            .Should().BeEmpty();
+        var countCompleted = 0;
+        var transport = Substitute.For<ITransport>();
+        transport.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .Returns(async callInfo =>
+            {
+                var token = callInfo.Arg<CancellationToken>();
+                await Task.Delay(processingDelayPerEnvelope, token);
+                Interlocked.Increment(ref countCompleted);
+                _logger.Log(SentryLevel.Debug, $"Sent envelope {countCompleted}.");
+            });
+
+        // Set the timeout for the desired result
+        var initFlushTimeout = testDelayWorking switch
+        {
+            // more than enough
+            true => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes * 10)),
+            // enough for at least one, but not all
+            false => TimeSpan.FromTicks(processingDelayPerEnvelope.Ticks * (numEnvelopes - 1)),
+            // none at all
+            null => TimeSpan.Zero
+        };
+
+        // Act
+        SentryOptions options = null;
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            using var _ = SentrySdk.Init(o =>
+            {
+                // Disable process exit flush to resolve "There is no currently active test." errors.
+                o.DisableAppDomainProcessExitFlush();
+
+                o.Dsn = ValidDsn;
+                o.Debug = true;
+                o.DiagnosticLogger = _logger;
+                o.CacheDirectoryPath = cachePath;
+                o.FileSystem = fileSystem;
+                o.InitCacheFlushTimeout = initFlushTimeout;
+                o.Transport = transport;
+                options = o;
+            });
+
+            stopwatch.Stop();
+
+            // Assert
+            switch (testDelayWorking)
+            {
+                case true:
+                    // We waited long enough to have them all
+                    Assert.Equal(numEnvelopes, countCompleted);
+
+                    // But we should not have waited longer than we needed to
+                    Assert.True(stopwatch.Elapsed < initFlushTimeout, "Should not have waited for the entire timeout!");
+                    break;
+                case false:
+                    // We only waited long enough to have at least one, but not all of them
+                    Assert.InRange(countCompleted, 1, numEnvelopes - 1);
+                    break;
+                case null:
+                    // We shouldn't have any, as we didn't ask to flush the cache on init
+                    Assert.Equal(0, countCompleted);
+                    break;
+            }
+        }
+        finally
+        {
+            // cleanup to avoid disposing/deleting the temp directory while the cache worker is still running
+            var cachingTransport = (CachingTransport)options!.Transport;
+            await cachingTransport!.StopWorkerAsync();
+        }
     }
 
     [Fact]
@@ -290,8 +377,8 @@ public class SentrySdkTests : SentrySdkTestFixture
     [Fact]
     public void Dispose_DisposingFirst_DoesntAffectSecond()
     {
-        var first = SentrySdk.Init(ValidDsnWithSecret);
-        var second = SentrySdk.Init(ValidDsnWithSecret);
+        var first = SentrySdk.Init(ValidDsn);
+        var second = SentrySdk.Init(ValidDsn);
         SentrySdk.AddBreadcrumb("test", "category");
         first.Dispose();
         var called = false;
@@ -305,7 +392,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     }
 
     [Fact]
-    public async Task FlushAsync_NotInit_NoOp() => await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+    public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
 
     [Fact]
     public void PushScope_InstanceOf_DisabledClient()
@@ -357,7 +444,7 @@ public class SentrySdkTests : SentrySdkTestFixture
     public async Task ConfigureScope_OnTask_PropagatedToCaller()
     {
         const string expected = "test";
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        using (SentrySdk.Init(ValidDsn))
         {
             await ModifyScope();
 
@@ -374,6 +461,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         }
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
@@ -382,10 +470,11 @@ public class SentrySdkTests : SentrySdkTestFixture
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_InvokedWithNewScope()
     {
-        using (SentrySdk.Init(ValidDsnWithoutSecret))
+        using (SentrySdk.Init(ValidDsn))
         {
             Scope expected = null;
             SentrySdk.ConfigureScope(s => expected = s);
@@ -397,6 +486,106 @@ public class SentrySdkTests : SentrySdkTestFixture
             Assert.NotSame(expected, actual);
 
             SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeAppliesToEvent()
+    {
+        const string expected = "test";
+        var worker = Substitute.For<IBackgroundWorker>();
+
+        using (SentrySdk.Init(o =>
+               {
+                   o.Dsn = ValidDsn;
+                   o.BackgroundWorker = worker;
+               }))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), s => s.AddBreadcrumb(expected));
+
+            worker.EnqueueEnvelope(
+                Arg.Is<Envelope>(e => e.Items
+                    .Select(i => i.Payload)
+                    .OfType<JsonSerializable>()
+                    .Select(i => i.Source)
+                    .OfType<SentryEvent>()
+                    .Single()
+                    .Breadcrumbs
+                    .Single()
+                    .Message == expected));
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeOnlyAppliesOnlyOnce()
+    {
+        using (SentrySdk.Init(ValidDsn))
+        {
+            var callbackCounter = 0;
+            SentrySdk.CaptureEvent(new SentryEvent(), _ => callbackCounter++);
+            SentrySdk.CaptureEvent(new SentryEvent());
+
+            Assert.Equal(1, callbackCounter);
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScopeNull_LogsError()
+    {
+        var logger = new InMemoryDiagnosticLogger();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = logger,
+            Debug = true
+        };
+
+        using (SentrySdk.Init(options))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), null as Action<Scope>);
+
+            logger.Entries.Any(e =>
+                    e.Level == SentryLevel.Error &&
+                    e.Message == "Failure to capture event: {0}")
+                .Should()
+                .BeTrue();
+        }
+    }
+
+    [Fact]
+    public void CaptureEvent_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
+        {
+            SentrySdk.CaptureEvent(new SentryEvent(), _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
+        }
+    }
+
+    [Fact]
+    public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
+        {
+            SentrySdk.CaptureException(new Exception(), _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
+        }
+    }
+
+    [Fact]
+    public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        var scopeCallbackWasInvoked = false;
+        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
+        {
+            SentrySdk.CaptureMessage("TestMessage", _ => scopeCallbackWasInvoked = true);
+
+            Assert.True(scopeCallbackWasInvoked);
         }
     }
 
@@ -431,7 +620,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         const string expected = "test";
         using (SentrySdk.Init(o =>
                {
-                   o.Dsn = ValidDsnWithSecret;
+                   o.Dsn = ValidDsn;
                    o.BackgroundWorker = worker;
                }))
         {
@@ -508,7 +697,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         // Act
         var sut = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             IsGlobalModeEnabled = false
         });
 
@@ -524,7 +713,7 @@ public class SentrySdkTests : SentrySdkTestFixture
         // Act
         var sut = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             IsGlobalModeEnabled = true
         });
 
@@ -542,7 +731,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         _ = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
             Debug = true
@@ -569,7 +758,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         _ = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = false,
             Debug = true
@@ -596,7 +785,7 @@ public class SentrySdkTests : SentrySdkTestFixture
 
         _ = SentrySdk.InitHub(new SentryOptions
         {
-            Dsn = ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
             Debug = true
@@ -607,5 +796,10 @@ public class SentrySdkTests : SentrySdkTestFixture
             Arg.Any<string>(),
             Arg.Any<Exception>(),
             Arg.Any<object[]>());
+    }
+
+    public void Dispose()
+    {
+        SentrySdk.Close();
     }
 }

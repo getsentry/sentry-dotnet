@@ -1,8 +1,3 @@
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-using Sentry.EntityFramework.Internals.Extensions;
-using Sentry.Extensibility;
-
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryPerformanceListener : IDbCommandInterceptor
@@ -10,10 +5,10 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     internal const string SentryUserStateKey = "SentrySpanRef";
     internal const string DbReaderKey = "db.query";
     internal const string DbNonQueryKey = "db.execute";
-    internal const string DbScalarKey = "db.query-scalar";
+    internal const string DbScalarKey = "db.query.scalar";
 
-    private SentryOptions _options { get; }
-    private IHub _hub { get; }
+    private SentryOptions _options;
+    private IHub _hub;
 
     internal SentryQueryPerformanceListener(IHub hub, SentryOptions options)
     {
@@ -68,9 +63,10 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
                 span.Finish(interceptionContext.Exception);
             }
         }
-        else
+        //Only log if there was a transaction on the Hub.
+        else if (_options.DiagnosticLevel == SentryLevel.Debug && _hub.GetSpan() is { })
         {
-            _options.DiagnosticLogger?.LogWarning("Span with key {0} was not found on interceptionContext.", key);
+            _options.DiagnosticLogger?.LogDebug("Span with key {0} was not found on interceptionContext.", key);
         }
     }
 }

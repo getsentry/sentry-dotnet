@@ -1,17 +1,30 @@
-using System.Data.Entity.Infrastructure.Interception;
-using Sentry.Integrations;
-
 namespace Sentry.EntityFramework;
 
 internal class DbInterceptionIntegration : ISdkIntegration
 {
-    private IDbInterceptor? _sqlInterceptor { get; set; }
+    // Internal for testing.
+    internal IDbInterceptor? SqlInterceptor { get; private set; }
+
+    internal const string SampleRateDisabledMessage = "EF performance won't be collected because TracesSampleRate is set to 0.";
 
     public void Register(IHub hub, SentryOptions options)
     {
-        _sqlInterceptor = new SentryQueryPerformanceListener(hub, options);
-        DbInterception.Add(_sqlInterceptor);
+        if (options.TracesSampleRate == 0)
+        {
+            options.DiagnosticLogger?.LogInfo(SampleRateDisabledMessage);
+        }
+        else
+        {
+            SqlInterceptor = new SentryQueryPerformanceListener(hub, options);
+            DbInterception.Add(SqlInterceptor);
+        }
     }
 
-    public void Unregister() => DbInterception.Remove(_sqlInterceptor);
+    public void Unregister()
+    {
+        if (SqlInterceptor is { } interceptor)
+        {
+            DbInterception.Remove(interceptor);
+        }
+    }
 }

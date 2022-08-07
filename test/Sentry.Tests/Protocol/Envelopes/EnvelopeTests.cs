@@ -1,13 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Sentry.Infrastructure;
-using Sentry.Internal;
-using Sentry.Protocol;
-using Sentry.Protocol.Envelopes;
 using Sentry.Testing;
 
 namespace Sentry.Tests.Protocol.Envelopes;
@@ -16,6 +6,15 @@ public class EnvelopeTests
 {
     // Tests driven by examples from docs:
     // https://develop.sentry.dev/sdk/envelopes/#full-examples
+
+    private readonly IDiagnosticLogger _testOutputLogger;
+    private readonly MockClock _fakeClock;
+
+    public EnvelopeTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+        _fakeClock = new MockClock(DateTimeOffset.MaxValue);
+    }
 
     [Fact]
     public async Task Serialization_EnvelopeWithoutItems_Success()
@@ -26,11 +25,27 @@ public class EnvelopeTests
             Array.Empty<EnvelopeItem>());
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n");
+            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithoutItems_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
+            Array.Empty<EnvelopeItem>());
+
+        // Act
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
     }
 
     [Fact]
@@ -66,11 +81,36 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{}\n" +
+            "{\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
+            "{\"type\":\"session\",\"length\":75}\n" +
+            "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithoutHeader_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object>(),
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object>{["type"] = "session"},
+                    new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
+                        .ToMemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"session\",\"length\":75}\n" +
             "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n");
     }
@@ -139,11 +179,58 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
+            "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
+            "\xef\xbb\xbfHello\r\n\n" +
+            "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
+            "{\"message\":\"hello world\",\"level\":\"error\"}\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithTwoItems_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object>
+            {
+                ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc",
+                ["dsn"] = "https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42"
+            },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "attachment",
+                        ["length"] = 13,
+                        ["content_type"] = "text/plain",
+                        ["filename"] = "hello.txt"
+                    },
+                    new StreamSerializable("\xef\xbb\xbfHello\r\n".ToMemoryStream())
+                ),
+
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "event",
+                        ["length"] = 41,
+                        ["content_type"] = "application/json",
+                        ["filename"] = "application.log"
+                    },
+                    new StreamSerializable("{\"message\":\"hello world\",\"level\":\"error\"}".ToMemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
             "\xef\xbb\xbfHello\r\n\n" +
             "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
@@ -227,11 +314,50 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
+            "{\"type\":\"attachment\",\"length\":0}\n" +
+            "\n" +
+            "{\"type\":\"attachment\",\"length\":0}\n" +
+            "\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithTwoEmptyItems_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "attachment",
+                        ["length"] = 0L
+                    },
+                    new StreamSerializable(new MemoryStream())
+                ),
+
+                new EnvelopeItem(
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = "attachment",
+                        ["length"] = 0L
+                    },
+                    new StreamSerializable(new MemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":0}\n" +
             "\n" +
             "{\"type\":\"attachment\",\"length\":0}\n" +
@@ -295,11 +421,35 @@ public class EnvelopeTests
             });
 
         // Act
-        var output = await envelope.SerializeToStringAsync(new TraceDiagnosticLogger(SentryLevel.Debug));
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
         output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
+            "{\"type\":\"attachment\",\"length\":10}\n" +
+            "helloworld\n");
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithItemWithoutLength_Success_Synchronous()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "attachment"},
+                    new StreamSerializable("helloworld".ToMemoryStream())
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
             "{\"type\":\"attachment\",\"length\":10}\n" +
             "helloworld\n");
     }
@@ -369,20 +519,13 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, _testOutputLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
 
         // Assert
-
-        // Can't compare the entire object graph because output envelope contains evaluated length,
-        // which original envelope doesn't have.
-        envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
-        envelopeRoundtrip.Items.Should().ContainSingle();
-
-        var payloadContent = (envelopeRoundtrip.Items[0].Payload as JsonSerializable)?.Source;
-        payloadContent.Should().BeEquivalentTo(@event, o => o.Excluding(x => x.Exception));
+        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -406,7 +549,7 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, _testOutputLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
@@ -443,7 +586,7 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, _testOutputLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
@@ -475,19 +618,13 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, _testOutputLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
 
         // Assert
-
-        // Can't compare the entire object graph because output envelope contains evaluated length,
-        // which original envelope doesn't have.
-        envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
-        envelopeRoundtrip.Items.Should().ContainSingle();
-        envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
-            .Which.Source.Should().BeEquivalentTo(feedback);
+        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -501,19 +638,13 @@ public class EnvelopeTests
         using var stream = new MemoryStream();
 
         // Act
-        await envelope.SerializeAsync(stream, new TraceDiagnosticLogger(SentryLevel.Debug));
+        await envelope.SerializeAsync(stream, _testOutputLogger);
         stream.Seek(0, SeekOrigin.Begin);
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
 
         // Assert
-
-        // Can't compare the entire object graph because output envelope contains evaluated length,
-        // which original envelope doesn't have.
-        envelopeRoundtrip.Header.Should().BeEquivalentTo(envelope.Header);
-        envelopeRoundtrip.Items.Should().ContainSingle();
-        envelopeRoundtrip.Items[0].Payload.Should().BeOfType<JsonSerializable>()
-            .Which.Source.Should().BeEquivalentTo(sessionUpdate);
+        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
@@ -566,5 +697,32 @@ public class EnvelopeTests
                 nested["name"] == SdkVersion.Instance.Name &&
                 nested["version"] == SdkVersion.Instance.Version;
         }).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Serialization_RoundTrip_ReplacesSentAtHeader()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
+            Array.Empty<EnvelopeItem>());
+
+        // Act
+        _fakeClock.SetUtcNow(DateTimeOffset.MinValue);
+        var serialized = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(serialized);
+        await writer.FlushAsync();
+        stream.Seek(0, SeekOrigin.Begin);
+        var deserialized = await Envelope.DeserializeAsync(stream);
+
+        _fakeClock.SetUtcNow(DateTimeOffset.MaxValue);
+        var output = await deserialized.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
     }
 }

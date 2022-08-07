@@ -9,7 +9,4 @@ if [ "$GITHUB_ACTIONS" == "true" ]
 fi
 
 dotnet test -c Release -l $testLogger \
-    /p:CollectCoverage=true \
-    /p:CoverletOutputFormat=opencover \
-    /p:Exclude=\"[Sentry.Protocol.Test*]*,[xunit.*]*,[Sentry.Test*]*\" \
-    /p:UseSourceLink=true
+    /p:CopyLocalLockFileAssemblies=true

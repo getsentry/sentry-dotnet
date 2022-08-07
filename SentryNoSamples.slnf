@@ -11,6 +11,7 @@
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry.Google.Cloud.Functions\\Sentry.Google.Cloud.Functions.csproj",
       "src\\Sentry.Log4Net\\Sentry.Log4Net.csproj",
+      "src\\Sentry.Maui\\Sentry.Maui.csproj",
       "src\\Sentry.NLog\\Sentry.NLog.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry.Tunnel\\Sentry.Tunnel.csproj",
@@ -19,15 +20,17 @@
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
       "test\\Sentry.DiagnosticSource.Tests\\Sentry.DiagnosticSource.Tests.csproj",
+      "test\\Sentry.DiagnosticSource.IntegrationTests\\Sentry.DiagnosticSource.IntegrationTests.csproj",
       "test\\Sentry.EntityFramework.Tests\\Sentry.EntityFramework.Tests.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
       "test\\Sentry.Google.Cloud.Functions.Tests\\Sentry.Google.Cloud.Functions.Tests.csproj",
       "test\\Sentry.Log4Net.Tests\\Sentry.Log4Net.Tests.csproj",
+      "test\\Sentry.Maui.Tests\\Sentry.Maui.Tests.csproj",
       "test\\Sentry.NLog.Tests\\Sentry.NLog.Tests.csproj",
       "test\\Sentry.Serilog.Tests\\Sentry.Serilog.Tests.csproj",
+      "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
-      "test\\Sentry.Tests\\Sentry.Tests.csproj",
-      "test\\Sentry.Tunnel.Tests\\Sentry.Tunnel.Tests.csproj"
+      "test\\Sentry.Tests\\Sentry.Tests.csproj"
     ]
   }
 }

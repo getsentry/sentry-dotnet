@@ -5,19 +5,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
-    <ProjectReference Include="../Sentry.Testing/Sentry.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
   <!-- Run netcoreapp3.1 against netcoreapp3.0 target of Sentry -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <ProjectReference Update="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=netcoreapp3.0" />
+    <ProjectReference Update="..\..\src\Sentry\Sentry.csproj" SetTargetFramework="TargetFramework=netcoreapp3.0" />
   </ItemGroup>
 
   <!-- Run netcoreapp3.0 against netstandard2.1 target of Sentry -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <ProjectReference Update="../../src/Sentry/Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
-    <!-- NET Core's built-in STJ is lower version which causes conflicts, so we have to explicitly reference it -->
+    <ProjectReference Update="..\..\src\Sentry\Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
+    <!-- NET Core 3.0's built-in STJ is lower version which causes conflicts, so we have to explicitly reference it -->
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
     <!-- Ben.Demystifier uses S.R.M v5 and also requires it via package reference when on nca3.x -->
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
@@ -26,21 +27,14 @@
   <!-- DiagnosticSource Tests -->
   <!-- netcoreapp3.0 skipped since it'll target NET standard on Sentry. -->
   <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' and '$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
-    <Compile Include="../Sentry.DiagnosticSource.Tests/*.cs">
-      <Link>Internals/DiagnosticSource/%(Filename)%(Extension)</Link>
+    <Compile Include="..\Sentry.DiagnosticSource.Tests\*.cs">
+      <Link>Internals\DiagnosticSource\%(Filename)%(Extension)</Link>
     </Compile>
-    <Compile Include="../Sentry.Diagnostics.DiagnosticSource.Tests/Integration/**/*.cs">
-      <Link>Internals/DiagnosticSource/Integration/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    <Compile Include="..\Sentry.Diagnostics.DiagnosticSource.Tests\Integration\**\*.cs">
+      <Link>Internals\DiagnosticSource\Integration\%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
-
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.11" />
   </ItemGroup>
 
-  <!-- DiagnosticSource -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
-  </ItemGroup>
-  
+  <Import Project="..\..\src\Sentry\buildTransitive\Sentry.props" />
+
 </Project>

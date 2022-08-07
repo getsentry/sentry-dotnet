@@ -1,9 +1,16 @@
-using Sentry.Tests.Helpers;
+using Sentry.Testing;
 
 namespace Sentry.Tests.Protocol;
 
 public class UserTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public UserTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -16,7 +23,7 @@ public class UserTests
             Other = new Dictionary<string, string> { { "testCustomValueKey", "testCustomValue" } }
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{" +
@@ -57,7 +64,7 @@ public class UserTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((User user, string serialized) @case)
     {
-        var actual = @case.user.ToJsonString();
+        var actual = @case.user.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

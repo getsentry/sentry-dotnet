@@ -1,4 +1,4 @@
-#if !NETCOREAPP2_1
+#if NETCOREAPP3_1_OR_GREATER
 using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,7 +19,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -65,7 +65,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -108,7 +108,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -125,10 +125,7 @@ public class SentryTracingMiddlewareTests
                 app.UseRouting();
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => Task.CompletedTask);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
             }));
 
         var client = server.CreateClient();
@@ -155,7 +152,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -201,12 +198,13 @@ public class SentryTracingMiddlewareTests
     {
         // Arrange
         TransactionSamplingContext samplingContext = null;
+        HttpContext httpContext = null;
 
         var sentryClient = Substitute.For<ISentryClient>();
 
         var hub = new Internal.Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx =>
             {
                 samplingContext = ctx;
@@ -229,10 +227,11 @@ public class SentryTracingMiddlewareTests
                 app.UseRouting();
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
+                app.UseEndpoints(routes => routes.Map("/person/{id}", context =>
                 {
-                    routes.Map("/person/{id}", _ => Task.CompletedTask);
-                });
+                    httpContext = context;
+                    return Task.CompletedTask;
+                }));
             }));
 
         var client = server.CreateClient();
@@ -245,6 +244,7 @@ public class SentryTracingMiddlewareTests
         samplingContext.TryGetHttpMethod().Should().Be("GET");
         samplingContext.TryGetHttpRoute().Should().Be("/person/{id}");
         samplingContext.TryGetHttpPath().Should().Be("/person/13");
+        samplingContext.TryGetHttpContext().Should().BeSameAs(httpContext);
     }
 
     [Fact]
@@ -257,7 +257,7 @@ public class SentryTracingMiddlewareTests
 
         var hub = new Internal.Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx =>
             {
                 samplingContext = ctx;
@@ -292,10 +292,7 @@ public class SentryTracingMiddlewareTests
                 });
                 app.UseSentryTracing();
 
-                app.UseEndpoints(routes =>
-                {
-                    routes.Map("/person/{id}", _ => throw exception);
-                });
+                app.UseEndpoints(routes => routes.Map("/person/{id}", _ => throw exception));
             }));
 
         var client = server.CreateClient();
@@ -306,6 +303,90 @@ public class SentryTracingMiddlewareTests
         // Assert
         Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out var span));
         Assert.Equal(SpanStatus.InternalError, span.Status);
+    }
+
+    [Fact]
+    public async Task Transaction_TransactionNameProviderSetSet_TransactionNameSet()
+    {
+        // Arrange
+        Transaction transaction = null;
+
+        var expectedName = "My custom name";
+
+        var sentryClient = Substitute.For<ISentryClient>();
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
+            .Do(callback => transaction = callback.Arg<Transaction>());
+        var options = new SentryAspNetCoreOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        };
+
+        var hub = new Hub(options, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseSentry(aspNewOptions => aspNewOptions.TransactionNameProvider = _ => expectedName)
+            .ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            }).Configure(app => app.UseSentryTracing()));
+
+        var client = server.CreateClient();
+
+        // Act
+        try
+        {
+            await client.GetStringAsync("/person/13.bmp");
+        }
+        // Expected error.
+        catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+        { }
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction?.Name.Should().Be($"GET {expectedName}");
+    }
+
+    [Fact]
+    public async Task Transaction_TransactionNameProviderSetUnset_UnknownTransactionNameSet()
+    {
+        // Arrange
+        Transaction transaction = null;
+
+        var sentryClient = Substitute.For<ISentryClient>();
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
+            .Do(callback => transaction = callback.Arg<Transaction>());
+        var options = new SentryAspNetCoreOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        };
+
+        var hub = new Hub(options, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            }).Configure(app => app.UseSentryTracing()));
+
+        var client = server.CreateClient();
+
+        // Act
+        try
+        {
+            await client.GetStringAsync("/person/13.bmp");
+        }
+        // Expected error.
+        catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+        { }
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction?.Name.Should().Be("Unknown Route");
     }
 }
 

@@ -1,17 +1,10 @@
-using System.IO.Compression;
-using System.Net;
-using Sentry;
-using Sentry.Serilog;
-using Serilog.Configuration;
-using Serilog.Events;
-using Serilog.Formatting;
-
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Serilog;
 
 /// <summary>
 /// Sentry Serilog Sink extensions.
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentrySinkExtensions
 {
     /// <summary>

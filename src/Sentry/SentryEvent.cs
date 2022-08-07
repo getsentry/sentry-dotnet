@@ -66,7 +66,7 @@ namespace Sentry
         public string? Platform { get; set; }
 
         /// <summary>
-        /// Identifies the host SDK from which the event was recorded.
+        /// Identifies the computer from which the event was recorded.
         /// </summary>
         public string? ServerName { get; set; }
 
@@ -97,6 +97,12 @@ namespace Sentry
         }
 
         /// <summary>
+        /// The Sentry Debug Meta Images interface.
+        /// </summary>
+        /// <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta#debug-images"/>
+        public List<DebugImage>? DebugImages { get; set; }
+
+        /// <summary>
         /// A list of relevant modules and their versions.
         /// </summary>
         public IDictionary<string, string> Modules => _modules ??= new Dictionary<string, string>();
@@ -116,13 +122,13 @@ namespace Sentry
             set => _request = value;
         }
 
-        private Contexts? _contexts;
+        private readonly Contexts _contexts = new();
 
         /// <inheritdoc />
         public Contexts Contexts
         {
-            get => _contexts ??= new Contexts();
-            set => _contexts = value;
+            get => _contexts;
+            set => _contexts.ReplaceWith(value);
         }
 
         private User? _user;
@@ -233,7 +239,7 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
             writer.WriteStringIfNotWhiteSpace("transaction", TransactionName);
             writer.WriteSerializableIfNotNull("request", _request, logger);
-            writer.WriteSerializableIfNotNull("contexts", _contexts, logger);
+            writer.WriteSerializableIfNotNull("contexts", _contexts.NullIfEmpty(), logger);
             writer.WriteSerializableIfNotNull("user", _user, logger);
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteSerializable("sdk", Sdk, logger);
@@ -242,13 +248,25 @@ namespace Sentry
             writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
             writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
 
+            if (DebugImages?.Count > 0)
+            {
+                writer.WritePropertyName("debug_meta");
+                writer.WriteStartObject();
+
+                writer.WriteArray("images", DebugImages.ToArray(), logger);
+
+                writer.WriteEndObject();
+            }
+
             writer.WriteEndObject();
         }
 
         /// <summary>
         /// Parses from JSON.
         /// </summary>
-        public static SentryEvent FromJson(JsonElement json)
+        public static SentryEvent FromJson(JsonElement json) => FromJson(json, null);
+
+        internal static SentryEvent FromJson(JsonElement json, Exception? exception)
         {
             var modules = json.GetPropertyOrNull("modules")?.GetStringDictionaryOrNull();
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
@@ -258,8 +276,8 @@ namespace Sentry
             var platform = json.GetPropertyOrNull("platform")?.GetString();
             var serverName = json.GetPropertyOrNull("server_name")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
-            var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).Pipe(v => new SentryValues<SentryException>(v));
-            var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).Pipe(v => new SentryValues<SentryThread>(v));
+            var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).ToList().Pipe(v => new SentryValues<SentryException>(v));
+            var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).ToList().Pipe(v => new SentryValues<SentryThread>(v));
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
             var transaction = json.GetPropertyOrNull("transaction")?.GetString();
             var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
@@ -272,7 +290,10 @@ namespace Sentry
             var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
 
-            return new SentryEvent(null, timestamp, eventId)
+            var debugMeta = json.GetPropertyOrNull("debug_meta");
+            var images = debugMeta?.GetPropertyOrNull("images")?.EnumerateArray().Select(DebugImage.FromJson).ToList();
+
+            return new SentryEvent(exception, timestamp, eventId)
             {
                 _modules = modules?.WhereNotNullValue().ToDictionary(),
                 Message = message,
@@ -282,10 +303,11 @@ namespace Sentry
                 Release = release,
                 SentryExceptionValues = exceptionValues,
                 SentryThreadValues = threadValues,
+                DebugImages = images,
                 Level = level,
                 TransactionName = transaction,
                 _request = request,
-                _contexts = contexts,
+                Contexts = contexts ?? new(),
                 _user = user,
                 Environment = environment,
                 Sdk = sdk,

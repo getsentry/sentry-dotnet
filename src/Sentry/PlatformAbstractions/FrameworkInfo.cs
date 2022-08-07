@@ -36,6 +36,7 @@ namespace Sentry.PlatformAbstractions
                 {528049, "4.8"},
                 {528209, "4.8"},
                 {528372, "4.8"},
+                {528449, "4.8"}
             };
     }
 }

@@ -7,7 +7,7 @@ namespace Sentry.Extensibility
     /// <summary>
     /// An abstraction to the transport of the event.
     /// </summary>
-    internal interface ITransport
+    public interface ITransport
     {
         /// <summary>
         /// Sends the <see cref="Envelope" /> to Sentry asynchronously.
@@ -15,10 +15,5 @@ namespace Sentry.Extensibility
         /// <param name="envelope">The envelope to send to Sentry.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default);
-    }
-
-    internal interface IFlushableTransport : ITransport
-    {
-        Task FlushAsync(CancellationToken cancellationToken = default);
     }
 }

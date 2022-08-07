@@ -6,70 +6,55 @@ on:
       - main
       - release/*
   pull_request:
+
 jobs:
   build:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
-      DOTNET_MULTILEVEL_LOOKUP: 1
+
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: windows-latest
-            build_script: .\build.ps1
-          - os: ubuntu-latest
-            build_script: ./build.sh
-          - os: macos-latest
-            build_script: ./build.sh
+        # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
+        os: [ubuntu-latest, windows-latest, macos-12]
 
     steps:
         - name: Checkout
-          uses: actions/checkout@v2.3.3
+          uses: actions/checkout@v3
           with:
             submodules: recursive
-            fetch-depth: 2 # default is 1 and codecov needs > 1
-        - name: Setup .NET SDK (v2.1)
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: '2.1.818'
-        - name: Setup .NET SDK (v3.1)
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: '3.1.x'
-        - name: Setup .NET SDK (v5.0)
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: '5.0.x'
-        - name: Setup .NET SDK (v6.0)
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: '6.0.x'
-            
-        - name: Run build script
-          run: ${{ matrix.build_script }}
 
-        - name: Publish coverage report
-          uses: codecov/codecov-action@v1
+        - name: Setup Environment
+          uses: ./.github/actions/environment
+
+        - name: Build Native Dependencies
+          uses: ./.github/actions/buildnative
+
+        - name: Build
+          run: dotnet build -c Release --nologo /p:CopyLocalLockFileAssemblies=true
+
+        - name: Test
+          run: dotnet test -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+
+        - name: Pack
+          # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
+          if: startsWith(matrix.os, 'macos')
+          run: dotnet pack -c Release --no-build --nologo
 
         - name: Upload Verify Results
           if: failure()
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v3
           with:
             name: verify-test-results
             path: |
               **/*.received.*
 
         - name: Archive Artifacts
-          # only the ps1 script packages the SDK
-          if: matrix.os == 'windows-latest'
-          uses: actions/upload-artifact@v2
+          # only archive on macos since we only pack on macos. See Pack step.
+          if: startsWith(matrix.os, 'macos')
+          uses: actions/upload-artifact@v3
           with:
             name: ${{ github.sha }}
             if-no-files-found: error
             path: |
               ${{ github.workspace }}/src/**/Release/*.nupkg
-

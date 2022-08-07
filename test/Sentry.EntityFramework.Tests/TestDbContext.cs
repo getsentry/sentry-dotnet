@@ -1,7 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.Data.Common;
-using System.Data.Entity;
-
 namespace Sentry.EntityFramework.Tests;
 
 public class TestDbContext : DbContext
