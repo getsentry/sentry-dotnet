@@ -18,14 +18,14 @@ public class IntegrationTests
         var hub = SentrySdk.InitHub(options);
         using (SentrySdk.UseHub(hub))
         {
-
             var hierarchy = SetupLogging(hub);
 
             var log = LogManager.GetLogger(typeof(IntegrationTests));
             log.Error("The message");
 
-            hierarchy.Flush(10000);
-            await hub.FlushAsync(TimeSpan.FromSeconds(10000));
+            hierarchy.Flush(1000);
+
+            await hub.FlushAsync(TimeSpan.FromSeconds(1000));
         }
 
         await Verify(transport.Envelopes)
@@ -64,9 +64,9 @@ public class IntegrationTests
 
             log.Error("The message");
 
-            hierarchy.Flush(10000);
+            hierarchy.Flush(1000);
 
-            await hub.FlushAsync(TimeSpan.FromSeconds(10000));
+            await hub.FlushAsync(TimeSpan.FromSeconds(1000));
         }
 
         var warningsAndAbove = diagnosticLogger.Entries
