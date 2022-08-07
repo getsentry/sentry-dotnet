@@ -2,7 +2,7 @@
 public class EventProcessorTests
 {
     [Fact]
-    public Task Simple()
+    public async Task Simple()
     {
         var transport = new RecordingTransport();
         var options = new SentryOptions
@@ -15,10 +15,13 @@ public class EventProcessorTests
 
         options.AddEventProcessor(new TheEventProcessor());
         var hub = SentrySdk.InitHub(options);
-        using var sdk = SentrySdk.UseHub(hub);
-        hub.CaptureMessage("TheMessage");
+        using (SentrySdk.UseHub(hub))
+        {
+            hub.CaptureMessage("TheMessage");
+            await hub.FlushAsync(TimeSpan.FromSeconds(1));
+        }
 
-        return Verify(transport.Envelopes)
+        await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
