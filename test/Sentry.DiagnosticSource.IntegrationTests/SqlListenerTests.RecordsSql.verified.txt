@@ -61,7 +61,6 @@
           IsFinished: true,
           Operation: db.query,
           Description:
-
 insert into MyTable (Value)
 values (@value);,
           Status: Ok,

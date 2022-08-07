@@ -31,6 +31,9 @@ public class VersioningTests
                 o.Transport = transport;
                 o.Debug = true;
                 o.DiagnosticLogger = _logger;
+
+                // Disable process exit flush to resolve "There is no currently active test." errors.
+                o.DisableAppDomainProcessExitFlush();
             })
             .ConfigureServices(services =>
             {
@@ -69,8 +72,8 @@ public class VersioningTests
 
         await Verify(new {result, payloads})
             .IgnoreStandardSentryMembers()
-            .ScrubLinesContaining("Message: Executed action ")
-            .IgnoreMembers("ConnectionId", "RequestId");
+            .IgnoreMembers("ConnectionId", "RequestId")
+            .ScrubLinesWithReplace(_=>_.Split(new []{" (Sentry.AspNetCore.Tests) "},StringSplitOptions.None)[0]);
     }
 
     [ApiController]

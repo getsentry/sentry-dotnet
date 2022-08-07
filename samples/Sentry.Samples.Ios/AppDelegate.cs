@@ -41,7 +41,7 @@ public class AppDelegate : UIApplicationDelegate
 
         // Uncomment to try these
         // throw new Exception("Test Unhandled Managed Exception");
-        // SentrySdk.CauseNativeCrash();
+        // SentrySdk.CauseCrash(CrashType.Native);
 
         return true;
     }

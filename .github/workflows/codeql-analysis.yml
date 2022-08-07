@@ -32,7 +32,7 @@ jobs:
         languages: csharp
 
     - name: Build
-      run: dotnet build
+      run: dotnet build --nologo
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

@@ -39,6 +39,12 @@ public class SentryQueryPerformanceListenerTests
     }
 
     private readonly Fixture _fixture = new();
+    private readonly IDiagnosticLogger _logger;
+
+    public SentryQueryPerformanceListenerTests(ITestOutputHelper output)
+    {
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output, SentryLevel.Debug);
+    }
 
     [Theory]
     [InlineData(DbScalarKey)]
@@ -221,12 +227,11 @@ public class SentryQueryPerformanceListenerTests
         // Arrange
         var hub = _fixture.Hub;
         hub.GetSpan().ReturnsNull();
-        var logger = Substitute.For<ITestOutputHelper>();
 
         var options = new SentryOptions
         {
             Debug = true,
-            DiagnosticLogger = new TestOutputDiagnosticLogger(logger)
+            DiagnosticLogger = _logger
         };
 
         var listener = new SentryQueryPerformanceListener(hub, options);
@@ -235,6 +240,6 @@ public class SentryQueryPerformanceListenerTests
         listener.ScalarExecuted(Substitute.For<DbCommand>(), Substitute.For<DbCommandInterceptionContext<object>>());
 
         // Assert
-        logger.Received(0).WriteLine(Arg.Any<string>());
+        _logger.DidNotReceiveWithAnyArgs().Log(default, default!);
     }
 }
