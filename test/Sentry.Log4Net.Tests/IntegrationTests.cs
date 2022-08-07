@@ -25,18 +25,13 @@ public class IntegrationTests
 
         hierarchy.Flush(10000);
 
-        return Verify(
-                new
-                {
-                    transport.Envelopes,
-                    diagnosticLogger=diagnosticLogger.Entries.Where(x => !x.Message.Contains("Initializing Hub for Dsn"))
-                })
+        return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
     }
 
     [Fact]
-    public Task LoggingInsideTheContextOfLogging()
+    public async Task LoggingInsideTheContextOfLogging()
     {
         var transport = new RecordingTransport();
         var diagnosticLogger = new InMemoryDiagnosticLogger();
@@ -68,14 +63,18 @@ public class IntegrationTests
 
         hierarchy.Flush(10000);
 
-        return Verify(
+        var warningsAndAbove = diagnosticLogger.Entries
+            .Where(_ => _.Level > SentryLevel.Warning)
+            .ToList();
+        await Verify(
                 new
                 {
                     transport.Envelopes,
-                    diagnosticLogger=diagnosticLogger.Entries.Where(x => !x.Message.Contains("Initializing Hub for Dsn"))
+                    warningsAndAbove
                 })
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
+        Assert.Empty(warningsAndAbove);
     }
 
     private static Hierarchy SetupLogging(IHub hub)

@@ -217,7 +217,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope);;
+        sentEnvelope.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]
