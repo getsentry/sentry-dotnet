@@ -2,7 +2,7 @@
 public class IntegrationTests
 {
     [Fact]
-    public Task Simple()
+    public async Task Simple()
     {
         var transport = new RecordingTransport();
         var diagnosticLogger = new InMemoryDiagnosticLogger();
@@ -16,16 +16,19 @@ public class IntegrationTests
         };
 
         var hub = SentrySdk.InitHub(options);
-        using var sdk = SentrySdk.UseHub(hub);
+        using (SentrySdk.UseHub(hub))
+        {
 
-        var hierarchy = SetupLogging(hub);
+            var hierarchy = SetupLogging(hub);
 
-        var log = LogManager.GetLogger(typeof(IntegrationTests));
-        log.Error("The message");
+            var log = LogManager.GetLogger(typeof(IntegrationTests));
+            log.Error("The message");
 
-        hierarchy.Flush(10000);
-        Assert.Single(transport.Envelopes);
-        return Verify(transport.Envelopes)
+            hierarchy.Flush(10000);
+            await hub.FlushAsync(TimeSpan.FromSeconds(10000));
+        }
+
+        await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
     }
@@ -46,24 +49,26 @@ public class IntegrationTests
         };
 
         var hub = SentrySdk.InitHub(options);
-        using var sdk = SentrySdk.UseHub(hub);
+        using (SentrySdk.UseHub(hub))
+        {
+            var hierarchy = SetupLogging(hub);
 
-        var hierarchy = SetupLogging(hub);
+            var log = LogManager.GetLogger(typeof(IntegrationTests));
+            SentrySdk.ConfigureScope(
+                scope =>
+                {
+                    scope.OnEvaluating += (_, _) =>
+                        log.Error("message from OnEvaluating");
+                    log.Error("message");
+                });
 
-        var log = LogManager.GetLogger(typeof(IntegrationTests));
-        SentrySdk.ConfigureScope(
-            scope =>
-            {
-                scope.OnEvaluating += (_, _) =>
-                    log.Error("message from OnEvaluating");
-                log.Error("message");
-            });
+            log.Error("The message");
 
-        log.Error("The message");
+            hierarchy.Flush(10000);
 
-        hierarchy.Flush(10000);
+            await hub.FlushAsync(TimeSpan.FromSeconds(10000));
+        }
 
-        Assert.Single(transport.Envelopes);
         var warningsAndAbove = diagnosticLogger.Entries
             .Where(_ => _.Level > SentryLevel.Warning)
             .ToList();
