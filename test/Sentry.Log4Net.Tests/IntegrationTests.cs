@@ -63,6 +63,7 @@ public class IntegrationTests
 
         hierarchy.Flush(10000);
 
+        Assert.Single(transport.Envelopes);
         var warningsAndAbove = diagnosticLogger.Entries
             .Where(_ => _.Level > SentryLevel.Warning)
             .ToList();
