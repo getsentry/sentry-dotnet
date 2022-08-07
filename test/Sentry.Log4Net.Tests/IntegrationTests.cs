@@ -24,7 +24,7 @@ public class IntegrationTests
         log.Error("The message");
 
         hierarchy.Flush(10000);
-
+        Assert.Single(transport.Envelopes);
         return Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
