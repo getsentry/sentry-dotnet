@@ -8,9 +8,19 @@
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.5.11" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
+    
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+
+    <Using Include="NLog" />
+    <Using Include="NLog.Common" />
+    <Using Include="NLog.Config" />
+    <Using Include="NLog.Layouts" />
+    <Using Include="NLog.Targets" />
+    <Using Include="Sentry.NLog" />
+    <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Infrastructure" />
+    <Using Include="Sentry.Reflection" />
+    <Using Include="System.ComponentModel" />
   </ItemGroup>
 
 </Project>

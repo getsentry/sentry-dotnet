@@ -2,9 +2,41 @@
 
 ## Unreleased
 
+## Features
+
+- Added 'integrations' to SdkVersion ([#1820](https://github.com/getsentry/sentry-dotnet/pull/1820))
+- Updated Sentry Android SDK to version 6.3.0 ([#1826](https://github.com/getsentry/sentry-dotnet/pull/1826))
+- Add the Sentry iOS SDK ([#1829](https://github.com/getsentry/sentry-dotnet/pull/1829))
+- Enable Scope Sync for iOS ([#1834](https://github.com/getsentry/sentry-dotnet/pull/1834))
+- Add API for deliberately crashing an app ([#1842](https://github.com/getsentry/sentry-dotnet/pull/1842))
+
 ### Fixes
 
+- Fix logging loop with NLog sentry ([#1824](https://github.com/getsentry/sentry-dotnet/pull/1824))
+- Fix logging loop with Serilog sentry ([#1828](https://github.com/getsentry/sentry-dotnet/pull/1828))
+
+## 3.20.1
+
+### Fixes
+
+- URGENT: Fix events rejected due to duplicate `sent_at` header when offline caching is enabled through `CacheDirectoryPath` ([#1818](https://github.com/getsentry/sentry-dotnet/pull/1818))
+- Fix null ref in aspnet TryGetTraceHeader ([#1807](https://github.com/getsentry/sentry-dotnet/pull/1807))
+
+## 3.20.0
+
+### Features
+
+- Use `sent_at` instead of `sentry_timestamp` to reduce clock skew ([#1690](https://github.com/getsentry/sentry-dotnet/pull/1690)) 
+- Send project root path with events ([#1739](https://github.com/getsentry/sentry-dotnet/pull/1739))
+
+### Fixes
+
+- Detect MVC versioning in route ([#1731](https://github.com/getsentry/sentry-dotnet/pull/1731))
 - Fix error with `ConcurrentHashMap` on Android <= 9 ([#1761](https://github.com/getsentry/sentry-dotnet/pull/1761))
+- Minor improvements to `BackgroundWorker` ([#1773](https://github.com/getsentry/sentry-dotnet/pull/1773))
+- Make GzipRequestBodyHandler respect async ([#1776](https://github.com/getsentry/sentry-dotnet/pull/1776))
+- Fix race condition in handling of `InitCacheFlushTimeout` ([#1784](https://github.com/getsentry/sentry-dotnet/pull/1784))
+- Fix exceptions on background thread not reported in Unity ([#1794](https://github.com/getsentry/sentry-dotnet/pull/1794))
 
 ## 3.19.0
 

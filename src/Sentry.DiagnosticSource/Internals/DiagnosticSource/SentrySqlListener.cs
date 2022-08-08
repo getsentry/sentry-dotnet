@@ -154,8 +154,9 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                if ((value.Key == SqlMicrosoftWriteConnectionCloseAfterCommand ||
-                     value.Key == SqlDataWriteConnectionCloseAfterCommand) &&
+                if (value.Key is
+                        SqlMicrosoftWriteConnectionCloseAfterCommand or
+                        SqlDataWriteConnectionCloseAfterCommand &&
                     value.GetProperty<Guid>(ConnectionKey) is { } id &&
                     TryGetConnectionSpan(scope, id) is { } connectionSpan)
                 {
@@ -163,8 +164,9 @@ namespace Sentry.Internals.DiagnosticSource
                     return;
                 }
 
-                if ((value.Key is SqlMicrosoftWriteTransactionCommitAfter ||
-                     value.Key is SqlDataWriteTransactionCommitAfter) &&
+                if (value.Key is
+                        SqlMicrosoftWriteTransactionCommitAfter or
+                        SqlDataWriteTransactionCommitAfter &&
                     value.GetSubProperty<Guid>("Connection", "ClientConnectionId") is { } commitId &&
                     TryGetConnectionSpan(scope, commitId) is { } commitSpan)
                 {

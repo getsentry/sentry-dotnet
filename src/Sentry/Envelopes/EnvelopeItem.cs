@@ -128,11 +128,11 @@ namespace Sentry.Protocol.Envelopes
             writer.Flush();
         }
 
-        private async Task SerializeHeaderAsync(
+        private Task SerializeHeaderAsync(
             Stream stream,
             IDiagnosticLogger? logger,
             CancellationToken cancellationToken) =>
-            await SerializeHeaderAsync(stream, Header, logger, cancellationToken).ConfigureAwait(false);
+            SerializeHeaderAsync(stream, Header, logger, cancellationToken);
 
         private void SerializeHeader(Stream stream, IDiagnosticLogger? logger) =>
             SerializeHeader(stream, Header, logger);

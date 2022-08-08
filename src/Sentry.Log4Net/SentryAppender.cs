@@ -1,8 +1,3 @@
-using log4net.Appender;
-using log4net.Core;
-using Sentry.Extensibility;
-using Sentry.Reflection;
-
 namespace Sentry.Log4Net;
 
 /// <summary>
@@ -20,7 +15,7 @@ public class SentryAppender : AppenderSkeleton
 
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
-    internal IHub Hub { get; set; }
+    private readonly IHub _hub;
 
     /// <summary>
     /// Sentry DSN.
@@ -36,6 +31,12 @@ public class SentryAppender : AppenderSkeleton
     public string? Environment { get; set; }
 
     /// <summary>
+    /// log4net SDK name.
+    /// </summary>
+    /// <see href="https://github.com/getsentry/sentry-release-registry" />
+    internal const string SdkName = "sentry.dotnet.log4net";
+
+    /// <summary>
     /// Creates a new instance of the <see cref="SentryAppender"/>.
     /// </summary>
     public SentryAppender() : this(SentrySdk.Init, HubAdapter.Instance)
@@ -46,7 +47,7 @@ public class SentryAppender : AppenderSkeleton
         IHub hubGetter)
     {
         _initAction = initAction;
-        Hub = hubGetter;
+        _hub = hubGetter;
     }
 
     /// <summary>
@@ -62,7 +63,7 @@ public class SentryAppender : AppenderSkeleton
             return;
         }
 
-        if (!Hub.IsEnabled && _sdkHandle == null)
+        if (!_hub.IsEnabled && _sdkHandle == null)
         {
             if (Dsn == null)
             {
@@ -85,7 +86,7 @@ public class SentryAppender : AppenderSkeleton
 
         if (evt.Sdk is { } sdk)
         {
-            sdk.Name = Constants.SdkName;
+            sdk.Name = SdkName;
             sdk.Version = NameAndVersion.Version;
 
             if (NameAndVersion.Version is { } version)
@@ -114,7 +115,7 @@ public class SentryAppender : AppenderSkeleton
             evt.Environment = Environment;
         }
 
-        _ = Hub.CaptureEvent(evt);
+        _hub.CaptureEvent(evt);
     }
 
     private static IEnumerable<KeyValuePair<string, object?>> GetLoggingEventProperties(LoggingEvent loggingEvent)
@@ -132,7 +133,7 @@ public class SentryAppender : AppenderSkeleton
             {
                 var value = properties[key];
                 if (value != null
-                    && (!(value is string stringValue) || !string.IsNullOrWhiteSpace(stringValue)))
+                    && (value is not string stringValue || !string.IsNullOrWhiteSpace(stringValue)))
                 {
                     yield return new KeyValuePair<string, object?>(key, value);
                 }

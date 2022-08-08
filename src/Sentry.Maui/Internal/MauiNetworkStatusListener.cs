@@ -57,7 +57,7 @@ internal class MauiNetworkStatusListener : INetworkStatusListener
         }
     }
 
-    private bool TreatAsOnline(NetworkAccess access) => access switch
+    private static bool TreatAsOnline(NetworkAccess access) => access switch
     {
         // This is the expected status when we know we're online
         NetworkAccess.Internet => true,

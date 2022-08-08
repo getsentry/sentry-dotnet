@@ -6,11 +6,24 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
-  </ItemGroup>
 
-  <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <ProjectReference Include="..\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj" />
+    
+    <Using Include="System.Collections" />
+    <Using Include="System.IO.Compression" />
+    <Using Include="System.Net" />
+    <Using Include="System.Text.Json" />
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Hosting" />
+    <Using Include="Sentry.AspNetCore.Tests" />
+    <Using Include="Sentry.Testing" />
+    <Using Include="Sentry.Tests" />
+    <Using Include="Serilog" />
+    <Using Include="Serilog.Events" />
+    <Using Include="Serilog.Context" />
+    <Using Include="Serilog.Formatting.Display" />
+    <Using Include="Serilog.Parsing" />
   </ItemGroup>
 
 </Project>

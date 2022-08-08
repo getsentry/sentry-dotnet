@@ -1,9 +1,3 @@
-using System.IO.Compression;
-using System.Net;
-using System.Text.Json;
-using Serilog;
-using Serilog.Events;
-
 namespace Sentry.Serilog.Tests;
 
 public class SentrySerilogSinkExtensionsTests
@@ -35,7 +29,7 @@ public class SentrySerilogSinkExtensionsTests
         public LogEventLevel MinimumEventLevel { get; } = LogEventLevel.Verbose;
         public LogEventLevel MinimumBreadcrumbLevel { get; } = LogEventLevel.Fatal;
 
-        public SentrySerilogOptions GetSut() => new();
+        public static SentrySerilogOptions GetSut() => new();
     }
 
     private readonly Fixture _fixture = new();
@@ -43,7 +37,7 @@ public class SentrySerilogSinkExtensionsTests
     [Fact]
     public void ConfigureSentrySerilogOptions_WithNoParameters_MakesNoChangesToObject()
     {
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         // Make the call with only the required parameter
         SentrySinkExtensions.ConfigureSentrySerilogOptions(sut);
@@ -57,7 +51,7 @@ public class SentrySerilogSinkExtensionsTests
     [Fact]
     public void ConfigureSentrySerilogOptions_WithOneParameter_MakesAppropriateChangeToObject()
     {
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         // Make the call with only the required parameter
         const bool sendDefaultPii = true;
@@ -74,7 +68,7 @@ public class SentrySerilogSinkExtensionsTests
     [Fact]
     public void ConfigureSentrySerilogOptions_WithMultipleParameters_MakesAppropriateChangesToObject()
     {
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, sendDefaultPii: _fixture.SendDefaultPii,
             decompressionMethods: _fixture.DecompressionMethods, reportAssemblies: _fixture.ReportAssemblies, sampleRate: _fixture.SampleRate);
@@ -94,7 +88,7 @@ public class SentrySerilogSinkExtensionsTests
     [Fact]
     public void ConfigureSentrySerilogOptions_WithAllParameters_MakesAppropriateChangesToObject()
     {
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, _fixture.Dsn, _fixture.MinimumEventLevel,
             _fixture.MinimumBreadcrumbLevel, null, null, _fixture.SendDefaultPii,

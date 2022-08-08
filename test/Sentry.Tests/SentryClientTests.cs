@@ -762,8 +762,10 @@ public class SentryClientTests
     [Fact]
     public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
     {
-        using var cacheDirectory = new TempDirectory();
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
+        _fixture.SentryOptions.FileSystem = fileSystem;
         _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.Transport = new FakeTransport();
 
@@ -776,8 +778,10 @@ public class SentryClientTests
     [Fact]
     public async Task SentryClient_WithCachingTransport_RecordsDiscardedEvents()
     {
-        using var cacheDirectory = new TempDirectory();
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
+        _fixture.SentryOptions.FileSystem = fileSystem;
         _fixture.SentryOptions.Dsn = ValidDsn;
 
         var innerTransport = Substitute.For<ITransport>();

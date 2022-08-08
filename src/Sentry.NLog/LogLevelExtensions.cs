@@ -1,5 +1,3 @@
-using NLog;
-
 namespace Sentry.NLog;
 
 internal static class LogLevelExtensions

@@ -10,8 +10,9 @@ namespace Sentry.Extensibility
     public interface IBackgroundWorker
     {
         /// <summary>
-        /// Attempts to queue the envelope with the worker.
+        /// Attempts to enqueue the envelope with the worker.
         /// </summary>
+        /// <param name="envelope">The envelope to enqueue.</param>
         /// <returns>True of queueing was successful. Otherwise, false.</returns>
         bool EnqueueEnvelope(Envelope envelope);
 

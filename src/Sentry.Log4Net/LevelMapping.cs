@@ -1,5 +1,3 @@
-using log4net.Core;
-
 namespace Sentry.Log4Net;
 
 internal static class LevelMapping

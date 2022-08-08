@@ -14,7 +14,7 @@ namespace Sentry.AspNetCore;
 public class SentryTunnelMiddleware : IMiddleware
 {
     private readonly string[] _allowedHosts;
-    private Lazy<string> Version => new(() => (GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty));
+    private Lazy<string> Version => new(() => GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty);
 
     /// <summary>
     /// Middleware that can forward Sentry envelopes.

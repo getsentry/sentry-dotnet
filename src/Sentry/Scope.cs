@@ -249,7 +249,8 @@ namespace Sentry
                 //Always drop the breadcrumb.
                 return;
             }
-            else if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
+
+            if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
             {
                 _breadcrumbs.TryDequeue(out _);
             }

@@ -1,0 +1,6 @@
+{
+  FileName: Internals/SentryStackTraceFactoryTests.cs,
+  Function: GenericMethodThatThrows,
+  Module: Other.Tests.Internals.SentryStackTraceFactoryTests,
+  InApp: true
+}

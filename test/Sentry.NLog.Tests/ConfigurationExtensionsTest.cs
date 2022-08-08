@@ -1,17 +1,11 @@
-using NLog;
-using NLog.Config;
-using NLog.Layouts;
-
 namespace Sentry.NLog.Tests;
 
 public class ConfigurationExtensionsTest
 {
-    private readonly LoggingConfiguration _sut = new();
-
     [Fact]
     public void AddSentry_Parameterless_DefaultTargetName()
     {
-        var actual = _sut.AddSentry();
+        var actual = new LoggingConfiguration().AddSentry();
         Assert.Equal(ConfigurationExtensions.DefaultTargetName, actual.AllTargets[0].Name);
     }
 
@@ -19,7 +13,7 @@ public class ConfigurationExtensionsTest
     public void AddSentry_ConfigCallback_CallbackInvoked()
     {
         var expected = TimeSpan.FromDays(1);
-        var actual = _sut.AddSentry(o => o.FlushTimeout = expected);
+        var actual = new LoggingConfiguration().AddSentry(o => o.FlushTimeout = expected);
         var sentryTarget = Assert.IsType<SentryTarget>(actual.AllTargets[0]);
         Assert.Equal(expected.TotalSeconds, sentryTarget.FlushTimeoutSeconds);
     }
@@ -29,7 +23,7 @@ public class ConfigurationExtensionsTest
     {
         var expectedTimeout = TimeSpan.FromDays(1);
         var expectedDsn = "https://a@sentry.io/1";
-        var actual = _sut.AddSentry(expectedDsn, o => o.FlushTimeout = expectedTimeout);
+        var actual = new LoggingConfiguration().AddSentry(expectedDsn, o => o.FlushTimeout = expectedTimeout);
         var sentryTarget = Assert.IsType<SentryTarget>(actual.AllTargets[0]);
         Assert.Equal(expectedTimeout.TotalSeconds, sentryTarget.FlushTimeoutSeconds);
         Assert.Equal(expectedDsn, sentryTarget.Options.Dsn);

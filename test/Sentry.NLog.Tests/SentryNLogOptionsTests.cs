@@ -1,5 +1,3 @@
-using NLog;
-
 namespace Sentry.NLog.Tests;
 
 public class SentryNLogOptionsTests

@@ -29,7 +29,7 @@ namespace Sentry.Internal.Extensions
             value = jsonProperty.Value;
         }
 
-        public static IReadOnlyDictionary<string, object?>? GetDictionaryOrNull(this JsonElement json)
+        public static Dictionary<string, object?>? GetDictionaryOrNull(this JsonElement json)
         {
             if (json.ValueKind != JsonValueKind.Object)
             {
@@ -46,7 +46,7 @@ namespace Sentry.Internal.Extensions
             return result;
         }
 
-        public static IReadOnlyDictionary<string, string?>? GetStringDictionaryOrNull(this JsonElement json)
+        public static Dictionary<string, string?>? GetStringDictionaryOrNull(this JsonElement json)
         {
             if (json.ValueKind != JsonValueKind.Object)
             {

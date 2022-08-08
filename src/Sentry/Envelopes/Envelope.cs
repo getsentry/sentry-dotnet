@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
@@ -16,7 +17,9 @@ namespace Sentry.Protocol.Envelopes
     /// </summary>
     public sealed class Envelope : ISerializable, IDisposable
     {
+        private const string SdkKey = "sdk";
         private const string EventIdKey = "event_id";
+        private const string SentAtKey = "sent_at";
 
         /// <summary>
         /// Header associated with the envelope.
@@ -38,7 +41,7 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <summary>
-        /// Attempts to extract the value of "sentry_id" header if it's present.
+        /// Attempts to extract the value of "event_id" header if it's present.
         /// </summary>
         public SentryId? TryGetEventId() =>
             Header.TryGetValue(EventIdKey, out var value) &&
@@ -47,33 +50,57 @@ namespace Sentry.Protocol.Envelopes
                 ? new SentryId(guid)
                 : null;
 
-        private async Task SerializeHeaderAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken)
+        private async Task SerializeHeaderAsync(
+            Stream stream,
+            IDiagnosticLogger? logger,
+            ISystemClock clock,
+            CancellationToken cancellationToken)
         {
+            // Append the sent_at header, except when writing to disk
+            var headerItems = !stream.IsFileStream()
+                ? Header.Append(SentAtKey, clock.GetUtcNow())
+                : Header;
+
             var writer = new Utf8JsonWriter(stream);
 
 #if NET461 || NETSTANDARD2_0
-            using (writer)
+            await using (writer)
 #else
             await using (writer.ConfigureAwait(false))
 #endif
             {
-                writer.WriteDictionaryValue(Header, logger);
+                writer.WriteDictionaryValue(headerItems, logger);
                 await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private void SerializeHeader(Stream stream, IDiagnosticLogger? logger)
+        private void SerializeHeader(Stream stream, IDiagnosticLogger? logger, ISystemClock clock)
         {
+            // Append the sent_at header, except when writing to disk
+            var headerItems = !stream.IsFileStream()
+                ? Header.Append(SentAtKey, clock.GetUtcNow())
+                : Header;
+
             using var writer = new Utf8JsonWriter(stream);
-            writer.WriteDictionaryValue(Header, logger);
+            writer.WriteDictionaryValue(headerItems, logger);
             writer.Flush();
         }
 
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
+        public Task SerializeAsync(
+            Stream stream,
+            IDiagnosticLogger? logger,
+            CancellationToken cancellationToken = default) =>
+            SerializeAsync(stream, logger, SystemClock.Clock, cancellationToken);
+
+        internal async Task SerializeAsync(
+            Stream stream,
+            IDiagnosticLogger? logger,
+            ISystemClock clock,
+            CancellationToken cancellationToken = default)
         {
             // Header
-            await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);
+            await SerializeHeaderAsync(stream, logger, clock, cancellationToken).ConfigureAwait(false);
             await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
             // Items
@@ -85,10 +112,13 @@ namespace Sentry.Protocol.Envelopes
         }
 
         /// <inheritdoc />
-        public void Serialize(Stream stream, IDiagnosticLogger? logger)
+        public void Serialize(Stream stream, IDiagnosticLogger? logger) =>
+            Serialize(stream, logger, SystemClock.Clock);
+
+        internal void Serialize(Stream stream, IDiagnosticLogger? logger, ISystemClock clock)
         {
             // Header
-            SerializeHeader(stream, logger);
+            SerializeHeader(stream, logger, clock);
             stream.WriteByte((byte)'\n');
 
             // Items
@@ -123,7 +153,7 @@ namespace Sentry.Protocol.Envelopes
 
             return new Dictionary<string, object?>(2, StringComparer.Ordinal)
             {
-                ["sdk"] = SdkHeader,
+                [SdkKey] = SdkHeader,
                 [EventIdKey] = eventId.Value.ToString()
             };
         }
@@ -246,9 +276,14 @@ namespace Sentry.Protocol.Envelopes
                 prevByte = curByte;
             }
 
-            return
+            var header =
                 Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
+
+            // The sent_at header should not be included in the result
+            header.Remove(SentAtKey);
+
+            return header;
         }
 
         /// <summary>

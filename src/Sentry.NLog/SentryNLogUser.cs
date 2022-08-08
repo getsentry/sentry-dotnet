@@ -1,7 +1,3 @@
-using NLog.Config;
-using NLog.Layouts;
-using NLog.Targets;
-
 namespace Sentry.NLog;
 
 /// <summary>
