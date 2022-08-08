@@ -24,6 +24,7 @@
               SentryThreads: [],
               Level: error,
               Request: {},
+              Contexts: {},
               User: {},
               Environment: production
             }
@@ -55,6 +56,7 @@
               SentryThreads: [],
               Level: error,
               Request: {},
+              Contexts: {},
               User: {},
               Environment: production
             }
