@@ -43,6 +43,7 @@
             SentryThreads: [],
             Level: error,
             Request: {},
+            Contexts: {},
             User: {
               Email: ,
               Id: myId,
