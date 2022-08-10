@@ -30,14 +30,6 @@ internal class SentryMauiInitializer : IMauiInitializeService
         var binder = services.GetRequiredService<MauiEventsBinder>();
         binder.BindMauiEvents();
 
-#if IOS || MACCATALYST
-        // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
-        ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
-        {
-            args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
-        };
-#endif
-
         // Register with the WinUI unhandled exception handler when needed
         RegisterApplicationUnhandledExceptionForWinUI();
     }

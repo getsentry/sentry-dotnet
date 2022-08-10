@@ -72,8 +72,8 @@ namespace Sentry.Internal
             // https://issuetracker.unity3d.com/issues/il2cpp-player-crashes-when-calling-process-dot-getcurrentprocess-dot-starttime
             if (options.DetectStartupTime == StartupTimeDetectionMode.Best)
             {
-#if ANDROID
-                options.LogWarning("StartupTimeDetectionMode.Best is not available on android.  Using 'Fast' mode.");
+#if ANDROID || IOS || MACCATALYST
+                options.LogWarning("StartupTimeDetectionMode.Best is not available on this platform.  Using 'Fast' mode.");
                 return;
 #else
                 // StartupTime is set to UtcNow in this constructor.

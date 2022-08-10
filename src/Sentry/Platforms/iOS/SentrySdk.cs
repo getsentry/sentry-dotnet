@@ -8,12 +8,18 @@ public static partial class SentrySdk
 {
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
+        // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
+        ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
+        {
+            args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
+        };
+
         // Set options for the managed SDK that don't depend on the Cocoa SDK
         options.AutoSessionTracking = true;
         options.IsGlobalModeEnabled = true;
 
-        // // "Best" mode throws permission exception on Android -- TODO: does it on iOS?
-        // options.DetectStartupTime = StartupTimeDetectionMode.Fast;
+        // "Best" mode throws platform not supported exception.  Use "Fast" mode instead.
+        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
 
         // Now initialize the Cocoa SDK
         SentryCocoa.SentryOptions? cocoaOptions = null;
