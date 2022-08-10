@@ -21,6 +21,10 @@
     <SentryCocoaSdkVersion>7.23.0</SentryCocoaSdkVersion>
     <SentryCocoaSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Cocoa\$(SentryCocoaSdkVersion)\</SentryCocoaSdkDirectory>
     <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
+
+    <!-- TODO: Replace with commented line once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
+    <SentryCocoaZipFile>$(MSBuildThisFileDirectory)Sentry.xcframework.$(SentryCocoaSdkVersion).custombuild.zip</SentryCocoaZipFile>
+    <!-- <SentryCocoaZipFile>$(SentryCocoaSdkDirectory)Sentry.xcframework.zip</SentryCocoaZipFile> -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,16 +34,20 @@
   </ItemGroup>
 
   <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences">
-    <DownloadFile
+
+    <!-- TODO: Uncomment to download official version from GitHub once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
+    <!-- <DownloadFile
       SourceUrl="https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaSdkVersion)/Sentry.xcframework.zip"
       DestinationFolder="$(SentryCocoaSdkDirectory)"
-      Condition="!Exists('$(SentryCocoaSdkDirectory)Sentry.xcframework.zip')"
+      Condition="!Exists('$(SentryCocoaZipFile)')"
       Retries="3"
-    />
-    <Unzip
-      SourceFiles="$(SentryCocoaSdkDirectory)Sentry.xcframework.zip"
-      DestinationFolder="$(SentryCocoaSdkDirectory)"
-      Condition="Exists('$(SentryCocoaSdkDirectory)Sentry.xcframework.zip') AND !Exists('$(SentryCocoaFramework)')"
+    /> -->
+
+    <!-- Unzip with built-in command to properly restore symlinks -->
+    <MakeDir Directories="$(SentryCocoaSdkDirectory)" Condition="!Exists('$(SentryCocoaSdkDirectory)')"/>
+    <Exec
+      Command="unzip -q &quot;$(SentryCocoaZipFile)&quot; -d &quot;$(SentryCocoaSdkDirectory)&quot;"
+      Condition="Exists('$(SentryCocoaZipFile)') And !Exists('$(SentryCocoaFramework)')"
     />
   </Target>
 
