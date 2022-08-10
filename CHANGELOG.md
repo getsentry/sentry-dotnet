@@ -9,6 +9,7 @@
 - Add the Sentry iOS SDK ([#1829](https://github.com/getsentry/sentry-dotnet/pull/1829))
 - Enable Scope Sync for iOS ([#1834](https://github.com/getsentry/sentry-dotnet/pull/1834))
 - Add API for deliberately crashing an app ([#1842](https://github.com/getsentry/sentry-dotnet/pull/1842))
+- Add Mac Catalyst target ([#1848](https://github.com/getsentry/sentry-dotnet/pull/1848))
 
 ### Fixes
 

@@ -17,7 +17,7 @@ public partial class MainPage
         JavaCrashBtn.IsVisible = false;
 #endif
 
-#if !(ANDROID || IOS) // TODO: Enable for MACCATALYST
+#if !(ANDROID || IOS || MACCATALYST)
         NativeCrashBtn.IsVisible = false;
 #endif
         _logger = logger;
@@ -64,7 +64,7 @@ public partial class MainPage
 
     private void OnNativeCrashClicked(object sender, EventArgs e)
     {
-#if ANDROID || IOS // TODO: Enable for MACCATALYST
+#if ANDROID || IOS || MACCATALYST
         SentrySdk.CauseCrash(CrashType.Native);
 #endif
     }
