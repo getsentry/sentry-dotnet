@@ -827,7 +827,7 @@ interface SentryOptions
 
     // @property (copy, nonatomic) SentryBeforeSendEventCallback _Nullable beforeSend;
     [NullAllowed, Export ("beforeSend", ArgumentSemantic.Copy)]
-    Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
+    Func<SentryEvent?, SentryEvent> BeforeSend { get; set; }
 
     // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
     [NullAllowed, Export ("beforeBreadcrumb", ArgumentSemantic.Copy)]
@@ -916,7 +916,7 @@ interface SentryOptions
 
     // @property (nonatomic) SentryTracesSamplerCallback _Nullable tracesSampler;
     [NullAllowed, Export ("tracesSampler", ArgumentSemantic.Assign)]
-    Func<SentrySamplingContext, NSNumber> TracesSampler { get; set; }
+    Func<SentrySamplingContext, NSNumber?> TracesSampler { get; set; }
 
     // @property (readonly, assign, nonatomic) BOOL isTracingEnabled;
     [Export ("isTracingEnabled")]
