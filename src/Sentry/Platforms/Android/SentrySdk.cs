@@ -94,11 +94,8 @@ public static partial class SentrySdk
                     o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
                 }
 
-                var javaTags = o.Tags;
-                foreach (var tag in options.DefaultTags)
-                {
-                    javaTags.Add(tag);
-                }
+                // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
+                //       one when sending events, which is relayed through the scope observer.
 
                 if (options.HttpProxy is System.Net.WebProxy proxy)
                 {

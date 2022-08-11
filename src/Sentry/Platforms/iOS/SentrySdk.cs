@@ -54,7 +54,8 @@ public static partial class SentrySdk
             // NOTE: options.CacheDirectoryPath - No option for this in Sentry Cocoa, but caching is still enabled
             // https://github.com/getsentry/sentry-cocoa/issues/1051
 
-            // o.??? = options.DefaultTags
+            // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
+            //       one when sending events, which is relayed through the scope observer.
 
             if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
             {
