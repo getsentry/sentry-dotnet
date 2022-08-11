@@ -78,6 +78,12 @@ public static partial class SentrySdk
 
             // TODO: Work on below (copied from Android implementation - needs updating)
 
+            // if (options.iOS.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
+            // {
+            //     // Note: Nullable return is allowed but delegate is generated incorrectly
+            //     o.BeforeSend = evt => beforeSend(evt.ToSentryEvent(o))?.ToCocoaSentryEvent(options, o)!;
+            // }
+
             //
             //         // These options we have behind feature flags
             //         if (options.Android.EnableAndroidSdkTracing)
