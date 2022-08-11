@@ -135,6 +135,11 @@ public static partial class SentrySdk
             //         o.EnableExternalConfiguration = false;
             //         o.EnableDeduplication = false;
             //         o.AttachServerName = false;
+
+            // In-App Excludes and Includes to be passed to the Cocoa SDK
+            options.iOS.InAppExcludes?.ForEach(x => o.AddInAppExclude(x));
+            options.iOS.InAppIncludes?.ForEach(x => o.AddInAppInclude(x));
+
             //
             //         // These options are intentionally not expose or modified
             //         //o.MaxRequestBodySize   // N/A for Android apps

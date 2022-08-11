@@ -157,8 +157,8 @@ public static partial class SentrySdk
                 o.ReadTimeoutMillis = (int)options.Android.ReadTimeout.TotalMilliseconds;
 
                 // In-App Excludes and Includes to be passed to the Android SDK
-                options.Android.InAppExclude?.ToList().ForEach(x => o.AddInAppExclude(x));
-                options.Android.InAppInclude?.ToList().ForEach(x => o.AddInAppInclude(x));
+                options.Android.InAppExcludes?.ForEach(x => o.AddInAppExclude(x));
+                options.Android.InAppIncludes?.ForEach(x => o.AddInAppInclude(x));
 
                 // These options are intentionally set and not exposed for modification
                 o.EnableExternalConfiguration = false;

@@ -204,8 +204,8 @@ public partial class SentryOptions
 
         // ---------- Other ----------
 
-        internal string[]? InAppExclude { get; set; }
-        internal string[]? InAppInclude { get; set; }
+        internal List<string>? InAppExcludes { get; private set; }
+        internal List<string>? InAppIncludes { get; private set; }
 
         /// <summary>
         /// Add prefix to exclude from 'InApp' stacktrace list by the Android SDK.
@@ -218,10 +218,11 @@ public partial class SentryOptions
         /// <example>
         /// 'java.util.', 'org.apache.logging.log4j.'
         /// </example>
-        public void AddInAppExclude(string prefix) =>
-            InAppExclude = InAppExclude != null
-                ? InAppExclude.Concat(new[] { prefix }).ToArray()
-                : new[] { prefix };
+        public void AddInAppExclude(string prefix)
+        {
+            InAppExcludes ??= new List<string>();
+            InAppExcludes.Add(prefix);
+        }
 
         /// <summary>
         /// Add prefix to include as in 'InApp' stacktrace by the Android SDK.
@@ -234,10 +235,10 @@ public partial class SentryOptions
         /// <example>
         /// 'java.util.customcode.', 'io.sentry.samples.'
         /// </example>
-        public void AddInAppInclude(string prefix) =>
-            InAppInclude = InAppInclude != null
-                ? InAppInclude.Concat(new[] { prefix }).ToArray()
-                : new[] { prefix };
+        public void AddInAppInclude(string prefix){
+            InAppIncludes ??= new List<string>();
+            InAppIncludes.Add(prefix);
+        }
 
         /// <summary>
         /// Gets or sets a value that indicates if tracing features are enabled on the embedded Android SDK.

@@ -38,5 +38,38 @@ public partial class SentryOptions
         // /// be stripped away during the roundtripping between the two SDKs.  Use with caution.
         // /// </remarks>
         // public bool EnableCocoaSdkBeforeSend { get; set; }
+
+        // ---------- Other ----------
+
+        internal List<string>? InAppExcludes { get; private set; }
+        internal List<string>? InAppIncludes { get; private set; }
+
+        /// <summary>
+        /// Add prefix to exclude from 'InApp' stacktrace list by the Cocoa SDK.
+        /// Note that this uses iOS module names, not .NET namespaces.
+        /// </summary>
+        /// <param name="prefix">The string used to filter the stacktrace to be excluded from InApp.</param>
+        /// <remarks>
+        /// https://docs.sentry.io/platforms/apple/guides/ios/configuration/options/#in-app-exclude
+        /// </remarks>
+        public void AddInAppExclude(string prefix)
+        {
+            InAppExcludes ??= new List<string>();
+            InAppExcludes.Add(prefix);
+        }
+
+        /// <summary>
+        /// Add prefix to include as in 'InApp' stacktrace by the Cocoa SDK.
+        /// Note that this uses Cocoa package names, not .NET namespaces.
+        /// </summary>
+        /// <param name="prefix">The string used to filter the stacktrace to be included in InApp.</param>
+        /// <remarks>
+        /// See https://docs.sentry.io/platforms/apple/guides/ios/configuration/options/#in-app-include
+        /// </remarks>
+        public void AddInAppInclude(string prefix)
+        {
+            InAppIncludes ??= new List<string>();
+            InAppIncludes.Add(prefix);
+        }
     }
 }
