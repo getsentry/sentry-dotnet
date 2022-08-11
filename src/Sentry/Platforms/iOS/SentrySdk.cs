@@ -74,11 +74,17 @@ public static partial class SentrySdk
                 }
             }
 
-            // TODO: Finish SentryEventExtensions to enable this
+            // TODO: Finish SentryEventExtensions to enable these
+            //
             // if (options.iOS.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
             // {
             //     // Note: Nullable return is allowed but delegate is generated incorrectly
             //     o.BeforeSend = evt => beforeSend(evt.ToSentryEvent(o))?.ToCocoaSentryEvent(options, o)!;
+            // }
+            //
+            // if (options.iOS.OnCrashedLastRun is { } onCrashedLastRun)
+            // {
+            //     o.OnCrashedLastRun = evt => onCrashedLastRun(evt.ToSentryEvent(o));
             // }
 
             // These options are from Cocoa's SentryOptions
@@ -100,14 +106,18 @@ public static partial class SentrySdk
             o.EnableUIViewControllerTracking = options.iOS.EnableUIViewControllerTracking;
             o.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
             o.StitchAsyncCode = options.iOS.StitchAsyncCode;
+            o.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
 
             // In-App Excludes and Includes to be passed to the Cocoa SDK
             options.iOS.InAppExcludes?.ForEach(x => o.AddInAppExclude(x));
             options.iOS.InAppIncludes?.ForEach(x => o.AddInAppInclude(x));
 
             // These options are intentionally not expose or modified
-            // o.Enabled;
+            // o.Enabled
             // o.SdkInfo
+            // o.Integrations
+            // o.DefaultIntegrations
+
 
             // // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
             // o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));

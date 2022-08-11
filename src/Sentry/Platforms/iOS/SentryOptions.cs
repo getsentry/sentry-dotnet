@@ -37,6 +37,10 @@ public partial class SentryOptions
         public bool EnableUserInteractionTracing { get; set; }
         public bool StitchAsyncCode { get; set; }
 
+        // public Action<SentryEvent>? OnCrashedLastRun { get; set; }
+
+        public NSUrlSessionDelegate? UrlSessionDelegate { get; set; }
+
 
         // ---------- Other ----------
 
