@@ -14,6 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="System.Globalization" />
+    <Using Include="System.Text.Json" />
     <Using Include="Foundation" />
   </ItemGroup>
 
