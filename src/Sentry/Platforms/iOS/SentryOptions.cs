@@ -18,7 +18,25 @@ public partial class SentryOptions
 
         // ---------- From Cocoa's SentryOptions.h ----------
 
-        // TODO
+        public bool AttachScreenshot { get; set; }
+        public TimeSpan AppHangTimeoutInterval { get; set; }
+        public TimeSpan IdleTimeout { get; set; }
+        public string? Distribution { get; set; }
+        public bool EnableAppHangTracking { get; set; }
+        public bool EnableAutoBreadcrumbTracking { get; set; }
+        public bool EnableAutoPerformanceTracking { get; set; }
+        public bool EnableAutoSessionTracking { get; set; }
+        public bool EnableCoreDataTracking { get; set; }
+        public bool EnableFileIOTracking { get; set; }
+        public bool EnableNetworkBreadcrumbs { get; set; }
+        public bool EnableNetworkTracking { get; set; }
+        public bool EnableOutOfMemoryTracking { get; set; }
+        public bool EnableProfiling { get; set; }
+        public bool EnableSwizzling { get; set; }
+        public bool EnableUIViewControllerTracking { get; set; }
+        public bool EnableUserInteractionTracing { get; set; }
+        public bool StitchAsyncCode { get; set; }
+
 
         // ---------- Other ----------
 
@@ -38,8 +56,6 @@ public partial class SentryOptions
         // /// be stripped away during the roundtripping between the two SDKs.  Use with caution.
         // /// </remarks>
         // public bool EnableCocoaSdkBeforeSend { get; set; }
-
-        // ---------- Other ----------
 
         internal List<string>? InAppExcludes { get; private set; }
         internal List<string>? InAppIncludes { get; private set; }
