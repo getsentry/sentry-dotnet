@@ -64,7 +64,19 @@ public static partial class SentrySdk
                     .ToCocoaBreadcrumb()!;
             }
 
-            // TOOD: Work on below (copied from Android)
+            // These options we have behind feature flags
+            if (options.iOS.EnableCocoaSdkTracing)
+            {
+                o.TracesSampleRate = options.TracesSampleRate;
+
+                if (options.TracesSampler is { } tracesSampler)
+                {
+                    // Note: Nullable return is allowed but delegate is generated incorrectly
+                    o.TracesSampler = context => tracesSampler(context.ToTransactionSamplingContext())!;
+                }
+            }
+
+            // TODO: Work on below (copied from Android implementation - needs updating)
 
             //
             //         // These options we have behind feature flags

@@ -16,6 +16,16 @@ public partial class SentryOptions
     {
         internal IosOptions() { }
 
+        // ---------- From Cocoa's SentryOptions.h ----------
+
         // TODO
+
+        // ---------- Other ----------
+
+        /// <summary>
+        /// Gets or sets a value that indicates if tracing features are enabled on the embedded Cocoa SDK.
+        /// The default value is <c>false</c> (disabled).
+        /// </summary>
+        public bool EnableCocoaSdkTracing { get; set; }
     }
 }
