@@ -250,7 +250,7 @@ public partial class SentryOptions
         /// events that originate from the embedded Android SDK. The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>
-        /// This is an experimental feature and is imperefct, as the .NET SDK and the embedded Android SDK don't
+        /// This is an experimental feature and is imperfect, as the .NET SDK and the embedded Android SDK don't
         /// implement all of the same features that may be present in the event graph. Some optional elements may
         /// be stripped away during the roundtripping between the two SDKs.  Use with caution.
         /// </remarks>
