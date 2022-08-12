@@ -668,6 +668,12 @@ namespace Sentry
 #endif
             };
 
+#if ANDROID
+            Android = new AndroidOptions(this);
+#elif IOS || MACCATALYST
+            IOS = new IOSOptions(this);
+#endif
+
             InAppExclude = new[] {
                     "System.",
                     "Mono.",
@@ -716,7 +722,6 @@ namespace Sentry
 #else
             InAppInclude = Array.Empty<string>();
 #endif
-
         }
     }
 }

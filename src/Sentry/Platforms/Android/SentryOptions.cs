@@ -6,14 +6,19 @@ public partial class SentryOptions
     /// <summary>
     /// Exposes additional options for the Android platform.
     /// </summary>
-    public AndroidOptions Android { get; } = new();
+    public AndroidOptions Android { get; }
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
     public class AndroidOptions
     {
-        internal AndroidOptions() { }
+        private readonly SentryOptions _options;
+
+        internal AndroidOptions(SentryOptions options)
+        {
+            _options = options;
+        }
 
         // ---------- From SentryAndroidOptions.java ----------
 
