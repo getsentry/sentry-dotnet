@@ -157,14 +157,15 @@ public partial class SentryOptions
         /// </summary>
         public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        // TODO: Should we have this Distribution property on SentryOptions (with Release and Environment)?
         /// <summary>
-        /// Gets or sets the distribution.
+        /// The distribution of the application, associated with the release set in <see cref="Release"/>.
         /// </summary>
-        /// <remarks>
-        /// See https://docs.sentry.io/platforms/java/guides/spring/configuration/#distribution
-        /// </remarks>
-        public string? Distribution { get; set; }
+        [Obsolete("Use SentryOptions.Distribution instead.  This property will be removed in a future version.")]
+        public string? Distribution
+        {
+            get => _options.Distribution;
+            set => _options.Distribution = value;
+        }
 
         /// <summary>
         /// Gets or sets a value that indicates if the NDK (Android Native Development Kit) is enabled.

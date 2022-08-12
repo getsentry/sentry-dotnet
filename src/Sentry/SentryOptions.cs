@@ -224,6 +224,20 @@ namespace Sentry
         public string? Release { get; set; }
 
         /// <summary>
+        /// The distribution of the application, associated with the release set in <see cref="Release"/>.
+        /// </summary>
+        /// <example>
+        /// TODO: add examples
+        /// </example>
+        /// <remarks>
+        /// Distributions are used to disambiguate build or deployment variants of the same release of an application.
+        /// Normally used only for mobile apps.
+        /// If not explicitly defined via configuration or environment variable (SENTRY_DIST).
+        /// </remarks>
+        /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/#optional-attributes"/>
+        public string? Distribution { get; set; }
+
+        /// <summary>
         /// The environment the application is running
         /// </summary>
         /// <remarks>
