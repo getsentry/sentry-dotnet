@@ -53,9 +53,15 @@ public static partial class SentrySdk
 
         if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
         {
-            // Note: Nullable return is allowed but delegate is generated incorrectly
-            cocoaOptions.BeforeBreadcrumb = b => beforeBreadcrumb(b.ToBreadcrumb(options.DiagnosticLogger))?
-                .ToCocoaBreadcrumb()!;
+            cocoaOptions.BeforeBreadcrumb = b =>
+            {
+                var breadcrumb = b.ToBreadcrumb(options.DiagnosticLogger);
+                var result = beforeBreadcrumb(breadcrumb)?.ToCocoaBreadcrumb();
+
+                // Note: Nullable result is allowed but delegate is generated incorrectly
+                // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+                return result!;
+            };
         }
 
         // These options we have behind feature flags
@@ -65,22 +71,40 @@ public static partial class SentrySdk
 
             if (options.TracesSampler is { } tracesSampler)
             {
-                // Note: Nullable return is allowed but delegate is generated incorrectly
-                cocoaOptions.TracesSampler = context => tracesSampler(context.ToTransactionSamplingContext())!;
+                cocoaOptions.TracesSampler = cocoaContext =>
+                {
+                    var context = cocoaContext.ToTransactionSamplingContext();
+                    var result = tracesSampler(context);
+
+                    // Note: Nullable result is allowed but delegate is generated incorrectly
+                    // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+                    return result!;
+                };
             }
         }
 
         // TODO: Finish SentryEventExtensions to enable these
-        //
+
         // if (options.iOS.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
         // {
-        //     // Note: Nullable return is allowed but delegate is generated incorrectly
-        //     cocoaOptions.BeforeSend = evt => beforeSend(evt.ToSentryEvent(o))?.ToCocoaSentryEvent(options, o)!;
-        // }
+        //     cocoaOptions.BeforeSend = evt =>
+        //     {
+        //         var sentryEvent = evt.ToSentryEvent(cocoaOptions);
+        //         var result = beforeSend(sentryEvent)?.ToCocoaSentryEvent(options, cocoaOptions);
         //
+        //         // Note: Nullable result is allowed but delegate is generated incorrectly
+        //         // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+        //         return result!;
+        //     };
+        // }
+
         // if (options.iOS.OnCrashedLastRun is { } onCrashedLastRun)
         // {
-        //     cocoaOptions.OnCrashedLastRun = evt => onCrashedLastRun(evt.ToSentryEvent(o));
+        //     cocoaOptions.OnCrashedLastRun = evt =>
+        //     {
+        //         var sentryEvent = evt.ToSentryEvent(cocoaOptions);
+        //         onCrashedLastRun(sentryEvent);
+        //     };
         // }
 
         // These options are from Cocoa's SentryOptions
