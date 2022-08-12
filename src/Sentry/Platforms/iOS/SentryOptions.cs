@@ -25,7 +25,6 @@ public partial class SentryOptions
         public bool EnableAppHangTracking { get; set; }
         public bool EnableAutoBreadcrumbTracking { get; set; }
         public bool EnableAutoPerformanceTracking { get; set; }
-        public bool EnableAutoSessionTracking { get; set; }
         public bool EnableCoreDataTracking { get; set; }
         public bool EnableFileIOTracking { get; set; }
         public bool EnableNetworkBreadcrumbs { get; set; }

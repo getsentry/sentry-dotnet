@@ -95,7 +95,6 @@ public static partial class SentrySdk
             o.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
             o.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
             o.EnableAutoPerformanceTracking = options.iOS.EnableAutoPerformanceTracking;
-            o.EnableAutoSessionTracking = options.iOS.EnableAutoSessionTracking;
             o.EnableCoreDataTracking = options.iOS.EnableCoreDataTracking;
             o.EnableFileIOTracking = options.iOS.EnableFileIOTracking;
             o.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
