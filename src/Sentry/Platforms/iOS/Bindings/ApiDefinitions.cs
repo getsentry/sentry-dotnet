@@ -66,7 +66,7 @@ interface Constants
 // @interface PrivateSentrySDKOnly : NSObject
 [BaseType (typeof(NSObject))]
 [Internal]
-interface PrivateSentrySDKOnly
+interface PrivateSentrySdkOnly
 {
     // +(void)storeEnvelope:(SentryEnvelope * _Nonnull)envelope;
     [Static]
@@ -117,12 +117,12 @@ interface PrivateSentrySDKOnly
     // @property (assign, nonatomic, class) BOOL appStartMeasurementHybridSDKMode;
     [Static]
     [Export ("appStartMeasurementHybridSDKMode")]
-    bool AppStartMeasurementHybridSDKMode { get; set; }
+    bool AppStartMeasurementHybridSdkMode { get; set; }
 
     // @property (assign, nonatomic, class) BOOL framesTrackingMeasurementHybridSDKMode;
     [Static]
     [Export ("framesTrackingMeasurementHybridSDKMode")]
-    bool FramesTrackingMeasurementHybridSDKMode { get; set; }
+    bool FramesTrackingMeasurementHybridSdkMode { get; set; }
 
     // @property (readonly, assign, nonatomic, class) BOOL isFramesTrackingRunning;
     [Static]
@@ -1392,7 +1392,7 @@ interface SentryNSError : SentrySerializable
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentrySDK
+interface SentrySdk
 {
     // @property (readonly, nonatomic, class) id<SentrySpan> _Nullable span;
     [Static]
