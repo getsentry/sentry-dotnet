@@ -56,7 +56,7 @@ public partial class MainPage
     {
         try
         {
-            SentrySdk.CauseCrash(CrashType.Managed);
+            throw new ApplicationException("This exception was thrown and captured manually, without crashing the app.");
         }
         catch (Exception ex)
         {
