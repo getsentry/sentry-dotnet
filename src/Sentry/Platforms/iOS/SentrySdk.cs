@@ -23,7 +23,7 @@ public static partial class SentrySdk
 
         // Now initialize the Cocoa SDK
         SentryCocoa.SentryOptions? cocoaOptions = null;
-        SentryCocoa.SentrySdk.StartWithConfigureOptions(o =>
+        SentryCocoaSdk.StartWithConfigureOptions(o =>
         {
             // Capture the Cocoa options reference on the outer scope
             cocoaOptions = o;
@@ -147,7 +147,7 @@ public static partial class SentrySdk
 
         // Set options for the managed SDK that depend on the Cocoa SDK
         options.AddEventProcessor(new IosEventProcessor(cocoaOptions!));
-        options.CrashedLastRun = () => SentryCocoa.SentrySdk.CrashedLastRun;
+        options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
         options.ScopeObserver = new IosScopeObserver(options);
 
