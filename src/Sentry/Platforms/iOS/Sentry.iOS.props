@@ -17,6 +17,7 @@
     <Using Include="System.Globalization" />
     <Using Include="System.Text.Json" />
     <Using Include="Foundation" />
+    <Using Include="SentryCocoa.SentryOptions" Alias="SentryCocoaOptions" />
     <Using Include="SentryCocoa.SentrySdk" Alias="SentryCocoaSdk" />
   </ItemGroup>
 

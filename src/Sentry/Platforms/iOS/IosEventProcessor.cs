@@ -4,9 +4,9 @@ namespace Sentry.iOS;
 
 internal class IosEventProcessor : ISentryEventProcessor, IDisposable
 {
-    private readonly SentryCocoa.SentryOptions _options;
+    private readonly SentryCocoaOptions _options;
 
-    public IosEventProcessor(SentryCocoa.SentryOptions options)
+    public IosEventProcessor(SentryCocoaOptions options)
     {
         _options = options;
     }

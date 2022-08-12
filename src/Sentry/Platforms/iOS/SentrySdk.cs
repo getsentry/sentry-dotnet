@@ -21,129 +21,126 @@ public static partial class SentrySdk
         // "Best" mode throws platform not supported exception.  Use "Fast" mode instead.
         options.DetectStartupTime = StartupTimeDetectionMode.Fast;
 
-        // Now initialize the Cocoa SDK
-        SentryCocoa.SentryOptions? cocoaOptions = null;
-        SentryCocoaSdk.StartWithConfigureOptions(o =>
+        // Set options for the Cocoa SDK
+        var cocoaOptions = new SentryCocoaOptions();
+
+        // These options are copied over from our SentryOptions
+        cocoaOptions.AttachStacktrace = options.AttachStacktrace;
+        cocoaOptions.Debug = options.Debug;
+        cocoaOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
+        cocoaOptions.Dsn = options.Dsn;
+        cocoaOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
+        cocoaOptions.Environment = options.Environment;
+        cocoaOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
+        cocoaOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
+        cocoaOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
+        cocoaOptions.ReleaseName = options.Release;
+        cocoaOptions.SampleRate = options.SampleRate;
+        cocoaOptions.SendClientReports = options.SendClientReports;
+        cocoaOptions.SendDefaultPii = options.SendDefaultPii;
+        cocoaOptions.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
+
+        // These options are not available in the Sentry Cocoa SDK
+        // cocoaOptions.? = options.InitCacheFlushTimeout;
+        // cocoaOptions.? = options.MaxQueueItems;
+        // cocoaOptions.? = options.ShutdownTimeout;
+
+        // NOTE: options.CacheDirectoryPath - No option for this in Sentry Cocoa, but caching is still enabled
+        // https://github.com/getsentry/sentry-cocoa/issues/1051
+
+        // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
+        //       one when sending events, which is relayed through the scope observer.
+
+        if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
         {
-            // Capture the Cocoa options reference on the outer scope
-            cocoaOptions = o;
+            // Note: Nullable return is allowed but delegate is generated incorrectly
+            cocoaOptions.BeforeBreadcrumb = b => beforeBreadcrumb(b.ToBreadcrumb(options.DiagnosticLogger))?
+                .ToCocoaBreadcrumb()!;
+        }
 
-            // These options are copied over from our SentryOptions
-            o.AttachStacktrace = options.AttachStacktrace;
-            o.Debug = options.Debug;
-            o.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
-            o.Dsn = options.Dsn;
-            o.EnableAutoSessionTracking = options.AutoSessionTracking;
-            o.Environment = options.Environment;
-            o.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
-            o.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
-            o.MaxCacheItems = (nuint) options.MaxCacheItems;
-            o.ReleaseName = options.Release;
-            o.SampleRate = options.SampleRate;
-            o.SendClientReports = options.SendClientReports;
-            o.SendDefaultPii = options.SendDefaultPii;
-            o.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
+        // These options we have behind feature flags
+        if (options.iOS.EnableCocoaSdkTracing)
+        {
+            cocoaOptions.TracesSampleRate = options.TracesSampleRate;
 
-            // These options are not available in the Sentry Cocoa SDK
-            // o.? = options.InitCacheFlushTimeout;
-            // o.? = options.MaxQueueItems;
-            // o.? = options.ShutdownTimeout;
-
-            // NOTE: options.CacheDirectoryPath - No option for this in Sentry Cocoa, but caching is still enabled
-            // https://github.com/getsentry/sentry-cocoa/issues/1051
-
-            // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
-            //       one when sending events, which is relayed through the scope observer.
-
-            if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
+            if (options.TracesSampler is { } tracesSampler)
             {
                 // Note: Nullable return is allowed but delegate is generated incorrectly
-                o.BeforeBreadcrumb = b => beforeBreadcrumb(b.ToBreadcrumb(options.DiagnosticLogger))?
-                    .ToCocoaBreadcrumb()!;
+                cocoaOptions.TracesSampler = context => tracesSampler(context.ToTransactionSamplingContext())!;
             }
+        }
 
-            // These options we have behind feature flags
-            if (options.iOS.EnableCocoaSdkTracing)
+        // TODO: Finish SentryEventExtensions to enable these
+        //
+        // if (options.iOS.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
+        // {
+        //     // Note: Nullable return is allowed but delegate is generated incorrectly
+        //     cocoaOptions.BeforeSend = evt => beforeSend(evt.ToSentryEvent(o))?.ToCocoaSentryEvent(options, o)!;
+        // }
+        //
+        // if (options.iOS.OnCrashedLastRun is { } onCrashedLastRun)
+        // {
+        //     cocoaOptions.OnCrashedLastRun = evt => onCrashedLastRun(evt.ToSentryEvent(o));
+        // }
+
+        // These options are from Cocoa's SentryOptions
+        cocoaOptions.AttachScreenshot = options.iOS.AttachScreenshot;
+        cocoaOptions.AppHangTimeoutInterval = options.iOS.AppHangTimeoutInterval.TotalSeconds;
+        cocoaOptions.IdleTimeout = options.iOS.IdleTimeout.TotalSeconds;
+        cocoaOptions.Dist = options.iOS.Distribution;
+        cocoaOptions.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
+        cocoaOptions.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
+        cocoaOptions.EnableAutoPerformanceTracking = options.iOS.EnableAutoPerformanceTracking;
+        cocoaOptions.EnableCoreDataTracking = options.iOS.EnableCoreDataTracking;
+        cocoaOptions.EnableFileIOTracking = options.iOS.EnableFileIOTracking;
+        cocoaOptions.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
+        cocoaOptions.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
+        cocoaOptions.EnableOutOfMemoryTracking = options.iOS.EnableOutOfMemoryTracking;
+        cocoaOptions.EnableSwizzling = options.iOS.EnableSwizzling;
+        cocoaOptions.EnableUIViewControllerTracking = options.iOS.EnableUIViewControllerTracking;
+        cocoaOptions.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
+        cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
+        cocoaOptions.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
+
+        // In-App Excludes and Includes to be passed to the Cocoa SDK
+        options.iOS.InAppExcludes?.ForEach(x => cocoaOptions.AddInAppExclude(x));
+        options.iOS.InAppIncludes?.ForEach(x => cocoaOptions.AddInAppInclude(x));
+
+        // These options are intentionally not expose or modified
+        // cocoaOptions.Enabled
+        // cocoaOptions.SdkInfo
+        // cocoaOptions.Integrations
+        // cocoaOptions.DefaultIntegrations
+        // cocoaOptions.EnableProfiling  (deprecated)
+
+        // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
+        // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
+        // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
+        // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
+        // Thankfully, we can see Xamarin's unhandled exception handler on the stack trace, so we can filter them out.
+        // Here is the function that calls abort(), which we will use as a filter:
+        // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
+        cocoaOptions.BeforeSend = evt =>
+        {
+            // There should only be one exception on the event in this case
+            if (evt.Exceptions?.Length == 1)
             {
-                o.TracesSampleRate = options.TracesSampleRate;
-
-                if (options.TracesSampler is { } tracesSampler)
+                // It will match the following characteristics
+                var ex = evt.Exceptions[0];
+                if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
+                    ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
                 {
-                    // Note: Nullable return is allowed but delegate is generated incorrectly
-                    o.TracesSampler = context => tracesSampler(context.ToTransactionSamplingContext())!;
+                    // Don't sent it
+                    return null!;
                 }
             }
 
-            // TODO: Finish SentryEventExtensions to enable these
-            //
-            // if (options.iOS.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
-            // {
-            //     // Note: Nullable return is allowed but delegate is generated incorrectly
-            //     o.BeforeSend = evt => beforeSend(evt.ToSentryEvent(o))?.ToCocoaSentryEvent(options, o)!;
-            // }
-            //
-            // if (options.iOS.OnCrashedLastRun is { } onCrashedLastRun)
-            // {
-            //     o.OnCrashedLastRun = evt => onCrashedLastRun(evt.ToSentryEvent(o));
-            // }
+            // Other event, send as normal
+            return evt;
+        };
 
-            // These options are from Cocoa's SentryOptions
-            o.AttachScreenshot = options.iOS.AttachScreenshot;
-            o.AppHangTimeoutInterval = options.iOS.AppHangTimeoutInterval.TotalSeconds;
-            o.IdleTimeout = options.iOS.IdleTimeout.TotalSeconds;
-            o.Dist = options.iOS.Distribution;
-            o.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
-            o.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
-            o.EnableAutoPerformanceTracking = options.iOS.EnableAutoPerformanceTracking;
-            o.EnableCoreDataTracking = options.iOS.EnableCoreDataTracking;
-            o.EnableFileIOTracking = options.iOS.EnableFileIOTracking;
-            o.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
-            o.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
-            o.EnableOutOfMemoryTracking = options.iOS.EnableOutOfMemoryTracking;
-            o.EnableSwizzling = options.iOS.EnableSwizzling;
-            o.EnableUIViewControllerTracking = options.iOS.EnableUIViewControllerTracking;
-            o.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
-            o.StitchAsyncCode = options.iOS.StitchAsyncCode;
-            o.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
-
-            // In-App Excludes and Includes to be passed to the Cocoa SDK
-            options.iOS.InAppExcludes?.ForEach(x => o.AddInAppExclude(x));
-            options.iOS.InAppIncludes?.ForEach(x => o.AddInAppInclude(x));
-
-            // These options are intentionally not expose or modified
-            // o.Enabled
-            // o.SdkInfo
-            // o.Integrations
-            // o.DefaultIntegrations
-            // o.EnableProfiling  (deprecated)
-
-            // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
-            // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
-            // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
-            // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
-            // Thankfully, we can see Xamarin's unhandled exception handler on the stack trace, so we can filter them out.
-            // Here is the function that calls abort(), which we will use as a filter:
-            // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
-            o.BeforeSend = evt =>
-            {
-                // There should only be one exception on the event in this case
-                if (evt.Exceptions?.Length == 1)
-                {
-                    // It will match the following characteristics
-                    var ex = evt.Exceptions[0];
-                    if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
-                        ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
-                    {
-                        // Don't sent it
-                        return null!;
-                    }
-                }
-
-                // Other event, send as normal
-                return evt;
-            };
-
-        });
+        // Now initialize the Cocoa SDK
+        SentryCocoaSdk.StartWithOptionsObject(cocoaOptions);
 
         // Set options for the managed SDK that depend on the Cocoa SDK
         options.AddEventProcessor(new IosEventProcessor(cocoaOptions!));

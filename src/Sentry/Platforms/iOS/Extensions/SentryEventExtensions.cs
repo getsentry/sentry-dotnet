@@ -18,7 +18,7 @@
 //      * updating the objects on either side.
 //      */
 //
-//     public static SentryEvent ToSentryEvent(this SentryCocoa.SentryEvent sentryEvent, SentryCocoa.SentryOptions cocoaOptions)
+//     public static SentryEvent ToSentryEvent(this SentryCocoa.SentryEvent sentryEvent, SentryCocoaOptions cocoaOptions)
 //     {
 //         using var stream = sentryEvent.ToJsonStream()!;
 //         //stream.Seek(0, SeekOrigin.Begin); ??
@@ -28,7 +28,7 @@
 //         return SentryEvent.FromJson(json.RootElement, exception);
 //     }
 //
-//     public static SentryCocoa.SentryEvent ToCocoaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, SentryCocoa.SentryOptions cocoaOptions)
+//     public static SentryCocoa.SentryEvent ToCocoaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, SentryCocoaOptions cocoaOptions)
 //     {
 //         var envelope = Envelope.FromEvent(sentryEvent);
 //
