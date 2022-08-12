@@ -118,17 +118,30 @@ public static partial class SentrySdk
             // o.Integrations
             // o.DefaultIntegrations
 
-            // NOTE
             // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
             // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
             // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
             // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
-            //
-            // A similar thing happens on Android, which we exclude with:
-            //     o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
-            //
-            // TODO: How should we handle this for iOS?  We probably don't want to completely exclude SIGABRT
-            //
+            // Thankfully, we can see Xamarin's unhandled exception handler on the stack trace, so we can filter them out.
+            o.BeforeSend = evt =>
+            {
+                // There should only be one exception on the event in this case
+                if (evt.Exceptions?.Length == 1)
+                {
+                    // It will match the following characteristics
+                    var ex = evt.Exceptions[0];
+                    if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
+                        ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
+                    {
+                        // Don't sent it
+                        return null!;
+                    }
+                }
+
+                // Other event, send as normal
+                return evt;
+            };
+
         });
 
         // Set options for the managed SDK that depend on the Cocoa SDK
@@ -138,6 +151,5 @@ public static partial class SentrySdk
         options.ScopeObserver = new IosScopeObserver(options);
 
         // TODO: Pause/Resume
-
     }
 }
