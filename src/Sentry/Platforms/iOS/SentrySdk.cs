@@ -118,10 +118,17 @@ public static partial class SentrySdk
             // o.Integrations
             // o.DefaultIntegrations
 
-
-            // // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
-            // o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
-
+            // NOTE
+            // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
+            // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
+            // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
+            // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
+            //
+            // A similar thing happens on Android, which we exclude with:
+            //     o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
+            //
+            // TODO: How should we handle this for iOS?  We probably don't want to completely exclude SIGABRT
+            //
         });
 
         // Set options for the managed SDK that depend on the Cocoa SDK
