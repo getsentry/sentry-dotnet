@@ -100,7 +100,6 @@ public static partial class SentrySdk
             o.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
             o.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
             o.EnableOutOfMemoryTracking = options.iOS.EnableOutOfMemoryTracking;
-            o.EnableProfiling = options.iOS.EnableProfiling;
             o.EnableSwizzling = options.iOS.EnableSwizzling;
             o.EnableUIViewControllerTracking = options.iOS.EnableUIViewControllerTracking;
             o.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
