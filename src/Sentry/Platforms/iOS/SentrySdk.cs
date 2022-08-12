@@ -116,6 +116,7 @@ public static partial class SentrySdk
             // o.SdkInfo
             // o.Integrations
             // o.DefaultIntegrations
+            // o.EnableProfiling  (deprecated)
 
             // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
             // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
