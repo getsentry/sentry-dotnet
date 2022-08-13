@@ -24,7 +24,8 @@ public class EventProcessorTests
         }
 
         await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
+            .IgnoreStandardSentryMembers()
+            .IgnoreMember(nameof(SentryEvent.Distribution));
     }
 
     public class TheEventProcessor : ISentryEventProcessor

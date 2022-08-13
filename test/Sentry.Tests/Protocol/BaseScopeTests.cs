@@ -90,6 +90,22 @@ public class BaseScopeTests
     }
 
     [Fact]
+    public void Release_Settable()
+    {
+        var expected = "Release";
+        _sut.Release = expected;
+        Assert.Same(expected, _sut.Release);
+    }
+
+    [Fact]
+    public void Distribution_Settable()
+    {
+        var expected = "Distribution";
+        _sut.Distribution = expected;
+        Assert.Same(expected, _sut.Distribution);
+    }
+
+    [Fact]
     public void Environment_Settable()
     {
         var expected = "Environment";

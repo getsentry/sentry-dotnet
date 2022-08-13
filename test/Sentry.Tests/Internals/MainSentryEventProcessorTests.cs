@@ -8,7 +8,7 @@ public class MainSentryEventProcessorTests
     private class Fixture
     {
         public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-        public SentryOptions SentryOptions { get; set; } = new() { Release = "release-123" };
+        public SentryOptions SentryOptions { get; set; } = new() { Release = "release-123", Distribution = "dist-123"};
         public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
     }
 
@@ -248,6 +248,51 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         Assert.Equal(sut.Release, evt.Release);
+    }
+
+    [Fact]
+    public void Process_DistributionOnOptions_SetToEvent()
+    {
+        const string expectedVersion = "14G60";
+        _fixture.SentryOptions.Distribution = expectedVersion;
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+
+        _ = sut.Process(evt);
+
+        Assert.Equal(expectedVersion, evt.Distribution);
+    }
+
+    [Fact]
+    public void Process_NoDistributionOnOptions_SameAsCachedVersion()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+
+        _ = sut.Process(evt);
+
+        Assert.Equal(sut.Distribution, evt.Distribution);
+    }
+
+    [Fact]
+    public void Process_NoDistributionOnOptions_SameAsEnvironmentVariable()
+    {
+        _fixture.SentryOptions.Distribution = null;
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+
+        EnvironmentVariableGuard.WithVariable(
+            Sentry.Internal.Constants.DistributionEnvironmentVariable,
+            "abc123",
+            () =>
+            {
+                // Distribution is cached
+                DistributionLocator.Reset();
+
+                _ = sut.Process(evt);
+            });
+
+        Assert.Equal("abc123", evt.Distribution);
     }
 
     [Theory]

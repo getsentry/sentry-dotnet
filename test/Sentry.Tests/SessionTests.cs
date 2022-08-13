@@ -21,6 +21,7 @@ public class SessionTests
             "bar",
             DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
             "release123",
+            "dist123",
             "env123",
             "192.168.0.1",
             "Google Chrome");
@@ -53,6 +54,7 @@ public class SessionTests
             "\"status\":\"crashed\"," +
             "\"attrs\":{" +
             "\"release\":\"release123\"," +
+            "\"dist\":\"dist123\"," +
             "\"environment\":\"env123\"," +
             "\"ip_address\":\"192.168.0.1\"," +
             "\"user_agent\":\"Google Chrome\"" +
@@ -69,6 +71,7 @@ public class SessionTests
             "bar",
             DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
             "release123",
+            "dist123",
             "env123",
             "192.168.0.1",
             "Google Chrome");
