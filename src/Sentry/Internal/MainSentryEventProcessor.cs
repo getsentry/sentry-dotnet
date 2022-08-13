@@ -85,20 +85,9 @@ namespace Sentry.Internal
                 }
             }
 
-            if (@event.Level == null)
-            {
-                @event.Level = SentryLevel.Error;
-            }
-
-            if (@event.Release == null)
-            {
-                @event.Release = Release;
-            }
-
-            if (@event.Distribution == null)
-            {
-                @event.Distribution = Distribution;
-            }
+            @event.Level ??= SentryLevel.Error;
+            @event.Release ??= Release;
+            @event.Distribution ??= Distribution;
 
             if (@event.Exception == null)
             {
