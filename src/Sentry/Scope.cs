@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -14,7 +15,7 @@ namespace Sentry
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
-    public class Scope : IEventLike
+    public class Scope : IEventLike, IHasDistribution
     {
         internal SentryOptions Options { get; }
 
@@ -131,6 +132,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public string? Release { get; set; }
+
+        /// <inheritdoc />
+        public string? Distribution { get; set; }
 
         /// <inheritdoc />
         public string? Environment { get; set; }
@@ -363,6 +367,7 @@ namespace Sentry
 
             other.Platform ??= Platform;
             other.Release ??= Release;
+            other.WithDistribution(_ => _.Distribution ??= Distribution);
             other.Environment ??= Environment;
             other.TransactionName ??= TransactionName;
             other.Level ??= Level;

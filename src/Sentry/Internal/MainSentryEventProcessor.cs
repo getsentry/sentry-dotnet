@@ -26,6 +26,8 @@ namespace Sentry.Internal
 
         internal string? Release => ReleaseLocator.Resolve(_options);
 
+        internal string? Distribution => DistributionLocator.Resolve(_options);
+
         public MainSentryEventProcessor(
             SentryOptions options,
             Func<ISentryStackTraceFactory> sentryStackTraceFactoryAccessor)
@@ -91,6 +93,11 @@ namespace Sentry.Internal
             if (@event.Release == null)
             {
                 @event.Release = Release;
+            }
+
+            if (@event.Distribution == null)
+            {
+                @event.Distribution = Distribution;
             }
 
             if (@event.Exception == null)

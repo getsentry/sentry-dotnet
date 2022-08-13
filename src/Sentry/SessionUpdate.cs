@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -9,7 +10,7 @@ namespace Sentry
     /// Session update.
     /// </summary>
     // https://develop.sentry.dev/sdk/sessions/#session-update-payload
-    public class SessionUpdate : ISession, IJsonSerializable
+    public class SessionUpdate : ISession, IJsonSerializable, IHasReadOnlyDistribution
     {
         /// <inheritdoc />
         public SentryId Id { get; }
@@ -22,6 +23,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public string Release { get; }
+
+        /// <inheritdoc />
+        public string? Distribution { get; }
 
         /// <inheritdoc />
         public string? Environment { get; }
@@ -68,6 +72,39 @@ namespace Sentry
             string? distinctId,
             DateTimeOffset startTimestamp,
             string release,
+            string? distribution,
+            string? environment,
+            string? ipAddress,
+            string? userAgent,
+            int errorCount,
+            bool isInitial,
+            DateTimeOffset timestamp,
+            int sequenceNumber,
+            SessionEndStatus? endStatus)
+        {
+            Id = id;
+            DistinctId = distinctId;
+            StartTimestamp = startTimestamp;
+            Release = release;
+            Distribution = distribution;
+            Environment = environment;
+            IpAddress = ipAddress;
+            UserAgent = userAgent;
+            ErrorCount = errorCount;
+            IsInitial = isInitial;
+            Timestamp = timestamp;
+            SequenceNumber = sequenceNumber;
+            EndStatus = endStatus;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SessionUpdate"/>.
+        /// </summary>
+        public SessionUpdate(
+            SentryId id,
+            string? distinctId,
+            DateTimeOffset startTimestamp,
+            string release,
             string? environment,
             string? ipAddress,
             string? userAgent,
@@ -105,6 +142,7 @@ namespace Sentry
                 session.DistinctId,
                 session.StartTimestamp,
                 session.Release,
+                session.GetDistribution(),
                 session.Environment,
                 session.IpAddress,
                 session.UserAgent,
@@ -155,6 +193,7 @@ namespace Sentry
             // Attributes
             writer.WriteStartObject("attrs");
             writer.WriteString("release", Release);
+            writer.WriteStringIfNotWhiteSpace("dist", Distribution);
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
             writer.WriteStringIfNotWhiteSpace("user_agent", UserAgent);
@@ -172,6 +211,7 @@ namespace Sentry
             var distinctId = json.GetPropertyOrNull("did")?.GetString();
             var startTimestamp = json.GetProperty("started").GetDateTimeOffset();
             var release = json.GetProperty("attrs").GetProperty("release").GetStringOrThrow();
+            var distribution = json.GetProperty("attrs").GetPropertyOrNull("dist")?.GetString();
             var environment = json.GetProperty("attrs").GetPropertyOrNull("environment")?.GetString();
             var ipAddress = json.GetProperty("attrs").GetPropertyOrNull("ip_address")?.GetString();
             var userAgent = json.GetProperty("attrs").GetPropertyOrNull("user_agent")?.GetString();
@@ -186,6 +226,7 @@ namespace Sentry
                 distinctId,
                 startTimestamp,
                 release,
+                distribution,
                 environment,
                 ipAddress,
                 userAgent,

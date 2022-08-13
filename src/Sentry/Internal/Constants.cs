@@ -16,6 +16,11 @@ namespace Sentry.Internal
         public const string ReleaseEnvironmentVariable = "SENTRY_RELEASE";
 
         /// <summary>
+        /// Sentry distribution environment variable.
+        /// </summary>
+        public const string DistributionEnvironmentVariable = "SENTRY_DIST";
+
+        /// <summary>
         /// Sentry environment, environment variable.
         /// </summary>
         public const string EnvironmentEnvironmentVariable = "SENTRY_ENVIRONMENT";

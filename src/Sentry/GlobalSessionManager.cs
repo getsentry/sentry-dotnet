@@ -329,11 +329,12 @@ namespace Sentry
             }
 
             // Extract other parameters
+            var distribution = DistributionLocator.Resolve(_options);
             var environment = EnvironmentLocator.Resolve(_options);
             var distinctId = TryGetInstallationId();
 
             // Create new session
-            var session = new Session(distinctId, release, environment);
+            var session = new Session(distinctId, release, distribution, environment);
 
             // Set new session and check whether we ended up overwriting an active one in the process
             var previousSession = Interlocked.Exchange(ref _currentSession, session);
