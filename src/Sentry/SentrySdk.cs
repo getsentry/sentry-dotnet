@@ -500,7 +500,7 @@ namespace Sentry
                     break;
 #elif IOS || MACCATALYST
                 case CrashType.Native:
-                    SentryCocoa.SentrySDK.Crash();
+                    SentryCocoaSdk.Crash();
                     break;
 #endif
                 default:

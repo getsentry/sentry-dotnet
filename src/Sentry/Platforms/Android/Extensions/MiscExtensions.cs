@@ -1,6 +1,6 @@
 namespace Sentry.Android.Extensions;
 
-internal static class SMiscExtensions
+internal static class MiscExtensions
 {
     public static SentryId ToSentryId(this Java.Protocol.SentryId sentryId) => new(Guid.Parse(sentryId.ToString()));
 

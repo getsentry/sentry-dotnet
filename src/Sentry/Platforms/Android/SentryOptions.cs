@@ -33,7 +33,7 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/android/configuration/app-not-respond/
         /// </remarks>
-        public bool AnrReportInDebug { get; set; }
+        public bool AnrReportInDebug { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the ANR (Application Not Responding) timeout interval.
@@ -53,7 +53,7 @@ public partial class SentryOptions
         /// This feature is provided by the Sentry Android SDK and thus only works for Java-based errors.
         /// See https://docs.sentry.io/platforms/android/enriching-events/screenshots/
         /// </remarks>
-        public bool AttachScreenshot { get; set; }
+        public bool AttachScreenshot { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value that indicates if automatic breadcrumbs for <c>Activity</c> lifecycle events are
@@ -129,7 +129,7 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/android/performance/instrumentation/automatic-instrumentation/#user-interaction-instrumentation
         /// </remarks>
-        public bool EnableUserInteractionTracing { get; set; }
+        public bool EnableUserInteractionTracing { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the interval for profiling traces, when enabled with <see cref="ProfilingEnabled"/>.
@@ -144,7 +144,7 @@ public partial class SentryOptions
         /// Gets or sets a value that indicates if all the threads are automatically attached to all logged events.
         /// The default value is <c>false</c> (disabled).
         /// </summary>
-        public bool AttachThreads { get; set; }
+        public bool AttachThreads { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the connection timeout on the HTTP connection used by Java when sending data to Sentry.
@@ -152,14 +152,14 @@ public partial class SentryOptions
         /// </summary>
         public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        // TODO: Should we have this Distribution property on SentryOptions (with Release and Environment)?
         /// <summary>
-        /// Gets or sets the distribution.
+        /// Gets or sets the distribution of the application.
         /// </summary>
         /// <remarks>
-        /// See https://docs.sentry.io/platforms/java/guides/spring/configuration/#distribution
+        /// See "dist" in https://develop.sentry.dev/sdk/event-payloads/#optional-attributes
         /// </remarks>
-        public string? Distribution { get; set; }
+        // TODO: Should we have this property on the main SentryOptions (with Release and Environment)?
+        public string? Distribution { get; set; } = null;
 
         /// <summary>
         /// Gets or sets a value that indicates if the NDK (Android Native Development Kit) is enabled.
@@ -186,14 +186,14 @@ public partial class SentryOptions
         /// Gets or sets a value that indicates if uncaught Java errors will have their stack traces
         /// printed to the standard error stream. The default value is <c>false</c> (disabled).
         /// </summary>
-        public bool PrintUncaughtStackTrace { get; set; }
+        public bool PrintUncaughtStackTrace { get; set; } = false;
 
         /// <summary>
         /// Gets or sets if profiling is enabled for transactions.
         /// The default value is <c>false</c> (disabled).
         /// See also <see cref="ProfilingTracesInterval"/>.
         /// </summary>
-        public bool ProfilingEnabled { get; set; }
+        public bool ProfilingEnabled { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the read timeout on the HTTP connection used by Java when sending data to Sentry.
@@ -204,8 +204,8 @@ public partial class SentryOptions
 
         // ---------- Other ----------
 
-        internal string[]? InAppExclude { get; set; }
-        internal string[]? InAppInclude { get; set; }
+        internal List<string>? InAppExcludes { get; private set; }
+        internal List<string>? InAppIncludes { get; private set; }
 
         /// <summary>
         /// Add prefix to exclude from 'InApp' stacktrace list by the Android SDK.
@@ -218,10 +218,11 @@ public partial class SentryOptions
         /// <example>
         /// 'java.util.', 'org.apache.logging.log4j.'
         /// </example>
-        public void AddInAppExclude(string prefix) =>
-            InAppExclude = InAppExclude != null
-                ? InAppExclude.Concat(new[] { prefix }).ToArray()
-                : new[] { prefix };
+        public void AddInAppExclude(string prefix)
+        {
+            InAppExcludes ??= new List<string>();
+            InAppExcludes.Add(prefix);
+        }
 
         /// <summary>
         /// Add prefix to include as in 'InApp' stacktrace by the Android SDK.
@@ -234,26 +235,26 @@ public partial class SentryOptions
         /// <example>
         /// 'java.util.customcode.', 'io.sentry.samples.'
         /// </example>
-        public void AddInAppInclude(string prefix) =>
-            InAppInclude = InAppInclude != null
-                ? InAppInclude.Concat(new[] { prefix }).ToArray()
-                : new[] { prefix };
+        public void AddInAppInclude(string prefix){
+            InAppIncludes ??= new List<string>();
+            InAppIncludes.Add(prefix);
+        }
 
         /// <summary>
         /// Gets or sets a value that indicates if tracing features are enabled on the embedded Android SDK.
         /// The default value is <c>false</c> (disabled).
         /// </summary>
-        public bool EnableAndroidSdkTracing { get; set; }
+        public bool EnableAndroidSdkTracing { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value that indicates if the <see cref="BeforeSend"/> callback will be invoked for
         /// events that originate from the embedded Android SDK. The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>
-        /// This is an experimental feature and is imperefct, as the .NET SDK and the embedded Android SDK don't
+        /// This is an experimental feature and is imperfect, as the .NET SDK and the embedded Android SDK don't
         /// implement all of the same features that may be present in the event graph. Some optional elements may
-        /// be stripped away during the roundtripping between the two SDKs.  Use with caution.
+        /// be stripped away during the round-tripping between the two SDKs.  Use with caution.
         /// </remarks>
-        public bool EnableAndroidSdkBeforeSend { get; set; }
+        public bool EnableAndroidSdkBeforeSend { get; set; } = false;
     }
 }
