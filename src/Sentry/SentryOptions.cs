@@ -625,11 +625,15 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public INetworkStatusListener? NetworkStatusListener { get; set; }
 
+        internal SettingLocator SettingLocator { get; set; }
+
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
+            SettingLocator = new SettingLocator(this);
+
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
