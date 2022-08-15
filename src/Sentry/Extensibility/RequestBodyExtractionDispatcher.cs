@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Extensibility
 {
@@ -34,8 +35,7 @@ namespace Sentry.Extensibility
         public object? ExtractPayload(IHttpRequest request)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (request is null)
+            if (request.IsNull())
             {
                 return null;
             }

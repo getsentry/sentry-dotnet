@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Extensibility
 {
@@ -103,8 +104,9 @@ namespace Sentry.Extensibility
                                             .Where(f => f is not null)
 #endif
             };
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse - Backward compatibility
-            if (frames is null)
+
+            // Not to throw on code that ignores nullability warnings.
+            if (frames.IsNull())
             {
                 _options.LogDebug("No stack frames found. AttachStacktrace: '{0}', isCurrentStackTrace: '{1}'",
                     _options.AttachStacktrace, isCurrentStackTrace);

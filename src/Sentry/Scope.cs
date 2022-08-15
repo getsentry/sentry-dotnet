@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -322,8 +323,7 @@ namespace Sentry
         public void Apply(IEventLike other)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (other is null)
+            if (other.IsNull())
             {
                 return;
             }
@@ -385,8 +385,7 @@ namespace Sentry
         public void Apply(Scope other)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (other is null)
+            if (other.IsNull())
             {
                 return;
             }
