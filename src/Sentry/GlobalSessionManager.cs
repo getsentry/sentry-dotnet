@@ -318,7 +318,7 @@ namespace Sentry
         public SessionUpdate? StartSession()
         {
             // Extract release
-            var release = ReleaseLocator.Resolve(_options);
+            var release = _options.SettingLocator.GetRelease();
             if (string.IsNullOrWhiteSpace(release))
             {
                 // Release health without release is just health (useless)
@@ -329,7 +329,7 @@ namespace Sentry
             }
 
             // Extract other parameters
-            var environment = EnvironmentLocator.Resolve(_options);
+            var environment = _options.SettingLocator.GetEnvironment();
             var distinctId = TryGetInstallationId();
 
             // Create new session

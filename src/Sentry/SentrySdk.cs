@@ -33,9 +33,8 @@ namespace Sentry
 
             ProcessInfo.Instance ??= new ProcessInfo(options);
 
-            // If DSN is null (i.e. not explicitly disabled, just unset), then
-            // try to resolve the value from environment.
-            var dsnString = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
+            // Locate the DSN
+            var dsnString = options.SettingLocator.GetDsn();
 
             // If it's either explicitly disabled or we couldn't resolve the DSN
             // from anywhere else, return a disabled hub.

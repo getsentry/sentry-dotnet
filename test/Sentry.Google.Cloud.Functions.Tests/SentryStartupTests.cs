@@ -40,19 +40,34 @@ public class SentryStartupTests
     }
 
     [Fact]
-    public void ConfigureLogging_ModifiesReleaseLocatorAndReadsKRevisionEnvVar_AppendsToRelease()
+    public void ConfigureLogging_ReadsKRevisionEnvVar_AppendsToRelease()
     {
+        LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(o =>
+            o.FakeSettings().EnvironmentVariables["K_REVISION"] = "9");
+
         var sut = new SentryStartup();
-        EnvironmentVariableGuard.WithVariable("K_REVISION", "9", () =>
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.EndsWith("+9", options.Release);
+    }
+
+    [Fact]
+    public void ConfigureLogging_IgnoresKRevisionEnvVar_WhenReleaseAlreadySet()
+    {
+        LoggingBuilder.Services.Configure<SentryAspNetCoreOptions>(o =>
         {
-            sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
-
-            var provider = LoggingBuilder.Services.BuildServiceProvider();
-            var option = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>();
-
-            Assert.Null(option.Value.Release);
-            Assert.EndsWith("+9", ReleaseLocator.Resolve(option.Value));
+            o.Release = "Foo";
+            o.FakeSettings().EnvironmentVariables["K_REVISION"] = "9";
         });
+
+        var sut = new SentryStartup();
+        sut.ConfigureLogging(WebHostBuilderContext, LoggingBuilder);
+
+        var provider = LoggingBuilder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<SentryAspNetCoreOptions>>().Value;
+        Assert.Equal("Foo", options.Release);
     }
 
     [Fact]

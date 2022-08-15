@@ -60,10 +60,10 @@ namespace Sentry.Internal
             eventLike.Platform ??= Sentry.Constants.Platform;
 
             // Release
-            eventLike.Release ??= ReleaseLocator.Resolve(_options);
+            eventLike.Release ??= _options.SettingLocator.GetRelease();
 
             // Environment
-            eventLike.Environment ??= EnvironmentLocator.Resolve(_options);
+            eventLike.Environment ??= _options.SettingLocator.GetEnvironment();
 
             // User
             // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
