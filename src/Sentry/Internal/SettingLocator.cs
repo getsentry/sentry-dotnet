@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Sentry.Internal.Extensions;
 
@@ -54,7 +53,9 @@ namespace Sentry.Internal
             return dsn;
         }
 
-        public string? GetEnvironment([NotNullWhen(true)] bool useDefaultIfNotFound = true)
+        public string GetEnvironment() => GetEnvironment(true)!;
+
+        public string? GetEnvironment(bool useDefaultIfNotFound)
         {
             var environment = _options.Environment;
             if (!string.IsNullOrWhiteSpace(environment))
@@ -69,6 +70,10 @@ namespace Sentry.Internal
                 environment ??= Debugger.IsAttached
                     ? Constants.DebugEnvironmentSetting
                     : Constants.ProductionEnvironmentSetting;
+            }
+            else if (environment == null)
+            {
+                return null;
             }
 
             _options.Environment = environment;
