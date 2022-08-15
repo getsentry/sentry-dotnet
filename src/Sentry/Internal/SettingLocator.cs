@@ -11,10 +11,6 @@ namespace Sentry.Internal
     /// </summary>
     internal class SettingLocator
     {
-        private const string DsnEnvironmentVariable = "SENTRY_DSN";
-        private const string EnvironmentEnvironmentVariable = "SENTRY_ENVIRONMENT";
-        private const string ReleaseEnvironmentVariable = "SENTRY_RELEASE";
-
         private readonly SentryOptions _options;
 
         public SettingLocator(SentryOptions options)
@@ -50,7 +46,7 @@ namespace Sentry.Internal
                 return dsn;
             }
 
-            dsn = GetEnvironmentVariable(DsnEnvironmentVariable)
+            dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
                   ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn
                   ?? Sentry.Constants.DisableSdkDsnValue;
 
@@ -66,7 +62,7 @@ namespace Sentry.Internal
                 return environment;
             }
 
-            environment = GetEnvironmentVariable(EnvironmentEnvironmentVariable).NullIfWhitespace();
+            environment = GetEnvironmentVariable(Constants.EnvironmentEnvironmentVariable).NullIfWhitespace();
 
             if (useDefaultIfNotFound)
             {
@@ -87,7 +83,7 @@ namespace Sentry.Internal
                 return release;
             }
 
-            release = GetEnvironmentVariable(ReleaseEnvironmentVariable).NullIfWhitespace()
+            release = GetEnvironmentVariable(Constants.ReleaseEnvironmentVariable).NullIfWhitespace()
                       ?? ApplicationVersionLocator.GetCurrent(AssemblyForAttributes);
 
             _options.Release = release;
