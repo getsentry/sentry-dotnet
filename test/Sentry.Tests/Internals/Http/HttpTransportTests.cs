@@ -107,21 +107,20 @@ public class HttpTransportTests
 
         var logger = new InMemoryDiagnosticLogger();
 
-        var func = Substitute.For<Func<string, string>>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Debug = true,
+            DiagnosticLogger = logger
+        };
+
         var path = Path.GetTempPath();
         const string expectedEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
-
-        func(expectedEnvVar).Returns(path);
+        options.FakeSettings().EnvironmentVariables[expectedEnvVar] = path;
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
-            {
-                Dsn = ValidDsn,
-                Debug = true,
-                DiagnosticLogger = logger
-            },
-            new HttpClient(httpHandler),
-            func);
+            options,
+            new HttpClient(httpHandler));
 
         var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -172,18 +171,19 @@ public class HttpTransportTests
 
         var logger = new InMemoryDiagnosticLogger();
 
-        var func = Substitute.For<Func<string, string>>();
-        func(Arg.Any<string>()).Returns(null as string);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Debug = true,
+            DiagnosticLogger = logger
+        };
+
+        const string expectedEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
+        options.FakeSettings().EnvironmentVariables[expectedEnvVar] = null; // explicitly for this test
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
-            {
-                Dsn = ValidDsn,
-                Debug = true,
-                DiagnosticLogger = logger
-            },
-            new HttpClient(httpHandler),
-            func);
+            options,
+            new HttpClient(httpHandler));
 
         // Act
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));

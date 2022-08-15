@@ -33,35 +33,26 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void LastEventId_SetToEventId()
     {
-        EnvironmentVariableGuard.WithVariable(
-            DsnEnvironmentVariable,
-            ValidDsn,
-            () =>
-            {
-                using (SentrySdk.Init())
-                {
-                    var id = SentrySdk.CaptureMessage("test");
-                    Assert.Equal(id, SentrySdk.LastEventId);
-                }
-            });
+        using (SentrySdk.Init(ValidDsn))
+        {
+            var id = SentrySdk.CaptureMessage("test");
+            Assert.Equal(id, SentrySdk.LastEventId);
+        }
     }
 
     [Fact]
     public void LastEventId_Transaction_DoesNotReset()
     {
-        EnvironmentVariableGuard.WithVariable(
-            DsnEnvironmentVariable,
-            ValidDsn,
-            () =>
-            {
-                using (SentrySdk.Init(o => o.TracesSampleRate = 1.0))
-                {
-                    var id = SentrySdk.CaptureMessage("test");
-                    var transaction = SentrySdk.StartTransaction("test", "test");
-                    transaction.Finish();
-                    Assert.Equal(id, SentrySdk.LastEventId);
-                }
-            });
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.TracesSampleRate = 1.0;
+        });
+
+        var id = SentrySdk.CaptureMessage("test");
+        var transaction = SentrySdk.StartTransaction("test", "test");
+        transaction.Finish();
+        Assert.Equal(id, SentrySdk.LastEventId);
     }
 
     [Fact]
@@ -80,79 +71,38 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void Init_CallbackWithoutDsn_ValidDsnEnvironmentVariable_LocatesDsnEnvironmentVariable()
-    {
-        EnvironmentVariableGuard.WithVariable(
-            DsnEnvironmentVariable,
-            ValidDsn,
-            () =>
-            {
-                using (SentrySdk.Init(_ => { }))
-                {
-                    Assert.True(SentrySdk.IsEnabled);
-                }
-            });
-    }
-
-    [Fact]
-    public void Init_CallbackWithoutDsn_InvalidDsnEnvironmentVariable_Throws()
-    {
-        EnvironmentVariableGuard.WithVariable(
-            DsnEnvironmentVariable,
-            InvalidDsn,
-            () =>
-            {
-                Assert.Throws<ArgumentException>(() =>
-                {
-                    using (SentrySdk.Init(_ => { }))
-                    {
-                    }
-                });
-            });
-    }
-
-    [Fact]
     public void Init_ValidDsnEnvironmentVariable_EnablesSdk()
     {
-        EnvironmentVariableGuard.WithVariable(
-            DsnEnvironmentVariable,
-            ValidDsn,
-            () =>
-            {
-                using (SentrySdk.Init())
-                {
-                    Assert.True(SentrySdk.IsEnabled);
-                }
-            });
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = ValidDsn;
+        });
+
+        Assert.True(SentrySdk.IsEnabled);
     }
 
     [Fact]
     public void Init_InvalidDsnEnvironmentVariable_Throws()
     {
-        EnvironmentVariableGuard.WithVariable(
-            DsnEnvironmentVariable,
-            // If the variable was set, to non empty string but value is broken, better crash than silently disable
-            InvalidDsn,
-            () =>
+        // If the variable was set, to non empty string but value is broken, better crash than silently disable
+        var ex = Assert.Throws<ArgumentException>(() =>
+            SentrySdk.Init(o =>
             {
-                var ex = Assert.Throws<ArgumentException>(SentrySdk.Init);
-                Assert.Equal("Invalid DSN: A Project Id is required.", ex.Message);
-            });
+                o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = InvalidDsn;
+            }));
+
+        Assert.Equal("Invalid DSN: A Project Id is required.", ex.Message);
     }
 
     [Fact]
     public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
     {
-        EnvironmentVariableGuard.WithVariable(
-            DsnEnvironmentVariable,
-            Constants.DisableSdkDsnValue,
-            () =>
-            {
-                using (SentrySdk.Init())
-                {
-                    Assert.False(SentrySdk.IsEnabled);
-                }
-            });
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = Constants.DisableSdkDsnValue;
+        });
+
+        Assert.False(SentrySdk.IsEnabled);
     }
 
     [Fact]
@@ -427,10 +377,10 @@ public class SentrySdkTests : IDisposable
     public void PushScope_MultiCallParameterless_SameDisposableInstance() => Assert.Same(SentrySdk.PushScope(), SentrySdk.PushScope());
 
     [Fact]
-    public void AddBreadcrumb_NoClock_NoOp() => SentrySdk.AddBreadcrumb(null);
+    public void AddBreadcrumb_NoClock_NoOp() => SentrySdk.AddBreadcrumb(null!);
 
     [Fact]
-    public void AddBreadcrumb_WithClock_NoOp() => SentrySdk.AddBreadcrumb(clock: null, null);
+    public void AddBreadcrumb_WithClock_NoOp() => SentrySdk.AddBreadcrumb(clock: null, null!);
 
     [Fact]
     public void ConfigureScope_Sync_CallbackNeverInvoked()
@@ -543,7 +493,7 @@ public class SentrySdkTests : IDisposable
 
         using (SentrySdk.Init(options))
         {
-            SentrySdk.CaptureEvent(new SentryEvent(), null as Action<Scope>);
+            SentrySdk.CaptureEvent(new SentryEvent(), (null as Action<Scope>)!);
 
             logger.Entries.Any(e =>
                     e.Level == SentryLevel.Error &&
@@ -661,7 +611,7 @@ public class SentrySdkTests : IDisposable
     {
         var clientExtensions = typeof(SentryClientExtensions).GetMembers(BindingFlags.Public | BindingFlags.Static)
             // Remove the extension argument: Method(this ISentryClient client, ...
-            .Select(m => m.ToString().Replace($"({typeof(ISentryClient).FullName}, ", "("));
+            .Select(m => m.ToString()!.Replace($"({typeof(ISentryClient).FullName}, ", "("));
         var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
         Assert.Empty(clientExtensions.Except(sentrySdk.Select(m => m.ToString())));

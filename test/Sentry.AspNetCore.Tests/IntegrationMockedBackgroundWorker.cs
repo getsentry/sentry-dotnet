@@ -291,27 +291,22 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     }
 
     [Fact]
-    public async Task Environment_NotOnOptions_ValueFromEnvVar()
+    public async Task Environment_NotOnOptions_ValueFromHostingEnvironment()
     {
         const string expected = "environment";
+        Build(environment: expected);
 
-        await EnvironmentVariableGuard.WithVariableAsync("ASPNETCORE_ENVIRONMENT",
-            expected,
-            async () =>
-            {
-                Build();
-                _ = await HttpClient.GetAsync("/throw");
+        _ = await HttpClient.GetAsync("/throw");
 
-                _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
-                    e.Items
-                        .Select(i => i.Payload)
-                        .OfType<JsonSerializable>()
-                        .Select(i => i.Source)
-                        .OfType<SentryEvent>()
-                        .Single()
-                        .Environment == expected
-                ));
-            });
+        _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+            e.Items
+                .Select(i => i.Payload)
+                .OfType<JsonSerializable>()
+                .Select(i => i.Source)
+                .OfType<SentryEvent>()
+                .Single()
+                .Environment == expected
+        ));
     }
 
     [Fact]
@@ -320,24 +315,23 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         const string expected = "environment";
         const string other = "other";
 
-        Configure = o => o.Environment = expected;
+        Configure = o =>
+        {
+            o.Environment = expected;
+            o.FakeSettings().EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = other;
+        };
 
-        await EnvironmentVariableGuard.WithVariableAsync("ASPNETCORE_ENVIRONMENT",
-            other,
-            async () =>
-            {
-                Build();
-                _ = await HttpClient.GetAsync("/throw");
+        Build();
+        _ = await HttpClient.GetAsync("/throw");
 
-                _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
-                    e.Items
-                        .Select(i => i.Payload)
-                        .OfType<JsonSerializable>()
-                        .Select(i => i.Source)
-                        .OfType<SentryEvent>()
-                        .Single()
-                        .Environment == expected
-                ));
-            });
+        _ = Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(e =>
+            e.Items
+                .Select(i => i.Payload)
+                .OfType<JsonSerializable>()
+                .Select(i => i.Source)
+                .OfType<SentryEvent>()
+                .Single()
+                .Environment == expected
+        ));
     }
 }

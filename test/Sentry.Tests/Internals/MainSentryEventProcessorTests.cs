@@ -278,19 +278,13 @@ public class MainSentryEventProcessorTests
     public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
     {
         _fixture.SentryOptions.Environment = null;
+        _fixture.SentryOptions.FakeSettings()
+            .EnvironmentVariables[Sentry.Internal.Constants.EnvironmentEnvironmentVariable] = environment;
+
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
 
-        EnvironmentVariableGuard.WithVariable(
-            Sentry.Internal.Constants.EnvironmentEnvironmentVariable,
-            environment,
-            () =>
-            {
-                // Environment is cached
-                EnvironmentLocator.Reset();
-
-                _ = sut.Process(evt);
-            });
+        _ = sut.Process(evt);
 
         Assert.Equal(expectedEnvironment, evt.Environment);
     }
