@@ -26,7 +26,7 @@ namespace Sentry.Internal
 
         internal string? Release => _options.SettingLocator.GetRelease();
 
-        internal string? Distribution => _options.SettingLocator.GetDistribution();
+        internal string? Distribution => _options.Distribution;
 
         public MainSentryEventProcessor(
             SentryOptions options,

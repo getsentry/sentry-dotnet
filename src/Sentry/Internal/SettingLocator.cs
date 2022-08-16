@@ -94,19 +94,5 @@ namespace Sentry.Internal
             _options.Release = release;
             return release;
         }
-
-        public string? GetDistribution()
-        {
-            var distribution = _options.Distribution;
-            if (!string.IsNullOrWhiteSpace(distribution))
-            {
-                return distribution;
-            }
-
-            distribution = GetEnvironmentVariable(Constants.DistributionEnvironmentVariable).NullIfWhitespace();
-
-            _options.Distribution = distribution;
-            return distribution;
-        }
     }
 }

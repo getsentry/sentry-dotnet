@@ -11,7 +11,6 @@ public class SettingLocatorTests
     private const string DsnEnvironmentVariable = Internal.Constants.DsnEnvironmentVariable;
     private const string EnvironmentEnvironmentVariable = Internal.Constants.EnvironmentEnvironmentVariable;
     private const string ReleaseEnvironmentVariable = Internal.Constants.ReleaseEnvironmentVariable;
-    private const string DistributionEnvironmentVariable = Internal.Constants.DistributionEnvironmentVariable;
 
     private static Assembly GetAssemblyWithDsn(string dsn) =>
         AssemblyCreationHelper.CreateAssemblyWithDsnAttribute(dsn);
@@ -291,42 +290,5 @@ public class SettingLocatorTests
 
         Assert.Equal(expected, release);
         Assert.Equal(expected, options.Release);
-    }
-
-    [Fact]
-    public void GetDistribution_WithEnvironmentVariable_ReturnsAndSetsDistribution()
-    {
-        var options = new SentryOptions();
-        options.FakeSettings().EnvironmentVariables[DistributionEnvironmentVariable] = "111";
-
-        var distribution = options.SettingLocator.GetDistribution();
-
-        Assert.Equal("111", distribution);
-        Assert.Equal("111", options.Distribution);
-    }
-
-    [Fact]
-    public void GetDistribution_WithOptionAlreadySet_IgnoresEnvironmentVariable()
-    {
-        var options = new SentryOptions {Distribution = "222"};
-        options.FakeSettings().EnvironmentVariables[DistributionEnvironmentVariable] = "333";
-
-        var distribution = options.SettingLocator.GetDistribution();
-
-        Assert.Equal("222", distribution);
-        Assert.Equal("222", options.Distribution);
-    }
-
-    [Fact]
-    public void GetDistribution_WithNoValueAnywhere_ReturnsNull()
-    {
-        var assembly = typeof(SentrySdk).Assembly;
-        var options = new SentryOptions();
-        options.FakeSettings().AssemblyForAttributes = assembly;
-
-        var distribution = options.SettingLocator.GetDistribution();
-
-        Assert.Null(distribution);
-        Assert.Null(options.Distribution);
     }
 }
