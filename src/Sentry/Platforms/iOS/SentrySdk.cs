@@ -18,6 +18,10 @@ public static partial class SentrySdk
         options.AutoSessionTracking = true;
         options.IsGlobalModeEnabled = true;
 
+        // Set default release and distribution
+        options.Release ??= GetDefaultReleaseString();
+        options.Distribution ??= GetDefaultDistributionString();
+
         // "Best" mode throws platform not supported exception.  Use "Fast" mode instead.
         options.DetectStartupTime = StartupTimeDetectionMode.Fast;
 
@@ -174,4 +178,17 @@ public static partial class SentrySdk
 
         // TODO: Pause/Resume
     }
+
+    private static string GetDefaultReleaseString()
+    {
+        var packageName = GetBundleValue("CFBundleIdentifier");
+        var packageVersion = GetBundleValue("CFBundleShortVersionString");
+        var buildVersion = GetBundleValue("CFBundleVersion");
+
+        return $"{packageName}@{packageVersion}+{buildVersion}";
+    }
+
+    private static string GetDefaultDistributionString() => GetBundleValue("CFBundleVersion");
+
+    private static string GetBundleValue(string key) => NSBundle.MainBundle.ObjectForInfoDictionary(key).ToString();
 }
