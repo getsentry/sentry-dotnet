@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using Sentry.Internal;
 
 namespace Sentry
 {
@@ -8,7 +7,7 @@ namespace Sentry
     /// Sentry session.
     /// </summary>
     // https://develop.sentry.dev/sdk/sessions
-    public class Session : ISession, IHasReadOnlyDistribution
+    public class Session : ISession
     {
         /// <inheritdoc />
         public SentryId Id { get; }
@@ -21,9 +20,6 @@ namespace Sentry
 
         /// <inheritdoc />
         public string Release { get; }
-
-        /// <inheritdoc />
-        public string? Distribution { get; }
 
         /// <inheritdoc />
         public string? Environment { get; }
@@ -47,7 +43,6 @@ namespace Sentry
             string? distinctId,
             DateTimeOffset startTimestamp,
             string release,
-            string? distribution,
             string? environment,
             string? ipAddress,
             string? userAgent)
@@ -56,7 +51,6 @@ namespace Sentry
             DistinctId = distinctId;
             StartTimestamp = startTimestamp;
             Release = release;
-            Distribution = distribution;
             Environment = environment;
             IpAddress = ipAddress;
             UserAgent = userAgent;
@@ -66,20 +60,11 @@ namespace Sentry
         /// Initializes a new instance of <see cref="Session"/>.
         /// </summary>
         public Session(string? distinctId, string release, string? environment)
-            : this(distinctId, release, distribution: null, environment)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Session"/>.
-        /// </summary>
-        public Session(string? distinctId, string release, string? distribution, string? environment)
             : this(
                 SentryId.Create(),
                 distinctId,
                 DateTimeOffset.Now,
                 release,
-                distribution,
                 environment,
                 null,
                 null)

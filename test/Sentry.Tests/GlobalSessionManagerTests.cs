@@ -512,7 +512,6 @@ public class GlobalSessionManagerTests : IDisposable
             "did",
             DateTimeOffset.Now,
             "release",
-            "dist",
             "env",
             "ip",
             "ua",
