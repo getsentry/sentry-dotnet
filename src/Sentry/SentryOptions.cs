@@ -227,12 +227,15 @@ namespace Sentry
         /// The distribution of the application, associated with the release set in <see cref="Release"/>.
         /// </summary>
         /// <example>
-        /// TODO: add examples
+        /// 22
+        /// 14G60
         /// </example>
         /// <remarks>
-        /// Distributions are used to disambiguate build or deployment variants of the same release of an application.
-        /// Normally used only for mobile apps.
-        /// If not explicitly defined via configuration or environment variable (SENTRY_DIST).
+        /// Distributions are used to disambiguate build or deployment variants of the same release of
+        /// an application. For example, it can be the build number of an XCode (iOS) build, or the version
+        /// code of an Android build.
+        /// A distribution can be set under any circumstances, and is passed along to Sentry if provided.
+        /// However, they are generally relevant only for mobile application scenarios.
         /// </remarks>
         /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/#optional-attributes"/>
         public string? Distribution { get; set; }

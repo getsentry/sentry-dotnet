@@ -16,7 +16,6 @@ public partial class SentryOptions
     /// </summary>
     public class IosOptions
     {
-        // ReSharper disable once NotAccessedField.Local
         private readonly SentryOptions _options;
 
         internal IosOptions(SentryOptions options)
@@ -58,13 +57,14 @@ public partial class SentryOptions
         public TimeSpan IdleTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
         /// <summary>
-        /// Gets or sets the distribution of the application.
+        /// The distribution of the application, associated with the release set in <see cref="Release"/>.
         /// </summary>
-        /// <remarks>
-        /// See "dist" in https://develop.sentry.dev/sdk/event-payloads/#optional-attributes
-        /// </remarks>
-        // TODO: Should we have this property on the main SentryOptions (with Release and Environment)?
-        public string? Distribution { get; set; } = null;
+        [Obsolete("Use SentryOptions.Distribution instead.  This property will be removed in a future version.")]
+        public string? Distribution
+        {
+            get => _options.Distribution;
+            set => _options.Distribution = value;
+        }
 
         /// <summary>
         /// When enabled, the SDK tracks when the application stops responding for a specific amount of

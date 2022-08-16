@@ -111,7 +111,7 @@ public static partial class SentrySdk
         cocoaOptions.AttachScreenshot = options.iOS.AttachScreenshot;
         cocoaOptions.AppHangTimeoutInterval = options.iOS.AppHangTimeoutInterval.TotalSeconds;
         cocoaOptions.IdleTimeout = options.iOS.IdleTimeout.TotalSeconds;
-        cocoaOptions.Dist = options.iOS.Distribution;
+        cocoaOptions.Dist = options.Distribution;
         cocoaOptions.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
         cocoaOptions.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
         cocoaOptions.EnableAutoPerformanceTracking = options.iOS.EnableAutoPerformanceTracking;
