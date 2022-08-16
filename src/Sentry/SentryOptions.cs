@@ -586,7 +586,7 @@ namespace Sentry
         /// </remarks>
         public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
 
-#if ANDROID
+#if ANDROID || IOS || MACCATALYST
         /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and
         /// end the session when it's closed.
@@ -639,11 +639,15 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public INetworkStatusListener? NetworkStatusListener { get; set; }
 
+        internal SettingLocator SettingLocator { get; set; }
+
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
+            SettingLocator = new SettingLocator(this);
+
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };

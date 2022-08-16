@@ -38,5 +38,15 @@ namespace Sentry.Internal.Extensions
                 cts.CancelAfter(timeout);
             }
         }
+
+        /// <summary>
+        /// Determines whether an object is <c>null</c>.
+        /// </summary>
+        /// <remarks>
+        /// This method exists so that we can test for null in situations where a method might be called from
+        /// code that ignores nullability warnings.
+        /// (It prevents us having to have two different resharper ignore comments depending on target framework.)
+        /// </remarks>
+        public static bool IsNull(this object? o) => o is null;
     }
 }

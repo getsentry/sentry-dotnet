@@ -33,9 +33,14 @@ public abstract class SentrySdkTestFixture : IDisposable
         }
     };
 
-    protected virtual void Build()
+    protected virtual void Build(string environment = default)
     {
         var builder = new WebHostBuilder();
+
+        if (!string.IsNullOrWhiteSpace(environment))
+        {
+            builder.UseEnvironment(environment);
+        }
 
         _ = builder.ConfigureServices(s =>
         {

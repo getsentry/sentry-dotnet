@@ -11,6 +11,7 @@
 - Add API for deliberately crashing an app ([#1842](https://github.com/getsentry/sentry-dotnet/pull/1842))
 - Add Mac Catalyst target ([#1848](https://github.com/getsentry/sentry-dotnet/pull/1848))
 - Add `Distribution` properties ([#1851](https://github.com/getsentry/sentry-dotnet/pull/1851))
+- Add and configure options for the iOS SDK ([#1849](https://github.com/getsentry/sentry-dotnet/pull/1849))
 
 ### Fixes
 

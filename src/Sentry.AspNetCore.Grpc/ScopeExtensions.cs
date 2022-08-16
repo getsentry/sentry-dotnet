@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore.Grpc;
 
@@ -18,12 +19,10 @@ public static class ScopeExtensions
         SentryAspNetCoreOptions options) where TRequest : class
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable ConditionIsAlwaysTrueOrFalse
-        if (scope is null || context is null || options is null)
+        if (scope.IsNull() || context.IsNull() || options.IsNull())
         {
             return;
         }
-        // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         scope.SetTag("grpc.method", context.Method);
 

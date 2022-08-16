@@ -36,7 +36,7 @@ internal static class SystemWebVersionLocator
 
     public static string? Resolve(SentryOptions options, HttpContext context)
     {
-        var release = ReleaseLocator.Resolve(options);
+        var release = options.SettingLocator.GetRelease();
         return Resolve(release, context);
     }
 }

@@ -105,13 +105,12 @@ public class SentryAspNetCoreOptionsSetupTests
     public void Filters_Environment_SentryEnvironment_Set(string environment)
     {
         // Arrange.
-        EnvironmentVariableGuard.WithVariable(Internal.Constants.EnvironmentEnvironmentVariable, environment, () =>
-        {
-            // Act.
-            _sut.Configure(_target);
+        _target.FakeSettings().EnvironmentVariables[Internal.Constants.EnvironmentEnvironmentVariable] = environment;
 
-            // Assert.
-            Assert.Equal(environment, _target.Environment);
-        });
+        // Act.
+        _sut.Configure(_target);
+
+        // Assert.
+        Assert.Equal(environment, _target.Environment);
     }
 }

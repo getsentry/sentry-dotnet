@@ -74,7 +74,6 @@ namespace Sentry.Internal
             {
 #if ANDROID || IOS || MACCATALYST
                 options.LogWarning("StartupTimeDetectionMode.Best is not available on this platform.  Using 'Fast' mode.");
-                return;
 #else
                 // StartupTime is set to UtcNow in this constructor.
                 // That's computationally cheap but not very precise.
@@ -99,7 +98,7 @@ namespace Sentry.Internal
             }
         }
 
-#if !ANDROID
+#if !(ANDROID || IOS || MACCATALYST)
         private static DateTimeOffset GetStartupTime()
         {
             using var proc = Process.GetCurrentProcess();

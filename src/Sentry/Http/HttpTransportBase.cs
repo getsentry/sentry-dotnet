@@ -47,7 +47,7 @@ namespace Sentry.Http
         {
             _options = options;
             _clock = clock ?? SystemClock.Clock;
-            _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
+            _getEnvironmentVariable = getEnvironmentVariable ?? options.SettingLocator.GetEnvironmentVariable;
         }
 
         // Keep track of rate limits and their expiry dates.

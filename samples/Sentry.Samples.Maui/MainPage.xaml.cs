@@ -8,10 +8,16 @@ public partial class MainPage
 {
     private readonly ILogger<MainPage> _logger;
 
-    int count = 0;
+    private int _count = 0;
 
     // NOTE: You can only inject an ILogger<T>, not a plain ILogger
     public MainPage(ILogger<MainPage> logger)
+    {
+        _logger = logger;
+        InitializeComponent();
+    }
+
+    protected override void OnAppearing()
     {
 #if !ANDROID
         JavaCrashBtn.IsVisible = false;
@@ -20,22 +26,25 @@ public partial class MainPage
 #if !(ANDROID || IOS || MACCATALYST)
         NativeCrashBtn.IsVisible = false;
 #endif
-        _logger = logger;
-        InitializeComponent();
+        base.OnAppearing();
     }
 
     private void OnCounterClicked(object sender, EventArgs e)
     {
-        count++;
+        _count++;
 
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
+        if (_count == 1)
+        {
+            CounterBtn.Text = $"Clicked {_count} time";
+        }
         else
-            CounterBtn.Text = $"Clicked {count} times";
+        {
+            CounterBtn.Text = $"Clicked {_count} times";
+        }
 
         SemanticScreenReader.Announce(CounterBtn.Text);
 
-        _logger.LogInformation("The button has been clicked {ClickCount} times", count);
+        _logger.LogInformation("The button has been clicked {ClickCount} times", _count);
     }
 
     private void OnUnhandledExceptionClicked(object sender, EventArgs e)
@@ -47,7 +56,7 @@ public partial class MainPage
     {
         try
         {
-            SentrySdk.CauseCrash(CrashType.Managed);
+            throw new ApplicationException("This exception was thrown and captured manually, without crashing the app.");
         }
         catch (Exception ex)
         {

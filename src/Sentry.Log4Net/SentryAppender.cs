@@ -1,3 +1,5 @@
+using Sentry.Internal.Extensions;
+
 namespace Sentry.Log4Net;
 
 /// <summary>
@@ -57,8 +59,7 @@ public class SentryAppender : AppenderSkeleton
     protected override void Append(LoggingEvent loggingEvent)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (loggingEvent is null)
+        if (loggingEvent.IsNull())
         {
             return;
         }

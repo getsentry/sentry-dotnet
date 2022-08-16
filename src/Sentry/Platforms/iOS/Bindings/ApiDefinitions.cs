@@ -66,7 +66,7 @@ interface Constants
 // @interface PrivateSentrySDKOnly : NSObject
 [BaseType (typeof(NSObject))]
 [Internal]
-interface PrivateSentrySDKOnly
+interface PrivateSentrySdkOnly
 {
     // +(void)storeEnvelope:(SentryEnvelope * _Nonnull)envelope;
     [Static]
@@ -117,12 +117,12 @@ interface PrivateSentrySDKOnly
     // @property (assign, nonatomic, class) BOOL appStartMeasurementHybridSDKMode;
     [Static]
     [Export ("appStartMeasurementHybridSDKMode")]
-    bool AppStartMeasurementHybridSDKMode { get; set; }
+    bool AppStartMeasurementHybridSdkMode { get; set; }
 
     // @property (assign, nonatomic, class) BOOL framesTrackingMeasurementHybridSDKMode;
     [Static]
     [Export ("framesTrackingMeasurementHybridSDKMode")]
-    bool FramesTrackingMeasurementHybridSDKMode { get; set; }
+    bool FramesTrackingMeasurementHybridSdkMode { get; set; }
 
     // @property (readonly, assign, nonatomic, class) BOOL isFramesTrackingRunning;
     [Static]
@@ -827,7 +827,7 @@ interface SentryOptions
 
     // @property (copy, nonatomic) SentryBeforeSendEventCallback _Nullable beforeSend;
     [NullAllowed, Export ("beforeSend", ArgumentSemantic.Copy)]
-    Func<SentryEvent, SentryEvent> BeforeSend { get; set; }
+    Func<SentryEvent?, SentryEvent> BeforeSend { get; set; }
 
     // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
     [NullAllowed, Export ("beforeBreadcrumb", ArgumentSemantic.Copy)]
@@ -916,7 +916,7 @@ interface SentryOptions
 
     // @property (nonatomic) SentryTracesSamplerCallback _Nullable tracesSampler;
     [NullAllowed, Export ("tracesSampler", ArgumentSemantic.Assign)]
-    Func<SentrySamplingContext, NSNumber> TracesSampler { get; set; }
+    Func<SentrySamplingContext, NSNumber?> TracesSampler { get; set; }
 
     // @property (readonly, assign, nonatomic) BOOL isTracingEnabled;
     [Export ("isTracingEnabled")]
@@ -1392,7 +1392,7 @@ interface SentryNSError : SentrySerializable
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentrySDK
+interface SentrySdk
 {
     // @property (readonly, nonatomic, class) id<SentrySpan> _Nullable span;
     [Static]

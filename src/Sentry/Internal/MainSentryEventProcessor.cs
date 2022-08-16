@@ -24,7 +24,7 @@ namespace Sentry.Internal
         private readonly SentryOptions _options;
         internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
 
-        internal string? Release => ReleaseLocator.Resolve(_options);
+        internal string? Release => _options.SettingLocator.GetRelease();
 
         internal string? Distribution => DistributionLocator.Resolve(_options);
 
