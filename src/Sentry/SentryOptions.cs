@@ -689,7 +689,7 @@ namespace Sentry
 #if ANDROID
             Android = new AndroidOptions(this);
 #elif IOS || MACCATALYST
-            IOS = new IOSOptions(this);
+            iOS = new IosOptions(this);
 #endif
 
             InAppExclude = new[] {

@@ -63,7 +63,7 @@ namespace Sentry.Internal
             eventLike.Release ??= _options.SettingLocator.GetRelease();
 
             // Distribution
-            eventLike.WithDistribution(_ => _.Distribution ??= DistributionLocator.Resolve(_options));
+            eventLike.WithDistribution(_ => _.Distribution ??= _options.SettingLocator.GetDistribution());
 
             // Environment
             eventLike.Environment ??= _options.SettingLocator.GetEnvironment();

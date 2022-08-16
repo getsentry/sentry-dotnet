@@ -274,27 +274,6 @@ public class MainSentryEventProcessorTests
         Assert.Equal(sut.Distribution, evt.Distribution);
     }
 
-    [Fact]
-    public void Process_NoDistributionOnOptions_SameAsEnvironmentVariable()
-    {
-        _fixture.SentryOptions.Distribution = null;
-        var sut = _fixture.GetSut();
-        var evt = new SentryEvent();
-
-        EnvironmentVariableGuard.WithVariable(
-            Sentry.Internal.Constants.DistributionEnvironmentVariable,
-            "abc123",
-            () =>
-            {
-                // Distribution is cached
-                DistributionLocator.Reset();
-
-                _ = sut.Process(evt);
-            });
-
-        Assert.Equal("abc123", evt.Distribution);
-    }
-
     [Theory]
     [InlineData(null, Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
     [InlineData("", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.

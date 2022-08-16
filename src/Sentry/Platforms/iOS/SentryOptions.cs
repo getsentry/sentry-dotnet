@@ -9,13 +9,14 @@ public partial class SentryOptions
     /// Exposes additional options for the iOS platform.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public IosOptions iOS { get; } = new();
+    public IosOptions iOS { get; }
 
     /// <summary>
     /// Provides additional options for the iOS platform.
     /// </summary>
     public class IosOptions
     {
+        // ReSharper disable once NotAccessedField.Local
         private readonly SentryOptions _options;
 
         internal IosOptions(SentryOptions options)
