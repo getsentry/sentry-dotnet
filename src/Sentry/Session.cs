@@ -39,7 +39,8 @@ namespace Sentry
         // Start at -1 so that the first increment puts it at 0
         private int _sequenceNumber = -1;
 
-        internal Session(SentryId id,
+        internal Session(
+            SentryId id,
             string? distinctId,
             DateTimeOffset startTimestamp,
             string release,
