@@ -585,7 +585,7 @@ namespace Sentry
         public long MaxAttachmentSize { get; set; } = 20 * 1024 * 1024;
 
         /// <summary>
-        /// The mode that the SDK should user when attempting to detect the app's and device's startup time.
+        /// The mode that the SDK should use when attempting to detect the app's and device's startup time.
         /// </summary>
         /// <remarks>
         /// Note that the highest precision value relies on <see cref="System.Diagnostics.Process.GetCurrentProcess"/>
