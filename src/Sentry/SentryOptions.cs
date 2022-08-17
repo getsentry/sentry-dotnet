@@ -589,7 +589,7 @@ namespace Sentry
         /// </remarks>
         public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
 
-#if ANDROID || IOS || MACCATALYST
+#if __MOBILE__
         /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and
         /// end the session when it's closed.
@@ -691,7 +691,7 @@ namespace Sentry
 
 #if ANDROID
             Android = new AndroidOptions(this);
-#elif IOS || MACCATALYST
+#elif __IOS__
             iOS = new IosOptions(this);
 #endif
 

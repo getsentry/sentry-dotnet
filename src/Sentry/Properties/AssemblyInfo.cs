@@ -37,6 +37,6 @@ using System.Runtime.CompilerServices;
 
 
 // The targets for these platforms are not CLS Compliant
-#if !(ANDROID || IOS || MACCATALYST)
+#if !__MOBILE__
 [assembly: CLSCompliant(true)]
 #endif
