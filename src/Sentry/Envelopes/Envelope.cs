@@ -180,14 +180,17 @@ namespace Sentry.Protocol.Envelopes
                 {
                     try
                     {
-                        var envelopeItem = EnvelopeItem.FromAttachment(attachment);
-                        if (envelopeItem is not null)
+                        // We pull the stream out here so we can length check
+                        // to avoid adding an invalid attachment
+                        var stream = attachment.Content.GetStream();
+                        if (stream.Length != 0)
                         {
-                            items.Add(envelopeItem);
+                            items.Add(EnvelopeItem.FromAttachment(attachment, stream));
                         }
                         else
                         {
-                            logger?.LogWarning("Did not add '{0}' to envelope. Stream might be empty.", attachment.FileName);
+                            logger?.LogWarning("Did not add '{0}' to envelope because the stream was empty.",
+                                attachment.FileName);
                         }
                     }
                     catch (Exception exception)

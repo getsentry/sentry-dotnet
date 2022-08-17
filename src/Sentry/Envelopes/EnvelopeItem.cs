@@ -259,14 +259,14 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Creates an <see cref="EnvelopeItem"/> from <paramref name="attachment"/>.
         /// </summary>
-        public static EnvelopeItem? FromAttachment(Attachment attachment)
+        public static EnvelopeItem FromAttachment(Attachment attachment)
         {
             var stream = attachment.Content.GetStream();
-            if (stream.Length == 0)
-            {
-                return null;
-            }
+            return FromAttachment(attachment, stream);
+        }
 
+        internal static EnvelopeItem FromAttachment(Attachment attachment, Stream stream)
+        {
             var attachmentType = attachment.Type switch
             {
                 AttachmentType.Minidump => "event.minidump",
