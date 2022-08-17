@@ -183,7 +183,7 @@ namespace Sentry.Protocol.Envelopes
                         // We pull the stream out here so we can length check
                         // to avoid adding an invalid attachment
                         var stream = attachment.Content.GetStream();
-                        if (stream.Length != 0)
+                        if (stream.TryGetLength() != 0)
                         {
                             items.Add(EnvelopeItem.FromAttachment(attachment, stream));
                         }
