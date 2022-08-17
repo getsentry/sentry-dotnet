@@ -13,13 +13,8 @@ internal class SentryMauiInitializer : IMauiInitializeService
     {
         var options = services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
         var disposer = services.GetRequiredService<Disposer>();
-
-#if ANDROID
-        var context = global::Android.App.Application.Context;
-        var disposable = SentrySdk.Init(context, options);
-#else
+        
         var disposable = SentrySdk.Init(options);
-#endif
 
         // Register the return value from initializing the SDK with the disposer.
         // This will ensure that it gets disposed when the service provider is disposed.

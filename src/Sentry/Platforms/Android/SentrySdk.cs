@@ -3,7 +3,6 @@ using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
-using Sentry.Extensibility;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
@@ -11,7 +10,7 @@ namespace Sentry;
 
 public static partial class SentrySdk
 {
-    private static AndroidContext? AndroidContext;
+    private static AndroidContext AppContext { get; set; } = Application.Context;
 
     /// <summary>
     /// Initializes the SDK for Android, with an optional configuration options callback.
@@ -19,11 +18,12 @@ public static partial class SentrySdk
     /// <param name="context">The Android application context.</param>
     /// <param name="configureOptions">The configuration options callback.</param>
     /// <returns>An object that should be disposed when the application terminates.</returns>
+    [Obsolete("It is no longer required to provide the application context when calling Init. " +
+              "This method may be removed in a future major release.")]
     public static IDisposable Init(AndroidContext context, Action<SentryOptions>? configureOptions)
     {
-        var options = new SentryOptions();
-        configureOptions?.Invoke(options);
-        return Init(context, options);
+        AppContext = context;
+        return Init(configureOptions);
     }
 
     /// <summary>
@@ -32,9 +32,11 @@ public static partial class SentrySdk
     /// <param name="context">The Android application context.</param>
     /// <param name="options">The configuration options instance.</param>
     /// <returns>An object that should be disposed when the application terminates.</returns>
+    [Obsolete("It is no longer required to provide the application context when calling Init. " +
+              "This method may be removed in a future major release.")]
     public static IDisposable Init(AndroidContext context, SentryOptions options)
     {
-        AndroidContext = context;
+        AppContext = context;
         return Init(options);
     }
 
@@ -53,18 +55,9 @@ public static partial class SentrySdk
         // Make sure we capture managed exceptions from the Android environment
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 
-        // Now initialize the Android SDK if we have been given an AndroidContext
-        var context = AndroidContext;
-        if (context == null)
-        {
-            options.LogWarning("Running on Android, but did not initialize Sentry with an AndroidContext. " +
-                               "The embedded Sentry Android SDK is disabled. " +
-                               "Call SentrySdk.Init(AndroidContext, SentryOptions) instead.");
-            return;
-        }
-
+        // Now initialize the Android SDK
         SentryAndroidOptions? androidOptions = null;
-        SentryAndroid.Init(context, new JavaLogger(options),
+        SentryAndroid.Init(AppContext, new JavaLogger(options),
             new OptionsConfigurationCallback(o =>
             {
                 // Capture the android options reference on the outer scope
@@ -200,14 +193,13 @@ public static partial class SentrySdk
 
     private static string? GetDefaultReleaseString()
     {
-        var context = AndroidContext ?? Application.Context;
-        var packageName = context.PackageName;
+        var packageName = AppContext.PackageName;
         if (packageName == null)
         {
             return null;
         }
 
-        var packageInfo = context.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+        var packageInfo = AppContext.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
         return packageInfo == null ? null : $"{packageName}@{packageInfo.VersionName}+{packageInfo.GetVersionCode()}";
     }
 
@@ -215,14 +207,13 @@ public static partial class SentrySdk
 
     private static long? GetAndroidPackageVersionCode()
     {
-        var context = AndroidContext ?? Application.Context;
-        var packageName = context.PackageName;
+        var packageName = AppContext.PackageName;
         if (packageName == null)
         {
             return null;
         }
 
-        var packageInfo = context.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+        var packageInfo = AppContext.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
         return packageInfo?.GetVersionCode();
     }
 
