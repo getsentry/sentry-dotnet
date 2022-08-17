@@ -539,9 +539,11 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
+        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+
         var attachment = new Attachment(
             AttachmentType.Default,
-            new StreamAttachmentContent(Stream.Null),
+            new StreamAttachmentContent(attachmentStream),
             "file.txt",
             null);
 
@@ -574,9 +576,11 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
+        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+
         var attachment = new Attachment(
             AttachmentType.Default,
-            new StreamAttachmentContent(Stream.Null),
+            new StreamAttachmentContent(attachmentStream),
             "file.txt",
             null);
 
@@ -698,6 +702,23 @@ public class EnvelopeTests
                 nested["name"] == SdkVersion.Instance.Name &&
                 nested["version"] == SdkVersion.Instance.Version;
         }).Should().BeTrue();
+    }
+
+    [Fact]
+    public void FromEvent_EmptyAttachmentStream_DoesNotIncludeAttachment()
+    {
+        // Arrange
+        var attachment = new Attachment(
+            default,
+            new StreamAttachmentContent(Stream.Null),
+            "Screenshot.jpg",
+            "image/jpg");
+
+        // Act
+        var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+
+        // Assert
+        envelope.Items.Should().HaveCount(1);
     }
 
     [Fact]
