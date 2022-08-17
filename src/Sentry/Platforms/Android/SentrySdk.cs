@@ -165,7 +165,7 @@ public static partial class SentrySdk
                 o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
             }));
 
-        // Set options for the managed SDK that depend on the Android SDK
+        // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
         options.CrashedLastRun = () => Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
