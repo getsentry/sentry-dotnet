@@ -605,6 +605,7 @@ namespace Sentry
         /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and
         /// end the session when it's closed.
+        /// On mobile application platforms, this is enabled by default.
         /// </summary>
         public bool AutoSessionTracking { get; set; } = true;
 #else
@@ -613,8 +614,8 @@ namespace Sentry
         /// end the session when it's closed.
         /// </summary>
         /// <remarks>
-        /// Note: this is disabled by default in the current version, but will become
-        /// enabled by default in the next major version.
+        /// Note: this is disabled by default in the current version (except for mobile targets and MAUI),
+        /// but will become enabled by default in the next major version.
         /// Currently this only works for release health in client mode
         /// (desktop, mobile applications, but not web servers).
         /// </remarks>

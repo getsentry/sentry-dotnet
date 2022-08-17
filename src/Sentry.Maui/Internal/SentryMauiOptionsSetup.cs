@@ -13,6 +13,9 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
     {
         base.Configure(options);
 
+        // NOTE: Anything set here will overwrite options set by the user.
+        //       For option defaults that can be changed, use the constructor in SentryMauiOptions instead.
+
         // We'll initialize the SDK in SentryMauiInitializer
         options.InitializeSdk = false;
 

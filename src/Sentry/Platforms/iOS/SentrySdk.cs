@@ -14,9 +14,6 @@ public static partial class SentrySdk
             args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
         };
 
-        // Set options for the managed SDK that don't depend on the Cocoa SDK
-        options.AutoSessionTracking = true;
-
         // Set default release and distribution
         options.Release ??= GetDefaultReleaseString();
         options.Distribution ??= GetDefaultDistributionString();

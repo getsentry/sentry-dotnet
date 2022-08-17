@@ -42,9 +42,6 @@ public static partial class SentrySdk
 
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
-        // Set options for the managed SDK that don't depend on the Android SDK
-        options.AutoSessionTracking = true;
-
         // Set default release and distribution
         options.Release ??= GetDefaultReleaseString();
         options.Distribution ??= GetDefaultDistributionString();
