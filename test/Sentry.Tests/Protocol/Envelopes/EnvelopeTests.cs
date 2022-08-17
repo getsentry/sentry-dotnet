@@ -707,7 +707,10 @@ public class EnvelopeTests
     public void FromEvent_EmptyAttachmentStream_DoesNotIncludeAttachment()
     {
         // Arrange
-        var attachment = new Attachment(default, new StreamAttachmentContent(new MemoryStream()), "Screenshot.jpg",
+        var attachment = new Attachment(
+            default,
+            new StreamAttachmentContent(Stream.Null),
+            "Screenshot.jpg",
             "image/jpg");
 
         // Act
