@@ -15,6 +15,7 @@ public class SentryMauiOptions : SentryLoggingOptions
         // there for all MAUI targets, we'll set them again here.
 
         AutoSessionTracking = true;
+        DetectStartupTime = StartupTimeDetectionMode.Fast;
     }
 
     /// <summary>

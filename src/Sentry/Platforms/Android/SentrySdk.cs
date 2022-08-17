@@ -46,9 +46,6 @@ public static partial class SentrySdk
         options.Release ??= GetDefaultReleaseString();
         options.Distribution ??= GetDefaultDistributionString();
 
-        // "Best" mode throws permission exception on Android
-        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
-
         // Make sure we capture managed exceptions from the Android environment
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 

@@ -18,9 +18,6 @@ public static partial class SentrySdk
         options.Release ??= GetDefaultReleaseString();
         options.Distribution ??= GetDefaultDistributionString();
 
-        // "Best" mode throws platform not supported exception.  Use "Fast" mode instead.
-        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
-
         // Set options for the Cocoa SDK
         var cocoaOptions = new SentryCocoaOptions();
 
