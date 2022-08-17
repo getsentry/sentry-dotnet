@@ -36,7 +36,7 @@ namespace Sentry
             get => true;
             set
             {
-                if (value == false)
+                if (value is false)
                 {
                     _diagnosticLogger?.LogWarning("Cannot disable Global Mode on {0}", DeviceInfo.PlatformName);
                 }
