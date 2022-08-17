@@ -180,7 +180,15 @@ namespace Sentry.Protocol.Envelopes
                 {
                     try
                     {
-                        items.Add(EnvelopeItem.FromAttachment(attachment));
+                        var envelopeItem = EnvelopeItem.FromAttachment(attachment);
+                        if (envelopeItem is not null)
+                        {
+                            items.Add(envelopeItem);
+                        }
+                        else
+                        {
+                            logger?.LogWarning("Did not add '{0}' to envelope. Stream might be empty.", attachment.FileName);
+                        }
                     }
                     catch (Exception exception)
                     {

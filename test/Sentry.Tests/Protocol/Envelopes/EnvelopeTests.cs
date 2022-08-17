@@ -700,6 +700,20 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public void FromEvent_EmptyAttachmentStream_DoesNotIncludeAttachment()
+    {
+        // Arrange
+        var attachment = new Attachment(default, new StreamAttachmentContent(new MemoryStream()), "Screenshot.jpg",
+            "image/jpg");
+
+        // Act
+        var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+
+        // Assert
+        envelope.Items.Should().HaveCount(1);
+    }
+
+    [Fact]
     public async Task Serialization_RoundTrip_ReplacesSentAtHeader()
     {
         // Arrange
