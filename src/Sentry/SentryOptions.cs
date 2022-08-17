@@ -26,10 +26,28 @@ namespace Sentry
     {
         private Dictionary<string, string>? _defaultTags;
 
+#if __MOBILE__
+        /// <summary>
+        /// Specifies whether to use global scope management mode.
+        /// Always <c>true</c> for mobile targets.
+        /// </summary>
+        public bool IsGlobalModeEnabled
+        {
+            get => true;
+            set
+            {
+                if (value == false)
+                {
+                    _diagnosticLogger?.LogWarning("Cannot disable Global Mode on {0}", DeviceInfo.PlatformName);
+                }
+            }
+        }
+#else
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// </summary>
         public bool IsGlobalModeEnabled { get; set; }
+#endif
 
         /// <summary>
         /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
