@@ -538,9 +538,11 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
+        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+
         var attachment = new Attachment(
             AttachmentType.Default,
-            new StreamAttachmentContent(Stream.Null),
+            new StreamAttachmentContent(attachmentStream),
             "file.txt",
             null);
 
@@ -573,9 +575,11 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
+        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+
         var attachment = new Attachment(
             AttachmentType.Default,
-            new StreamAttachmentContent(Stream.Null),
+            new StreamAttachmentContent(attachmentStream),
             "file.txt",
             null);
 
