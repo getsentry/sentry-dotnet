@@ -6,14 +6,19 @@ public partial class SentryOptions
     /// <summary>
     /// Exposes additional options for the Android platform.
     /// </summary>
-    public AndroidOptions Android { get; } = new();
+    public AndroidOptions Android { get; }
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
     public class AndroidOptions
     {
-        internal AndroidOptions() { }
+        private readonly SentryOptions _options;
+
+        internal AndroidOptions(SentryOptions options)
+        {
+            _options = options;
+        }
 
         // ---------- From SentryAndroidOptions.java ----------
 
@@ -153,13 +158,14 @@ public partial class SentryOptions
         public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        /// Gets or sets the distribution of the application.
+        /// The distribution of the application, associated with the release set in <see cref="Release"/>.
         /// </summary>
-        /// <remarks>
-        /// See "dist" in https://develop.sentry.dev/sdk/event-payloads/#optional-attributes
-        /// </remarks>
-        // TODO: Should we have this property on the main SentryOptions (with Release and Environment)?
-        public string? Distribution { get; set; } = null;
+        [Obsolete("Use SentryOptions.Distribution instead.  This property will be removed in a future version.")]
+        public string? Distribution
+        {
+            get => _options.Distribution;
+            set => _options.Distribution = value;
+        }
 
         /// <summary>
         /// Gets or sets a value that indicates if the NDK (Android Native Development Kit) is enabled.

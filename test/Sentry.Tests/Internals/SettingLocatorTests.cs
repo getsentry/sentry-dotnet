@@ -156,7 +156,7 @@ public class SettingLocatorTests
     }
 
     [Fact]
-    public void GetDsn_WithNoDsnAnywhere_ReturnsAndSetsDisabledDsn()
+    public void GetDsn_WithNoValueAnywhere_ReturnsAndSetsDisabledDsn()
     {
         var options = new SentryOptions();
 
@@ -228,7 +228,7 @@ public class SettingLocatorTests
     }
 
     [Fact]
-    public void GetEnvironment_WithNoEnvironmentAnywhere_ReturnsAndSetsDefault()
+    public void GetEnvironment_WithNoValueAnywhere_ReturnsAndSetsDefault()
     {
         var options = new SentryOptions();
 
@@ -278,7 +278,7 @@ public class SettingLocatorTests
     }
 
     [Fact]
-    public void GetRelease_WithNoEnvironmentAnywhere_ReturnsAndSetsDefault()
+    public void GetRelease_WithNoValueAnywhere_ReturnsAndSetsDefault()
     {
         var assembly = typeof(SentrySdk).Assembly;
         var options = new SentryOptions();

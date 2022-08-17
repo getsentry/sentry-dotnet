@@ -72,6 +72,7 @@ public static partial class SentrySdk
                 o.AttachStacktrace = options.AttachStacktrace;
                 o.Debug = options.Debug;
                 o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
+                o.Dist = options.Distribution;
                 o.Dsn = options.Dsn;
                 o.EnableAutoSessionTracking = options.AutoSessionTracking;
                 o.Environment = options.Environment;
@@ -148,7 +149,6 @@ public static partial class SentrySdk
                 // These options are in Java.SentryOptions but not ours
                 o.AttachThreads = options.Android.AttachThreads;
                 o.ConnectionTimeoutMillis = (int)options.Android.ConnectionTimeout.TotalMilliseconds;
-                o.Dist = options.Android.Distribution;
                 o.EnableNdk = options.Android.EnableNdk;
                 o.EnableShutdownHook = options.Android.EnableShutdownHook;
                 o.EnableUncaughtExceptionHandler = options.Android.EnableUncaughtExceptionHandler;

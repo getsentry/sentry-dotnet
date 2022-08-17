@@ -308,6 +308,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Attachment> Attachments { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
+        public string? Distribution { get; set; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
@@ -383,6 +384,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
         public System.Collections.Generic.List<Sentry.DebugImage>? DebugImages { get; set; }
+        public string? Distribution { get; set; }
         public string? Environment { get; set; }
         public Sentry.SentryId EventId { get; }
         public System.Exception? Exception { get; }
@@ -478,6 +480,7 @@ namespace Sentry
         public Sentry.StartupTimeDetectionMode DetectStartupTime { get; set; }
         public Sentry.SentryLevel DiagnosticLevel { get; set; }
         public Sentry.Extensibility.IDiagnosticLogger? DiagnosticLogger { get; set; }
+        public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
         public string? Environment { get; set; }
@@ -805,6 +808,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
         public string? Description { get; set; }
+        public string? Distribution { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
         public string? Environment { get; set; }
         public Sentry.SentryId EventId { get; }
@@ -859,6 +863,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
         public string? Description { get; set; }
+        public string? Distribution { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }

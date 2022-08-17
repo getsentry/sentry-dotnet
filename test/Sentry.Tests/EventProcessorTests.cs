@@ -1,4 +1,6 @@
-﻿[UsesVerify]
+﻿namespace Sentry.Tests;
+
+[UsesVerify]
 public class EventProcessorTests
 {
     [Fact]

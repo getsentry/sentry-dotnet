@@ -504,6 +504,7 @@ public class EnvelopeTests
             },
             Modules = { { "module_key", "module_value" } },
             Release = "release",
+            Distribution = "distribution",
             SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
             SentryThreads = new[] { new SentryThread { Crashed = true } },
             ServerName = "server_name",
