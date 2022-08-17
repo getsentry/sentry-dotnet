@@ -1,3 +1,5 @@
+using Android.Content.PM;
+using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
@@ -41,6 +43,10 @@ public static partial class SentrySdk
         // Set options for the managed SDK that don't depend on the Android SDK
         options.AutoSessionTracking = true;
         options.IsGlobalModeEnabled = true;
+
+        // Set default release and distribution
+        options.Release ??= GetDefaultReleaseString();
+        options.Distribution ??= GetDefaultDistributionString();
 
         // "Best" mode throws permission exception on Android
         options.DetectStartupTime = StartupTimeDetectionMode.Fast;
@@ -191,5 +197,50 @@ public static partial class SentrySdk
         {
             Close();
         }
+    }
+
+    private static string? GetDefaultReleaseString()
+    {
+        var context = AndroidContext ?? Application.Context;
+        var packageName = context.PackageName;
+        if (packageName == null)
+        {
+            return null;
+        }
+
+        var packageInfo = context.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+        return packageInfo == null ? null : $"{packageName}@{packageInfo.VersionName}+{packageInfo.GetVersionCode()}";
+    }
+
+    private static string? GetDefaultDistributionString() => GetAndroidPackageVersionCode()?.ToString();
+
+    private static long? GetAndroidPackageVersionCode()
+    {
+        var context = AndroidContext ?? Application.Context;
+        var packageName = context.PackageName;
+        if (packageName == null)
+        {
+            return null;
+        }
+
+        var packageInfo = context.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+        return packageInfo?.GetVersionCode();
+    }
+
+    private static long? GetVersionCode(this PackageInfo packageInfo)
+    {
+        // The value comes from different property depending on Android version
+        if (AndroidBuild.VERSION.SdkInt >= BuildVersionCodes.P)
+        {
+#pragma warning disable CA1416
+            // callsite only reachable on Android >= P (28)
+            return packageInfo.LongVersionCode;
+#pragma warning restore CA1416
+        }
+
+#pragma warning disable CS0618
+        // obsolete on Android >= P (28)
+        return packageInfo.VersionCode;
+#pragma warning restore CS0618
     }
 }
