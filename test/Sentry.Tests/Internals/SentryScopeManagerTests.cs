@@ -10,10 +10,7 @@ public class SentryScopeManagerTests
 
         public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
 
-        public SentryScopeManager GetSut() => new(
-            SentryOptions.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
-            SentryOptions,
-            Client);
+        public SentryScopeManager GetSut() => new(SentryOptions, Client);
     }
 
     private readonly Fixture _fixture = new();
@@ -315,7 +312,7 @@ public class SentryScopeManagerTests
     public void GlobalMode_PushScope_SameScope()
     {
         // Arrange
-        _fixture.SentryOptions.ScopeStackContainer = new GlobalScopeStackContainer();
+        _fixture.SentryOptions.IsGlobalModeEnabled = true;
         var sut = _fixture.GetSut();
 
         // Act

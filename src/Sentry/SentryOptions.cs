@@ -10,9 +10,9 @@ using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Http;
-using Sentry.Internal.ScopeStack;
+using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
+
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internals.DiagnosticSource;
 #endif
@@ -26,16 +26,10 @@ namespace Sentry
     {
         private Dictionary<string, string>? _defaultTags;
 
-        internal IScopeStackContainer? ScopeStackContainer { get; set; }
-
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// </summary>
-        public bool IsGlobalModeEnabled
-        {
-            get => ScopeStackContainer is GlobalScopeStackContainer;
-            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
-        }
+        public bool IsGlobalModeEnabled { get; set; }
 
         /// <summary>
         /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
