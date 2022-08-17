@@ -12,6 +12,7 @@
 - Add Mac Catalyst target ([#1848](https://github.com/getsentry/sentry-dotnet/pull/1848))
 - Add `Distribution` properties ([#1851](https://github.com/getsentry/sentry-dotnet/pull/1851))
 - Add and configure options for the iOS SDK ([#1849](https://github.com/getsentry/sentry-dotnet/pull/1849))
+- Set default `Release` and `Distribution` for iOS and Android ([#1856](https://github.com/getsentry/sentry-dotnet/pull/1856))
 
 ### Fixes
 
