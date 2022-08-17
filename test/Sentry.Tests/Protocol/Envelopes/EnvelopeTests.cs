@@ -722,6 +722,25 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public void FromEvent_EmptyAttachmentStream_DisposesStream()
+    {
+        // Arrange
+        var path = Path.GetTempFileName();
+        using var stream = File.OpenRead(path);
+        var attachment = new Attachment(
+            default,
+            new StreamAttachmentContent(stream),
+            "Screenshot.jpg",
+            "image/jpg");
+
+        // Act
+        _ = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+
+        // Assert
+        Assert.Throws<ObjectDisposedException>(() => stream.ReadByte());
+    }
+
+    [Fact]
     public async Task Serialization_RoundTrip_ReplacesSentAtHeader()
     {
         // Arrange
