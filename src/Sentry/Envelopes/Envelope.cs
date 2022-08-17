@@ -189,6 +189,11 @@ namespace Sentry.Protocol.Envelopes
                         }
                         else
                         {
+                            // We would normally dispose the stream when we dispose the envelope item
+                            // But in this case, we need to explicitly dispose here or we will be leaving
+                            // the stream open indefinitely.
+                            stream.Dispose();
+
                             logger?.LogWarning("Did not add '{0}' to envelope because the stream was empty.",
                                 attachment.FileName);
                         }
