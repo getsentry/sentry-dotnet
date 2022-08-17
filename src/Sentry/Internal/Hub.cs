@@ -50,7 +50,10 @@ namespace Sentry.Internal
             _clock = clock ?? SystemClock.Clock;
             _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
-            ScopeManager = scopeManager ?? new SentryScopeManager(options, _ownedClient);
+            ScopeManager = scopeManager ?? new SentryScopeManager(
+                options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
+                options,
+                _ownedClient);
 
             _rootScope = options.IsGlobalModeEnabled
                 ? DisabledHub.Instance

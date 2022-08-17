@@ -10,6 +10,7 @@ using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Http;
+using Sentry.Internal.ScopeStack;
 using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
 
@@ -27,6 +28,9 @@ namespace Sentry
         private Dictionary<string, string>? _defaultTags;
 
 #if __MOBILE__
+
+        internal IScopeStackContainer? ScopeStackContainer { get; } = new GlobalScopeStackContainer();
+
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// Always <c>true</c> for mobile targets.
@@ -43,10 +47,16 @@ namespace Sentry
             }
         }
 #else
+        internal IScopeStackContainer? ScopeStackContainer { get; set; }
+
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// </summary>
-        public bool IsGlobalModeEnabled { get; set; }
+        public bool IsGlobalModeEnabled
+        {
+            get => ScopeStackContainer is GlobalScopeStackContainer;
+            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
+        }
 #endif
 
         /// <summary>

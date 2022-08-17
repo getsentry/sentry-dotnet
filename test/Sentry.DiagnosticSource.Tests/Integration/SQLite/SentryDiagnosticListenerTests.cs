@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Sentry.Internal.ScopeStack;
 using Sentry.Internals.DiagnosticSource;
 
 namespace Sentry.DiagnosticSource.Tests.Integration.SQLite;
@@ -18,12 +19,13 @@ public class SentryDiagnosticListenerTests
         {
             var options = new SentryOptions
             {
-                TracesSampleRate = 1.0,
-                IsGlobalModeEnabled = false
+                TracesSampleRate = 1.0
             };
-
-            var client = Substitute.For<ISentryClient>();
-            ScopeManager = new SentryScopeManager(options, client);
+            ScopeManager = new SentryScopeManager(
+                new AsyncLocalScopeStackContainer(),
+                options,
+                Substitute.For<ISentryClient>()
+            );
 
             Hub = Substitute.For<IHub>();
             Hub.GetSpan().ReturnsForAnyArgs(_ => GetSpan());
