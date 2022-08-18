@@ -6,7 +6,7 @@ public class MainActivity : Activity
 {
     protected override void OnCreate(Bundle? savedInstanceState)
     {
-        SentrySdk.Init(this, o =>
+        SentrySdk.Init(o =>
         {
             o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
             o.SendDefaultPii = true; // adds the user's IP address automatically

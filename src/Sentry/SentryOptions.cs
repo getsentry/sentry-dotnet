@@ -11,8 +11,9 @@ using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
+using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
+
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internals.DiagnosticSource;
 #endif
@@ -26,6 +27,26 @@ namespace Sentry
     {
         private Dictionary<string, string>? _defaultTags;
 
+#if __MOBILE__
+
+        internal IScopeStackContainer? ScopeStackContainer { get; } = new GlobalScopeStackContainer();
+
+        /// <summary>
+        /// Specifies whether to use global scope management mode.
+        /// Always <c>true</c> for mobile targets.
+        /// </summary>
+        public bool IsGlobalModeEnabled
+        {
+            get => true;
+            set
+            {
+                if (value is false)
+                {
+                    _diagnosticLogger?.LogWarning("Cannot disable Global Mode on {0}", DeviceInfo.PlatformName);
+                }
+            }
+        }
+#else
         internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
         /// <summary>
@@ -36,6 +57,7 @@ namespace Sentry
             get => ScopeStackContainer is GlobalScopeStackContainer;
             set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
         }
+#endif
 
         /// <summary>
         /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
@@ -573,13 +595,19 @@ namespace Sentry
         public long MaxAttachmentSize { get; set; } = 20 * 1024 * 1024;
 
         /// <summary>
-        /// Whether the SDK should attempt to detect the app's and device's startup time.
+        /// The mode that the SDK should use when attempting to detect the app's and device's startup time.
         /// </summary>
         /// <remarks>
         /// Note that the highest precision value relies on <see cref="System.Diagnostics.Process.GetCurrentProcess"/>
         /// which might not be available. For example on Unity's IL2CPP.
+        /// Additionally, "Best" mode is not available on mobile platforms.
         /// </remarks>
-        public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
+        public StartupTimeDetectionMode DetectStartupTime { get; set; } =
+#if __MOBILE__
+            StartupTimeDetectionMode.Fast;
+#else
+            StartupTimeDetectionMode.Best;
+#endif
 
         /// <summary>
         /// Determines the duration of time a session can stay paused before it's considered ended.
@@ -589,10 +617,11 @@ namespace Sentry
         /// </remarks>
         public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
 
-#if ANDROID || IOS || MACCATALYST
+#if __MOBILE__
         /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and
         /// end the session when it's closed.
+        /// On mobile application platforms, this is enabled by default.
         /// </summary>
         public bool AutoSessionTracking { get; set; } = true;
 #else
@@ -601,8 +630,8 @@ namespace Sentry
         /// end the session when it's closed.
         /// </summary>
         /// <remarks>
-        /// Note: this is disabled by default in the current version, but will become
-        /// enabled by default in the next major version.
+        /// Note: this is disabled by default in the current version (except for mobile targets and MAUI),
+        /// but will become enabled by default in the next major version.
         /// Currently this only works for release health in client mode
         /// (desktop, mobile applications, but not web servers).
         /// </remarks>
@@ -691,7 +720,7 @@ namespace Sentry
 
 #if ANDROID
             Android = new AndroidOptions(this);
-#elif IOS || MACCATALYST
+#elif __IOS__
             iOS = new IosOptions(this);
 #endif
 

@@ -23,7 +23,7 @@ public partial class MainPage
         JavaCrashBtn.IsVisible = false;
 #endif
 
-#if !(ANDROID || IOS || MACCATALYST)
+#if !__MOBILE__
         NativeCrashBtn.IsVisible = false;
 #endif
         base.OnAppearing();
@@ -73,7 +73,7 @@ public partial class MainPage
 
     private void OnNativeCrashClicked(object sender, EventArgs e)
     {
-#if ANDROID || IOS || MACCATALYST
+#if __MOBILE__
         SentrySdk.CauseCrash(CrashType.Native);
 #endif
     }

@@ -31,7 +31,7 @@ namespace Sentry
         JavaBackgroundThread,
 #endif
 
-#if ANDROID || IOS || MACCATALYST
+#if __MOBILE__
         /// <summary>
         /// A native operation that will crash the appliction will be performed by a C library.
         /// </summary>

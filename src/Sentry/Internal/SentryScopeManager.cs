@@ -29,6 +29,7 @@ namespace Sentry.Internal
             ISentryClient rootClient)
         {
             ScopeStackContainer = scopeStackContainer;
+
             _options = options;
             NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }

@@ -14,16 +14,9 @@ public static partial class SentrySdk
             args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
         };
 
-        // Set options for the managed SDK that don't depend on the Cocoa SDK
-        options.AutoSessionTracking = true;
-        options.IsGlobalModeEnabled = true;
-
         // Set default release and distribution
         options.Release ??= GetDefaultReleaseString();
         options.Distribution ??= GetDefaultDistributionString();
-
-        // "Best" mode throws platform not supported exception.  Use "Fast" mode instead.
-        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
 
         // Set options for the Cocoa SDK
         var cocoaOptions = new SentryCocoaOptions();
@@ -170,7 +163,7 @@ public static partial class SentrySdk
         // Now initialize the Cocoa SDK
         SentryCocoaSdk.StartWithOptionsObject(cocoaOptions);
 
-        // Set options for the managed SDK that depend on the Cocoa SDK
+        // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new IosEventProcessor(cocoaOptions!));
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;

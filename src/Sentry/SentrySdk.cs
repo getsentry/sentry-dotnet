@@ -54,7 +54,7 @@ namespace Sentry
             // Initialize bundled platform SDKs here
 #if ANDROID
             InitSentryAndroidSdk(options);
-#elif IOS || MACCATALYST
+#elif __IOS__
             InitSentryCocoaSdk(options);
 #endif
             return new Hub(options);
@@ -497,7 +497,7 @@ namespace Sentry
                 case CrashType.Native:
                     NativeCrash();
                     break;
-#elif IOS || MACCATALYST
+#elif __IOS__
                 case CrashType.Native:
                     SentryCocoaSdk.Crash();
                     break;
