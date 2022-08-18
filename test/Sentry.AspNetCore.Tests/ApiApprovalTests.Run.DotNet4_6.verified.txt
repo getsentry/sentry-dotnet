@@ -40,6 +40,9 @@ namespace Sentry.AspNetCore
     public class SentryAspNetCoreOptions : Sentry.Extensions.Logging.SentryLoggingOptions
     {
         public SentryAspNetCoreOptions() { }
+        [System.Obsolete("Not supported via code.\\r\\nhttps://github.com/getsentry/sentry-dotnet/pull/1860\\r" +
+            "\\nInstead set the value in appsettings.json:\\r\\n\"Sentry\": {\\r\\n  \"AdjustStandard" +
+            "EnvironmentNameCasing\": false\\r\\n}")]
         public bool AdjustStandardEnvironmentNameCasing { get; set; }
         public bool FlushOnCompletedRequest { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
