@@ -18,7 +18,6 @@ public static class Program
             // Example integration with advanced configuration scenarios:
             .UseSentry(options =>
             {
-                options.AdjustStandardEnvironmentNameCasing = false;
                 // The parameter 'options' here has values populated through the configuration system.
                 // That includes 'appsettings.json', environment variables and anything else
                 // defined on the ConfigurationBuilder.

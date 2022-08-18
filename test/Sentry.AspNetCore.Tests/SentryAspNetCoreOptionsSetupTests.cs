@@ -3,6 +3,7 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Sentry.Testing;
@@ -55,14 +56,11 @@ public class SentryAspNetCoreOptionsSetupTests
         var hostingEnvironment = Substitute.For<IHostingEnvironment>();
         hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
 
-        var sut = new SentryAspNetCoreOptionsSetup(
-            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>());
-
         //const string environment = "some environment";
         _target.Environment = environment;
 
         // Act.
-        sut.Configure(_target);
+        SentryWebHostBuilderExtensions.SetEnvironment(hostingEnvironment, _target);
 
         // Assert.
         Assert.Equal(expectedEnvironment, _target.Environment);
@@ -83,14 +81,11 @@ public class SentryAspNetCoreOptionsSetupTests
         var hostingEnvironment = Substitute.For<IHostingEnvironment>();
         hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
 
-        var sut = new SentryAspNetCoreOptionsSetup(
-            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>());
-
         _target.Environment = environment;
         _target.AdjustStandardEnvironmentNameCasing = adjustStandardEnvironmentNameCasingSetting;
 
         // Act.
-        sut.Configure(_target);
+        SentryWebHostBuilderExtensions.SetEnvironment(hostingEnvironment, _target);
 
         // Assert.
         Assert.Equal(expectedEnvironment, _target.Environment);
@@ -102,10 +97,11 @@ public class SentryAspNetCoreOptionsSetupTests
     public void Filters_Environment_SentryEnvironment_Set(string environment)
     {
         // Arrange.
+        var hostingEnvironment = Substitute.For<IHostingEnvironment>();
         _target.FakeSettings().EnvironmentVariables[Internal.Constants.EnvironmentEnvironmentVariable] = environment;
 
         // Act.
-        _sut.Configure(_target);
+        SentryWebHostBuilderExtensions.SetEnvironment(hostingEnvironment, _target);
 
         // Assert.
         Assert.Equal(environment, _target.Environment);

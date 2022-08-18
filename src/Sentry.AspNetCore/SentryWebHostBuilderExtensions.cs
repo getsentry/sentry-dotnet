@@ -1,11 +1,11 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
-using Microsoft.Extensions.Hosting;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Hosting;
@@ -58,7 +58,11 @@ public static class SentryWebHostBuilderExtensions
             });
         });
 
-    private static void SetEnvironment(IWebHostEnvironment hostingEnvironment, SentryAspNetCoreOptions options)
+#if NETSTANDARD2_0
+    internal static void SetEnvironment(IHostingEnvironment hostingEnvironment, SentryAspNetCoreOptions options)
+#else
+    internal static void SetEnvironment(IWebHostEnvironment hostingEnvironment, SentryAspNetCoreOptions options)
+#endif
     {
         // Set environment from AspNetCore hosting environment name, if not set already
         // Note: The SettingLocator will take care of the default behavior and assignment, which takes precedence.
