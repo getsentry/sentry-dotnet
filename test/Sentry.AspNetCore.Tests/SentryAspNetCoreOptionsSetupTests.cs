@@ -12,8 +12,7 @@ namespace Sentry.AspNetCore.Tests;
 public class SentryAspNetCoreOptionsSetupTests
 {
     private readonly SentryAspNetCoreOptionsSetup _sut = new(
-        Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-        Substitute.For<IHostingEnvironment>());
+        Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>());
 
     private readonly SentryAspNetCoreOptions _target = new();
 
@@ -57,8 +56,7 @@ public class SentryAspNetCoreOptionsSetupTests
         hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
 
         var sut = new SentryAspNetCoreOptionsSetup(
-            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-            hostingEnvironment);
+            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>());
 
         //const string environment = "some environment";
         _target.Environment = environment;
@@ -86,8 +84,7 @@ public class SentryAspNetCoreOptionsSetupTests
         hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
 
         var sut = new SentryAspNetCoreOptionsSetup(
-            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-            hostingEnvironment);
+            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>());
 
         _target.Environment = environment;
         _target.AdjustStandardEnvironmentNameCasing = adjustStandardEnvironmentNameCasingSetting;
