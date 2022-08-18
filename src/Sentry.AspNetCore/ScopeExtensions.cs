@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore;
 
@@ -25,12 +26,10 @@ public static class ScopeExtensions
     public static void Populate(this Scope scope, HttpContext context, SentryAspNetCoreOptions options)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable ConditionIsAlwaysTrueOrFalse
-        if (scope is null || context is null || options is null)
+        if (scope.IsNull() || context.IsNull() || options.IsNull())
         {
             return;
         }
-        // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         // With the logger integration, a BeginScope call is made with RequestId. That ends up adding
         // two tags with the same value: RequestId and TraceIdentifier
@@ -178,12 +177,10 @@ public static class ScopeExtensions
     public static void Populate(this Scope scope, Activity activity)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable ConditionIsAlwaysTrueOrFalse
-        if (scope is null || activity is null)
+        if (scope.IsNull() || activity.IsNull())
         {
             return;
         }
-        // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         //scope.ActivityId = activity.Id;
 

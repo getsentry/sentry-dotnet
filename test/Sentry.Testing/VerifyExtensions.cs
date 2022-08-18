@@ -3,8 +3,13 @@ public static class VerifyExtensions
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
     {
         return settings
-            .AddExtraSettings(x => x.Converters.Add(new SpansConverter()))
-            .IgnoreMembersWithType<Contexts>()
+            .ScrubMachineName()
+            .ScrubUserName()
+            .AddExtraSettings(_ =>
+            {
+                _.Converters.Add(new SpansConverter());
+                _.Converters.Add(new ContextsConverter());
+            })
             .IgnoreMembersWithType<SdkVersion>()
             .IgnoreMembersWithType<DateTimeOffset>()
             .IgnoreMembersWithType<SpanId>()
@@ -21,6 +26,7 @@ public static class VerifyExtensions
             .IgnoreMembers<SentryException>(
                 _ => _.Module,
                 _ => _.ThreadId)
+            .IgnoreMembers<SentryThread>(_ => _.Id)
             .IgnoreMembers<SentryStackFrame>(
                 _ => _.FileName,
                 _ => _.LineNumber,
@@ -46,6 +52,27 @@ public static class VerifyExtensions
             }
 
             writer.WriteEndArray();
+        }
+    }
+
+    class ContextsConverter : WriteOnlyJsonConverter<Contexts>
+    {
+        public override void Write(VerifyJsonWriter writer, Contexts contexts)
+        {
+            var items = contexts
+                .Where(_ => _.Key != "os" &&
+                            _.Key != "Current Culture" &&
+                            _.Key != "ThreadPool Info" &&
+                            _.Key != "runtime" &&
+                            _.Key != "Current UI Culture" &&
+                            _.Key != "device" &&
+                            _.Key != ".NET Framework" &&
+                            _.Key != "app" &&
+                            _.Key != "Memory Info" &&
+                            _.Key != "Dynamic Code")
+                .OrderBy(x => x.Key)
+                .ToDictionary();
+            writer.Serialize(items);
         }
     }
 }

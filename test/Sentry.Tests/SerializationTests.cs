@@ -1,5 +1,6 @@
-using System.Text.Json;
 using Sentry.Testing;
+
+namespace Sentry.Tests;
 
 [UsesVerify]
 public class SerializationTests

@@ -11,8 +11,9 @@ using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
+using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
+
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internals.DiagnosticSource;
 #endif
@@ -26,16 +27,37 @@ namespace Sentry
     {
         private Dictionary<string, string>? _defaultTags;
 
+        /// <summary>
+        /// If set, the <see cref="SentryScopeManager"/> will ignore <see cref="IsGlobalModeEnabled"/>
+        /// and use the provided container instead.
+        /// </summary>
+        /// <remarks>
+        /// Used by the ASP.NET (classic) integration.
+        /// </remarks>
         internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
+#if __MOBILE__
         /// <summary>
         /// Specifies whether to use global scope management mode.
+        /// Always <c>true</c> for mobile targets.
         /// </summary>
         public bool IsGlobalModeEnabled
         {
-            get => ScopeStackContainer is GlobalScopeStackContainer;
-            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
+            get => true;
+            set
+            {
+                if (value is false)
+                {
+                    _diagnosticLogger?.LogWarning("Cannot disable Global Mode on {0}", DeviceInfo.PlatformName);
+                }
+            }
         }
+#else
+        /// <summary>
+        /// Specifies whether to use global scope management mode.
+        /// </summary>
+        public bool IsGlobalModeEnabled { get; set; }
+#endif
 
         /// <summary>
         /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
@@ -222,6 +244,23 @@ namespace Sentry
         /// </remarks>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/releases/"/>
         public string? Release { get; set; }
+
+        /// <summary>
+        /// The distribution of the application, associated with the release set in <see cref="Release"/>.
+        /// </summary>
+        /// <example>
+        /// 22
+        /// 14G60
+        /// </example>
+        /// <remarks>
+        /// Distributions are used to disambiguate build or deployment variants of the same release of
+        /// an application. For example, it can be the build number of an XCode (iOS) build, or the version
+        /// code of an Android build.
+        /// A distribution can be set under any circumstances, and is passed along to Sentry if provided.
+        /// However, they are generally relevant only for mobile application scenarios.
+        /// </remarks>
+        /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/#optional-attributes"/>
+        public string? Distribution { get; set; }
 
         /// <summary>
         /// The environment the application is running
@@ -556,13 +595,19 @@ namespace Sentry
         public long MaxAttachmentSize { get; set; } = 20 * 1024 * 1024;
 
         /// <summary>
-        /// Whether the SDK should attempt to detect the app's and device's startup time.
+        /// The mode that the SDK should use when attempting to detect the app's and device's startup time.
         /// </summary>
         /// <remarks>
         /// Note that the highest precision value relies on <see cref="System.Diagnostics.Process.GetCurrentProcess"/>
         /// which might not be available. For example on Unity's IL2CPP.
+        /// Additionally, "Best" mode is not available on mobile platforms.
         /// </remarks>
-        public StartupTimeDetectionMode DetectStartupTime { get; set; } = StartupTimeDetectionMode.Best;
+        public StartupTimeDetectionMode DetectStartupTime { get; set; } =
+#if __MOBILE__
+            StartupTimeDetectionMode.Fast;
+#else
+            StartupTimeDetectionMode.Best;
+#endif
 
         /// <summary>
         /// Determines the duration of time a session can stay paused before it's considered ended.
@@ -572,10 +617,11 @@ namespace Sentry
         /// </remarks>
         public TimeSpan AutoSessionTrackingInterval { get; set; } = TimeSpan.FromSeconds(30);
 
-#if ANDROID
+#if __MOBILE__
         /// <summary>
         /// Whether the SDK should start a session automatically when it's initialized and
         /// end the session when it's closed.
+        /// On mobile application platforms, this is enabled by default.
         /// </summary>
         public bool AutoSessionTracking { get; set; } = true;
 #else
@@ -584,8 +630,8 @@ namespace Sentry
         /// end the session when it's closed.
         /// </summary>
         /// <remarks>
-        /// Note: this is disabled by default in the current version, but will become
-        /// enabled by default in the next major version.
+        /// Note: this is disabled by default in the current version (except for mobile targets and MAUI),
+        /// but will become enabled by default in the next major version.
         /// Currently this only works for release health in client mode
         /// (desktop, mobile applications, but not web servers).
         /// </remarks>
@@ -625,11 +671,15 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public INetworkStatusListener? NetworkStatusListener { get; set; }
 
+        internal SettingLocator SettingLocator { get; set; }
+
         /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()
         {
+            SettingLocator = new SettingLocator(this);
+
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
@@ -667,6 +717,12 @@ namespace Sentry
                 new SentryDiagnosticListenerIntegration(),
 #endif
             };
+
+#if ANDROID
+            Android = new AndroidOptions(this);
+#elif __IOS__
+            iOS = new IosOptions(this);
+#endif
 
             InAppExclude = new[] {
                     "System.",
@@ -716,7 +772,6 @@ namespace Sentry
 #else
             InAppInclude = Array.Empty<string>();
 #endif
-
         }
     }
 }

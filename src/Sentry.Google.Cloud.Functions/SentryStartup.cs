@@ -28,17 +28,6 @@ public class SentryStartup : FunctionsStartup
 
         logging.Services.AddSingleton<ISentryEventProcessor, SentryGoogleCloudFunctionEventProcessor>();
 
-        ReleaseLocator.FromEnvironmentLazy = new Lazy<string?>(() =>
-        {
-            var environmentRelease = ReleaseLocator.LocateFromEnvironment();
-            if (environmentRelease != null &&
-                Environment.GetEnvironmentVariable("K_REVISION") is { } revision)
-            {
-                environmentRelease = $"{environmentRelease}+{revision}";
-            }
-            return environmentRelease;
-        });
-
         // TODO: refactor this with SentryWebHostBuilderExtensions
         var section = context.Configuration.GetSection("Sentry");
         logging.Services.Configure<SentryAspNetCoreOptions>(section);
@@ -47,10 +36,22 @@ public class SentryStartup : FunctionsStartup
         {
             // Make sure all events are flushed out
             options.FlushBeforeRequestCompleted = true;
+
             // K_SERVICE is where the name of the FAAS is stored.
-            // It'll return null. if GCP Function is running locally.
-            var serviceName = Environment.GetEnvironmentVariable("K_SERVICE");
+            // It will return null if GCP Function is running locally.
+            var serviceName = options.SettingLocator.GetEnvironmentVariable("K_SERVICE");
             options.TransactionNameProvider = _ => serviceName;
+
+            // Append revision from environment variable to release, unless release has already been set.
+            if (string.IsNullOrWhiteSpace(options.Release))
+            {
+                var revision = options.SettingLocator.GetEnvironmentVariable("K_REVISION");
+                if (!string.IsNullOrWhiteSpace(revision))
+                {
+                    var release = options.SettingLocator.GetRelease();
+                    options.Release = $"{release}+{revision}";
+                }
+            }
         });
 
         logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();

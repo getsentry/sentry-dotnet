@@ -57,10 +57,10 @@ public class SentrySinkTests
         sut.Emit(evt);
 
         var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Equal(b.Message, expectedException.Message);
-        Assert.Equal(b.Timestamp, DateTimeOffset.MaxValue);
+        Assert.Equal(expectedException.Message, b.Message);
+        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
         Assert.Null(b.Category);
-        Assert.Equal(b.Level, expectedLevel);
+        Assert.Equal(expectedLevel, b.Level);
         Assert.Null(b.Type);
         Assert.Null(b.Data);
     }
@@ -77,7 +77,7 @@ public class SentrySinkTests
 
         var expected = typeof(SentrySink).Assembly.GetNameAndVersion();
         _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == SentrySink.SdkName
                                                    && e.Sdk.Version == expected.Version));
     }
 

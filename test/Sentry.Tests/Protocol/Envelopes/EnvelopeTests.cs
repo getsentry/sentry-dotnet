@@ -504,6 +504,7 @@ public class EnvelopeTests
             },
             Modules = { { "module_key", "module_value" } },
             Release = "release",
+            Distribution = "distribution",
             SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
             SentryThreads = new[] { new SentryThread { Crashed = true } },
             ServerName = "server_name",
@@ -538,9 +539,11 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
+        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+
         var attachment = new Attachment(
             AttachmentType.Default,
-            new StreamAttachmentContent(Stream.Null),
+            new StreamAttachmentContent(attachmentStream),
             "file.txt",
             null);
 
@@ -573,9 +576,11 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
+        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+
         var attachment = new Attachment(
             AttachmentType.Default,
-            new StreamAttachmentContent(Stream.Null),
+            new StreamAttachmentContent(attachmentStream),
             "file.txt",
             null);
 
@@ -697,6 +702,42 @@ public class EnvelopeTests
                 nested["name"] == SdkVersion.Instance.Name &&
                 nested["version"] == SdkVersion.Instance.Version;
         }).Should().BeTrue();
+    }
+
+    [Fact]
+    public void FromEvent_EmptyAttachmentStream_DoesNotIncludeAttachment()
+    {
+        // Arrange
+        var attachment = new Attachment(
+            default,
+            new StreamAttachmentContent(Stream.Null),
+            "Screenshot.jpg",
+            "image/jpg");
+
+        // Act
+        var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+
+        // Assert
+        envelope.Items.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void FromEvent_EmptyAttachmentStream_DisposesStream()
+    {
+        // Arrange
+        var path = Path.GetTempFileName();
+        using var stream = File.OpenRead(path);
+        var attachment = new Attachment(
+            default,
+            new StreamAttachmentContent(stream),
+            "Screenshot.jpg",
+            "image/jpg");
+
+        // Act
+        _ = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+
+        // Assert
+        Assert.Throws<ObjectDisposedException>(() => stream.ReadByte());
     }
 
     [Fact]

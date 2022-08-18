@@ -32,12 +32,13 @@ public class CachingTransportTests
             FileSystem = _fileSystem
         };
 
+        string httpContent = null;
         Exception exception = null;
         var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(async message =>
          {
              try
              {
-                 await message.Content!.ReadAsStringAsync();
+                 httpContent = await message.Content!.ReadAsStringAsync();
              }
              catch (Exception readStreamException)
              {
@@ -47,7 +48,14 @@ public class CachingTransportTests
 
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
+        const string attachmentContent = "test-attachment";
         var tempFile = Path.GetTempFileName();
+
+#if NETCOREAPP
+        await File.WriteAllTextAsync(tempFile, attachmentContent);
+#else
+        File.WriteAllText(tempFile, attachmentContent);
+#endif
 
         try
         {
@@ -59,6 +67,7 @@ public class CachingTransportTests
             await transport.FlushAsync();
 
             // Assert
+            Assert.Contains(attachmentContent, httpContent);
             if (exception != null)
             {
                 throw exception;
@@ -217,7 +226,7 @@ public class CachingTransportTests
 
         // Assert
         var sentEnvelope = innerTransport.GetSentEnvelopes().Single();
-        sentEnvelope.Should().BeEquivalentTo(envelope);;
+        sentEnvelope.Should().BeEquivalentTo(envelope);
     }
 
     [Fact]

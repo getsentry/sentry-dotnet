@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
@@ -15,7 +16,7 @@ namespace Sentry
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
     [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-    public sealed class SentryEvent : IEventLike, IJsonSerializable
+    public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistribution
     {
         private IDictionary<string, string>? _modules;
 
@@ -72,6 +73,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public string? Release { get; set; }
+
+        /// <inheritdoc />
+        public string? Distribution { get; set; }
 
         internal SentryValues<SentryException>? SentryExceptionValues { get; set; }
 
@@ -234,6 +238,7 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("platform", Platform);
             writer.WriteStringIfNotWhiteSpace("server_name", ServerName);
             writer.WriteStringIfNotWhiteSpace("release", Release);
+            writer.WriteStringIfNotWhiteSpace("dist", Distribution);
             writer.WriteSerializableIfNotNull("exception", SentryExceptionValues, logger);
             writer.WriteSerializableIfNotNull("threads", SentryThreadValues, logger);
             writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
@@ -276,6 +281,7 @@ namespace Sentry
             var platform = json.GetPropertyOrNull("platform")?.GetString();
             var serverName = json.GetPropertyOrNull("server_name")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
+            var distribution = json.GetPropertyOrNull("dist")?.GetString();
             var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).ToList().Pipe(v => new SentryValues<SentryException>(v));
             var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).ToList().Pipe(v => new SentryValues<SentryThread>(v));
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
@@ -301,6 +307,7 @@ namespace Sentry
                 Platform = platform,
                 ServerName = serverName,
                 Release = release,
+                Distribution = distribution,
                 SentryExceptionValues = exceptionValues,
                 SentryThreadValues = threadValues,
                 DebugImages = images,

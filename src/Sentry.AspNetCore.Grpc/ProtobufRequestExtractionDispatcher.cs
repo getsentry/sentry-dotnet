@@ -1,5 +1,6 @@
 using Google.Protobuf;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore.Grpc;
 
@@ -36,8 +37,7 @@ public class ProtobufRequestExtractionDispatcher : IProtobufRequestPayloadExtrac
         where TRequest : class, IMessage
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (request is null)
+        if (request.IsNull())
         {
             return null;
         }

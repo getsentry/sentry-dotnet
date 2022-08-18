@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -46,8 +47,7 @@ namespace Sentry
             BreadcrumbLevel level = default)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (hasBreadcrumbs is null)
+            if (hasBreadcrumbs.IsNull())
             {
                 return;
             }
@@ -90,8 +90,7 @@ namespace Sentry
             BreadcrumbLevel level = default)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (hasBreadcrumbs is null)
+            if (hasBreadcrumbs.IsNull())
             {
                 return;
             }
@@ -129,8 +128,7 @@ namespace Sentry
             BreadcrumbLevel level = default)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (hasBreadcrumbs is null)
+            if (hasBreadcrumbs.IsNull())
             {
                 return;
             }

@@ -1,3 +1,5 @@
+#pragma warning disable CS0618
+
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.Maui;
@@ -6,7 +8,7 @@ public partial class MainPage
 {
     private readonly ILogger<MainPage> _logger;
 
-    int count = 0;
+    private int _count = 0;
 
     // NOTE: You can only inject an ILogger<T>, not a plain ILogger
     public MainPage(ILogger<MainPage> logger)
@@ -15,35 +17,65 @@ public partial class MainPage
         InitializeComponent();
     }
 
+    protected override void OnAppearing()
+    {
+#if !ANDROID
+        JavaCrashBtn.IsVisible = false;
+#endif
+
+#if !__MOBILE__
+        NativeCrashBtn.IsVisible = false;
+#endif
+        base.OnAppearing();
+    }
+
     private void OnCounterClicked(object sender, EventArgs e)
     {
-        count++;
+        _count++;
 
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
+        if (_count == 1)
+        {
+            CounterBtn.Text = $"Clicked {_count} time";
+        }
         else
-            CounterBtn.Text = $"Clicked {count} times";
+        {
+            CounterBtn.Text = $"Clicked {_count} times";
+        }
 
         SemanticScreenReader.Announce(CounterBtn.Text);
 
-        _logger.LogInformation("The button has been clicked {ClickCount} times", count);
+        _logger.LogInformation("The button has been clicked {ClickCount} times", _count);
     }
 
     private void OnUnhandledExceptionClicked(object sender, EventArgs e)
     {
-        throw new Exception("This is an unhanded test exception, thrown from managed code in a MAUI app!");
+        SentrySdk.CauseCrash(CrashType.Managed);
     }
 
     private void OnCapturedExceptionClicked(object sender, EventArgs e)
     {
         try
         {
-            throw new Exception("This is a captured test exception, thrown from managed code in a MAUI app!");
+            throw new ApplicationException("This exception was thrown and captured manually, without crashing the app.");
         }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
         }
+    }
+
+    private void OnJavaCrashClicked(object sender, EventArgs e)
+    {
+#if ANDROID
+        SentrySdk.CauseCrash(CrashType.Java);
+#endif
+    }
+
+    private void OnNativeCrashClicked(object sender, EventArgs e)
+    {
+#if __MOBILE__
+        SentrySdk.CauseCrash(CrashType.Native);
+#endif
     }
 }
 

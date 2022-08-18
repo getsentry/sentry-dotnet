@@ -13,13 +13,8 @@ internal class SentryMauiInitializer : IMauiInitializeService
     {
         var options = services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
         var disposer = services.GetRequiredService<Disposer>();
-
-#if ANDROID
-        var context = global::Android.App.Application.Context;
-        var disposable = SentrySdk.Init(context, options);
-#else
+        
         var disposable = SentrySdk.Init(options);
-#endif
 
         // Register the return value from initializing the SDK with the disposer.
         // This will ensure that it gets disposed when the service provider is disposed.
@@ -29,14 +24,6 @@ internal class SentryMauiInitializer : IMauiInitializeService
         // Bind MAUI events
         var binder = services.GetRequiredService<MauiEventsBinder>();
         binder.BindMauiEvents();
-
-#if IOS || MACCATALYST
-        // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
-        ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
-        {
-            args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
-        };
-#endif
 
         // Register with the WinUI unhandled exception handler when needed
         RegisterApplicationUnhandledExceptionForWinUI();

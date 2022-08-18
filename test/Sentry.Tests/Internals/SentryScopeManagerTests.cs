@@ -10,10 +10,7 @@ public class SentryScopeManagerTests
 
         public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
 
-        public SentryScopeManager GetSut() => new(
-            SentryOptions.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
-            SentryOptions,
-            Client);
+        public SentryScopeManager GetSut() => new(SentryOptions, Client);
     }
 
     private readonly Fixture _fixture = new();
@@ -315,7 +312,7 @@ public class SentryScopeManagerTests
     public void GlobalMode_PushScope_SameScope()
     {
         // Arrange
-        _fixture.SentryOptions.ScopeStackContainer = new GlobalScopeStackContainer();
+        _fixture.SentryOptions.IsGlobalModeEnabled = true;
         var sut = _fixture.GetSut();
 
         // Act
@@ -326,5 +323,33 @@ public class SentryScopeManagerTests
         // Assert
         scope1.Should().BeSameAs(scope2);
         client1.Should().BeSameAs(client2);
+    }
+
+    [Fact]
+    public void GlobalMode_Disabled_Uses_AsyncLocalScopeStackContainer()
+    {
+        _fixture.SentryOptions.IsGlobalModeEnabled = false;
+        var sut = _fixture.GetSut();
+        Assert.IsType<AsyncLocalScopeStackContainer>(sut.ScopeStackContainer);
+    }
+
+    [Fact]
+    public void GlobalMode_Enabled_Uses_GlobalScopeStackContainer()
+    {
+        _fixture.SentryOptions.IsGlobalModeEnabled = true;
+        var sut = _fixture.GetSut();
+        Assert.IsType<GlobalScopeStackContainer>(sut.ScopeStackContainer);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Uses_Provided_ScopeStackContainer_Ignoring_GlobalMode(bool globalModeSetting)
+    {
+        var container = Substitute.For<IScopeStackContainer>();
+        _fixture.SentryOptions.ScopeStackContainer = container;
+        _fixture.SentryOptions.IsGlobalModeEnabled = globalModeSetting;
+        var sut = _fixture.GetSut();
+        Assert.Same(container, sut.ScopeStackContainer);
     }
 }

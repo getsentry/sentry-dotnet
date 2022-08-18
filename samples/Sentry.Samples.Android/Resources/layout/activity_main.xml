@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    
+
     <ScrollView android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/scroll_content"
@@ -42,15 +42,15 @@
 
             <Button android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/throwKotlinException"
-                    android:text="@string/throw_kotlin_exception"
+                    android:id="@+id/throwJavaException"
+                    android:text="@string/throw_java_exception"
                     android:layout_weight="0.5"
                     android:layout_marginTop="10dp"/>
 
             <Button android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/throwKotlinExceptionBackgroundThread"
-                    android:text="@string/throw_kotlin_exception_background_thread"
+                    android:id="@+id/throwJavaExceptionBackgroundThread"
+                    android:text="@string/throw_java_exception_background_thread"
                     android:layout_weight="0.5"
                     android:layout_marginTop="10dp"/>
 

@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-ios</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    <CodesignKey>iPhone Developer</CodesignKey>
+  </PropertyGroup>
+
+  <!--
+    In a real project, use the PackageReference and set the version to the latest release.
+    Use that instead of the ProjectReference.
+  -->
+
+  <ItemGroup>
+    <!-- <PackageReference Include="Sentry" Version="..." /> -->
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <!--
+    This next section is to build an empty assembly instead of the actual sample app when not building on a Mac.
+    We do this here so we don't have to worry about solution configurations or filters in CI.
+    It is not needed in a real application.
+  -->
+  <PropertyGroup Condition="!$([MSBuild]::IsOSPlatform('OSX'))">
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <DefaultItemExcludes>**\*</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!--
+    Workaround for https://github.com/dotnet/maui/issues/7272 (also happens for iOS without MAUI)
+    This should not be needed in a real application.
+  -->
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
+    <ItemGroup>
+      <ResolvedFileToPublish
+        Update="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+        PublishFolderType="None" />
+    </ItemGroup>
+  </Target>
+
+</Project>

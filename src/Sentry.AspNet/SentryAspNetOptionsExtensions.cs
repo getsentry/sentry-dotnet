@@ -25,7 +25,7 @@ public static class SentryAspNetOptionsExtensions
         var eventProcessor = new SystemWebRequestEventProcessor(payloadExtractor, options);
 
         // Ignore options.IsGlobalModeEnable, we always want to use HttpContext as backing store here
-        options.ScopeStackContainer ??= new HttpContextScopeStackContainer();
+        options.ScopeStackContainer = new HttpContextScopeStackContainer();
 
         options.DiagnosticLogger ??= new TraceDiagnosticLogger(options.DiagnosticLevel);
         options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);

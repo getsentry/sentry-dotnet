@@ -9,10 +9,20 @@
 
 - Added 'integrations' to SdkVersion ([#1820](https://github.com/getsentry/sentry-dotnet/pull/1820))
 - Updated Sentry Android SDK to version 6.3.0 ([#1826](https://github.com/getsentry/sentry-dotnet/pull/1826))
+- Add the Sentry iOS SDK ([#1829](https://github.com/getsentry/sentry-dotnet/pull/1829))
+- Enable Scope Sync for iOS ([#1834](https://github.com/getsentry/sentry-dotnet/pull/1834))
+- Add API for deliberately crashing an app ([#1842](https://github.com/getsentry/sentry-dotnet/pull/1842))
+- Add Mac Catalyst target ([#1848](https://github.com/getsentry/sentry-dotnet/pull/1848))
+- Add `Distribution` properties ([#1851](https://github.com/getsentry/sentry-dotnet/pull/1851))
+- Add and configure options for the iOS SDK ([#1849](https://github.com/getsentry/sentry-dotnet/pull/1849))
+- Set default `Release` and `Distribution` for iOS and Android ([#1856](https://github.com/getsentry/sentry-dotnet/pull/1856))
 
 ### Fixes
 
 - Fix logging loop with NLog sentry ([#1824](https://github.com/getsentry/sentry-dotnet/pull/1824))
+- Fix logging loop with Serilog sentry ([#1828](https://github.com/getsentry/sentry-dotnet/pull/1828))
+- Skip attachment if stream is empty ([#1854](https://github.com/getsentry/sentry-dotnet/pull/1854))
+- Allow some mobile options to be modified from defaults ([#1857](https://github.com/getsentry/sentry-dotnet/pull/1857))
 
 ## 3.20.1
 

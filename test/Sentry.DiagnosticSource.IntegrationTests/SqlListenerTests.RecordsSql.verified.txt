@@ -1,4 +1,4 @@
-﻿[
+[
   {
     Source: {
       Exception: {
@@ -18,6 +18,11 @@
       Level: error,
       TransactionName: my transaction,
       Request: {},
+      Contexts: {
+        trace: {
+          Operation: 
+        }
+      },
       User: {},
       Environment: production
     }
@@ -31,6 +36,14 @@
       Status: UnknownError,
       IsSampled: true,
       Request: {},
+      Contexts: {
+        trace: {
+          Operation: my operation,
+          Description: ,
+          Status: UnknownError,
+          IsSampled: true
+        }
+      },
       User: {},
       Environment: production,
       Spans: [
@@ -48,7 +61,6 @@
           IsFinished: true,
           Operation: db.query,
           Description:
-
 insert into MyTable (Value)
 values (@value);,
           Status: Ok,

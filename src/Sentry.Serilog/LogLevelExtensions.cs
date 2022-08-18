@@ -1,7 +1,20 @@
 namespace Sentry.Serilog;
 
-internal static class LogLevelExtensions
+internal static class SentryExtensions
 {
+    public static bool TryGetSourceContext(this LogEvent logEvent, [NotNullWhen(true)] out string? sourceContext)
+    {
+        if (logEvent.Properties.TryGetValue("SourceContext", out var prop) &&
+            prop is ScalarValue {Value: string sourceContextValue})
+        {
+            sourceContext = sourceContextValue;
+            return true;
+        }
+
+        sourceContext = null;
+        return false;
+    }
+
     public static SentryLevel? ToSentryLevel(this LogEventLevel loggingLevel)
     {
         return loggingLevel switch

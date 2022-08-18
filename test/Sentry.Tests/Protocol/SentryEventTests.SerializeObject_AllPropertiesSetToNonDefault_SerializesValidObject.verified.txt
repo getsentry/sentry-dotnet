@@ -31,6 +31,7 @@
       }
     ]
   },
+  dist: distribution,
   environment: environment,
   event_id: Guid_2,
   exception: {

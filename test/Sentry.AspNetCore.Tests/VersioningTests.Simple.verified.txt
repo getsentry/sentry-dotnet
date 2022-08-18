@@ -13,6 +13,14 @@
           Method: GET,
           QueryString: 
         },
+        Contexts: {
+          trace: {
+            Operation: http.server,
+            Description: ,
+            Status: Ok,
+            IsSampled: true
+          }
+        },
         User: {},
         Environment: production,
         Breadcrumbs: [
@@ -45,6 +53,7 @@
             Category: Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor
           },
           {
+            Message: Executed action Sentry.AspNetCore.Tests.VersioningTests+TargetController.Method,
             Data: {
               eventId: ActionExecuted
             },

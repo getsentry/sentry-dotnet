@@ -180,7 +180,23 @@ namespace Sentry.Protocol.Envelopes
                 {
                     try
                     {
-                        items.Add(EnvelopeItem.FromAttachment(attachment));
+                        // We pull the stream out here so we can length check
+                        // to avoid adding an invalid attachment
+                        var stream = attachment.Content.GetStream();
+                        if (stream.TryGetLength() != 0)
+                        {
+                            items.Add(EnvelopeItem.FromAttachment(attachment, stream));
+                        }
+                        else
+                        {
+                            // We would normally dispose the stream when we dispose the envelope item
+                            // But in this case, we need to explicitly dispose here or we will be leaving
+                            // the stream open indefinitely.
+                            stream.Dispose();
+
+                            logger?.LogWarning("Did not add '{0}' to envelope because the stream was empty.",
+                                attachment.FileName);
+                        }
                     }
                     catch (Exception exception)
                     {

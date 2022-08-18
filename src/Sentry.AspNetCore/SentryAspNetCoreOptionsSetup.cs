@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
-using Sentry.Internal;
+
 #if NETSTANDARD2_0
 using Microsoft.AspNetCore.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -35,16 +35,16 @@ namespace Sentry.AspNetCore
         {
             base.Configure(options);
 
-            // Don't override user defined value.
-            if (string.IsNullOrWhiteSpace(options.Environment))
+            // Set environment from AspNetCore hosting environment name, if not set already
+            // Note: The SettingLocator will take care of the default behavior and assignment, which takes precedence.
+            //       We only need to do anything here if nothing was found by the locator.
+            if (options.SettingLocator.GetEnvironment(useDefaultIfNotFound: false) is null)
             {
-                var locatedEnvironment = EnvironmentLocator.LocateFromEnvironmentVariable();
-                if (!string.IsNullOrWhiteSpace(locatedEnvironment))
+                if (!options.AdjustStandardEnvironmentNameCasing)
                 {
-                    // Sentry specific environment takes precedence #92.
-                    options.Environment = locatedEnvironment;
+                    options.Environment = _hostingEnvironment.EnvironmentName;
                 }
-                else if (options.AdjustStandardEnvironmentNameCasing)
+                else
                 {
                     // NOTE: Sentry prefers to have its environment setting to be all lower case.
                     //       .NET Core sets the ENV variable to 'Production' (upper case P),
@@ -74,10 +74,6 @@ namespace Sentry.AspNetCore
                         // Use the value set by the developer.
                         options.Environment = _hostingEnvironment.EnvironmentName;
                     }
-                }
-                else
-                {
-                    options.Environment = _hostingEnvironment.EnvironmentName;
                 }
             }
 
