@@ -40,7 +40,9 @@ namespace Sentry.AspNetCore
             //       We only need to do anything here if nothing was found by the locator.
             if (options.SettingLocator.GetEnvironment(useDefaultIfNotFound: false) is null)
             {
+#pragma warning disable CS0618
                 if (!options.AdjustStandardEnvironmentNameCasing)
+#pragma warning restore CS0618
                 {
                     options.Environment = _hostingEnvironment.EnvironmentName;
                 }

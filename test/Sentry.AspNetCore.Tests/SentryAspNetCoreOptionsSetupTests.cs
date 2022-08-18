@@ -90,7 +90,9 @@ public class SentryAspNetCoreOptionsSetupTests
             hostingEnvironment);
 
         _target.Environment = environment;
+#pragma warning disable CS0618
         _target.AdjustStandardEnvironmentNameCasing = adjustStandardEnvironmentNameCasingSetting;
+#pragma warning restore CS0618
 
         // Act.
         sut.Configure(_target);

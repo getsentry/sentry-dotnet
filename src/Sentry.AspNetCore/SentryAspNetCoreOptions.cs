@@ -60,6 +60,10 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// The default .NET Core environment names include Production, Development and Staging (note Pascal casing), whereas Sentry prefers
     /// to have its environment setting be all lower case.
     /// </remarks>
+    [Obsolete(@"Not supported via code. Instead set the value in appsettings.json:
+   ""Sentry"": {
+    ""AdjustStandardEnvironmentNameCasing"": false
+  }")]
     public bool AdjustStandardEnvironmentNameCasing { get; set; } = true;
 
     /// <summary>
