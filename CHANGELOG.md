@@ -20,6 +20,7 @@
 - Fix logging loop with Serilog sentry ([#1828](https://github.com/getsentry/sentry-dotnet/pull/1828))
 - Skip attachment if stream is empty ([#1854](https://github.com/getsentry/sentry-dotnet/pull/1854))
 - Allow some mobile options to be modified from defaults ([#1857](https://github.com/getsentry/sentry-dotnet/pull/1857))
+- Obsolete AdjustStandardEnvironmentNameCasing with workaround ([#1860](https://github.com/getsentry/sentry-dotnet/pull/1860))
 
 ## 3.20.1
 
