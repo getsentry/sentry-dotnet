@@ -77,7 +77,8 @@ public class OptionsTests
     {
         [HttpOptions]
         public string Method()
-        {   SentrySdk.ConfigureScope(scope => scope.TransactionName = "TheTransaction");
+        {
+            SentrySdk.ConfigureScope(scope => scope.TransactionName = "TheTransaction");
             return "Hello world";
         }
     }
