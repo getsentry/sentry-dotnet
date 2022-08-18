@@ -27,10 +27,16 @@ namespace Sentry
     {
         private Dictionary<string, string>? _defaultTags;
 
+        /// <summary>
+        /// If set, the <see cref="SentryScopeManager"/> will ignore <see cref="IsGlobalModeEnabled"/>
+        /// and use the provided container instead.
+        /// </summary>
+        /// <remarks>
+        /// Used by the ASP.NET (classic) integration.
+        /// </remarks>
+        internal IScopeStackContainer? ScopeStackContainer { get; set; }
+
 #if __MOBILE__
-
-        internal IScopeStackContainer? ScopeStackContainer { get; } = new GlobalScopeStackContainer();
-
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// Always <c>true</c> for mobile targets.
@@ -47,16 +53,10 @@ namespace Sentry
             }
         }
 #else
-        internal IScopeStackContainer? ScopeStackContainer { get; set; }
-
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// </summary>
-        public bool IsGlobalModeEnabled
-        {
-            get => ScopeStackContainer is GlobalScopeStackContainer;
-            set => ScopeStackContainer = value ? new GlobalScopeStackContainer() : new AsyncLocalScopeStackContainer();
-        }
+        public bool IsGlobalModeEnabled { get; set; }
 #endif
 
         /// <summary>
