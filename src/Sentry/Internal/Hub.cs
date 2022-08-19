@@ -338,6 +338,11 @@ namespace Sentry.Internal
 
         public void CaptureTransaction(Transaction transaction)
         {
+            CaptureTransaction(transaction, null);
+        }
+
+        public void CaptureTransaction(Transaction transaction, Scope? scope = null)
+        {
             try
             {
                 // Apply scope data
@@ -348,7 +353,7 @@ namespace Sentry.Internal
                 // Apply enricher
                 _enricher.Apply(transaction);
 
-                currentScope.Value.CaptureTransaction(transaction);
+                currentScope.Value.CaptureTransaction(transaction, scope);
             }
             catch (Exception e)
             {
