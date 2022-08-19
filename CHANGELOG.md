@@ -13,6 +13,7 @@
 - Add `Distribution` properties ([#1851](https://github.com/getsentry/sentry-dotnet/pull/1851))
 - Add and configure options for the iOS SDK ([#1849](https://github.com/getsentry/sentry-dotnet/pull/1849))
 - Set default `Release` and `Distribution` for iOS and Android ([#1856](https://github.com/getsentry/sentry-dotnet/pull/1856))
+- Apply WinUI 3 exception handler in Sentry core ([#1863](https://github.com/getsentry/sentry-dotnet/pull/1863))
 
 ### Fixes
 
