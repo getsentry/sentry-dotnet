@@ -1,12 +1,12 @@
-#if NETCOREAPP2_1 || NET461
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#endif
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Sentry.Testing;
+
+#if NETCOREAPP3_1_OR_GREATER
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
+#else
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#endif
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -55,8 +55,6 @@ public class SentryAspNetCoreOptionsSetupTests
         // Arrange.
         var hostingEnvironment = Substitute.For<IHostingEnvironment>();
         hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
-
-        //const string environment = "some environment";
         _target.Environment = environment;
 
         // Act.
