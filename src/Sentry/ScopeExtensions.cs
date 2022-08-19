@@ -31,8 +31,9 @@ namespace Sentry
                 yield return processor;
             }
         }
+
         /// <summary>
-        /// Invokes all event processor providers available.
+        /// Invokes all transaction processor providers available.
         /// </summary>
         /// <param name="scope">The Scope which holds the processor providers.</param>
         public static IEnumerable<ISentryTransactionProcessor> GetAllTransactionProcessors(this Scope scope)

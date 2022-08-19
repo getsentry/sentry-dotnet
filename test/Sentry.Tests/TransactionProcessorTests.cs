@@ -34,7 +34,7 @@ public class TransactionProcessorTests
     {
         public void Process(Transaction transaction)
         {
-            transaction.Contexts["transactionKey"] = "transactionValue";
+            transaction.Contexts["key"] = "value";
         }
     }
 }

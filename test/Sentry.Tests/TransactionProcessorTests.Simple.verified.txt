@@ -58,13 +58,13 @@
             IsSampled: true,
             Request: {},
             Contexts: {
+              key: value,
               trace: {
                 Operation: my operation,
                 Description: ,
                 Status: UnknownError,
                 IsSampled: true
-              },
-              transactionKey: transactionValue
+              }
             },
             User: {},
             Environment: production,

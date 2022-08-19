@@ -56,13 +56,8 @@ public class EventProcessorTests
     {
         public SentryEvent Process(SentryEvent @event)
         {
-            @event.Contexts["eventKey"] = "eventValue";
+            @event.Contexts["key"] = "value";
             return @event;
-        }
-
-        public void Process(Transaction transaction)
-        {
-            transaction.Contexts["transactionKey"] = "transactionValue";
         }
     }
 }
