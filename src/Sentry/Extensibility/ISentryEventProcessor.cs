@@ -16,12 +16,5 @@ namespace Sentry.Extensibility
         /// Meaning the event should no longer be processed nor send.
         /// </remarks>
         SentryEvent? Process(SentryEvent @event);
-
-        // /// <summary>
-        // /// Process the <see cref="Transaction"/>
-        // /// </summary>
-        // /// <param name="transaction">The Transaction to process</param>
-        // /// <return>The processed event or <c>null</c> if the event was dropped.</return>
-        // void Process(Transaction transaction){}
     }
 }
