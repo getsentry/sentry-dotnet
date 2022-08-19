@@ -1,19 +1,19 @@
-#if NETCOREAPP2_1 || NET461
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#endif
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Sentry.Testing;
+
+#if NETCOREAPP3_1_OR_GREATER
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
+#else
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#endif
 
 namespace Sentry.AspNetCore.Tests;
 
 public class SentryAspNetCoreOptionsSetupTests
 {
     private readonly SentryAspNetCoreOptionsSetup _sut = new(
-        Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-        Substitute.For<IHostingEnvironment>());
+        Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>());
 
     private readonly SentryAspNetCoreOptions _target = new();
 
@@ -55,16 +55,10 @@ public class SentryAspNetCoreOptionsSetupTests
         // Arrange.
         var hostingEnvironment = Substitute.For<IHostingEnvironment>();
         hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
-
-        var sut = new SentryAspNetCoreOptionsSetup(
-            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-            hostingEnvironment);
-
-        //const string environment = "some environment";
         _target.Environment = environment;
 
         // Act.
-        sut.Configure(_target);
+        _target.SetEnvironment(hostingEnvironment);
 
         // Assert.
         Assert.Equal(expectedEnvironment, _target.Environment);
@@ -85,15 +79,11 @@ public class SentryAspNetCoreOptionsSetupTests
         var hostingEnvironment = Substitute.For<IHostingEnvironment>();
         hostingEnvironment.EnvironmentName = hostingEnvironmentSetting;
 
-        var sut = new SentryAspNetCoreOptionsSetup(
-            Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>(),
-            hostingEnvironment);
-
         _target.Environment = environment;
         _target.AdjustStandardEnvironmentNameCasing = adjustStandardEnvironmentNameCasingSetting;
 
         // Act.
-        sut.Configure(_target);
+        _target.SetEnvironment(hostingEnvironment);
 
         // Assert.
         Assert.Equal(expectedEnvironment, _target.Environment);
@@ -105,10 +95,11 @@ public class SentryAspNetCoreOptionsSetupTests
     public void Filters_Environment_SentryEnvironment_Set(string environment)
     {
         // Arrange.
+        var hostingEnvironment = Substitute.For<IHostingEnvironment>();
         _target.FakeSettings().EnvironmentVariables[Internal.Constants.EnvironmentEnvironmentVariable] = environment;
 
         // Act.
-        _sut.Configure(_target);
+        _target.SetEnvironment(hostingEnvironment);
 
         // Assert.
         Assert.Equal(environment, _target.Environment);
