@@ -32,9 +32,8 @@ namespace Sentry.Integrations
 
     internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
     {
-        private static readonly Assembly? WinUIAssembly = GetWinUIAssembly();
-
         private static readonly byte[] WinUIPublicKeyToken = Convert.FromHexString("de31ebe4ad15742b");
+        private static readonly Assembly? WinUIAssembly = GetWinUIAssembly();
 
         private Exception? _lastFirstChanceException;
         private IHub _hub = null!;
