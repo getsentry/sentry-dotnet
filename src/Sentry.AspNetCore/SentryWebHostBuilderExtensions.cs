@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
@@ -54,60 +53,9 @@ public static class SentryWebHostBuilderExtensions
             sentryBuilder.AddSentryOptions(options =>
             {
                 configureOptions?.Invoke(context, options);
-                SetEnvironment(context.HostingEnvironment, options);
+                options.SetEnvironment(context.HostingEnvironment);
             });
         });
-
-#if NETSTANDARD2_0
-    internal static void SetEnvironment(IHostingEnvironment hostingEnvironment, SentryAspNetCoreOptions options)
-#else
-    internal static void SetEnvironment(IWebHostEnvironment hostingEnvironment, SentryAspNetCoreOptions options)
-#endif
-    {
-        // Set environment from AspNetCore hosting environment name, if not set already
-        // Note: The SettingLocator will take care of the default behavior and assignment, which takes precedence.
-        //       We only need to do anything here if nothing was found by the locator.
-        if (options.SettingLocator.GetEnvironment(useDefaultIfNotFound: false) is not null)
-        {
-            return;
-        }
-
-        if (options.AdjustStandardEnvironmentNameCasing)
-        {
-            // NOTE: Sentry prefers to have its environment setting to be all lower case.
-            //       .NET Core sets the ENV variable to 'Production' (upper case P),
-            //       'Development' (upper case D) or 'Staging' (upper case S) which conflicts with
-            //       the Sentry recommendation. As such, we'll be kind and override those values,
-            //       here ... if applicable.
-            // Assumption: The Hosting Environment is always set.
-            //             If not set by a developer, then the framework will auto set it.
-            //             Alternatively, developers might set this to a CUSTOM value, which we
-            //             need to respect (especially the case-sensitivity).
-            //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
-
-            if (hostingEnvironment.IsProduction())
-            {
-                options.Environment = Sentry.Internal.Constants.ProductionEnvironmentSetting;
-            }
-            else if (hostingEnvironment.IsStaging())
-            {
-                options.Environment = Sentry.Internal.Constants.StagingEnvironmentSetting;
-            }
-            else if (hostingEnvironment.IsDevelopment())
-            {
-                options.Environment = Sentry.Internal.Constants.DevelopmentEnvironmentSetting;
-            }
-            else
-            {
-                // Use the value set by the developer.
-                options.Environment = hostingEnvironment.EnvironmentName;
-            }
-        }
-        else
-        {
-            options.Environment = hostingEnvironment.EnvironmentName;
-        }
-    }
 
     /// <summary>
     /// Uses Sentry integration.

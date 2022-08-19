@@ -60,7 +60,7 @@ public class SentryAspNetCoreOptionsSetupTests
         _target.Environment = environment;
 
         // Act.
-        SentryWebHostBuilderExtensions.SetEnvironment(hostingEnvironment, _target);
+        _target.SetEnvironment(hostingEnvironment);
 
         // Assert.
         Assert.Equal(expectedEnvironment, _target.Environment);
@@ -85,7 +85,7 @@ public class SentryAspNetCoreOptionsSetupTests
         _target.AdjustStandardEnvironmentNameCasing = adjustStandardEnvironmentNameCasingSetting;
 
         // Act.
-        SentryWebHostBuilderExtensions.SetEnvironment(hostingEnvironment, _target);
+        _target.SetEnvironment(hostingEnvironment);
 
         // Assert.
         Assert.Equal(expectedEnvironment, _target.Environment);
@@ -101,7 +101,7 @@ public class SentryAspNetCoreOptionsSetupTests
         _target.FakeSettings().EnvironmentVariables[Internal.Constants.EnvironmentEnvironmentVariable] = environment;
 
         // Act.
-        SentryWebHostBuilderExtensions.SetEnvironment(hostingEnvironment, _target);
+        _target.SetEnvironment(hostingEnvironment);
 
         // Assert.
         Assert.Equal(environment, _target.Environment);
