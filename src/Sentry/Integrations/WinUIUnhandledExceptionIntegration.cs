@@ -1,4 +1,4 @@
-#if NET5_0_OR_GREATER 
+#if NET5_0_OR_GREATER
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -36,18 +36,6 @@ namespace Sentry.Integrations
         private IHub _hub = null!;
         private SentryOptions _options = null!;
 
-        // Constants used for reflection
-        private const string WinUIAssemblyName = "Microsoft.WinUI";
-        private const string WinUiAssemblyPublicKeyToken = "de31ebe4ad15742b";
-        private const string WinUINamespace = "Microsoft.UI.Xaml";
-        private const string ApplicationTypeName = "Application";
-        private const string UnhandledExceptionEventName = "UnhandledException";
-        private const string CurrentPropertyName = "Current";
-        private const string HandledPropertyName = "Handled";
-        private const string ExceptionPropertyName = "Exception";
-        private const string ApplicationTypeFullName = WinUINamespace + "." + ApplicationTypeName;
-        private const string Mechanism = WinUINamespace + "." + UnhandledExceptionEventName;
-
         public static bool IsApplicable => WinUIAssembly != null;
 
         public void Register(IHub hub, SentryOptions options)
@@ -81,14 +69,14 @@ namespace Sentry.Integrations
             {
                 // first check by name
                 var assemblyName = x.GetName();
-                if (assemblyName.Name != WinUIAssemblyName)
+                if (assemblyName.Name != "Microsoft.WinUI")
                 {
                     return false;
                 }
 
                 // check the public key token also
                 var token = assemblyName.GetPublicKeyToken();
-                return token != null && string.Equals(Convert.ToHexString(token), WinUiAssemblyPublicKeyToken, StringComparison.OrdinalIgnoreCase);
+                return token != null && string.Equals(Convert.ToHexString(token), "de31ebe4ad15742b", StringComparison.OrdinalIgnoreCase);
             });
         }
 
@@ -98,9 +86,9 @@ namespace Sentry.Integrations
             //   Microsoft.UI.Xaml.Application.Current.UnhandledException += WinUIUnhandledExceptionHandler;
             //
             EventHandler handler = WinUIUnhandledExceptionHandler!;
-            var applicationType = WinUIAssembly!.GetType(ApplicationTypeFullName)!;
-            var application = applicationType.GetProperty(CurrentPropertyName)!.GetValue(null);
-            var eventInfo = applicationType.GetEvent(UnhandledExceptionEventName)!;
+            var applicationType = WinUIAssembly!.GetType("Microsoft.UI.Xaml.Application")!;
+            var application = applicationType.GetProperty("Current")!.GetValue(null);
+            var eventInfo = applicationType.GetEvent("UnhandledException")!;
             var typedHandler = Delegate.CreateDelegate(eventInfo.EventHandlerType!, handler.Target, handler.Method);
             eventInfo.AddEventHandler(application, typedHandler);
         }
@@ -108,8 +96,8 @@ namespace Sentry.Integrations
         private void WinUIUnhandledExceptionHandler(object sender, object e)
         {
             var eventArgsType = e.GetType();
-            var handled = (bool)eventArgsType.GetProperty(HandledPropertyName)!.GetValue(e)!;
-            var exception = (Exception)eventArgsType.GetProperty(ExceptionPropertyName)!.GetValue(e)!;
+            var handled = (bool)eventArgsType.GetProperty("Handled")!.GetValue(e)!;
+            var exception = (Exception)eventArgsType.GetProperty("Exception")!.GetValue(e)!;
 
             // Second part of workaround for https://github.com/microsoft/microsoft-ui-xaml/issues/7160
             if (exception.StackTrace is null)
@@ -119,7 +107,7 @@ namespace Sentry.Integrations
 
             // Set some useful data and capture the exception
             exception.Data[Protocol.Mechanism.HandledKey] = handled;
-            exception.Data[Protocol.Mechanism.MechanismKey] = Mechanism;
+            exception.Data[Protocol.Mechanism.MechanismKey] = "Microsoft.UI.Xaml.UnhandledException";
             _hub.CaptureException(exception);
 
             if (!handled)
