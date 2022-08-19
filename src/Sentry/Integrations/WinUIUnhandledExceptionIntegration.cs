@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Sentry.Extensibility;
 
 namespace Sentry.Integrations
 {
@@ -79,15 +80,22 @@ namespace Sentry.Integrations
 
         private void AttachEventHandler()
         {
-            // Reflection equivalent of:
-            //   Microsoft.UI.Xaml.Application.Current.UnhandledException += WinUIUnhandledExceptionHandler;
-            //
-            EventHandler handler = WinUIUnhandledExceptionHandler!;
-            var applicationType = WinUIAssembly!.GetType("Microsoft.UI.Xaml.Application")!;
-            var application = applicationType.GetProperty("Current")!.GetValue(null);
-            var eventInfo = applicationType.GetEvent("UnhandledException")!;
-            var typedHandler = Delegate.CreateDelegate(eventInfo.EventHandlerType!, handler.Target, handler.Method);
-            eventInfo.AddEventHandler(application, typedHandler);
+            try
+            {
+                // Reflection equivalent of:
+                //   Microsoft.UI.Xaml.Application.Current.UnhandledException += WinUIUnhandledExceptionHandler;
+                //
+                EventHandler handler = WinUIUnhandledExceptionHandler!;
+                var applicationType = WinUIAssembly!.GetType("Microsoft.UI.Xaml.Application")!;
+                var application = applicationType.GetProperty("Current")!.GetValue(null);
+                var eventInfo = applicationType.GetEvent("UnhandledException")!;
+                var typedHandler = Delegate.CreateDelegate(eventInfo.EventHandlerType!, handler.Target, handler.Method);
+                eventInfo.AddEventHandler(application, typedHandler);
+            }
+            catch (Exception ex)
+            {
+                _options.LogError("Could not attach WinUIUnhandledExceptionHandler.", ex);
+            }
         }
 
         private void WinUIUnhandledExceptionHandler(object sender, object e)
