@@ -55,15 +55,4 @@
     />
   </Target>
 
-  <!--
-    Workaround for https://github.com/dotnet/msbuild/issues/4584 needed when packing in 6.0.3xx
-    Remove when 6.0.4xx is released, and bump SDK version global.json.
-  -->
-  <Target Name="RemoveInvalidManifest" AfterTargets="BuiltProjectOutputGroup">
-    <ItemGroup Condition="!Exists('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)')">
-      <BuiltProjectOutputGroupOutput Remove="$([System.IO.Path]::GetFullPath('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)'))" />
-    </ItemGroup>
-  </Target>
-
-
 </Project>
