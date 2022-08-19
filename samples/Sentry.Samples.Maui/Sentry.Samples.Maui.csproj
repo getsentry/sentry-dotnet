@@ -19,7 +19,7 @@
     <ApplicationTitle>Sentry.Samples.Maui</ApplicationTitle>
 
     <!-- App Identifier -->
-    <ApplicationId>io.sentry.samples.maui</ApplicationId>
+    <ApplicationId>io.sentry.dotnet.samples.maui</ApplicationId>
     <ApplicationIdGuid>52a4f672-a7ff-471e-bc74-fd81d6e28e53</ApplicationIdGuid>
 
     <!-- Versions -->
