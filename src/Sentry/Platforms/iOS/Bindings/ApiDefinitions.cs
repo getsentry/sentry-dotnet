@@ -64,7 +64,7 @@ interface Constants
 // delegate void SentryOnAppStartMeasurementAvailable ([NullAllowed] SentryAppStartMeasurement arg0);
 
 // @interface PrivateSentrySDKOnly : NSObject
-[BaseType (typeof(NSObject))]
+[BaseType (typeof(NSObject), Name="PrivateSentrySDKOnly")]
 [Internal]
 interface PrivateSentrySdkOnly
 {
@@ -1389,7 +1389,7 @@ interface SentryNSError : SentrySerializable
 }
 
 // @interface SentrySDK : NSObject
-[BaseType (typeof(NSObject))]
+[BaseType (typeof(NSObject), Name="SentrySDK")]
 [DisableDefaultCtor]
 [Internal]
 interface SentrySdk
