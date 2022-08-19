@@ -133,13 +133,6 @@ namespace Sentry.Extensibility
         /// <summary>
         /// No-Op.
         /// </summary>
-        public void CaptureTransaction(Transaction transaction, Scope? scope = null)
-        {
-        }
-
-        /// <summary>
-        /// No-Op.
-        /// </summary>
         public void CaptureSession(SessionUpdate sessionUpdate)
         {
         }

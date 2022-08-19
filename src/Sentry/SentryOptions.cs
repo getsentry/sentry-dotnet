@@ -97,9 +97,19 @@ namespace Sentry
         internal ISentryEventProcessor[]? EventProcessors { get; set; }
 
         /// <summary>
+        /// A list of event processors
+        /// </summary>
+        internal ISentryTransactionProcessor[]? TransactionProcessors { get; set; }
+
+        /// <summary>
         /// A list of providers of <see cref="ISentryEventProcessor"/>
         /// </summary>
         internal Func<IEnumerable<ISentryEventProcessor>>[]? EventProcessorsProviders { get; set; }
+
+        /// <summary>
+        /// A list of providers of <see cref="ISentryEventProcessor"/>
+        /// </summary>
+        internal Func<IEnumerable<ISentryTransactionProcessor>>[]? TransactionProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
@@ -682,6 +692,10 @@ namespace Sentry
 
             EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
+            };
+
+            TransactionProcessorsProviders = new Func<IEnumerable<ISentryTransactionProcessor>>[] {
+                () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
             };
 
             ExceptionProcessorsProviders = new Func<IEnumerable<ISentryEventExceptionProcessor>>[] {

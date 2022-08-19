@@ -93,12 +93,6 @@ namespace Sentry
         /// <inheritdoc />
         public void CaptureTransaction(Transaction transaction)
         {
-            CaptureTransaction(transaction, null);
-        }
-
-        /// <inheritdoc />
-        public void CaptureTransaction(Transaction transaction, Scope? scope = null)
-        {
             if (transaction.SpanId.Equals(SpanId.Empty))
             {
                 _options.LogWarning("Transaction dropped due to empty id.");
@@ -120,21 +114,6 @@ namespace Sentry
                 _options.LogWarning("Capturing a transaction which has not been finished. " +
                                     "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
                                     "to properly finalize the transaction and send it to Sentry.");
-            }
-
-
-            if (scope != null)
-            {
-                foreach (var processor in scope.GetAllEventProcessors())
-                {
-                    processor.Process(transaction);
-                    if (transaction.IsSampled == false)
-                    {
-                        _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
-                        _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                        break;
-                    }
-                }
             }
 
 

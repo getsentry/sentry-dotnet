@@ -1,0 +1,77 @@
+[
+  {
+    Header: {
+      event_id: Guid_1,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Message: {
+              Message: TheMessage
+            },
+            Platform: csharp,
+            SentryExceptions: [],
+            SentryThreads: [],
+            Level: info,
+            TransactionName: my transaction,
+            Request: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
+            User: {},
+            Environment: production
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      event_id: Guid_2,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: transaction
+        },
+        Payload: {
+          Source: {
+            Name: my transaction,
+            Platform: csharp,
+            Operation: my operation,
+            Description: ,
+            Status: UnknownError,
+            IsSampled: true,
+            Request: {},
+            Contexts: {
+              trace: {
+                Operation: my operation,
+                Description: ,
+                Status: UnknownError,
+                IsSampled: true
+              },
+              transactionKey: transactionValue
+            },
+            User: {},
+            Environment: production,
+            IsFinished: true
+          }
+        }
+      }
+    ]
+  }
+]

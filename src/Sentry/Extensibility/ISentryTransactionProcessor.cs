@@ -9,6 +9,6 @@
         /// Process the <see cref="Transaction"/>
         /// </summary>
         /// <param name="transaction">The Transaction to process</param>
-        void Process(Transaction transaction){}
+        void Process(Transaction transaction);
     }
 }

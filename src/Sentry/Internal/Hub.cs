@@ -338,22 +338,32 @@ namespace Sentry.Internal
 
         public void CaptureTransaction(Transaction transaction)
         {
-            CaptureTransaction(transaction, null);
-        }
-
-        public void CaptureTransaction(Transaction transaction, Scope? scope = null)
-        {
             try
             {
                 // Apply scope data
                 var currentScope = ScopeManager.GetCurrent();
-                currentScope.Key.Evaluate();
-                currentScope.Key.Apply(transaction);
+                var scope = currentScope.Key;
+                scope.Evaluate();
+                scope.Apply(transaction);
 
                 // Apply enricher
                 _enricher.Apply(transaction);
 
-                currentScope.Value.CaptureTransaction(transaction, scope);
+                if (transaction.IsSampled != false)
+                {
+                    foreach (var processor in scope.GetAllTransactionProcessors())
+                    {
+                        processor.Process(transaction);
+                        if (transaction.IsSampled == false)
+                        {
+                            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.TransactionProcessor, DataCategory.Error);
+                            _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
+                            return;
+                        }
+                    }
+                }
+
+                currentScope.Value.CaptureTransaction(transaction);
             }
             catch (Exception e)
             {
