@@ -100,9 +100,19 @@ namespace Sentry.Integrations
 
         private void WinUIUnhandledExceptionHandler(object sender, object e)
         {
-            var eventArgsType = e.GetType();
-            var handled = (bool)eventArgsType.GetProperty("Handled")!.GetValue(e)!;
-            var exception = (Exception)eventArgsType.GetProperty("Exception")!.GetValue(e)!;
+            bool handled;
+            Exception exception;
+            try
+            {
+                var eventArgsType = e.GetType();
+                handled = (bool)eventArgsType.GetProperty("Handled")!.GetValue(e)!;
+                exception = (Exception)eventArgsType.GetProperty("Exception")!.GetValue(e)!;
+            }
+            catch (Exception ex)
+            {
+                _options.LogError("Could not get exception details in WinUIUnhandledExceptionHandler.", ex);
+                return;
+            }
 
             // Second part of workaround for https://github.com/microsoft/microsoft-ui-xaml/issues/7160
             if (exception.StackTrace is null)
