@@ -1,5 +1,6 @@
 #if NET5_0_OR_GREATER
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -31,6 +32,8 @@ namespace Sentry.Integrations
     internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
     {
         private static readonly Assembly? WinUIAssembly = GetWinUIAssembly();
+
+        private static readonly byte[] WinUIPublicKeyToken = Convert.FromHexString("de31ebe4ad15742b");
 
         private Exception? _lastFirstChanceException;
         private IHub _hub = null!;
@@ -67,16 +70,10 @@ namespace Sentry.Integrations
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             return Array.Find(assemblies, x =>
             {
-                // first check by name
+                // check by name and public key token
                 var assemblyName = x.GetName();
-                if (assemblyName.Name != "Microsoft.WinUI")
-                {
-                    return false;
-                }
-
-                // check the public key token also
-                var token = assemblyName.GetPublicKeyToken();
-                return token != null && string.Equals(Convert.ToHexString(token), "de31ebe4ad15742b", StringComparison.OrdinalIgnoreCase);
+                return assemblyName.Name == "Microsoft.WinUI" &&
+                       assemblyName.GetPublicKeyToken()?.SequenceEqual(WinUIPublicKeyToken) is true;
             });
         }
 
