@@ -1,14 +1,16 @@
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Graphics device unit.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#gpu-context"/>
-    public sealed class Gpu : IJsonSerializable
+    public sealed class Gpu : IJsonSerializable, ICloneable<Gpu>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -122,7 +124,9 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        internal Gpu Clone()
+        internal Gpu Clone() => ((ICloneable<Gpu>)this).Clone();
+
+        Gpu ICloneable<Gpu>.Clone()
             => new()
             {
                 Name = Name,

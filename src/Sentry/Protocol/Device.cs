@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -10,7 +11,7 @@ namespace Sentry.Protocol
     /// Describes the device that caused the event. This is most appropriate for mobile applications.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class Device : IJsonSerializable
+    public sealed class Device : IJsonSerializable, ICloneable<Device>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -245,7 +246,9 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        internal Device Clone()
+        internal Device Clone() => ((ICloneable<Device>)this).Clone();
+
+        Device ICloneable<Device>.Clone()
             => new()
             {
                 Name = Name,

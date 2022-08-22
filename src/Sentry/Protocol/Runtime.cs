@@ -1,9 +1,10 @@
-// ReSharper disable once CheckNamespace
-
+using System;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
@@ -13,7 +14,7 @@ namespace Sentry.Protocol
     /// Typically this context is used multiple times if multiple runtimes are involved (for instance if you have a JavaScript application running on top of JVM)
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class Runtime : IJsonSerializable
+    public sealed class Runtime : IJsonSerializable, ICloneable<Runtime>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -55,7 +56,9 @@ namespace Sentry.Protocol
         /// </summary>
         // NOTE: This appears to have been public by mistake
         [Obsolete("This method will be made internal in a future version.")]
-        public Runtime Clone()
+        public Runtime Clone() => ((ICloneable<Runtime>)this).Clone();
+
+        Runtime ICloneable<Runtime>.Clone()
             => new()
             {
                 Name = Name,

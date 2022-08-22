@@ -1,9 +1,9 @@
-// ReSharper disable once CheckNamespace
-
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
@@ -12,7 +12,7 @@ namespace Sentry.Protocol
     /// web request that triggered the event.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class Browser : IJsonSerializable
+    public sealed class Browser : IJsonSerializable, ICloneable<Browser>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -32,7 +32,9 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance
         /// </summary>
-        internal Browser Clone()
+        internal Browser Clone() => ((ICloneable<Browser>)this).Clone();
+
+        Browser ICloneable<Browser>.Clone()
             => new()
             {
                 Name = Name,

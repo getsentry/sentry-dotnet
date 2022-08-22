@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -14,7 +15,7 @@ namespace Sentry.Protocol
     /// was running and carries meta data about the current session.
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class App : IJsonSerializable
+    public sealed class App : IJsonSerializable, ICloneable<App>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -59,7 +60,9 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        internal App Clone()
+        internal App Clone() => ((ICloneable<App>)this).Clone();
+
+        App ICloneable<App>.Clone()
             => new()
             {
                 Identifier = Identifier,

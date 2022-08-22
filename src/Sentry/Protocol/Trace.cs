@@ -1,13 +1,16 @@
+using System;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Trace context data.
     /// </summary>
-    public class Trace : ITraceContext, IJsonSerializable
+    public class Trace : ITraceContext, IJsonSerializable, ICloneable<Trace>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -38,7 +41,9 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        internal Trace Clone() => new()
+        internal Trace Clone() => ((ICloneable<Trace>)this).Clone();
+
+        Trace ICloneable<Trace>.Clone() => new()
         {
             SpanId = SpanId,
             ParentSpanId = ParentSpanId,

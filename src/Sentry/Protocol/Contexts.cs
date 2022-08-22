@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
@@ -76,17 +77,7 @@ namespace Sentry
         {
             foreach (var kv in this)
             {
-                var value = kv.Key switch
-                {
-                    App.Type when kv.Value is App app => app.Clone(),
-                    Browser.Type when kv.Value is Browser browser => browser.Clone(),
-                    Device.Type when kv.Value is Device device => device.Clone(),
-                    OperatingSystem.Type when kv.Value is OperatingSystem os => os.Clone(),
-                    Runtime.Type when kv.Value is Runtime runtime => runtime.Clone(),
-                    Gpu.Type when kv.Value is Gpu gpu => gpu.Clone(),
-                    _ => kv.Value
-                };
-
+                var value = kv.Value is ICloneable<object> cloneable ? cloneable.Clone() : kv.Value;
                 to.TryAdd(kv.Key, value);
             }
         }

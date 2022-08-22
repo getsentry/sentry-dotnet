@@ -1,9 +1,9 @@
-// ReSharper disable once CheckNamespace
-
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
@@ -13,7 +13,7 @@ namespace Sentry.Protocol
     /// Defines the operating system that caused the event. In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#os-context"/>
-    public sealed class OperatingSystem : IJsonSerializable
+    public sealed class OperatingSystem : IJsonSerializable, ICloneable<OperatingSystem>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -58,7 +58,9 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance
         /// </summary>
-        internal OperatingSystem Clone()
+        internal OperatingSystem Clone() => ((ICloneable<OperatingSystem>)this).Clone();
+
+        OperatingSystem ICloneable<OperatingSystem>.Clone()
             => new()
             {
                 Name = Name,
