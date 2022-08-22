@@ -14,6 +14,7 @@
 - Add `Distribution` properties ([#1851](https://github.com/getsentry/sentry-dotnet/pull/1851))
 - Add and configure options for the iOS SDK ([#1849](https://github.com/getsentry/sentry-dotnet/pull/1849))
 - Set default `Release` and `Distribution` for iOS and Android ([#1856](https://github.com/getsentry/sentry-dotnet/pull/1856))
+- Apply WinUI 3 exception handler in Sentry core ([#1863](https://github.com/getsentry/sentry-dotnet/pull/1863))
 
 ### Fixes
 
@@ -21,6 +22,7 @@
 - Fix logging loop with Serilog sentry ([#1828](https://github.com/getsentry/sentry-dotnet/pull/1828))
 - Skip attachment if stream is empty ([#1854](https://github.com/getsentry/sentry-dotnet/pull/1854))
 - Allow some mobile options to be modified from defaults ([#1857](https://github.com/getsentry/sentry-dotnet/pull/1857))
+- Fix environment name casing issue ([#1861](https://github.com/getsentry/sentry-dotnet/pull/1861))
 
 ## 3.20.1
 

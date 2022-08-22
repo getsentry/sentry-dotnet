@@ -1,6 +1,13 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
+
+#if NETSTANDARD2_0
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#else
+using Microsoft.Extensions.Hosting;
+#endif
 
 namespace Sentry.AspNetCore;
 
@@ -69,5 +76,52 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     {
         // Don't report Environment.UserName as the user.
         IsEnvironmentUser = false;
+    }
+
+    internal void SetEnvironment(IWebHostEnvironment hostingEnvironment)
+    {
+        // Set environment from AspNetCore hosting environment name, if not set already
+        // Note: The SettingLocator will take care of the default behavior and assignment, which takes precedence.
+        //       We only need to do anything here if nothing was found by the locator.
+        if (SettingLocator.GetEnvironment(useDefaultIfNotFound: false) is not null)
+        {
+            return;
+        }
+
+        if (AdjustStandardEnvironmentNameCasing)
+        {
+            // NOTE: Sentry prefers to have its environment setting to be all lower case.
+            //       .NET Core sets the ENV variable to 'Production' (upper case P),
+            //       'Development' (upper case D) or 'Staging' (upper case S) which conflicts with
+            //       the Sentry recommendation. As such, we'll be kind and override those values,
+            //       here ... if applicable.
+            // Assumption: The Hosting Environment is always set.
+            //             If not set by a developer, then the framework will auto set it.
+            //             Alternatively, developers might set this to a CUSTOM value, which we
+            //             need to respect (especially the case-sensitivity).
+            //             REF: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments
+
+            if (hostingEnvironment.IsProduction())
+            {
+                Environment = Internal.Constants.ProductionEnvironmentSetting;
+            }
+            else if (hostingEnvironment.IsStaging())
+            {
+                Environment = Internal.Constants.StagingEnvironmentSetting;
+            }
+            else if (hostingEnvironment.IsDevelopment())
+            {
+                Environment = Internal.Constants.DevelopmentEnvironmentSetting;
+            }
+            else
+            {
+                // Use the value set by the developer.
+                Environment = hostingEnvironment.EnvironmentName;
+            }
+        }
+        else
+        {
+            Environment = hostingEnvironment.EnvironmentName;
+        }
     }
 }

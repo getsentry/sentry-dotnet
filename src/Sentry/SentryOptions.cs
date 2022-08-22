@@ -732,6 +732,13 @@ namespace Sentry
 #endif
             };
 
+#if NET5_0_OR_GREATER
+            if (WinUIUnhandledExceptionIntegration.IsApplicable)
+            {
+                this.AddIntegration(new WinUIUnhandledExceptionIntegration());
+            }
+#endif
+
 #if ANDROID
             Android = new AndroidOptions(this);
 #elif __IOS__

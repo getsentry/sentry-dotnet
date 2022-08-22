@@ -52,6 +52,11 @@ public partial class MainPage
         SentrySdk.CauseCrash(CrashType.Managed);
     }
 
+    private void OnBackgroundThreadUnhandledExceptionClicked(object sender, EventArgs e)
+    {
+        SentrySdk.CauseCrash(CrashType.ManagedBackgroundThread);
+    }
+
     private void OnCapturedExceptionClicked(object sender, EventArgs e)
     {
         try
