@@ -125,7 +125,7 @@ namespace Sentry
 
             foreach (var (name, value) in json.EnumerateObject())
             {
-                var type = value.GetPropertyOrNull("type")?.GetString();
+                var type = value.GetPropertyOrNull("type")?.GetString() ?? name;
 
                 // Handle known context types
                 if (string.Equals(type, App.Type, StringComparison.OrdinalIgnoreCase))
