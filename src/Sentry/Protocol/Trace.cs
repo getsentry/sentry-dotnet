@@ -1,16 +1,14 @@
-using System;
 using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Trace context data.
     /// </summary>
-    public class Trace : ITraceContext, IJsonSerializable, ICloneable<Trace>
+    public class Trace : ITraceContext, IJsonSerializable, ICloneable<Trace>, IUpdatable<Trace>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -52,6 +50,30 @@ namespace Sentry.Protocol
             Status = Status,
             IsSampled = IsSampled
         };
+
+        /// <summary>
+        /// Updates this instance with data from the properties in the <paramref name="source"/>,
+        /// unless there is already a value in the existing property.
+        /// </summary>
+        internal void UpdateFrom(Trace source) => ((IUpdatable<Trace>)this).UpdateFrom(source);
+
+        void IUpdatable.UpdateFrom(object source)
+        {
+            if (source is Trace trace)
+            {
+                ((IUpdatable<Trace>)this).UpdateFrom(trace);
+            }
+        }
+
+        void IUpdatable<Trace>.UpdateFrom(Trace source)
+        {
+            SpanId = SpanId == default ? source.SpanId : SpanId;
+            ParentSpanId ??= source.ParentSpanId;
+            TraceId = TraceId == default ? source.TraceId : TraceId;
+            Operation = string.IsNullOrWhiteSpace(Operation) ? source.Operation : Operation;
+            Status ??= source.Status;
+            IsSampled ??= source.IsSampled;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)

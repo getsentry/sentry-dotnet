@@ -3,14 +3,13 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Graphics device unit.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#gpu-context"/>
-    public sealed class Gpu : IJsonSerializable, ICloneable<Gpu>
+    public sealed class Gpu : IJsonSerializable, ICloneable<Gpu>, IUpdatable<Gpu>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -145,6 +144,39 @@ namespace Sentry.Protocol
                 SupportsComputeShaders = SupportsComputeShaders,
                 SupportsGeometryShaders = SupportsGeometryShaders
             };
+
+        /// <summary>
+        /// Updates this instance with data from the properties in the <paramref name="source"/>,
+        /// unless there is already a value in the existing property.
+        /// </summary>
+        internal void UpdateFrom(Gpu source) => ((IUpdatable<Gpu>)this).UpdateFrom(source);
+
+        void IUpdatable.UpdateFrom(object source)
+        {
+            if (source is Gpu gpu)
+            {
+                ((IUpdatable<Gpu>)this).UpdateFrom(gpu);
+            }
+        }
+
+        void IUpdatable<Gpu>.UpdateFrom(Gpu source)
+        {
+            Name ??= source.Name;
+            Id ??= source.Id;
+            VendorId ??= source.VendorId;
+            VendorName ??= source.VendorName;
+            MemorySize ??= source.MemorySize;
+            ApiType ??= source.ApiType;
+            MultiThreadedRendering ??= source.MultiThreadedRendering;
+            Version ??= source.Version;
+            NpotSupport ??= source.NpotSupport;
+            MaxTextureSize ??= source.MaxTextureSize;
+            GraphicsShaderLevel ??= source.GraphicsShaderLevel;
+            SupportsDrawCallInstancing ??= source.SupportsDrawCallInstancing;
+            SupportsRayTracing ??= source.SupportsRayTracing;
+            SupportsComputeShaders ??= source.SupportsComputeShaders;
+            SupportsGeometryShaders ??= source.SupportsGeometryShaders;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)

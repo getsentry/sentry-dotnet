@@ -4,14 +4,13 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
     /// Describes the device that caused the event. This is most appropriate for mobile applications.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class Device : IJsonSerializable, ICloneable<Device>
+    public sealed class Device : IJsonSerializable, ICloneable<Device>, IUpdatable<Device>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -288,6 +287,60 @@ namespace Sentry.Protocol
                 SupportsAudio = SupportsAudio,
                 SupportsLocationService = SupportsLocationService
             };
+
+        /// <summary>
+        /// Updates this instance with data from the properties in the <paramref name="source"/>,
+        /// unless there is already a value in the existing property.
+        /// </summary>
+        internal void UpdateFrom(Device source) => ((IUpdatable<Device>)this).UpdateFrom(source);
+
+        void IUpdatable.UpdateFrom(object source)
+        {
+            if (source is Device device)
+            {
+                ((IUpdatable<Device>)this).UpdateFrom(device);
+            }
+        }
+
+        void IUpdatable<Device>.UpdateFrom(Device source)
+        {
+            Name ??= source.Name;
+            Manufacturer ??= source.Manufacturer;
+            Brand ??= source.Brand;
+            Architecture ??= source.Architecture;
+            BatteryLevel ??= source.BatteryLevel;
+            IsCharging ??= source.IsCharging;
+            IsOnline ??= source.IsOnline;
+            BootTime ??= source.BootTime;
+            ExternalFreeStorage ??= source.ExternalFreeStorage;
+            ExternalStorageSize ??= source.ExternalStorageSize;
+            ScreenResolution ??= source.ScreenResolution;
+            ScreenDensity ??= source.ScreenDensity;
+            ScreenDpi ??= source.ScreenDpi;
+            Family ??= source.Family;
+            FreeMemory ??= source.FreeMemory;
+            FreeStorage ??= source.FreeStorage;
+            MemorySize ??= source.MemorySize;
+            Model ??= source.Model;
+            ModelId ??= source.ModelId;
+            Orientation ??= source.Orientation;
+            Simulator ??= source.Simulator;
+            StorageSize ??= source.StorageSize;
+            Timezone ??= source.Timezone;
+            UsableMemory ??= source.UsableMemory;
+            LowMemory ??= source.LowMemory;
+            ProcessorCount ??= source.ProcessorCount;
+            CpuDescription ??= source.CpuDescription;
+            ProcessorFrequency ??= source.ProcessorFrequency;
+            SupportsVibration ??= source.SupportsVibration;
+            DeviceType ??= source.DeviceType;
+            BatteryStatus ??= source.BatteryStatus;
+            DeviceUniqueIdentifier ??= source.DeviceUniqueIdentifier;
+            SupportsAccelerometer ??= source.SupportsAccelerometer;
+            SupportsGyroscope ??= source.SupportsGyroscope;
+            SupportsAudio ??= source.SupportsAudio;
+            SupportsLocationService ??= source.SupportsLocationService;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)

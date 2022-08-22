@@ -4,7 +4,6 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
@@ -14,7 +13,7 @@ namespace Sentry.Protocol
     /// Typically this context is used multiple times if multiple runtimes are involved (for instance if you have a JavaScript application running on top of JVM)
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class Runtime : IJsonSerializable, ICloneable<Runtime>
+    public sealed class Runtime : IJsonSerializable, ICloneable<Runtime>, IUpdatable<Runtime>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -67,6 +66,29 @@ namespace Sentry.Protocol
                 Build = Build,
                 RawDescription = RawDescription
             };
+
+        /// <summary>
+        /// Updates this instance with data from the properties in the <paramref name="source"/>,
+        /// unless there is already a value in the existing property.
+        /// </summary>
+        internal void UpdateFrom(Runtime source) => ((IUpdatable<Runtime>)this).UpdateFrom(source);
+
+        void IUpdatable.UpdateFrom(object source)
+        {
+            if (source is Runtime runtime)
+            {
+                ((IUpdatable<Runtime>)this).UpdateFrom(runtime);
+            }
+        }
+
+        void IUpdatable<Runtime>.UpdateFrom(Runtime source)
+        {
+            Name ??= source.Name;
+            Version ??= source.Version;
+            Identifier ??= source.Identifier;
+            Build ??= source.Build;
+            RawDescription ??= source.RawDescription;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)

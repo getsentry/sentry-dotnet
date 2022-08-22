@@ -4,7 +4,6 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
@@ -15,7 +14,7 @@ namespace Sentry.Protocol
     /// was running and carries meta data about the current session.
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class App : IJsonSerializable, ICloneable<App>
+    public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -73,6 +72,31 @@ namespace Sentry.Protocol
                 Version = Version,
                 Build = Build
             };
+
+        /// <summary>
+        /// Updates this instance with data from the properties in the <paramref name="source"/>,
+        /// unless there is already a value in the existing property.
+        /// </summary>
+        internal void UpdateFrom(App source) => ((IUpdatable<App>)this).UpdateFrom(source);
+
+        void IUpdatable.UpdateFrom(object source)
+        {
+            if (source is App app)
+            {
+                ((IUpdatable<App>)this).UpdateFrom(app);
+            }
+        }
+
+        void IUpdatable<App>.UpdateFrom(App source)
+        {
+            Identifier ??= source.Identifier;
+            StartTime ??= source.StartTime;
+            Hash ??= source.Hash;
+            BuildType ??= source.BuildType;
+            Name ??= source.Name;
+            Version ??= source.Version;
+            Build ??= source.Build;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
