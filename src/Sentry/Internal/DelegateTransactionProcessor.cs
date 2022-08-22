@@ -12,9 +12,10 @@ namespace Sentry.Internal
             _action = action;
         }
 
-        public void Process(Transaction transaction)
+        public Transaction Process(Transaction transaction)
         {
             _action(transaction);
+            return transaction;
         }
     }
 }

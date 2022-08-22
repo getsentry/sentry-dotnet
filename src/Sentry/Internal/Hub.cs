@@ -349,12 +349,13 @@ namespace Sentry.Internal
                 // Apply enricher
                 _enricher.Apply(transaction);
 
+                var processedTransaction = transaction;
                 if (transaction.IsSampled != false)
                 {
                     foreach (var processor in scope.GetAllTransactionProcessors())
                     {
-                        processor.Process(transaction);
-                        if (transaction.IsSampled == false)
+                        processedTransaction = processor.Process(transaction);
+                        if (processedTransaction == null)
                         {
                             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
                             _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
@@ -363,7 +364,7 @@ namespace Sentry.Internal
                     }
                 }
 
-                currentScope.Value.CaptureTransaction(transaction);
+                currentScope.Value.CaptureTransaction(processedTransaction);
             }
             catch (Exception e)
             {

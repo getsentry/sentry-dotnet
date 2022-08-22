@@ -1073,7 +1073,7 @@ namespace Sentry.Extensibility
     }
     public interface ISentryTransactionProcessor
     {
-        void Process(Sentry.Transaction transaction);
+        Sentry.Transaction? Process(Sentry.Transaction transaction);
     }
     public interface ITransport
     {

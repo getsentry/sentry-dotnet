@@ -26,8 +26,11 @@ public class TransactionProcessorTests
 
     public class TheProcessor : ISentryTransactionProcessor
     {
-        public void Process(Transaction transaction) =>
+        public Transaction Process(Transaction transaction)
+        {
             transaction.Contexts["key"] = "value";
+            return transaction;
+        }
     }
 
     [Fact]
@@ -53,8 +56,8 @@ public class TransactionProcessorTests
 
     public class DiscardProcessor : ISentryTransactionProcessor
     {
-        public void Process(Transaction transaction) =>
-            transaction.IsSampled = false;
+        public Transaction Process(Transaction transaction) =>
+            null;
     }
 
     private static SentryOptions Options(RecordingTransport transport) =>
