@@ -41,7 +41,9 @@ public class RuntimeTests
             Version = "version"
         };
 
+#pragma warning disable CS0618
         var clone = sut.Clone();
+#pragma warning restore CS0618
 
         Assert.Equal(sut.Name, clone.Name);
         Assert.Equal(sut.RawDescription, clone.RawDescription);

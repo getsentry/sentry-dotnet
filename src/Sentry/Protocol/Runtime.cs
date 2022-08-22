@@ -53,6 +53,8 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance
         /// </summary>
+        // NOTE: This appears to have been public by mistake
+        [Obsolete("This method will be made internal in a future version.")]
         public Runtime Clone()
             => new()
             {
