@@ -99,7 +99,7 @@ namespace Sentry
         /// <summary>
         /// A list of event processors
         /// </summary>
-        internal ISentryTransactionProcessor[]? TransactionProcessors { get; set; }
+        internal List<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventProcessor"/>

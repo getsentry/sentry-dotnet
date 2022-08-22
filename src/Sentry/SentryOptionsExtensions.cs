@@ -216,9 +216,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processor">The transaction processor.</param>
         public static void AddTransactionProcessor(this SentryOptions options, ISentryTransactionProcessor processor)
-            => options.TransactionProcessors = options.TransactionProcessors != null
-                ? options.TransactionProcessors.Concat(new[] { processor }).ToArray()
-                : new[] { processor };
+        {
+            if (options.TransactionProcessors == null)
+            {
+                options.TransactionProcessors = new() {processor};
+            }
+            else
+            {
+                options.TransactionProcessors.Add(processor);
+            }
+        }
 
         /// <summary>
         /// Adds transaction processors which are invoked when creating a <see cref="Transaction"/>.
@@ -226,9 +233,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processors">The transaction processors.</param>
         public static void AddTransactionProcessors(this SentryOptions options, IEnumerable<ISentryTransactionProcessor> processors)
-            => options.TransactionProcessors = options.TransactionProcessors != null
-                ? options.TransactionProcessors.Concat(processors).ToArray()
-                : processors.ToArray();
+        {
+            if (options.TransactionProcessors == null)
+            {
+                options.TransactionProcessors = processors.ToList();
+            }
+            else
+            {
+                options.TransactionProcessors.AddRange(processors);
+            }
+        }
 
         /// <summary>
         /// Adds an transaction processor provider which is invoked when creating a <see cref="Transaction"/>.
