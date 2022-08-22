@@ -356,7 +356,7 @@ namespace Sentry.Internal
                         processor.Process(transaction);
                         if (transaction.IsSampled == false)
                         {
-                            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.TransactionProcessor, DataCategory.Error);
+                            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
                             _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                             return;
                         }
