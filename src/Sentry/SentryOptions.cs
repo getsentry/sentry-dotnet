@@ -776,8 +776,6 @@ namespace Sentry
             {
                 "Sentry.Samples."
             };
-#else
-            InAppInclude = Array.Empty<string>();
 #endif
         }
     }
