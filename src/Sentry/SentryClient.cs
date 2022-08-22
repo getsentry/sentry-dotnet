@@ -156,7 +156,7 @@ namespace Sentry
                 }
             }
 
-            if (@event.Exception != null && _options.ExceptionFilters?.Length > 0)
+            if (@event.Exception != null && _options.ExceptionFilters?.Count > 0)
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
