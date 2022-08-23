@@ -19,6 +19,14 @@ runs:
         dotnet-version: 2.1.818
         # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
 
+    - if: ${{ runner.os == 'Windows' }}
+      name: Use GNU tar on Windows
+      # See https://github.com/actions/cache/issues/752#issuecomment-1222415717
+      shell: cmd
+      run: |
+        echo "Adding GNU tar to PATH"
+        echo C:\Program Files\Git\usr\bin>>"%GITHUB_PATH%"
+
     - name: Dependency Caching
       uses: actions/cache@v3
       with:
