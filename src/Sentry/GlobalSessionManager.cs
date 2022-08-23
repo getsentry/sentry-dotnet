@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
@@ -333,7 +334,7 @@ namespace Sentry
             var distinctId = TryGetInstallationId();
 
             // Create new session
-            var session = new Session(distinctId, release, environment);
+            var session = new Session(distinctId, release, environment, RuntimeInformation.OSDescription);
 
             // Set new session and check whether we ended up overwriting an active one in the process
             var previousSession = Interlocked.Exchange(ref _currentSession, session);

@@ -61,6 +61,11 @@ namespace Sentry
         public SessionEndStatus? EndStatus { get; }
 
         /// <summary>
+        /// OS
+        /// </summary>
+        public string? OperatingSystem { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
         /// </summary>
         public SessionUpdate(
@@ -71,6 +76,7 @@ namespace Sentry
             string? environment,
             string? ipAddress,
             string? userAgent,
+            string? operatingSystem,
             int errorCount,
             bool isInitial,
             DateTimeOffset timestamp,
@@ -84,6 +90,7 @@ namespace Sentry
             Environment = environment;
             IpAddress = ipAddress;
             UserAgent = userAgent;
+            OperatingSystem = operatingSystem;
             ErrorCount = errorCount;
             IsInitial = isInitial;
             Timestamp = timestamp;
@@ -108,6 +115,7 @@ namespace Sentry
                 session.Environment,
                 session.IpAddress,
                 session.UserAgent,
+                session.OperatingSystem,
                 session.ErrorCount,
                 isInitial,
                 timestamp,
@@ -158,6 +166,7 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
             writer.WriteStringIfNotWhiteSpace("user_agent", UserAgent);
+            writer.WriteStringIfNotWhiteSpace("os", OperatingSystem);
             writer.WriteEndObject();
 
             writer.WriteEndObject();
@@ -175,6 +184,7 @@ namespace Sentry
             var environment = json.GetProperty("attrs").GetPropertyOrNull("environment")?.GetString();
             var ipAddress = json.GetProperty("attrs").GetPropertyOrNull("ip_address")?.GetString();
             var userAgent = json.GetProperty("attrs").GetPropertyOrNull("user_agent")?.GetString();
+            var os = json.GetProperty("attrs").GetPropertyOrNull("os")?.GetString();
             var errorCount = json.GetPropertyOrNull("errors")?.GetInt32() ?? 0;
             var isInitial = json.GetPropertyOrNull("init")?.GetBoolean() ?? false;
             var timestamp = json.GetProperty("timestamp").GetDateTimeOffset();
@@ -189,6 +199,7 @@ namespace Sentry
                 environment,
                 ipAddress,
                 userAgent,
+                os,
                 errorCount,
                 isInitial,
                 timestamp,

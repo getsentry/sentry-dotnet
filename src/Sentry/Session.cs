@@ -30,6 +30,9 @@ namespace Sentry
         /// <inheritdoc />
         public string? UserAgent { get; }
 
+        /// <inheritdoc />
+        public string? OperatingSystem { get; }
+
         private int _errorCount;
 
         /// <inheritdoc />
@@ -46,7 +49,8 @@ namespace Sentry
             string release,
             string? environment,
             string? ipAddress,
-            string? userAgent)
+            string? userAgent,
+            string? operatingSystem)
         {
             Id = id;
             DistinctId = distinctId;
@@ -55,12 +59,13 @@ namespace Sentry
             Environment = environment;
             IpAddress = ipAddress;
             UserAgent = userAgent;
+            OperatingSystem = operatingSystem;
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="Session"/>.
         /// </summary>
-        public Session(string? distinctId, string release, string? environment)
+        public Session(string? distinctId, string release, string? environment, string? operatingSystem)
             : this(
                 SentryId.Create(),
                 distinctId,
@@ -68,7 +73,8 @@ namespace Sentry
                 release,
                 environment,
                 null,
-                null)
+                null,
+                operatingSystem)
         {
         }
 
