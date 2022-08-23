@@ -25,6 +25,7 @@ namespace Sentry.Internal
         internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
         internal IInternalScopeManager ScopeManager { get; }
+        internal ISessionManager SessionManager => _sessionManager;
 
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;

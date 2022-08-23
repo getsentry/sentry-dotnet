@@ -155,6 +155,11 @@ namespace Sentry
         public static bool IsEnabled { [DebuggerStepThrough] get => _hub.IsEnabled; }
 
         /// <summary>
+        /// Gets the current session.
+        /// </summary>
+        public static Session? CurrentSession => ((_hub as Hub)?.SessionManager as GlobalSessionManager)?.CurrentSession;
+
+        /// <summary>
         /// Creates a new scope that will terminate when disposed.
         /// </summary>
         /// <remarks>
