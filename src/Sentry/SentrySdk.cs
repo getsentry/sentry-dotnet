@@ -160,6 +160,20 @@ namespace Sentry
         public static Session? CurrentSession => ((_hub as Hub)?.SessionManager as GlobalSessionManager)?.CurrentSession;
 
         /// <summary>
+        /// hackweek
+        /// </summary>
+        public static SessionDetails? SessionDetails
+        {
+            set
+            {
+                if ((_hub as Hub)?.SessionManager is GlobalSessionManager mgr)
+                {
+                    mgr.SessionDetails = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Creates a new scope that will terminate when disposed.
         /// </summary>
         /// <remarks>

@@ -32,6 +32,8 @@ namespace Sentry
         // Internal for testing
         internal Session? CurrentSession => _currentSession;
 
+        internal SessionDetails? SessionDetails { get; set; }
+
         public bool IsSessionActive => _currentSession is not null;
 
         public GlobalSessionManager(
@@ -334,7 +336,7 @@ namespace Sentry
             var distinctId = TryGetInstallationId();
 
             // Create new session
-            var session = new Session(distinctId, release, environment, RuntimeInformation.OSDescription);
+            var session = new Session(distinctId, release, environment, SessionDetails);
 
             // Set new session and check whether we ended up overwriting an active one in the process
             var previousSession = Interlocked.Exchange(ref _currentSession, session);

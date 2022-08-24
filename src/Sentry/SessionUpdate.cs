@@ -6,6 +6,16 @@ using Sentry.Internal.Extensions;
 namespace Sentry
 {
     /// <summary>
+    /// Hackweek
+    /// </summary>
+    public class SessionDetails
+    {
+        public string? OsName { get; set; }
+        public string? OsNameAndVersion { get; set; }
+        public string? DeviceFamily { get; set; }
+        public string? DeviceManufacturer { get; set; }
+    }
+    /// <summary>
     /// Session update.
     /// </summary>
     // https://develop.sentry.dev/sdk/sessions/#session-update-payload
@@ -61,9 +71,9 @@ namespace Sentry
         public SessionEndStatus? EndStatus { get; }
 
         /// <summary>
-        /// OS
+        /// hackweek
         /// </summary>
-        public string? OperatingSystem { get; }
+        public SessionDetails? SessionDetails { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SessionUpdate"/>.
@@ -76,7 +86,7 @@ namespace Sentry
             string? environment,
             string? ipAddress,
             string? userAgent,
-            string? operatingSystem,
+            SessionDetails? sessionDetails,
             int errorCount,
             bool isInitial,
             DateTimeOffset timestamp,
@@ -90,7 +100,7 @@ namespace Sentry
             Environment = environment;
             IpAddress = ipAddress;
             UserAgent = userAgent;
-            OperatingSystem = operatingSystem;
+            SessionDetails = sessionDetails;
             ErrorCount = errorCount;
             IsInitial = isInitial;
             Timestamp = timestamp;
@@ -115,7 +125,7 @@ namespace Sentry
                 session.Environment,
                 session.IpAddress,
                 session.UserAgent,
-                session.OperatingSystem,
+                session.SessionDetails,
                 session.ErrorCount,
                 isInitial,
                 timestamp,
@@ -166,7 +176,13 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("environment", Environment);
             writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
             writer.WriteStringIfNotWhiteSpace("user_agent", UserAgent);
-            writer.WriteStringIfNotWhiteSpace("os", OperatingSystem);
+            if (SessionDetails is not null)
+            {
+                writer.WriteStringIfNotWhiteSpace("os", SessionDetails.OsNameAndVersion);
+                writer.WriteStringIfNotWhiteSpace("os.name", SessionDetails.OsName);
+                writer.WriteStringIfNotWhiteSpace("device.family", SessionDetails.DeviceFamily);
+                writer.WriteStringIfNotWhiteSpace("device.manufacturer", SessionDetails.DeviceManufacturer);
+            }
             writer.WriteEndObject();
 
             writer.WriteEndObject();
@@ -184,13 +200,27 @@ namespace Sentry
             var environment = json.GetProperty("attrs").GetPropertyOrNull("environment")?.GetString();
             var ipAddress = json.GetProperty("attrs").GetPropertyOrNull("ip_address")?.GetString();
             var userAgent = json.GetProperty("attrs").GetPropertyOrNull("user_agent")?.GetString();
-            var os = json.GetProperty("attrs").GetPropertyOrNull("os")?.GetString();
+            var osNameAndVersion = json.GetProperty("attrs").GetPropertyOrNull("os")?.GetString();
+            var osName = json.GetProperty("attrs").GetPropertyOrNull("os.name")?.GetString();
+            var deviceFamily = json.GetProperty("attrs").GetPropertyOrNull("device.family")?.GetString();
+            var deviceManufacturer = json.GetProperty("attrs").GetPropertyOrNull("device.manufacturer")?.GetString();
             var errorCount = json.GetPropertyOrNull("errors")?.GetInt32() ?? 0;
             var isInitial = json.GetPropertyOrNull("init")?.GetBoolean() ?? false;
             var timestamp = json.GetProperty("timestamp").GetDateTimeOffset();
             var sequenceNumber = json.GetProperty("seq").GetInt32();
             var endStatus = json.GetPropertyOrNull("status")?.GetString()?.ParseEnum<SessionEndStatus>();
 
+            SessionDetails? details = null;
+            if (deviceFamily is not null || deviceManufacturer is not null || osName is not null || osName is not null)
+            {
+                details = new SessionDetails
+                {
+                    DeviceFamily = deviceFamily,
+                    DeviceManufacturer = deviceManufacturer,
+                    OsName = osNameAndVersion,
+                    OsNameAndVersion = osName
+                };
+            }
             return new SessionUpdate(
                 id,
                 distinctId,
@@ -199,7 +229,7 @@ namespace Sentry
                 environment,
                 ipAddress,
                 userAgent,
-                os,
+                details,
                 errorCount,
                 isInitial,
                 timestamp,

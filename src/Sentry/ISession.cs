@@ -43,9 +43,9 @@ namespace Sentry
         string? UserAgent { get; }
 
         /// <summary>
-        /// OS
+        /// Hackweek
         /// </summary>
-        string? OperatingSystem { get; }
+        SessionDetails? SessionDetails { get; }
 
         /// <summary>
         /// Reported error count.
