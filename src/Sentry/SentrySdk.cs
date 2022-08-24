@@ -162,16 +162,7 @@ namespace Sentry
         /// <summary>
         /// hackweek
         /// </summary>
-        public static SessionDetails? SessionDetails
-        {
-            set
-            {
-                if ((_hub as Hub)?.SessionManager is GlobalSessionManager mgr)
-                {
-                    mgr.SessionDetails = value;
-                }
-            }
-        }
+        public static SessionDetails? SessionDetails { get; set; }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed.
