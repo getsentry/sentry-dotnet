@@ -43,6 +43,11 @@ namespace Sentry
         string? UserAgent { get; }
 
         /// <summary>
+        /// OS
+        /// </summary>
+        string? OperatingSystem { get; }
+
+        /// <summary>
         /// Reported error count.
         /// </summary>
         int ErrorCount { get; }
