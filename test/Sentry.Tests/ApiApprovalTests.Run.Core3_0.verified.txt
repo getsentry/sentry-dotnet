@@ -345,7 +345,7 @@ namespace Sentry
         public static void AddExceptionProcessor(this Sentry.Scope scope, Sentry.Extensibility.ISentryEventExceptionProcessor processor) { }
         public static void AddExceptionProcessors(this Sentry.Scope scope, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> processors) { }
         public static void AddTransactionProcessor(this Sentry.Scope scope, Sentry.Extensibility.ISentryTransactionProcessor processor) { }
-        public static void AddTransactionProcessor(this Sentry.Scope scope, System.Action<Sentry.Transaction> processor) { }
+        public static void AddTransactionProcessor(this Sentry.Scope scope, System.Func<Sentry.Transaction, Sentry.Transaction?> processor) { }
         public static void AddTransactionProcessors(this Sentry.Scope scope, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.Scope scope) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.Scope scope) { }

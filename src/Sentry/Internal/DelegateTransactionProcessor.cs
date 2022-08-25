@@ -5,17 +5,16 @@ namespace Sentry.Internal
 {
     internal class DelegateTransactionProcessor : ISentryTransactionProcessor
     {
-        private readonly Action<Transaction> _action;
+        private readonly Func<Transaction, Transaction?> _func;
 
-        public DelegateTransactionProcessor(Action<Transaction> action)
+        public DelegateTransactionProcessor(Func<Transaction, Transaction?> func)
         {
-            _action = action;
+            _func = func;
         }
 
-        public Transaction Process(Transaction transaction)
+        public Transaction? Process(Transaction transaction)
         {
-            _action(transaction);
-            return transaction;
+            return _func(transaction);
         }
     }
 }

@@ -129,7 +129,7 @@ namespace Sentry
         /// </summary>
         /// <param name="scope">The Scope to hold the processor.</param>
         /// <param name="processor">The transaction processor.</param>
-        public static void AddTransactionProcessor(this Scope scope, Action<Transaction> processor)
+        public static void AddTransactionProcessor(this Scope scope, Func<Transaction, Transaction?> processor)
             => scope.AddTransactionProcessor(new DelegateTransactionProcessor(processor));
 
         /// <summary>
