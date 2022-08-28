@@ -10,11 +10,11 @@ using Sentry.Testing;
 namespace Sentry.AspNetCore.Tests;
 
 [UsesVerify]
-public class OptionsTests
+public class PreFlightRequestTest
 {
     private readonly TestOutputDiagnosticLogger _logger;
 
-    public OptionsTests(ITestOutputHelper output)
+    public PreFlightRequestTest(ITestOutputHelper output)
     {
         _logger = new TestOutputDiagnosticLogger(output);
     }
@@ -39,6 +39,16 @@ public class OptionsTests
             .ConfigureServices(services =>
             {
                 services.AddRouting();
+                services.AddCors(options =>
+                {
+                    options.AddDefaultPolicy(
+                        builder =>
+                        {
+                            builder.AllowAnyOrigin();
+                            builder.AllowAnyHeader();
+                            builder.AllowAnyMethod();
+                        });
+                });
 
                 var controllers = services.AddControllers();
                 controllers.UseSpecificControllers(typeof(OptionsController));
@@ -47,13 +57,17 @@ public class OptionsTests
             {
                 app.UseRouting();
                 app.UseSentryTracing();
+                app.UseCors();
                 app.UseEndpoints(_ => _.MapControllers());
             }));
 
         var client = server.CreateClient();
 
         // Act
-        var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Options, "/Target");
+        var request = new HttpRequestMessage(HttpMethod.Options, "/Target");
+        request.Headers.Add("Access-Control-Request-Headers", "origin");
+        request.Headers.Add("Access-Control-Request-Method", "GET");
+        request.Headers.Add("Origin", "https://sentry.io/foo");
         var result = await client.SendAsync(request);
 
         // dispose will ultimately trigger the background worker to flush
@@ -65,17 +79,18 @@ public class OptionsTests
             .Select(x => x.Payload)
             .ToList();
 
-        await Verify(new {result, payloads})
+
+        await Verify(new { result, payloads })
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("ConnectionId", "RequestId")
-            .ScrubLinesWithReplace(_ => _.Split(new[] {" (Sentry.AspNetCore.Tests) "}, StringSplitOptions.None)[0]);
+            .ScrubLinesWithReplace(_ => _.Split(new[] { " (Sentry.AspNetCore.Tests) " }, StringSplitOptions.None)[0]);
     }
 
     [ApiController]
     [Route("Target")]
     public class OptionsController : ControllerBase
     {
-        [HttpOptions]
+        [HttpGet]
         public string Method()
         {
             SentrySdk.ConfigureScope(scope => scope.TransactionName = "TheTransaction");
