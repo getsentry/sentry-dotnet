@@ -29,8 +29,18 @@ namespace Sentry.AspNetCore.Extensions
             }
 
             var sentryRouteName = context.Features.Get<TransactionNameProvider>();
+            if (sentryRouteName?.Invoke(context) is { } transactionName)
+            {
+                return transactionName;
+            }
 
-            return sentryRouteName?.Invoke(context);
+            var pathValue = context.Request.Path.Value;
+            if (string.IsNullOrWhiteSpace(pathValue))
+            {
+                return null;
+            }
+
+            return pathValue;
         }
 
         // Internal for testing.

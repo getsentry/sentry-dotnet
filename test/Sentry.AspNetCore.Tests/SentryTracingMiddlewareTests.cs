@@ -386,7 +386,7 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         transaction.Should().NotBeNull();
-        transaction?.Name.Should().Be("Unknown Route");
+        transaction?.Name.Should().Be("GET /person/13.bmp");
     }
 }
 
