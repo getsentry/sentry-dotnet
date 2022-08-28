@@ -4,6 +4,11 @@ public class RecordingTransport : ITransport
 
     public IEnumerable<Envelope> Envelopes => _envelopes;
 
+    public IEnumerable<ISerializable> Payloads =>
+        Envelopes
+            .SelectMany(x => x.Items)
+            .Select(x => x.Payload);
+
     public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
     {
         lock (_envelopes)

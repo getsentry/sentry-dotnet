@@ -1,6 +1,6 @@
 ﻿{
   result: Hello world,
-  payloads: [
+  Payloads: [
     {
       Source: {
         Name: GET v1.1/Target,
@@ -32,14 +32,14 @@
             Category: Microsoft.AspNetCore.Hosting.Diagnostics
           },
           {
-            Message: Executing endpoint 'Sentry.AspNetCore.Tests.VersioningTests+TargetController.Method (Sentry.AspNetCore.Tests)',
+            Message: Executing endpoint 'Sentry.AspNetCore.Tests.VersioningTests+VersionController.Method (Sentry.AspNetCore.Tests)',
             Data: {
               eventId: ExecutingEndpoint
             },
             Category: Microsoft.AspNetCore.Routing.EndpointMiddleware
           },
           {
-            Message: Route matched with {action = "Method", controller = "Target"}. Executing controller action with signature System.String Method() on controller Sentry.AspNetCore.Tests.VersioningTests+TargetController (Sentry.AspNetCore.Tests).,
+            Message: Route matched with {action = "Method", controller = "Version"}. Executing controller action with signature System.String Method() on controller Sentry.AspNetCore.Tests.VersioningTests+VersionController (Sentry.AspNetCore.Tests).,
             Data: {
               eventId: ControllerActionExecuting
             },
@@ -53,14 +53,14 @@
             Category: Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor
           },
           {
-            Message: Executed action Sentry.AspNetCore.Tests.VersioningTests+TargetController.Method,
+            Message: Executed action Sentry.AspNetCore.Tests.VersioningTests+VersionController.Method,
             Data: {
               eventId: ActionExecuted
             },
             Category: Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker
           },
           {
-            Message: Executed endpoint 'Sentry.AspNetCore.Tests.VersioningTests+TargetController.Method (Sentry.AspNetCore.Tests)',
+            Message: Executed endpoint 'Sentry.AspNetCore.Tests.VersioningTests+VersionController.Method (Sentry.AspNetCore.Tests)',
             Data: {
               eventId: ExecutedEndpoint
             },
@@ -69,9 +69,9 @@
         ],
         Tags: {
           ActionId: Guid_1,
-          ActionName: Sentry.AspNetCore.Tests.VersioningTests+TargetController.Method (Sentry.AspNetCore.Tests),
+          ActionName: Sentry.AspNetCore.Tests.VersioningTests+VersionController.Method (Sentry.AspNetCore.Tests),
           route.action: Method,
-          route.controller: Target,
+          route.controller: Version,
           route.version: 1.1
         },
         IsFinished: true
