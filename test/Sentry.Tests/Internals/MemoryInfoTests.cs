@@ -1,6 +1,6 @@
-using Sentry.Testing;
-
 #if NETCOREAPP3_1_OR_GREATER
+
+using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
 
