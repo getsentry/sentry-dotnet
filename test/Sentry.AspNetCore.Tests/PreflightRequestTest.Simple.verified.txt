@@ -1,60 +1,24 @@
 ﻿{
   result: {
     Version: 1.1,
+    Status: 204 No Content,
+    Headers: {
+      Access-Control-Allow-Headers: origin,
+      Access-Control-Allow-Methods: GET,
+      Access-Control-Allow-Origin: *
+    },
     Content: {
-      Headers: []
+      Headers: {}
     },
-    StatusCode: NoContent,
-    ReasonPhrase: No Content,
-    Headers: [
-      {
-        Key: Access-Control-Allow-Origin,
-        Value: [
-          *
-        ]
-      },
-      {
-        Key: Access-Control-Allow-Headers,
-        Value: [
-          origin
-        ]
-      },
-      {
-        Key: Access-Control-Allow-Methods,
-        Value: [
-          GET
-        ]
+    Request: {
+      Method: OPTIONS,
+      Uri: http://localhost/Target,
+      Headers: {
+        Access-Control-Request-Headers: origin,
+        Access-Control-Request-Method: GET,
+        Origin: https://sentry.io/foo
       }
-    ],
-    TrailingHeaders: [],
-    RequestMessage: {
-      Version: 1.1,
-      Method: {
-        Method: OPTIONS
-      },
-      RequestUri: 'http://localhost/Target',
-      Headers: [
-        {
-          Key: Access-Control-Request-Headers,
-          Value: [
-            origin
-          ]
-        },
-        {
-          Key: Access-Control-Request-Method,
-          Value: [
-            GET
-          ]
-        },
-        {
-          Key: Origin,
-          Value: [
-            https://sentry.io/foo
-          ]
-        }
-      ]
-    },
-    IsSuccessStatusCode: true
+    }
   },
   payloads: [
     {

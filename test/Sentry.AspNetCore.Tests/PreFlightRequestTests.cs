@@ -10,11 +10,11 @@ using Sentry.Testing;
 namespace Sentry.AspNetCore.Tests;
 
 [UsesVerify]
-public class PreflighRequests
+public class PreflightRequestTest
 {
     private readonly TestOutputDiagnosticLogger _logger;
 
-    public PreflighRequests(ITestOutputHelper output)
+    public PreflightRequestTest(ITestOutputHelper output)
     {
         _logger = new TestOutputDiagnosticLogger(output);
     }
