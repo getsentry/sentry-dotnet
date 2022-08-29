@@ -1,12 +1,3 @@
-using System.ComponentModel;
-using System.IO.Compression;
-using System.Net;
-using Sentry;
-using Sentry.Serilog;
-using Serilog.Configuration;
-using Serilog.Events;
-using Serilog.Formatting;
-
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Serilog;
 

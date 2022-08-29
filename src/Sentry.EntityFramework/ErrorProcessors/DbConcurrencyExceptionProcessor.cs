@@ -1,6 +1,3 @@
-using System.Data;
-using Sentry.Extensibility;
-
 namespace Sentry.EntityFramework.ErrorProcessors;
 
 /// <summary>

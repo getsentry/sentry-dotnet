@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Sentry.Testing;
 
 namespace Sentry.Tests;
 
@@ -79,8 +80,7 @@ public class HubExtensionsTests
     public void AddBreadcrumb_AllFields_CreatesBreadcrumb()
     {
         var expectedTimestamp = DateTimeOffset.MaxValue;
-        var clock = Substitute.For<ISystemClock>();
-        _ = clock.GetUtcNow().Returns(expectedTimestamp);
+        var clock = new MockClock(expectedTimestamp);
 
         const string expectedMessage = "message";
         const string expectedType = "type";

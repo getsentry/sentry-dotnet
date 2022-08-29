@@ -128,11 +128,11 @@ namespace Sentry.Protocol.Envelopes
             writer.Flush();
         }
 
-        private async Task SerializeHeaderAsync(
+        private Task SerializeHeaderAsync(
             Stream stream,
             IDiagnosticLogger? logger,
             CancellationToken cancellationToken) =>
-            await SerializeHeaderAsync(stream, Header, logger, cancellationToken).ConfigureAwait(false);
+            SerializeHeaderAsync(stream, Header, logger, cancellationToken);
 
         private void SerializeHeader(Stream stream, IDiagnosticLogger? logger) =>
             SerializeHeader(stream, Header, logger);
@@ -262,7 +262,11 @@ namespace Sentry.Protocol.Envelopes
         public static EnvelopeItem FromAttachment(Attachment attachment)
         {
             var stream = attachment.Content.GetStream();
+            return FromAttachment(attachment, stream);
+        }
 
+        internal static EnvelopeItem FromAttachment(Attachment attachment, Stream stream)
+        {
             var attachmentType = attachment.Type switch
             {
                 AttachmentType.Minidump => "event.minidump",

@@ -53,8 +53,13 @@ public class BaseScopeTests
     {
         _sut.Contexts.App.Name = "Foo";
 
-        var expected = new Contexts();
-        expected.App.Name = "Bar";
+        var expected = new Contexts
+        {
+            App =
+            {
+                Name = "Bar"
+            }
+        };
 
         _sut.Contexts = expected;
 
@@ -82,6 +87,22 @@ public class BaseScopeTests
         var expected = "Transaction";
         _sut.TransactionName = expected;
         Assert.Same(expected, _sut.TransactionName);
+    }
+
+    [Fact]
+    public void Release_Settable()
+    {
+        var expected = "Release";
+        _sut.Release = expected;
+        Assert.Same(expected, _sut.Release);
+    }
+
+    [Fact]
+    public void Distribution_Settable()
+    {
+        var expected = "Distribution";
+        _sut.Distribution = expected;
+        Assert.Same(expected, _sut.Distribution);
     }
 
     [Fact]

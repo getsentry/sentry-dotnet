@@ -1,5 +1,6 @@
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Hosting;
+using Sentry.AspNetCore.Tests;
 using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Grpc.Tests;
@@ -35,7 +36,7 @@ public class SentryGrpcSdkTestFixture : SentrySdkTestFixture
             sentryBuilder.AddGrpc();
             sentryBuilder.AddSentryOptions(options =>
             {
-                options.Dsn = DsnSamples.ValidDsnWithSecret;
+                options.Dsn = ValidDsn;
                 options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
 
                 Configure?.Invoke(options);

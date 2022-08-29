@@ -1,8 +1,3 @@
-using System.Collections;
-using Serilog.Events;
-using Serilog.Formatting.Display;
-using Serilog.Parsing;
-
 namespace Sentry.Serilog.Tests;
 
 public class SentrySinkTests
@@ -13,12 +8,11 @@ public class SentrySinkTests
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public Func<IHub> HubAccessor { get; set; }
         public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
-        public ISystemClock Clock { get; set; } = Substitute.For<ISystemClock>();
         public Scope Scope { get; } = new(new SentryOptions());
 
         public Fixture()
         {
-            _ = Hub.IsEnabled.Returns(true);
+            Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
             Hub.ConfigureScope(Arg.Invoke(Scope));
         }
@@ -28,7 +22,7 @@ public class SentrySinkTests
                 Options,
                 HubAccessor,
                 SdkDisposeHandle,
-                Clock);
+                new MockClock());
     }
 
     private readonly Fixture _fixture = new();
@@ -45,7 +39,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Exception == expected));
     }
 
@@ -63,10 +57,10 @@ public class SentrySinkTests
         sut.Emit(evt);
 
         var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Equal(b.Message, expectedException.Message);
-        Assert.Equal(b.Timestamp, _fixture.Clock.GetUtcNow());
+        Assert.Equal(expectedException.Message, b.Message);
+        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
         Assert.Null(b.Category);
-        Assert.Equal(b.Level, expectedLevel);
+        Assert.Equal(expectedLevel, b.Level);
         Assert.Null(b.Type);
         Assert.Null(b.Data);
     }
@@ -82,8 +76,8 @@ public class SentrySinkTests
         sut.Emit(evt);
 
         var expected = typeof(SentrySink).Assembly.GetNameAndVersion();
-        _ = _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
+        _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == SentrySink.SdkName
                                                    && e.Sdk.Version == expected.Version));
     }
 
@@ -138,7 +132,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Level == sentryLevel));
     }
 
@@ -154,7 +148,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Formatted == expected));
     }
 
@@ -172,27 +166,27 @@ public class SentrySinkTests
     [Fact]
     public void Emit_DisabledHub_CaptureNotCalled()
     {
-        _ = _fixture.Hub.IsEnabled.Returns(false);
+        _fixture.Hub.IsEnabled.Returns(false);
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
             Enumerable.Empty<LogEventProperty>());
         sut.Emit(evt);
 
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
     public void Emit_EnabledHub_CaptureCalled()
     {
-        _ = _fixture.Hub.IsEnabled.Returns(true);
+        _fixture.Hub.IsEnabled.Returns(true);
         var sut = _fixture.GetSut();
 
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Error, null, MessageTemplate.Empty,
             Enumerable.Empty<LogEventProperty>());
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -207,7 +201,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1)
+        _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra["IPAddress"].ToString() == expectedIp));
     }
 
@@ -249,7 +243,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
             p.Message.Formatted == $"Test {param} log"
             && p.Message.Message == expectedMessage));
     }
@@ -261,7 +255,7 @@ public class SentrySinkTests
         const int param = 10;
 
         // Use custom TextFormatter
-        _fixture.Options.TextFormatter = new MessageTemplateTextFormatter("[{structured}] {Message}", null);
+        _fixture.Options.TextFormatter = new MessageTemplateTextFormatter("[{structured}] {Message}");
 
         var sut = _fixture.GetSut();
 
@@ -271,7 +265,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
             p.Message.Formatted == $"[{param}] Test log with formatter"
             && p.Message.Message == expectedMessage));
     }
@@ -287,7 +281,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -301,7 +295,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -344,7 +338,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
             p.Logger == expectedLogger));
     }
 
@@ -359,7 +353,7 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(p =>
             p.Logger == null));
     }
 }

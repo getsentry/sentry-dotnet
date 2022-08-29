@@ -1,0 +1,218 @@
+[
+  {
+    Header: {
+      event_id: Guid_1,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Message: {
+              Message: Debug message stored as breadcrumb.,
+              Formatted: [42] Debug message stored as breadcrumb.
+            },
+            Platform: csharp,
+            ServerName: TheMachineName,
+            SentryExceptions: [],
+            SentryThreads: [],
+            Level: debug,
+            Request: {},
+            Contexts: {},
+            User: {
+              IpAddress: {{auto}},
+              Username: TheUserName
+            },
+            Environment: production,
+            Extra: {
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 42
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      event_id: Guid_2,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Message: {
+              Message: Message with a different MyTaskId,
+              Formatted: [65] Message with a different MyTaskId
+            },
+            Platform: csharp,
+            ServerName: TheMachineName,
+            SentryExceptions: [],
+            SentryThreads: [],
+            Level: debug,
+            Request: {},
+            Contexts: {},
+            User: {
+              IpAddress: {{auto}},
+              Username: TheUserName
+            },
+            Environment: production,
+            Breadcrumbs: [
+              {
+                Message: [42] Debug message stored as breadcrumb.,
+                Level: debug
+              }
+            ],
+            Extra: {
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 65
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      event_id: Guid_3,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Message: {
+              Message: Some event that includes the previous breadcrumbs,
+              Formatted: [42] Some event that includes the previous breadcrumbs
+            },
+            Platform: csharp,
+            ServerName: TheMachineName,
+            SentryExceptions: [],
+            SentryThreads: [],
+            Level: error,
+            Request: {},
+            Contexts: {},
+            User: {
+              IpAddress: {{auto}},
+              Username: TheUserName
+            },
+            Environment: production,
+            Breadcrumbs: [
+              {
+                Message: [42] Debug message stored as breadcrumb.,
+                Level: debug
+              },
+              {
+                Message: [65] Message with a different MyTaskId,
+                Level: debug
+              }
+            ],
+            Extra: {
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 42
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      event_id: Guid_4,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Exception: {
+              $type: Exception,
+              Type: Exception,
+              Message: Exception message,
+              Data: {
+                details: Do work always throws.
+              }
+            },
+            Message: {
+              Message: Error: with exception,
+              Formatted: [42] Error: with exception
+            },
+            Platform: csharp,
+            ServerName: TheMachineName,
+            SentryExceptions: [
+              {
+                Type: System.Exception,
+                Value: Exception message,
+                Stacktrace: {
+                  Frames: [
+                    {
+                      Function: Task IntegrationTests.Simple(),
+                      InApp: true
+                    }
+                  ]
+                },
+                Mechanism: {},
+                Data: {
+                  details: Do work always throws.
+                }
+              }
+            ],
+            SentryThreads: [],
+            Level: fatal,
+            Request: {},
+            Contexts: {},
+            User: {
+              IpAddress: {{auto}},
+              Username: TheUserName
+            },
+            Environment: production,
+            Breadcrumbs: [
+              {
+                Message: [42] Debug message stored as breadcrumb.,
+                Level: debug
+              },
+              {
+                Message: [65] Message with a different MyTaskId,
+                Level: debug
+              },
+              {
+                Message: [42] Some event that includes the previous breadcrumbs,
+                Level: error
+              }
+            ],
+            Extra: {
+              Exception[0][details]: Do work always throws.,
+              inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
+              MyTaskId: 42
+            }
+          }
+        }
+      }
+    ]
+  }
+]

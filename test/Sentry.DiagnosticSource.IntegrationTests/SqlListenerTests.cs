@@ -21,7 +21,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         {
             TracesSampleRate = 1,
             Transport = transport,
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLevel = SentryLevel.Debug
         };
 
@@ -43,13 +43,9 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             transaction.Finish();
         }
 
-        var payloads = transport.Envelopes
-            .SelectMany(x => x.Items)
-            .Select(x => x.Payload)
-            .ToList();
-
-        await Verify(payloads)
+        var result = await Verify(transport.Payloads)
             .IgnoreStandardSentryMembers();
+        Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
 #endif
 
@@ -62,7 +58,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         {
             TracesSampleRate = 1,
             Transport = transport,
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             DiagnosticLevel = SentryLevel.Debug
         };
 
@@ -84,12 +80,9 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             transaction.Finish();
         }
 
-        var payloads = transport.Envelopes
-            .SelectMany(x => x.Items)
-            .Select(x => x.Payload)
-            .ToList();
-        await Verify(payloads)
+        var result = await Verify(transport.Payloads)
             .IgnoreStandardSentryMembers()
             .UniqueForRuntimeAndVersion();
+        Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
 }

@@ -209,10 +209,12 @@ namespace Sentry.Protocol
         /// </summary>
         /// <example>
         /// iOS: UIDevice.identifierForVendor (UUID)
-        /// Android: md5 of ANDROID_ID
+        /// Android: The generated Installation ID
         /// Windows Store Apps: AdvertisingManager::AdvertisingId (possible fallback to HardwareIdentification::GetPackageSpecificToken().Id)
         /// Windows Standalone: hash from the concatenation of strings taken from Computer System Hardware Classes
         /// </example>
+        /// TODO: Investigate - Do ALL platforms now return a generated installation ID?
+        ///       See https://github.com/getsentry/sentry-java/pull/1455
         public string? DeviceUniqueIdentifier { get; set; }
 
         /// <summary>

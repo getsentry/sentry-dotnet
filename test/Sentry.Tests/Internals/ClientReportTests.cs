@@ -1,9 +1,11 @@
 using System.Text.Json;
+using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
 
 public class ClientReportTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
     private readonly ClientReport _testClientReport;
     private const string TestJsonString =
         "{" +
@@ -13,8 +15,10 @@ public class ClientReportTests
         "{\"reason\":\"event_processor\",\"category\":\"security\",\"quantity\":3}]" +
         "}";
 
-    public ClientReportTests()
+    public ClientReportTests(ITestOutputHelper output)
     {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+
         var timestamp = DateTimeOffset.MaxValue;
         var discardedEvents = new Dictionary<DiscardReasonWithCategory, int>
         {
@@ -28,7 +32,7 @@ public class ClientReportTests
     [Fact]
     public void Serializes()
     {
-        var jsonString = _testClientReport.ToJsonString();
+        var jsonString = _testClientReport.ToJsonString(_testOutputLogger);
         Assert.Equal(TestJsonString, jsonString);
     }
 

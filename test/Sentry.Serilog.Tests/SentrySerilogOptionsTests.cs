@@ -1,5 +1,3 @@
-using Serilog.Events;
-
 namespace Sentry.Serilog.Tests;
 
 public class SentrySerilogOptionsTests

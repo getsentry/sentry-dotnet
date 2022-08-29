@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -11,7 +12,7 @@ namespace Sentry
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ITransactionData, IJsonSerializable
+    public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
     {
         /// <summary>
         /// Transaction's event ID.
@@ -57,6 +58,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public string? Release { get; set; }
+
+        /// <inheritdoc />
+        public string? Distribution { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
@@ -212,6 +216,7 @@ namespace Sentry
             Operation = tracer.Operation;
             Platform = tracer.Platform;
             Release = tracer.Release;
+            Distribution = tracer.GetDistribution();
             StartTimestamp = tracer.StartTimestamp;
             EndTimestamp = tracer.EndTimestamp;
             Description = tracer.Description;
@@ -261,6 +266,7 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("level", Level?.ToString().ToLowerInvariant());
             writer.WriteStringIfNotWhiteSpace("platform", Platform);
             writer.WriteStringIfNotWhiteSpace("release", Release);
+            writer.WriteStringIfNotWhiteSpace("dist", Distribution);
             writer.WriteStringIfNotWhiteSpace("transaction", Name);
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteStringIfNotNull("timestamp", EndTimestamp);
@@ -290,6 +296,7 @@ namespace Sentry
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
             var platform = json.GetPropertyOrNull("platform")?.GetString();
             var release = json.GetPropertyOrNull("release")?.GetString();
+            var distribution = json.GetPropertyOrNull("dist")?.GetString();
             var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
             var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
             var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
@@ -312,6 +319,7 @@ namespace Sentry
                 Level = level,
                 Platform = platform,
                 Release = release,
+                Distribution = distribution,
                 _request = request,
                 Contexts = contexts ?? new(),
                 _user = user,

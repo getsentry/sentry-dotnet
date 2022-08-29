@@ -80,11 +80,8 @@ internal class SentryMiddleware
 
             if (_options.FlushOnCompletedRequest)
             {
-                context.Response.OnCompleted(async () =>
-                {
-                    // Serverless environments flush the queue at the end of each request
-                    await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
-                });
+                // Serverless environments flush the queue at the end of each request
+                context.Response.OnCompleted(() => hub.FlushAsync(timeout: _options.FlushTimeout));
             }
 
             hub.ConfigureScope(scope =>
@@ -135,12 +132,9 @@ internal class SentryMiddleware
                 ExceptionDispatchInfo.Capture(e).Throw();
             }
 
-            async Task FlushBeforeCompleted()
-            {
-                // Some environments disables the application after sending a request,
-                // making the OnCompleted flush to not work.
-                await hub.FlushAsync(timeout: _options.FlushTimeout).ConfigureAwait(false);
-            }
+            // Some environments disables the application after sending a request,
+            // making the OnCompleted flush to not work.
+             Task FlushBeforeCompleted() => hub.FlushAsync(timeout: _options.FlushTimeout);
 
             void CaptureException(Exception e, SentryId eventId, string mechanism)
             {

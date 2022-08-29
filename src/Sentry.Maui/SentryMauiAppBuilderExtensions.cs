@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
 using Sentry.Maui.Internal;
@@ -40,10 +42,6 @@ public static class SentryMauiAppBuilderExtensions
     public static MauiAppBuilder UseSentry(this MauiAppBuilder builder,
         Action<SentryMauiOptions>? configureOptions)
     {
-        // TODO: Verify that each of these dependencies is needed.
-
-        // builder.Logging.AddConfiguration();
-
         var services = builder.Services;
         services.Configure<SentryMauiOptions>(options =>
             builder.Configuration.GetSection("Sentry").Bind(options));
@@ -53,6 +51,8 @@ public static class SentryMauiAppBuilderExtensions
             services.Configure(configureOptions);
         }
 
+        services.AddLogging();
+        services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();

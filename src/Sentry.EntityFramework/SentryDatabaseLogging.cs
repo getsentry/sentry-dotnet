@@ -1,6 +1,3 @@
-using System.Data.Entity.Infrastructure.Interception;
-using Sentry.Extensibility;
-
 namespace Sentry.EntityFramework;
 
 /// <summary>
@@ -8,7 +5,7 @@ namespace Sentry.EntityFramework;
 /// </summary>
 public static class SentryDatabaseLogging
 {
-    private static int Init = 0;
+    private static int Init;
 
     /// <summary>
     /// Adds an instance of <see cref="SentryCommandInterceptor"/> to <see cref="DbInterception"/>

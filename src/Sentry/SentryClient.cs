@@ -156,7 +156,7 @@ namespace Sentry
                 }
             }
 
-            if (@event.Exception != null && _options.ExceptionFilters?.Length > 0)
+            if (@event.Exception != null && _options.ExceptionFilters?.Count > 0)
             {
                 if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
                 {
@@ -280,7 +280,7 @@ namespace Sentry
         /// Disposes this client
         /// </summary>
         /// <inheritdoc />
-        [Obsolete("Sentry client should no be explicitly disposed of. This method will be removed in version 4.")]
+        [Obsolete("Sentry client should not be explicitly disposed of. This method will be removed in version 4.")]
         public void Dispose()
         {
             _options.LogDebug("Flushing SentryClient.");

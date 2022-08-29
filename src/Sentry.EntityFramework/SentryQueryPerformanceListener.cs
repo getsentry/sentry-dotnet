@@ -1,8 +1,3 @@
-using System.Data.Common;
-using System.Data.Entity.Infrastructure.Interception;
-using Sentry.EntityFramework.Internals.Extensions;
-using Sentry.Extensibility;
-
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryPerformanceListener : IDbCommandInterceptor
@@ -12,8 +7,8 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     internal const string DbNonQueryKey = "db.execute";
     internal const string DbScalarKey = "db.query.scalar";
 
-    private SentryOptions _options { get; }
-    private IHub _hub { get; }
+    private SentryOptions _options;
+    private IHub _hub;
 
     internal SentryQueryPerformanceListener(IHub hub, SentryOptions options)
     {

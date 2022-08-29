@@ -1,5 +1,3 @@
-using Sentry.Extensibility;
-
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryLogger : IQueryLogger

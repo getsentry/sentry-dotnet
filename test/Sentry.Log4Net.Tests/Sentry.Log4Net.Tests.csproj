@@ -1,12 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry.Log4Net/Sentry.Log4Net.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Log4Net\Sentry.Log4Net.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+    
+    <Using Include="log4net" />
+    <Using Include="log4net.Core" />
+    <Using Include="Sentry.Tests" />
+    <Using Include="Sentry.Testing" />
+    <Using Include="log4net.Appender" />
+    <Using Include="log4net.Layout" />
+    <Using Include="log4net.Repository.Hierarchy" />
+    <Using Include="Sentry.Log4Net" />
   </ItemGroup>
 
 </Project>

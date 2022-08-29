@@ -1,6 +1,3 @@
-using log4net;
-using log4net.Core;
-
 namespace Sentry.Log4Net.Tests;
 
 public class SentryAppenderTests
@@ -63,7 +60,7 @@ public class SentryAppenderTests
 
         var expected = typeof(SentryAppender).Assembly.GetNameAndVersion();
         _ = _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == Constants.SdkName
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Sdk.Name == SentryAppender.SdkName
                                                    && e.Sdk.Version == expected.Version));
     }
 

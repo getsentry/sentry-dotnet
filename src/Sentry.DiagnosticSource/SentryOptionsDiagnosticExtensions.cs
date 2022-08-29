@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Linq;
+using Sentry.Extensibility;
 using Sentry.Internals.DiagnosticSource;
 
 namespace Sentry
@@ -15,7 +16,15 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The Sentry options.</param>
         public static void AddDiagnosticSourceIntegration(this SentryOptions options)
-            => options.AddIntegration(new SentryDiagnosticListenerIntegration());
+        {
+            if (options.Integrations?.OfType<SentryDiagnosticListenerIntegration>().Any() is true)
+            {
+                options.LogWarning($"{nameof(SentryDiagnosticListenerIntegration)} has already been added. The second call to {nameof(AddDiagnosticSourceIntegration)} will be ignored.");
+                return;
+            }
+
+            options.AddIntegration(new SentryDiagnosticListenerIntegration());
+        }
 
         /// <summary>
         /// Disables the integrations with Diagnostic source.
@@ -23,6 +32,6 @@ namespace Sentry
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
             => options.Integrations =
-                options.Integrations?.Where(p => p.GetType() != typeof(SentryDiagnosticListenerIntegration)).ToArray();
+                options.Integrations?.Where(p => p.GetType() != typeof(SentryDiagnosticListenerIntegration)).ToList();
     }
 }

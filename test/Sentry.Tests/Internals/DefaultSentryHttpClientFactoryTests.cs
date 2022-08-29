@@ -10,10 +10,10 @@ public class DefaultSentryHttpClientFactoryTests
     {
         public SentryOptions HttpOptions { get; set; } = new()
         {
-            Dsn = DsnSamples.ValidDsnWithSecret
+            Dsn = ValidDsn
         };
 
-        public DefaultSentryHttpClientFactory GetSut()
+        public static DefaultSentryHttpClientFactory GetSut()
             => new();
     }
 
@@ -22,7 +22,7 @@ public class DefaultSentryHttpClientFactoryTests
     [Fact]
     public void Create_Returns_HttpClient()
     {
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         Assert.NotNull(sut.Create(_fixture.HttpOptions));
     }
@@ -32,7 +32,7 @@ public class DefaultSentryHttpClientFactoryTests
     {
         _fixture.HttpOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
 
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
 
@@ -49,7 +49,7 @@ public class DefaultSentryHttpClientFactoryTests
     {
         _fixture.HttpOptions.RequestBodyCompressionLevel = level;
 
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
 
@@ -63,7 +63,7 @@ public class DefaultSentryHttpClientFactoryTests
     {
         _fixture.HttpOptions.RequestBodyCompressionLevel = level;
         _fixture.HttpOptions.RequestBodyCompressionBuffered = false;
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
 
@@ -73,7 +73,7 @@ public class DefaultSentryHttpClientFactoryTests
     [Fact]
     public void Create_RetryAfterHandler_FirstHandler()
     {
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
 
@@ -89,7 +89,7 @@ public class DefaultSentryHttpClientFactoryTests
             Assert.Equal("application/json", client.DefaultRequestHeaders.Accept.ToString());
             configureHandlerInvoked = true;
         };
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         _ = sut.Create(_fixture.HttpOptions);
 
@@ -101,7 +101,7 @@ public class DefaultSentryHttpClientFactoryTests
     {
         var handler = Substitute.For<HttpClientHandler>();
         _fixture.HttpOptions.CreateHttpClientHandler = () => handler;
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
 
@@ -112,7 +112,7 @@ public class DefaultSentryHttpClientFactoryTests
     public void Create_NullCreateHttpClientHandler_HttpClientHandlerUsed()
     {
         _fixture.HttpOptions.CreateHttpClientHandler = null;
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
 
@@ -123,7 +123,7 @@ public class DefaultSentryHttpClientFactoryTests
     public void Create_NullReturnedCreateHttpClientHandler_HttpClientHandlerUsed()
     {
         _fixture.HttpOptions.CreateHttpClientHandler = () => null;
-        var sut = _fixture.GetSut();
+        var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
 
