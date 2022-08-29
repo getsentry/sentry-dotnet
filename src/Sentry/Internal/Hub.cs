@@ -59,7 +59,7 @@ namespace Sentry.Internal
             _enricher = new Enricher(options);
 
             var integrations = options.Integrations;
-            if (integrations?.Length > 0)
+            if (integrations?.Count > 0)
             {
                 foreach (var integration in integrations)
                 {

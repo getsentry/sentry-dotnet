@@ -89,39 +89,29 @@ namespace Sentry
         /// <summary>
         /// A list of exception processors
         /// </summary>
-        internal ISentryEventExceptionProcessor[]? ExceptionProcessors { get; set; }
+        internal List<ISentryEventExceptionProcessor>? ExceptionProcessors { get; set; }
 
         /// <summary>
         /// A list of event processors
         /// </summary>
-        internal ISentryEventProcessor[]? EventProcessors { get; set; }
-
-        /// <summary>
-        /// A list of event processors
-        /// </summary>
-        internal List<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
+        internal List<ISentryEventProcessor>? EventProcessors { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventProcessor"/>
         /// </summary>
-        internal Func<IEnumerable<ISentryEventProcessor>>[]? EventProcessorsProviders { get; set; }
-
-        /// <summary>
-        /// A list of providers of <see cref="ISentryEventProcessor"/>
-        /// </summary>
-        internal Func<IEnumerable<ISentryTransactionProcessor>>[]? TransactionProcessorsProviders { get; set; }
+        internal List<Func<IEnumerable<ISentryEventProcessor>>>? EventProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
         /// </summary>
-        internal Func<IEnumerable<ISentryEventExceptionProcessor>>[]? ExceptionProcessorsProviders { get; set; }
+        internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>>? ExceptionProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of integrations to be added when the SDK is initialized.
         /// </summary>
-        internal ISdkIntegration[]? Integrations { get; set; }
+        internal List<ISdkIntegration>? Integrations { get; set; }
 
-        internal IExceptionFilter[]? ExceptionFilters { get; set; } = Array.Empty<IExceptionFilter>();
+        internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
         /// <summary>
         /// The worker used by the client to pass envelopes.
@@ -146,7 +136,7 @@ namespace Sentry
         /// <example>
         /// 'System.', 'Microsoft.'
         /// </example>
-        internal string[]? InAppExclude { get; set; }
+        internal List<string>? InAppExclude { get; set; }
 
         /// <summary>
         /// A list of namespaces (or prefixes) considered part of application code
@@ -160,7 +150,7 @@ namespace Sentry
         /// 'System.CustomNamespace', 'Microsoft.Azure.App'
         /// </example>
         /// <seealso href="https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/options/#in-app-include"/>
-        internal string[]? InAppInclude { get; set; }
+        internal List<string>? InAppInclude { get; set; }
 
         /// <summary>
         /// Whether to include default Personal Identifiable information
@@ -690,15 +680,11 @@ namespace Sentry
         {
             SettingLocator = new SettingLocator(this);
 
-            EventProcessorsProviders = new Func<IEnumerable<ISentryEventProcessor>>[] {
+            EventProcessorsProviders = new () {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
             };
 
-            TransactionProcessorsProviders = new Func<IEnumerable<ISentryTransactionProcessor>>[] {
-                () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
-            };
-
-            ExceptionProcessorsProviders = new Func<IEnumerable<ISentryEventExceptionProcessor>>[] {
+            ExceptionProcessorsProviders = new () {
                 () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
             };
 
@@ -708,17 +694,17 @@ namespace Sentry
 
             ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
-            EventProcessors = new ISentryEventProcessor[] {
+            EventProcessors = new (){
                 // De-dupe to be the first to run
                 new DuplicateEventDetectionEventProcessor(this),
                 new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
             };
 
-            ExceptionProcessors = new ISentryEventExceptionProcessor[] {
+            ExceptionProcessors = new (){
                 new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)
             };
 
-            Integrations = new ISdkIntegration[] {
+            Integrations = new () {
                 // Auto-session tracking to be the first to run
                 new AutoSessionTrackingIntegration(),
                 new AppDomainUnhandledExceptionIntegration(),
@@ -745,7 +731,7 @@ namespace Sentry
             iOS = new IosOptions(this);
 #endif
 
-            InAppExclude = new[] {
+            InAppExclude = new () {
                     "System.",
                     "Mono.",
                     "Sentry.",
@@ -786,12 +772,10 @@ namespace Sentry
             };
 
 #if DEBUG
-            InAppInclude = new[]
+            InAppInclude = new()
             {
                 "Sentry.Samples."
             };
-#else
-            InAppInclude = Array.Empty<string>();
 #endif
         }
     }

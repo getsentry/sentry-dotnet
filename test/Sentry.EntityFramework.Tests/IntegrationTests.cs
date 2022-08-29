@@ -52,11 +52,7 @@ public class IntegrationTests
             }
         }
 
-        var payloads = transport.Envelopes
-            .SelectMany(x => x.Items)
-            .Select(x => x.Payload)
-            .ToList();
-        var result = await Verify(payloads)
+        var result = await Verify(transport.Payloads)
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain(shouldNotAppearInPayload, result.Text);
         options.DisableDbInterceptionIntegration();

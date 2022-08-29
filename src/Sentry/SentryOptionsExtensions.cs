@@ -34,7 +34,7 @@ namespace Sentry
         /// <param name="options">The SentryOptions to remove the processor from.</param>
         public static void DisableDuplicateEventDetection(this SentryOptions options)
             => options.EventProcessors =
-                options.EventProcessors?.Where(p => p.GetType() != typeof(DuplicateEventDetectionEventProcessor)).ToArray();
+                options.EventProcessors?.Where(p => p.GetType() != typeof(DuplicateEventDetectionEventProcessor)).ToList();
 
         /// <summary>
         /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>.
@@ -50,7 +50,7 @@ namespace Sentry
         /// <param name="options">The SentryOptions to remove the integration from.</param>
         public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
             => options.Integrations =
-                options.Integrations?.Where(p => p.GetType() != typeof(SentryDiagnosticListenerIntegration)).ToArray();
+                options.Integrations?.Where(p => p.GetType() != typeof(SentryDiagnosticListenerIntegration)).ToList();
 #endif
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Sentry
         public static void DisableNetFxInstallationsIntegration(this SentryOptions options)
         {
             options.EventProcessors =
-                options.EventProcessors?.Where(p => p.GetType() != typeof(NetFxInstallationsEventProcessor)).ToArray();
+                options.EventProcessors?.Where(p => p.GetType() != typeof(NetFxInstallationsEventProcessor)).ToList();
             options.RemoveIntegration<NetFxInstallationsIntegration>();
         }
 #endif
@@ -90,11 +90,11 @@ namespace Sentry
         {
             if (options.Integrations == null)
             {
-                options.Integrations = new[] {integration};
+                options.Integrations = new() {integration};
             }
             else
             {
-                options.Integrations = options.Integrations.Concat(new[] {integration}).ToArray();
+                options.Integrations.Add(integration);
             }
         }
 
@@ -104,7 +104,7 @@ namespace Sentry
         /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
         /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
         public static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
-            => options.Integrations = options.Integrations?.Where(p => p.GetType() != typeof(TIntegration)).ToArray();
+            => options.Integrations = options.Integrations?.Where(p => p.GetType() != typeof(TIntegration)).ToList();
 
         /// <summary>
         /// Add an exception filter.
@@ -112,9 +112,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="exceptionFilter">The exception filter to add.</param>
         public static void AddExceptionFilter(this SentryOptions options, IExceptionFilter exceptionFilter)
-            => options.ExceptionFilters = options.ExceptionFilters != null
-                ? options.ExceptionFilters.Concat(new[] { exceptionFilter }).ToArray()
-                : new[] { exceptionFilter };
+        {
+            if (options.ExceptionFilters == null)
+            {
+                options.ExceptionFilters = new () {exceptionFilter};
+            }
+            else
+            {
+                options.ExceptionFilters.Add(exceptionFilter);
+            }
+        }
 
         /// <summary>
         /// Ignore exception of type <typeparamref name="TException"/> or derived.
@@ -138,9 +145,16 @@ namespace Sentry
         /// 'System.', 'Microsoft.'
         /// </example>
         public static void AddInAppExclude(this SentryOptions options, string prefix)
-            => options.InAppExclude = options.InAppExclude != null
-                ? options.InAppExclude.Concat(new[] { prefix }).ToArray()
-                : new[] { prefix };
+        {
+            if (options.InAppExclude == null)
+            {
+                options.InAppExclude = new () {prefix};
+            }
+            else
+            {
+                options.InAppExclude.Add(prefix);
+            }
+        }
 
         /// <summary>
         /// Add prefix to include as in 'InApp' stacktrace.
@@ -156,9 +170,16 @@ namespace Sentry
         /// 'System.CustomNamespace', 'Microsoft.Azure.App'
         /// </example>
         public static void AddInAppInclude(this SentryOptions options, string prefix)
-            => options.InAppInclude = options.InAppInclude != null
-                ? options.InAppInclude.Concat(new[] { prefix }).ToArray()
-                : new[] { prefix };
+        {
+            if (options.InAppInclude == null)
+            {
+                options.InAppInclude = new () {prefix};
+            }
+            else
+            {
+                options.InAppInclude.Add(prefix);
+            }
+        }
 
         /// <summary>
         /// Add an exception processor.
@@ -166,9 +187,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processor">The exception processor.</param>
         public static void AddExceptionProcessor(this SentryOptions options, ISentryEventExceptionProcessor processor)
-            => options.ExceptionProcessors = options.ExceptionProcessors != null
-                ? options.ExceptionProcessors.Concat(new[] { processor }).ToArray()
-                : new[] { processor };
+        {
+            if (options.ExceptionProcessors == null)
+            {
+                options.ExceptionProcessors = new() {processor};
+            }
+            else
+            {
+                options.ExceptionProcessors.Add(processor);
+            }
+        }
 
         /// <summary>
         /// Add the exception processors.
@@ -176,9 +204,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processors">The exception processors.</param>
         public static void AddExceptionProcessors(this SentryOptions options, IEnumerable<ISentryEventExceptionProcessor> processors)
-            => options.ExceptionProcessors = options.ExceptionProcessors != null
-                ? options.ExceptionProcessors.Concat(processors).ToArray()
-                : processors.ToArray();
+        {
+            if (options.ExceptionProcessors == null)
+            {
+                options.ExceptionProcessors = processors.ToList();
+            }
+            else
+            {
+                options.ExceptionProcessors.AddRange(processors);
+            }
+        }
 
         /// <summary>
         /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
@@ -186,9 +221,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processor">The event processor.</param>
         public static void AddEventProcessor(this SentryOptions options, ISentryEventProcessor processor)
-            => options.EventProcessors = options.EventProcessors != null
-                ? options.EventProcessors.Concat(new[] { processor }).ToArray()
-                : new[] { processor };
+        {
+            if (options.EventProcessors == null)
+            {
+                options.EventProcessors = new() {processor};
+            }
+            else
+            {
+                options.EventProcessors.Add(processor);
+            }
+        }
 
         /// <summary>
         /// Adds event processors which are invoked when creating a <see cref="SentryEvent"/>.
@@ -196,9 +238,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor.</param>
         /// <param name="processors">The event processors.</param>
         public static void AddEventProcessors(this SentryOptions options, IEnumerable<ISentryEventProcessor> processors)
-            => options.EventProcessors = options.EventProcessors != null
-                ? options.EventProcessors.Concat(processors).ToArray()
-                : processors.ToArray();
+        {
+            if (options.EventProcessors == null)
+            {
+                options.EventProcessors = processors.ToList();
+            }
+            else
+            {
+                options.EventProcessors.AddRange(processors);
+            }
+        }
 
         /// <summary>
         /// Adds an event processor provider which is invoked when creating a <see cref="SentryEvent"/>.
@@ -206,9 +255,16 @@ namespace Sentry
         /// <param name="options">The SentryOptions to hold the processor provider.</param>
         /// <param name="processorProvider">The event processor provider.</param>
         public static void AddEventProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryEventProcessor>> processorProvider)
-            => options.EventProcessorsProviders = options.EventProcessorsProviders != null
-                ? options.EventProcessorsProviders.Concat(new[] { processorProvider }).ToArray()
-                : new[] { processorProvider };
+        {
+            if (options.EventProcessorsProviders == null)
+            {
+                options.EventProcessorsProviders = new() {processorProvider};
+            }
+            else
+            {
+                options.EventProcessorsProviders.Add(processorProvider);
+            }
+        }
 
         /// <summary>
         /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
@@ -261,9 +317,16 @@ namespace Sentry
         /// <param name="processorProvider">The exception processor provider.</param>
         public static void AddExceptionProcessorProvider(this SentryOptions options,
             Func<IEnumerable<ISentryEventExceptionProcessor>> processorProvider)
-            => options.ExceptionProcessorsProviders = options.ExceptionProcessorsProviders != null
-                ? options.ExceptionProcessorsProviders.Concat(new[] { processorProvider }).ToArray()
-                : new[] { processorProvider };
+        {
+            if (options.ExceptionProcessorsProviders == null)
+            {
+                options.ExceptionProcessorsProviders = new() {processorProvider};
+            }
+            else
+            {
+                options.ExceptionProcessorsProviders.Add(processorProvider);
+            }
+        }
 
         /// <summary>
         /// Invokes all event processor providers available.
