@@ -307,8 +307,8 @@ namespace Sentry
         /// <param name="processorProvider">The transaction processor provider.</param>
         public static void AddTransactionProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryTransactionProcessor>> processorProvider)
             => options.TransactionProcessorsProviders = options.TransactionProcessorsProviders != null
-                ? options.TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToArray()
-                : new[] { processorProvider };
+                ? options.TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToList()
+                : new() { processorProvider };
 
         /// <summary>
         /// Add the exception processor provider.
