@@ -1,5 +1,3 @@
-using Sentry.Samples.AspNetCore.Blazor.Server.Data;
-
 // Capture blazor bootstrapping errors
 using var sdk = SentrySdk.Init(o =>
 {
@@ -10,10 +8,9 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+    // Add services to the container.
     builder.Services.AddRazorPages();
     builder.Services.AddServerSideBlazor();
-    builder.Services.AddSingleton<WeatherForecastService>();
     builder.WebHost.UseSentry();
 
     var app = builder.Build();
