@@ -22,13 +22,6 @@ try
     // Enable Sentry performance monitoring
     app.UseSentryTracing();
 
-    // Configure the HTTP request pipeline.
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseExceptionHandler("/Error");
-        app.UseHsts();
-    }
-
     app.UseHttpsRedirection();
 
     app.UseStaticFiles();
