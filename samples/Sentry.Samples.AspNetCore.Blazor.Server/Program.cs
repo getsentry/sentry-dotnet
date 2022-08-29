@@ -1,13 +1,16 @@
 // Capture blazor bootstrapping errors
-using var sdk = SentrySdk.Init(o =>
+
+Action<SentryOptions>? configureSentry = o =>
 {
     o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
     o.Debug = true;
-});
+};
+using var sdk = SentrySdk.Init(configureSentry);
 try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    builder.Logging.AddSentry(configureSentry);
     // Add services to the container.
     builder.Services.AddRazorPages();
     builder.Services.AddServerSideBlazor();
