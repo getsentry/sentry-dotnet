@@ -5,7 +5,7 @@ namespace Sentry.AspNet.Internal;
 
 internal static class SystemWebVersionLocator
 {
-    internal static string? Resolve(string? release, HttpContext context)
+    internal static string? Resolve(string? release, HttpContext? context)
     {
         if (!string.IsNullOrWhiteSpace(release))
         {
