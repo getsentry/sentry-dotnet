@@ -215,7 +215,17 @@ namespace Sentry.Internal
 
             try
             {
+                var stopwatch = Stopwatch.StartNew();
                 await DoFlushAsync(timeoutWithShutdown.Token).ConfigureAwait(false);
+
+                // We may not have waited the full timeout amount due to timer precision, so wait a bit longer if needed.
+                // See https://github.com/getsentry/sentry-dotnet/issues/1864
+                while (!_shutdownSource.IsCancellationRequested &&
+                       _queue.Count > 0 &&
+                       stopwatch.Elapsed < timeout)
+                {
+                    await Task.Delay(10, CancellationToken.None).ConfigureAwait(false);
+                }
             }
             finally
             {
