@@ -9,7 +9,9 @@ public class FrameworkInstallationExtensionsTests
     {
         //Arrange
         FrameworkInstallation frameworkInstallation = null;
+
         //Act
+        // ReSharper disable once ExpressionIsAlwaysNull
         var version = frameworkInstallation.GetVersionNumber();
 
         //Assert

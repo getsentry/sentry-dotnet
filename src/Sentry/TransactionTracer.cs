@@ -9,7 +9,7 @@ namespace Sentry
     /// <summary>
     /// Transaction tracer.
     /// </summary>
-    public class TransactionTracer : ITransaction
+    public class TransactionTracer : ITransaction, IHasDistribution
     {
         private readonly IHub _hub;
         private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
@@ -49,6 +49,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public string? Release { get; set; }
+
+        /// <inheritdoc />
+        public string? Distribution { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;

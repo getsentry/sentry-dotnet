@@ -15,12 +15,14 @@ namespace Sentry.PlatformAbstractions
         /// <param name="runtime">The runtime instance to check.</param>
         /// <returns>True if it's .NET Framework, otherwise false.</returns>
         public static bool IsNetFx(this Runtime runtime) => runtime.IsRuntime(".NET Framework");
+
         /// <summary>
-        /// Is the runtime instance .NET Core.
+        /// Is the runtime instance .NET Core (or .NET).
         /// </summary>
         /// <param name="runtime">The runtime instance to check.</param>
-        /// <returns>True if it's .NET Core, otherwise false.</returns>
-        public static bool IsNetCore(this Runtime runtime) => runtime.IsRuntime(".NET Core");
+        /// <returns>True if it's .NET Core (or .NET), otherwise false.</returns>
+        public static bool IsNetCore(this Runtime runtime) => runtime.IsRuntime(".NET Core") || runtime.IsRuntime(".NET");
+
         /// <summary>
         /// Is the runtime instance Mono.
         /// </summary>

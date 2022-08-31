@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Sentry/Sentry.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    
     <PackageReference Include="log4net" Version="2.0.12" />
+    
+    <Using Include="log4net.Appender" />
+    <Using Include="log4net.Core" />
+    <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Reflection" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v5.0", FrameworkDisplayName="")]
-namespace Google.Cloud.Functions.Framework
+﻿namespace Google.Cloud.Functions.Framework
 {
     public class SentryStartup : Google.Cloud.Functions.Hosting.FunctionsStartup
     {

@@ -1,8 +1,18 @@
 // ReSharper disable once CheckNamespace
+
+using Sentry.Testing;
+
 namespace Sentry.Protocol.Tests.Exceptions;
 
 public class MechanismTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public MechanismTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -17,7 +27,7 @@ public class MechanismTests
         sut.Data.Add("data-key", "data-value");
         sut.Meta.Add("meta-key", "meta-value");
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{\"data\":{\"data-key\":\"data-value\"}," +
@@ -33,7 +43,7 @@ public class MechanismTests
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((Mechanism mechanism, string serialized) @case)
     {
-        var actual = @case.mechanism.ToJsonString();
+        var actual = @case.mechanism.ToJsonString(_testOutputLogger);
 
         Assert.Equal(@case.serialized, actual);
     }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore;
 
@@ -25,12 +26,10 @@ public static class ScopeExtensions
     public static void Populate(this Scope scope, HttpContext context, SentryAspNetCoreOptions options)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable ConditionIsAlwaysTrueOrFalse
-        if (scope is null || context is null || options is null)
+        if (scope.IsNull() || context.IsNull() || options.IsNull())
         {
             return;
         }
-        // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         // With the logger integration, a BeginScope call is made with RequestId. That ends up adding
         // two tags with the same value: RequestId and TraceIdentifier
@@ -65,23 +64,26 @@ public static class ScopeExtensions
         try
         {
             var routeData = context.GetRouteData();
-            var controller = routeData.Values["controller"]?.ToString();
-            var action = routeData.Values["action"]?.ToString();
-            var area = routeData.Values["area"]?.ToString();
+            var values = routeData.Values;
 
-            if (controller != null)
+            if (values["controller"] is string controller)
             {
                 scope.SetTag("route.controller", controller);
             }
 
-            if (action != null)
+            if (values["action"] is string action)
             {
                 scope.SetTag("route.action", action);
             }
 
-            if (area != null)
+            if (values["area"] is string area)
             {
                 scope.SetTag("route.area", area);
+            }
+
+            if (values["version"] is string version)
+            {
+                scope.SetTag("route.version", version);
             }
 
             // Transaction Name may only be available afterward the creation of the Transaction.
@@ -175,12 +177,10 @@ public static class ScopeExtensions
     public static void Populate(this Scope scope, Activity activity)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable ConditionIsAlwaysTrueOrFalse
-        if (scope is null || activity is null)
+        if (scope.IsNull() || activity.IsNull())
         {
             return;
         }
-        // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
         //scope.ActivityId = activity.Id;
 

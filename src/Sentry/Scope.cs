@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Internal;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -14,7 +16,7 @@ namespace Sentry
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
-    public class Scope : IEventLike
+    public class Scope : IEventLike, IHasDistribution
     {
         internal SentryOptions Options { get; }
 
@@ -133,6 +135,9 @@ namespace Sentry
         public string? Release { get; set; }
 
         /// <inheritdoc />
+        public string? Distribution { get; set; }
+
+        /// <inheritdoc />
         public string? Environment { get; set; }
 
         // TransactionName is kept for legacy purposes because
@@ -249,7 +254,8 @@ namespace Sentry
                 //Always drop the breadcrumb.
                 return;
             }
-            else if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
+
+            if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
             {
                 _breadcrumbs.TryDequeue(out _);
             }
@@ -321,8 +327,7 @@ namespace Sentry
         public void Apply(IEventLike other)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (other is null)
+            if (other.IsNull())
             {
                 return;
             }
@@ -362,6 +367,7 @@ namespace Sentry
 
             other.Platform ??= Platform;
             other.Release ??= Release;
+            other.WithDistribution(_ => _.Distribution ??= Distribution);
             other.Environment ??= Environment;
             other.TransactionName ??= TransactionName;
             other.Level ??= Level;
@@ -384,8 +390,7 @@ namespace Sentry
         public void Apply(Scope other)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (other is null)
+            if (other.IsNull())
             {
                 return;
             }

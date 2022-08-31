@@ -6,7 +6,7 @@ using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
 {
-    internal sealed class SentryScopeManager : IInternalScopeManager, IDisposable
+    internal sealed class SentryScopeManager : IInternalScopeManager
     {
         // Internal for testing
         public IScopeStackContainer ScopeStackContainer { get; }
@@ -23,12 +23,13 @@ namespace Sentry.Internal
 
         private bool IsGlobalMode => ScopeStackContainer is GlobalScopeStackContainer;
 
-        public SentryScopeManager(
-            IScopeStackContainer scopeStackContainer,
-            SentryOptions options,
-            ISentryClient rootClient)
+        public SentryScopeManager(SentryOptions options, ISentryClient rootClient)
         {
-            ScopeStackContainer = scopeStackContainer;
+            ScopeStackContainer = options.ScopeStackContainer ?? (
+                options.IsGlobalModeEnabled
+                    ? new GlobalScopeStackContainer()
+                    : new AsyncLocalScopeStackContainer());
+
             _options = options;
             NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }

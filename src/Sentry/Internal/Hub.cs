@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal
 {
@@ -30,6 +29,8 @@ namespace Sentry.Internal
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;
 
+        internal SentryOptions Options => _options;
+
         internal Hub(
             SentryOptions options,
             ISentryClient? client = null,
@@ -50,10 +51,7 @@ namespace Sentry.Internal
             _clock = clock ?? SystemClock.Clock;
             _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
-            ScopeManager = scopeManager ?? new SentryScopeManager(
-                options.ScopeStackContainer ?? new AsyncLocalScopeStackContainer(),
-                options,
-                _ownedClient);
+            ScopeManager = scopeManager ?? new SentryScopeManager(options, _ownedClient);
 
             _rootScope = options.IsGlobalModeEnabled
                 ? DisabledHub.Instance
@@ -63,7 +61,7 @@ namespace Sentry.Internal
             _enricher = new Enricher(options);
 
             var integrations = options.Integrations;
-            if (integrations?.Length > 0)
+            if (integrations?.Count > 0)
             {
                 foreach (var integration in integrations)
                 {

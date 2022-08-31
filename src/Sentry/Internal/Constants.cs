@@ -35,6 +35,8 @@ namespace Sentry.Internal
         // See: https://github.com/getsentry/sentry-release-registry
 #if ANDROID
         public const string SdkName = "sentry.dotnet.android";
+#elif __IOS__
+        public const string SdkName = "sentry.dotnet.cocoa";
 #else
         public const string SdkName = "sentry.dotnet";
 #endif

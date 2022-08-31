@@ -1,0 +1,31 @@
+{
+  clientReportJson: {
+    discarded_events: [
+      {
+        category: internal,
+        quantity: 1,
+        reason: network_error
+      },
+      {
+        category: security,
+        quantity: 1,
+        reason: network_error
+      },
+      {
+        category: error,
+        quantity: 2,
+        reason: queue_overflow
+      },
+      {
+        category: transaction,
+        quantity: 3,
+        reason: ratelimit_backoff
+      }
+    ]
+  },
+  eventItemJson: {
+    event_id: Guid_1,
+    platform: csharp,
+    sdk: {}
+  }
+}

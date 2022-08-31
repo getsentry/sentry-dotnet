@@ -29,13 +29,6 @@ namespace Sentry.Internal
 
         public BackgroundWorker(
             ITransport transport,
-            SentryOptions options)
-            : this(transport, options, null)
-        {
-        }
-
-        internal BackgroundWorker(
-            ITransport transport,
             SentryOptions options,
             CancellationTokenSource? shutdownSource = null,
             ConcurrentQueue<Envelope>? queue = null)
@@ -47,10 +40,27 @@ namespace Sentry.Internal
             _shutdownSource = shutdownSource ?? new CancellationTokenSource();
             _queuedEnvelopeSemaphore = new SemaphoreSlim(0, _maxItems);
 
-            WorkerTask = Task.Run(async () => await WorkerAsync().ConfigureAwait(false));
+            options.LogDebug("Starting BackgroundWorker.");
+            WorkerTask = Task.Run(DoWorkAsync);
         }
 
-        public bool EnqueueEnvelope(Envelope envelope)
+        /// <inheritdoc />
+        public bool EnqueueEnvelope(Envelope envelope) => EnqueueEnvelope(envelope, true);
+
+        /// <summary>
+        /// Attempts to enqueue the envelope with the worker.
+        /// </summary>
+        /// <param name="envelope">The envelope to enqueue.</param>
+        /// <param name="process">
+        /// Whether to process the next item in the queue after enqueuing this item,
+        /// which may or may not be the item being enqueued.  The default is <c>true</c>.
+        /// Pass <c>false</c> for testing, when you want to add items to the queue without unblocking the worker.
+        /// After items are enqueued, use <see cref="ProcessQueuedItems"/> to unblock the worker to process the items.
+        /// Disposing the worker will also unblock the items, which will then be processed until the shutdown timeout
+        /// is reached or the queue is emptied.
+        /// </param>
+        /// <returns>True of queueing was successful. Otherwise, false.</returns>
+        public bool EnqueueEnvelope(Envelope envelope, bool process)
         {
             if (_disposed)
             {
@@ -59,20 +69,37 @@ namespace Sentry.Internal
 
             if (Interlocked.Increment(ref _currentItems) > _maxItems)
             {
-                _ = Interlocked.Decrement(ref _currentItems);
+                Interlocked.Decrement(ref _currentItems);
                 _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
+                _options.LogInfo("Discarding envelope {0} because the queue is full.", envelope.TryGetEventId());
                 return false;
             }
 
+            _options.LogDebug("Enqueuing envelope {0}", envelope.TryGetEventId());
             _queue.Enqueue(envelope);
-            _ = _queuedEnvelopeSemaphore.Release();
+
+            if (process)
+            {
+                _queuedEnvelopeSemaphore.Release();
+            }
 
             return true;
         }
 
-        private async Task WorkerAsync()
+        /// <summary>
+        /// Processes the number of queued items specified.
+        /// Used only in testing, after calling <see cref="EnqueueEnvelope(Envelope, bool)"/>
+        /// when passing <c>process: false</c>.
+        /// </summary>
+        /// <param name="count">The number of items to process from the queue.</param>
+        public void ProcessQueuedItems(int count)
         {
-            var cancellation = _shutdownSource.Token;
+            _queuedEnvelopeSemaphore.Release(count);
+        }
+
+        private async Task DoWorkAsync()
+        {
+            _options.LogDebug("BackgroundWorker Started.");
 
             using var shutdownTimeout = new CancellationTokenSource();
             var shutdownRequested = false;
@@ -89,12 +116,14 @@ namespace Sentry.Internal
                     {
                         try
                         {
-                            await _queuedEnvelopeSemaphore.WaitAsync(cancellation).ConfigureAwait(false);
+                            await _queuedEnvelopeSemaphore.WaitAsync(_shutdownSource.Token).ConfigureAwait(false);
                         }
-                        // Cancellation requested, but continue as there are more items
+                        // Cancellation requested and no timeout allowed, so exit even if there are more items
                         catch (OperationCanceledException) when (_options.ShutdownTimeout == TimeSpan.Zero)
                         {
                             _options.LogDebug("Exiting immediately due to 0 shutdown timeout. #{0} in queue.", _queue.Count);
+
+                            shutdownTimeout.Cancel();
 
                             return;
                         }
@@ -106,7 +135,7 @@ namespace Sentry.Internal
                                 _options.ShutdownTimeout,
                                 _queue.Count);
 
-                            shutdownTimeout.CancelAfter(_options.ShutdownTimeout);
+                            shutdownTimeout.CancelAfterSafe(_options.ShutdownTimeout);
 
                             shutdownRequested = true;
                         }
@@ -147,8 +176,9 @@ namespace Sentry.Internal
                         }
                         finally
                         {
-                            _ = _queue.TryDequeue(out _);
-                            _ = Interlocked.Decrement(ref _currentItems);
+                            _options.LogDebug("De-queueing event {0}", envelope.TryGetEventId());
+                            _queue.TryDequeue(out _);
+                            Interlocked.Decrement(ref _currentItems);
                             OnFlushObjectReceived?.Invoke(envelope, EventArgs.Empty);
                         }
                     }
@@ -167,10 +197,6 @@ namespace Sentry.Internal
                 _options.LogFatal("Exception in the background worker.", e);
                 throw;
             }
-            finally
-            {
-                _queuedEnvelopeSemaphore.Dispose();
-            }
         }
 
         public async Task FlushAsync(TimeSpan timeout)
@@ -181,21 +207,51 @@ namespace Sentry.Internal
                 return;
             }
 
+            // Start timer from here.
+            using var timeoutSource = new CancellationTokenSource();
+            using var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
+                timeoutSource.Token, _shutdownSource.Token);
+            timeoutSource.CancelAfterSafe(timeout);
+
+            try
+            {
+                var stopwatch = Stopwatch.StartNew();
+                await DoFlushAsync(timeoutWithShutdown.Token).ConfigureAwait(false);
+
+                // We may not have waited the full timeout amount due to timer precision, so wait a bit longer if needed.
+                // See https://github.com/getsentry/sentry-dotnet/issues/1864
+                while (!_shutdownSource.IsCancellationRequested &&
+                       _queue.Count > 0 &&
+                       stopwatch.Elapsed < timeout)
+                {
+                    await Task.Delay(10, CancellationToken.None).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                // Send a final client report, if there is one.  We do this after flushing the queue, because sending
+                // the queued envelopes might encounter situations such as rate limiting, and we want to report those.
+                // (Client reports themselves are never rate limited.)
+                await SendFinalClientReportAsync(timeoutWithShutdown.Token).ConfigureAwait(false);
+            }
+        }
+
+        private async Task DoFlushAsync(CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                _options.LogDebug("Timeout or shutdown already requested. Exiting.");
+                return;
+            }
+
             if (_queue.IsEmpty)
             {
                 _options.LogDebug("No events to flush.");
                 return;
             }
 
-            // Start timer from here.
-            var timeoutSource = new CancellationTokenSource();
-            timeoutSource.CancelAfter(timeout);
-            var flushSuccessSource = new CancellationTokenSource();
-
-            var timeoutWithShutdown = CancellationTokenSource.CreateLinkedTokenSource(
-                timeoutSource.Token,
-                _shutdownSource.Token,
-                flushSuccessSource.Token);
+            var completionSource = new TaskCompletionSource<bool>();
+            cancellationToken.Register(() => completionSource.TrySetCanceled());
 
             var counter = 0;
             var depth = int.MaxValue;
@@ -205,20 +261,13 @@ namespace Sentry.Internal
                 // ReSharper disable once AccessToModifiedClosure
                 if (Interlocked.Increment(ref counter) >= depth)
                 {
-                    try
-                    {
-                        _options.LogDebug("Signaling flush completed.");
-                        // ReSharper disable once AccessToDisposedClosure
-                        flushSuccessSource.Cancel();
-                    }
-                    catch // Timeout or Shutdown might have been called so this token was disposed.
-                    {
-                        // Flush will release when timeout is hit.
-                    }
+                    _options.LogDebug("Signaling flush completed.");
+                    completionSource.TrySetResult(true);
                 }
             }
 
             OnFlushObjectReceived += EventFlushedCallback; // Started counting events
+
             try
             {
                 var trackedDepth = _queue.Count;
@@ -227,7 +276,7 @@ namespace Sentry.Internal
                     return;
                 }
 
-                _ = Interlocked.Exchange(ref depth, trackedDepth);
+                Interlocked.Exchange(ref depth, trackedDepth);
                 _options.LogDebug("Tracking depth: {0}.", trackedDepth);
 
                 if (counter >= depth) // When the worker finished flushing before we set the depth
@@ -235,20 +284,42 @@ namespace Sentry.Internal
                     return;
                 }
 
-                // Await until event is flushed or one of the tokens triggers
-                await Task.Delay(timeout, timeoutWithShutdown.Token).ConfigureAwait(false);
-                _options.LogDebug("Timeout when trying to flush queue.");
+                // Await until event is flushed (or we have cancelled)
+                await completionSource.Task.ConfigureAwait(false);
+
+                _options.LogDebug("Successfully flushed all events up to call to FlushAsync.");
             }
             catch (OperationCanceledException)
             {
-                _options.LogDebug(flushSuccessSource.IsCancellationRequested
-                    ? "Successfully flushed all events up to call to FlushAsync."
-                    : "Timeout when trying to flush queue.");
+                _options.LogDebug("Timeout when trying to flush queue.");
             }
             finally
             {
                 OnFlushObjectReceived -= EventFlushedCallback;
-                timeoutWithShutdown.Dispose();
+            }
+        }
+
+        private async Task SendFinalClientReportAsync(CancellationToken cancellationToken)
+        {
+            var clientReport = _options.ClientReportRecorder.GenerateClientReport();
+            if (clientReport != null)
+            {
+                _options.LogDebug("Sending client report after flushing queue.");
+                using var envelope = Envelope.FromClientReport(clientReport);
+
+                try
+                {
+                    await _transport.SendEnvelopeAsync(envelope, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    _options.LogInfo("Timeout or shutdown while trying to send final client report. Exiting.");
+                }
+                catch (Exception exception)
+                {
+                    _options.LogError("Error while sending final client report (event ID: '{0}').",
+                        exception, envelope.TryGetEventId());
+                }
             }
         }
 
@@ -262,6 +333,7 @@ namespace Sentry.Internal
 
             if (_disposed)
             {
+                _options.LogDebug("Already disposed BackgroundWorker.");
                 return;
             }
 
@@ -269,30 +341,40 @@ namespace Sentry.Internal
 
             try
             {
-                // Immediately requests the Worker to stop.
+                // Requests the worker to stop.
+                // This will cause the current (or next) call to _queuedEnvelopeSemaphore.WaitAsync to throw
+                // an OperationCanceledException in DoWorkAsync, which will subsequently stop the worker at the
+                // appropriate time.
                 _shutdownSource.Cancel();
 
-                // If there's anything in the queue, it'll keep running until 'shutdownTimeout' is reached
-                // If the queue is empty it will quit immediately
-                _ = WorkerTask.Wait(_options.ShutdownTimeout);
-
-                // Dispose the transport if needed
-                (_transport as IDisposable)?.Dispose();
+                // Now wait for the worker stop.
+                // This will wait until either the queue is empty, or the shutdown timeout is reached.
+                // NOTE: While non-intuitive, do not pass a timeout or cancellation token here.  We are waiting for
+                // the _continuation_ of the method, not its _execution_.  If we stop waiting prematurely, we may
+                // leave the task in the "WaitingForActivation" state, which has resulted in some flaky tests and
+                // may cause unexpected behavior in client applications.
+                WorkerTask.Wait();
             }
             catch (OperationCanceledException)
             {
-                _options.LogDebug("Stopping the background worker due to a cancellation");
+                _options.LogDebug("Stopping the background worker due to a cancellation.");
             }
             catch (Exception exception)
             {
                 _options.LogError("Stopping the background worker threw an exception.", exception);
             }
-
-            if (!_queue.IsEmpty)
+            finally
             {
-                _options.LogWarning(
-                    "Worker stopped while {0} were still in the queue.",
-                    _queue.Count);
+                if (!_queue.IsEmpty)
+                {
+                    _options.LogWarning("Worker stopped while {0} were still in the queue.", _queue.Count);
+                }
+
+                _queuedEnvelopeSemaphore.Dispose();
+                _shutdownSource.Dispose();
+
+                // Dispose the transport if needed
+                (_transport as IDisposable)?.Dispose();
             }
         }
     }

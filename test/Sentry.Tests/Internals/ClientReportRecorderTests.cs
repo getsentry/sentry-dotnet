@@ -1,3 +1,5 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Internals;
 
 public class ClientReportRecorderTests
@@ -7,14 +9,7 @@ public class ClientReportRecorderTests
     private class Fixture
     {
         public SentryOptions Options { get; } = new();
-        public ISystemClock Clock { get; } = GetClock();
-
-        private static ISystemClock GetClock()
-        {
-            var clock = Substitute.For<ISystemClock>();
-            clock.GetUtcNow().Returns(DateTimeOffset.UtcNow);
-            return clock;
-        }
+        public ISystemClock Clock { get; } = new MockClock(DateTimeOffset.UtcNow);
     }
 
     [Fact]

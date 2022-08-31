@@ -7,14 +7,10 @@
     <ApplicationId>io.sentry.dotnet.samples.android</ApplicationId>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <!-- BG8605 and BG8606 due to kotlin.reflect missing even though no usage is explicitly done on Buggy.kt - Sample works fine. -->
-    <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <Using Include="Android.App.Activity" Alias="Activity" />
-    <TransformFile Include="Kotlin/Metadata.xml" />
-    <AndroidLibrary Include="Kotlin/buggy.jar" />
   </ItemGroup>
 </Project>

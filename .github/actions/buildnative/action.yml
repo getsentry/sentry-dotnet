@@ -1,0 +1,32 @@
+name: Build Native Dependencies
+runs:
+  using: composite
+
+  steps:
+
+    - name: Set Environment Variables
+      shell: bash
+      run: echo "JAVA_HOME_11=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+
+    - name: Install Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Build C Project
+      if: runner.os == 'Linux' || runner.os == 'macOS'
+      shell: bash
+      run: src/Sentry/Platforms/Android/C/build.sh
+
+    - name: Build C Project
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: src\Sentry\Platforms\Android\C\build.cmd
+
+    - name: Build Java Project
+      if: runner.os == 'Linux' || runner.os == 'macOS'
+      shell: bash
+      run: src/Sentry/Platforms/Android/Java/build.sh
+
+    - name: Build Java Project
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: src\Sentry\Platforms\Android\Java\build.cmd

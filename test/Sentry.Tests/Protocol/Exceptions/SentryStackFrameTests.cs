@@ -1,7 +1,16 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests.Protocol.Exceptions;
 
 public class SentryStackFrameTests
 {
+    private readonly IDiagnosticLogger _testOutputLogger;
+
+    public SentryStackFrameTests(ITestOutputHelper output)
+    {
+        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
@@ -28,7 +37,7 @@ public class SentryStackFrameTests
             AddressMode = "rel:0"
         };
 
-        var actual = sut.ToJsonString();
+        var actual = sut.ToJsonString(_testOutputLogger);
 
         Assert.Equal(
             "{" +
@@ -92,8 +101,10 @@ public class SentryStackFrameTests
     {
         // Arrange
         var module = "IncludedModule";
-        var sut = new SentryStackFrame();
-        sut.Module = module;
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
         var options = new SentryOptions();
         options.AddInAppInclude(module);
 
@@ -109,8 +120,10 @@ public class SentryStackFrameTests
     {
         // Arrange
         var module = "ExcludedModule";
-        var sut = new SentryStackFrame();
-        sut.Module = module;
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
         var options = new SentryOptions();
         options.AddInAppExclude(module);
 
@@ -126,8 +139,10 @@ public class SentryStackFrameTests
     {
         // Arrange
         var module = "AppModule";
-        var sut = new SentryStackFrame();
-        sut.Module = module;
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
         var options = new SentryOptions();
 
         // Act
@@ -142,8 +157,10 @@ public class SentryStackFrameTests
     {
         // Arrange
         var module = "ExcludedModule";
-        var sut = new SentryStackFrame();
-        sut.Module = module;
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
         var options = new SentryOptions();
         options.AddInAppExclude(module);
         sut.InApp = true;

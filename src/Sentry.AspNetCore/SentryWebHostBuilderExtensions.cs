@@ -49,7 +49,13 @@ public static class SentryWebHostBuilderExtensions
         this IWebHostBuilder builder,
         Action<WebHostBuilderContext, SentryAspNetCoreOptions>? configureOptions)
         => builder.UseSentry((context, sentryBuilder) =>
-            sentryBuilder.AddSentryOptions(options => configureOptions?.Invoke(context, options)));
+        {
+            sentryBuilder.AddSentryOptions(options =>
+            {
+                configureOptions?.Invoke(context, options);
+                options.SetEnvironment(context.HostingEnvironment);
+            });
+        });
 
     /// <summary>
     /// Uses Sentry integration.
@@ -90,6 +96,7 @@ public static class SentryWebHostBuilderExtensions
 
             var sentryBuilder = logging.Services.AddSentry();
             configureSentry?.Invoke(context, sentryBuilder);
+
         });
 
         _ = builder.ConfigureServices(c => _ = c.AddTransient<IStartupFilter, SentryStartupFilter>());

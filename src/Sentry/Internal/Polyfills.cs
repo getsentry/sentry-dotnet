@@ -61,6 +61,24 @@ namespace System.Collections.Generic
 }
 #endif
 
+#if NET461
+namespace System.Linq
+{
+    internal static class PolyfillExtensions
+    {
+        public static IEnumerable<TSource> Append<TSource>(this IEnumerable<TSource> source, TSource element)
+        {
+            foreach (var item in source)
+            {
+                yield return item;
+            }
+
+            yield return element;
+        }
+    }
+}
+#endif
+
 #if !NET5_0_OR_GREATER
 internal static partial class PolyfillExtensions
 {

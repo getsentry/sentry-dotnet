@@ -11,7 +11,17 @@ namespace Sentry.Internal.Extensions
     {
         // The Json options with a preset of rules that will remove dangerous and problematic
         // data from the serialized object.
-        private static JsonSerializerOptions serializerOption = new() { Converters = { new SentryJsonConverter() } };
+        private static JsonSerializerOptions serializerOption = new()
+        {
+            Converters =
+            {
+                new SentryJsonConverter(),
+                new IntPtrJsonConverter(),
+                new IntPtrNullableJsonConverter(),
+                new UIntPtrJsonConverter(),
+                new UIntPtrNullableJsonConverter()
+            }
+        };
 
         public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
         {
@@ -19,7 +29,7 @@ namespace Sentry.Internal.Extensions
             value = jsonProperty.Value;
         }
 
-        public static IReadOnlyDictionary<string, object?>? GetDictionaryOrNull(this JsonElement json)
+        public static Dictionary<string, object?>? GetDictionaryOrNull(this JsonElement json)
         {
             if (json.ValueKind != JsonValueKind.Object)
             {
@@ -36,7 +46,7 @@ namespace Sentry.Internal.Extensions
             return result;
         }
 
-        public static IReadOnlyDictionary<string, string?>? GetStringDictionaryOrNull(this JsonElement json)
+        public static Dictionary<string, string?>? GetStringDictionaryOrNull(this JsonElement json)
         {
             if (json.ValueKind != JsonValueKind.Object)
             {

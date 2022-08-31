@@ -1,4 +1,4 @@
-#if !NETCOREAPP2_1
+#if NETCOREAPP3_1_OR_GREATER
 using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,7 +19,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -65,7 +65,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -108,7 +108,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -152,7 +152,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = DsnSamples.ValidDsnWithoutSecret, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -204,7 +204,7 @@ public class SentryTracingMiddlewareTests
 
         var hub = new Internal.Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx =>
             {
                 samplingContext = ctx;
@@ -257,7 +257,7 @@ public class SentryTracingMiddlewareTests
 
         var hub = new Internal.Hub(new SentryOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             TracesSampler = ctx =>
             {
                 samplingContext = ctx;
@@ -318,7 +318,7 @@ public class SentryTracingMiddlewareTests
             .Do(callback => transaction = callback.Arg<Transaction>());
         var options = new SentryAspNetCoreOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         };
 
@@ -359,7 +359,7 @@ public class SentryTracingMiddlewareTests
             .Do(callback => transaction = callback.Arg<Transaction>());
         var options = new SentryAspNetCoreOptions
         {
-            Dsn = DsnSamples.ValidDsnWithoutSecret,
+            Dsn = ValidDsn,
             TracesSampleRate = 1
         };
 

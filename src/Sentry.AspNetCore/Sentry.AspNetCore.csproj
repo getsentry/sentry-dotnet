@@ -10,7 +10,6 @@
     <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
   </ItemGroup>
 
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <ProjectReference Include="..\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
 

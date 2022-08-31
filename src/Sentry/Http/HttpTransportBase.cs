@@ -46,8 +46,8 @@ namespace Sentry.Http
             ISystemClock? clock = default)
         {
             _options = options;
-            _clock = clock ?? new SystemClock();
-            _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
+            _clock = clock ?? SystemClock.Clock;
+            _getEnvironmentVariable = getEnvironmentVariable ?? options.SettingLocator.GetEnvironmentVariable;
         }
 
         // Keep track of rate limits and their expiry dates.
@@ -184,16 +184,15 @@ namespace Sentry.Http
             var authHeader =
                 $"Sentry sentry_version={_options.SentryVersion}," +
                 $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
-                $"sentry_key={dsn.PublicKey}," +
-                (dsn.SecretKey is { } secretKey ? $"sentry_secret={secretKey}," : null) +
-                $"sentry_timestamp={_clock.GetUtcNow().ToUnixTimeSeconds()}";
+                $"sentry_key={dsn.PublicKey}" +
+                (dsn.SecretKey is { } secretKey ? $",sentry_secret={secretKey}" : null);
 
             return new HttpRequestMessage
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,
                 Headers = {{"X-Sentry-Auth", authHeader}},
-                Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger)
+                Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger, _clock)
             };
         }
 
@@ -226,8 +225,7 @@ namespace Sentry.Http
         /// <param name="response">The response message received from Sentry.</param>
         /// <param name="envelope">The envelope that was being sent.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
-        protected async Task HandleResponseAsync(HttpResponseMessage response, Envelope envelope,
-            CancellationToken cancellationToken)
+        protected Task HandleResponseAsync(HttpResponseMessage response, Envelope envelope, CancellationToken cancellationToken)
         {
             // Read & set rate limits for future requests
             ExtractRateLimits(response.Headers);
@@ -235,12 +233,10 @@ namespace Sentry.Http
             // Handle results
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                await HandleSuccessAsync(envelope, cancellationToken).ConfigureAwait(false);
+                return HandleSuccessAsync(envelope, cancellationToken);
             }
-            else
-            {
-                await HandleFailureAsync(response, envelope, cancellationToken).ConfigureAwait(false);
-            }
+
+            return HandleFailureAsync(response, envelope, cancellationToken);
         }
 
         /// <summary>
@@ -286,7 +282,7 @@ namespace Sentry.Http
         {
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
-                var payload = envelope.SerializeToString(_options.DiagnosticLogger);
+                var payload = envelope.SerializeToString(_options.DiagnosticLogger, _clock);
                 _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
                     envelope.TryGetEventId(),
                     payload);
@@ -302,7 +298,7 @@ namespace Sentry.Http
         {
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
-                var payload = await envelope.SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken)
+                var payload = await envelope.SerializeToStringAsync(_options.DiagnosticLogger, _clock, cancellationToken)
                     .ConfigureAwait(false);
 
                 _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}",
@@ -338,7 +334,7 @@ namespace Sentry.Http
             // If debug level, dump the whole envelope to the logger
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
-                var payload = envelope.SerializeToString(_options.DiagnosticLogger);
+                var payload = envelope.SerializeToString(_options.DiagnosticLogger, _clock);
                 _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n", envelope.TryGetEventId(), payload);
 
                 // SDK is in debug mode, and envelope was too large. To help troubleshoot:
@@ -393,7 +389,7 @@ namespace Sentry.Http
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
                 var payload = await envelope
-                    .SerializeToStringAsync(_options.DiagnosticLogger, cancellationToken).ConfigureAwait(false);
+                    .SerializeToStringAsync(_options.DiagnosticLogger, _clock, cancellationToken).ConfigureAwait(false);
                 _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n", envelope.TryGetEventId(), payload);
 
 

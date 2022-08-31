@@ -16,6 +16,7 @@ namespace Sentry.PlatformAbstractions
         /// v2.0.50727, v3.5, v4.0
         /// </example>
         public string? ShortName { get; set; }
+
         /// <summary>
         /// Version
         /// </summary>
@@ -23,6 +24,7 @@ namespace Sentry.PlatformAbstractions
         /// 2.0.50727.4927, 3.0.30729.4926, 3.5.30729.4926
         /// </example>
         public Version? Version { get; set; }
+
         /// <summary>
         /// Service pack number, if any
         /// </summary>
@@ -30,12 +32,14 @@ namespace Sentry.PlatformAbstractions
         /// Only relevant prior to .NET 4
         /// </remarks>
         public int? ServicePack { get; set; }
+
         /// <summary>
         /// Type of Framework profile
         /// </summary>
         /// <remarks>Only relevant for .NET 3.5 and 4.0</remarks>
         /// <seealso href="https://docs.microsoft.com/en-us/dotnet/framework/deployment/client-profile"/>
         public FrameworkProfile? Profile { get; set; }
+
         /// <summary>
         ///  A .NET Framework release key
         /// </summary>
@@ -67,6 +71,7 @@ namespace Sentry.PlatformAbstractions
         /// The .NET Client Profile is a subset of the .NET Framework
         /// </summary>
         Client,
+
         /// <summary>
         /// The full .NET Framework
         /// </summary>

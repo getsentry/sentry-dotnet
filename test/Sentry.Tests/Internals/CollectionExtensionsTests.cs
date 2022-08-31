@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 
+namespace Sentry.Tests.Internals;
+
 [UsesVerify]
 public class CollectionExtensionsTests
 {
@@ -7,7 +9,8 @@ public class CollectionExtensionsTests
     public Task GetOrCreate_invalid_type()
     {
         var dictionary = new ConcurrentDictionary<string, object> {["key"] = 1};
-        return Throws(() => dictionary.GetOrCreate<Value>("key")).IgnoreStackTrack();
+        return Throws(() => dictionary.GetOrCreate<Value>("key"))
+            .IgnoreStackTrace();
     }
 
     class Value
