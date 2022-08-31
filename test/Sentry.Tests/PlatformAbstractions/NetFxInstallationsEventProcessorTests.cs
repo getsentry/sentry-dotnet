@@ -44,7 +44,7 @@ public class NetFxInstallationsEventProcessorTests
         _ = sut.Process(@event);
 
         //Assert
-        var dictionary = @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey] as Dictionary<string, string>;
+        var dictionary = (Dictionary<string, string>) @event.Contexts[NetFxInstallationsEventProcessor.NetFxInstallationsKey];
         foreach (var item in installationList)
         {
             Assert.Contains($"\"{item.GetVersionNumber()}\"", dictionary[$"{NetFxInstallationsEventProcessor.NetFxInstallationsKey} {item.Profile}"]);

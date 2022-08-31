@@ -29,6 +29,8 @@ namespace Sentry.Internal
         private int _isEnabled = 1;
         public bool IsEnabled => _isEnabled == 1;
 
+        internal SentryOptions Options => _options;
+
         internal Hub(
             SentryOptions options,
             ISentryClient? client = null,
