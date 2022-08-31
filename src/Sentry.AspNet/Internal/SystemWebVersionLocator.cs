@@ -5,7 +5,7 @@ namespace Sentry.AspNet.Internal;
 
 internal static class SystemWebVersionLocator
 {
-    internal static string? Resolve(string? release, HttpContext context)
+    internal static string? Resolve(string? release, HttpContext? context)
     {
         if (!string.IsNullOrWhiteSpace(release))
         {
@@ -15,9 +15,9 @@ internal static class SystemWebVersionLocator
         return Resolve(context);
     }
 
-    internal static string? Resolve(HttpContext context)
+    internal static string? Resolve(HttpContext? context)
     {
-        if (context.ApplicationInstance?.GetType() is { } type)
+        if (context?.ApplicationInstance?.GetType() is { } type)
         {
             // Usually the type is ASP.global_asax and the BaseType is the Web Application.
             while (type is { Namespace: "ASP" })
