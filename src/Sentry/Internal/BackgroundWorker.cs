@@ -222,7 +222,7 @@ namespace Sentry.Internal
                 // See https://github.com/getsentry/sentry-dotnet/issues/1864
                 while (!_shutdownSource.IsCancellationRequested && _queue.Count > 0 && sw.Elapsed < timeout)
                 {
-                    await Task.Delay(10, _shutdownSource.Token).ConfigureAwait(false);
+                    await Task.Delay(10, CancellationToken.None).ConfigureAwait(false);
                 }
             }
             finally
