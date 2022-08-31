@@ -1,4 +1,4 @@
-#if NET461
+#if NETFRAMEWORK
 using System;
 using System.Collections.Generic;
 using Microsoft.Win32;
@@ -10,8 +10,9 @@ namespace Sentry.PlatformAbstractions
     /// </summary>
     public static partial class FrameworkInfo
     {
-        internal const string NetFxNdpRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\";
-        internal const string NetFxNdpFullRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
+        private const string NetFxNdpRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\";
+        private const string NetFxNdpFullRegistryKey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
+
         /// <summary>
         /// Get the latest Framework installation for the specified CLR
         /// </summary>
@@ -53,8 +54,7 @@ namespace Sentry.PlatformAbstractions
                 if (clrVersion == 2)
                 {
                     // CLR 2 runs .NET 2 to 3.5
-                    if (installation.Version.Major is 2 or 3
-                        && installation.Version >= latest.Version)
+                    if (installation.Version?.Major is 2 or 3 && installation.Version >= latest.Version)
                     {
                         latest = installation;
                     }
@@ -65,8 +65,7 @@ namespace Sentry.PlatformAbstractions
                 }
                 else if (clrVersion == 4)
                 {
-                    if (installation.Version.Major == 4
-                        && installation.Version >= latest.Version)
+                    if (installation.Version?.Major == 4 && installation.Version >= latest.Version)
                     {
                         latest = installation;
                     }
@@ -131,14 +130,13 @@ namespace Sentry.PlatformAbstractions
 
         private static FrameworkInstallation GetFromV4(RegistryKey subKey, string subKeyName)
         {
-            var hasRelease = int.TryParse(
-                subKey.GetValue("Release", null)?.ToString(), out var release);
+            Version? version = null;
 
-            Version version = null;
-            if (hasRelease)
+            var release = subKey.GetInt("Release");
+            if (release != null)
             {
                 // 4.5+
-                var displayableVersion = GetNetFxVersionFromRelease(release);
+                var displayableVersion = GetNetFxVersionFromRelease(release.Value);
                 if (displayableVersion != null)
                 {
                     version = displayableVersion;
@@ -147,37 +145,40 @@ namespace Sentry.PlatformAbstractions
 
             if (version == null)
             {
-                _ = Version.TryParse(subKey.GetString("Version"), out var parsed);
-                version = parsed;
+                var input = subKey.GetString("Version");
+                if (input != null && Version.TryParse(input, out var parsed))
+                {
+                    version = parsed;
+                }
             }
+
+            var servicePack = subKey.GetInt("SP");
+
+            var profile = subKeyName switch
+            {
+                "Full" => FrameworkProfile.Full,
+                "Client" => FrameworkProfile.Client,
+                _ => (FrameworkProfile?)null
+            };
 
             return new FrameworkInstallation
             {
-                Profile = subKeyName switch
-                {
-                    "Full" => FrameworkProfile.Full,
-                    "Client" => FrameworkProfile.Client,
-                    _ => null
-                },
+                Release = release,
                 Version = version,
-                ServicePack = subKey.GetInt("SP"),
-                Release = hasRelease ? release : null
+                ServicePack = servicePack,
+                Profile = profile
             };
         }
 
         // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#to-find-net-framework-versions-by-querying-the-registry-in-code-net-framework-45-and-later
-        internal static int? Get45PlusLatestInstallationFromRegistry()
+        private static int? Get45PlusLatestInstallationFromRegistry()
         {
             using var ndpKey = Registry.LocalMachine.OpenSubKey(NetFxNdpFullRegistryKey, false);
             return ndpKey?.GetInt("Release");
         }
 
-        internal static Version GetNetFxVersionFromRelease(int release)
-        {
-            _ = NetFxReleaseVersionMap.TryGetValue(release, out var version);
-            _ = Version.TryParse(version, out var parsed);
-            return parsed;
-        }
+        private static Version? GetNetFxVersionFromRelease(int release) =>
+            NetFxReleaseVersionMap.TryGetValue(release, out var version) ? Version.Parse(version) : null;
     }
 }
 

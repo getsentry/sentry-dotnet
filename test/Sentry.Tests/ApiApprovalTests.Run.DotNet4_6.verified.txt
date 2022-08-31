@@ -1181,16 +1181,16 @@ namespace Sentry.PlatformAbstractions
         Client = 0,
         Full = 1,
     }
-    public class Runtime
+    public class Runtime : System.IEquatable<Sentry.PlatformAbstractions.Runtime>
     {
         public Runtime(string? name = null, string? version = null, Sentry.PlatformAbstractions.FrameworkInstallation? frameworkInstallation = null, string? raw = null) { }
-        public Sentry.PlatformAbstractions.FrameworkInstallation FrameworkInstallation { get; }
+        public Sentry.PlatformAbstractions.FrameworkInstallation? FrameworkInstallation { get; }
         public string? Identifier { get; set; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }
         public static Sentry.PlatformAbstractions.Runtime Current { get; }
-        public bool Equals(Sentry.PlatformAbstractions.Runtime other) { }
+        public bool Equals(Sentry.PlatformAbstractions.Runtime? other) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string? ToString() { }
