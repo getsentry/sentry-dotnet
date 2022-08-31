@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Win32;
+using Sentry.Extensibility;
 
 namespace Sentry.PlatformAbstractions
 {
@@ -177,8 +178,16 @@ namespace Sentry.PlatformAbstractions
             return ndpKey?.GetInt("Release");
         }
 
-        private static Version? GetNetFxVersionFromRelease(int release) =>
-            NetFxReleaseVersionMap.TryGetValue(release, out var version) ? Version.Parse(version) : null;
+        private static Version? GetNetFxVersionFromRelease(int release)
+        {
+            if (NetFxReleaseVersionMap.TryGetValue(release, out var version))
+            {
+                return Version.Parse(version);
+            }
+
+            SentrySdk.CurrentOptions?.LogWarning("Could not determine .NET Framework version for release {0}.", release);
+            return null;
+        }
     }
 }
 
