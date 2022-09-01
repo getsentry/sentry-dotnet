@@ -116,7 +116,9 @@ public class RuntimeInfoTests
         }};
         yield return new object[] { new ParseTestCase
         {
-            Raw = ".NET Framework For Windows Mobile 10"
+            Raw = ".NET Framework For Windows Mobile 10",
+            ExpectedName = ".NET Framework For Windows Mobile",
+            ExpectedVersion = "10"
         }};
         yield return new object[] { new ParseTestCase
         {
@@ -126,7 +128,8 @@ public class RuntimeInfoTests
         }};
         yield return new object[] { new ParseTestCase
         {
-            Raw = "web"
+            Raw = "web",
+            ExpectedName = "web"
         }};
         yield return new object[] { new ParseTestCase
         {
