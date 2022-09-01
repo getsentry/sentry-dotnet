@@ -11,13 +11,13 @@ using Sentry.Testing;
 namespace Sentry.AspNetCore.Tests;
 
 [UsesVerify]
-public class VersioningTests
+public class WebIntegrationTests
 {
     private readonly TestOutputDiagnosticLogger _logger;
 
-    public VersioningTests(ITestOutputHelper output)
+    public WebIntegrationTests(ITestOutputHelper output)
     {
-        _logger = new TestOutputDiagnosticLogger(output);
+        _logger = new(output);
     }
 
     [Fact]
