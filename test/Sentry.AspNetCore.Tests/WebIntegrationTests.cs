@@ -11,6 +11,7 @@ using Sentry.Testing;
 namespace Sentry.AspNetCore.Tests;
 
 [UsesVerify]
+[Collection(nameof(SentrySdkCollection))]
 public class WebIntegrationTests
 {
     private readonly TestOutputDiagnosticLogger _logger;
