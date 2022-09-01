@@ -322,14 +322,6 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
-    public async Task FlushAsync_EmptyQueue_LogsAndReturns()
-    {
-        using var sut = _fixture.GetSut();
-        await sut.FlushAsync(TimeSpan.MaxValue);
-        _fixture.Logger.Received(1).Log(SentryLevel.Debug, "No events to flush.");
-    }
-
-    [Fact]
     public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
     {
         // Arrange
