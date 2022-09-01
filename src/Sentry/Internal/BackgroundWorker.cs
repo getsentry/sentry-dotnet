@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal
@@ -288,6 +289,12 @@ namespace Sentry.Internal
                 await completionSource.Task.ConfigureAwait(false);
 
                 _options.LogDebug("Successfully flushed all events up to call to FlushAsync.");
+
+                if (_transport is CachingTransport cachingTransport && !cancellationToken.IsCancellationRequested)
+                {
+                    _options.LogDebug("Flushing caching transport with remaining flush time.");
+                    await cachingTransport.FlushAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
             catch (OperationCanceledException)
             {
