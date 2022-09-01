@@ -37,13 +37,14 @@ public class TransactionProcessorTests
     public void SampledOut()
     {
         var options = new SentryOptions();
-        options.AddTransactionProcessor(new TrackingProcessor());
+        var processor = new TrackingProcessor();
+        options.AddTransactionProcessor(processor);
         var transaction = new Transaction("name", "operation")
         {
             IsSampled = false
         };
         new Hub(options).CaptureTransaction(transaction);
-        Assert.False(TrackingProcessor.Called);
+        Assert.False(processor.Called);
     }
 
     public class TrackingProcessor : ISentryTransactionProcessor
@@ -54,7 +55,7 @@ public class TransactionProcessorTests
             return transaction;
         }
 
-        public static bool Called;
+        public bool Called;
     }
 
     [Fact]
