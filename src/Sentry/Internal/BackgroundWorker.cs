@@ -245,12 +245,6 @@ namespace Sentry.Internal
                 return;
             }
 
-            if (_queue.IsEmpty)
-            {
-                _options.LogDebug("No events to flush.");
-                return;
-            }
-
             var completionSource = new TaskCompletionSource<bool>();
             cancellationToken.Register(() => completionSource.TrySetCanceled());
 
@@ -271,22 +265,20 @@ namespace Sentry.Internal
 
             try
             {
+                // now we're subscribed and counting, make sure it's not already empty.
                 var trackedDepth = _queue.Count;
-                if (trackedDepth == 0) // now we're subscribed and counting, make sure it's not already empty.
+                if (trackedDepth != 0)
                 {
-                    return;
+                    Interlocked.Exchange(ref depth, trackedDepth);
+                    _options.LogDebug("Tracking depth: {0}.", trackedDepth);
+
+                    // Check if the worker didn't finish flushing before we set the depth
+                    if (counter < depth)
+                    {
+                        // Await until event is flushed (or we have cancelled)
+                        await completionSource.Task.ConfigureAwait(false);
+                    }
                 }
-
-                Interlocked.Exchange(ref depth, trackedDepth);
-                _options.LogDebug("Tracking depth: {0}.", trackedDepth);
-
-                if (counter >= depth) // When the worker finished flushing before we set the depth
-                {
-                    return;
-                }
-
-                // Await until event is flushed (or we have cancelled)
-                await completionSource.Task.ConfigureAwait(false);
 
                 _options.LogDebug("Successfully flushed all events up to call to FlushAsync.");
 
