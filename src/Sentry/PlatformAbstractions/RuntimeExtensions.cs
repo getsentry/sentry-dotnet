@@ -14,26 +14,26 @@ namespace Sentry.PlatformAbstractions
         /// </summary>
         /// <param name="runtime">The runtime instance to check.</param>
         /// <returns>True if it's .NET Framework, otherwise false.</returns>
-        public static bool IsNetFx(this Runtime runtime) => runtime.IsRuntime(".NET Framework");
+        public static bool IsNetFx(this Runtime runtime) => runtime.StartsWith(".NET Framework");
 
         /// <summary>
         /// Is the runtime instance .NET Core (or .NET).
         /// </summary>
         /// <param name="runtime">The runtime instance to check.</param>
         /// <returns>True if it's .NET Core (or .NET), otherwise false.</returns>
-        public static bool IsNetCore(this Runtime runtime) => runtime.IsRuntime(".NET Core") || runtime.IsRuntime(".NET");
+        public static bool IsNetCore(this Runtime runtime) =>
+            runtime.StartsWith(".NET Core") ||
+            (runtime.StartsWith(".NET") && !runtime.StartsWith(".NET Framework"));
 
         /// <summary>
         /// Is the runtime instance Mono.
         /// </summary>
         /// <param name="runtime">The runtime instance to check.</param>
         /// <returns>True if it's Mono, otherwise false.</returns>
-        public static bool IsMono(this Runtime runtime) => runtime.IsRuntime("Mono");
+        public static bool IsMono(this Runtime runtime) => runtime.StartsWith("Mono");
 
-        private static bool IsRuntime(this Runtime? runtime, string runtimeName)
-        {
-            return runtime?.Name?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true
-                   || runtime?.Raw?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true;
-        }
+        private static bool StartsWith(this Runtime? runtime, string runtimeName) =>
+            runtime?.Name?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true ||
+            runtime?.Raw?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true;
     }
 }
