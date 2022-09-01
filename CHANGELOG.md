@@ -26,6 +26,7 @@
 - Fix environment name casing issue ([#1861](https://github.com/getsentry/sentry-dotnet/pull/1861))
 - Null check HttpContext in SystemWebVersionLocator ([#1881](https://github.com/getsentry/sentry-dotnet/pull/1881))
 - Fix detection of .NET Framework 4.8.1 ([#1885](https://github.com/getsentry/sentry-dotnet/pull/1885))
+- Flush caching transport with main flush ([#1890](https://github.com/getsentry/sentry-dotnet/pull/1890))
 
 ## 3.20.1
 
