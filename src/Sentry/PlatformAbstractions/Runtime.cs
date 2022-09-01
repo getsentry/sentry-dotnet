@@ -1,29 +1,20 @@
+using System;
+
 namespace Sentry.PlatformAbstractions
 {
     /// <summary>
     /// Details of the runtime
     /// </summary>
-    public class Runtime
+    public class Runtime : IEquatable<Runtime>
     {
-        private static Runtime? _runtime;
         /// <summary>
         /// Gets the current runtime
         /// </summary>
         /// <value>
         /// The current runtime.
         /// </value>
-        public static Runtime Current
-        {
-            get
-            {
-                if (_runtime is null)
-                {
-                    _runtime = RuntimeInfo.GetRuntime();
-                    RuntimeInfo.SetAdditionalParameters(_runtime);
-                }
-                return _runtime;
-            }
-        }
+        public static Runtime Current { get; } = RuntimeInfo.GetRuntime();
+
         /// <summary>
         /// The name of the runtime
         /// </summary>
@@ -31,22 +22,25 @@ namespace Sentry.PlatformAbstractions
         /// .NET Framework, .NET Native, Mono
         /// </example>
         public string? Name { get; }
+
         /// <summary>
         /// The version of the runtime
         /// </summary>
         /// <example>
         /// 4.7.2633.0
         /// </example>
-        public string? Version { get; internal set; }
-#if NET461
+        public string? Version { get; }
+
+#if NETFRAMEWORK
         /// <summary>
         /// The .NET Framework installation which is running the process
         /// </summary>
         /// <value>
         /// The framework installation or null if not running .NET Framework
         /// </value>
-        public FrameworkInstallation FrameworkInstallation { get; internal set; }
+        public FrameworkInstallation? FrameworkInstallation { get; }
 #endif
+
         /// <summary>
         /// The raw value parsed to extract Name and Version
         /// </summary>
@@ -62,26 +56,48 @@ namespace Sentry.PlatformAbstractions
         /// <remarks>
         /// This property will be populated for .NET 5 and newer, or <c>null</c> otherwise.
         /// </remarks>
-        public string? Identifier { get; set; }
+        public string? Identifier
+        {
+            get => _identifier;
+
+            [Obsolete("This setter is nonfunctional, and will be removed in a future version.")]
+            // ReSharper disable ValueParameterNotUsed
+            set { }
+            // ReSharper restore ValueParameterNotUsed
+        }
+
+        // TODO: Convert to get-only auto-property in next major version
+        private readonly string? _identifier;
 
         /// <summary>
         /// Creates a new Runtime instance
         /// </summary>
+#if NETFRAMEWORK
         public Runtime(
             string? name = null,
             string? version = null,
-#if NET461
             FrameworkInstallation? frameworkInstallation = null,
-#endif
             string? raw = null)
         {
             Name = name;
             Version = version;
-#if NET461
             FrameworkInstallation = frameworkInstallation;
-#endif
             Raw = raw;
+            _identifier = null;
         }
+#else
+        public Runtime(
+            string? name = null,
+            string? version = null,
+            string? raw = null,
+            string? identifier = null)
+        {
+            Name = name;
+            Version = version;
+            Raw = raw;
+            _identifier = identifier;
+        }
+#endif
 
         /// <summary>
         /// The string representation of the Runtime
@@ -108,18 +124,26 @@ namespace Sentry.PlatformAbstractions
         /// </summary>
         /// <param name="other">The instance to compare against.</param>
         /// <returns>True if the instances are equal by reference or its state.</returns>
-        public bool Equals(Runtime other)
+        public bool Equals(Runtime? other)
         {
             if (other is null)
+            {
                 return false;
+            }
+
             if (ReferenceEquals(this, other))
+            {
                 return true;
+            }
+
             return string.Equals(Name, other.Name)
                    && string.Equals(Version, other.Version)
-#if NET461
-                   && Equals(FrameworkInstallation, other.FrameworkInstallation)
+                   && string.Equals(Raw, other.Raw)
+#if NETFRAMEWORK
+                   && Equals(FrameworkInstallation, other.FrameworkInstallation);
+#else
+                   && Equals(Identifier, other.Identifier);
 #endif
-                   && string.Equals(Raw, other.Raw);
         }
 
         /// <summary>
@@ -130,11 +154,20 @@ namespace Sentry.PlatformAbstractions
         public override bool Equals(object? obj)
         {
             if (obj is null)
+            {
                 return false;
+            }
+
             if (ReferenceEquals(this, obj))
+            {
                 return true;
+            }
+
             if (obj.GetType() != GetType())
+            {
                 return false;
+            }
+
             return Equals((Runtime)obj);
         }
 
@@ -146,12 +179,14 @@ namespace Sentry.PlatformAbstractions
         {
             unchecked
             {
-                var hashCode = Name != null ? Name.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ (Version != null ? Version.GetHashCode() : 0);
-#if NET461
-                hashCode = (hashCode * 397) ^ (FrameworkInstallation != null ? FrameworkInstallation.GetHashCode() : 0);
+                var hashCode = Name?.GetHashCode() ?? 0;
+                hashCode = (hashCode * 397) ^ (Version?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Raw?.GetHashCode() ?? 0);
+#if NETFRAMEWORK
+                hashCode = (hashCode * 397) ^ (FrameworkInstallation?.GetHashCode() ?? 0);
+#else
+                hashCode = (hashCode * 397) ^ (_identifier?.GetHashCode() ?? 0);
 #endif
-                hashCode = (hashCode * 397) ^ (Raw != null ? Raw.GetHashCode() : 0);
                 return hashCode;
             }
         }

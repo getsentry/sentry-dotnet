@@ -1,8 +1,6 @@
-// ReSharper disable once CheckNamespace
-
 using Sentry.Testing;
 
-namespace Sentry.Protocol.Tests.Context;
+namespace Sentry.Tests.Protocol.Context;
 
 public class GpuTests
 {

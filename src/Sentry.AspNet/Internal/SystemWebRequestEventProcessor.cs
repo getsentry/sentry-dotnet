@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using System.Web;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.AspNet.Internal;
@@ -91,18 +90,6 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
         }
 
         @event.ServerName = Environment.MachineName;
-
-        // Move 'runtime' under key 'server-runtime' as User-Agent parsing done at
-        // Sentry will represent the client's
-        if (@event.Contexts.TryRemove(Runtime.Type, out var runtime))
-        {
-            @event.Contexts["server-runtime"] = runtime;
-        }
-
-        if (@event.Contexts.TryRemove(Protocol.OperatingSystem.Type, out var os))
-        {
-            @event.Contexts["server-os"] = os;
-        }
 
         var body = PayloadExtractor.ExtractPayload(new SystemWebHttpRequest(context.Request));
         if (body != null)

@@ -16,14 +16,21 @@
 - Add and configure options for the iOS SDK ([#1849](https://github.com/getsentry/sentry-dotnet/pull/1849))
 - Set default `Release` and `Distribution` for iOS and Android ([#1856](https://github.com/getsentry/sentry-dotnet/pull/1856))
 - Apply WinUI 3 exception handler in Sentry core ([#1863](https://github.com/getsentry/sentry-dotnet/pull/1863))
+- Copy context info from iOS ([#1884](https://github.com/getsentry/sentry-dotnet/pull/1884))
 
 ### Fixes
 
+- Parse "Mono Unity IL2CPP" correctly in platform runtime name ([#1742](https://github.com/getsentry/sentry-dotnet/pull/1742))
 - Fix logging loop with NLog sentry ([#1824](https://github.com/getsentry/sentry-dotnet/pull/1824))
 - Fix logging loop with Serilog sentry ([#1828](https://github.com/getsentry/sentry-dotnet/pull/1828))
 - Skip attachment if stream is empty ([#1854](https://github.com/getsentry/sentry-dotnet/pull/1854))
 - Allow some mobile options to be modified from defaults ([#1857](https://github.com/getsentry/sentry-dotnet/pull/1857))
 - Fix environment name casing issue ([#1861](https://github.com/getsentry/sentry-dotnet/pull/1861))
+- Null check HttpContext in SystemWebVersionLocator ([#1881](https://github.com/getsentry/sentry-dotnet/pull/1881))
+- Fix detection of .NET Framework 4.8.1 ([#1885](https://github.com/getsentry/sentry-dotnet/pull/1885))
+- Flush caching transport with main flush ([#1890](https://github.com/getsentry/sentry-dotnet/pull/1890))
+- Fix Sentry interfering with MAUI's focus events ([#1891](https://github.com/getsentry/sentry-dotnet/pull/1891))
+- Stop using `server-os` and `server-runtime` ([#1893](https://github.com/getsentry/sentry-dotnet/pull/1893))
 
 ## 3.20.1
 

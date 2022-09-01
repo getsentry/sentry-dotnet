@@ -1,25 +1,44 @@
+using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.PlatformAbstractions;
 
 public class RuntimeInfoTests
 {
-    [Fact] // Verifies that some value is extracted anywhere the tests runs
-    public void GetRuntime_NotNull()
+    [Fact]
+    public void GetRuntime_AllProperties()
     {
         var actual = RuntimeInfo.GetRuntime();
         Assert.NotNull(actual);
         Assert.NotNull(actual.Name);
         Assert.NotNull(actual.Version);
+        Assert.NotNull(actual.Raw);
+
+#if NET5_0_OR_GREATER
+        Assert.Equal(".NET", actual.Name);
+        Assert.NotNull(actual.Identifier);
+#elif NETCOREAPP
+        Assert.Equal(".NET Core", actual.Name);
+#elif NETFRAMEWORK
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Assert.Equal(".NET Framework", actual.Name);
+            Assert.NotNull(actual.FrameworkInstallation);
+            Assert.NotNull(actual.FrameworkInstallation.Version);
+        }
+        else
+        {
+            Assert.Equal("Mono", actual.Name);
+            Assert.Null(actual.FrameworkInstallation);
+        }
+#endif
     }
 
     [Theory]
     [MemberData(nameof(ParseTestCases))]
     public void Parse_TestCases(ParseTestCase parseTestCase)
     {
-        var actual = RuntimeInfo.Parse(parseTestCase.Raw,
-            parseTestCase.NameProvided);
+        var actual = RuntimeInfo.Parse(parseTestCase.Raw, parseTestCase.NameProvided);
 
         if (parseTestCase.Raw == null)
         {
@@ -29,66 +48,18 @@ public class RuntimeInfoTests
             }
             else
             {
+                Assert.NotNull(actual);
                 Assert.Equal(parseTestCase.NameProvided, actual.Name);
             }
         }
         else
         {
+            Assert.NotNull(actual);
             Assert.Equal(parseTestCase.ExpectedName, actual.Name);
             Assert.Equal(parseTestCase.ExpectedVersion, actual.Version);
             Assert.Equal(parseTestCase.Raw, actual.Raw);
         }
     }
-
-#if NET461
-    [SkippableFact]
-    public void SetReleaseAndVersionNetFx_OnNetFx_NonNullReleaseAndVersion()
-    {
-        // This test is only relevant when running on CLR.
-        Skip.If(RuntimeInfo.GetRuntime().IsMono());
-
-        var input = new Runtime(".NET Framework");
-        RuntimeInfo.SetNetFxReleaseAndVersion(input);
-
-        input.Version.Should().NotBeNull();
-        input.FrameworkInstallation.Should().NotBeNull();
-        input.FrameworkInstallation.Version.Should().NotBeNull();
-    }
-#endif
-
-#if NETCOREAPP2_1 || NETCOREAPP3_0
-    [Fact]
-    public void SetNetCoreVersion_NetCoreAsName()
-    {
-        var input = new Runtime(".NET Core");
-        RuntimeInfo.SetNetCoreVersion(input);
-
-        Assert.NotNull(input.Version);
-        Assert.Equal(".NET Core", input.Name);
-    }
-#endif
-
-#if NET5_0_OR_GREATER
-    [Fact]
-    public void SetNetCoreVersion_Net5Runtime_NullNetCoreVersion()
-    {
-        var input = new Runtime(".NET");
-        RuntimeInfo.SetNetCoreVersion(input);
-
-        Assert.Equal(".NET", input.Name);
-        Assert.Null(input.Version);
-    }
-
-    [Fact]
-    public void SetRuntimeIdentifier()
-    {
-        var input = new Runtime(".NET");
-        RuntimeInfo.SetRuntimeIdentifier(input);
-
-        Assert.Equal(".NET", input.Name);
-        Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, input.Identifier);
-    }
-#endif
 
     public static IEnumerable<object[]> ParseTestCases()
     {
@@ -145,7 +116,9 @@ public class RuntimeInfoTests
         }};
         yield return new object[] { new ParseTestCase
         {
-            Raw = ".NET Framework For Windows Mobile 10"
+            Raw = ".NET Framework For Windows Mobile 10",
+            ExpectedName = ".NET Framework For Windows Mobile",
+            ExpectedVersion = "10"
         }};
         yield return new object[] { new ParseTestCase
         {
@@ -155,7 +128,8 @@ public class RuntimeInfoTests
         }};
         yield return new object[] { new ParseTestCase
         {
-            Raw = "web"
+            Raw = "web",
+            ExpectedName = "web"
         }};
         yield return new object[] { new ParseTestCase
         {
@@ -166,6 +140,18 @@ public class RuntimeInfoTests
         {
             Raw = null,
             ExpectedName = null,
+            ExpectedVersion = null
+        }};
+        yield return new object[] { new ParseTestCase
+        {
+            Raw = "Mono 6.13.0 (explicit/88268f9e785)",
+            ExpectedName = "Mono",
+            ExpectedVersion = "6.13.0"
+        }};
+        yield return new object[] { new ParseTestCase
+        {
+            Raw = "Mono Unity IL2CPP (Jun 22 2022 18:13:02)",
+            ExpectedName = "Mono Unity IL2CPP",
             ExpectedVersion = null
         }};
     }
