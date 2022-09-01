@@ -347,8 +347,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
         button.Clicked += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Clicked), UserType, UserActionCategory);
         button.Pressed += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Pressed), UserType,UserActionCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Pressed), UserType, UserActionCategory);
         button.Released += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Released), UserType,UserActionCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Released), UserType, UserActionCategory);
     }
 }
