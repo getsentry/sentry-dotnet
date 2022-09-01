@@ -1,8 +1,7 @@
-// ReSharper disable once CheckNamespace
-
 using Sentry.Testing;
+using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
-namespace Sentry.Protocol.Tests.Context;
+namespace Sentry.Tests.Protocol.Context;
 
 public class OperatingSystemTests
 {
