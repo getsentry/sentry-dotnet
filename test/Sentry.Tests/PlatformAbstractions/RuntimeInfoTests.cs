@@ -116,7 +116,9 @@ public class RuntimeInfoTests
         }};
         yield return new object[] { new ParseTestCase
         {
-            Raw = ".NET Framework For Windows Mobile 10"
+            Raw = ".NET Framework For Windows Mobile 10",
+            ExpectedName = ".NET Framework For Windows Mobile",
+            ExpectedVersion = "10"
         }};
         yield return new object[] { new ParseTestCase
         {
@@ -126,7 +128,8 @@ public class RuntimeInfoTests
         }};
         yield return new object[] { new ParseTestCase
         {
-            Raw = "web"
+            Raw = "web",
+            ExpectedName = "web"
         }};
         yield return new object[] { new ParseTestCase
         {
@@ -137,6 +140,18 @@ public class RuntimeInfoTests
         {
             Raw = null,
             ExpectedName = null,
+            ExpectedVersion = null
+        }};
+        yield return new object[] { new ParseTestCase
+        {
+            Raw = "Mono 6.13.0 (explicit/88268f9e785)",
+            ExpectedName = "Mono",
+            ExpectedVersion = "6.13.0"
+        }};
+        yield return new object[] { new ParseTestCase
+        {
+            Raw = "Mono Unity IL2CPP (Jun 22 2022 18:13:02)",
+            ExpectedName = "Mono Unity IL2CPP",
             ExpectedVersion = null
         }};
     }
