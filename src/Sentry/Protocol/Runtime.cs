@@ -1,7 +1,7 @@
-// ReSharper disable once CheckNamespace
-
+using System;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -13,7 +13,7 @@ namespace Sentry.Protocol
     /// Typically this context is used multiple times if multiple runtimes are involved (for instance if you have a JavaScript application running on top of JVM)
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-    public sealed class Runtime : IJsonSerializable
+    public sealed class Runtime : IJsonSerializable, ICloneable<Runtime>, IUpdatable<Runtime>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -53,7 +53,11 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance
         /// </summary>
-        public Runtime Clone()
+        // NOTE: This appears to have been public by mistake
+        [Obsolete("This method will be made internal in a future version.")]
+        public Runtime Clone() => ((ICloneable<Runtime>)this).Clone();
+
+        Runtime ICloneable<Runtime>.Clone()
             => new()
             {
                 Name = Name,
@@ -62,6 +66,29 @@ namespace Sentry.Protocol
                 Build = Build,
                 RawDescription = RawDescription
             };
+
+        /// <summary>
+        /// Updates this instance with data from the properties in the <paramref name="source"/>,
+        /// unless there is already a value in the existing property.
+        /// </summary>
+        internal void UpdateFrom(Runtime source) => ((IUpdatable<Runtime>)this).UpdateFrom(source);
+
+        void IUpdatable.UpdateFrom(object source)
+        {
+            if (source is Runtime runtime)
+            {
+                ((IUpdatable<Runtime>)this).UpdateFrom(runtime);
+            }
+        }
+
+        void IUpdatable<Runtime>.UpdateFrom(Runtime source)
+        {
+            Name ??= source.Name;
+            Version ??= source.Version;
+            Identifier ??= source.Identifier;
+            Build ??= source.Build;
+            RawDescription ??= source.RawDescription;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)

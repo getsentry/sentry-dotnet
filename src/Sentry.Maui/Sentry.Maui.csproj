@@ -13,7 +13,7 @@
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
 
     <!-- Add a pre-release identifier for this package  -->
-    <Version>$(Version)-preview.2</Version>
+    <Version>$(Version)-preview.3</Version>
 
     <!--
       Imports MAUI dependencies.

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal
@@ -215,7 +216,17 @@ namespace Sentry.Internal
 
             try
             {
+                var stopwatch = Stopwatch.StartNew();
                 await DoFlushAsync(timeoutWithShutdown.Token).ConfigureAwait(false);
+
+                // We may not have waited the full timeout amount due to timer precision, so wait a bit longer if needed.
+                // See https://github.com/getsentry/sentry-dotnet/issues/1864
+                while (!_shutdownSource.IsCancellationRequested &&
+                       _queue.Count > 0 &&
+                       stopwatch.Elapsed < timeout)
+                {
+                    await Task.Delay(10, CancellationToken.None).ConfigureAwait(false);
+                }
             }
             finally
             {
@@ -231,12 +242,6 @@ namespace Sentry.Internal
             if (cancellationToken.IsCancellationRequested)
             {
                 _options.LogDebug("Timeout or shutdown already requested. Exiting.");
-                return;
-            }
-
-            if (_queue.IsEmpty)
-            {
-                _options.LogDebug("No events to flush.");
                 return;
             }
 
@@ -260,24 +265,28 @@ namespace Sentry.Internal
 
             try
             {
+                // now we're subscribed and counting, make sure it's not already empty.
                 var trackedDepth = _queue.Count;
-                if (trackedDepth == 0) // now we're subscribed and counting, make sure it's not already empty.
+                if (trackedDepth != 0)
                 {
-                    return;
+                    Interlocked.Exchange(ref depth, trackedDepth);
+                    _options.LogDebug("Tracking depth: {0}.", trackedDepth);
+
+                    // Check if the worker didn't finish flushing before we set the depth
+                    if (counter < depth)
+                    {
+                        // Await until event is flushed (or we have cancelled)
+                        await completionSource.Task.ConfigureAwait(false);
+                    }
                 }
-
-                Interlocked.Exchange(ref depth, trackedDepth);
-                _options.LogDebug("Tracking depth: {0}.", trackedDepth);
-
-                if (counter >= depth) // When the worker finished flushing before we set the depth
-                {
-                    return;
-                }
-
-                // Await until event is flushed (or we have cancelled)
-                await completionSource.Task.ConfigureAwait(false);
 
                 _options.LogDebug("Successfully flushed all events up to call to FlushAsync.");
+
+                if (_transport is CachingTransport cachingTransport && !cancellationToken.IsCancellationRequested)
+                {
+                    _options.LogDebug("Flushing caching transport with remaining flush time.");
+                    await cachingTransport.FlushAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
             catch (OperationCanceledException)
             {

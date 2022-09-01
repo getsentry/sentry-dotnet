@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using NSubstitute.ExceptionExtensions;
+using Sentry.Internal.Http;
 using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
@@ -41,6 +42,7 @@ public class BackgroundWorkerTests
                     return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
                 });
 
+            SentryOptions.Dsn = ValidDsn;
             SentryOptions.Debug = true;
             SentryOptions.DiagnosticLogger = Logger;
             SentryOptions.ClientReportRecorder = ClientReportRecorder;
@@ -320,14 +322,6 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
-    public async Task FlushAsync_EmptyQueue_LogsAndReturns()
-    {
-        using var sut = _fixture.GetSut();
-        await sut.FlushAsync(TimeSpan.MaxValue);
-        _fixture.Logger.Received(1).Log(SentryLevel.Debug, "No events to flush.");
-    }
-
-    [Fact]
     public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
     {
         // Arrange
@@ -385,8 +379,8 @@ public class BackgroundWorkerTests
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
         Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
 
-        // Test the timeout, with a bit of tolerance on the lower bound
-        sw.Elapsed.Should().BeGreaterThan(flushTimeout - TimeSpan.FromMilliseconds(10));
+        // Test the timeout
+        sw.Elapsed.Should().BeGreaterThan(flushTimeout);
     }
 
     [Fact]
@@ -468,5 +462,32 @@ public class BackgroundWorkerTests
         await _fixture.Transport.Received(1).SendEnvelopeAsync(
             Arg.Is<Envelope>(e => e.Items.Count == 1 && e.Items[0].TryGetType() == "client_report"),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task FlushAsync_Calls_CachingTransport_FlushAsync()
+    {
+        // Arrange
+        var fileSystem = new FakeFileSystem();
+        using var tempDir = new TempDirectory(fileSystem);
+
+        var options = _fixture.SentryOptions;
+        options.FileSystem = fileSystem;
+        options.CacheDirectoryPath = tempDir.Path;
+
+        var innerTransport = _fixture.Transport;
+        _fixture.Transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+
+        using var sut = _fixture.GetSut();
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        // Act
+        sut.EnqueueEnvelope(envelope, process: false);
+        sut.ProcessQueuedItems(1);
+        await sut.FlushAsync(Timeout.InfiniteTimeSpan);
+
+        // Assert
+        _fixture.Logger.Received(1)
+            .Log(SentryLevel.Debug, "External FlushAsync invocation: flushing cached envelopes.");
     }
 }
