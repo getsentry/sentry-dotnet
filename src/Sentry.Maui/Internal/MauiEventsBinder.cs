@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Options;
@@ -125,6 +126,13 @@ internal class MauiEventsBinder : IMauiEventsBinder
         var events = elementType.GetEvents(BindingFlags.Instance | BindingFlags.Public);
         foreach (var eventInfo in events.Where(e => !ExplicitlyHandledTypes.Contains(e.DeclaringType!)))
         {
+            var browsable = eventInfo.GetCustomAttribute<EditorBrowsableAttribute>();
+            if (browsable != null && browsable.State != EditorBrowsableState.Always)
+            {
+                // These events are not meant for typical consumption.
+                continue;
+            }
+
             Action<object, object> handler = (sender, _) =>
             {
                 _hub.AddBreadcrumbForEvent(_options, sender, eventInfo.Name);
