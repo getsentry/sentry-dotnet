@@ -28,6 +28,7 @@
 - Null check HttpContext in SystemWebVersionLocator ([#1881](https://github.com/getsentry/sentry-dotnet/pull/1881))
 - Fix detection of .NET Framework 4.8.1 ([#1885](https://github.com/getsentry/sentry-dotnet/pull/1885))
 - Flush caching transport with main flush ([#1890](https://github.com/getsentry/sentry-dotnet/pull/1890))
+- Fix Sentry interfering with MAUI's focus events ([#1891](https://github.com/getsentry/sentry-dotnet/pull/1891))
 
 ## 3.20.1
 
