@@ -18,6 +18,7 @@
 
 ### Fixes
 
+- Parse "Mono Unity IL2CPP" correctly in platform runtime name ([#1742](https://github.com/getsentry/sentry-dotnet/pull/1742))
 - Fix logging loop with NLog sentry ([#1824](https://github.com/getsentry/sentry-dotnet/pull/1824))
 - Fix logging loop with Serilog sentry ([#1828](https://github.com/getsentry/sentry-dotnet/pull/1828))
 - Skip attachment if stream is empty ([#1854](https://github.com/getsentry/sentry-dotnet/pull/1854))
