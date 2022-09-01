@@ -36,7 +36,12 @@ public class TransactionProcessorTests
     [Fact]
     public void SampledOut()
     {
-        var options = new SentryOptions();
+        var transport = Substitute.For<ITransport>();
+        var options = new SentryOptions
+        {
+            Transport = transport,
+            Dsn = ValidDsn
+        };
         var processor = new TrackingProcessor();
         options.AddTransactionProcessor(processor);
         var transaction = new Transaction("name", "operation")
@@ -49,13 +54,13 @@ public class TransactionProcessorTests
 
     public class TrackingProcessor : ISentryTransactionProcessor
     {
+        public bool Called { get; private set; }
+
         public Transaction Process(Transaction transaction)
         {
             Called = true;
             return transaction;
         }
-
-        public bool Called;
     }
 
     [Fact]
