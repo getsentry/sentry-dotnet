@@ -22,7 +22,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
 
     public IntegrationMockedBackgroundWorker()
     {
-        ConfigureWehHost = builder =>
+        ConfigureWebHost = builder =>
         {
             _ = builder.UseSentry(options =>
             {
@@ -242,7 +242,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     [Fact]
     public void AllSettingsViaJson()
     {
-        ConfigureWehHost = b =>
+        ConfigureWebHost = b =>
         {
             _ = b.ConfigureAppConfiguration(c =>
             {
