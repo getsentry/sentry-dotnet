@@ -1,6 +1,33 @@
 # Changelog
 
-## Unreleased
+## 3.21.0
+
+### Various fixes & improvements
+
+- Add ISentryTransactionProcessor (#1862) by @SimonCropp
+- Stop using `server-os` and `server-runtime` (#1893) by @mattjohnsonpint
+- Fix Sentry interfering with MAUI's focus events (#1891) by @mattjohnsonpint
+- Copy context info from iOS (#1884) by @mattjohnsonpint
+- Flush caching transport with main flush (#1890) by @mattjohnsonpint
+- Parse "Mono Unity IL2CPP" correctly in platform runtime name (#1742) by @bitsandfoxes
+- Fix detection of .NET Framework 4.8.1 (#1885) by @mattjohnsonpint
+- null check HttpContext in SystemWebVersionLocator (#1881) by @SimonCropp
+- Move Array option over to use List<T> (#1866) by @SimonCropp
+- Apply WinUI 3 exception handler in Sentry core (#1863) by @mattjohnsonpint
+- Fix environment name casing issue (#1861) by @SimonCropp
+- Allow some mobile options to be modified from defaults (#1857) by @mattjohnsonpint
+- Set default `Release` and `Distribution` for iOS and Android (#1856) by @mattjohnsonpint
+- fix: Skip attachment if stream is empty (#1854) by @bitsandfoxes
+- Add `Distribution` properties to go along with `Release` info (#1851) by @mattjohnsonpint
+- Add and configure options for the iOS SDK (#1849) by @mattjohnsonpint
+- Add MacCatalyst target and sample app (#1848) by @mattjohnsonpint
+- Add API for deliberately crashing an app (#1842) by @mattjohnsonpint
+- Serilog integration tests (#1828) by @SimonCropp
+- Enable Scope Sync for iOS (#1834) by @mattjohnsonpint
+- Add Native iOS Support (#1829) by @mattjohnsonpint
+- Logging loop with n log sentry (#1824) by @SimonCropp
+- Update Sentry Android SDK to version 6.3.0 (#1826) by @mattjohnsonpint
+- feat: Added 'integrations' to SdkVersion (#1820) by @bitsandfoxes
 
 ## Features
 
