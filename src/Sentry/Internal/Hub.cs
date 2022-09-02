@@ -344,13 +344,29 @@ namespace Sentry.Internal
             {
                 // Apply scope data
                 var currentScope = ScopeManager.GetCurrent();
-                currentScope.Key.Evaluate();
-                currentScope.Key.Apply(transaction);
+                var scope = currentScope.Key;
+                scope.Evaluate();
+                scope.Apply(transaction);
 
                 // Apply enricher
                 _enricher.Apply(transaction);
 
-                currentScope.Value.CaptureTransaction(transaction);
+                var processedTransaction = transaction;
+                if (transaction.IsSampled != false)
+                {
+                    foreach (var processor in scope.GetAllTransactionProcessors())
+                    {
+                        processedTransaction = processor.Process(transaction);
+                        if (processedTransaction == null)
+                        {
+                            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+                            _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
+                            return;
+                        }
+                    }
+                }
+
+                currentScope.Value.CaptureTransaction(processedTransaction);
             }
             catch (Exception e)
             {

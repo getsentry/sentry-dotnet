@@ -267,6 +267,50 @@ namespace Sentry
         }
 
         /// <summary>
+        /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
+        /// </summary>
+        /// <param name="options">The SentryOptions to hold the processor.</param>
+        /// <param name="processor">The transaction processor.</param>
+        public static void AddTransactionProcessor(this SentryOptions options, ISentryTransactionProcessor processor)
+        {
+            if (options.TransactionProcessors == null)
+            {
+                options.TransactionProcessors = new() {processor};
+            }
+            else
+            {
+                options.TransactionProcessors.Add(processor);
+            }
+        }
+
+        /// <summary>
+        /// Adds transaction processors which are invoked when creating a <see cref="Transaction"/>.
+        /// </summary>
+        /// <param name="options">The SentryOptions to hold the processor.</param>
+        /// <param name="processors">The transaction processors.</param>
+        public static void AddTransactionProcessors(this SentryOptions options, IEnumerable<ISentryTransactionProcessor> processors)
+        {
+            if (options.TransactionProcessors == null)
+            {
+                options.TransactionProcessors = processors.ToList();
+            }
+            else
+            {
+                options.TransactionProcessors.AddRange(processors);
+            }
+        }
+
+        /// <summary>
+        /// Adds an transaction processor provider which is invoked when creating a <see cref="Transaction"/>.
+        /// </summary>
+        /// <param name="options">The SentryOptions to hold the processor provider.</param>
+        /// <param name="processorProvider">The transaction processor provider.</param>
+        public static void AddTransactionProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryTransactionProcessor>> processorProvider)
+            => options.TransactionProcessorsProviders = options.TransactionProcessorsProviders != null
+                ? options.TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToList()
+                : new() { processorProvider };
+
+        /// <summary>
         /// Add the exception processor provider.
         /// </summary>
         /// <param name="options">The SentryOptions to hold the processor provider.</param>
@@ -290,6 +334,13 @@ namespace Sentry
         /// <param name="options">The SentryOptions which holds the processor providers.</param>
         public static IEnumerable<ISentryEventProcessor> GetAllEventProcessors(this SentryOptions options)
             => options.EventProcessorsProviders?.SelectMany(p => p()) ?? Enumerable.Empty<ISentryEventProcessor>();
+
+        /// <summary>
+        /// Invokes all transaction processor providers available.
+        /// </summary>
+        /// <param name="options">The SentryOptions which holds the processor providers.</param>
+        public static IEnumerable<ISentryTransactionProcessor> GetAllTransactionProcessors(this SentryOptions options)
+            => options.TransactionProcessorsProviders?.SelectMany(p => p()) ?? Enumerable.Empty<ISentryTransactionProcessor>();
 
         /// <summary>
         /// Invokes all exception processor providers available.

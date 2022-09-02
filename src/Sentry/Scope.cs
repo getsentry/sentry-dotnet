@@ -62,10 +62,18 @@ namespace Sentry
         private readonly Lazy<ConcurrentBag<ISentryEventProcessor>> _lazyEventProcessors =
             new(LazyThreadSafetyMode.PublicationOnly);
 
+        private readonly Lazy<ConcurrentBag<ISentryTransactionProcessor>> _lazyTransactionProcessors =
+            new(LazyThreadSafetyMode.PublicationOnly);
+
         /// <summary>
         /// A list of event processors.
         /// </summary>
         internal ConcurrentBag<ISentryEventProcessor> EventProcessors => _lazyEventProcessors.Value;
+
+        /// <summary>
+        /// A list of event processors.
+        /// </summary>
+        internal ConcurrentBag<ISentryTransactionProcessor> TransactionProcessors => _lazyTransactionProcessors.Value;
 
         /// <summary>
         /// An event that fires when the scope evaluates.
@@ -423,6 +431,11 @@ namespace Sentry
             foreach (var processor in EventProcessors)
             {
                 clone.EventProcessors.Add(processor);
+            }
+
+            foreach (var processor in TransactionProcessors)
+            {
+                clone.TransactionProcessors.Add(processor);
             }
 
             foreach (var processor in ExceptionProcessors)

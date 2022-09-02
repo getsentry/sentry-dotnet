@@ -344,8 +344,12 @@ namespace Sentry
         public static void AddEventProcessors(this Sentry.Scope scope, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> processors) { }
         public static void AddExceptionProcessor(this Sentry.Scope scope, Sentry.Extensibility.ISentryEventExceptionProcessor processor) { }
         public static void AddExceptionProcessors(this Sentry.Scope scope, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> processors) { }
+        public static void AddTransactionProcessor(this Sentry.Scope scope, Sentry.Extensibility.ISentryTransactionProcessor processor) { }
+        public static void AddTransactionProcessor(this Sentry.Scope scope, System.Func<Sentry.Transaction, Sentry.Transaction?> processor) { }
+        public static void AddTransactionProcessors(this Sentry.Scope scope, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.Scope scope) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.Scope scope) { }
+        public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors(this Sentry.Scope scope) { }
     }
     public sealed class SdkVersion : Sentry.IJsonSerializable
     {
@@ -528,6 +532,9 @@ namespace Sentry
         public static void AddInAppExclude(this Sentry.SentryOptions options, string prefix) { }
         public static void AddInAppInclude(this Sentry.SentryOptions options, string prefix) { }
         public static void AddIntegration(this Sentry.SentryOptions options, Sentry.Integrations.ISdkIntegration integration) { }
+        public static void AddTransactionProcessor(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryTransactionProcessor processor) { }
+        public static void AddTransactionProcessorProvider(this Sentry.SentryOptions options, System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor>> processorProvider) { }
+        public static void AddTransactionProcessors(this Sentry.SentryOptions options, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
         public static void ApplyDefaultTags(this Sentry.SentryOptions options, Sentry.IHasTags hasTags) { }
         public static void DisableAppDomainProcessExitFlush(this Sentry.SentryOptions options) { }
         public static void DisableAppDomainUnhandledExceptionCapture(this Sentry.SentryOptions options) { }
@@ -536,6 +543,7 @@ namespace Sentry
         public static void DisableTaskUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }
+        public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors(this Sentry.SentryOptions options) { }
         public static void RemoveIntegration<TIntegration>(this Sentry.SentryOptions options)
             where TIntegration : Sentry.Integrations.ISdkIntegration { }
         public static Sentry.SentryOptions UseStackTraceFactory(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
@@ -1063,6 +1071,10 @@ namespace Sentry.Extensibility
     public interface ISentryStackTraceFactory
     {
         Sentry.SentryStackTrace? Create(System.Exception? exception = null);
+    }
+    public interface ISentryTransactionProcessor
+    {
+        Sentry.Transaction? Process(Sentry.Transaction transaction);
     }
     public interface ITransport
     {

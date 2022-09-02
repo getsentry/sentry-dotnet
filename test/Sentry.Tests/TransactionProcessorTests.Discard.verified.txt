@@ -1,0 +1,60 @@
+[
+  {
+    Header: {
+      event_id: Guid_1,
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Message: {
+              Message: TheMessage
+            },
+            Platform: csharp,
+            SentryExceptions: [],
+            SentryThreads: [],
+            Level: info,
+            TransactionName: my transaction,
+            Request: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
+            User: {},
+            Environment: production
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      sdk: {
+        name: sentry.dotnet,
+        version: 3.20.1
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: client_report
+        },
+        Payload: {
+          Source: {
+            DiscardedEvents: {
+              DiscardReasonWithCategory { Reason = DiscardReason { Value = event_processor }, Category = DataCategory { Value = transaction } }: 1
+            }
+          }
+        }
+      }
+    ]
+  }
+]
