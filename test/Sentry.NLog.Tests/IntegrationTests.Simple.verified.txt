@@ -3,8 +3,7 @@
     Header: {
       event_id: Guid_1,
       sdk: {
-        name: sentry.dotnet,
-        version: 3.20.1
+        name: sentry.dotnet
       }
     },
     Items: [
