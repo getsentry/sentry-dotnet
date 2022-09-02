@@ -1,8 +1,17 @@
-﻿namespace Sentry.Tests;
+using Sentry.Testing;
+
+namespace Sentry.Tests;
 
 [UsesVerify]
 public class EventProcessorTests
 {
+    private readonly TestOutputDiagnosticLogger _logger;
+
+    public EventProcessorTests(ITestOutputHelper output)
+    {
+        _logger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public async Task Simple()
     {
@@ -71,12 +80,13 @@ public class EventProcessorTests
         public SentryEvent Process(SentryEvent @event) => null;
     }
 
-    private static SentryOptions Options(RecordingTransport transport) =>
+    private SentryOptions Options(ITransport transport) =>
         new()
         {
             TracesSampleRate = 1,
             Debug = true,
             Transport = transport,
             Dsn = ValidDsn,
+            DiagnosticLogger = _logger
         };
 }
