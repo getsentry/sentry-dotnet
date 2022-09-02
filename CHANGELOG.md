@@ -2,37 +2,11 @@
 
 ## 3.21.0
 
-### Various fixes & improvements
-
-- Add ISentryTransactionProcessor (#1862) by @SimonCropp
-- Stop using `server-os` and `server-runtime` (#1893) by @mattjohnsonpint
-- Fix Sentry interfering with MAUI's focus events (#1891) by @mattjohnsonpint
-- Copy context info from iOS (#1884) by @mattjohnsonpint
-- Flush caching transport with main flush (#1890) by @mattjohnsonpint
-- Parse "Mono Unity IL2CPP" correctly in platform runtime name (#1742) by @bitsandfoxes
-- Fix detection of .NET Framework 4.8.1 (#1885) by @mattjohnsonpint
-- null check HttpContext in SystemWebVersionLocator (#1881) by @SimonCropp
-- Move Array option over to use List<T> (#1866) by @SimonCropp
-- Apply WinUI 3 exception handler in Sentry core (#1863) by @mattjohnsonpint
-- Fix environment name casing issue (#1861) by @SimonCropp
-- Allow some mobile options to be modified from defaults (#1857) by @mattjohnsonpint
-- Set default `Release` and `Distribution` for iOS and Android (#1856) by @mattjohnsonpint
-- fix: Skip attachment if stream is empty (#1854) by @bitsandfoxes
-- Add `Distribution` properties to go along with `Release` info (#1851) by @mattjohnsonpint
-- Add and configure options for the iOS SDK (#1849) by @mattjohnsonpint
-- Add MacCatalyst target and sample app (#1848) by @mattjohnsonpint
-- Add API for deliberately crashing an app (#1842) by @mattjohnsonpint
-- Serilog integration tests (#1828) by @SimonCropp
-- Enable Scope Sync for iOS (#1834) by @mattjohnsonpint
-- Add Native iOS Support (#1829) by @mattjohnsonpint
-- Logging loop with n log sentry (#1824) by @SimonCropp
-- Update Sentry Android SDK to version 6.3.0 (#1826) by @mattjohnsonpint
-- feat: Added 'integrations' to SdkVersion (#1820) by @bitsandfoxes
+_Includes Sentry.Maui Preview 3_
 
 ## Features
 
 - Add ISentryTransactionProcessor ([#1862](https://github.com/getsentry/sentry-dotnet/pull/1862))
-- Move Array option over to use List<T> ([#1866](https://github.com/getsentry/sentry-dotnet/pull/1866))
 - Added 'integrations' to SdkVersion ([#1820](https://github.com/getsentry/sentry-dotnet/pull/1820))
 - Updated Sentry Android SDK to version 6.3.0 ([#1826](https://github.com/getsentry/sentry-dotnet/pull/1826))
 - Add the Sentry iOS SDK ([#1829](https://github.com/getsentry/sentry-dotnet/pull/1829))
@@ -84,33 +58,29 @@
 
 ## 3.19.0
 
+_Includes Sentry.Maui Preview 2_
+
 ### Features
 
 - Expose `EnumerateChainedExceptions` ([#1733](https://github.com/getsentry/sentry-dotnet/pull/1733))
 - Android Scope Sync ([#1737](https://github.com/getsentry/sentry-dotnet/pull/1737))
+- Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
 - Support `IntPtr` and `UIntPtr` serialization ([#1746](https://github.com/getsentry/sentry-dotnet/pull/1746))
 - Log Warning when secret is detected in DSN ([#1749](https://github.com/getsentry/sentry-dotnet/pull/1749))
 - Catch permission exceptions on Android ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
+- Enable offline caching in MAUI ([#1753](https://github.com/getsentry/sentry-dotnet/pull/1753))
 - Send client report when flushing queue ([#1757](https://github.com/getsentry/sentry-dotnet/pull/1757))
 
 ### Fixes
 
+- Set MAUI minimum version ([#1728](https://github.com/getsentry/sentry-dotnet/pull/1728))
 - Don't allow `SentryDiagnosticListenerIntegration` to be added multiple times ([#1748](https://github.com/getsentry/sentry-dotnet/pull/1748))
+- Catch permission exceptions for MAUI ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
 - Don't allow newlines in diagnostic logger messages ([#1756](https://github.com/getsentry/sentry-dotnet/pull/1756))
 
-## Sentry.Maui 3.19.0-preview.2
-
-### Features
-
-- Enable logging in MAUI ([#1738](https://github.com/getsentry/sentry-dotnet/pull/1738))
-- Enable offline caching in MAUI ([#1753](https://github.com/getsentry/sentry-dotnet/pull/1753))
-
-### Fixes
-
-- Set MAUI minimum version ([#1728](https://github.com/getsentry/sentry-dotnet/pull/1728))
-- Catch permission exceptions for MAUI ([#1750](https://github.com/getsentry/sentry-dotnet/pull/1750))
-
 ## 3.18.0
+
+_Includes Sentry.Maui Preview 1_
 
 ### Features
 
@@ -125,6 +95,13 @@
   - Set Java/Android SDK options ([#1694](https://github.com/getsentry/sentry-dotnet/pull/1694))
   - Refactor and update Android options ([#1705](https://github.com/getsentry/sentry-dotnet/pull/1705))
   - Add Android OS information to the event context ([#1716](https://github.com/getsentry/sentry-dotnet/pull/1716))
+- Added a new `Sentry.Maui` integration library for the [.NET MAUI](https://dotnet.microsoft.com/apps/maui) platform:
+  - Initial MAUI support ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
+  - Continue with adding MAUI support ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
+  - MAUI events become extra context in Sentry events ([#1706](https://github.com/getsentry/sentry-dotnet/pull/1706))
+  - Add options for PII breadcrumbs from MAUI events ([#1709](https://github.com/getsentry/sentry-dotnet/pull/1709))
+  - Add device information to the event context ([#1713](https://github.com/getsentry/sentry-dotnet/pull/1713))
+  - Add platform OS information to the event context ([#1717](https://github.com/getsentry/sentry-dotnet/pull/1717))
 
 ### Fixes
 
@@ -138,18 +115,6 @@
 - Improve serialization perf and fix memory leak in `SentryEvent` ([#1693](https://github.com/getsentry/sentry-dotnet/pull/1693))
 - Add type checking in contexts TryGetValue ([#1700](https://github.com/getsentry/sentry-dotnet/pull/1700))
 - Restore serialization of the `Platform` name ([#1702](https://github.com/getsentry/sentry-dotnet/pull/1702))
-
-## Sentry.Maui 3.18.0-preview.1
-
-### Features
-
-- Added a new `Sentry.Maui` integration library for the [.NET MAUI](https://dotnet.microsoft.com/apps/maui) platform:
-  - Initial MAUI support ([#1663](https://github.com/getsentry/sentry-dotnet/pull/1663))
-  - Continue with adding MAUI support ([#1670](https://github.com/getsentry/sentry-dotnet/pull/1670))
-  - MAUI events become extra context in Sentry events ([#1706](https://github.com/getsentry/sentry-dotnet/pull/1706))
-  - Add options for PII breadcrumbs from MAUI events ([#1709](https://github.com/getsentry/sentry-dotnet/pull/1709))
-  - Add device information to the event context ([#1713](https://github.com/getsentry/sentry-dotnet/pull/1713))
-  - Add platform OS information to the event context ([#1717](https://github.com/getsentry/sentry-dotnet/pull/1717))
 
 ## 3.17.1
 
