@@ -1,8 +1,17 @@
-﻿namespace Sentry.Tests;
+using Sentry.Testing;
+
+namespace Sentry.Tests;
 
 [UsesVerify]
 public class TransactionProcessorTests
 {
+    private readonly TestOutputDiagnosticLogger _logger;
+
+    public TransactionProcessorTests(ITestOutputHelper output)
+    {
+        _logger = new TestOutputDiagnosticLogger(output);
+    }
+
     [Fact]
     public async Task Simple()
     {
@@ -37,11 +46,7 @@ public class TransactionProcessorTests
     public void SampledOut()
     {
         var transport = Substitute.For<ITransport>();
-        var options = new SentryOptions
-        {
-            Transport = transport,
-            Dsn = ValidDsn
-        };
+        var options = Options(transport);
         var processor = new TrackingProcessor();
         options.AddTransactionProcessor(processor);
         var transaction = new Transaction("name", "operation")
@@ -90,12 +95,13 @@ public class TransactionProcessorTests
             null;
     }
 
-    private static SentryOptions Options(RecordingTransport transport) =>
+    private SentryOptions Options(ITransport transport) =>
         new()
         {
             TracesSampleRate = 1,
             Debug = true,
             Transport = transport,
             Dsn = ValidDsn,
+            DiagnosticLogger = _logger
         };
 }

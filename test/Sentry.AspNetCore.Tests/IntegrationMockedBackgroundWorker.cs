@@ -20,14 +20,15 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     private IBackgroundWorker Worker { get; set; } = Substitute.For<IBackgroundWorker>();
     protected Action<SentryAspNetCoreOptions> Configure;
 
-    public IntegrationMockedBackgroundWorker()
+    public IntegrationMockedBackgroundWorker(ITestOutputHelper output)
     {
-        ConfigureWehHost = builder =>
+        ConfigureWebHost = builder =>
         {
             _ = builder.UseSentry(options =>
             {
                 options.Dsn = ValidDsn;
                 options.BackgroundWorker = Worker;
+                options.DiagnosticLogger = new TestOutputDiagnosticLogger(output);
 
                 Configure?.Invoke(options);
             });
@@ -242,7 +243,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
     [Fact]
     public void AllSettingsViaJson()
     {
-        ConfigureWehHost = b =>
+        ConfigureWebHost = b =>
         {
             _ = b.ConfigureAppConfiguration(c =>
             {

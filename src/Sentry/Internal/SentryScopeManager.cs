@@ -42,14 +42,12 @@ namespace Sentry.Internal
 
         public void ConfigureScope(Action<Scope>? configureScope)
         {
-            _options.LogDebug("Configuring the scope.");
             var scope = GetCurrent();
             configureScope?.Invoke(scope.Key);
         }
 
         public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
         {
-            _options.LogDebug("Configuring the scope asynchronously.");
             var scope = GetCurrent();
             return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }
