@@ -37,10 +37,15 @@ public static class Program
     private static void DemoLogger(ILogger logger)
     {
         // Here is an example of how you can set user properties in code via NLog. The layout is configured to use these values for the sentry user
-        using (MappedDiagnosticsLogicalContext.SetScoped("id", "myId"))
-        using (MappedDiagnosticsLogicalContext.SetScoped("username", "userNumberOne"))
-        using (MappedDiagnosticsLogicalContext.SetScoped("email", "theCoolest@sample.com"))
-        using (MappedDiagnosticsLogicalContext.SetScoped("ipAddress", "127.0.0.1"))
+        var properties = new Dictionary<string, string>
+        {
+            {"id", "myId"},
+            {"username", "userNumberOne"},
+            {"email", "theCoolest@sample.com"},
+            {"ipAddress", "127.0.0.1"}
+        };
+
+        using (ScopeContext.PushProperties(properties))
         {
             // Minimum Breadcrumb and Event log levels are set to levels higher than Trace.
             // In this case, Trace messages are ignored
@@ -120,10 +125,10 @@ public static class Program
                 //Optionally specify user properties via NLog (here using MappedDiagnosticsLogicalContext as an example)
                 o.User = new SentryNLogUser
                 {
-                    Id = "${mdlc:item=id}",
-                    Username = "${mdlc:item=username}",
-                    Email = "${mdlc:item=email}",
-                    IpAddress = "${mdlc:item=ipAddress}",
+                    Id = "${scopeproperty:item=id}",
+                    Username = "${scopeproperty:item=username}",
+                    Email = "${scopeproperty:item=email}",
+                    IpAddress = "${scopeproperty:item=ipAddress}",
                     Other =
                     {
                         new TargetPropertyWithContext("mood", "joyous")
