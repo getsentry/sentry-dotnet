@@ -14,13 +14,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="System.Globalization" />
+    <Using Include="System.Text.Json" />
     <Using Include="Foundation" />
+    <Using Include="SentryCocoa.SentryOptions" Alias="SentryCocoaOptions" />
+    <Using Include="SentryCocoa.SentrySdk" Alias="SentryCocoaSdk" />
   </ItemGroup>
 
   <PropertyGroup>
     <SentryCocoaSdkVersion>7.23.0</SentryCocoaSdkVersion>
     <SentryCocoaSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Cocoa\$(SentryCocoaSdkVersion)\</SentryCocoaSdkDirectory>
     <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
+
+    <!-- TODO: Replace with commented line once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
+    <SentryCocoaZipFile>$(MSBuildThisFileDirectory)Sentry.xcframework.$(SentryCocoaSdkVersion).custombuild.zip</SentryCocoaZipFile>
+    <!-- <SentryCocoaZipFile>$(SentryCocoaSdkDirectory)Sentry.xcframework.zip</SentryCocoaZipFile> -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,28 +38,21 @@
   </ItemGroup>
 
   <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences">
-    <DownloadFile
+
+    <!-- TODO: Uncomment to download official version from GitHub once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
+    <!-- <DownloadFile
       SourceUrl="https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaSdkVersion)/Sentry.xcframework.zip"
       DestinationFolder="$(SentryCocoaSdkDirectory)"
-      Condition="!Exists('$(SentryCocoaSdkDirectory)Sentry.xcframework.zip')"
+      Condition="!Exists('$(SentryCocoaZipFile)')"
       Retries="3"
-    />
-    <Unzip
-      SourceFiles="$(SentryCocoaSdkDirectory)Sentry.xcframework.zip"
-      DestinationFolder="$(SentryCocoaSdkDirectory)"
-      Condition="Exists('$(SentryCocoaSdkDirectory)Sentry.xcframework.zip') AND !Exists('$(SentryCocoaFramework)')"
+    /> -->
+
+    <!-- Unzip with built-in command to properly restore symlinks -->
+    <MakeDir Directories="$(SentryCocoaSdkDirectory)" Condition="!Exists('$(SentryCocoaSdkDirectory)')"/>
+    <Exec
+      Command="unzip -q &quot;$(SentryCocoaZipFile)&quot; -d &quot;$(SentryCocoaSdkDirectory)&quot;"
+      Condition="Exists('$(SentryCocoaZipFile)') And !Exists('$(SentryCocoaFramework)')"
     />
   </Target>
-
-  <!--
-    Workaround for https://github.com/dotnet/msbuild/issues/4584 needed when packing in 6.0.3xx
-    Remove when 6.0.4xx is released, and bump SDK version global.json.
-  -->
-  <Target Name="RemoveInvalidManifest" AfterTargets="BuiltProjectOutputGroup">
-    <ItemGroup Condition="!Exists('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)')">
-      <BuiltProjectOutputGroupOutput Remove="$([System.IO.Path]::GetFullPath('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)'))" />
-    </ItemGroup>
-  </Target>
-
 
 </Project>

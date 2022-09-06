@@ -1,3 +1,5 @@
+using Sentry.Internal.Extensions;
+
 // ReSharper disable once CheckNamespace
 namespace NLog;
 
@@ -25,8 +27,7 @@ public static class ConfigurationExtensions
         Action<SentryNLogOptions>? optionsConfig = null)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (configuration is null)
+        if (configuration.IsNull())
         {
             return configuration!;
         }
@@ -50,8 +51,7 @@ public static class ConfigurationExtensions
         Action<SentryNLogOptions>? optionsConfig = null)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (configuration is null)
+        if (configuration.IsNull())
         {
             return configuration!;
         }
@@ -74,8 +74,7 @@ public static class ConfigurationExtensions
         Action<SentryNLogOptions>? optionsConfig = null)
     {
         // Not to throw on code that ignores nullability warnings.
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (configuration is null)
+        if (configuration.IsNull())
         {
             return configuration!;
         }

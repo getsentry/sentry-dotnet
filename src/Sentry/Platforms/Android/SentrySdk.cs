@@ -1,7 +1,8 @@
+using Android.Content.PM;
+using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
-using Sentry.Extensibility;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
@@ -9,7 +10,7 @@ namespace Sentry;
 
 public static partial class SentrySdk
 {
-    private static AndroidContext? AndroidContext;
+    private static AndroidContext AppContext { get; set; } = Application.Context;
 
     /// <summary>
     /// Initializes the SDK for Android, with an optional configuration options callback.
@@ -17,11 +18,12 @@ public static partial class SentrySdk
     /// <param name="context">The Android application context.</param>
     /// <param name="configureOptions">The configuration options callback.</param>
     /// <returns>An object that should be disposed when the application terminates.</returns>
+    [Obsolete("It is no longer required to provide the application context when calling Init. " +
+              "This method may be removed in a future major release.")]
     public static IDisposable Init(AndroidContext context, Action<SentryOptions>? configureOptions)
     {
-        var options = new SentryOptions();
-        configureOptions?.Invoke(options);
-        return Init(context, options);
+        AppContext = context;
+        return Init(configureOptions);
     }
 
     /// <summary>
@@ -30,36 +32,26 @@ public static partial class SentrySdk
     /// <param name="context">The Android application context.</param>
     /// <param name="options">The configuration options instance.</param>
     /// <returns>An object that should be disposed when the application terminates.</returns>
+    [Obsolete("It is no longer required to provide the application context when calling Init. " +
+              "This method may be removed in a future major release.")]
     public static IDisposable Init(AndroidContext context, SentryOptions options)
     {
-        AndroidContext = context;
+        AppContext = context;
         return Init(options);
     }
 
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
-        // Set options for the managed SDK that don't depend on the Android SDK
-        options.AutoSessionTracking = true;
-        options.IsGlobalModeEnabled = true;
-
-        // "Best" mode throws permission exception on Android
-        options.DetectStartupTime = StartupTimeDetectionMode.Fast;
+        // Set default release and distribution
+        options.Release ??= GetDefaultReleaseString();
+        options.Distribution ??= GetDefaultDistributionString();
 
         // Make sure we capture managed exceptions from the Android environment
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 
-        // Now initialize the Android SDK if we have been given an AndroidContext
-        var context = AndroidContext;
-        if (context == null)
-        {
-            options.LogWarning("Running on Android, but did not initialize Sentry with an AndroidContext. " +
-                               "The embedded Sentry Android SDK is disabled. " +
-                               "Call SentrySdk.Init(AndroidContext, SentryOptions) instead.");
-            return;
-        }
-
+        // Now initialize the Android SDK
         SentryAndroidOptions? androidOptions = null;
-        SentryAndroid.Init(context, new JavaLogger(options),
+        SentryAndroid.Init(AppContext, new JavaLogger(options),
             new OptionsConfigurationCallback(o =>
             {
                 // Capture the android options reference on the outer scope
@@ -72,6 +64,7 @@ public static partial class SentrySdk
                 o.AttachStacktrace = options.AttachStacktrace;
                 o.Debug = options.Debug;
                 o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
+                o.Dist = options.Distribution;
                 o.Dsn = options.Dsn;
                 o.EnableAutoSessionTracking = options.AutoSessionTracking;
                 o.Environment = options.Environment;
@@ -94,11 +87,8 @@ public static partial class SentrySdk
                     o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
                 }
 
-                var javaTags = o.Tags;
-                foreach (var tag in options.DefaultTags)
-                {
-                    javaTags.Add(tag);
-                }
+                // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
+                //       one when sending events, which is relayed through the scope observer.
 
                 if (options.HttpProxy is System.Net.WebProxy proxy)
                 {
@@ -151,7 +141,6 @@ public static partial class SentrySdk
                 // These options are in Java.SentryOptions but not ours
                 o.AttachThreads = options.Android.AttachThreads;
                 o.ConnectionTimeoutMillis = (int)options.Android.ConnectionTimeout.TotalMilliseconds;
-                o.Dist = options.Android.Distribution;
                 o.EnableNdk = options.Android.EnableNdk;
                 o.EnableShutdownHook = options.Android.EnableShutdownHook;
                 o.EnableUncaughtExceptionHandler = options.Android.EnableUncaughtExceptionHandler;
@@ -160,8 +149,8 @@ public static partial class SentrySdk
                 o.ReadTimeoutMillis = (int)options.Android.ReadTimeout.TotalMilliseconds;
 
                 // In-App Excludes and Includes to be passed to the Android SDK
-                options.Android.InAppExclude?.ToList().ForEach(x => o.AddInAppExclude(x));
-                options.Android.InAppInclude?.ToList().ForEach(x => o.AddInAppInclude(x));
+                options.Android.InAppExcludes?.ForEach(x => o.AddInAppExclude(x));
+                options.Android.InAppIncludes?.ForEach(x => o.AddInAppInclude(x));
 
                 // These options are intentionally set and not exposed for modification
                 o.EnableExternalConfiguration = false;
@@ -176,7 +165,7 @@ public static partial class SentrySdk
                 o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
             }));
 
-        // Set options for the managed SDK that depend on the Android SDK
+        // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
         options.CrashedLastRun = () => Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
@@ -194,5 +183,48 @@ public static partial class SentrySdk
         {
             Close();
         }
+    }
+
+    private static string? GetDefaultReleaseString()
+    {
+        var packageName = AppContext.PackageName;
+        if (packageName == null)
+        {
+            return null;
+        }
+
+        var packageInfo = AppContext.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+        return packageInfo == null ? null : $"{packageName}@{packageInfo.VersionName}+{packageInfo.GetVersionCode()}";
+    }
+
+    private static string? GetDefaultDistributionString() => GetAndroidPackageVersionCode()?.ToString();
+
+    private static long? GetAndroidPackageVersionCode()
+    {
+        var packageName = AppContext.PackageName;
+        if (packageName == null)
+        {
+            return null;
+        }
+
+        var packageInfo = AppContext.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+        return packageInfo?.GetVersionCode();
+    }
+
+    private static long? GetVersionCode(this PackageInfo packageInfo)
+    {
+        // The value comes from different property depending on Android version
+        if (AndroidBuild.VERSION.SdkInt >= BuildVersionCodes.P)
+        {
+#pragma warning disable CA1416
+            // callsite only reachable on Android >= P (28)
+            return packageInfo.LongVersionCode;
+#pragma warning restore CA1416
+        }
+
+#pragma warning disable CS0618
+        // obsolete on Android >= P (28)
+        return packageInfo.VersionCode;
+#pragma warning restore CS0618
     }
 }

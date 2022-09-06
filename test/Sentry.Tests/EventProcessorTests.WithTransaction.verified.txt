@@ -1,0 +1,38 @@
+[
+  {
+    Header: {
+      event_id: Guid_1,
+      sdk: {
+        name: sentry.dotnet
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Message: {
+              Message: TheMessage
+            },
+            Platform: csharp,
+            SentryExceptions: [],
+            SentryThreads: [],
+            Level: info,
+            TransactionName: my transaction,
+            Request: {},
+            Contexts: {
+              key: value,
+              trace: {
+                Operation: 
+              }
+            },
+            User: {},
+            Environment: production
+          }
+        }
+      }
+    ]
+  }
+]

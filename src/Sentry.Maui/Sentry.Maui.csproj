@@ -13,15 +13,14 @@
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
 
     <!-- Add a pre-release identifier for this package  -->
-    <Version>$(Version)-preview.2</Version>
+    <Version>$(Version)-preview.3</Version>
 
     <!--
-      Imports MAUI dependencies, and sets the minimum compatible version.
+      Imports MAUI dependencies.
       Requires the MAUI .NET workload to be installed with:
         dotnet workload install maui
     -->
     <UseMaui>true</UseMaui>
-    <MauiVersion>6.0.400</MauiVersion>
 
     <!--
       MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749
@@ -31,11 +30,10 @@
 
     <!--
       As long as we are using platform-specific targets, we have to set some default supported versions.
-      TODO: These are the same ones used in the MAUI sample app.  Investigate if we can/should go lower.
     -->
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">10.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>

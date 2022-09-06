@@ -8,34 +8,43 @@ public partial class MainPage
 {
     private readonly ILogger<MainPage> _logger;
 
-    int count = 0;
+    private int _count = 0;
 
     // NOTE: You can only inject an ILogger<T>, not a plain ILogger
     public MainPage(ILogger<MainPage> logger)
+    {
+        _logger = logger;
+        InitializeComponent();
+    }
+
+    protected override void OnAppearing()
     {
 #if !ANDROID
         JavaCrashBtn.IsVisible = false;
 #endif
 
-#if !(ANDROID || IOS) // TODO: Enable for MACCATALYST
+#if !__MOBILE__
         NativeCrashBtn.IsVisible = false;
 #endif
-        _logger = logger;
-        InitializeComponent();
+        base.OnAppearing();
     }
 
     private void OnCounterClicked(object sender, EventArgs e)
     {
-        count++;
+        _count++;
 
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
+        if (_count == 1)
+        {
+            CounterBtn.Text = $"Clicked {_count} time";
+        }
         else
-            CounterBtn.Text = $"Clicked {count} times";
+        {
+            CounterBtn.Text = $"Clicked {_count} times";
+        }
 
         SemanticScreenReader.Announce(CounterBtn.Text);
 
-        _logger.LogInformation("The button has been clicked {ClickCount} times", count);
+        _logger.LogInformation("The button has been clicked {ClickCount} times", _count);
     }
 
     private void OnUnhandledExceptionClicked(object sender, EventArgs e)
@@ -43,11 +52,16 @@ public partial class MainPage
         SentrySdk.CauseCrash(CrashType.Managed);
     }
 
+    private void OnBackgroundThreadUnhandledExceptionClicked(object sender, EventArgs e)
+    {
+        SentrySdk.CauseCrash(CrashType.ManagedBackgroundThread);
+    }
+
     private void OnCapturedExceptionClicked(object sender, EventArgs e)
     {
         try
         {
-            SentrySdk.CauseCrash(CrashType.Managed);
+            throw new ApplicationException("This exception was thrown and captured manually, without crashing the app.");
         }
         catch (Exception ex)
         {
@@ -64,7 +78,7 @@ public partial class MainPage
 
     private void OnNativeCrashClicked(object sender, EventArgs e)
     {
-#if ANDROID || IOS // TODO: Enable for MACCATALYST
+#if __MOBILE__
         SentrySdk.CauseCrash(CrashType.Native);
 #endif
     }

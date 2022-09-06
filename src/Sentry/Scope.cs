@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sentry.Extensibility;
+using Sentry.Internal;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -14,7 +16,7 @@ namespace Sentry
     /// Scope data is sent together with any event captured
     /// during the lifetime of the scope.
     /// </remarks>
-    public class Scope : IEventLike
+    public class Scope : IEventLike, IHasDistribution
     {
         internal SentryOptions Options { get; }
 
@@ -60,10 +62,18 @@ namespace Sentry
         private readonly Lazy<ConcurrentBag<ISentryEventProcessor>> _lazyEventProcessors =
             new(LazyThreadSafetyMode.PublicationOnly);
 
+        private readonly Lazy<ConcurrentBag<ISentryTransactionProcessor>> _lazyTransactionProcessors =
+            new(LazyThreadSafetyMode.PublicationOnly);
+
         /// <summary>
         /// A list of event processors.
         /// </summary>
         internal ConcurrentBag<ISentryEventProcessor> EventProcessors => _lazyEventProcessors.Value;
+
+        /// <summary>
+        /// A list of event processors.
+        /// </summary>
+        internal ConcurrentBag<ISentryTransactionProcessor> TransactionProcessors => _lazyTransactionProcessors.Value;
 
         /// <summary>
         /// An event that fires when the scope evaluates.
@@ -131,6 +141,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public string? Release { get; set; }
+
+        /// <inheritdoc />
+        public string? Distribution { get; set; }
 
         /// <inheritdoc />
         public string? Environment { get; set; }
@@ -322,8 +335,7 @@ namespace Sentry
         public void Apply(IEventLike other)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (other is null)
+            if (other.IsNull())
             {
                 return;
             }
@@ -363,6 +375,7 @@ namespace Sentry
 
             other.Platform ??= Platform;
             other.Release ??= Release;
+            other.WithDistribution(_ => _.Distribution ??= Distribution);
             other.Environment ??= Environment;
             other.TransactionName ??= TransactionName;
             other.Level ??= Level;
@@ -385,8 +398,7 @@ namespace Sentry
         public void Apply(Scope other)
         {
             // Not to throw on code that ignores nullability warnings.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (other is null)
+            if (other.IsNull())
             {
                 return;
             }
@@ -419,6 +431,11 @@ namespace Sentry
             foreach (var processor in EventProcessors)
             {
                 clone.EventProcessors.Add(processor);
+            }
+
+            foreach (var processor in TransactionProcessors)
+            {
+                clone.TransactionProcessors.Add(processor);
             }
 
             foreach (var processor in ExceptionProcessors)

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry
 {
     /// <summary>
@@ -76,18 +79,37 @@ namespace Sentry
         {
             foreach (var kv in this)
             {
-                var value = kv.Key switch
-                {
-                    App.Type when kv.Value is App app => app.Clone(),
-                    Browser.Type when kv.Value is Browser browser => browser.Clone(),
-                    Device.Type when kv.Value is Device device => device.Clone(),
-                    OperatingSystem.Type when kv.Value is OperatingSystem os => os.Clone(),
-                    Runtime.Type when kv.Value is Runtime runtime => runtime.Clone(),
-                    Gpu.Type when kv.Value is Gpu gpu => gpu.Clone(),
-                    _ => kv.Value
-                };
+                to.AddOrUpdate(kv.Key,
 
-                to.TryAdd(kv.Key, value);
+                    addValueFactory: _ =>
+                        kv.Value is ICloneable<object> cloneable
+                            ? cloneable.Clone()
+                            : kv.Value,
+
+                    updateValueFactory: (_, existing) =>
+                    {
+                        if (existing is IUpdatable updatable)
+                        {
+                            updatable.UpdateFrom(kv.Value);
+                        }
+                        else if (kv.Value is IDictionary<string, object?> source &&
+                                 existing is IDictionary<string, object?> target)
+                        {
+                            foreach (var item in source)
+                            {
+                                if (!target.TryGetValue(item.Key, out var value))
+                                {
+                                    target.Add(item);
+                                }
+                                else if (value is null)
+                                {
+                                    target[item.Key] = item.Value;
+                                }
+                            }
+                        }
+
+                        return existing;
+                    });
             }
         }
 
@@ -103,7 +125,7 @@ namespace Sentry
 
             foreach (var (name, value) in json.EnumerateObject())
             {
-                var type = value.GetPropertyOrNull("type")?.GetString();
+                var type = value.GetPropertyOrNull("type")?.GetString() ?? name;
 
                 // Handle known context types
                 if (string.Equals(type, App.Type, StringComparison.OrdinalIgnoreCase))

@@ -1,7 +1,6 @@
-// ReSharper disable once CheckNamespace
-
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol
@@ -13,7 +12,7 @@ namespace Sentry.Protocol
     /// Defines the operating system that caused the event. In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#os-context"/>
-    public sealed class OperatingSystem : IJsonSerializable
+    public sealed class OperatingSystem : IJsonSerializable, ICloneable<OperatingSystem>, IUpdatable<OperatingSystem>
     {
         /// <summary>
         /// Tells Sentry which type of context this is.
@@ -58,7 +57,9 @@ namespace Sentry.Protocol
         /// <summary>
         /// Clones this instance
         /// </summary>
-        internal OperatingSystem Clone()
+        internal OperatingSystem Clone() => ((ICloneable<OperatingSystem>)this).Clone();
+
+        OperatingSystem ICloneable<OperatingSystem>.Clone()
             => new()
             {
                 Name = Name,
@@ -68,6 +69,30 @@ namespace Sentry.Protocol
                 KernelVersion = KernelVersion,
                 Rooted = Rooted
             };
+
+        /// <summary>
+        /// Updates this instance with data from the properties in the <paramref name="source"/>,
+        /// unless there is already a value in the existing property.
+        /// </summary>
+        internal void UpdateFrom(OperatingSystem source) => ((IUpdatable<OperatingSystem>)this).UpdateFrom(source);
+
+        void IUpdatable.UpdateFrom(object source)
+        {
+            if (source is OperatingSystem os)
+            {
+                ((IUpdatable<OperatingSystem>)this).UpdateFrom(os);
+            }
+        }
+
+        void IUpdatable<OperatingSystem>.UpdateFrom(OperatingSystem source)
+        {
+            Name ??= source.Name;
+            Version ??= source.Version;
+            RawDescription ??= source.RawDescription;
+            Build ??= source.Build;
+            KernelVersion ??= source.KernelVersion;
+            Rooted ??= source.Rooted;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)

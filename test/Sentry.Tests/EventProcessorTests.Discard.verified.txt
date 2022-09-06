@@ -1,0 +1,23 @@
+[
+  {
+    Header: {
+      sdk: {
+        name: sentry.dotnet
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: client_report
+        },
+        Payload: {
+          Source: {
+            DiscardedEvents: {
+              DiscardReasonWithCategory { Reason = DiscardReason { Value = event_processor }, Category = DataCategory { Value = error } }: 1
+            }
+          }
+        }
+      }
+    ]
+  }
+]

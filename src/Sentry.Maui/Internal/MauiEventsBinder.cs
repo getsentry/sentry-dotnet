@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Options;
@@ -27,6 +28,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private static readonly HashSet<Type> ExplicitlyHandledTypes = new()
     {
         typeof(Element),
+        typeof(VisualElement),
         typeof(BindableObject),
         typeof(Application),
         typeof(Window),
@@ -60,6 +62,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
         {
             // All elements have a set of common events we can hook
             BindElementEvents(e.Element);
+
+            if (e.Element is VisualElement visualElement)
+            {
+                BindVisualElementEvents(visualElement);
+            }
 
             // We'll use reflection to attach to other events
             // This allows us to attach to events from custom controls
@@ -125,6 +132,13 @@ internal class MauiEventsBinder : IMauiEventsBinder
         var events = elementType.GetEvents(BindingFlags.Instance | BindingFlags.Public);
         foreach (var eventInfo in events.Where(e => !ExplicitlyHandledTypes.Contains(e.DeclaringType!)))
         {
+            var browsable = eventInfo.GetCustomAttribute<EditorBrowsableAttribute>();
+            if (browsable != null && browsable.State != EditorBrowsableState.Always)
+            {
+                // These events are not meant for typical consumption.
+                continue;
+            }
+
             Action<object, object> handler = (sender, _) =>
             {
                 _hub.AddBreadcrumbForEvent(_options, sender, eventInfo.Name);
@@ -255,6 +269,30 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // element.PropertyChanged
     }
 
+    private void BindVisualElementEvents(VisualElement element)
+    {
+        element.Focused += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Focused), SystemType, RenderingCategory);
+
+        element.Unfocused += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unfocused), SystemType, RenderingCategory);
+
+        element.Loaded += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Loaded), SystemType, RenderingCategory);
+
+        element.Unloaded += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unloaded), SystemType, RenderingCategory);
+
+        element.ChildrenReordered += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.ChildrenReordered), SystemType, RenderingCategory);
+
+        element.MeasureInvalidated += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.MeasureInvalidated), SystemType, RenderingCategory);
+
+        element.SizeChanged += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.SizeChanged), SystemType, RenderingCategory);
+    }
+
     private void BindShellEvents(Shell shell)
     {
         // Navigation events
@@ -309,8 +347,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
         button.Clicked += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Clicked), UserType, UserActionCategory);
         button.Pressed += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Pressed), UserType,UserActionCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Pressed), UserType, UserActionCategory);
         button.Released += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Released), UserType,UserActionCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Released), UserType, UserActionCategory);
     }
 }

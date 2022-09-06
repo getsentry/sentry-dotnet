@@ -262,7 +262,11 @@ namespace Sentry.Protocol.Envelopes
         public static EnvelopeItem FromAttachment(Attachment attachment)
         {
             var stream = attachment.Content.GetStream();
+            return FromAttachment(attachment, stream);
+        }
 
+        internal static EnvelopeItem FromAttachment(Attachment attachment, Stream stream)
+        {
             var attachmentType = attachment.Type switch
             {
                 AttachmentType.Minidump => "event.minidump",

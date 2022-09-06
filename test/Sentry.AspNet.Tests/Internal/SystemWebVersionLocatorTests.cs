@@ -15,6 +15,14 @@ public class SystemWebVersionLocatorTests :
     }
 
     [Fact]
+    public void Null_HttpContext()
+    {
+        var actual = SystemWebVersionLocator.Resolve((string)null, null);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
     public void HttpApplicationAssembly_VersionParsing()
     {
         var expected = ApplicationVersionLocator.GetCurrent(typeof(HttpApplication).Assembly);

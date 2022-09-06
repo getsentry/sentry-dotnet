@@ -450,6 +450,20 @@ public class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_Distribution_SetFromOptions()
+    {
+        const string expectedDistribution = "some distribution";
+        _fixture.SentryOptions.Distribution = expectedDistribution;
+
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event);
+
+        Assert.Equal(expectedDistribution, @event.Distribution);
+    }
+
+    [Fact]
     public void CaptureEvent_DisposedClient_DoesNotThrow()
     {
         var sut = _fixture.GetSut();

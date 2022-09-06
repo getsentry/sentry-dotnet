@@ -22,6 +22,8 @@ namespace Sentry
     {
         private static IHub _hub = DisabledHub.Instance;
 
+        internal static SentryOptions? CurrentOptions => _hub is Hub hub ? hub.Options : null;
+
         /// <summary>
         /// Last event id recorded in the current scope.
         /// </summary>
@@ -33,9 +35,8 @@ namespace Sentry
 
             ProcessInfo.Instance ??= new ProcessInfo(options);
 
-            // If DSN is null (i.e. not explicitly disabled, just unset), then
-            // try to resolve the value from environment.
-            var dsnString = options.Dsn ??= DsnLocator.FindDsnStringOrDisable();
+            // Locate the DSN
+            var dsnString = options.SettingLocator.GetDsn();
 
             // If it's either explicitly disabled or we couldn't resolve the DSN
             // from anywhere else, return a disabled hub.
@@ -55,7 +56,7 @@ namespace Sentry
             // Initialize bundled platform SDKs here
 #if ANDROID
             InitSentryAndroidSdk(options);
-#elif IOS || MACCATALYST
+#elif __IOS__
             InitSentryCocoaSdk(options);
 #endif
             return new Hub(options);
@@ -498,9 +499,9 @@ namespace Sentry
                 case CrashType.Native:
                     NativeCrash();
                     break;
-#elif IOS || MACCATALYST
+#elif __IOS__
                 case CrashType.Native:
-                    SentryCocoa.SentrySDK.Crash();
+                    SentryCocoaSdk.Crash();
                     break;
 #endif
                 default:

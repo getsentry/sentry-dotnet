@@ -23,12 +23,13 @@ namespace Sentry.Internal
 
         private bool IsGlobalMode => ScopeStackContainer is GlobalScopeStackContainer;
 
-        public SentryScopeManager(
-            IScopeStackContainer scopeStackContainer,
-            SentryOptions options,
-            ISentryClient rootClient)
+        public SentryScopeManager(SentryOptions options, ISentryClient rootClient)
         {
-            ScopeStackContainer = scopeStackContainer;
+            ScopeStackContainer = options.ScopeStackContainer ?? (
+                options.IsGlobalModeEnabled
+                    ? new GlobalScopeStackContainer()
+                    : new AsyncLocalScopeStackContainer());
+
             _options = options;
             NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
         }
@@ -41,14 +42,12 @@ namespace Sentry.Internal
 
         public void ConfigureScope(Action<Scope>? configureScope)
         {
-            _options.LogDebug("Configuring the scope.");
             var scope = GetCurrent();
             configureScope?.Invoke(scope.Key);
         }
 
         public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
         {
-            _options.LogDebug("Configuring the scope asynchronously.");
             var scope = GetCurrent();
             return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
         }

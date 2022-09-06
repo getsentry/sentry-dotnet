@@ -8,7 +8,7 @@ public class MainSentryEventProcessorTests
     private class Fixture
     {
         public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-        public SentryOptions SentryOptions { get; set; } = new() { Release = "release-123" };
+        public SentryOptions SentryOptions { get; set; } = new() { Release = "release-123", Distribution = "dist-123"};
         public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
     }
 
@@ -250,6 +250,30 @@ public class MainSentryEventProcessorTests
         Assert.Equal(sut.Release, evt.Release);
     }
 
+    [Fact]
+    public void Process_DistributionOnOptions_SetToEvent()
+    {
+        const string expectedVersion = "14G60";
+        _fixture.SentryOptions.Distribution = expectedVersion;
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+
+        _ = sut.Process(evt);
+
+        Assert.Equal(expectedVersion, evt.Distribution);
+    }
+
+    [Fact]
+    public void Process_NoDistributionOnOptions_SameAsCachedVersion()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+
+        _ = sut.Process(evt);
+
+        Assert.Equal(sut.Distribution, evt.Distribution);
+    }
+
     [Theory]
     [InlineData(null, Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
     [InlineData("", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
@@ -278,19 +302,13 @@ public class MainSentryEventProcessorTests
     public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
     {
         _fixture.SentryOptions.Environment = null;
+        _fixture.SentryOptions.FakeSettings()
+            .EnvironmentVariables[Sentry.Internal.Constants.EnvironmentEnvironmentVariable] = environment;
+
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
 
-        EnvironmentVariableGuard.WithVariable(
-            Sentry.Internal.Constants.EnvironmentEnvironmentVariable,
-            environment,
-            () =>
-            {
-                // Environment is cached
-                EnvironmentLocator.Reset();
-
-                _ = sut.Process(evt);
-            });
+        _ = sut.Process(evt);
 
         Assert.Equal(expectedEnvironment, evt.Environment);
     }

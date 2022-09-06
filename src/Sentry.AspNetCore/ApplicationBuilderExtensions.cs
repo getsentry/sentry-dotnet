@@ -32,7 +32,8 @@ internal static class ApplicationBuilderExtensions
         var options = app.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>();
         if (options?.Value is { } o)
         {
-            if (o.Debug && (o.DiagnosticLogger == null || o.DiagnosticLogger.GetType() == typeof(ConsoleDiagnosticLogger)))
+            if (o.Debug && (o.DiagnosticLogger is null or ConsoleDiagnosticLogger ||
+                            o.DiagnosticLogger.GetType().Name == "TestOutputDiagnosticLogger"))
             {
                 var logger = app.ApplicationServices.GetRequiredService<ILogger<ISentryClient>>();
                 o.DiagnosticLogger = new MelDiagnosticLogger(logger, o.DiagnosticLevel);

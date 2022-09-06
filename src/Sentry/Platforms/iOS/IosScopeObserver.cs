@@ -23,7 +23,7 @@ internal sealed class IosScopeObserver : IScopeObserver
         try
         {
             var b = breadcrumb.ToCocoaBreadcrumb();
-            SentryCocoa.SentrySDK.ConfigureScope(scope => scope.AddBreadcrumb(b));
+            SentryCocoaSdk.ConfigureScope(scope => scope.AddBreadcrumb(b));
         }
         finally
         {
@@ -43,7 +43,7 @@ internal sealed class IosScopeObserver : IScopeObserver
 
             if (value is string s)
             {
-                SentryCocoa.SentrySDK.ConfigureScope(scope =>
+                SentryCocoaSdk.ConfigureScope(scope =>
                     scope.SetExtraValue(NSObject.FromObject(s), key));
 
                 return;
@@ -52,7 +52,7 @@ internal sealed class IosScopeObserver : IScopeObserver
             try
             {
                 var json = JsonSerializer.Serialize(value);
-                SentryCocoa.SentrySDK.ConfigureScope(scope => scope.SetExtraValue(NSObject.FromObject(json), key));
+                SentryCocoaSdk.ConfigureScope(scope => scope.SetExtraValue(NSObject.FromObject(json), key));
             }
             catch (Exception ex)
             {
@@ -69,7 +69,7 @@ internal sealed class IosScopeObserver : IScopeObserver
     {
         try
         {
-            SentryCocoa.SentrySDK.ConfigureScope(scope => scope.SetTagValue(value, key));
+            SentryCocoaSdk.ConfigureScope(scope => scope.SetTagValue(value, key));
         }
         finally
         {
@@ -81,7 +81,7 @@ internal sealed class IosScopeObserver : IScopeObserver
     {
         try
         {
-            SentryCocoa.SentrySDK.ConfigureScope(scope => scope.RemoveTagForKey(key));
+            SentryCocoaSdk.ConfigureScope(scope => scope.RemoveTagForKey(key));
         }
         finally
         {
@@ -94,7 +94,7 @@ internal sealed class IosScopeObserver : IScopeObserver
         try
         {
             var u = user?.ToCocoaUser();
-            SentryCocoa.SentrySDK.ConfigureScope(scope => scope.SetUser(u));
+            SentryCocoaSdk.ConfigureScope(scope => scope.SetUser(u));
         }
         finally
         {

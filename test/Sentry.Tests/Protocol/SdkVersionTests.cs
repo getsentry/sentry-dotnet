@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 using Sentry.Testing;
 
+namespace Sentry.Tests.Protocol;
+
 public class SdkVersionTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
