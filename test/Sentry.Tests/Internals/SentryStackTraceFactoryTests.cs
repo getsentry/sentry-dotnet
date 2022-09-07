@@ -19,8 +19,9 @@ public class SentryStackTraceFactoryTests
     private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace;
 
     [Fact]
-    public void Create_NoExceptionAndDefaultAttachStackTraceOption_NullResult()
+    public void Create_NoExceptionAndAttachStackTraceOptionFalse_NullResult()
     {
+        _fixture.SentryOptions.AttachStacktrace = false;
         var sut = _fixture.GetSut();
 
         Assert.Null(sut.Create());
