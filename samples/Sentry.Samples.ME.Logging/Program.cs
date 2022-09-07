@@ -1,13 +1,16 @@
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 
+namespace Sentry.Samples.ME.Logging;
+
 internal class Program
 {
     private static void Main()
     {
-        using var loggerFactory = new LoggerFactory()
-            .AddConsole(LogLevel.Trace)
-            .AddSentry(o =>
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddConsole();
+            builder.AddSentry(o =>
             {
                 // Set to true to SDK debugging to see the internal messages through the logging library.
                 o.Debug = false;
@@ -23,11 +26,11 @@ internal class Program
                 o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
 
                 // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
-                o.AddLogEntryFilter((category, level, eventId, exception)
-                    => level < LogLevel.Critical && exception?.GetType() == typeof(DivideByZeroException));
+                o.AddLogEntryFilter((_, level, _, exception) => level < LogLevel.Critical && exception is DivideByZeroException);
 
                 o.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
             });
+        });
         var logger = loggerFactory.CreateLogger<Program>();
 
         logger.LogTrace("1 - By *default* this log level is ignored by Sentry.");
@@ -46,10 +49,10 @@ internal class Program
             999);
 
         using (logger.BeginScope(new Dictionary<string, string>
-        {
-            {"A", "some value"},
-            {"B", "more value"},
-        }))
+               {
+                   {"A", "some value"},
+                   {"B", "more value"},
+               }))
         {
             logger.LogWarning("4 - Breadcrumb that only exists inside this scope");
 
@@ -83,16 +86,16 @@ internal class Program
 
 internal static class Dependency
 {
-    private static int _counter;
+    private static int Counter;
 
     public static void Work(string message)
     {
-        if (_counter == 10)
+        if (Counter == 10)
         {
             throw new InvalidOperationException(message);
         }
 
-        _counter++;
+        Counter++;
         Work(message);
     }
 }
