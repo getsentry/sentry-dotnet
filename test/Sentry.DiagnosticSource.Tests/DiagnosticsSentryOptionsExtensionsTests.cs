@@ -13,7 +13,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
             p => p is SentryDiagnosticListenerIntegration);
     }
 
-#if NETCOREAPP3_0 || NETCOREAPP2_1 || NET461
+#if NETFRAMEWORK
     [Fact]
     public void AddDiagnosticSourceIntegration()
     {

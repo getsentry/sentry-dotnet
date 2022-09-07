@@ -78,6 +78,20 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
         },
         {
           IsFinished: true,
+          Operation: db.query.compile,
+          Description: 'DbSet<TestEntity>()',
+          Status: Ok,
+          IsSampled: true
+        },
+        {
+          IsFinished: true,
+          Operation: db.query.compile,
+          Description: 'DbSet<TestEntity>()',
+          Status: Ok,
+          IsSampled: true
+        },
+        {
+          IsFinished: true,
           Operation: db.query,
           Status: DeadlineExceeded,
           IsSampled: true,

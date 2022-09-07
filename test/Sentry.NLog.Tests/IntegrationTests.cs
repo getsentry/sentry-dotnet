@@ -27,10 +27,10 @@ public class IntegrationTests
                 options.Dsn = ValidDsn;
                 options.User = new SentryNLogUser
                 {
-                    Id = "${mdlc:item=id}",
-                    Username = "${mdlc:item=username}",
-                    Email = "${mdlc:item=email}",
-                    IpAddress = "${mdlc:item=ipAddress}",
+                    Id = "${scopeproperty:item=id}",
+                    Username = "${scopeproperty:item=username}",
+                    Email = "${scopeproperty:item=email}",
+                    IpAddress = "${scopeproperty:item=ipAddress}",
                     Other =
                     {
                         new TargetPropertyWithContext("mood", "joyous")
@@ -44,7 +44,7 @@ public class IntegrationTests
 
         var log = LogManager.GetCurrentClassLogger();
 
-        using (MappedDiagnosticsLogicalContext.SetScoped("id", "myId"))
+        using (ScopeContext.PushProperty("id", "myId"))
         {
             try
             {

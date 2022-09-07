@@ -3,10 +3,6 @@ using System.Net.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 
-#if NETCOREAPP2_1
-using System.Reflection;
-#endif
-
 namespace Sentry.Tests;
 
 public class HubTests
@@ -335,11 +331,7 @@ public class HubTests
 
             logger.Received().Log(SentryLevel.Error,
                 "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
-#if NETCOREAPP2_1
-                Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
-#else
                 Arg.Any<InvalidDataException>(),
-#endif
                 Arg.Any<object[]>());
 
         }

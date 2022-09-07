@@ -1,4 +1,4 @@
-namespace Sentry
+﻿namespace Sentry
 {
     public static class SentryOptionsDiagnosticExtensions
     {
