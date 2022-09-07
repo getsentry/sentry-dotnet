@@ -1,4 +1,4 @@
-#if NET461
+#if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
 using Runtime = Sentry.PlatformAbstractions.Runtime;
 

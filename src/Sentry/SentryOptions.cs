@@ -192,12 +192,13 @@ namespace Sentry
         public string? ServerName { get; set; }
 
         /// <summary>
-        /// Whether to send the stack trace of a event captured without an exception
+        /// Whether to send the stack trace of a event captured without an exception.
+        /// As of version 3.22.0, the default is <c>true</c>.
         /// </summary>
         /// <remarks>
         /// Append stack trace of the call to the SDK to capture a message or event without Exception
         /// </remarks>
-        public bool AttachStacktrace { get; set; }
+        public bool AttachStacktrace { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.

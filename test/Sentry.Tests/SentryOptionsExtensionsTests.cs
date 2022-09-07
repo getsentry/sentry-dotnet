@@ -1,4 +1,4 @@
-#if NET461
+#if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
 #endif
 
@@ -16,7 +16,7 @@ public class SentryOptionsExtensionsTests
             p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
     }
 
-#if NET461
+#if NETFRAMEWORK
     [Fact]
     public void DisableNetFxInstallationsEventProcessor_RemovesDisableNetFxInstallationsEventProcessorEventProcessor()
     {

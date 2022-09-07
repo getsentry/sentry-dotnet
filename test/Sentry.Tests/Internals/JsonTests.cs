@@ -234,11 +234,7 @@ public class JsonTests
 
         // Assert
         logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
-#if NETCOREAPP2_1
-            Arg.Is<TargetInvocationException>(e => e.InnerException.GetType() == typeof(InvalidDataException)),
-#else
             Arg.Any<InvalidDataException>(),
-#endif
             Arg.Any<object[]>());
     }
 }

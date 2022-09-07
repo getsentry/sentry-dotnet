@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NLog" Version="5.0.4" />
     <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
 
@@ -18,7 +19,7 @@
     <Using Include="Sentry.Tests" />
     <Using Include="System.Collections" />
     <Using Include="System.Xml" />
-    
+
   </ItemGroup>
 
 </Project>

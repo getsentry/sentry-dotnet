@@ -87,6 +87,7 @@ public class EventProcessorTests
             Debug = true,
             Transport = transport,
             Dsn = ValidDsn,
-            DiagnosticLogger = _logger
+            DiagnosticLogger = _logger,
+            AttachStacktrace = false
         };
 }

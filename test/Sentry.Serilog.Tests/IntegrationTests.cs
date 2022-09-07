@@ -19,6 +19,7 @@ public class IntegrationTests
                 _.Dsn = ValidDsn;
                 _.SendDefaultPii = true;
                 _.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
+                _.AttachStacktrace = false;
             });
 
         Log.Logger = configuration.CreateLogger();
@@ -70,6 +71,7 @@ public class IntegrationTests
                 _.DiagnosticLogger = diagnosticLogger;
                 _.Dsn = ValidDsn;
                 _.Debug = true;
+                _.AttachStacktrace = false;
             });
 
         Log.Logger = configuration.CreateLogger();
