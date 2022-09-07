@@ -46,9 +46,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
-    <ProjectReference Include="..\MauiTestUtils\src\DeviceTests\TestUtils.DeviceTests.csproj" />
-    <ProjectReference Include="..\MauiTestUtils\src\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj" />
-    <ProjectReference Include="..\MauiTestUtils\src\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\MauiTestUtils\DeviceTests\TestUtils.DeviceTests.csproj" />
+    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj" />
+    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
   </ItemGroup>
