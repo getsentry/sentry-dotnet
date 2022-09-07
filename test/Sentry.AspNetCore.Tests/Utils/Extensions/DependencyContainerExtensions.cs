@@ -8,7 +8,7 @@ internal static class DependencyContainerExtensions
     {
         options.ValidateScopes = enable;
 
-#if !NET461 && !NETCOREAPP2_1
+#if NETCOREAPP3_1_OR_GREATER
         options.ValidateOnBuild = enable;
 #endif
     }

@@ -386,7 +386,7 @@ public class ScopeExtensionsTests
         Assert.Equal("5", sut.Breadcrumbs.Last().Message);
     }
 
-#if !NET461
+#if !NETFRAMEWORK
     [Fact]
     public void AddBreadcrumb_ValueTuple_AllArgumentsMatch()
     {

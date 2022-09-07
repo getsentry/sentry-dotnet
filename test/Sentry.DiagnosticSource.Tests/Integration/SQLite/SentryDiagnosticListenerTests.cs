@@ -82,7 +82,7 @@ public class SentryDiagnosticListenerTests
 
         // Assert
         Assert.NotNull(exception);
-#if !NET5_0_OR_GREATER
+#if NETFRAMEWORK
         Assert.Single(spans); //1 command
 #else
         Assert.Equal(2, spans.Count); //1 query compiler, 1 command
@@ -106,7 +106,7 @@ public class SentryDiagnosticListenerTests
 
         // Assert
         Assert.Equal(3, result.Count);
-#if !NET5_0_OR_GREATER
+#if NETFRAMEWORK
         Assert.Single(spans); //1 command
 #else
         Assert.Equal(2, spans.Count); //1 query compiler, 1 command

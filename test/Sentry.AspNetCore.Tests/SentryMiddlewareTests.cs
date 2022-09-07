@@ -1,13 +1,14 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
-#if NETCOREAPP2_1 || NET461
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using Microsoft.AspNetCore.Hosting;
-#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
+
+#if NETCOREAPP3_1_OR_GREATER
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
+#else
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#endif
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -19,7 +20,7 @@ public class SentryMiddlewareTests
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public Func<IHub> HubAccessor { get; set; }
         public SentryAspNetCoreOptions Options { get; set; } = new();
-        public IWebHostEnvironment HostingEnvironment { get; set; } = Substitute.For<IWebHostEnvironment>();
+        public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
         public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
         public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
         public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
@@ -95,7 +96,7 @@ public class SentryMiddlewareTests
         _fixture.RequestDelegate = _ => throw expected;
 
         _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
-            .Do(c => Assert.False((bool)c.Arg<SentryEvent>().Exception.Data[Mechanism.HandledKey]));
+            .Do(c => Assert.False((bool?)c.Arg<SentryEvent>().Exception?.Data[Mechanism.HandledKey]));
 
         var sut = _fixture.GetSut();
 
