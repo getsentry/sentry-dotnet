@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+## Features
+
+- `SentryOptions.AttachStackTrace` is now enabled by default. ([#1907](https://github.com/getsentry/sentry-dotnet/pull/1907))
+
 ## 3.21.0
 
 _Includes Sentry.Maui Preview 3_

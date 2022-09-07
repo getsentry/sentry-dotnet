@@ -102,6 +102,7 @@ public class TransactionProcessorTests
             Debug = true,
             Transport = transport,
             Dsn = ValidDsn,
-            DiagnosticLogger = _logger
+            DiagnosticLogger = _logger,
+            AttachStacktrace = false
         };
 }

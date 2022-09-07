@@ -30,6 +30,13 @@ public class SentryOptionsTests
         Assert.Null(sut.Transport);
     }
 
+    [Fact]
+    public void AttachStackTrace_ByDefault_True()
+    {
+        var sut = new SentryOptions();
+        Assert.True(sut.AttachStacktrace);
+    }
+
 #if NET461
     [SkippableFact(typeof(IsTypeException))]
     public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
