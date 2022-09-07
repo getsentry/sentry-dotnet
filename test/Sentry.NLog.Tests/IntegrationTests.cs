@@ -78,6 +78,7 @@ public class IntegrationTests
                 options.DiagnosticLogger = diagnosticLogger;
                 options.Transport = transport;
                 options.Dsn = ValidDsn;
+                options.AttachStacktrace = false;
             });
 
         LogManager.Configuration = configuration;

@@ -12,7 +12,8 @@ public class IntegrationTests
             Debug = true,
             Transport = transport,
             DiagnosticLogger = diagnosticLogger,
-            Dsn = ValidDsn
+            Dsn = ValidDsn,
+            AttachStacktrace = false
         };
 
         var hub = SentrySdk.InitHub(options);
@@ -45,7 +46,8 @@ public class IntegrationTests
             DiagnosticLogger = diagnosticLogger,
             DiagnosticLevel = SentryLevel.Debug,
             Transport = transport,
-            Dsn = ValidDsn
+            Dsn = ValidDsn,
+            AttachStacktrace = false
         };
 
         var hub = SentrySdk.InitHub(options);
