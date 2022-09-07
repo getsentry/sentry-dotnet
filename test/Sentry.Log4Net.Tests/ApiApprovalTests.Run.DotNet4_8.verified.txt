@@ -1,4 +1,4 @@
-[assembly: System.CLSCompliant(true)]
+﻿[assembly: System.CLSCompliant(true)]
 namespace Sentry.Log4Net
 {
     public class SentryAppender : log4net.Appender.AppenderSkeleton
