@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- must target netcoreapp since net5 and net 6 will result in the core interception coming into play -->
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <!-- Running these tests on Mono fail -->
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
-    <TargetFrameworks>net48;$(TargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +15,7 @@
 
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
-    
+
     <Using Include="System.Collections.Concurrent" />
     <Using Include="System.ComponentModel.DataAnnotations" />
     <Using Include="System.Data.Common" />

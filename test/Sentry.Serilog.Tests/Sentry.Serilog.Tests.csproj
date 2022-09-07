@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,7 +9,7 @@
 
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <ProjectReference Include="..\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj" />
-    
+
     <Using Include="System.Collections" />
     <Using Include="System.IO.Compression" />
     <Using Include="System.Net" />

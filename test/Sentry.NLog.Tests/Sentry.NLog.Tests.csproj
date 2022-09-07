@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +18,7 @@
     <Using Include="Sentry.Tests" />
     <Using Include="System.Collections" />
     <Using Include="System.Xml" />
-    
+
   </ItemGroup>
 
 </Project>
