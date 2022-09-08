@@ -6,6 +6,7 @@
     <AssemblyName>Microsoft.Maui.TestUtils</AssemblyName>
 
     <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

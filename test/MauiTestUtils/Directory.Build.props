@@ -3,7 +3,6 @@
   <PropertyGroup>
     <LangVersion>10</LangVersion>
     <SignAssembly>false</SignAssembly>
-    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
 </Project>

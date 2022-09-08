@@ -15,6 +15,7 @@
     <Nullable>enable</Nullable>
     <UseMauiCore>true</UseMauiCore>
     <UseMauiEssentials>true</UseMauiEssentials>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

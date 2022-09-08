@@ -14,6 +14,7 @@
     <AssemblyName>Microsoft.Maui.TestUtils.DeviceTests.Runners</AssemblyName>
     <!--<Nullable>enable</Nullable>-->
     <UseMaui>true</UseMaui>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
