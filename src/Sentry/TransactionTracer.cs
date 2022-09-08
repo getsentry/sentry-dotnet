@@ -53,6 +53,8 @@ namespace Sentry
         /// <inheritdoc />
         public string? Distribution { get; set; }
 
+        public TransactionSourceType? SourceType { get; set; }
+
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
 

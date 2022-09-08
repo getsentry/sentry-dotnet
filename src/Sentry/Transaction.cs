@@ -62,6 +62,11 @@ namespace Sentry
         /// <inheritdoc />
         public string? Distribution { get; set; }
 
+        /// <summary>
+        /// SourceType
+        /// </summary>
+        public TransactionSourceType? SourceType { get; set; }
+
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
 
@@ -214,6 +219,7 @@ namespace Sentry
             SpanId = tracer.SpanId;
             TraceId = tracer.TraceId;
             Operation = tracer.Operation;
+            SourceType = tracer.SourceType;
             Platform = tracer.Platform;
             Release = tracer.Release;
             Distribution = tracer.GetDistribution();

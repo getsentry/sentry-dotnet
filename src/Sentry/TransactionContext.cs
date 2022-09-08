@@ -8,6 +8,9 @@ namespace Sentry
         /// <inheritdoc />
         public string Name { get; }
 
+        /// <inheritdoc />
+        public TransactionSourceType? SourceType { get; }
+
         /// <summary>
         /// Whether the parent transaction of this transaction has been sampled.
         /// </summary>
