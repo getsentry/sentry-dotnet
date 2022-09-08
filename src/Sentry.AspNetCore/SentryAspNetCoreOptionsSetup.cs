@@ -6,7 +6,6 @@ using Sentry.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
-using Microsoft.Extensions.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 

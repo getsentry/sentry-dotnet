@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using DiffEngine;
-using LocalDb;
 
 public sealed class LocalDbFixture : IDisposable
 {

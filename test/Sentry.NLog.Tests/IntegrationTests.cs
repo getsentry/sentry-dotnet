@@ -1,9 +1,4 @@
-﻿using NLog;
-using NLog.Config;
-using NLog.Targets;
-using Sentry.Testing;
-
-namespace Sentry.NLog.Tests;
+﻿namespace Sentry.NLog.Tests;
 
 [UsesVerify]
 public class IntegrationTests

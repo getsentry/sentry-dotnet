@@ -1,5 +1,7 @@
-using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
+#if NETFRAMEWORK
+using System.Runtime.InteropServices;
+#endif
 
 namespace Sentry.Tests.PlatformAbstractions;
 

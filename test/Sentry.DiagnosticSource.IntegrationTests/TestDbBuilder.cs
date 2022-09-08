@@ -1,5 +1,3 @@
-using System.Data;
-using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 

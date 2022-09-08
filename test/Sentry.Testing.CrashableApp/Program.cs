@@ -1,5 +1,3 @@
-using System;
-
 #pragma warning disable CS0618
 
 namespace Sentry.Testing.CrashableApp;
