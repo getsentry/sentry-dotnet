@@ -10,10 +10,14 @@ namespace Sentry.Maui.Device.TestApp
             appBuilder
                 .ConfigureTests(new TestOptions
                 {
+                    // This is the list of assemblies containing tests that will be run
                     Assemblies =
                     {
-                        typeof(Sentry.Tests.SentrySdkTests).Assembly,
-                        typeof(Sentry.Maui.Tests.ApiApprovalTests).Assembly
+                        // TODO: validate tests
+                        // typeof(Sentry.Tests.SentrySdkTests).Assembly,
+                        // typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
+
+                        typeof(Sentry.Maui.Tests.MauiNetworkStatusListenerTests).Assembly
                     },
                 })
                 .UseHeadlessRunner(new HeadlessRunnerOptions
