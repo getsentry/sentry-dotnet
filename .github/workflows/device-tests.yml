@@ -10,47 +10,36 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
-    defaults:
-      run:
-        shell: pwsh
     steps:
         - name: Checkout
           uses: actions/checkout@v3
           with:
             submodules: recursive
 
-        - name: Install .NET Workloads (Ubuntu)
-          run: 'dotnet workload install maui-android --temp-dir "${{ runner.temp }}"'
+        - name: Setup Environment
+          uses: ./.github/actions/environment
 
-        - name: Build
-          run: |
-            $project = 'test/Sentry.Maui.Device.TestApp'
-            dotnet restore $project
-            dotnet build -c Release $project -o bin/
+        - name: Build Native Dependencies
+          uses: ./.github/actions/buildnative
 
-        - name: Upload test app
+        - name: Build Android Test App
+          run: dotnet build -c Release -f net6.0-android test/Sentry.Maui.Device.TestApp -o bin/
+
+        - name: Upload Android Test App
           uses: actions/upload-artifact@v3
           with:
             name: device-test-android
             if-no-files-found: error
-            path: bin/io.sentry.maui.device.testapp-Signed.apk
+            path: bin/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
     name: Run Android API-${{ matrix.api-level }} Test
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # TODO find out how to build the app for lower SDK levels
-        # db: failed to install /Users/runner/work/sentry-dotnet/sentry-dotnet/./io.sentry.maui.device.testapp-Signed.apk: Failure [INSTALL_FAILED_OLDER_SDK: Failed parse during installPackageLI: /data/app/vmdl1343941439.tmp/base.apk (at Binary XML file line #9): Requires newer sdk version #31 (current version is #27)]
-        api-level: [31]
-    defaults:
-      run:
-        shell: pwsh
+        api-level: [31] # TODO: [27,28,29,30,31,32]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -61,18 +50,13 @@ jobs:
           name: device-test-android
           path: bin
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 6.0.x
-
       - name: Install xharness
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.0.0-prerelease*"
 
       - name: Test
         continue-on-error: true   # Temporary until all tests are fixed
         timeout-minutes: 30
-        uses: reactivecircus/android-emulator-runner@e790971012b979513b4e2fe70d4079bc0ca8a1ae
+        uses: reactivecircus/android-emulator-runner@b390b0e1166697ae57c242a0a33c29ca9f5ae078
         with:
           api-level: ${{ matrix.api-level }}
           target: google_apis
@@ -83,11 +67,12 @@ jobs:
           disk-size: 4096M
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
-          script: xharness android test --output-directory=./test_output --app=bin/io.sentry.maui.device.testapp-Signed.apk --package-name=io.sentry.maui.device.testapp
+          script: xharness android test --output-directory=./test_output --app=bin/io.sentry.dotnet.maui.device.testapp-Signed.apk --package-name=io.sentry.dotnet.maui.device.testapp
 
       - name: Test Report
         if: success() || failure()
         run: scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
+        shell: pwsh
 
       - name: Upload results
         if:  success() || failure()
