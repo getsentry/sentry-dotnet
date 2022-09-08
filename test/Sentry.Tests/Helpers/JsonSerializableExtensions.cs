@@ -1,4 +1,6 @@
+#if NETCOREAPP3_0_OR_GREATER
 using System.Buffers;
+#endif
 using System.Text.Json;
 
 internal static class JsonSerializableExtensions

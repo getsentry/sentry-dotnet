@@ -1,4 +1,6 @@
+#if NETCOREAPP
 using System.Runtime.InteropServices;
+#endif
 
 namespace Sentry.Tests.Internals;
 
