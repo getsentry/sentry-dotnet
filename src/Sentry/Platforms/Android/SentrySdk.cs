@@ -136,7 +136,6 @@ public static partial class SentrySdk
                 o.EnableSystemEventBreadcrumbs = options.Android.EnableSystemEventBreadcrumbs;
                 o.EnableUserInteractionBreadcrumbs = options.Android.EnableUserInteractionBreadcrumbs;
                 o.EnableUserInteractionTracing = options.Android.EnableUserInteractionTracing;
-                o.ProfilingTracesIntervalMillis = (int)options.Android.ProfilingTracesInterval.TotalMilliseconds;
 
                 // These options are in Java.SentryOptions but not ours
                 o.AttachThreads = options.Android.AttachThreads;
@@ -144,7 +143,7 @@ public static partial class SentrySdk
                 o.EnableNdk = options.Android.EnableNdk;
                 o.EnableShutdownHook = options.Android.EnableShutdownHook;
                 o.EnableUncaughtExceptionHandler = options.Android.EnableUncaughtExceptionHandler;
-                o.ProfilingEnabled = options.Android.ProfilingEnabled;
+                o.ProfilesSampleRate = (JavaDouble?)options.Android.ProfilesSampleRate;
                 o.PrintUncaughtStackTrace = options.Android.PrintUncaughtStackTrace;
                 o.ReadTimeoutMillis = (int)options.Android.ReadTimeout.TotalMilliseconds;
 
