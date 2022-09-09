@@ -61,11 +61,13 @@ public class MauiNetworkStatusListenerTests
         var connectivity = Substitute.For<IConnectivity>();
         connectivity.NetworkAccess.Returns(access);
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource();
         var listener = new MauiNetworkStatusListener(connectivity, _options);
 
         var task = listener.WaitForNetworkOnlineAsync(cts.Token);
         connectivity.ConnectivityChanged += Raise.EventWith(default, new ConnectivityChangedEventArgs(access, default));
+
+        cts.CancelAfter(TimeSpan.FromMilliseconds(500));
 
         if (expected)
         {
