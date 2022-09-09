@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [31] # TODO: [27,28,29,30,31,32]
+        api-level: [27,28,29,30,31,32]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -61,11 +61,9 @@ jobs:
         uses: reactivecircus/android-emulator-runner@b390b0e1166697ae57c242a0a33c29ca9f5ae078
         with:
           api-level: ${{ matrix.api-level }}
-          target: google_apis
           force-avd-creation: false
           ram-size: 2048M
           arch: x86_64
-          cores: 2
           disk-size: 4096M
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
