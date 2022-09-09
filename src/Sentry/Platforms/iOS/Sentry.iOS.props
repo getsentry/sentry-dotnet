@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <SentryCocoaSdkVersion>7.23.0</SentryCocoaSdkVersion>
+    <SentryCocoaSdkVersion>7.24.1</SentryCocoaSdkVersion>
     <SentryCocoaSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Cocoa\$(SentryCocoaSdkVersion)\</SentryCocoaSdkDirectory>
     <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
 

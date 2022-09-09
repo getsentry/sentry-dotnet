@@ -10,17 +10,9 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
-    - name: Install .NET 2.1 SDK
-      uses: actions/setup-dotnet@v2
-      env:
-        # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs on Ubuntu and Windows (doesn't happen on macOS)
-        DOTNET_INSTALL_DIR: ${{ runner.os == 'Linux' && '/usr/share/dotnet' || runner.os == 'Windows' && 'C:\Program Files\dotnet' || '' }}
-      with:
-        dotnet-version: 2.1.818
-        # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
-
     - name: Dependency Caching
       uses: actions/cache@v3
+      if: runner.os != 'Windows' # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
       with:
         path: ~/.nuget/packages
         # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.
