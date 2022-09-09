@@ -13,6 +13,17 @@ public class SentryMauiAppBuilderExtensionsTests
         {
             var builder = MauiApp.CreateBuilder();
             builder.Services.AddSingleton(Substitute.For<IApplication>());
+
+            builder.Services.Configure<SentryMauiOptions>(options =>
+            {
+                // Don't use a real transport for any of these tests
+                options.Transport = Substitute.For<ITransport>();
+
+                // Disable auto session tracking so the Android/iOS SDK doesn't start a session
+                // when these tests are run as device tests.
+                options.AutoSessionTracking = false;
+            });
+
             Builder = builder;
         }
     }

@@ -684,7 +684,8 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
-            Debug = true
+            Debug = true,
+            DetectStartupTime = StartupTimeDetectionMode.Fast // `.Best` would actually trigger a warning log on Android
         });
 
         logger.DidNotReceive().Log(

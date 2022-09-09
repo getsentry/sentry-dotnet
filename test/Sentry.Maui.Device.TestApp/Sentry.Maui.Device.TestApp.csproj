@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-android</TargetFrameworks>
+    <!-- TODO: fix windows APPX1101 build failure -->
+    <!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks> -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">10.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <OutputType>Exe</OutputType>
+    <SingleProject>true</SingleProject>
+    <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
+    <AssemblyName>Sentry.Maui.Device.TestApp</AssemblyName>
+    <UseMaui>true</UseMaui>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Display name -->
+    <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>io.sentry.dotnet.maui.device.testapp</ApplicationId>
+    <ApplicationIdGuid>4A534873-8D78-46AE-AE75-0F8F00152A2F</ApplicationIdGuid>
+
+    <!-- Versions -->
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+
+    <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
+         https://docs.microsoft.com/en-us/dotnet/core/compatibility/sdk/5.0/referencing-executable-generates-error -->
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#512BD4" />
+    <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" BaseSize="128,128" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MauiTestUtils\DeviceTests\TestUtils.DeviceTests.csproj" />
+    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj" />
+    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
+    <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
+    <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
+  </ItemGroup>
+
+  <!-- https://github.com/dotnet/maui/blob/main/.nuspec/Microsoft.Maui.TestUtils.DeviceTests.Runners.targets -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="RootNamespace" />
+    <CompilerVisibleProperty Include="ApplicationId" />
+    <CompilerVisibleProperty Include="ApplicationTitle" />
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="IsMauiSplashScreen" />
+    <AdditionalFiles Include="@(MauiSplashScreen)" IsMauiSplashScreen="True" />
+  </ItemGroup>
+
+  <!-- Workaround for https://github.com/dotnet/maui/issues/7272 -->
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
+    <ItemGroup>
+      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.PublishFolderType)' == ''" PublishFolderType="None" />
+    </ItemGroup>
+  </Target>
+
+</Project>
