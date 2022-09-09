@@ -61,6 +61,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@b390b0e1166697ae57c242a0a33c29ca9f5ae078
         with:
           api-level: ${{ matrix.api-level }}
+          target: google_apis
           force-avd-creation: false
           ram-size: 2048M
           arch: x86_64
