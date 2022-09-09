@@ -19,18 +19,11 @@ internal static class UserExtensions
         var cocoaUser = new SentryCocoa.SentryUser
         {
             Email = user.Email,
+            UserId = user.Id,
             IpAddress = user.IpAddress,
             Username = user.Username,
             Data = user.Other.ToNullableNSDictionary()
         };
-
-        // Leave a null User ID uninitialized since it is optional.
-        // It should be nullable in the Sentry Cocoa SDK, but isn't currently.
-        // See: https://github.com/getsentry/sentry-cocoa/issues/2035
-        if (user.Id != null)
-        {
-            cocoaUser.UserId = user.Id;
-        }
 
         return cocoaUser;
     }
