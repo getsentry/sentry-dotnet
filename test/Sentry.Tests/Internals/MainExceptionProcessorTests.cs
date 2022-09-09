@@ -150,6 +150,7 @@ public class MainExceptionProcessorTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public Task CreateSentryException_Aggregate()
     {
         var sut = _fixture.GetSut();
@@ -161,6 +162,7 @@ public class MainExceptionProcessorTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public Task CreateSentryException_Aggregate_Keep()
     {
         _fixture.SentryOptions.KeepAggregateException = true;

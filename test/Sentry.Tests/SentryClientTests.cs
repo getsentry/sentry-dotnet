@@ -422,6 +422,7 @@ public class SentryClientTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
     {
         var error = new Exception("Exception message!");
@@ -432,7 +433,7 @@ public class SentryClientTests
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(@event);
 
-        return Verifier.Verify(@event.Breadcrumbs);
+        return Verify(@event.Breadcrumbs);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using System.Diagnostics;
 #pragma warning disable CS0618
 
@@ -46,3 +47,4 @@ public class SentrySdkCrashTests
         stderr = process.StandardError.ReadToEnd();
     }
 }
+#endif
