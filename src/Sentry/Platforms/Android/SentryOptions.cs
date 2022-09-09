@@ -137,10 +137,10 @@ public partial class SentryOptions
         public bool EnableUserInteractionTracing { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets the interval for profiling traces, when enabled with <see cref="ProfilingEnabled"/>.
-        /// The default value is 10 milliseconds.
+        /// Deprecated.
         /// </summary>
-        public TimeSpan ProfilingTracesInterval { get; set; } = TimeSpan.FromMilliseconds(10);
+        [Obsolete("This property is deprecated and ignored.")]
+        public TimeSpan ProfilingTracesInterval { get; set; }
 
 
         // ---------- From SentryOptions.java ----------
@@ -197,9 +197,19 @@ public partial class SentryOptions
         /// <summary>
         /// Gets or sets if profiling is enabled for transactions.
         /// The default value is <c>false</c> (disabled).
-        /// See also <see cref="ProfilingTracesInterval"/>.
         /// </summary>
-        public bool ProfilingEnabled { get; set; } = false;
+        [Obsolete("Use ProfilesSampleRate instead")]
+        public bool ProfilingEnabled
+        {
+            get => (ProfilesSampleRate ?? 0.0) > 0.0;
+            set => ProfilesSampleRate = value ? 1.0 : null;
+        }
+
+        /// <summary>
+        /// Gets or sets the profiling sample rate, between 0.0 and 1.0.
+        /// The default value is <c>null</c> (disabled).
+        /// </summary>
+        public double? ProfilesSampleRate { get; set; }
 
         /// <summary>
         /// Gets or sets the read timeout on the HTTP connection used by Java when sending data to Sentry.
