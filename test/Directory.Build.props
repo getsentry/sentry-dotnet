@@ -10,19 +10,6 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-  <!-- configure xunit -->
-  <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('windows')) AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))==''">
-    <Content Include="..\xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows')) AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))==''">
-    <Content Include="..\xunit.runner.windows.json">
-      <Link>xunit.runner.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
   <ItemGroup>
     <Using Include="Sentry" />
     <Using Include="Sentry.Extensibility" />
