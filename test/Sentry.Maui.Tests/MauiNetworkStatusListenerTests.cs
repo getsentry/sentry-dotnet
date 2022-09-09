@@ -67,16 +67,16 @@ public class MauiNetworkStatusListenerTests
         var task = listener.WaitForNetworkOnlineAsync(cts.Token);
         connectivity.ConnectivityChanged += Raise.EventWith(default, new ConnectivityChangedEventArgs(access, default));
 
-        try
+        if (expected)
         {
+            // If we expected to be online, then this should complete without throwing.
             await task;
         }
-        catch (OperationCanceledException)
+        else
         {
+            // If we expected to be offline, then we'll time out and get a cancellation exception.
+            await Assert.ThrowsAsync<TaskCanceledException>(() => task);
         }
-
-        // If we timed-out waiting (to simulate being offline), then cancellation will be requested
-        Assert.Equal(expected, !cts.IsCancellationRequested);
     }
 
     [Fact]
