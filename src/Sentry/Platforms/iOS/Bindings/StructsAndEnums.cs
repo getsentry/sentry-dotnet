@@ -23,6 +23,26 @@ internal enum SentryLevel : ulong
 }
 
 [Native]
+internal enum SentryPermissionStatus : long
+{
+	Unknown = 0,
+	Granted,
+	Partial,
+	Denied
+}
+
+[Native]
+internal enum SentryTransactionNameSource : long
+{
+	Custom = 0,
+	Url,
+	Route,
+	View,
+	Component,
+	Task
+}
+
+[Native]
 internal enum SentryAppStartType : ulong
 {
     Warm,
