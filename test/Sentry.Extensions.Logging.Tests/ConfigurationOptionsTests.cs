@@ -14,7 +14,15 @@ public class ConfigurationOptionsTests
         public Fixture()
         {
             Builder = new ConfigurationBuilder();
-            _ = Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+#if ANDROID
+            var stream = Application.Context.Assets?.Open("appsettings.json");
+            if (stream != null)
+            {
+                Builder.AddJsonStream(stream);
+            }
+#else
+            Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+#endif
         }
 
         public IServiceProvider GetSut()

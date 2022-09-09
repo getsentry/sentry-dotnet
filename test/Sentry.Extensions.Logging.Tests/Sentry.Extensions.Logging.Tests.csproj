@@ -19,9 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
+    <AndroidAsset Include="appsettings.json" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
   </ItemGroup>
 
 </Project>
