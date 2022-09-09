@@ -44,6 +44,9 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Download test app artifact
         uses: actions/download-artifact@v3
         with:
@@ -51,10 +54,9 @@ jobs:
           path: bin
 
       - name: Install xharness
-        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*" --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
+        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
 
       - name: Test
-        continue-on-error: true   # Temporary until all tests are fixed
         timeout-minutes: 30
         uses: reactivecircus/android-emulator-runner@b390b0e1166697ae57c242a0a33c29ca9f5ae078
         with:
