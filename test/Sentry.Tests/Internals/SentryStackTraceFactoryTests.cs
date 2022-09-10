@@ -149,6 +149,7 @@ public class SentryStackTraceFactoryTests
     }
 
     [SkippableFact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void FileNameShouldBeRelative()
     {
         Skip.If(RuntimeInfo.GetRuntime().IsMono());

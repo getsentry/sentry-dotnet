@@ -43,6 +43,7 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void GetCurrent_Equality_FalseOnModifiedScope()
     {
         var sut = _fixture.GetSut();
@@ -75,6 +76,7 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void BindClient_ScopeState_StaysTheSame()
     {
         var sut = _fixture.GetSut();
@@ -122,6 +124,7 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void PushScope_Parameterless_SetsNewAsCurrent()
     {
         var sut = _fixture.GetSut();
@@ -155,6 +158,7 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void PushScope_StateInstance_SetsNewAsCurrent()
     {
         var sut = _fixture.GetSut();
@@ -204,6 +208,7 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public async Task AsyncTasks_IsolatedScopes()
     {
         var sut = _fixture.GetSut();
@@ -269,6 +274,7 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public async Task Async_IsolatedScopes()
     {
         var sut = _fixture.GetSut();
@@ -326,6 +332,7 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void GlobalMode_Disabled_Uses_AsyncLocalScopeStackContainer()
     {
         _fixture.SentryOptions.IsGlobalModeEnabled = false;

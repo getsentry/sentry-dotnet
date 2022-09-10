@@ -61,12 +61,14 @@ public class ProcessInfoTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void Options_DefaultOptionValue_IsBestMode()
     {
         Assert.Equal(StartupTimeDetectionMode.Best, new SentryOptions().DetectStartupTime);
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public async Task Ctor_DefaultArguments_ImproveStartupTimePrecision()
     {
         // Not passing a mock callback here so this is 'an integration test' with GetCurrentProcess()
@@ -96,6 +98,7 @@ public class ProcessInfoTests
     [InlineData(StartupTimeDetectionMode.None, false)]
     [InlineData(StartupTimeDetectionMode.Fast, false)]
     [InlineData(StartupTimeDetectionMode.Best, true)]
+    [Trait("Category", "DeviceUnvalidated")] // fails on Best mode
     public async Task Ctor_PreciseAppStartCallback_RunsOnlyOnBestMode(
         StartupTimeDetectionMode mode,
         bool fastCallbackInvoked)

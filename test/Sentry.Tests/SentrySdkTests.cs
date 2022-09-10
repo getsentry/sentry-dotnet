@@ -422,6 +422,7 @@ public class SentrySdkTests : IDisposable
 
     [Obsolete]
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void WithScope_InvokedWithNewScope()
     {
         using (SentrySdk.Init(ValidDsn))
@@ -642,6 +643,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void InitHub_GlobalModeOff_AsyncLocalContainer()
     {
         // Act
@@ -674,6 +676,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void InitHub_GlobalModeOn_NoWarningOrErrorLogged()
     {
         var logger = Substitute.For<IDiagnosticLogger>();
@@ -702,6 +705,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void InitHub_GlobalModeOff_NoWarningOrErrorLogged()
     {
         var logger = Substitute.For<IDiagnosticLogger>();

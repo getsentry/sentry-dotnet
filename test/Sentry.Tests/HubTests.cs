@@ -15,6 +15,7 @@ public class HubTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
         // Arrange
@@ -954,6 +955,7 @@ public class HubTests
     }
 
     [Fact]
+    [Trait("Category", "DeviceUnvalidated")] // fails
     public void Ctor_GlobalModeFalse_DoesPushScope()
     {
         // Arrange
