@@ -149,9 +149,12 @@ public class SentryStackTraceFactoryTests
     }
 
     [SkippableFact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
     public void FileNameShouldBeRelative()
     {
+#if __MOBILE__
+        // We don't get file paths on mobile unless we've got a debugger attached.
+        Skip.If(true);
+#endif
         Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
         _fixture.SentryOptions.AttachStacktrace = true;
