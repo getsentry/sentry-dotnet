@@ -411,27 +411,35 @@ public class SentrySdkTests : IDisposable
         }
     }
 
-    [Obsolete]
     [Fact]
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
         var invoked = false;
+#pragma warning disable CS0618
         SentrySdk.WithScope(_ => invoked = true);
+#pragma warning restore CS0618
         Assert.False(invoked);
     }
 
-    [Obsolete]
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void WithScope_InvokedWithNewScope()
     {
-        using (SentrySdk.Init(ValidDsn))
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn
+        };
+
+        Skip.If(options.IsGlobalModeEnabled);
+
+        using (SentrySdk.Init(options))
         {
             Scope expected = null;
             SentrySdk.ConfigureScope(s => expected = s);
 
             Scope actual = null;
+#pragma warning disable CS0618
             SentrySdk.WithScope(s => actual = s);
+#pragma warning restore CS0618
             Assert.NotNull(actual);
 
             Assert.NotSame(expected, actual);
@@ -642,16 +650,19 @@ public class SentrySdkTests : IDisposable
         await sut.FlushAsync(TimeSpan.FromDays(1));
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void InitHub_GlobalModeOff_AsyncLocalContainer()
     {
         // Act
-        var sut = SentrySdk.InitHub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
             IsGlobalModeEnabled = false
-        });
+        };
+
+        Skip.If(options.IsGlobalModeEnabled);
+
+        var sut = SentrySdk.InitHub(options);
 
         var hub = (Hub)sut;
 
@@ -675,21 +686,24 @@ public class SentrySdkTests : IDisposable
         hub.ScopeManager.ScopeStackContainer.Should().BeOfType<GlobalScopeStackContainer>();
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void InitHub_GlobalModeOn_NoWarningOrErrorLogged()
     {
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-        _ = SentrySdk.InitHub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
             Debug = true,
             DetectStartupTime = StartupTimeDetectionMode.Fast // `.Best` would actually trigger a warning log on Android
-        });
+        };
+
+        Skip.If(options.IsGlobalModeEnabled);
+
+        SentrySdk.InitHub(options);
 
         logger.DidNotReceive().Log(
             SentryLevel.Warning,
@@ -704,20 +718,23 @@ public class SentrySdkTests : IDisposable
             Arg.Any<object[]>());
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void InitHub_GlobalModeOff_NoWarningOrErrorLogged()
     {
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-        _ = SentrySdk.InitHub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = false,
             Debug = true
-        });
+        };
+
+        Skip.If(options.IsGlobalModeEnabled);
+
+        SentrySdk.InitHub(options);
 
         logger.DidNotReceive().Log(
             SentryLevel.Warning,

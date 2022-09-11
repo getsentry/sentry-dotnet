@@ -42,10 +42,11 @@ public class SentryScopeManagerTests
         Assert.NotEqual(root, sut.GetCurrent());
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void GetCurrent_Equality_FalseOnModifiedScope()
     {
+        Skip.If(_fixture.SentryOptions.IsGlobalModeEnabled);
+
         var sut = _fixture.GetSut();
 
         var root = sut.GetCurrent();
@@ -75,10 +76,11 @@ public class SentryScopeManagerTests
         Assert.Same(currentScope.Key, sut.GetCurrent().Key);
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void BindClient_ScopeState_StaysTheSame()
     {
+        Skip.If(_fixture.SentryOptions.IsGlobalModeEnabled);
+
         var sut = _fixture.GetSut();
         var currentScope = sut.GetCurrent();
 
@@ -123,10 +125,11 @@ public class SentryScopeManagerTests
         Assert.True(isInvoked);
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void PushScope_Parameterless_SetsNewAsCurrent()
     {
+        Skip.If(_fixture.SentryOptions.IsGlobalModeEnabled);
+
         var sut = _fixture.GetSut();
         var first = sut.GetCurrent();
         _ = sut.PushScope();
@@ -157,10 +160,11 @@ public class SentryScopeManagerTests
         Assert.Same(firstScope.Value, secondScope.Value);
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void PushScope_StateInstance_SetsNewAsCurrent()
     {
+        Skip.If(_fixture.SentryOptions.IsGlobalModeEnabled);
+
         var sut = _fixture.GetSut();
         var first = sut.GetCurrent();
         _ = sut.PushScope(new object());
@@ -207,10 +211,11 @@ public class SentryScopeManagerTests
         Assert.Equal(root, sut.GetCurrent());
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public async Task AsyncTasks_IsolatedScopes()
     {
+        Skip.If(_fixture.SentryOptions.IsGlobalModeEnabled);
+
         var sut = _fixture.GetSut();
         var root = sut.GetCurrent();
 
@@ -273,10 +278,11 @@ public class SentryScopeManagerTests
         Assert.Equal(root, sut.GetCurrent());
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public async Task Async_IsolatedScopes()
     {
+        Skip.If(_fixture.SentryOptions.IsGlobalModeEnabled);
+
         var sut = _fixture.GetSut();
         var root = sut.GetCurrent();
         void AddRandomTag() => sut.GetCurrent().Key.SetTag(Guid.NewGuid().ToString(), "1");
@@ -331,11 +337,11 @@ public class SentryScopeManagerTests
         client1.Should().BeSameAs(client2);
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void GlobalMode_Disabled_Uses_AsyncLocalScopeStackContainer()
     {
         _fixture.SentryOptions.IsGlobalModeEnabled = false;
+        Skip.If(_fixture.SentryOptions.IsGlobalModeEnabled);
         var sut = _fixture.GetSut();
         Assert.IsType<AsyncLocalScopeStackContainer>(sut.ScopeStackContainer);
     }

@@ -14,16 +14,19 @@ public class HubTests
         _output = output;
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
             BackgroundWorker = new FakeBackgroundWorker()
-        });
+        };
+
+        Skip.If(options.IsGlobalModeEnabled);
+
+        var hub = new Hub(options);
 
         // Act & assert
         using (hub.PushScope())
@@ -954,19 +957,22 @@ public class HubTests
         scopeManager.DidNotReceiveWithAnyArgs().PushScope();
     }
 
-    [Fact]
-    [Trait("Category", "DeviceUnvalidated")] // fails
+    [SkippableFact]
     public void Ctor_GlobalModeFalse_DoesPushScope()
     {
         // Arrange
         var scopeManager = Substitute.For<IInternalScopeManager>();
 
         // Act
-        _ = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             IsGlobalModeEnabled = false,
             Dsn = ValidDsn,
-        }, scopeManager: scopeManager);
+        };
+
+        Skip.If(options.IsGlobalModeEnabled);
+
+        _ = new Hub(options, scopeManager: scopeManager);
 
         // Assert
         scopeManager.Received(1).PushScope();
