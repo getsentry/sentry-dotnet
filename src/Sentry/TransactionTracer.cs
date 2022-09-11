@@ -53,6 +53,7 @@ namespace Sentry
         /// <inheritdoc />
         public string? Distribution { get; set; }
 
+        /// <inheritdoc />
         public TransactionNameSource? Source { get; set; }
 
         /// <inheritdoc />
