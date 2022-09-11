@@ -9,13 +9,33 @@ namespace Sentry
         public string Name { get; }
 
         /// <inheritdoc />
-        public TransactionSourceType? SourceType { get; }
+        public TransactionNameSource? Source { get; }
 
         /// <summary>
         /// Whether the parent transaction of this transaction has been sampled.
         /// </summary>
         public bool? IsParentSampled { get; }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="TransactionContext"/>.
+        /// </summary>
+        public TransactionContext(
+            SpanId spanId,
+            SpanId? parentSpanId,
+            SentryId traceId,
+            string name,
+            string operation,
+            string? description,
+            SpanStatus? status,
+            bool? isSampled,
+            bool? isParentSampled,
+            TransactionNameSource? source)
+            : base(spanId, parentSpanId, traceId, operation, description, status, isSampled)
+        {
+            Name = name;
+            IsParentSampled = isParentSampled;
+            Source = source;
+        }
         /// <summary>
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>

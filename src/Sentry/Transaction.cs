@@ -65,7 +65,7 @@ namespace Sentry
         /// <summary>
         /// SourceType
         /// </summary>
-        public TransactionSourceType? SourceType { get; set; }
+        public TransactionNameSource? Source { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
@@ -219,7 +219,7 @@ namespace Sentry
             SpanId = tracer.SpanId;
             TraceId = tracer.TraceId;
             Operation = tracer.Operation;
-            SourceType = tracer.SourceType;
+            Source = tracer.Source;
             Platform = tracer.Platform;
             Release = tracer.Release;
             Distribution = tracer.GetDistribution();
@@ -274,6 +274,17 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("release", Release);
             writer.WriteStringIfNotWhiteSpace("dist", Distribution);
             writer.WriteStringIfNotWhiteSpace("transaction", Name);
+
+            if (Source != null)
+            {
+                writer.WritePropertyName("transaction_info");
+                writer.WriteStartObject();
+                writer.WritePropertyName("source");
+                writer.WriteStringValue(Source.ToString()!.ToLowerInvariant());
+                writer.WriteEndObject();
+            }
+
+            writer.WriteStringIfNotWhiteSpace("transaction", Name);
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteStringIfNotNull("timestamp", EndTimestamp);
             writer.WriteSerializableIfNotNull("request", _request, logger);
@@ -297,6 +308,12 @@ namespace Sentry
         {
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var name = json.GetProperty("transaction").GetStringOrThrow();
+            var sourceValue = json.GetPropertyOrNull("transaction_info")?.GetPropertyOrNull("source")?.GetString();
+            TransactionNameSource? source = null;
+            if (sourceValue != null)
+            {
+                source = (TransactionNameSource)Enum.Parse(typeof(TransactionNameSource), sourceValue, true);
+            }
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
@@ -319,6 +336,7 @@ namespace Sentry
 
             return new Transaction(name)
             {
+                Source = source,
                 EventId = eventId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,

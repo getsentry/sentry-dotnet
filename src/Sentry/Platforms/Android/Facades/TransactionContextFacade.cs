@@ -25,7 +25,7 @@ internal class TransactionContextFacade : ITransactionContext
 
     public string? Description => _context.Description;
 
-    public TransactionSourceType? SourceType => _context.SourceType;
+    public TransactionNameSource? Source => _context.TransactionNameSource.ToSentryTransactionNameSource();
 
     public SpanStatus? Status => _context.Status?.ToSpanStatus();
 

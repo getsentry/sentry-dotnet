@@ -53,7 +53,7 @@ namespace Sentry
         /// <inheritdoc />
         public string? Distribution { get; set; }
 
-        public TransactionSourceType? SourceType { get; set; }
+        public TransactionNameSource? Source { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
@@ -167,6 +167,7 @@ namespace Sentry
         {
             _hub = hub;
             Name = name;
+            Source = Source;
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
             Operation = operation;
@@ -179,6 +180,7 @@ namespace Sentry
         {
             _hub = hub;
             Name = context.Name;
+            Source = Source;
             Operation = context.Operation;
             SpanId = context.SpanId;
             ParentSpanId = context.ParentSpanId;

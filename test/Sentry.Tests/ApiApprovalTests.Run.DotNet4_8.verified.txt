@@ -269,6 +269,7 @@ namespace Sentry
     {
         bool? IsParentSampled { get; }
         string Name { get; }
+        Sentry.TransactionNameSource? Source { get; }
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
     public sealed class Package : Sentry.IJsonSerializable
@@ -833,7 +834,7 @@ namespace Sentry
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
-        public Sentry.TransactionSourceType? SourceType { get; set; }
+        public Sentry.TransactionNameSource? Source { get; set; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Span> Spans { get; }
         public System.DateTimeOffset StartTimestamp { get; }
@@ -856,16 +857,12 @@ namespace Sentry
         public TransactionContext(string name, string operation, bool? isSampled) { }
         public TransactionContext(Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, bool? isParentSampled) { }
         public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled) { }
+        public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled, Sentry.TransactionNameSource? source) { }
         public bool? IsParentSampled { get; }
         public string Name { get; }
+        public Sentry.TransactionNameSource? Source { get; }
     }
-    public class TransactionSamplingContext
-    {
-        public TransactionSamplingContext(Sentry.ITransactionContext transactionContext, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> CustomSamplingContext { get; }
-        public Sentry.ITransactionContext TransactionContext { get; }
-    }
-    public enum TransactionSourceType
+    public enum TransactionNameSource
     {
         Custom = 0,
         Url = 1,
@@ -873,6 +870,12 @@ namespace Sentry
         View = 3,
         Component = 4,
         Task = 5,
+    }
+    public class TransactionSamplingContext
+    {
+        public TransactionSamplingContext(Sentry.ITransactionContext transactionContext, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
+        public System.Collections.Generic.IReadOnlyDictionary<string, object?> CustomSamplingContext { get; }
+        public Sentry.ITransactionContext TransactionContext { get; }
     }
     public class TransactionTracer : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
@@ -897,6 +900,7 @@ namespace Sentry
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
+        public Sentry.TransactionNameSource? Source { get; set; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }
         public System.DateTimeOffset StartTimestamp { get; }

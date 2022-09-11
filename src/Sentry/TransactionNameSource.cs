@@ -9,7 +9,7 @@ namespace Sentry
     /// The source should only be set by integrations and not by developers directly
     /// https://develop.sentry.dev/sdk/event-payloads/transaction/#transaction-annotations
     /// </summary>
-    public enum TransactionSourceType
+    public enum TransactionNameSource
     {
         /// <summary>
         /// User-defined name.
