@@ -35,8 +35,7 @@ public class HttpTransportTests
             .Returns(_ => SentryResponses.GetOkResponse());
 
         var httpTransport = new HttpTransport(
-            new()
-                { Dsn = ValidDsn },
+            new() { Dsn = ValidDsn },
             new(httpHandler));
 
         var envelope = Envelope.FromEvent(
@@ -691,8 +690,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new()
-                { Dsn = ValidDsn },
+            new() { Dsn = ValidDsn },
             new());
 
         var envelope = Envelope.FromEvent(new());
@@ -710,8 +708,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new()
-                { Dsn = ValidDsn },
+            new() { Dsn = ValidDsn },
             new());
 
         var envelope = Envelope.FromEvent(new());
@@ -730,8 +727,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new()
-                { Dsn = ValidDsn },
+            new() { Dsn = ValidDsn },
             new());
 
         var envelope = Envelope.FromEvent(new());
@@ -748,8 +744,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new()
-                { Dsn = ValidDsn },
+            new() { Dsn = ValidDsn },
             new());
 
         var envelope = Envelope.FromEvent(new());
@@ -768,8 +763,7 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new()
-                { Dsn = ValidDsn },
+            new() { Dsn = ValidDsn },
             new());
 
         var envelope = Envelope.FromEvent(new());

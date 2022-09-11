@@ -124,12 +124,9 @@ public class SentryDiagnosticListenerTests
         for (var j = 0; j < totalCommands; j++)
         {
             var i = j + 4;
-            context.Items.Add(new()
-                { Name = $"Number {i}" });
-            context.Items.Add(new()
-                { Name = $"Number2 {i}" });
-            context.Items.Add(new()
-                { Name = $"Number3 {i}" });
+            context.Items.Add(new() { Name = $"Number {i}" });
+            context.Items.Add(new() { Name = $"Number2 {i}" });
+            context.Items.Add(new() { Name = $"Number3 {i}" });
             commands.Add(i * 2);
         }
         // Save before the Transaction creation to avoid storing junk.

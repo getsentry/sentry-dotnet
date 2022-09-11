@@ -42,8 +42,7 @@ public class MiddlewareLoggerIntegration : IDisposable
             Client.When(client => client.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
                 .Do(callback => callback.Arg<Scope>().Evaluate());
 
-            var hub = new Hub(new()
-                { Dsn = ValidDsn });
+            var hub = new Hub(new() { Dsn = ValidDsn });
             hub.BindClient(Client);
             Hub = hub;
             var provider = new SentryLoggerProvider(hub, new MockClock(), loggingOptions);

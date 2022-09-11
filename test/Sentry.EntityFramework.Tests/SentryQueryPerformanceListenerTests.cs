@@ -69,16 +69,13 @@ public class SentryQueryPerformanceListenerTests
         switch (expectedOperation)
         {
             case DbScalarKey:
-                interceptor.ScalarExecuting(command, new()
-                    { Exception = new() });
+                interceptor.ScalarExecuting(command, new() { Exception = new() });
                 break;
             case DbNonQueryKey:
-                interceptor.NonQueryExecuting(command, new()
-                    { Exception = new() });
+                interceptor.NonQueryExecuting(command, new() { Exception = new() });
                 break;
             case DbReaderKey:
-                interceptor.ReaderExecuting(command, new()
-                    { Exception = new() });
+                interceptor.ReaderExecuting(command, new() { Exception = new() });
                 break;
             default:
                 throw new NotImplementedException();
@@ -204,8 +201,7 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var integration = new DbInterceptionIntegration();
-        integration.Register(_fixture.Hub, new()
-            { TracesSampleRate = 1 });
+        integration.Register(_fixture.Hub, new() { TracesSampleRate = 1 });
 
         // Act
         _ = _fixture.DbContext.TestTable.FirstOrDefault();

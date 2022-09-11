@@ -32,12 +32,9 @@ public class TransactionTests
         {
             Description = "desc123",
             Status = SpanStatus.Aborted,
-            User = new()
-                { Id = "user-id" },
-            Request = new()
-                { Method = "POST" },
-            Sdk = new()
-                { Name = "SDK-test", Version = "1.1.1" },
+            User = new() { Id = "user-id" },
+            Request = new() { Method = "POST" },
+            Sdk = new() { Name = "SDK-test", Version = "1.1.1" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
             Contexts =

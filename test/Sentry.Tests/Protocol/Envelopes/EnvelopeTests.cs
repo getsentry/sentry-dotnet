@@ -490,14 +490,10 @@ public class EnvelopeTests
         var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
         var @event = new SentryEvent(ex, timestamp, id)
         {
-            User = new()
-                { Id = "user-id" },
-            Request = new()
-                { Method = "POST" },
-            Contexts = new()
-                { ["context_key"] = "context_value" },
-            Sdk = new()
-                { Name = "SDK-test", Version = "1.0.0" },
+            User = new() { Id = "user-id" },
+            Request = new() { Method = "POST" },
+            Contexts = new() { ["context_key"] = "context_value" },
+            Sdk = new() { Name = "SDK-test", Version = "1.0.0" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
             Logger = "logger",
@@ -540,8 +536,7 @@ public class EnvelopeTests
         var @event = new SentryEvent
         {
             Message = "Test",
-            Sdk = new()
-                { Name = "SDK-test", Version = "1.0.0" }
+            Sdk = new() { Name = "SDK-test", Version = "1.0.0" }
         };
 
         using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
@@ -578,8 +573,7 @@ public class EnvelopeTests
         var @event = new SentryEvent
         {
             Message = "Test",
-            Sdk = new()
-                { Name = "SDK-test", Version = "1.0.0" }
+            Sdk = new() { Name = "SDK-test", Version = "1.0.0" }
         };
 
         using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});

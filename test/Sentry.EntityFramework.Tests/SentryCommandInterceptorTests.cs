@@ -58,8 +58,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.NonQueryExecuting(command, new()
-            { Exception = new() });
+        interceptor.NonQueryExecuting(command, new() { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 
@@ -136,8 +135,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ScalarExecuting(command, new()
-            { Exception = new() });
+        interceptor.ScalarExecuting(command, new() { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 

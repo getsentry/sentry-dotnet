@@ -44,8 +44,7 @@ public class SentryGrpcSdkTestFixture : SentrySdkTestFixture
         });
 
         Channel = GrpcChannel.ForAddress("http://test-server",
-            new()
-                { HttpClient = sentryHttpClient });
+            new() { HttpClient = sentryHttpClient });
 
         AfterConfigureBuilder?.Invoke(builder);
     }

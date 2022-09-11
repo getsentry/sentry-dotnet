@@ -72,8 +72,7 @@ public class ProcessInfoTests
         // Not passing a mock callback here so this is 'an integration test' with GetCurrentProcess()
         var logger = Substitute.For<IDiagnosticLogger>();
         var now = DateTimeOffset.UtcNow;
-        var sut = new ProcessInfo(new()
-            { DiagnosticLogger = logger });
+        var sut = new ProcessInfo(new() { DiagnosticLogger = logger });
         var initialTime = sut.StartupTime;
         await sut.PreciseAppStartupTask;
 

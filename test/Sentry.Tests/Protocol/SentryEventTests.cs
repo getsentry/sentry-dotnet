@@ -21,10 +21,8 @@ public class SentryEventTests
         var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
         var sut = new SentryEvent(ex, timestamp, id)
         {
-            User = new()
-                { Id = "user-id" },
-            Request = new()
-                { Method = "POST" },
+            User = new() { Id = "user-id" },
+            Request = new() { Method = "POST" },
             Contexts = new()
             {
                 ["context_key"] = "context_value",

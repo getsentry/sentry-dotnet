@@ -313,8 +313,7 @@ public class HubTests
             var evt = new SentryEvent
             {
                 Contexts = {[expectedContextKey] = new EvilContext()},
-                Message = new()
-                    {Formatted = expectedMessage}
+                Message = new() {Formatted = expectedMessage}
             };
 
             hub.CaptureEvent(evt);
@@ -392,8 +391,7 @@ public class HubTests
         // Act
         hub.CaptureEvent(new()
         {
-            SentryExceptions = new[] { new SentryException { Mechanism = new()
-                { Handled = false } } }
+            SentryExceptions = new[] { new SentryException { Mechanism = new() { Handled = false } } }
         });
 
         // Assert
