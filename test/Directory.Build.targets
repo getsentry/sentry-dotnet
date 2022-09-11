@@ -1,0 +1,8 @@
+<Project>
+  <Import Project="..\Directory.Build.targets" />
+
+  <!-- platform-specific targets should not be marked as test projects -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+</Project>
