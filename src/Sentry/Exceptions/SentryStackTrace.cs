@@ -51,7 +51,7 @@ namespace Sentry
                 .Select(SentryStackFrame.FromJson)
                 .ToArray();
 
-            return new SentryStackTrace
+            return new()
             {
                 InternalFrames = frames
             };

@@ -6,7 +6,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
 
     protected override void ConfigureBuilder(WebHostBuilder builder)
     {
-        Events = new List<SentryEvent>();
+        Events = new();
         Configure = options =>
         {
             options.BeforeSend = @event =>

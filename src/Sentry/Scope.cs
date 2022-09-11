@@ -96,7 +96,7 @@ namespace Sentry
         /// <inheritdoc />
         public Request Request
         {
-            get => _request ??= new Request();
+            get => _request ??= new();
             set => _request = value;
         }
 
@@ -124,7 +124,8 @@ namespace Sentry
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User { PropertyChanged = UserChanged };
+            get => _user ??= new()
+                { PropertyChanged = UserChanged };
             set
             {
                 _user = value;
@@ -237,7 +238,7 @@ namespace Sentry
 
         // For testing. Should explicitly require SentryOptions.
         internal Scope()
-            : this(new SentryOptions())
+            : this(new())
         {
         }
 

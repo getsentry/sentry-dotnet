@@ -15,14 +15,14 @@ public class RetryAfterHandlerOverhead
 
     [GlobalSetup(Target = nameof(With_RetryAfterHandler_OkResponse))]
     public void Setup_With_RetryAfterHandler_OkResponse()
-        => _invoker = new HttpMessageInvoker(new RetryAfterHandler(new FakeMessageHandler()));
+        => _invoker = new(new RetryAfterHandler(new FakeMessageHandler()));
 
     [GlobalSetup(Target = nameof(With_RetryAfterHandler_429Response))]
     public void Setup_With_RetryAfterHandler_429Response()
-        => _invoker = new HttpMessageInvoker(new RetryAfterHandler(new FakeMessageHandler(HttpStatusCode.TooManyRequests)));
+        => _invoker = new(new RetryAfterHandler(new FakeMessageHandler(HttpStatusCode.TooManyRequests)));
 
     [GlobalSetup(Target = nameof(Without_RetryAfterHandler))]
-    public void Setup_Without_RetryAfterHandler() => _invoker = new HttpMessageInvoker(new FakeMessageHandler());
+    public void Setup_Without_RetryAfterHandler() => _invoker = new(new FakeMessageHandler());
 
     [Benchmark(Baseline = true, Description = "Without RetryAfterHandler")]
     public async Task Without_RetryAfterHandler()

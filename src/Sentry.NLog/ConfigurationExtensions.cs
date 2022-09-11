@@ -111,6 +111,6 @@ public static class ConfigurationExtensions
     /// <param name="layout">The layout to be rendered for the tag</param>
     public static void AddTag(this SentryNLogOptions options, string name, Layout layout)
     {
-        options.Tags.Add(new TargetPropertyWithContext(name, layout));
+        options.Tags.Add(new(name, layout));
     }
 }

@@ -42,7 +42,7 @@ public class SentryClientTests
         _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
 
         // Not filtered since it's not in the inheritance chain
-        Assert.NotEqual(default, sut.CaptureException(new Exception()));
+        Assert.NotEqual(default, sut.CaptureException(new()));
         _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
     }
 
@@ -51,7 +51,7 @@ public class SentryClientTests
     {
         var sut = _fixture.GetSut();
 
-        var evt = new SentryEvent(new Exception());
+        var evt = new SentryEvent(new());
 
         var actual = sut.CaptureEvent(evt);
 
@@ -66,7 +66,7 @@ public class SentryClientTests
         _fixture.SentryOptions.AddExceptionProcessorProvider(() => new[] { exceptionProcessor });
         var sut = _fixture.GetSut();
 
-        var evt = new SentryEvent(new Exception());
+        var evt = new SentryEvent(new());
 
         _ = sut.CaptureEvent(evt);
 
@@ -82,7 +82,7 @@ public class SentryClientTests
 
         var sut = _fixture.GetSut();
 
-        var evt = new SentryEvent(new Exception());
+        var evt = new SentryEvent(new());
 
         _ = sut.CaptureEvent(evt, scope);
 
@@ -93,7 +93,7 @@ public class SentryClientTests
     public void CaptureEvent_NullEventWithScope_EmptyGuid()
     {
         var sut = _fixture.GetSut();
-        Assert.Equal(default, sut.CaptureEvent(null, new Scope(_fixture.SentryOptions)));
+        Assert.Equal(default, sut.CaptureEvent(null, new(_fixture.SentryOptions)));
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class SentryClientTests
 
         var sut = _fixture.GetSut();
 
-        var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
+        var actualId = sut.CaptureEvent(expectedEvent, new(_fixture.SentryOptions));
         Assert.Equal(expectedId, (Guid)actualId);
     }
 
@@ -143,7 +143,7 @@ public class SentryClientTests
             evaluated = true;
         };
 
-        _ = sut.CaptureEvent(new SentryEvent(), scope);
+        _ = sut.CaptureEvent(new(), scope);
 
         Assert.True(evaluated);
         Assert.Same(scope, actualSender);
@@ -170,7 +170,7 @@ public class SentryClientTests
         var expectedEvent = new SentryEvent();
 
         var sut = _fixture.GetSut();
-        var actualId = sut.CaptureEvent(expectedEvent, new Scope(_fixture.SentryOptions));
+        var actualId = sut.CaptureEvent(expectedEvent, new(_fixture.SentryOptions));
 
         Assert.Equal(default, actualId);
         _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -185,7 +185,7 @@ public class SentryClientTests
         _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
-        _ = sut.CaptureEvent(new SentryEvent());
+        _ = sut.CaptureEvent(new());
 
         _fixture.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
@@ -203,7 +203,7 @@ public class SentryClientTests
         _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
-        _ = sut.CaptureEvent(new SentryEvent());
+        _ = sut.CaptureEvent(new());
 
         _fixture.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -221,7 +221,7 @@ public class SentryClientTests
         _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
-        _ = sut.CaptureException(new Exception());
+        _ = sut.CaptureException(new());
 
         _fixture.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -329,7 +329,7 @@ public class SentryClientTests
         const double allowedRelativeDeviation = 0.15;
 
         // Arrange
-        var client = new SentryClient(new SentryOptions
+        var client = new SentryClient(new()
         {
             Dsn = ValidDsn,
             SampleRate = 0.5f,
@@ -339,7 +339,8 @@ public class SentryClientTests
         // Act
         var eventIds = Enumerable
             .Range(0, 1_000)
-            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
+            .Select(i => client.CaptureEvent(new()
+                { Message = $"Test[{i}]" }))
             .ToArray();
 
         var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
@@ -362,7 +363,7 @@ public class SentryClientTests
         const double allowedRelativeDeviation = 0.15;
 
         // Arrange
-        var client = new SentryClient(new SentryOptions
+        var client = new SentryClient(new()
         {
             Dsn = ValidDsn,
             SampleRate = 0.25f,
@@ -372,7 +373,8 @@ public class SentryClientTests
         // Act
         var eventIds = Enumerable
             .Range(0, 1_000)
-            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
+            .Select(i => client.CaptureEvent(new()
+                { Message = $"Test[{i}]" }))
             .ToArray();
 
         var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
@@ -395,7 +397,7 @@ public class SentryClientTests
         const double allowedRelativeDeviation = 0.15;
 
         // Arrange
-        var client = new SentryClient(new SentryOptions
+        var client = new SentryClient(new()
         {
             Dsn = ValidDsn,
             SampleRate = 0.75f,
@@ -405,7 +407,8 @@ public class SentryClientTests
         // Act
         var eventIds = Enumerable
             .Range(0, 1_000)
-            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
+            .Select(i => client.CaptureEvent(new()
+                { Message = $"Test[{i}]" }))
             .ToArray();
 
         var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
@@ -480,7 +483,7 @@ public class SentryClientTests
 
         //Act
         sut.CaptureUserFeedback(
-            new UserFeedback(SentryId.Empty, "name", "email", "comment"));
+            new(SentryId.Empty, "name", "email", "comment"));
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -494,7 +497,7 @@ public class SentryClientTests
 
         //Act
         sut.CaptureUserFeedback(
-            new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment"));
+            new(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment"));
 
         //Assert
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
@@ -507,7 +510,7 @@ public class SentryClientTests
         var sut = _fixture.GetSut();
 
         //Act
-        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
+        sut.CaptureUserFeedback(new(SentryId.Empty, "name", "email", "comment"));
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
@@ -516,7 +519,7 @@ public class SentryClientTests
     public void Dispose_should_only_flush()
     {
         // Arrange
-        var client = new SentryClient(new SentryOptions
+        var client = new SentryClient(new()
         {
             Dsn = ValidDsn,
         });
@@ -525,7 +528,8 @@ public class SentryClientTests
         client.Dispose();
 
         //Assert is still usable
-        client.CaptureEvent(new SentryEvent { Message = "Test" });
+        client.CaptureEvent(new()
+            { Message = "Test" });
     }
 
     [Fact]
@@ -533,7 +537,7 @@ public class SentryClientTests
     {
         var sut = _fixture.GetSut();
         sut.Dispose();
-        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
+        sut.CaptureUserFeedback(new(SentryId.Empty, "name", "email", "comment"));
     }
 
     [Fact]
@@ -543,7 +547,7 @@ public class SentryClientTests
         var client = _fixture.GetSut();
 
         // Act
-        client.CaptureTransaction(new Transaction(
+        client.CaptureTransaction(new(
             "test name",
             "test operation"
         )
@@ -564,7 +568,7 @@ public class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new(
                 "test name",
                 "test operation"
             )
@@ -609,7 +613,7 @@ public class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new(
                 null!,
                 "test operation"
             )
@@ -630,7 +634,7 @@ public class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new(
                 "test name",
                 null!
             )
@@ -651,7 +655,7 @@ public class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new(
                 "test name",
                 "test operation"
             )
@@ -670,7 +674,7 @@ public class SentryClientTests
         var sut = _fixture.GetSut();
         sut.Dispose();
         sut.CaptureTransaction(
-            new Transaction(
+            new(
                 "test name",
                 "test operation")
             {
@@ -807,7 +811,7 @@ public class SentryClientTests
         _fixture.SentryOptions.BeforeSend = _ => null;
 
         var sut = _fixture.GetSut();
-        _ = sut.CaptureEvent(new SentryEvent());
+        _ = sut.CaptureEvent(new());
         await cachingTransport.FlushAsync();
 
         _fixture.ClientReportRecorder.Received(1)

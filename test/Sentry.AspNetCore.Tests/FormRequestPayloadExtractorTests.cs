@@ -7,7 +7,7 @@ public class FormRequestPayloadExtractorTests : BaseRequestPayloadExtractorTests
 {
     public FormRequestPayloadExtractorTests()
     {
-        TestFixture = new Fixture();
+        TestFixture = new();
         _ = TestFixture.HttpRequest.ContentType.Returns("application/x-www-form-urlencoded");
     }
 

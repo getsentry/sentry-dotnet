@@ -23,7 +23,7 @@ internal static class FakeSentryServer
                 });
             });
 
-        return new TestServer(builder);
+        return new(builder);
     }
 
     public static TestServer CreateServer()

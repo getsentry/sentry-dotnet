@@ -29,7 +29,7 @@ public abstract class SentrySdkTestFixture : IDisposable
         new RequestHandler
         {
             Path = "/throw",
-            Handler = _ => throw new Exception("test error")
+            Handler = _ => throw new("test error")
         }
     };
 
@@ -64,7 +64,7 @@ public abstract class SentrySdkTestFixture : IDisposable
         ConfigureWebHost?.Invoke(builder);
         ConfigureBuilder(builder);
 
-        TestServer = new TestServer(builder);
+        TestServer = new(builder);
         HttpClient = TestServer.CreateClient();
         ServiceProvider = TestServer.Host.Services;
         LastExceptionFilter = ServiceProvider.GetRequiredService<LastExceptionFilter>();

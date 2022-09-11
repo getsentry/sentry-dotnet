@@ -15,7 +15,7 @@ public class HttpContextExtensionsTests
             if (pathBase is not null)
             {
                 // pathBase must start with '/' otherwise the new PathString will throw an exception.
-                httpContext.Request.PathBase = new PathString(pathBase);
+                httpContext.Request.PathBase = new(pathBase);
             }
 
             return httpContext;
@@ -32,7 +32,7 @@ public class HttpContextExtensionsTests
             if (pathBase is not null)
             {
                 // pathBase must start with '/' otherwise the new PathString will throw an exception.
-                httpContext.Request.PathBase = new PathString(pathBase);
+                httpContext.Request.PathBase = new(pathBase);
             }
 
             AddRouteValuesIfNotNull(httpContext.Request.RouteValues, "controller", controller);

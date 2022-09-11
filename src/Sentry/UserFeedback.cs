@@ -64,7 +64,7 @@ namespace Sentry
             var email = json.GetPropertyOrNull("email")?.GetString();
             var comments = json.GetPropertyOrNull("comments")?.GetString();
 
-            return new UserFeedback(eventId, name, email, comments);
+            return new(eventId, name, email, comments);
         }
     }
 }

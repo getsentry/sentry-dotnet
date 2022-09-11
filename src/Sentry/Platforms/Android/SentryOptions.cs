@@ -236,7 +236,7 @@ public partial class SentryOptions
         /// </example>
         public void AddInAppExclude(string prefix)
         {
-            InAppExcludes ??= new List<string>();
+            InAppExcludes ??= new();
             InAppExcludes.Add(prefix);
         }
 
@@ -252,7 +252,7 @@ public partial class SentryOptions
         /// 'java.util.customcode.', 'io.sentry.samples.'
         /// </example>
         public void AddInAppInclude(string prefix){
-            InAppIncludes ??= new List<string>();
+            InAppIncludes ??= new();
             InAppIncludes.Add(prefix);
         }
 

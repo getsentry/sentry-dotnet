@@ -210,7 +210,7 @@ namespace Sentry.Protocol.Envelopes
                 items.Add(EnvelopeItem.FromSession(sessionUpdate));
             }
 
-            return new Envelope(header, items);
+            return new(header, items);
         }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace Sentry.Protocol.Envelopes
                 EnvelopeItem.FromUserFeedback(sentryUserFeedback)
             };
 
-            return new Envelope(header, items);
+            return new(header, items);
         }
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace Sentry.Protocol.Envelopes
                 EnvelopeItem.FromTransaction(transaction)
             };
 
-            return new Envelope(header, items);
+            return new(header, items);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace Sentry.Protocol.Envelopes
                 EnvelopeItem.FromSession(sessionUpdate)
             };
 
-            return new Envelope(header, items);
+            return new(header, items);
         }
 
         /// <summary>
@@ -270,7 +270,7 @@ namespace Sentry.Protocol.Envelopes
                 EnvelopeItem.FromClientReport(clientReport)
             };
 
-            return new Envelope(header, items);
+            return new(header, items);
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
@@ -318,7 +318,7 @@ namespace Sentry.Protocol.Envelopes
                 items.Add(item);
             }
 
-            return new Envelope(header, items);
+            return new(header, items);
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace Sentry.Protocol.Envelopes
         {
             var items = Items.ToList();
             items.Add(item);
-            return new Envelope(Header, items);
+            return new(Header, items);
         }
     }
 }

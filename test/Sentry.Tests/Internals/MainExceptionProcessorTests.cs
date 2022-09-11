@@ -17,7 +17,7 @@ public class MainExceptionProcessorTests
     {
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
-        sut.Process(new Exception(), evt);
+        sut.Process(new(), evt);
 
         Assert.Empty(evt.Extra);
     }
@@ -27,7 +27,7 @@ public class MainExceptionProcessorTests
     {
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
-        sut.Process(new Exception("ex", new Exception()), evt);
+        sut.Process(new("ex", new()), evt);
 
         Assert.Empty(evt.Extra);
     }
@@ -141,7 +141,7 @@ public class MainExceptionProcessorTests
         var sut = _fixture.GetSut();
         var ex = new Exception
         {
-            Data = { [new object()] = new object() }
+            Data = { [new()] = new() }
         };
 
         var actual = sut.CreateSentryException(ex);
@@ -175,7 +175,7 @@ public class MainExceptionProcessorTests
 
     private static AggregateException BuildAggregateException()
     {
-        return new AggregateException(
+        return new(
             new Exception("Inner message1"),
             new Exception("Inner message2"));
     }
@@ -238,13 +238,13 @@ public class MainExceptionProcessorTests
         var ex = new Exception();
         var evt = new SentryEvent();
         var expectedContext1 = new KeyValuePair<string, Dictionary<string, object>>("Context 1",
-            new Dictionary<string, object>
+            new()
             {
                 { "Data1", new { a = 1, b = 2, c = "12345"} },
                 { "Data2", "Something broke." }
             });
         var expectedContext2 = new KeyValuePair<string, Dictionary<string, object>>("Context 2",
-            new Dictionary<string, object>
+            new()
             {
                 { "Data1", new { c = 1, d = 2, e = "12345"} },
                 { "Data2", "Something broke again." }
@@ -271,7 +271,7 @@ public class MainExceptionProcessorTests
         var expectedContext = new KeyValuePair<string, object>("Exception[0][sentry:context:Context 1]", null);
 
         var invalidContext2 = new KeyValuePair<string, Dictionary<string, object>>("",
-            new Dictionary<string, object>
+            new()
             {
                 { "Data3", new { c = 1, d = 2, e = "12345"} },
                 { "Data4", "Something broke again." }

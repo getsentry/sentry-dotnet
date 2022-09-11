@@ -27,7 +27,7 @@ namespace Sentry.Internal.Http
             var retryAfter = TimeSpan.FromSeconds(int.Parse(components[0], CultureInfo.InvariantCulture));
             var categories = components[1].Split(';').Select(c => new RateLimitCategory(c)).ToArray();
 
-            return new RateLimit(
+            return new(
                 categories,
                 retryAfter);
         }

@@ -65,7 +65,7 @@ namespace Sentry
             var @params = json.GetPropertyOrNull("params")?.EnumerateArray().Select(j => j.GetDynamicOrNull()).Where(o => o != null).ToArray();
             var formatted = json.GetPropertyOrNull("formatted")?.GetString();
 
-            return new SentryMessage
+            return new()
             {
                 Message = message,
                 Params = @params!,

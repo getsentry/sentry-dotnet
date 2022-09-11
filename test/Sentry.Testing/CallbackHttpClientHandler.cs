@@ -12,6 +12,6 @@ public class CallbackHttpClientHandler : HttpClientHandler
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         await _asyncMessageCallback(request);
-        return new HttpResponseMessage(HttpStatusCode.OK);
+        return new(HttpStatusCode.OK);
     }
 }

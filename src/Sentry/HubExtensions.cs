@@ -166,8 +166,8 @@ namespace Sentry
         /// <returns>The Id of the event</returns>
         public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope)
             => !hub.IsEnabled
-                ? new SentryId()
-                : hub.CaptureEvent(new SentryEvent(ex), configureScope);
+                ? new()
+                : hub.CaptureEvent(new(ex), configureScope);
 
         /// <summary>
         /// Captures a message with a configurable scope callback.
@@ -183,9 +183,9 @@ namespace Sentry
             Action<Scope> configureScope,
             SentryLevel level = SentryLevel.Info)
             => !hub.IsEnabled || string.IsNullOrWhiteSpace(message)
-                ? new SentryId()
+                ? new()
                 : hub.CaptureEvent(
-                    new SentryEvent
+                    new()
                     {
                         Message = message,
                         Level = level

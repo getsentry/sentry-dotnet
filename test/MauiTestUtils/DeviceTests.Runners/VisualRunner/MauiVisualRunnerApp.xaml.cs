@@ -32,7 +32,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 
             var navPage = new NavigationPage(hp);
 
-            return new Window(navPage);
+            return new(navPage);
         }
     }
 }

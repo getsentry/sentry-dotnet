@@ -18,7 +18,7 @@ public class HubTests
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             BackgroundWorker = new FakeBackgroundWorker()
@@ -38,7 +38,7 @@ public class HubTests
     public void PushAndLockScope_DoesNotAffectOuterScope()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             BackgroundWorker = new FakeBackgroundWorker()
@@ -61,7 +61,7 @@ public class HubTests
         var worker = Substitute.For<IBackgroundWorker>();
         worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(false);
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             BackgroundWorker = worker
@@ -82,7 +82,7 @@ public class HubTests
         var worker = Substitute.For<IBackgroundWorker>();
         worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             BackgroundWorker = worker
@@ -102,7 +102,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1
@@ -130,7 +130,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1
@@ -159,7 +159,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 0
@@ -188,14 +188,14 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
 
         // Act
-        hub.CaptureException(new Exception("error"));
+        hub.CaptureException(new("error"));
 
         // Assert
         client.Received(1).CaptureEvent(
@@ -211,7 +211,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             Release = "release"
@@ -220,7 +220,7 @@ public class HubTests
         hub.StartSession();
 
         // Act
-        hub.CaptureEvent(new SentryEvent());
+        hub.CaptureEvent(new());
         hub.EndSession();
 
         // Assert
@@ -233,13 +233,13 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1
         }, client);
         var scope = new Scope();
-        var evt = new SentryEvent(new Exception());
+        var evt = new SentryEvent(new());
         scope.Transaction = hub.StartTransaction("transaction", "operation");
 
         var child = scope.Transaction.StartChild("child", "child");
@@ -313,7 +313,8 @@ public class HubTests
             var evt = new SentryEvent
             {
                 Contexts = {[expectedContextKey] = new EvilContext()},
-                Message = new SentryMessage {Formatted = expectedMessage}
+                Message = new()
+                    {Formatted = expectedMessage}
             };
 
             hub.CaptureEvent(evt);
@@ -356,7 +357,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             Release = "release"
@@ -365,7 +366,7 @@ public class HubTests
         hub.StartSession();
 
         // Act
-        hub.CaptureEvent(new SentryEvent(new Exception()));
+        hub.CaptureEvent(new(new()));
         hub.EndSession();
 
         // Assert
@@ -389,9 +390,10 @@ public class HubTests
         hub.StartSession();
 
         // Act
-        hub.CaptureEvent(new SentryEvent
+        hub.CaptureEvent(new()
         {
-            SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
+            SentryExceptions = new[] { new SentryException { Mechanism = new()
+                { Handled = false } } }
         });
 
         // Assert
@@ -428,7 +430,7 @@ public class HubTests
 
         // Act
         // Simulate a terminating exception
-        integration.Handle(this, new UnhandledExceptionEventArgs(new Exception("test"), true));
+        integration.Handle(this, new(new Exception("test"), true));
 
         // Assert
         worker.Received().EnqueueEnvelope(
@@ -447,7 +449,7 @@ public class HubTests
     public void StartTransaction_NameOpDescription_Works()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn
         });
@@ -465,7 +467,7 @@ public class HubTests
     public void StartTransaction_FromTraceHeader_CopiesContext()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1
@@ -489,7 +491,7 @@ public class HubTests
     public void StartTransaction_FromTraceHeader_SampledInheritedFromParentRegardlessOfSampleRate()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 0
@@ -511,7 +513,7 @@ public class HubTests
     public void StartTransaction_FromTraceHeader_CustomSamplerCanSampleOutTransaction()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = _ => 0,
@@ -534,7 +536,7 @@ public class HubTests
     public void StartTransaction_StaticSampling_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1
@@ -551,7 +553,7 @@ public class HubTests
     public void StartTransaction_StaticSampling_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 0
@@ -571,7 +573,7 @@ public class HubTests
         const double allowedRelativeDeviation = 0.15;
 
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 0.5
@@ -603,7 +605,7 @@ public class HubTests
         const double allowedRelativeDeviation = 0.15;
 
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 0.25
@@ -635,7 +637,7 @@ public class HubTests
         const double allowedRelativeDeviation = 0.15;
 
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 0.75
@@ -664,7 +666,7 @@ public class HubTests
     public void StartTransaction_DynamicSampling_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
@@ -681,7 +683,7 @@ public class HubTests
     public void StartTransaction_DynamicSampling_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
@@ -698,7 +700,7 @@ public class HubTests
     public void StartTransaction_DynamicSampling_WithCustomContext_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
@@ -717,7 +719,7 @@ public class HubTests
     public void StartTransaction_DynamicSampling_WithCustomContext_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
@@ -736,7 +738,7 @@ public class HubTests
     public void StartTransaction_DynamicSampling_FallbackToStatic_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = _ => null,
@@ -754,7 +756,7 @@ public class HubTests
     public void StartTransaction_DynamicSampling_FallbackToStatic_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = _ => null,
@@ -772,7 +774,7 @@ public class HubTests
     public void GetTraceHeader_ReturnsHeaderForActiveSpan()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn
         });
@@ -800,7 +802,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn
         }, client);
@@ -820,7 +822,7 @@ public class HubTests
     public void Dispose_IsEnabled_SetToFalse()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn
         });
@@ -858,7 +860,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             Release = "release"
@@ -883,7 +885,7 @@ public class HubTests
         sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
         sessionManager.StartSession().Returns(newSession);
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             Release = "release"
@@ -903,7 +905,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             Release = "release"
@@ -925,7 +927,7 @@ public class HubTests
         var client = Substitute.For<ISentryClient>();
 
         // Act
-        _ = new Hub(new SentryOptions
+        _ = new Hub(new()
         {
             Dsn = ValidDsn,
             AutoSessionTracking = true,
@@ -943,7 +945,7 @@ public class HubTests
         var scopeManager = Substitute.For<IInternalScopeManager>();
 
         // Act
-        _ = new Hub(new SentryOptions
+        _ = new Hub(new()
         {
             IsGlobalModeEnabled = true,
             Dsn = ValidDsn,
@@ -960,7 +962,7 @@ public class HubTests
         var scopeManager = Substitute.For<IInternalScopeManager>();
 
         // Act
-        _ = new Hub(new SentryOptions
+        _ = new Hub(new()
         {
             IsGlobalModeEnabled = false,
             Dsn = ValidDsn,
@@ -976,7 +978,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
@@ -1100,7 +1102,7 @@ public class HubTests
         // Arrange
         var client = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions
+        var hub = new Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1

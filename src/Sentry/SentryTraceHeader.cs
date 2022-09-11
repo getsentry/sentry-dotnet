@@ -57,7 +57,7 @@ namespace Sentry
                 ? string.Equals(components[2], "1", StringComparison.OrdinalIgnoreCase)
                 : (bool?)null;
 
-            return new SentryTraceHeader(traceId, spanId, isSampled);
+            return new(traceId, spanId, isSampled);
         }
     }
 }

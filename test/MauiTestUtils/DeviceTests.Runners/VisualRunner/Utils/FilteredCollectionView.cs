@@ -24,7 +24,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
             this.dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
             this.filter = filter ?? throw new ArgumentNullException(nameof(filter));
             this.filterArgument = filterArgument;
-            filteredList = new SortedList<T>(sort);
+            filteredList = new(sort);
 
             this.dataSource.CollectionChanged += DataSource_CollectionChanged;
 
@@ -234,13 +234,13 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
                 if (index < 0)
                 {
                     filteredList.Insert(~index, item);
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, ~index));
+                    OnCollectionChanged(new(NotifyCollectionChangedAction.Add, item, ~index));
                 }
             }
             else if (index >= 0)
             {
                 filteredList.RemoveAt(index);
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+                OnCollectionChanged(new(NotifyCollectionChangedAction.Remove, item, index));
             }
 
             OnItemChanged(item, e);
@@ -254,7 +254,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
                 if (index < 0)
                 {
                     filteredList.Insert(~index, item);
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, ~index));
+                    OnCollectionChanged(new(NotifyCollectionChangedAction.Add, item, ~index));
                 }
             }
 
@@ -275,7 +275,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
             if (index >= 0)
             {
                 filteredList.RemoveAt(index);
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+                OnCollectionChanged(new(NotifyCollectionChangedAction.Remove, item, index));
             }
         }
 
@@ -291,7 +291,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
                 }
             }
 
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(new(NotifyCollectionChangedAction.Reset));
         }
     }
 }

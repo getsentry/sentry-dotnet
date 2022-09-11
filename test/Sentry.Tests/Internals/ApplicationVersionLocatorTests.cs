@@ -15,7 +15,7 @@ public class ApplicationVersionLocatorTests
     public void GetCurrent_ValidVersion_ReturnsVersion(string expectedVersion)
     {
         var name = "dynamic-assembly";
-        var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, new AssemblyName(name));
+        var asm = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, new(name));
         var actual = ApplicationVersionLocator.GetCurrent(asm);
         Assert.Equal($"{name}@{expectedVersion}", actual);
     }
@@ -26,7 +26,7 @@ public class ApplicationVersionLocatorTests
         // Arrange
         var asm = AssemblyCreationHelper.CreateWithInformationalVersion(
             "app@1.0.0",
-            new AssemblyName("dynamic-assembly"));
+            new("dynamic-assembly"));
 
         // Act
         var version = ApplicationVersionLocator.GetCurrent(asm);

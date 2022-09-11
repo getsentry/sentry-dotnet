@@ -8,7 +8,7 @@ public class SentrySinkTests
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public Func<IHub> HubAccessor { get; set; }
         public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
-        public Scope Scope { get; } = new(new SentryOptions());
+        public Scope Scope { get; } = new(new());
 
         public Fixture()
         {

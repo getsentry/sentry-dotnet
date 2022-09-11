@@ -54,7 +54,7 @@ public class SentryAppenderTests
     {
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
 
         sut.DoAppend(evt);
 
@@ -69,7 +69,7 @@ public class SentryAppenderTests
     {
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
 
         SentryEvent actual = null;
         _fixture.Hub.When(h => h.CaptureEvent(Arg.Any<SentryEvent>()))
@@ -129,7 +129,7 @@ public class SentryAppenderTests
     public void Append_ByDefault_DoesNotSetUser()
     {
         var sut = _fixture.GetSut();
-        var evt = new LoggingEvent(new LoggingEventData
+        var evt = new LoggingEvent(new()
         {
             Identity = "sentry-user"
         });
@@ -144,7 +144,7 @@ public class SentryAppenderTests
     {
         const string expected = "sentry-user";
         var sut = _fixture.GetSut();
-        var evt = new LoggingEvent(new LoggingEventData
+        var evt = new LoggingEvent(new()
         {
             Identity = expected
         });
@@ -162,7 +162,7 @@ public class SentryAppenderTests
         _fixture.Dsn = null;
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
         sut.DoAppend(evt);
 
         Assert.False(_fixture.InitInvoked);
@@ -174,7 +174,7 @@ public class SentryAppenderTests
         _ = _fixture.Hub.IsEnabled.Returns(true);
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
         sut.DoAppend(evt);
 
         Assert.False(_fixture.InitInvoked);
@@ -185,7 +185,7 @@ public class SentryAppenderTests
     {
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
         sut.DoAppend(evt);
 
         Assert.True(_fixture.InitInvoked);
@@ -198,7 +198,7 @@ public class SentryAppenderTests
         _fixture.Dsn = null;
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
         sut.DoAppend(evt);
 
         Assert.False(_fixture.InitInvoked);
@@ -212,7 +212,7 @@ public class SentryAppenderTests
         _ = _fixture.Hub.IsEnabled.Returns(false);
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
         sut.DoAppend(evt);
 
         Assert.False(_fixture.InitInvoked);
@@ -229,9 +229,9 @@ public class SentryAppenderTests
 
         var sut = _fixture.GetSut();
 
-        var evt = new LoggingEvent(new LoggingEventData
+        var evt = new LoggingEvent(new()
         {
-            LocationInfo = new LocationInfo(
+            LocationInfo = new(
                 expectedClass,
                 expectedMethod,
                 expectedFileName,
@@ -258,7 +258,7 @@ public class SentryAppenderTests
         var sut = _fixture.GetSut();
         sut.Dsn = "dsn";
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
         sut.DoAppend(evt);
 
         _ = _fixture.Hub.Received(1)
@@ -269,7 +269,7 @@ public class SentryAppenderTests
     public void Append_ByDefault_DoesNotSetEnvironment()
     {
         var sut = _fixture.GetSut();
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
 
         sut.DoAppend(evt);
 
@@ -283,7 +283,7 @@ public class SentryAppenderTests
         const string expected = "dev";
         var sut = _fixture.GetSut();
         sut.Environment = expected;
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
 
         sut.DoAppend(evt);
 
@@ -298,7 +298,7 @@ public class SentryAppenderTests
         var sut = _fixture.GetSut();
         sut.Dsn = expectedDsn;
 
-        var evt = new LoggingEvent(new LoggingEventData());
+        var evt = new LoggingEvent(new());
         sut.DoAppend(evt);
 
         _fixture.SdkDisposeHandle.DidNotReceive().Dispose();

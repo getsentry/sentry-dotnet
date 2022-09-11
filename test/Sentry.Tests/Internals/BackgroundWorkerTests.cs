@@ -12,7 +12,7 @@ public class BackgroundWorkerTests
 
     public BackgroundWorkerTests(ITestOutputHelper outputHelper)
     {
-        _fixture = new Fixture(outputHelper);
+        _fixture = new(outputHelper);
     }
 
     private class Fixture
@@ -92,7 +92,7 @@ public class BackgroundWorkerTests
     public async Task Dispose_WhenRequestInFlight_StopsTask()
     {
         var tcs = new TaskCompletionSource<object>();
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         _fixture.Transport
             .When(t => t.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
@@ -112,7 +112,7 @@ public class BackgroundWorkerTests
     [Fact]
     public void Dispose_TokenCancelledWhenRequestInFlight_StopsTask()
     {
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         _fixture.Transport
             .SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>())
@@ -150,7 +150,7 @@ public class BackgroundWorkerTests
         var sut = _fixture.GetSut();
         for (var i = 0; i < 3; i++)
         {
-            sut.EnqueueEnvelope(Envelope.FromEvent(new SentryEvent()), process: false);
+            sut.EnqueueEnvelope(Envelope.FromEvent(new()), process: false);
         }
 
         // Disposing the worker should stop its internal task
@@ -172,7 +172,7 @@ public class BackgroundWorkerTests
         var sut = _fixture.GetSut();
         for (var i = 0; i < 3; i++)
         {
-            sut.EnqueueEnvelope(Envelope.FromEvent(new SentryEvent()), process: false);
+            sut.EnqueueEnvelope(Envelope.FromEvent(new()), process: false);
         }
 
         // Disposing the worker should stop its internal task
@@ -213,7 +213,7 @@ public class BackgroundWorkerTests
     public void CaptureEvent_LimitReached_EventDropped()
     {
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
         _fixture.SentryOptions.MaxQueueItems = 1;
 
         using var sut = _fixture.GetSut();
@@ -230,7 +230,7 @@ public class BackgroundWorkerTests
     public void CaptureEvent_LimitReached_RecordsDiscardedEvent()
     {
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
         _fixture.SentryOptions.MaxQueueItems = 1;
 
         using var sut = _fixture.GetSut();
@@ -250,7 +250,7 @@ public class BackgroundWorkerTests
     public void CaptureEvent_DisposedWorker_ThrowsObjectDisposedException()
     {
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         var sut = _fixture.GetSut();
@@ -264,7 +264,7 @@ public class BackgroundWorkerTests
     public void CaptureEvent_InnerTransportInvoked()
     {
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
         _fixture.UseDefaultShutdownTimeout();
         var sut = _fixture.GetSut();
 
@@ -281,11 +281,11 @@ public class BackgroundWorkerTests
     public void CaptureEvent_InnerTransportThrows_WorkerSuppresses()
     {
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         _fixture.Transport
             .When(e => e.SendEnvelopeAsync(envelope))
-            .Do(_ => throw new Exception("Sending to sentry failed."));
+            .Do(_ => throw new("Sending to sentry failed."));
 
         using var sut = _fixture.GetSut();
         // Act
@@ -325,7 +325,7 @@ public class BackgroundWorkerTests
     public async Task FlushAsync_SingleEvent_FlushReturnsAfterEventSent()
     {
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
         using var sut = _fixture.GetSut();
 
         // Act
@@ -347,7 +347,7 @@ public class BackgroundWorkerTests
     public async Task FlushAsync_ZeroTimeout_Accepted()
     {
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
         using var sut = _fixture.GetSut();
 
         // Act
@@ -365,7 +365,7 @@ public class BackgroundWorkerTests
         var flushTimeout = TimeSpan.FromMilliseconds(500);
 
         // Arrange
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
         _fixture.SentryOptions.MaxQueueItems = 1;
         using var sut = _fixture.GetSut();
 
@@ -424,7 +424,7 @@ public class BackgroundWorkerTests
             .RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Internal);
 
         using var sut = _fixture.GetSut();
-        sut.EnqueueEnvelope(Envelope.FromEvent(new SentryEvent()));
+        sut.EnqueueEnvelope(Envelope.FromEvent(new()));
 
         // Act
         await sut.FlushAsync(TimeSpan.MaxValue);
@@ -452,7 +452,7 @@ public class BackgroundWorkerTests
             });
 
         using var sut = _fixture.GetSut();
-        sut.EnqueueEnvelope(Envelope.FromEvent(new SentryEvent()));
+        sut.EnqueueEnvelope(Envelope.FromEvent(new()));
 
         // Act
         await sut.FlushAsync(TimeSpan.MaxValue);
@@ -479,7 +479,7 @@ public class BackgroundWorkerTests
         _fixture.Transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         using var sut = _fixture.GetSut();
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         sut.EnqueueEnvelope(envelope, process: false);

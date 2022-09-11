@@ -22,7 +22,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
-        sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
+        sut.Handle(this, new(new Exception(), true));
 
         _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
@@ -33,7 +33,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
-        sut.Handle(this, new UnhandledExceptionEventArgs(new object(), true));
+        sut.Handle(this, new(new(), true));
 
         _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
@@ -44,7 +44,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
-        sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
+        sut.Handle(this, new(new Exception(), true));
 
         _fixture.Hub.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }
@@ -56,7 +56,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         sut.Register(_fixture.Hub, SentryOptions);
 
         var exception = new Exception();
-        sut.Handle(this, new UnhandledExceptionEventArgs(exception, true));
+        sut.Handle(this, new(exception, true));
         Assert.False((bool)exception.Data[Mechanism.HandledKey]);
         Assert.True(exception.Data.Contains(Mechanism.MechanismKey));
 
@@ -74,7 +74,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
-        sut.Handle(this, new UnhandledExceptionEventArgs(null, true));
+        sut.Handle(this, new(null, true));
 
         _fixture.Hub.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }
@@ -85,7 +85,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
-        sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), false));
+        sut.Handle(this, new(new Exception(), false));
 
         var disposableHub = _fixture.Hub as IDisposable;
         disposableHub.DidNotReceive().Dispose();

@@ -288,10 +288,10 @@ public class SentryStackTraceFactoryTests
     // ReSharper disable UnusedParameter.Local
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static (Fixture f, int b) ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut) =>
-        throw new Exception();
+        throw new();
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void GenericMethodThatThrows<T>(T value) =>
-        throw new Exception();
+        throw new();
     // ReSharper restore UnusedParameter.Local
 }

@@ -16,7 +16,7 @@ public class SystemWebRequestEventProcessorTests :
 
         public SystemWebRequestEventProcessor GetSut()
         {
-            return new SystemWebRequestEventProcessor(RequestPayloadExtractor, SentryOptions);
+            return new(RequestPayloadExtractor, SentryOptions);
         }
     }
 

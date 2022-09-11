@@ -529,7 +529,7 @@ public class SentryMiddlewareTests
         var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
         _fixture.Options.ConfigureScope(expectedAction);
         var expectedExceptionMessage = "Expected Exception";
-        _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
+        _fixture.RequestDelegate = _ => throw new(expectedExceptionMessage);
         var sut = _fixture.GetSut();
 
         // Act
@@ -550,7 +550,7 @@ public class SentryMiddlewareTests
         // Arrange
         var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
         var expectedExceptionMessage = "Expected Exception";
-        _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
+        _fixture.RequestDelegate = _ => throw new(expectedExceptionMessage);
         _fixture.Options.ConfigureScope(expectedAction);
         var sut = _fixture.GetSut();
 
@@ -579,7 +579,7 @@ public class SentryMiddlewareTests
         // Arrange
         var firstHub = _fixture.Hub;
         var expectedExceptionMessage = "Expected Exception";
-        _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
+        _fixture.RequestDelegate = _ => throw new(expectedExceptionMessage);
         var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
         _fixture.Options.ConfigureScope(expectedAction);
         var sut = _fixture.GetSut();

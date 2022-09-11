@@ -6,7 +6,7 @@ internal class FakeFailingTransport : ITransport
         Envelope envelope,
         CancellationToken cancellationToken = default)
     {
-        throw new Exception("Expected transport failure has occured.")
+        throw new("Expected transport failure has occured.")
         {
             Source = nameof(FakeFailingTransport)
         };

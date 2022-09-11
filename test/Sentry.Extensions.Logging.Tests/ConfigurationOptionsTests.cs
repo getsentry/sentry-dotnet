@@ -13,7 +13,7 @@ public class ConfigurationOptionsTests
 
         public Fixture()
         {
-            Builder = new ConfigurationBuilder();
+            Builder = new();
             _ = Builder.AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
         }
 

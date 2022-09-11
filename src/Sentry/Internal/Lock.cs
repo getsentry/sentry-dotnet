@@ -8,7 +8,7 @@ namespace Sentry.Internal
     {
         private readonly Signal _signal;
 
-        public Lock() => _signal = new Signal(true);
+        public Lock() => _signal = new(true);
 
         public async Task<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
         {

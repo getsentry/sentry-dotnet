@@ -95,7 +95,7 @@ namespace Sentry.Http
                 }
             }
 
-            return new Envelope(envelope.Header, envelopeItems);
+            return new(envelope.Header, envelopeItems);
         }
 
         private void ProcessEnvelopeItem(DateTimeOffset now, EnvelopeItem item, List<EnvelopeItem> items)
@@ -187,7 +187,7 @@ namespace Sentry.Http
                 $"sentry_key={dsn.PublicKey}" +
                 (dsn.SecretKey is { } secretKey ? $",sentry_secret={secretKey}" : null);
 
-            return new HttpRequestMessage
+            return new()
             {
                 RequestUri = dsn.GetEnvelopeEndpointUri(),
                 Method = HttpMethod.Post,

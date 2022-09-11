@@ -34,7 +34,7 @@ public class CaptureExceptionDuplicateDetectionBenchmarks
     {
         for (var i = 0; i < EventCount; i++)
         {
-            SentrySdk.CaptureException(new Exception());
+            SentrySdk.CaptureException(new());
         }
     }
 
@@ -43,7 +43,7 @@ public class CaptureExceptionDuplicateDetectionBenchmarks
     {
         for (var i = 0; i < EventCount; i++)
         {
-            SentrySdk.CaptureException(new Exception());
+            SentrySdk.CaptureException(new());
         }
     }
 }

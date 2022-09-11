@@ -192,7 +192,7 @@ public class ContextsTests
         };
         const string expectedKey = "key";
 
-        sut[expectedKey] = new object();
+        sut[expectedKey] = new();
 
         var clone = sut.Clone();
 

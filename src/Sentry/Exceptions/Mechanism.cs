@@ -66,12 +66,12 @@ namespace Sentry.Protocol
         /// For proprietary or vendor-specific error codes, adding these values will give additional information to the user.
         /// </remarks>
         /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception/#meta-information"/>
-        public IDictionary<string, object> Meta => InternalMeta ??= new Dictionary<string, object>();
+        public IDictionary<string, object> Meta => InternalMeta ??= new();
 
         /// <summary>
         /// Arbitrary extra data that might help the user understand the error thrown by this mechanism.
         /// </summary>
-        public IDictionary<string, object> Data => InternalData ??= new Dictionary<string, object>();
+        public IDictionary<string, object> Data => InternalData ??= new();
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
@@ -100,7 +100,7 @@ namespace Sentry.Protocol
             var helpLink = json.GetPropertyOrNull("help_link")?.GetString();
             var handled = json.GetPropertyOrNull("handled")?.GetBoolean();
 
-            return new Mechanism
+            return new()
             {
                 InternalData = data?.WhereNotNullValue().ToDictionary(),
                 InternalMeta = meta?.WhereNotNullValue().ToDictionary(),

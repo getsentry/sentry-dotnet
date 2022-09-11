@@ -105,7 +105,7 @@ public class SentryAppender : AppenderSkeleton
 
         if (SendIdentity && !string.IsNullOrEmpty(loggingEvent.Identity))
         {
-            evt.User = new User
+            evt.User = new()
             {
                 Id = loggingEvent.Identity
             };
@@ -136,7 +136,7 @@ public class SentryAppender : AppenderSkeleton
                 if (value != null
                     && (value is not string stringValue || !string.IsNullOrWhiteSpace(stringValue)))
                 {
-                    yield return new KeyValuePair<string, object?>(key, value);
+                    yield return new(key, value);
                 }
             }
         }
@@ -146,38 +146,38 @@ public class SentryAppender : AppenderSkeleton
         {
             if (!string.IsNullOrEmpty(locInfo.ClassName))
             {
-                yield return new KeyValuePair<string, object?>(nameof(locInfo.ClassName), locInfo.ClassName);
+                yield return new(nameof(locInfo.ClassName), locInfo.ClassName);
             }
 
             if (!string.IsNullOrEmpty(locInfo.FileName))
             {
-                yield return new KeyValuePair<string, object?>(nameof(locInfo.FileName), locInfo.FileName);
+                yield return new(nameof(locInfo.FileName), locInfo.FileName);
             }
 
             if (int.TryParse(locInfo.LineNumber, out var lineNumber) && lineNumber != 0)
             {
-                yield return new KeyValuePair<string, object?>(nameof(locInfo.LineNumber), lineNumber);
+                yield return new(nameof(locInfo.LineNumber), lineNumber);
             }
 
             if (!string.IsNullOrEmpty(locInfo.MethodName))
             {
-                yield return new KeyValuePair<string, object?>(nameof(locInfo.MethodName), locInfo.MethodName);
+                yield return new(nameof(locInfo.MethodName), locInfo.MethodName);
             }
         }
 
         if (!string.IsNullOrEmpty(loggingEvent.ThreadName))
         {
-            yield return new KeyValuePair<string, object?>(nameof(loggingEvent.ThreadName), loggingEvent.ThreadName);
+            yield return new(nameof(loggingEvent.ThreadName), loggingEvent.ThreadName);
         }
 
         if (!string.IsNullOrEmpty(loggingEvent.Domain))
         {
-            yield return new KeyValuePair<string, object?>(nameof(loggingEvent.Domain), loggingEvent.Domain);
+            yield return new(nameof(loggingEvent.Domain), loggingEvent.Domain);
         }
 
         if (loggingEvent.Level != null)
         {
-            yield return new KeyValuePair<string, object?>("log4net-level", loggingEvent.Level.Name);
+            yield return new("log4net-level", loggingEvent.Level.Name);
         }
     }
 

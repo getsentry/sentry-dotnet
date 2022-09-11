@@ -61,7 +61,7 @@ namespace Sentry
             var current = json.GetPropertyOrNull("current")?.GetBoolean();
             var stacktrace = json.GetPropertyOrNull("stacktrace")?.Pipe(SentryStackTrace.FromJson);
 
-            return new SentryThread
+            return new()
             {
                 Id = id,
                 Name = name,

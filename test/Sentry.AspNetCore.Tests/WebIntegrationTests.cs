@@ -47,7 +47,7 @@ public class WebIntegrationTests
 
                     services.AddApiVersioning(versioningOptions =>
                     {
-                        versioningOptions.DefaultApiVersion = new ApiVersion(1, 0);
+                        versioningOptions.DefaultApiVersion = new(1, 0);
                         versioningOptions.AssumeDefaultVersionWhenUnspecified = true;
                         versioningOptions.ReportApiVersions = true;
                     });

@@ -455,7 +455,7 @@ namespace Sentry.Protocol
             var supportsAudio = json.GetPropertyOrNull("supports_audio")?.GetBoolean();
             var supportsLocationService = json.GetPropertyOrNull("supports_location_service")?.GetBoolean();
 
-            return new Device
+            return new()
             {
                 Timezone = timezone,
                 Name = name,

@@ -56,7 +56,7 @@ namespace Sentry
             var name = json.GetProperty("name").GetStringOrThrow();
             var version = json.GetProperty("version").GetStringOrThrow();
 
-            return new Package(name, version);
+            return new(name, version);
         }
 
         /// <inheritdoc />

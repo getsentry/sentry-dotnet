@@ -153,7 +153,7 @@ namespace Sentry
             var username = json.GetPropertyOrNull("username")?.GetString();
             var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
 
-            return new User
+            return new()
             {
                 Email = email,
                 Id = id,

@@ -9,7 +9,7 @@ public class RequestTests
         {
             Url = "https://sentry.io",
             Method = "OPTIONS",
-            Data = new object(),
+            Data = new(),
             QueryString = "?query=string",
         };
         sut.Headers.Add("X-Test", "header");

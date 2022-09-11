@@ -39,7 +39,7 @@ namespace Sentry.PlatformAbstractions
                 var release = Get45PlusLatestInstallationFromRegistry();
                 if (release != null)
                 {
-                    return new FrameworkInstallation
+                    return new()
                     {
                         Version = GetNetFxVersionFromRelease(release.Value),
                         Release = release
@@ -105,7 +105,7 @@ namespace Sentry.PlatformAbstractions
                 {
                     // 1.0 to 3.5
                     _ = Version.TryParse(version, out var parsed);
-                    yield return new FrameworkInstallation
+                    yield return new()
                     {
                         ShortName = versionKeyName,
                         Version = parsed,
@@ -162,7 +162,7 @@ namespace Sentry.PlatformAbstractions
                 _ => (FrameworkProfile?)null
             };
 
-            return new FrameworkInstallation
+            return new()
             {
                 Release = release,
                 Version = version,

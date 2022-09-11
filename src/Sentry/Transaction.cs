@@ -105,7 +105,7 @@ namespace Sentry
         /// <inheritdoc />
         public Request Request
         {
-            get => _request ??= new Request();
+            get => _request ??= new();
             set => _request = value;
         }
 
@@ -123,7 +123,7 @@ namespace Sentry
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User();
+            get => _user ??= new();
             set => _user = value;
         }
 
@@ -311,7 +311,7 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()
                 ?.ToDictionary();
 
-            return new Transaction(name)
+            return new(name)
             {
                 EventId = eventId,
                 StartTimestamp = startTimestamp,

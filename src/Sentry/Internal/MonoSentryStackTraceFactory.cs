@@ -37,7 +37,7 @@ namespace Sentry.Internal
                 {
                     if (StackFrameData.TryParse(line, out var frame))
                     {
-                        frames ??= new List<StackFrameData>();
+                        frames ??= new();
                         frames.Add(frame);
                     }
                 }
@@ -49,7 +49,7 @@ namespace Sentry.Internal
                 return base.Create(exception);
             }
 
-            return new SentryStackTrace
+            return new()
             {
                 // https://develop.sentry.dev/sdk/event-payloads/stacktrace/
                 Frames = frames.Select(f => new SentryStackFrame

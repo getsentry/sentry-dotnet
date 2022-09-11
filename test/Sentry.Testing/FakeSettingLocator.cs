@@ -31,7 +31,7 @@ internal static class SettingsLocatorExtension
             return locator;
         }
 
-        locator = new FakeSettingLocator(options);
+        locator = new(options);
         options.SettingLocator = locator;
         return locator;
     }

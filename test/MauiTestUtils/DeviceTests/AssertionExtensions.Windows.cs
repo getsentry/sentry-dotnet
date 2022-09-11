@@ -76,14 +76,14 @@ namespace Microsoft.Maui.DeviceTests
             if (view.Parent == null)
             {
                 // prepare to wait for element to be in the UI
-                tcs = new TaskCompletionSource();
-                unloadedTcs = new TaskCompletionSource();
+                tcs = new();
+                unloadedTcs = new();
 
                 view.Loaded += OnViewLoaded;
 
                 // attach to the UI
                 Grid grid;
-                window = new Window
+                window = new()
                 {
                     Content = new Grid
                     {
@@ -91,7 +91,7 @@ namespace Microsoft.Maui.DeviceTests
                         VerticalAlignment = VerticalAlignment.Center,
                         Children =
                         {
-                            (grid = new Grid
+                            (grid = new()
                             {
                                 Width = view.Width,
                                 Height = view.Height,

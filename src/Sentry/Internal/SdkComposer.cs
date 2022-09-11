@@ -47,7 +47,7 @@ namespace Sentry.Internal
             var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
             var httpClient = httpClientFactory.Create(_options);
 
-            return new HttpTransport(_options, httpClient);
+            return new(_options, httpClient);
         }
 
         public IBackgroundWorker CreateBackgroundWorker()

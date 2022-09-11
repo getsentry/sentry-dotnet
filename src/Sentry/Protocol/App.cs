@@ -128,7 +128,7 @@ namespace Sentry.Protocol
             var version = json.GetPropertyOrNull("app_version")?.GetString();
             var build = json.GetPropertyOrNull("app_build")?.GetString();
 
-            return new App
+            return new()
             {
                 Identifier = identifier,
                 StartTime = startTime,

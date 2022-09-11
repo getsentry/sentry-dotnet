@@ -15,7 +15,7 @@ public class AppDomainAdapterTests
         var evt = new ManualResetEventSlim(false);
         AppDomainAdapter.Instance.UnhandledException += (_, _) => evt.Set();
 
-        var thread = new Thread(() => throw new Exception())
+        var thread = new Thread(() => throw new())
         {
             IsBackground = false
         };

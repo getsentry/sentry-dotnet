@@ -30,14 +30,14 @@ namespace Sentry.PlatformAbstractions
             GetNetFxInstallationAndVersion(runtime, out var inst, out var ver);
             var version = runtime.Version ?? ver;
             var installation = runtime.FrameworkInstallation ?? inst;
-            return new Runtime(runtime.Name, version, installation, runtime.Raw);
+            return new(runtime.Name, version, installation, runtime.Raw);
 #elif NET5_0_OR_GREATER
             var version = runtime.Version ?? GetNetCoreVersion(runtime);
             var identifier = runtime.Identifier ?? GetRuntimeIdentifier(runtime);
-            return new Runtime(runtime.Name, version, runtime.Raw, identifier);
+            return new(runtime.Name, version, runtime.Raw, identifier);
 #else
             var version = runtime.Version ?? GetNetCoreVersion(runtime);
-            return new Runtime(runtime.Name, version, runtime.Raw);
+            return new(runtime.Name, version, runtime.Raw);
 #endif
         }
 
@@ -51,13 +51,13 @@ namespace Sentry.PlatformAbstractions
             var match = RuntimeParseRegex.Match(rawRuntimeDescription);
             if (match.Success)
             {
-                return new Runtime(
+                return new(
                     name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                     match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
                     raw: rawRuntimeDescription);
             }
 
-            return new Runtime(name, raw: rawRuntimeDescription);
+            return new(name, raw: rawRuntimeDescription);
         }
 
 #if NETFRAMEWORK
@@ -172,7 +172,7 @@ namespace Sentry.PlatformAbstractions
                 1 => "",
                 _ => version.ToString()
             };
-            return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
+            return new(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
         }
     }
 }

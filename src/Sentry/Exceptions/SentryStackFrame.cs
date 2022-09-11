@@ -61,12 +61,12 @@ namespace Sentry
         /// <summary>
         /// A list of source code lines before context_line (in order) – usually [lineno - 5:lineno].
         /// </summary>
-        public IList<string> PreContext => InternalPreContext ??= new List<string>();
+        public IList<string> PreContext => InternalPreContext ??= new();
 
         /// <summary>
         /// A list of source code lines after context_line (in order) – usually [lineno + 1:lineno + 5].
         /// </summary>
-        public IList<string> PostContext => InternalPostContext ??= new List<string>();
+        public IList<string> PostContext => InternalPostContext ??= new();
 
         /// <summary>
         /// Signifies whether this frame is related to the execution of the relevant code in this stacktrace.
@@ -80,7 +80,7 @@ namespace Sentry
         /// <summary>
         /// A mapping of variables which were available within this frame (usually context-locals).
         /// </summary>
-        public IDictionary<string, string> Vars => InternalVars ??= new Dictionary<string, string>();
+        public IDictionary<string, string> Vars => InternalVars ??= new();
 
         /// <summary>
         /// Which frames were omitted, if any.
@@ -94,7 +94,7 @@ namespace Sentry
         /// and went until the 9th (the number of frames omitted is end-start).
         /// The values should be based on a one-index.
         /// </example>
-        public IList<int> FramesOmitted => InternalFramesOmitted ??= new List<int>();
+        public IList<int> FramesOmitted => InternalFramesOmitted ??= new();
 
         /// <summary>
         /// The assembly where the code resides.
@@ -218,7 +218,7 @@ namespace Sentry
             var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
             var addressMode = json.GetPropertyOrNull("addr_mode")?.GetString();
 
-            return new SentryStackFrame
+            return new()
             {
                 InternalPreContext = preContext!,
                 InternalPostContext = postContext!,

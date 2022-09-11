@@ -484,7 +484,7 @@ public class MainSentryEventProcessorTests
         _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
 
-        var evt = new SentryEvent(new Exception());
+        var evt = new SentryEvent(new());
         _ = sut.Process(evt);
 
         _ = _fixture.SentryStackTraceFactory.DidNotReceive().Create();
@@ -495,9 +495,9 @@ public class MainSentryEventProcessorTests
     {
         //Arrange
         var sut = _fixture.GetSut();
-        var evt = new SentryEvent(new Exception());
-        CultureInfo.CurrentCulture = new CultureInfo(1042);
-        CultureInfo.CurrentUICulture = new CultureInfo(1042);
+        var evt = new SentryEvent(new());
+        CultureInfo.CurrentCulture = new(1042);
+        CultureInfo.CurrentUICulture = new(1042);
 
         //Act
         evt = sut.Process(evt);
@@ -512,9 +512,9 @@ public class MainSentryEventProcessorTests
     {
         //Arrange
         var sut = _fixture.GetSut();
-        var evt = new SentryEvent(new Exception());
-        CultureInfo.CurrentCulture = new CultureInfo(1041);
-        CultureInfo.CurrentUICulture = new CultureInfo(1033);
+        var evt = new SentryEvent(new());
+        CultureInfo.CurrentCulture = new(1041);
+        CultureInfo.CurrentUICulture = new(1033);
 
         //Act
         evt = sut.Process(evt);

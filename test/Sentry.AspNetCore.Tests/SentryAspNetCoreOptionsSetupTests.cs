@@ -28,7 +28,7 @@ public class SentryAspNetCoreOptionsSetupTests
     public void Filters_KestrelApplicationEvent_WithException_Filtered()
     {
         _sut.Configure(_target);
-        Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new Exception()));
+        Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new()));
     }
 
     [Fact]

@@ -104,7 +104,7 @@ namespace Sentry.Protocol
             var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
             var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
 
-            return new Trace
+            return new()
             {
                 SpanId = spanId,
                 ParentSpanId = parentSpanId,

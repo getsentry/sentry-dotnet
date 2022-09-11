@@ -18,12 +18,12 @@ public class SentryGrpcSdkTestFixture : SentrySdkTestFixture
     {
         new GrpcRequestHandler<TestRequest, TestResponse>
         {
-            Method = TestService.Descriptor.FindMethodByName("Test"), Response = new TestResponse()
+            Method = TestService.Descriptor.FindMethodByName("Test"), Response = new()
         },
         new GrpcRequestHandler<TestRequest, TestResponse>
         {
             Method = TestService.Descriptor.FindMethodByName("TestThrow"),
-            Handler = (_, _) => throw new Exception("test error")
+            Handler = (_, _) => throw new("test error")
         }
     };
 
@@ -44,7 +44,8 @@ public class SentryGrpcSdkTestFixture : SentrySdkTestFixture
         });
 
         Channel = GrpcChannel.ForAddress("http://test-server",
-            new GrpcChannelOptions { HttpClient = sentryHttpClient });
+            new()
+                { HttpClient = sentryHttpClient });
 
         AfterConfigureBuilder?.Invoke(builder);
     }

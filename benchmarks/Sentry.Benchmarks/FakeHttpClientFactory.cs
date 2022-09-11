@@ -30,7 +30,7 @@ internal class StatusCodeResponse : HttpResponseMessage
     {
         if (statusCode == HttpStatusCode.TooManyRequests)
         {
-            Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromHours(24));
+            Headers.RetryAfter = new(TimeSpan.FromHours(24));
         }
     }
 }

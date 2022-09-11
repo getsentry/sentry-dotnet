@@ -11,7 +11,7 @@ public class AssemblyExtensionsTests
         var asmName = new AssemblyName
         {
             Name = Guid.NewGuid().ToString(),
-            Version = new Version(1, 2, 3, 4)
+            Version = new(1, 2, 3, 4)
         };
 
         var actual = AssemblyCreationHelper.CreateAssembly(asmName).GetNameAndVersion();
@@ -27,7 +27,7 @@ public class AssemblyExtensionsTests
         var asmName = new AssemblyName
         {
             Name = Guid.NewGuid().ToString(),
-            Version = new Version(1, 2, 3, 4)
+            Version = new(1, 2, 3, 4)
         };
 
         var actual = AssemblyCreationHelper.CreateWithInformationalVersion(expectedVersion, asmName)

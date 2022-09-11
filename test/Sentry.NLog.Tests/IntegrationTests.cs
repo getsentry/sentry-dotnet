@@ -25,7 +25,7 @@ public class IntegrationTests
                 options.IncludeEventDataOnBreadcrumbs = true;
                 options.MinimumBreadcrumbLevel = LogLevel.Debug;
                 options.Dsn = ValidDsn;
-                options.User = new SentryNLogUser
+                options.User = new()
                 {
                     Id = "${scopeproperty:item=id}",
                     Username = "${scopeproperty:item=username}",

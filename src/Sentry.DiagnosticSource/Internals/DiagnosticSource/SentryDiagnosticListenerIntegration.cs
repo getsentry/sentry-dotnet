@@ -19,7 +19,7 @@ namespace Sentry.Internals.DiagnosticSource
                 return;
             }
 
-            _subscriber = new SentryDiagnosticSubscriber(hub, options);
+            _subscriber = new(hub, options);
             _diagnosticListener = DiagnosticListener.AllListeners.Subscribe(_subscriber);
         }
     }

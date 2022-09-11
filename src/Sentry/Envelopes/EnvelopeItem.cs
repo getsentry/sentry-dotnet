@@ -214,7 +214,7 @@ namespace Sentry.Protocol.Envelopes
                 [TypeKey] = TypeValueEvent
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(@event));
+            return new(header, new JsonSerializable(@event));
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace Sentry.Protocol.Envelopes
                 [TypeKey] = TypeValueUserReport
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
+            return new(header, new JsonSerializable(sentryUserFeedback));
         }
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace Sentry.Protocol.Envelopes
                 [TypeKey] = TypeValueTransaction
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(transaction));
+            return new(header, new JsonSerializable(transaction));
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace Sentry.Protocol.Envelopes
                 [TypeKey] = TypeValueSession
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(sessionUpdate));
+            return new(header, new JsonSerializable(sessionUpdate));
         }
 
         /// <summary>
@@ -285,7 +285,7 @@ namespace Sentry.Protocol.Envelopes
                 ["content_type"] = attachment.ContentType
             };
 
-            return new EnvelopeItem(header, new StreamSerializable(stream));
+            return new(header, new StreamSerializable(stream));
         }
 
         /// <summary>
@@ -298,7 +298,7 @@ namespace Sentry.Protocol.Envelopes
                 [TypeKey] = TypeValueClientReport
             };
 
-            return new EnvelopeItem(header, new JsonSerializable(report));
+            return new(header, new JsonSerializable(report));
         }
 
         private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
@@ -423,7 +423,7 @@ namespace Sentry.Protocol.Envelopes
                 }
             }
 
-            return new EnvelopeItem(header, payload);
+            return new(header, payload);
         }
     }
 }

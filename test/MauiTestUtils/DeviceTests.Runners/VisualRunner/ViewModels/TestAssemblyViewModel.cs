@@ -41,14 +41,14 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 
             RunInfo = runInfo;
 
-            RunAllTestsCommand = new Command(RunAllTestsExecute, () => !_isBusy);
-            RunFilteredTestsCommand = new Command(RunFilteredTestsExecute, () => !_isBusy);
+            RunAllTestsCommand = new(RunAllTestsExecute, () => !_isBusy);
+            RunFilteredTestsCommand = new(RunFilteredTestsExecute, () => !_isBusy);
             NavigateToResultCommand = new Command<TestCaseViewModel?>(NavigateToResultExecute, tc => !_isBusy);
 
             DisplayName = Path.GetFileNameWithoutExtension(runInfo.AssemblyFileName);
 
-            _allTests = new ObservableCollection<TestCaseViewModel>(runInfo.TestCases);
-            _results = new List<TestCaseViewModel>(runInfo.TestCases);
+            _allTests = new(runInfo.TestCases);
+            _results = new(runInfo.TestCases);
 
             _allTests.CollectionChanged += (_, args) =>
             {
@@ -70,7 +70,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
                 }
             };
 
-            _filteredTests = new FilteredCollectionView<TestCaseViewModel, (string, TestState)>(
+            _filteredTests = new(
                 _allTests,
                 IsTestFilterMatch,
                 (SearchQuery, ResultFilter),
@@ -171,7 +171,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
         void FilterAfterDelay()
         {
             _filterCancellationTokenSource?.Cancel();
-            _filterCancellationTokenSource = new CancellationTokenSource();
+            _filterCancellationTokenSource = new();
 
             var token = _filterCancellationTokenSource.Token;
 

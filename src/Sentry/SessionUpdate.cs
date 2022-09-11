@@ -181,7 +181,7 @@ namespace Sentry
             var sequenceNumber = json.GetProperty("seq").GetInt32();
             var endStatus = json.GetPropertyOrNull("status")?.GetString()?.ParseEnum<SessionEndStatus>();
 
-            return new SessionUpdate(
+            return new(
                 id,
                 distinctId,
                 startTimestamp,

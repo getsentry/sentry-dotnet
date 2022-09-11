@@ -18,7 +18,7 @@ public class MainActivity : Activity
         {
             scope.AddBreadcrumb("Custom Breadcrumb");
             scope.SetExtra("Test", "Custom Extra Data");
-            scope.User = new User
+            scope.User = new()
             {
                 Username = "SomeUser",
                 Email = "test@example.com",
@@ -39,7 +39,7 @@ public class MainActivity : Activity
         {
             try
             {
-                throw new Exception("Try, catch");
+                throw new("Try, catch");
             }
             catch (Exception e)
             {
@@ -47,7 +47,7 @@ public class MainActivity : Activity
             }
         };
         var throwUnhandledException = (Button)base.FindViewById(Resource.Id.throwUnhandledException)!;
-        throwUnhandledException.Click += (s, a) => throw new Exception("Unhandled");
+        throwUnhandledException.Click += (s, a) => throw new("Unhandled");
 
         var throwJavaException = (Button)base.FindViewById(Resource.Id.throwJavaException)!;
         throwJavaException.Click += (s, a) => SentrySdk.CauseCrash(CrashType.Java);

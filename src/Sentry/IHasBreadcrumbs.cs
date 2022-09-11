@@ -56,7 +56,7 @@ namespace Sentry
 
             if (dataPair != null)
             {
-                data = new Dictionary<string, string>
+                data = new()
                 {
                     {dataPair.Value.Item1, dataPair.Value.Item2}
                 };
@@ -133,7 +133,7 @@ namespace Sentry
                 return;
             }
 
-            hasBreadcrumbs.AddBreadcrumb(new Breadcrumb(
+            hasBreadcrumbs.AddBreadcrumb(new(
                 timestamp,
                 message,
                 type,

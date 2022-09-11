@@ -19,7 +19,7 @@ public class SentryQueryPerformanceListenerTests
         public Fixture()
         {
             DbConnection = Effort.DbConnectionFactory.CreateTransient();
-            DbContext = new TestDbContext(DbConnection, true);
+            DbContext = new(DbConnection, true);
             Hub = Substitute.For<IHub>();
             Tracer = Substitute.For<ITransaction>();
             Tracer.StartChild(Arg.Any<string>()).ReturnsForAnyArgs(AddSpan);
@@ -35,7 +35,7 @@ public class SentryQueryPerformanceListenerTests
         }
 
         public SentryQueryPerformanceListener GetListener()
-            => new(Hub, new SentryOptions());
+            => new(Hub, new());
     }
 
     private readonly Fixture _fixture = new();
@@ -69,13 +69,16 @@ public class SentryQueryPerformanceListenerTests
         switch (expectedOperation)
         {
             case DbScalarKey:
-                interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new() });
+                interceptor.ScalarExecuting(command, new()
+                    { Exception = new() });
                 break;
             case DbNonQueryKey:
-                interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new() });
+                interceptor.NonQueryExecuting(command, new()
+                    { Exception = new() });
                 break;
             case DbReaderKey:
-                interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new() });
+                interceptor.ReaderExecuting(command, new()
+                    { Exception = new() });
                 break;
             default:
                 throw new NotImplementedException();
@@ -201,7 +204,8 @@ public class SentryQueryPerformanceListenerTests
     {
         // Arrange
         var integration = new DbInterceptionIntegration();
-        integration.Register(_fixture.Hub, new SentryOptions { TracesSampleRate = 1 });
+        integration.Register(_fixture.Hub, new()
+            { TracesSampleRate = 1 });
 
         // Act
         _ = _fixture.DbContext.TestTable.FirstOrDefault();

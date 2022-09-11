@@ -92,7 +92,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
             var evt = new SentryEvent(exception)
             {
                 Logger = context,
-                Message = new SentryMessage
+                Message = new()
                 {
                     Formatted = formatted,
                     Message = template
@@ -127,7 +127,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         {
             // Exception.Message won't be used as Breadcrumb message
             // Avoid losing it by adding as data:
-            data = new Dictionary<string, string>
+            data = new()
             {
                 {"exception_message", exception.Message}
             };
@@ -166,11 +166,11 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
             var value = property.Value;
             if (value is ScalarValue scalarValue)
             {
-                yield return new KeyValuePair<string, object?>(property.Key, scalarValue.Value);
+                yield return new(property.Key, scalarValue.Value);
             }
             else if (value != null)
             {
-                yield return new KeyValuePair<string, object?>(property.Key, value);
+                yield return new(property.Key, value);
             }
         }
     }

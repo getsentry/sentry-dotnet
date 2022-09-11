@@ -14,7 +14,7 @@ public class ErrorProcessorTests
         options.AddEntityFramework();
         using var client = new SentryClient(options);
         // We use an actual Entity Framework instance since manually generating any EF related data is highly inaccurate
-        context.TestTable.Add(new TestDbContext.TestData());
+        context.TestTable.Add(new());
         try
         {
             // This will throw a validation exception since TestData has a Required column which we didn't set
@@ -51,7 +51,7 @@ public class ErrorProcessorTests
         options.AddEntityFramework();
         using var client = new SentryClient(options);
         // We use an actual Entity Framework instance since manually generating any EF related data is highly inaccurate
-        context.TestTable.Add(new TestDbContext.TestData());
+        context.TestTable.Add(new());
         try
         {
             // This will throw a validation exception since TestData has a Required column which we didn't set

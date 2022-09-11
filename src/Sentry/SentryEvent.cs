@@ -122,7 +122,7 @@ namespace Sentry
         /// <inheritdoc />
         public Request Request
         {
-            get => _request ??= new Request();
+            get => _request ??= new();
             set => _request = value;
         }
 
@@ -140,7 +140,7 @@ namespace Sentry
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User();
+            get => _user ??= new();
             set => _user = value;
         }
 
@@ -163,17 +163,17 @@ namespace Sentry
         private List<Breadcrumb>? _breadcrumbs;
 
         /// <inheritdoc />
-        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
+        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new();
 
         private Dictionary<string, object?>? _extra;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new();
 
         private Dictionary<string, string>? _tags;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags => _tags ??= new();
 
         internal bool HasException => Exception is not null || SentryExceptions?.Any() == true;
 
@@ -211,19 +211,19 @@ namespace Sentry
 
         /// <inheritdoc />
         public void AddBreadcrumb(Breadcrumb breadcrumb) =>
-            (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
+            (_breadcrumbs ??= new()).Add(breadcrumb);
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value) =>
-            (_extra ??= new Dictionary<string, object?>())[key] = value;
+            (_extra ??= new())[key] = value;
 
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
-            (_tags ??= new Dictionary<string, string>())[key] = value;
+            (_tags ??= new())[key] = value;
 
         /// <inheritdoc />
         public void UnsetTag(string key) =>
-            (_tags ??= new Dictionary<string, string>()).Remove(key);
+            (_tags ??= new()).Remove(key);
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
@@ -299,7 +299,7 @@ namespace Sentry
             var debugMeta = json.GetPropertyOrNull("debug_meta");
             var images = debugMeta?.GetPropertyOrNull("images")?.EnumerateArray().Select(DebugImage.FromJson).ToList();
 
-            return new SentryEvent(exception, timestamp, eventId)
+            return new(exception, timestamp, eventId)
             {
                 _modules = modules?.WhereNotNullValue().ToDictionary(),
                 Message = message,

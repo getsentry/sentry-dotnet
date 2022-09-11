@@ -24,7 +24,7 @@ public class SentryStartupTests
             .AddInMemoryCollection(new Dictionary<string, string>())
             .Build();
 
-        WebHostBuilderContext = new WebHostBuilderContext
+        WebHostBuilderContext = new()
         {
             Configuration = configuration,
             HostingEnvironment = HostingEnvironment

@@ -16,7 +16,7 @@ try
     // Captures logError and higher as events
     builder.Logging.AddSentry(o => o.InitializeSdk = false);
 
-    builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+    builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new(builder.HostEnvironment.BaseAddress) });
 
     await builder.Build().RunAsync();
 }

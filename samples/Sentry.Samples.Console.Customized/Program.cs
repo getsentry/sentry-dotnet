@@ -91,7 +91,7 @@ internal static class Program
             o.HttpProxy = null; //new WebProxy("https://localhost:3128");
 
             // Example customizing the HttpClientHandlers created
-            o.CreateHttpClientHandler = () => new HttpClientHandler
+            o.CreateHttpClientHandler = () => new()
             {
                 ServerCertificateCustomValidationCallback = (_, certificate, _, _) =>
                     !certificate.Archived
@@ -145,7 +145,7 @@ internal static class Program
             var user = $"user{timestamp}";
             var email = $"user{timestamp}@user{timestamp}.com";
 
-            SentrySdk.CaptureUserFeedback(new UserFeedback(eventId, user, email, "this is a sample user feedback"));
+            SentrySdk.CaptureUserFeedback(new(eventId, user, email, "this is a sample user feedback"));
 
             var error = new Exception("Attempting to send this multiple times");
 
@@ -161,9 +161,9 @@ internal static class Program
             for (var i = 0; i < count; i++)
             {
                 const string msg = "{0} of {1} items we'll wait to flush to Sentry!";
-                SentrySdk.CaptureEvent(new SentryEvent
+                SentrySdk.CaptureEvent(new()
                 {
-                    Message = new SentryMessage
+                    Message = new()
                     {
                         Message = msg,
                         Formatted = string.Format(msg, i, count)
@@ -191,7 +191,7 @@ internal static class Program
             SentrySdk.CaptureEvent(evt);
 
             // Using a different DSN:
-            using (var adminClient = new SentryClient(new SentryOptions { Dsn = AdminDsn }))
+            using (var adminClient = new SentryClient(new() { Dsn = AdminDsn }))
             {
                 // Make believe web framework middleware
                 var middleware = new AdminPartMiddleware(adminClient, null);
@@ -200,7 +200,7 @@ internal static class Program
             } // Dispose the client which flushes any queued events
 
             SentrySdk.CaptureException(
-                new Exception("Error outside of the admin section: Goes to the default DSN"));
+                new("Error outside of the admin section: Goes to the default DSN"));
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
@@ -229,7 +229,7 @@ internal static class Program
                     SentrySdk.BindClient(_adminClient);
                 }
 
-                SentrySdk.CaptureException(new Exception("Error at the admin section"));
+                SentrySdk.CaptureException(new("Error at the admin section"));
                 // Else it uses the default client
 
                 _middleware?.Invoke(request);

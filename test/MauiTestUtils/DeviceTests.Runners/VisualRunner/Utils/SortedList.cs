@@ -13,7 +13,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
         public SortedList(IComparer<T> comparer)
         {
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
-            _list = new List<T>();
+            _list = new();
         }
 
         public int IndexOf(T item)

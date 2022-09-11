@@ -52,7 +52,7 @@ public class FrameworkInstallationExtensionsTests
         //Arrange
         var frameworkInstallation = new FrameworkInstallation
         {
-            Version = new Version("1.2")
+            Version = new("1.2")
         };
 
         //Act
@@ -68,7 +68,7 @@ public class FrameworkInstallationExtensionsTests
         //Arrange
         var frameworkInstallation = new FrameworkInstallation
         {
-            Version = new Version(1, 2)
+            Version = new(1, 2)
         };
 
         //Act

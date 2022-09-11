@@ -31,7 +31,7 @@ namespace Sentry.Internal
                     : new AsyncLocalScopeStackContainer());
 
             _options = options;
-            NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
+            NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new(options), rootClient) };
         }
 
         public KeyValuePair<Scope, ISentryClient> GetCurrent()
@@ -90,7 +90,7 @@ namespace Sentry.Internal
             _options.LogDebug("New scope pushed.");
             var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length + 1];
             Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
-            newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new KeyValuePair<Scope, ISentryClient>(clonedScope, scope.Value);
+            newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new(clonedScope, scope.Value);
 
             ScopeAndClientStack = newScopeAndClientStack;
             return scopeSnapshot;
@@ -114,7 +114,7 @@ namespace Sentry.Internal
 
             var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length];
             Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
-            newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new KeyValuePair<Scope, ISentryClient>(top.Key, client ?? DisabledHub.Instance);
+            newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new(top.Key, client ?? DisabledHub.Instance);
             ScopeAndClientStack = newScopeAndClientStack;
         }
 

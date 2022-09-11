@@ -80,7 +80,7 @@ namespace Sentry.Protocol
             var name = json.GetPropertyOrNull("name")?.GetString();
             var version = json.GetPropertyOrNull("version")?.GetString();
 
-            return new Browser { Name = name, Version = version };
+            return new() { Name = name, Version = version };
         }
     }
 }

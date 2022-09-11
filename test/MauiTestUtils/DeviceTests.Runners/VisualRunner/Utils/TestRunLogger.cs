@@ -20,7 +20,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
         public TestRunLogger(ILogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _builder = new StringBuilder();
+            _builder = new();
         }
 
         public void LogTestResult(TestResultViewModel result)

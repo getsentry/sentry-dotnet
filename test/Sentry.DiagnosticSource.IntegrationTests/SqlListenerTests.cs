@@ -37,7 +37,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureException(new Exception("my exception"));
+            hub.CaptureException(new("my exception"));
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
             transaction.Finish();
@@ -74,7 +74,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureException(new Exception("my exception"));
+            hub.CaptureException(new("my exception"));
             await TestDbBuilder.AddEfData(database);
             await TestDbBuilder.GetEfData(database);
             transaction.Finish();

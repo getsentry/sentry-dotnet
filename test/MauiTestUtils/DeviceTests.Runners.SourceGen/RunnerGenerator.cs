@@ -15,7 +15,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
 
             context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.ApplicationId", out var applicationId);
             context.Log($"ApplicationId: {applicationId}");
-            ApplicationId = applicationId ?? throw new Exception("ApplicationId needs to be set.");
+            ApplicationId = applicationId ?? throw new("ApplicationId needs to be set.");
 
             context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.ApplicationTitle", out var applicationTitle);
             context.Log($"ApplicationTitle: {applicationTitle}");

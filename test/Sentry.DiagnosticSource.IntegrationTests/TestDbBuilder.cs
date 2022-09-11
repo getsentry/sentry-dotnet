@@ -26,7 +26,7 @@ public static class TestDbBuilder
     public static async Task AddEfData(SqlConnection connection)
     {
         using var dbContext = GetDbContext(connection);
-        dbContext.TestEntities.Add(new TestEntity { Property = "SHOULD NOT APPEAR IN PAYLOAD" });
+        dbContext.TestEntities.Add(new() { Property = "SHOULD NOT APPEAR IN PAYLOAD" });
         await dbContext.SaveChangesAsync();
     }
 

@@ -10,7 +10,7 @@ public class SentryLoggerTests
         public string CategoryName { get; set; } = "SomeApp";
         public IHub Hub { get; set; } = Substitute.For<IHub>();
         public SentryLoggingOptions Options { get; set; } = new();
-        public Scope Scope { get; } = new(new SentryOptions());
+        public Scope Scope { get; } = new(new());
 
         public Fixture()
         {

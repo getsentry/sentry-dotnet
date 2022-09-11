@@ -14,7 +14,7 @@ internal class AspNetCoreExceptionProcessor : ISentryEventExceptionProcessor
             {
                 foreach (var ex in @event.SentryExceptions)
                 {
-                    ex.Mechanism = new Mechanism
+                    ex.Mechanism = new()
                     {
                         Type = "ExceptionHandlerMiddleware",
                         Handled = false

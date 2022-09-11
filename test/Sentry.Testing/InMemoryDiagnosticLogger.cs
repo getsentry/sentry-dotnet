@@ -8,7 +8,7 @@ public class InMemoryDiagnosticLogger : IDiagnosticLogger
 
     public void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
     {
-        Entries.Enqueue(new Entry(logLevel, message, exception, args));
+        Entries.Enqueue(new(logLevel, message, exception, args));
     }
 
     public record Entry(

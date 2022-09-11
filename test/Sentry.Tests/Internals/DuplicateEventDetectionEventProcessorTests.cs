@@ -48,7 +48,7 @@ public class DuplicateEventDetectionEventProcessorTests
     [Fact]
     public void Process_FirstEventWithException_ReturnsEvent()
     {
-        var expected = new SentryEvent(new Exception());
+        var expected = new SentryEvent(new());
 
         var sut = _fixture.GetSut();
         var actual = sut.Process(expected);
@@ -120,7 +120,7 @@ public class DuplicateEventDetectionEventProcessorTests
         var duplicate = new Exception();
         var first = new SentryEvent(new InvalidOperationException("test", new AggregateException(duplicate)));
         var second = new SentryEvent(new InvalidOperationException("another test",
-            new Exception("testing", new AggregateException(duplicate))));
+            new("testing", new AggregateException(duplicate))));
 
         var sut = _fixture.GetSut();
         _ = sut.Process(first);
@@ -137,7 +137,7 @@ public class DuplicateEventDetectionEventProcessorTests
         var duplicate = new Exception();
         var first = new SentryEvent(new InvalidOperationException("test", new AggregateException(duplicate)));
         var second = new SentryEvent(new InvalidOperationException("another test",
-            new Exception("testing", new AggregateException(duplicate))));
+            new("testing", new AggregateException(duplicate))));
 
         var sut = _fixture.GetSut();
         _ = sut.Process(first);

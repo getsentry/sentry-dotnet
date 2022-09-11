@@ -36,7 +36,7 @@ namespace Sentry
             var update = SessionUpdate.FromJson(json.GetProperty("update"));
             var pauseTimestamp = json.GetPropertyOrNull("paused")?.GetDateTimeOffset();
 
-            return new PersistedSessionUpdate(update, pauseTimestamp);
+            return new(update, pauseTimestamp);
         }
     }
 }

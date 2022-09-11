@@ -11,7 +11,7 @@ public class SentryLoggerFactoryExtensionsTests
         var sut = Substitute.For<ILoggerFactory>();
         var hub = Substitute.For<IHub>();
         _ = hub.IsEnabled.Returns(true);
-        var scope = new Scope(new SentryOptions());
+        var scope = new Scope(new());
         hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(info => info.Arg<Action<Scope>>()(scope));
         _ = SentrySdk.UseHub(hub);
@@ -32,7 +32,7 @@ public class SentryLoggerFactoryExtensionsTests
         var sut = Substitute.For<ILoggerFactory>();
         var hub = Substitute.For<IHub>();
         _ = hub.IsEnabled.Returns(false);
-        var scope = new Scope(new SentryOptions());
+        var scope = new Scope(new());
         hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(info => info.Arg<Action<Scope>>()(scope));
         _ = SentrySdk.UseHub(hub);

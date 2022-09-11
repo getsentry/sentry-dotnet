@@ -24,7 +24,7 @@ public class SentryDiagnosticListenerTests
 
             var client = Substitute.For<ISentryClient>();
 
-            ScopeManager = new SentryScopeManager(options, client);
+            ScopeManager = new(options, client);
 
             Hub = Substitute.For<IHub>();
             Hub.GetSpan().ReturnsForAnyArgs(_ => GetSpan());
@@ -35,7 +35,7 @@ public class SentryDiagnosticListenerTests
 
             DiagnosticListener.AllListeners.Subscribe(new SentryDiagnosticSubscriber(Hub, options));
 
-            _database = new Database();
+            _database = new();
             _database.Seed();
         }
         public ItemsContext NewContext() => new(_database.ContextOptions);
@@ -124,9 +124,12 @@ public class SentryDiagnosticListenerTests
         for (var j = 0; j < totalCommands; j++)
         {
             var i = j + 4;
-            context.Items.Add(new Item { Name = $"Number {i}" });
-            context.Items.Add(new Item { Name = $"Number2 {i}" });
-            context.Items.Add(new Item { Name = $"Number3 {i}" });
+            context.Items.Add(new()
+                { Name = $"Number {i}" });
+            context.Items.Add(new()
+                { Name = $"Number2 {i}" });
+            context.Items.Add(new()
+                { Name = $"Number3 {i}" });
             commands.Add(i * 2);
         }
         // Save before the Transaction creation to avoid storing junk.

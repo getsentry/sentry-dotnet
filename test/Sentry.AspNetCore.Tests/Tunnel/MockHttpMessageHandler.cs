@@ -25,7 +25,7 @@ public class MockHttpMessageHandler : DelegatingHandler
         {
             Input = await request.Content.ReadAsStringAsync();
         }
-        return new HttpResponseMessage
+        return new()
         {
             StatusCode = _statusCode,
             Content = new StringContent(_response)

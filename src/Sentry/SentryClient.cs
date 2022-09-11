@@ -169,7 +169,7 @@ namespace Sentry
                 }
             }
 
-            scope ??= new Scope(_options);
+            scope ??= new(_options);
 
             _options.LogInfo("Capturing event.");
 

@@ -33,7 +33,7 @@ namespace Sentry
         {
             options.SetupLogging();
 
-            ProcessInfo.Instance ??= new ProcessInfo(options);
+            ProcessInfo.Instance ??= new(options);
 
             // Locate the DSN
             var dsnString = options.SettingLocator.GetDsn();
@@ -366,7 +366,7 @@ namespace Sentry
         /// <param name="name">The optional username.</param>
         [DebuggerStepThrough]
         public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
-            => _hub.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
+            => _hub.CaptureUserFeedback(new(eventId, name, email, comments));
 
         /// <summary>
         /// Captures a transaction.

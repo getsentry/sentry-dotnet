@@ -17,7 +17,7 @@ public class DefaultUserFactoryTests
     {
         const string username = "test-user";
         _ = Identity.Name.Returns(username); // by default reads: ClaimTypes.Name
-        Claims = new List<Claim>
+        Claims = new()
         {
             new(ClaimTypes.Email, username +"@sentry.io"),
             new(ClaimTypes.Name, username),

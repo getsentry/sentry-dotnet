@@ -47,15 +47,15 @@ namespace Sentry
         private ConcurrentDictionary<string, string>? _tags;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags => _tags ??= new();
 
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
-            (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
+            (_tags ??= new())[key] = value;
 
         /// <inheritdoc />
         public void UnsetTag(string key) =>
-            (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
+            (_tags ??= new()).TryRemove(key, out _);
 
         private ConcurrentDictionary<string, object?> _data = new();
 

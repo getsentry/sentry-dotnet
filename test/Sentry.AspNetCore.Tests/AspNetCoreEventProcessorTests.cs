@@ -6,7 +6,7 @@ public class AspNetCoreEventProcessorTests
 
     public AspNetCoreEventProcessorTests()
     {
-        _sut = new AspNetCoreEventProcessor();
+        _sut = new();
     }
 
     [Fact]

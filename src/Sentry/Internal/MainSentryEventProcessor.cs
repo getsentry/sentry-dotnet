@@ -35,7 +35,7 @@ namespace Sentry.Internal
             _options = options;
             SentryStackTraceFactoryAccessor = sentryStackTraceFactoryAccessor;
 
-            _enricher = new Enricher(options);
+            _enricher = new(options);
         }
 
         public SentryEvent Process(SentryEvent @event)

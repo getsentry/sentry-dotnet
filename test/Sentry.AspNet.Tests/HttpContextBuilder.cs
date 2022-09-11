@@ -4,14 +4,14 @@ public static class HttpContextBuilder
 {
     public static HttpContext Build(int responseStatusCode = 200)
     {
-        return new HttpContext(
-            new HttpRequest("test", "http://test/the/path", null),
-            new HttpResponse(TextWriter.Null)
+        return new(
+            new("test", "http://test/the/path", null),
+            new(TextWriter.Null)
             {
                 StatusCode = responseStatusCode
             })
         {
-            ApplicationInstance = new HttpApplication()
+            ApplicationInstance = new()
         };
     }
 }

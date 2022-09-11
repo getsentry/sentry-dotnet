@@ -73,7 +73,7 @@ public class SentryLoggerProviderTests
     public void Ctor_ScopeSdk_ContainNameAndVersion()
     {
         _ = _fixture.Hub.IsEnabled.Returns(true);
-        var scope = new Scope(new SentryOptions());
+        var scope = new Scope(new());
 
         _fixture.Hub.When(w => w.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(info => info.Arg<Action<Scope>>()(scope));

@@ -122,7 +122,7 @@ namespace Sentry.Protocol
             var kernelVersion = json.GetPropertyOrNull("kernel_version")?.GetString();
             var rooted = json.GetPropertyOrNull("rooted")?.GetBoolean();
 
-            return new OperatingSystem
+            return new()
             {
                 Name = name,
                 Version = version,

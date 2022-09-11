@@ -20,7 +20,7 @@ public class SentryExceptionTests
             Type = "Type",
             Module = "Module",
             ThreadId = 1,
-            Stacktrace = new SentryStackTrace
+            Stacktrace = new()
             {
                 Frames = { new SentryStackFrame
                 {
@@ -28,7 +28,7 @@ public class SentryExceptionTests
                 }}
             },
             Data = { new KeyValuePair<string, object>("data-key", "data-value") },
-            Mechanism = new Mechanism
+            Mechanism = new()
             {
                 Description = "Description"
             }

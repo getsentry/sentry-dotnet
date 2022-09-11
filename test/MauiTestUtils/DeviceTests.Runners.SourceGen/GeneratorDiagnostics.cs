@@ -5,7 +5,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
 {
     static class GeneratorDiagnostics
     {
-        public static readonly DiagnosticDescriptor LoggingMessage = new DiagnosticDescriptor(
+        public static readonly DiagnosticDescriptor LoggingMessage = new(
             id: "TST1001",
             title: "Logging Message",
             messageFormat: "{0}",

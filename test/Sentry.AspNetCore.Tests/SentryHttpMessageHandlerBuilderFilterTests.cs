@@ -36,7 +36,7 @@ namespace Sentry.AspNetCore.Tests
             // Will use this to record outgoing requests
             using var recorder = new RecordingHttpMessageHandler();
 
-            var hub = new Internal.Hub(new SentryOptions
+            var hub = new Internal.Hub(new()
             {
                 Dsn = ValidDsn
             });

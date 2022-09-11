@@ -516,7 +516,7 @@ namespace Sentry
         /// <remarks>
         /// If the key already exists in the event, it will not be overwritten by a default tag.
         /// </remarks>
-        public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
+        public Dictionary<string, string> DefaultTags => _defaultTags ??= new();
 
         private double _tracesSampleRate;
 
@@ -689,7 +689,7 @@ namespace Sentry
         /// </summary>
         public SentryOptions()
         {
-            SettingLocator = new SettingLocator(this);
+            SettingLocator = new(this);
 
             EventProcessorsProviders = new () {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
@@ -741,7 +741,7 @@ namespace Sentry
 #endif
 
 #if ANDROID
-            Android = new AndroidOptions(this);
+            Android = new(this);
 #elif __IOS__
             iOS = new IosOptions(this);
 #endif

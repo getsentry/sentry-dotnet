@@ -224,7 +224,7 @@ namespace Sentry.Protocol
             var supportsComputeShaders = json.GetPropertyOrNull("supports_compute_shaders")?.GetBoolean();
             var supportsGeometryShaders = json.GetPropertyOrNull("supports_geometry_shaders")?.GetBoolean();
 
-            return new Gpu
+            return new()
             {
                 Name = name,
                 Id = id,

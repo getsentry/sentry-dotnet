@@ -14,7 +14,7 @@ public class TraceDiagnosticLoggerTests
         try
         {
             var logger = new TraceDiagnosticLogger(SentryLevel.Debug);
-            logger.Log(SentryLevel.Debug, "the message {0}", new Exception("the exception"), "arg1");
+            logger.Log(SentryLevel.Debug, "the message {0}", new("the exception"), "arg1");
             Trace.Flush();
             Assert.Equal(@"  Debug: the message arg1
 System.Exception: the exception", listener.Messages.Single());

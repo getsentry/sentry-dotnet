@@ -116,7 +116,7 @@ namespace Sentry.Protocol
             var identifier = json.GetPropertyOrNull("identifier")?.GetString();
             var build = json.GetPropertyOrNull("build")?.GetString();
 
-            return new Runtime
+            return new()
             {
                 Name = name,
                 Version = version,

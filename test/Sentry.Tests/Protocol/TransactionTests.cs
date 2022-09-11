@@ -32,9 +32,12 @@ public class TransactionTests
         {
             Description = "desc123",
             Status = SpanStatus.Aborted,
-            User = new User { Id = "user-id" },
-            Request = new Request { Method = "POST" },
-            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
+            User = new()
+                { Id = "user-id" },
+            Request = new()
+                { Method = "POST" },
+            Sdk = new()
+                { Name = "SDK-test", Version = "1.1.1" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
             Contexts =
@@ -52,9 +55,9 @@ public class TransactionTests
         // Don't overwrite the contexts object as it contains trace data.
         // See https://github.com/getsentry/sentry-dotnet/issues/752
 
-        transaction.Sdk.AddPackage(new Package("name", "version"));
-        transaction.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
-        transaction.AddBreadcrumb(new Breadcrumb(
+        transaction.Sdk.AddPackage(new("name", "version"));
+        transaction.AddBreadcrumb(new(timestamp, "crumb"));
+        transaction.AddBreadcrumb(new(
             timestamp,
             "message",
             "type",

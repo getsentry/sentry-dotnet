@@ -19,12 +19,12 @@ public class GlobalSessionManagerTests : IDisposable
         public Fixture(Action<SentryOptions> configureOptions = null)
         {
             Clock.GetUtcNow().Returns(DateTimeOffset.Now);
-            Logger = new InMemoryDiagnosticLogger();
+            Logger = new();
 
             var fileSystem = new FakeFileSystem();
-            _cacheDirectory = new TempDirectory(fileSystem);
+            _cacheDirectory = new(fileSystem);
 
-            Options = new SentryOptions
+            Options = new()
             {
                 Dsn = ValidDsn,
                 CacheDirectoryPath = _cacheDirectory.Path,
@@ -247,7 +247,7 @@ public class GlobalSessionManagerTests : IDisposable
     {
         // Arrange
         var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
+        sut = new(
             _fixture.Options,
             persistedSessionProvider: _ => throw new FileNotFoundException());
 
@@ -263,7 +263,7 @@ public class GlobalSessionManagerTests : IDisposable
     {
         // Arrange
         var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
+        sut = new(
             _fixture.Options,
             persistedSessionProvider: _ => throw new DirectoryNotFoundException());
 
@@ -279,7 +279,7 @@ public class GlobalSessionManagerTests : IDisposable
     {
         // Arrange
         var sut = _fixture.GetSut();
-        sut = new GlobalSessionManager(
+        sut = new(
             _fixture.Options,
             persistedSessionProvider: _ => throw new EndOfStreamException());
 
@@ -368,7 +368,7 @@ public class GlobalSessionManagerTests : IDisposable
         _fixture.Options.CrashedLastRun = () => true;
         // Session was paused before persisted:
         var pausedTimestamp = DateTimeOffset.Now;
-        _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+        _fixture.PersistedSessionProvider = _ => new(
             AnySessionUpdate(),
             pausedTimestamp);
 
@@ -389,7 +389,7 @@ public class GlobalSessionManagerTests : IDisposable
         _fixture.Options.CrashedLastRun = null;
         // Session was paused before persisted:
         var pausedTimestamp = DateTimeOffset.Now;
-        _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+        _fixture.PersistedSessionProvider = _ => new(
             AnySessionUpdate(),
             pausedTimestamp);
 
@@ -409,7 +409,7 @@ public class GlobalSessionManagerTests : IDisposable
         // Arrange
         _fixture.Options.CrashedLastRun = null;
         var pausedTimestamp = DateTimeOffset.Now;
-        _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+        _fixture.PersistedSessionProvider = _ => new(
             AnySessionUpdate(),
             // No pause timestamp:
             null);

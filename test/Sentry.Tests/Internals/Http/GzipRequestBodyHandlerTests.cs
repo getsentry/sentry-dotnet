@@ -20,9 +20,9 @@ public class GzipRequestBodyHandlerTests
         {
             var uri = Dsn.Parse(ValidDsn).GetStoreEndpointUri();
 
-            Message = new HttpRequestMessage(HttpMethod.Post, uri)
+            Message = new(HttpMethod.Post, uri)
             {
-                Content = new StringContent(new string('a', MessageCharCount))
+                Content = new StringContent(new('a', MessageCharCount))
             };
         }
 

@@ -23,10 +23,10 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 
             _runner.OnDiagnosticMessage += RunnerOnOnDiagnosticMessage;
 
-            TestAssemblies = new ObservableCollection<TestAssemblyViewModel>();
+            TestAssemblies = new();
 
-            CreditsCommand = new Command(CreditsExecute);
-            RunEverythingCommand = new Command(RunEverythingExecute, () => !_isBusy);
+            CreditsCommand = new(CreditsExecute);
+            RunEverythingCommand = new(RunEverythingExecute, () => !_isBusy);
             NavigateToTestAssemblyCommand = new Command<TestAssemblyViewModel?>(NavigateToTestAssemblyExecute);
         }
 
@@ -68,7 +68,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
             {
                 var allTests = await _runner.DiscoverAsync();
 
-                TestAssemblies = new ObservableCollection<TestAssemblyViewModel>(allTests);
+                TestAssemblies = new(allTests);
                 RaisePropertyChanged(nameof(TestAssemblies));
             }
             finally

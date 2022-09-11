@@ -34,7 +34,7 @@ public class SentrySqlListenerTests
         private string _operationId;
         public string OperationId
         {
-            get => throw new Exception();
+            get => throw new();
             set => _operationId = value;
         }
         public string ConnectionId { get; set; }
@@ -52,16 +52,16 @@ public class SentrySqlListenerTests
         public IHub Hub { get; set; }
         public Fixture()
         {
-            Logger = new InMemoryDiagnosticLogger();
+            Logger = new();
 
-            Options = new SentryOptions
+            Options = new()
             {
                 Debug = true,
                 DiagnosticLogger = Logger,
                 DiagnosticLevel = SentryLevel.Debug,
                 TracesSampleRate = 1,
             };
-            Tracer = new TransactionTracer(Hub, "foo", "bar")
+            Tracer = new(Hub, "foo", "bar")
             {
                 IsSampled = true
             };
@@ -82,7 +82,7 @@ public class SentrySqlListenerTests
     {
         // Assert
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
 
         // Act
         interceptor.OnNext(new("Unknown", null));
@@ -100,7 +100,7 @@ public class SentrySqlListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
         if (addConnectionSpan)
         {
             _fixture.Tracer.StartChild("abc").SetExtra(ConnectionExtraKey, Guid.Empty);
@@ -124,7 +124,7 @@ public class SentrySqlListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
         var connectionOperationId = Guid.NewGuid();
@@ -173,7 +173,7 @@ public class SentrySqlListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
         var connectionOperationId = Guid.NewGuid();
@@ -222,7 +222,7 @@ public class SentrySqlListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
         var connectionId = Guid.NewGuid();
         var connectionOperationIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
 
@@ -260,7 +260,7 @@ public class SentrySqlListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
         var connectionOperationId = Guid.NewGuid();
@@ -413,7 +413,7 @@ public class SentrySqlListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
         var connectionOperationId = Guid.NewGuid();
@@ -463,7 +463,7 @@ public class SentrySqlListenerTests
     {
         // Arrange
         var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var interceptor = new SentrySqlListener(hub, new());
         var exceptionReceived = false;
 
         // Act

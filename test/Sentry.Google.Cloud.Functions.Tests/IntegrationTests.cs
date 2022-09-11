@@ -75,6 +75,6 @@ public class IntegrationTests
 
     public class FailingFunction : IHttpFunction
     {
-        public Task HandleAsync(HttpContext context) => throw new Exception(ExpectedMessage);
+        public Task HandleAsync(HttpContext context) => throw new(ExpectedMessage);
     }
 }

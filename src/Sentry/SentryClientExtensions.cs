@@ -18,8 +18,8 @@ namespace Sentry
         public static SentryId CaptureException(this ISentryClient client, Exception ex)
         {
             return !client.IsEnabled
-                ? new SentryId()
-                : client.CaptureEvent(new SentryEvent(ex));
+                ? new()
+                : client.CaptureEvent(new(ex));
         }
 
         /// <summary>
@@ -35,9 +35,9 @@ namespace Sentry
             SentryLevel level = SentryLevel.Info)
         {
             return !client.IsEnabled || string.IsNullOrWhiteSpace(message)
-                ? new SentryId()
+                ? new()
                 : client.CaptureEvent(
-                    new SentryEvent
+                    new()
                     {
                         Message = message,
                         Level = level
@@ -56,7 +56,7 @@ namespace Sentry
         {
             if (client.IsEnabled)
             {
-                client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
+                client.CaptureUserFeedback(new(eventId, name, email, comments));
             }
         }
     }

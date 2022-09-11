@@ -3,7 +3,7 @@ using Sentry.AspNet.Internal;
 public class SentryScopeManagerTests
 {
     static SentryScopeManager GetSut() => new(
-        new SentryOptions
+        new()
         {
             ScopeStackContainer = new HttpContextScopeStackContainer()
         },

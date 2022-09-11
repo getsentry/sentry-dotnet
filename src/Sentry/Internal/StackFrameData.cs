@@ -77,7 +77,7 @@ namespace Sentry.Internal
                 methodIndex = uint.Parse(match.Groups["MethodIndex"].Value, CultureInfo.InvariantCulture);
             }
 
-            stackFrame = new StackFrameData(
+            stackFrame = new(
                 line,
                 typeFullName,
                 methodSignature,

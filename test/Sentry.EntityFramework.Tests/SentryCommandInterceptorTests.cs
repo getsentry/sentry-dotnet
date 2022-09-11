@@ -11,7 +11,7 @@ public class SentryCommandInterceptorTests
         public Fixture()
         {
             DbConnection = Effort.DbConnectionFactory.CreateTransient();
-            DbContext = new TestDbContext(DbConnection, true);
+            DbContext = new(DbConnection, true);
         }
     }
 
@@ -39,7 +39,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int>());
+        interceptor.NonQueryExecuting(command, new());
         _fixture.QueryLogger.Received(1).Log(expected.Query);
     }
 
@@ -58,7 +58,8 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.NonQueryExecuting(command, new DbCommandInterceptionContext<int> { Exception = new() });
+        interceptor.NonQueryExecuting(command, new()
+            { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 
@@ -77,7 +78,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader>());
+        interceptor.ReaderExecuting(command, new());
         _fixture.QueryLogger.Received(1).Log(expected.Query);
     }
 
@@ -96,7 +97,8 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ReaderExecuting(command, new DbCommandInterceptionContext<DbDataReader> { Exception = new() });
+        interceptor.ReaderExecuting(command, new()
+            { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 
@@ -115,7 +117,7 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object>());
+        interceptor.ScalarExecuting(command, new());
         _fixture.QueryLogger.Received(1).Log(expected.Query);
     }
 
@@ -134,7 +136,8 @@ public class SentryCommandInterceptorTests
             CommandText = expected.Query
         };
 
-        interceptor.ScalarExecuting(command, new DbCommandInterceptionContext<object> { Exception = new() });
+        interceptor.ScalarExecuting(command, new()
+            { Exception = new() });
         _fixture.QueryLogger.Received(1).Log(expected.Query, BreadcrumbLevel.Error);
     }
 

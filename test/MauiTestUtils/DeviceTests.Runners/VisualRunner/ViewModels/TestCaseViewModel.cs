@@ -25,7 +25,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
             Message = "🔷 not run";
 
             // Create an initial result representing not run
-            _testResult = new TestResultViewModel(this, null);
+            _testResult = new(this, null);
         }
 
         public string AssemblyFileName { get; }

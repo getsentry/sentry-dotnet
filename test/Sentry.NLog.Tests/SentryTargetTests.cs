@@ -22,7 +22,7 @@ public class SentryTargetTests
         {
             Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
-            Scope = new Scope(new SentryOptions());
+            Scope = new(new());
             Hub.ConfigureScope(Arg.Invoke(Scope));
         }
 
@@ -690,14 +690,14 @@ public class SentryTargetTests
 
     [Fact]
     public void Ctor_Options_UseHubAdapter()
-        => Assert.Equal(HubAdapter.Instance, new SentryTarget(new SentryNLogOptions()).HubAccessor());
+        => Assert.Equal(HubAdapter.Instance, new SentryTarget(new()).HubAccessor());
 
     [Fact]
     public void GetTagsFromLogEvent_ContextProperties()
     {
         var factory = _fixture.GetLoggerFactory();
         var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
-        sentryTarget.Tags.Add(new TargetPropertyWithContext("Logger", "${logger:shortName=true}"));
+        sentryTarget.Tags.Add(new("Logger", "${logger:shortName=true}"));
         sentryTarget.IncludeEventPropertiesAsTags = true;
 
         var logger = factory.GetLogger("sentry");
@@ -726,11 +726,11 @@ public class SentryTargetTests
     {
         var factory = _fixture.GetLoggerFactory();
         var sentryTarget = factory.Configuration.FindTargetByName<SentryTarget>("sentry");
-        sentryTarget.User = new SentryNLogUser
+        sentryTarget.User = new()
         {
             Username = "${logger:shortName=true}",
         };
-        sentryTarget.User.Other!.Add(new TargetPropertyWithContext("mood", "joyous"));
+        sentryTarget.User.Other!.Add(new("mood", "joyous"));
 
         var logger = factory.GetLogger("sentry");
         logger.Fatal(DefaultMessage);

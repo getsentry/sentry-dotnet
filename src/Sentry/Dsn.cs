@@ -103,7 +103,7 @@ namespace Sentry
                 Path = $"{path}/api/{projectId}/"
             }.Uri;
 
-            return new Dsn(
+            return new(
                 dsn,
                 projectId,
                 path,

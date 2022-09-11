@@ -8,7 +8,7 @@ namespace Sentry.Maui.Device.TestApp
         {
             var appBuilder = MauiApp.CreateBuilder();
             appBuilder
-                .ConfigureTests(new TestOptions
+                .ConfigureTests(new()
                 {
                     // This is the list of assemblies containing tests that will be run
                     Assemblies =
@@ -20,7 +20,7 @@ namespace Sentry.Maui.Device.TestApp
                         typeof(Sentry.Maui.Tests.MauiNetworkStatusListenerTests).Assembly
                     },
                 })
-                .UseHeadlessRunner(new HeadlessRunnerOptions
+                .UseHeadlessRunner(new()
                 {
                     RequiresUIContext = true,
                 })

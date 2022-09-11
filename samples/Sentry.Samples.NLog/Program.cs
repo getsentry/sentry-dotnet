@@ -102,7 +102,7 @@ public static class Program
     private static void UsingCodeConfiguration()
     {
         // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
-        var config = LogManager.Configuration = new LoggingConfiguration();
+        var config = LogManager.Configuration = new();
         _ = config
             .AddSentry(o =>
             {
@@ -123,7 +123,7 @@ public static class Program
                 o.ShutdownTimeoutSeconds = 5;
 
                 //Optionally specify user properties via NLog (here using MappedDiagnosticsLogicalContext as an example)
-                o.User = new SentryNLogUser
+                o.User = new()
                 {
                     Id = "${scopeproperty:item=id}",
                     Username = "${scopeproperty:item=username}",

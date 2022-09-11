@@ -95,7 +95,7 @@ public class HomeController : Controller
 
     public IActionResult Test()
     {
-        throw new Exception("Test exception thrown in controller!");
+        throw new("Test exception thrown in controller!");
     }
 
     public IActionResult Error()

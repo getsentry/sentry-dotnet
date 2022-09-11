@@ -76,7 +76,7 @@ namespace Sentry
         /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
         /// </remarks>
         /// <value>The headers.</value>
-        public IDictionary<string, string> Headers => InternalHeaders ??= new Dictionary<string, string>();
+        public IDictionary<string, string> Headers => InternalHeaders ??= new();
 
         /// <summary>
         /// Gets or sets the optional environment data.
@@ -85,13 +85,13 @@ namespace Sentry
         /// This is where information such as IIS/CGI keys go that are not HTTP headers.
         /// </remarks>
         /// <value>The env.</value>
-        public IDictionary<string, string> Env => InternalEnv ??= new Dictionary<string, string>();
+        public IDictionary<string, string> Env => InternalEnv ??= new();
 
         /// <summary>
         /// Gets or sets some optional other data.
         /// </summary>
         /// <value>The other.</value>
-        public IDictionary<string, string> Other => InternalOther ??= new Dictionary<string, string>();
+        public IDictionary<string, string> Other => InternalOther ??= new();
 
         /// <summary>
         /// Clones this instance.
@@ -158,7 +158,7 @@ namespace Sentry
             var query = json.GetPropertyOrNull("query_string")?.GetString();
             var cookies = json.GetPropertyOrNull("cookies")?.GetString();
 
-            return new Request
+            return new()
             {
                 InternalEnv = env?.WhereNotNullValue()?.ToDictionary(),
                 InternalOther = other?.WhereNotNullValue().ToDictionary(),

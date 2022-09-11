@@ -26,7 +26,7 @@ public class ClientReportTests
             {DiscardReason.CacheOverflow.WithCategory(DataCategory.Error), 2},
             {DiscardReason.EventProcessor.WithCategory(DataCategory.Security), 3}
         };
-        _testClientReport = new ClientReport(timestamp, discardedEvents);
+        _testClientReport = new(timestamp, discardedEvents);
     }
 
     [Fact]

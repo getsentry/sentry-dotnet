@@ -66,7 +66,7 @@ public class SentryTunnelMiddleware : IMiddleware
 
         var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
         var client = httpClientFactory.CreateClient("SentryTunnel");
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Sentry.NET_Tunnel", Version.Value));
+        client.DefaultRequestHeaders.UserAgent.Add(new("Sentry.NET_Tunnel", Version.Value));
 
         try
         {
@@ -83,7 +83,7 @@ public class SentryTunnelMiddleware : IMiddleware
                 memoryStream.Position = 0;
                 var sentryRequest = new HttpRequestMessage
                 {
-                    RequestUri = new Uri($"https://{dsn.Host}/api/{projectId}/envelope/"),
+                    RequestUri = new($"https://{dsn.Host}/api/{projectId}/envelope/"),
                     Method = HttpMethod.Post,
                     Content = new StreamContent(memoryStream),
                 };

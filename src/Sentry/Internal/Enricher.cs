@@ -13,7 +13,7 @@ namespace Sentry.Internal
         private readonly Lazy<Runtime> _runtimeLazy = new(() =>
         {
             var current = PlatformAbstractions.Runtime.Current;
-            return new Runtime
+            return new()
             {
                 Name = current.Name,
                 Version = current.Version,

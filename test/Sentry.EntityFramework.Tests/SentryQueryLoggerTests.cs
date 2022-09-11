@@ -5,7 +5,7 @@ public class SentryQueryLoggerTests
     [Fact]
     public void Log_QueryLogger_CaptureEvent()
     {
-        var scope = new Scope(new SentryOptions());
+        var scope = new Scope(new());
         var hub = Substitute.For<IHub>();
         hub.IsEnabled.Returns(true);
         hub.ConfigureScope(Arg.Invoke(scope));

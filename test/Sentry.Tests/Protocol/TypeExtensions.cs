@@ -26,8 +26,8 @@ internal static class TypeExtensions
         var notReadOnly = fieldInfos.Where(f => !f.IsInitOnly).ToList();
         if (notReadOnly.Any())
         {
-            throw new Exception($"Type {type} has non readonly fields: " +
-                                string.Join(", ", notReadOnly.Select(p => p.Name)));
+            throw new($"Type {type} has non readonly fields: " +
+                      string.Join(", ", notReadOnly.Select(p => p.Name)));
         }
 
         foreach (var fieldInfo in fieldInfos)

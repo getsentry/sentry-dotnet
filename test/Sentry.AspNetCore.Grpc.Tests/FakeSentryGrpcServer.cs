@@ -35,6 +35,6 @@ public static class FakeSentryGrpcServer
                 });
             });
 
-        return new TestServer(builder);
+        return new(builder);
     }
 }

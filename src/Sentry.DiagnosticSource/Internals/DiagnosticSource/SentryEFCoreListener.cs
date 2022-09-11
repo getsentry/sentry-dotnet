@@ -80,7 +80,7 @@ namespace Sentry.Internals.DiagnosticSource
                 }
 
                 var asyncLocalSpan = GetSpanBucket(type);
-                asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
+                asyncLocalSpan.Value = new(startedChild);
             });
         }
 

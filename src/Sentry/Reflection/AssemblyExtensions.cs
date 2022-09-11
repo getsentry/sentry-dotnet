@@ -22,7 +22,7 @@ namespace Sentry.Reflection
         /// <returns>The SdkVersion.</returns>
         public static SdkVersion GetNameAndVersion(this Assembly asm)
         {
-            return new SdkVersion
+            return new()
             {
                 Name = asm.GetName().Name,
                 Version = asm.GetVersion()

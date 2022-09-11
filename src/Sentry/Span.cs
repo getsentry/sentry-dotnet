@@ -45,25 +45,25 @@ namespace Sentry
         private Dictionary<string, string>? _tags;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
+        public IReadOnlyDictionary<string, string> Tags => _tags ??= new();
 
         /// <inheritdoc />
         public void SetTag(string key, string value) =>
-            (_tags ??= new Dictionary<string, string>())[key] = value;
+            (_tags ??= new())[key] = value;
 
         /// <inheritdoc />
         public void UnsetTag(string key) =>
-            (_tags ??= new Dictionary<string, string>()).Remove(key);
+            (_tags ??= new()).Remove(key);
 
         // Aka 'data'
         private Dictionary<string, object?>? _extra;
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
+        public IReadOnlyDictionary<string, object?> Extra => _extra ??= new();
 
         /// <inheritdoc />
         public void SetExtra(string key, object? value) =>
-            (_extra ??= new Dictionary<string, object?>())[key] = value;
+            (_extra ??= new())[key] = value;
 
         /// <summary>
         /// Initializes an instance of <see cref="Span"/>.
@@ -135,7 +135,7 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()?.ToDictionary();
             var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDictionary();
 
-            return new Span(parentSpanId, operation)
+            return new(parentSpanId, operation)
             {
                 SpanId = spanId,
                 TraceId = traceId,

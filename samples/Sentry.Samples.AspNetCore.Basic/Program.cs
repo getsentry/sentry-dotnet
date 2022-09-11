@@ -56,7 +56,7 @@ public class Program
                         // The following exception will be captured by the SDK and the event
                         // will include the Log messages and any custom scope modifications
                         // as exemplified above.
-                        throw new Exception(
+                        throw new(
                             exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline");
                     });
                 });

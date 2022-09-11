@@ -21,7 +21,7 @@ public abstract class BaseRequestPayloadExtractorTests<TExtractor>
         public TExtractor GetSut()
         {
             _ = HttpRequest.Body.Returns(Stream);
-            return new TExtractor();
+            return new();
         }
     }
 

@@ -51,7 +51,7 @@ namespace Sentry.Internal
 
             // Generate the client report.
             var timestamp = _clock.GetUtcNow();
-            return new ClientReport(timestamp, discardedEvents);
+            return new(timestamp, discardedEvents);
         }
 
         public void Load(ClientReport clientReport)

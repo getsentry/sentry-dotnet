@@ -64,7 +64,7 @@ namespace Sentry.Internal
                     x => new DiscardReasonWithCategory(x.Reason, x.Category),
                     x => x.Quantity);
 
-            return new ClientReport(timestamp, discardedEvents);
+            return new(timestamp, discardedEvents);
         }
     }
 }

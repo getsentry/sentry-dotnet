@@ -8,7 +8,7 @@ namespace Microsoft.Maui.DeviceTests
 {
     public static partial class AssertionExtensions
     {
-        static readonly Random rnd = new Random();
+        static readonly Random rnd = new();
 
         public static async Task<bool> Wait(Func<bool> exitCondition, int timeout = 1000)
         {

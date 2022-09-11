@@ -32,7 +32,7 @@ public class ScopeExtensionsTests
     public void HasUser_EmptyUser_ReturnsFalse()
     {
         var sut = _fixture.GetSut();
-        sut.User = new User();
+        sut.User = new();
         Assert.False(sut.HasUser());
     }
 
@@ -1082,7 +1082,7 @@ public class ScopeExtensionsTests
         var sut = _fixture.GetSut();
         var target = _fixture.GetSut();
 
-        sut.User = new User();
+        sut.User = new();
         sut.Apply(target);
 
         Assert.NotSame(sut.User, target.User);
@@ -1149,7 +1149,7 @@ public class ScopeExtensionsTests
         var target = _fixture.GetSut();
 
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new()
         {
             Method = "method"
         };
@@ -1167,7 +1167,7 @@ public class ScopeExtensionsTests
         target.Request.Other.Add("InternalOther", "Other");
 
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new()
         {
             Env = { { "sut: InternalEnv", "Env" } },
             Headers = { { "sut: InternalHeaders", "Headers" } },
@@ -1185,13 +1185,13 @@ public class ScopeExtensionsTests
     public void Apply_Request_NotOnTarget_SetFromSource()
     {
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new()
         {
             Env = { { "sut: InternalEnv", "Env" } },
             Headers = { { "sut: InternalHeaders", "Headers" } },
             Other = { { "sut: InternalOther", "Other" } },
             Cookies = "sut: cookies",
-            Data = new object(),
+            Data = new(),
             Method = "sut: method",
             QueryString = "sut: query",
             Url = "sut: /something"
@@ -1226,10 +1226,10 @@ public class ScopeExtensionsTests
         target.Request = request;
 
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new()
         {
             Cookies = "sut: cookies",
-            Data = new object(),
+            Data = new(),
             Method = "sut: method",
             QueryString = "sut: query",
             Url = "sut: /something"

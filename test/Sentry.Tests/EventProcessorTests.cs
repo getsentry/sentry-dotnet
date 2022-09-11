@@ -9,7 +9,7 @@ public class EventProcessorTests
 
     public EventProcessorTests(ITestOutputHelper output)
     {
-        _logger = new TestOutputDiagnosticLogger(output);
+        _logger = new(output);
     }
 
     [Fact]

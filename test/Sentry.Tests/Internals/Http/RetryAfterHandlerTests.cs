@@ -20,8 +20,8 @@ public class RetryAfterHandlerTests
 
         public HttpMessageInvoker GetInvoker()
         {
-            Sut = new RetryAfterHandler(StubHandler, Clock);
-            return new HttpMessageInvoker(Sut);
+            Sut = new(StubHandler, Clock);
+            return new(Sut);
         }
     }
 
@@ -35,7 +35,7 @@ public class RetryAfterHandlerTests
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
         var invoker = _fixture.GetInvoker();
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
         Assert.Equal(0, _fixture.Sut.RetryAfterUtcTicks);
@@ -49,7 +49,7 @@ public class RetryAfterHandlerTests
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
         var invoker = _fixture.GetInvoker();
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
         Assert.Equal((Fixture.TimeReturned + RetryAfterHandler.DefaultRetryAfterDelay).UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
@@ -61,11 +61,11 @@ public class RetryAfterHandlerTests
     {
         var expected = new HttpResponseMessage(TooManyRequests);
         var date = DateTimeOffset.MaxValue;
-        expected.Headers.RetryAfter = new RetryConditionHeaderValue(date);
+        expected.Headers.RetryAfter = new(date);
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
         var invoker = _fixture.GetInvoker();
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
         Assert.Equal(date.Ticks, _fixture.Sut.RetryAfterUtcTicks);
@@ -77,12 +77,12 @@ public class RetryAfterHandlerTests
     {
         var expected = new HttpResponseMessage(TooManyRequests);
         var delta = TimeSpan.FromSeconds(300);
-        expected.Headers.RetryAfter = new RetryConditionHeaderValue(delta);
+        expected.Headers.RetryAfter = new(delta);
 
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
         var invoker = _fixture.GetInvoker();
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
         Assert.Equal((Fixture.TimeReturned + delta).UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
@@ -99,7 +99,7 @@ public class RetryAfterHandlerTests
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
         var invoker = _fixture.GetInvoker();
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
         var expectedTime = Fixture.TimeReturned.AddTicks((long)(floating * TimeSpan.TicksPerSecond));
@@ -119,11 +119,11 @@ public class RetryAfterHandlerTests
         var invoker = _fixture.GetInvoker();
 
         // First call
-        _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        _ = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
         Assert.True(_fixture.StubHandler.SendAsyncCalled);
 
         _fixture.StubHandler.SendAsyncCalled = false; // reset
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(TooManyRequests, actual.StatusCode);
         var expectedTime = Fixture.TimeReturned.AddTicks((long)(floating * TimeSpan.TicksPerSecond));
@@ -136,18 +136,18 @@ public class RetryAfterHandlerTests
     {
         var expected = new HttpResponseMessage(TooManyRequests);
         var delta = TimeSpan.FromSeconds(300);
-        expected.Headers.RetryAfter = new RetryConditionHeaderValue(delta);
+        expected.Headers.RetryAfter = new(delta);
 
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
         var invoker = _fixture.GetInvoker();
 
         // First call
-        _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        _ = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
         Assert.True(_fixture.StubHandler.SendAsyncCalled);
 
         _fixture.StubHandler.SendAsyncCalled = false; // reset
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(TooManyRequests, actual.StatusCode);
         Assert.Equal((Fixture.TimeReturned + delta).UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
@@ -159,18 +159,18 @@ public class RetryAfterHandlerTests
     {
         var response = new HttpResponseMessage(TooManyRequests);
         var date = DateTimeOffset.MaxValue;
-        response.Headers.RetryAfter = new RetryConditionHeaderValue(date);
+        response.Headers.RetryAfter = new(date);
 
         _fixture.StubHandler.SendAsyncFunc = (_, _) => response;
 
         var invoker = _fixture.GetInvoker();
 
         // First call
-        _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        _ = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
         Assert.True(_fixture.StubHandler.SendAsyncCalled);
 
         _fixture.StubHandler.SendAsyncCalled = false; // reset
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(TooManyRequests, actual.StatusCode);
         Assert.Equal(date.Ticks, _fixture.Sut.RetryAfterUtcTicks);
@@ -182,14 +182,14 @@ public class RetryAfterHandlerTests
     {
         var response = new HttpResponseMessage(TooManyRequests);
         var date = DateTimeOffset.Now - TimeSpan.FromDays(1);
-        response.Headers.RetryAfter = new RetryConditionHeaderValue(date);
+        response.Headers.RetryAfter = new(date);
 
         _fixture.StubHandler.SendAsyncFunc = (_, _) => response;
 
         var invoker = _fixture.GetInvoker();
 
         // First call: Too Many Requests, RetryAfterUtcTicks
-        _ = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        _ = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
         Assert.True(_fixture.StubHandler.SendAsyncCalled);
         Assert.Equal(date.UtcTicks, _fixture.Sut.RetryAfterUtcTicks);
 
@@ -198,7 +198,7 @@ public class RetryAfterHandlerTests
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
         _fixture.StubHandler.SendAsyncCalled = false;
 
-        var actual = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        var actual = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.Equal(expected, actual);
         Assert.Equal(0, _fixture.Sut.RetryAfterUtcTicks);
@@ -210,14 +210,14 @@ public class RetryAfterHandlerTests
     {
         var expected = new HttpResponseMessage(TooManyRequests);
         var date = DateTimeOffset.MaxValue;
-        expected.Headers.RetryAfter = new RetryConditionHeaderValue(date);
+        expected.Headers.RetryAfter = new(date);
         _fixture.StubHandler.SendAsyncFunc = (_, _) => expected;
 
         var invoker = _fixture.GetInvoker();
 
-        using var first = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
-        using var second = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
-        using var third = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/"), None);
+        using var first = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
+        using var second = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
+        using var third = await invoker.SendAsync(new(HttpMethod.Get, "/"), None);
 
         Assert.NotSame(first, second);
         Assert.NotSame(second, third);

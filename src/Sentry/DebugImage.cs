@@ -77,7 +77,7 @@ namespace Sentry
             var codeId = json.GetPropertyOrNull("code_id")?.GetString();
             var codeFile = json.GetPropertyOrNull("code_file")?.GetString();
 
-            return new DebugImage
+            return new()
             {
                 Type = type,
                 ImageAddress = imageAddress,

@@ -17,7 +17,7 @@ namespace Sentry
     public sealed class SdkVersion : IJsonSerializable
     {
         private static readonly Lazy<SdkVersion> InstanceLazy = new(
-            () => new SdkVersion
+            () => new()
             {
                 Name = "sentry.dotnet",
                 Version = typeof(ISentryClient).Assembly.GetVersion()
@@ -62,7 +62,7 @@ namespace Sentry
         /// <param name="name">The package name.</param>
         /// <param name="version">The package version.</param>
         public void AddPackage(string name, string version)
-            => AddPackage(new Package(name, version));
+            => AddPackage(new(name, version));
 
         internal void AddPackage(Package package)
             => InternalPackages.Add(package);
@@ -108,10 +108,10 @@ namespace Sentry
             // Version
             var version = json.GetPropertyOrNull("version")?.GetString() ?? "0.0.0";
 
-            return new SdkVersion
+            return new()
             {
-                InternalPackages = new ConcurrentBag<Package>(packages),
-                Integrations = new ConcurrentBag<string>(integrations),
+                InternalPackages = new(packages),
+                Integrations = new(integrations),
                 Name = name,
                 Version = version
             };

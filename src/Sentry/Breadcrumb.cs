@@ -144,7 +144,7 @@ namespace Sentry
             var category = json.GetPropertyOrNull("category")?.GetString();
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<BreadcrumbLevel>() ?? default;
 
-            return new Breadcrumb(timestamp, message, type, data!, category, level);
+            return new(timestamp, message, type, data!, category, level);
         }
     }
 }

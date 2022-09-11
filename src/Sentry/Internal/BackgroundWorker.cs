@@ -39,7 +39,7 @@ namespace Sentry.Internal
             _queue = queue ?? new ConcurrentQueue<Envelope>();
             _maxItems = options.MaxQueueItems;
             _shutdownSource = shutdownSource ?? new CancellationTokenSource();
-            _queuedEnvelopeSemaphore = new SemaphoreSlim(0, _maxItems);
+            _queuedEnvelopeSemaphore = new(0, _maxItems);
 
             options.LogDebug("Starting BackgroundWorker.");
             WorkerTask = Task.Run(DoWorkAsync);

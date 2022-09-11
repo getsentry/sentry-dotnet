@@ -13,7 +13,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 
         public AsyncLock()
         {
-            semaphore = new SemaphoreSlim(1);
+            semaphore = new(1);
             releaser = Task.FromResult(new Releaser(this));
         }
 

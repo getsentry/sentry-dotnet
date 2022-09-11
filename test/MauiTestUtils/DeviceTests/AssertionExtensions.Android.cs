@@ -99,7 +99,7 @@ namespace Microsoft.Maui.DeviceTests
         // Android doesn't handle adding and removing views in parallel very well
         // If a view is removed while a different test triggers a layout then you hit
         // a NRE exception
-        static SemaphoreSlim _attachAndRunSemaphore = new SemaphoreSlim(1);
+        static SemaphoreSlim _attachAndRunSemaphore = new(1);
         public static async Task<T> AttachAndRun<T>(this AView view, Func<Task<T>> action)
         {
             if (view.Parent is WrapperView wrapper)
@@ -277,7 +277,7 @@ namespace Microsoft.Maui.DeviceTests
             Assert.NotNull(bitmap);
             Assert.NotNull(other);
 
-            Assert.Equal(new Size(bitmap.Width, bitmap.Height), new Size(other.Width, other.Height));
+            Assert.Equal(new(bitmap.Width, bitmap.Height), new Size(other.Width, other.Height));
 
             Assert.True(IsMatching(), CreateEqualError(bitmap, other, $"Images did not match."));
 

@@ -8,7 +8,7 @@ public class SentryClientExtensionsTests
     public void CaptureException_DisabledClient_DoesNotCaptureEvent()
     {
         _ = _sut.IsEnabled.Returns(false);
-        var id = _sut.CaptureException(new Exception());
+        var id = _sut.CaptureException(new());
 
         _ = _sut.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
         Assert.Equal(default, id);
@@ -18,7 +18,7 @@ public class SentryClientExtensionsTests
     public void CaptureException_EnabledClient_CapturesEvent()
     {
         _ = _sut.IsEnabled.Returns(true);
-        _ = _sut.CaptureException(new Exception());
+        _ = _sut.CaptureException(new());
         _ = _sut.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
 

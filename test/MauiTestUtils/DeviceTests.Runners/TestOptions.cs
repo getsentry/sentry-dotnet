@@ -9,12 +9,12 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
         /// <summary>
         /// The list of assemblies that contain tests.
         /// </summary>
-        public List<Assembly> Assemblies { get; set; } = new List<Assembly>();
+        public List<Assembly> Assemblies { get; set; } = new();
 
         /// <summary>
         /// The list of categories to skip in the form:
         ///   [category-name]=[skip-when-value]
         /// </summary>
-        public List<string> SkipCategories { get; set; } = new List<string>();
+        public List<string> SkipCategories { get; set; } = new();
     }
 }

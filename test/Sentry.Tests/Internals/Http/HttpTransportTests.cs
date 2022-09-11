@@ -35,11 +35,12 @@ public class HttpTransportTests
             .Returns(_ => SentryResponses.GetOkResponse());
 
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = ValidDsn },
-            new HttpClient(httpHandler));
+            new()
+                { Dsn = ValidDsn },
+            new(httpHandler));
 
         var envelope = Envelope.FromEvent(
-            new SentryEvent(eventId: SentryResponses.ResponseId));
+            new(eventId: SentryResponses.ResponseId));
 
 #if NET5_0_OR_GREATER
         await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
@@ -71,15 +72,15 @@ public class HttpTransportTests
         var logger = new InMemoryDiagnosticLogger();
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -120,9 +121,9 @@ public class HttpTransportTests
 
         var httpTransport = new HttpTransport(
             options,
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -183,10 +184,10 @@ public class HttpTransportTests
 
         var httpTransport = new HttpTransport(
             options,
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
         // Act
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new()));
 
         // Assert
         logger.Entries.Any(e => e.Message == "Environment variable '{0}' set. Writing envelope to {1}")
@@ -213,15 +214,15 @@ public class HttpTransportTests
         var logger = new InMemoryDiagnosticLogger();
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -251,15 +252,15 @@ public class HttpTransportTests
         var logger = new InMemoryDiagnosticLogger();
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn,
                 Debug = true,
                 DiagnosticLogger = logger
             },
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         await httpTransport.SendEnvelopeAsync(envelope);
@@ -286,18 +287,18 @@ public class HttpTransportTests
             ));
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn,
                 DiagnosticLogger = _testOutputLogger,
                 SendClientReports = false,
                 Debug = true
             },
-            new HttpClient(httpHandler),
+            new(httpHandler),
             clock: _fakeClock);
 
         // First request always goes through
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new()));
 
         var envelope = new Envelope(
             new Dictionary<string, object>(),
@@ -363,12 +364,12 @@ public class HttpTransportTests
 
         var httpTransport = new HttpTransport(
             options,
-            new HttpClient(httpHandler),
+            new(httpHandler),
             clock: _fakeClock
         );
 
         // First request always goes through
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new()));
 
         var envelope = new Envelope(
             new Dictionary<string, object>(),
@@ -428,7 +429,7 @@ public class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => new HttpResponseMessage(HttpStatusCode.InternalServerError)));
+                () => new(HttpStatusCode.InternalServerError)));
 
         var options = new SentryOptions
         {
@@ -438,7 +439,7 @@ public class HttpTransportTests
             Debug = true
         };
 
-        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+        var httpTransport = new HttpTransport(options, new(httpHandler));
 
         // some arbitrary discarded events ahead of time
         var recorder = (ClientReportRecorder) options.ClientReportRecorder;
@@ -450,7 +451,7 @@ public class HttpTransportTests
         recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
 
         // Act
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new()));
 
         // Assert
         recorder.DiscardedEvents.Should().BeEquivalentTo(new Dictionary<DiscardReasonWithCategory, int>
@@ -472,7 +473,7 @@ public class HttpTransportTests
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => new HttpResponseMessage((HttpStatusCode)429)));
+                () => new((HttpStatusCode)429)));
 
         var options = new SentryOptions
         {
@@ -482,7 +483,7 @@ public class HttpTransportTests
             Debug = true
         };
 
-        var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
+        var httpTransport = new HttpTransport(options, new(httpHandler));
 
         // some arbitrary discarded events ahead of time
         var recorder = (ClientReportRecorder) options.ClientReportRecorder;
@@ -494,7 +495,7 @@ public class HttpTransportTests
         recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Security);
 
         // Act
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new()));
 
         // Assert
         var totalCounts = recorder.DiscardedEvents.Values.Sum();
@@ -511,14 +512,14 @@ public class HttpTransportTests
         var logger = new InMemoryDiagnosticLogger();
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn,
                 MaxAttachmentSize = 1,
                 DiagnosticLogger = logger,
                 Debug = true
             },
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
         var attachment = new Attachment(
             AttachmentType.Default,
@@ -527,7 +528,7 @@ public class HttpTransportTests
             null);
 
         using var envelope = Envelope.FromEvent(
-            new SentryEvent(),
+            new(),
             logger,
             new[] { attachment });
 
@@ -557,14 +558,14 @@ public class HttpTransportTests
         var logger = new InMemoryDiagnosticLogger();
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn,
                 MaxAttachmentSize = 1,
                 DiagnosticLogger = logger,
                 Debug = true
             },
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
         var attachmentNormal = new Attachment(
             AttachmentType.Default,
@@ -579,7 +580,7 @@ public class HttpTransportTests
             null);
 
         using var envelope = Envelope.FromEvent(
-            new SentryEvent(),
+            new(),
             null,
             new[] { attachmentNormal, attachmentTooBig });
 
@@ -610,19 +611,19 @@ public class HttpTransportTests
             ));
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn
             },
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
         var session = new Session("foo", "bar", "baz");
 
         // First request always goes through
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new()));
 
         // Send session update with init=true
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
         // Pretend the rate limit has already passed
         foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -633,7 +634,7 @@ public class HttpTransportTests
         // Act
 
         // Send another update with init=false (should get promoted)
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(false, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new(), null, null, session.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
         var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
@@ -652,19 +653,19 @@ public class HttpTransportTests
             ));
 
         var httpTransport = new HttpTransport(
-            new SentryOptions
+            new()
             {
                 Dsn = ValidDsn
             },
-            new HttpClient(httpHandler));
+            new(httpHandler));
 
         var session = new Session("foo", "bar", "baz");
 
         // First request always goes through
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new()));
 
         // Send session update with init=true
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new(), null, null, session.CreateUpdate(true, DateTimeOffset.Now)));
 
         // Pretend the rate limit has already passed
         foreach (var (category, _) in httpTransport.CategoryLimitResets)
@@ -676,7 +677,7 @@ public class HttpTransportTests
 
         // Send an update for different session with init=false (should NOT get promoted)
         var nextSession = new Session("foo2", "bar2", "baz2");
-        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new(), null, null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
         var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
@@ -690,10 +691,11 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = ValidDsn },
-            new HttpClient());
+            new()
+                { Dsn = ValidDsn },
+            new());
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         using var request = httpTransport.CreateRequest(envelope);
@@ -708,10 +710,11 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = ValidDsn },
-            new HttpClient());
+            new()
+                { Dsn = ValidDsn },
+            new());
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         using var request = httpTransport.CreateRequest(envelope);
@@ -727,10 +730,11 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = ValidDsn },
-            new HttpClient());
+            new()
+                { Dsn = ValidDsn },
+            new());
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         var request = httpTransport.CreateRequest(envelope);
@@ -744,10 +748,11 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = ValidDsn },
-            new HttpClient());
+            new()
+                { Dsn = ValidDsn },
+            new());
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         var uri = Dsn.Parse(ValidDsn).GetEnvelopeEndpointUri();
 
@@ -763,10 +768,11 @@ public class HttpTransportTests
     {
         // Arrange
         var httpTransport = new HttpTransport(
-            new SentryOptions { Dsn = ValidDsn },
-            new HttpClient());
+            new()
+                { Dsn = ValidDsn },
+            new());
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Act
         var request = httpTransport.CreateRequest(envelope);
@@ -834,7 +840,7 @@ public class HttpTransportTests
         var recorder = options.ClientReportRecorder;
         recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
 
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
         var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
 
         // There should only be the one event in the envelope

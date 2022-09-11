@@ -20,8 +20,8 @@ public class BackgroundWorkerFlushBenchmarks
     [IterationSetup]
     public void IterationSetup()
     {
-        _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 });
-        _event = new SentryEvent();
+        _backgroundWorker = new BackgroundWorker(new FakeTransport(), new() { MaxQueueItems = 1000 });
+        _event = new();
         _envelope = Envelope.FromEvent(_event);
 
         // Make sure worker spins once.

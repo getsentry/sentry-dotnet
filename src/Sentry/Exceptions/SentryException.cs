@@ -84,7 +84,7 @@ namespace Sentry.Protocol
             var stacktrace = json.GetPropertyOrNull("stacktrace")?.Pipe(SentryStackTrace.FromJson);
             var mechanism = json.GetPropertyOrNull("mechanism")?.Pipe(Mechanism.FromJson);
 
-            return new SentryException
+            return new()
             {
                 Type = type,
                 Value = value,

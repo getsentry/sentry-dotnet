@@ -8,7 +8,7 @@ namespace Sentry.Internal
     {
         public override IntPtr Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return new IntPtr(reader.GetInt64());
+            return new(reader.GetInt64());
         }
 
         public override void Write(Utf8JsonWriter writer, IntPtr value, JsonSerializerOptions options)

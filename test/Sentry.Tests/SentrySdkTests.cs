@@ -222,7 +222,7 @@ public class SentrySdkTests : IDisposable
         var initialInnerTransport = Substitute.For<ITransport>();
         var initialTransport = CachingTransport.Create(
             initialInnerTransport,
-            new SentryOptions
+            new()
             {
                 Debug = true,
                 DiagnosticLogger = _logger,
@@ -235,7 +235,7 @@ public class SentrySdkTests : IDisposable
         {
             for (var i = 0; i < numEnvelopes; i++)
             {
-                using var envelope = Envelope.FromEvent(new SentryEvent());
+                using var envelope = Envelope.FromEvent(new());
                 await initialTransport.SendEnvelopeAsync(envelope);
             }
         }
@@ -451,7 +451,7 @@ public class SentrySdkTests : IDisposable
                    o.BackgroundWorker = worker;
                }))
         {
-            SentrySdk.CaptureEvent(new SentryEvent(), s => s.AddBreadcrumb(expected));
+            SentrySdk.CaptureEvent(new(), s => s.AddBreadcrumb(expected));
 
             worker.EnqueueEnvelope(
                 Arg.Is<Envelope>(e => e.Items
@@ -472,8 +472,8 @@ public class SentrySdkTests : IDisposable
         using (SentrySdk.Init(ValidDsn))
         {
             var callbackCounter = 0;
-            SentrySdk.CaptureEvent(new SentryEvent(), _ => callbackCounter++);
-            SentrySdk.CaptureEvent(new SentryEvent());
+            SentrySdk.CaptureEvent(new(), _ => callbackCounter++);
+            SentrySdk.CaptureEvent(new());
 
             Assert.Equal(1, callbackCounter);
         }
@@ -493,7 +493,7 @@ public class SentrySdkTests : IDisposable
 
         using (SentrySdk.Init(options))
         {
-            SentrySdk.CaptureEvent(new SentryEvent(), (null as Action<Scope>)!);
+            SentrySdk.CaptureEvent(new(), (null as Action<Scope>)!);
 
             logger.Entries.Any(e =>
                     e.Level == SentryLevel.Error &&
@@ -509,7 +509,7 @@ public class SentrySdkTests : IDisposable
         var scopeCallbackWasInvoked = false;
         using (SentrySdk.Init(o => o.Dsn = ValidDsn))
         {
-            SentrySdk.CaptureEvent(new SentryEvent(), _ => scopeCallbackWasInvoked = true);
+            SentrySdk.CaptureEvent(new(), _ => scopeCallbackWasInvoked = true);
 
             Assert.True(scopeCallbackWasInvoked);
         }
@@ -521,7 +521,7 @@ public class SentrySdkTests : IDisposable
         var scopeCallbackWasInvoked = false;
         using (SentrySdk.Init(o => o.Dsn = ValidDsn))
         {
-            SentrySdk.CaptureException(new Exception(), _ => scopeCallbackWasInvoked = true);
+            SentrySdk.CaptureException(new(), _ => scopeCallbackWasInvoked = true);
 
             Assert.True(scopeCallbackWasInvoked);
         }
@@ -552,10 +552,10 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void CaptureEvent_Instance_NoOp() => SentrySdk.CaptureEvent(new SentryEvent());
+    public void CaptureEvent_Instance_NoOp() => SentrySdk.CaptureEvent(new());
 
     [Fact]
-    public void CaptureException_Instance_NoOp() => SentrySdk.CaptureException(new Exception());
+    public void CaptureException_Instance_NoOp() => SentrySdk.CaptureException(new());
 
     [Fact]
     public void CaptureMessage_Message_NoOp() => SentrySdk.CaptureMessage("message");
@@ -630,14 +630,14 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_NoDsn_DisposeDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions()) as IDisposable;
+        var sut = SentrySdk.InitHub(new()) as IDisposable;
         sut?.Dispose();
     }
 
     [Fact]
     public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions());
+        var sut = SentrySdk.InitHub(new());
         await sut.FlushAsync(TimeSpan.FromDays(1));
     }
 
@@ -645,7 +645,7 @@ public class SentrySdkTests : IDisposable
     public void InitHub_GlobalModeOff_AsyncLocalContainer()
     {
         // Act
-        var sut = SentrySdk.InitHub(new SentryOptions
+        var sut = SentrySdk.InitHub(new()
         {
             Dsn = ValidDsn,
             IsGlobalModeEnabled = false
@@ -661,7 +661,7 @@ public class SentrySdkTests : IDisposable
     public void InitHub_GlobalModeOn_GlobalContainer()
     {
         // Act
-        var sut = SentrySdk.InitHub(new SentryOptions
+        var sut = SentrySdk.InitHub(new()
         {
             Dsn = ValidDsn,
             IsGlobalModeEnabled = true
@@ -679,7 +679,7 @@ public class SentrySdkTests : IDisposable
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-        _ = SentrySdk.InitHub(new SentryOptions
+        _ = SentrySdk.InitHub(new()
         {
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
@@ -707,7 +707,7 @@ public class SentrySdkTests : IDisposable
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-        _ = SentrySdk.InitHub(new SentryOptions
+        _ = SentrySdk.InitHub(new()
         {
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
@@ -734,7 +734,7 @@ public class SentrySdkTests : IDisposable
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-        _ = SentrySdk.InitHub(new SentryOptions
+        _ = SentrySdk.InitHub(new()
         {
             Dsn = ValidDsn,
             DiagnosticLogger = logger,

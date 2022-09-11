@@ -25,7 +25,7 @@ namespace Microsoft.Maui
             {
                 foreach (var category in categories)
                 {
-                    yield return new KeyValuePair<string, string>(Category, category.ToString());
+                    yield return new(Category, category.ToString());
                 }
             }
         }

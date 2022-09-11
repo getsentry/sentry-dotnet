@@ -25,9 +25,9 @@ SentrySdk.ConfigureScope(scope =>
     //Populate the database
     for (var j = 0; j < 10; j++)
     {
-        db.Users.Add(new SampleUser { Id = j, RequiredColumn = "123" });
+        db.Users.Add(new() { Id = j, RequiredColumn = "123" });
     }
-    db.Users.Add(new SampleUser { Id = 52, RequiredColumn = "Bill" });
+    db.Users.Add(new() { Id = 52, RequiredColumn = "Bill" });
     manualSpan.Finish();
 
     manualSpan = scope.Transaction.StartChild("Save changes");

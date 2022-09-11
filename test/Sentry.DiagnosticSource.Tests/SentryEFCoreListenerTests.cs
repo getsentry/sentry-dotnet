@@ -22,7 +22,7 @@ public class SentryEFCoreListenerTests
 
     private class ThrowToStringClass
     {
-        public override string ToString() => throw new Exception("ThrowToStringClass");
+        public override string ToString() => throw new("ThrowToStringClass");
     }
 
     private class Fixture
@@ -35,11 +35,11 @@ public class SentryEFCoreListenerTests
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
-            Tracer = new TransactionTracer(Hub, "foo", "bar")
+            Tracer = new(Hub, "foo", "bar")
             {
                 IsSampled = true
             };
-            _scope = new Scope
+            _scope = new()
             {
                 Transaction = Tracer
             };
@@ -47,7 +47,7 @@ public class SentryEFCoreListenerTests
             var logger = Substitute.For<IDiagnosticLogger>();
             logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 
-            Options = new SentryOptions
+            Options = new()
             {
                 TracesSampleRate = 1.0,
                 Debug = true,
@@ -278,7 +278,7 @@ public class SentryEFCoreListenerTests
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, efSql));
-        hub.CaptureEvent(new SentryEvent(), null as Scope);
+        hub.CaptureEvent(new(), null as Scope);
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));

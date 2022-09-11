@@ -19,7 +19,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new() { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -65,7 +65,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn }, sentryClient);
+        var hub = new Internal.Hub(new() { Dsn = ValidDsn }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -108,7 +108,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new() { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -152,7 +152,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Internal.Hub(new() { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -202,7 +202,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions
+        var hub = new Internal.Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = ctx =>
@@ -255,7 +255,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions
+        var hub = new Internal.Hub(new()
         {
             Dsn = ValidDsn,
             TracesSampler = ctx =>

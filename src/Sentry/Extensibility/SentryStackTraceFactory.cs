@@ -63,7 +63,7 @@ namespace Sentry.Extensibility
         /// <returns>A StackTrace.</returns>
         protected virtual StackTrace CreateStackTrace(Exception? exception) =>
             exception is null
-                ? new StackTrace(true)
+                ? new(true)
                 : new StackTrace(exception, true);
 
         /// <summary>

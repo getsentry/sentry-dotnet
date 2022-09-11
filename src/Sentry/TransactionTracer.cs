@@ -91,7 +91,7 @@ namespace Sentry
         /// <inheritdoc />
         public Request Request
         {
-            get => _request ??= new Request();
+            get => _request ??= new();
             set => _request = value;
         }
 
@@ -109,7 +109,7 @@ namespace Sentry
         /// <inheritdoc />
         public User User
         {
-            get => _user ??= new User();
+            get => _user ??= new();
             set => _user = value;
         }
 
@@ -244,7 +244,7 @@ namespace Sentry
             _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
             // Client decides whether to discard this transaction based on sampling
-            _hub.CaptureTransaction(new Transaction(this));
+            _hub.CaptureTransaction(new(this));
         }
 
         /// <inheritdoc />

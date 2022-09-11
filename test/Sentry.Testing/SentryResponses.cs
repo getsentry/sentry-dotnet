@@ -25,7 +25,7 @@ public static class SentryResponses
             ? JsonSerializer.Serialize(new { detail, causes })
             : JsonSerializer.Serialize(new { detail });
 
-        return new HttpResponseMessage(code) { Content = new StringContent(responseContent, Encoding.UTF8, "application/json") };
+        return new(code) { Content = new StringContent(responseContent, Encoding.UTF8, "application/json") };
     }
 
     public static HttpResponseMessage GetTextErrorResponse(HttpStatusCode code, string detail)

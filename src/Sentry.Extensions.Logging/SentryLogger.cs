@@ -61,7 +61,7 @@ internal sealed class SentryLogger : ILogger
                     if (property.Key == "{OriginalFormat}" && property.Value is string template)
                     {
                         // Original format found, use Sentry logEntry interface
-                        @event.Message = new SentryMessage
+                        @event.Message = new()
                         {
                             Formatted = message,
                             Message = template

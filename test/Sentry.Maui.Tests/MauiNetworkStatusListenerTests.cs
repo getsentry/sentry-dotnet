@@ -10,7 +10,8 @@ public class MauiNetworkStatusListenerTests
 
     public MauiNetworkStatusListenerTests(ITestOutputHelper output)
     {
-        _options = new SentryOptions {DiagnosticLogger = new TestOutputDiagnosticLogger(output)};
+        _options = new()
+            {DiagnosticLogger = new TestOutputDiagnosticLogger(output)};
     }
 
     [Fact]

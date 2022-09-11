@@ -19,7 +19,7 @@ public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcesso
             }
             else
             {
-                list = new List<string> { error.ErrorMessage };
+                list = new() { error.ErrorMessage };
                 errorList.Add(error.PropertyName, list);
             }
         }

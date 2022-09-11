@@ -13,7 +13,7 @@ public sealed class LocalDbFixture : IDisposable
             return;
         }
 
-        SqlInstance = new SqlInstance(
+        SqlInstance = new(
             name: "SqlListenerTests" + Namer.RuntimeAndVersion,
             buildTemplate: TestDbBuilder.CreateTable);
     }

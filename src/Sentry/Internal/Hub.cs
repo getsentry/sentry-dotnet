@@ -58,7 +58,7 @@ namespace Sentry.Internal
                 // Push the first scope so the async local starts from here
                 : PushScope();
 
-            _enricher = new Enricher(options);
+            _enricher = new(options);
 
             var integrations = options.Integrations;
             if (integrations?.Count > 0)

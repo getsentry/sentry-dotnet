@@ -9,7 +9,7 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
         var handler = new RequestHandler
         {
             Path = "/throw",
-            Handler = _ => throw new Exception("test")
+            Handler = _ => throw new("test")
         };
 
         Handlers = new[] { handler };

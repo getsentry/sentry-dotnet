@@ -34,7 +34,7 @@ public class CachingTransportTests
 
         string httpContent = null;
         Exception exception = null;
-        var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(async message =>
+        var innerTransport = new HttpTransport(options, new(new CallbackHttpClientHandler(async message =>
          {
              try
              {
@@ -60,7 +60,7 @@ public class CachingTransportTests
         try
         {
             var attachment = new Attachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
-            using var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] { attachment });
+            using var envelope = Envelope.FromEvent(new(), attachments: new[] { attachment });
 
             // Act
             await transport.SendEnvelopeAsync(envelope);
@@ -101,7 +101,7 @@ public class CachingTransportTests
         using var waiter = new Waiter<Envelope>(handler => innerTransport.EnvelopeSent += handler);
 
         // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
 
         // wait for the inner transport to signal that it sent the envelope
@@ -142,7 +142,7 @@ public class CachingTransportTests
             });
 
         await using var transport = CachingTransport.Create(innerTransport, options);
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
 
         await Task.WhenAny(capturingCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(3)));
@@ -192,7 +192,7 @@ public class CachingTransportTests
             });
 
         await using var transport = CachingTransport.Create(innerTransport, options);
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
 
         // Assert
@@ -220,7 +220,7 @@ public class CachingTransportTests
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
         await transport.FlushAsync();
 
@@ -250,7 +250,7 @@ public class CachingTransportTests
         // Act
         for (var i = 0; i < options.MaxCacheItems + 2; i++)
         {
-            using var envelope = Envelope.FromEvent(new SentryEvent());
+            using var envelope = Envelope.FromEvent(new());
             await transport.SendEnvelopeAsync(envelope);
         }
 
@@ -278,7 +278,7 @@ public class CachingTransportTests
 
         for (var i = 0; i < 3; i++)
         {
-            using var envelope = Envelope.FromEvent(new SentryEvent());
+            using var envelope = Envelope.FromEvent(new());
             await initialTransport.SendEnvelopeAsync(envelope);
         }
 
@@ -316,12 +316,12 @@ public class CachingTransportTests
 
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
-            .Returns(_ => Task.FromException(new Exception("The Message")));
+            .Returns(_ => Task.FromException(new("The Message")));
 
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
 
         await transport.FlushAsync();
@@ -365,7 +365,7 @@ public class CachingTransportTests
         // Act
         for (var i = 0; i < 3; i++)
         {
-            using var envelope = Envelope.FromEvent(new SentryEvent());
+            using var envelope = Envelope.FromEvent(new());
             await transport.SendEnvelopeAsync(envelope);
         }
 
@@ -405,7 +405,7 @@ public class CachingTransportTests
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
         await transport.FlushAsync();
 
@@ -438,7 +438,7 @@ public class CachingTransportTests
 
         // Act
         recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope); // should internally generate a client report and write to disk
         var interimClientReport = recorder.GenerateClientReport(); // should be null
         await transport.FlushAsync(); // will read from disk and should send that client report
@@ -491,7 +491,7 @@ public class CachingTransportTests
         // Act
         await Assert.ThrowsAnyAsync<Exception>(async () =>
         {
-            using var envelope = Envelope.FromEvent(new SentryEvent());
+            using var envelope = Envelope.FromEvent(new());
             await transport.SendEnvelopeAsync(envelope); // will fail, since we set failStorage to true
         });
 
@@ -538,7 +538,7 @@ public class CachingTransportTests
 
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
 
         try
@@ -586,7 +586,7 @@ public class CachingTransportTests
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
         await transport.FlushAsync();
 
@@ -640,7 +640,7 @@ public class CachingTransportTests
             }, cts.Token);
 
             // Act
-            using var envelope = Envelope.FromEvent(new SentryEvent());
+            using var envelope = Envelope.FromEvent(new());
             await transport.SendEnvelopeAsync(envelope, cts.Token);
             await transport.FlushAsync(cts.Token);
         }
@@ -679,7 +679,7 @@ public class CachingTransportTests
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
         // Act
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
         await transport.SendEnvelopeAsync(envelope);
         await transport.FlushAsync();
 
@@ -705,7 +705,7 @@ public class CachingTransportTests
         var innerTransport = Substitute.For<ITransport>();
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
 
-        using var envelope = Envelope.FromEvent(new SentryEvent());
+        using var envelope = Envelope.FromEvent(new());
 
         // Act
         await transport.SendEnvelopeAsync(envelope);

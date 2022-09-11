@@ -9,7 +9,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
     public abstract class MauiTestActivity : AppCompatActivity
     {
-        public TaskCompletionSource<Bundle> TaskCompletionSource { get; } = new TaskCompletionSource<Bundle>();
+        public TaskCompletionSource<Bundle> TaskCompletionSource { get; } = new();
 
         protected override async void OnCreate(Bundle? savedInstanceState)
         {

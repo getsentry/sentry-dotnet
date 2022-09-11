@@ -37,7 +37,7 @@ public class ScopeTests
         // Arrange
         var logger = new InMemoryDiagnosticLogger();
 
-        var scope = new Scope(new SentryOptions
+        var scope = new Scope(new()
         {
             DiagnosticLogger = logger,
             Debug = true
@@ -263,15 +263,16 @@ public class ScopeTests
     public void AddBreadcrumb__AddBreadcrumb_RespectLimits(int initialCount, int maxBreadcrumbs, int expectedCount)
     {
         // Arrange
-        var scope = new Scope(new SentryOptions { MaxBreadcrumbs = maxBreadcrumbs });
+        var scope = new Scope(new()
+            { MaxBreadcrumbs = maxBreadcrumbs });
 
         for (var i = 0; i < initialCount; i++)
         {
-            scope.AddBreadcrumb(new Breadcrumb());
+            scope.AddBreadcrumb(new());
         }
 
         // Act
-        scope.AddBreadcrumb(new Breadcrumb());
+        scope.AddBreadcrumb(new());
 
         // Assert
         Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
@@ -288,7 +289,7 @@ public class ScopeTests
     {
         // Arrange
         var observer = NSubstitute.Substitute.For<IScopeObserver>();
-        var scope = new Scope(new SentryOptions
+        var scope = new Scope(new()
         {
             ScopeObserver = observer,
             EnableScopeSync = observerEnable
@@ -323,7 +324,8 @@ public class ScopeTests
     public void UserChanged_ObserverNull_Ignored(bool observerEnable)
     {
         // Arrange
-        var scope = new Scope(new SentryOptions { EnableScopeSync = observerEnable });
+        var scope = new Scope(new()
+            { EnableScopeSync = observerEnable });
         Exception exception = null;
 
         // Act
@@ -347,7 +349,7 @@ public class ScopeTests
     {
         // Arrange
         var observer = Substitute.For<IScopeObserver>();
-        var scope = new Scope(new SentryOptions
+        var scope = new Scope(new()
         {
             ScopeObserver = observer,
             EnableScopeSync = observerEnable
@@ -370,7 +372,7 @@ public class ScopeTests
     {
         // Arrange
         var observer = Substitute.For<IScopeObserver>();
-        var scope = new Scope(new SentryOptions
+        var scope = new Scope(new()
         {
             ScopeObserver = observer,
             EnableScopeSync = observerEnable
@@ -392,7 +394,7 @@ public class ScopeTests
     {
         // Arrange
         var observer = Substitute.For<IScopeObserver>();
-        var scope = new Scope(new SentryOptions
+        var scope = new Scope(new()
         {
             ScopeObserver = observer,
             EnableScopeSync = observerEnable
@@ -415,7 +417,7 @@ public class ScopeTests
     {
         // Arrange
         var observer = Substitute.For<IScopeObserver>();
-        var scope = new Scope(new SentryOptions
+        var scope = new Scope(new()
         {
             ScopeObserver = observer,
             EnableScopeSync = observerEnable

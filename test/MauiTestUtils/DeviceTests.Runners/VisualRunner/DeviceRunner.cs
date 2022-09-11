@@ -18,7 +18,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
     public class DeviceRunner : ITestListener, ITestRunner
     {
         readonly SynchronizationContext context = SynchronizationContext.Current;
-        readonly AsyncLock executionLock = new AsyncLock();
+        readonly AsyncLock executionLock = new();
         readonly ITestNavigation _navigation;
         readonly TestRunLogger _logger;
         volatile bool cancelled;
@@ -27,7 +27,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
         {
             TestAssemblies = testAssemblies;
             _navigation = navigation;
-            _logger = new TestRunLogger(logger);
+            _logger = new(logger);
         }
 
         public IReadOnlyCollection<Assembly> TestAssemblies { get; }
@@ -138,7 +138,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
                             framework.Find(false, sink, discoveryOptions);
                             sink.Finished.WaitOne();
 
-                            result.Add(new AssemblyRunInfo(
+                            result.Add(new(
                                 assemblyFileName,
                                 configuration,
                                 sink.TestCases.Select(tc => new TestCaseViewModel(assemblyFileName, tc)).ToList()));
@@ -169,7 +169,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
                 }
             }
 
-            return new TestAssemblyConfiguration();
+            return new();
         }
 
         static Stream GetConfigurationStreamForAssembly(string assemblyName)

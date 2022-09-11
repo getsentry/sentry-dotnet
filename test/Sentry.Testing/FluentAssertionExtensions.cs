@@ -49,7 +49,7 @@ public class EnvelopeAssertions : ReferenceTypeAssertions<Envelope, EnvelopeAsse
             Subject.Items[i].Should().BeEquivalentTo(expectation.Items[i]);
         }
 
-        return new AndConstraint<EnvelopeAssertions>(this);
+        return new(this);
     }
 }
 
@@ -84,6 +84,6 @@ public class EnvelopeItemAssertions : ReferenceTypeAssertions<EnvelopeItem, Enve
                 o => o.Excluding(item => item.Header));
         }
 
-        return new AndConstraint<EnvelopeItemAssertions>(this);
+        return new(this);
     }
 }

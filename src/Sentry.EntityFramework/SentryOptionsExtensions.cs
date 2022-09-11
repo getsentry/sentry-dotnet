@@ -25,7 +25,7 @@ public static class SentryOptionsExtensions
                 .LogError("Failed to configure EF breadcrumbs. Make sure to init Sentry before EF.", e);
         }
 
-        dbIntegration = new DbInterceptionIntegration();
+        dbIntegration = new();
         sentryOptions.AddIntegration(dbIntegration);
 
         sentryOptions.AddExceptionProcessor(new DbEntityValidationExceptionProcessor());

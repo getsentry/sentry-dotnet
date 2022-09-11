@@ -13,7 +13,7 @@ public class EnvelopeTests
     public EnvelopeTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
-        _fakeClock = new MockClock(DateTimeOffset.MaxValue);
+        _fakeClock = new(DateTimeOffset.MaxValue);
     }
 
     [Fact]
@@ -490,14 +490,18 @@ public class EnvelopeTests
         var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
         var @event = new SentryEvent(ex, timestamp, id)
         {
-            User = new User { Id = "user-id" },
-            Request = new Request { Method = "POST" },
-            Contexts = new Contexts { ["context_key"] = "context_value" },
-            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" },
+            User = new()
+                { Id = "user-id" },
+            Request = new()
+                { Method = "POST" },
+            Contexts = new()
+                { ["context_key"] = "context_value" },
+            Sdk = new()
+                { Name = "SDK-test", Version = "1.0.0" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
             Logger = "logger",
-            Message = new SentryMessage
+            Message = new()
             {
                 Message = "message",
                 Formatted = "structured_message"
@@ -536,7 +540,8 @@ public class EnvelopeTests
         var @event = new SentryEvent
         {
             Message = "Test",
-            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
+            Sdk = new()
+                { Name = "SDK-test", Version = "1.0.0" }
         };
 
         using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
@@ -573,7 +578,8 @@ public class EnvelopeTests
         var @event = new SentryEvent
         {
             Message = "Test",
-            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
+            Sdk = new()
+                { Name = "SDK-test", Version = "1.0.0" }
         };
 
         using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
@@ -689,7 +695,7 @@ public class EnvelopeTests
     public void FromEvent_Header_IncludesSdkInformation()
     {
         // Act
-        var envelope = Envelope.FromEvent(new SentryEvent());
+        var envelope = Envelope.FromEvent(new());
 
         // Assert
         envelope.Header.Any(kvp =>
@@ -715,7 +721,7 @@ public class EnvelopeTests
             "image/jpg");
 
         // Act
-        var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+        var envelope = Envelope.FromEvent(new(), attachments: new List<Attachment> { attachment });
 
         // Assert
         envelope.Items.Should().HaveCount(1);
@@ -734,7 +740,7 @@ public class EnvelopeTests
             "image/jpg");
 
         // Act
-        _ = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+        _ = Envelope.FromEvent(new(), attachments: new List<Attachment> { attachment });
 
         // Assert
         Assert.Throws<ObjectDisposedException>(() => stream.ReadByte());

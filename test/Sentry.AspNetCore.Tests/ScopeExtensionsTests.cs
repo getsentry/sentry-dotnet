@@ -8,7 +8,7 @@ namespace Sentry.AspNetCore.Tests;
 [UsesVerify]
 public class ScopeExtensionsTests
 {
-    private readonly Scope _sut = new(new SentryOptions());
+    private readonly Scope _sut = new(new());
     private readonly HttpContext _httpContext = Substitute.For<HttpContext>();
     private readonly HttpRequest _httpRequest = Substitute.For<HttpRequest>();
     private readonly IServiceProvider _provider = Substitute.For<IServiceProvider>();
@@ -29,7 +29,7 @@ public class ScopeExtensionsTests
         public const string ControllerName = "Ctrl";
         public const string ActionName = "Actn";
 
-        public readonly Scope Scope = new(new SentryOptions());
+        public readonly Scope Scope = new(new());
         public HttpContext HttpContext { get; } = Substitute.For<HttpContext>();
 
         public Fixture GetSut(bool addTransaction = true)
@@ -41,7 +41,7 @@ public class ScopeExtensionsTests
 
             var routeFeature = new RoutingFeature
             {
-                RouteData = new RouteData
+                RouteData = new()
                 {
                     Values =
                     {
@@ -65,7 +65,7 @@ public class ScopeExtensionsTests
             }
             var routeFeature = new RoutingFeature
             {
-                RouteData = new RouteData
+                RouteData = new()
                 {
                     Values = { { "", null } }
                 }
@@ -325,7 +325,7 @@ public class ScopeExtensionsTests
         const string version = "1.1";
         var routeFeature = new RoutingFeature
         {
-            RouteData = new RouteData
+            RouteData = new()
             {
                 Values =
                 {

@@ -52,7 +52,7 @@ namespace Sentry.Internal.Extensions
 
         public static IEnumerable<KeyValuePair<TKey, TValue>> Append<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source, TKey key, TValue value) =>
-            source.Append(new KeyValuePair<TKey, TValue>(key, value));
+            source.Append(new(key, value));
 
         public static IReadOnlyList<T> AsReadOnly<T>(this IList<T> list) =>
             list as IReadOnlyList<T> ?? new ReadOnlyCollection<T>(list);

@@ -7,7 +7,7 @@ public class SentryEventExceptionProcessorTests
     {
         var sut = Substitute.For<SentryEventExceptionProcessor<InvalidOperationException>>();
 
-        sut.Process(new Exception(), new SentryEvent());
+        sut.Process(new(), new());
 
         sut.DidNotReceive().ProcessException(Arg.Any<InvalidOperationException>(), Arg.Any<SentryEvent>());
     }
@@ -17,7 +17,7 @@ public class SentryEventExceptionProcessorTests
     {
         var sut = Substitute.For<SentryEventExceptionProcessor<Exception>>();
 
-        sut.Process(new Exception(), new SentryEvent());
+        sut.Process(new(), new());
 
         sut.Received(1).ProcessException(Arg.Any<Exception>(), Arg.Any<SentryEvent>());
     }
@@ -27,7 +27,7 @@ public class SentryEventExceptionProcessorTests
     {
         var sut = Substitute.For<SentryEventExceptionProcessor<ArgumentException>>();
 
-        sut.Process(new ArgumentNullException(), new SentryEvent());
+        sut.Process(new ArgumentNullException(), new());
 
         sut.Received(1).ProcessException(Arg.Any<ArgumentException>(), Arg.Any<SentryEvent>());
     }

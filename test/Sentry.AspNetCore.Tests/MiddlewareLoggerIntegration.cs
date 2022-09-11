@@ -42,7 +42,8 @@ public class MiddlewareLoggerIntegration : IDisposable
             Client.When(client => client.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
                 .Do(callback => callback.Arg<Scope>().Evaluate());
 
-            var hub = new Hub(new SentryOptions { Dsn = ValidDsn });
+            var hub = new Hub(new()
+                { Dsn = ValidDsn });
             hub.BindClient(Client);
             Hub = hub;
             var provider = new SentryLoggerProvider(hub, new MockClock(), loggingOptions);
@@ -71,7 +72,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         _fixture.RequestDelegate = _ =>
         {
             _fixture.SentryLogger.LogInformation(expectedCrumb);
-            throw new Exception();
+            throw new();
         };
         var sut = _fixture.GetSut();
 
@@ -92,7 +93,7 @@ public class MiddlewareLoggerIntegration : IDisposable
             {
                 _fixture.SentryLogger.LogInformation(expectedCrumb);
             }
-            throw new Exception();
+            throw new();
         };
         var sut = _fixture.GetSut();
 
@@ -108,7 +109,7 @@ public class MiddlewareLoggerIntegration : IDisposable
     {
         const SentryLevel expected = SentryLevel.Debug;
         _fixture.Options.ConfigureScope(s => s.Level = expected);
-        _fixture.RequestDelegate = _ => throw new Exception();
+        _fixture.RequestDelegate = _ => throw new();
         var sut = _fixture.GetSut();
 
         _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));

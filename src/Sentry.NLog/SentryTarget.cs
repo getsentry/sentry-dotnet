@@ -21,7 +21,7 @@ public sealed class SentryTarget : TargetWithContext
     /// <summary>
     /// Creates a new instance of <see cref="SentryTarget"/>.
     /// </summary>
-    public SentryTarget() : this(new SentryNLogOptions())
+    public SentryTarget() : this(new())
     {
     }
 
@@ -338,7 +338,7 @@ public sealed class SentryTarget : TargetWithContext
 
             var evt = new SentryEvent(exception)
             {
-                Message = new SentryMessage
+                Message = new()
                 {
                     Formatted = formatted,
                     Message = template
@@ -483,7 +483,7 @@ public sealed class SentryTarget : TargetWithContext
                 {
                     if (kv.Value?.ToString() is { } value)
                     {
-                        yield return new KeyValuePair<string, string>(kv.Key?.ToString() ?? "", value);
+                        yield return new(kv.Key?.ToString() ?? "", value);
                     }
                 }
             }
@@ -499,7 +499,7 @@ public sealed class SentryTarget : TargetWithContext
                     continue;
                 }
 
-                yield return new KeyValuePair<string, string>(tag.Name, tagValue);
+                yield return new(tag.Name, tagValue);
             }
         }
     }
