@@ -854,7 +854,9 @@ namespace Sentry
     {
         public TransactionContext(string name, string operation) { }
         public TransactionContext(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
+        public TransactionContext(string name, string operation, Sentry.TransactionNameSource? source) { }
         public TransactionContext(string name, string operation, bool? isSampled) { }
+        public TransactionContext(string name, string operation, Sentry.SentryTraceHeader traceHeader, Sentry.TransactionNameSource? source) { }
         public TransactionContext(Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, bool? isParentSampled) { }
         public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled) { }
         public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled, Sentry.TransactionNameSource? source) { }
