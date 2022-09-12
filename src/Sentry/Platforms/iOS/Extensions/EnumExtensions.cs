@@ -93,4 +93,26 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
 
+    public static TransactionNameSource ToTransactionNameSource(this SentryCocoa.TransactionNameSource source) =>
+        source.Name() switch
+        {
+            SentryCocoa.TransactionNameSource.Custom => TransactionNameSource.Custom,
+            SentryCocoa.TransactionNameSource.Url => TransactionNameSource.Url,
+            SentryCocoa.TransactionNameSource.Route => TransactionNameSource.Route,
+            SentryCocoa.TransactionNameSource.View => TransactionNameSource.View,
+            SentryCocoa.TransactionNameSource.Task => TransactionNameSource.Task,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source.Name(), message: default)
+        };
+
+    public static SentryCocoa.TransactionNameSource ToJavaTransactionNameSource(this TransactionNameSource source) =>
+        source switch
+        {
+            TransactionNameSource.Custom => SentryCocoa.TransactionNameSource.Custom!,
+            TransactionNameSource.Url => SentryCocoa.TransactionNameSource.Url!,
+            TransactionNameSource.Route => SentryCocoa.TransactionNameSource.Route!,
+            TransactionNameSource.View => SentryCocoa.TransactionNameSource.View!,
+            TransactionNameSource.Task => SentryCocoa.TransactionNameSource.Task!,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
+        };
+
 }
