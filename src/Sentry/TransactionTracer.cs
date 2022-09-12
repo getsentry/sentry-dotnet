@@ -41,6 +41,9 @@ namespace Sentry
         /// <inheritdoc cref="ITransaction.Name" />
         public string Name { get; set; }
 
+        /// <inheritdoc cref="ITransaction.NameSource" />
+        public TransactionNameSource NameSource { get; set; }
+
         /// <inheritdoc cref="ITransaction.IsParentSampled" />
         public bool? IsParentSampled { get; set; }
 
@@ -52,9 +55,6 @@ namespace Sentry
 
         /// <inheritdoc />
         public string? Distribution { get; set; }
-
-        /// <inheritdoc />
-        public TransactionNameSource? Source { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
@@ -165,10 +165,18 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public TransactionTracer(IHub hub, string name, string operation)
+            : this(hub, name, operation, TransactionNameSource.Custom)
+        {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="Transaction"/>.
+        /// </summary>
+        public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
         {
             _hub = hub;
             Name = name;
-            Source = Source;
+            NameSource = nameSource;
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
             Operation = operation;
@@ -181,7 +189,7 @@ namespace Sentry
         {
             _hub = hub;
             Name = context.Name;
-            Source = Source;
+            NameSource = context.NameSource;
             Operation = context.Operation;
             SpanId = context.SpanId;
             ParentSpanId = context.ParentSpanId;

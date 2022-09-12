@@ -9,7 +9,7 @@ namespace Sentry
         public string Name { get; }
 
         /// <inheritdoc />
-        public TransactionNameSource? Source { get; }
+        public TransactionNameSource NameSource { get; }
 
         /// <summary>
         /// Whether the parent transaction of this transaction has been sampled.
@@ -29,12 +29,12 @@ namespace Sentry
             SpanStatus? status,
             bool? isSampled,
             bool? isParentSampled,
-            TransactionNameSource? source)
+            TransactionNameSource nameSource)
             : base(spanId, parentSpanId, traceId, operation, description, status, isSampled)
         {
             Name = name;
             IsParentSampled = isParentSampled;
-            Source = source;
+            NameSource = nameSource;
         }
 
         /// <summary>
@@ -54,6 +54,7 @@ namespace Sentry
         {
             Name = name;
             IsParentSampled = isParentSampled;
+            NameSource = TransactionNameSource.Custom;
         }
 
         /// <summary>
@@ -98,8 +99,8 @@ namespace Sentry
             string name,
             string operation,
             SentryTraceHeader traceHeader,
-            TransactionNameSource? source)
-            : this(SpanId.Create(), traceHeader.SpanId, traceHeader.TraceId, name, operation, "", null, traceHeader.IsSampled, traceHeader.IsSampled, source)
+            TransactionNameSource nameSource)
+            : this(SpanId.Create(), traceHeader.SpanId, traceHeader.TraceId, name, operation, "", null, traceHeader.IsSampled, traceHeader.IsSampled, nameSource)
         {
         }
 
@@ -114,8 +115,8 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>
-        public TransactionContext(string name, string operation, TransactionNameSource? source)
-            : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, null, null, source)
+        public TransactionContext(string name, string operation, TransactionNameSource nameSource)
+            : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, null, null, nameSource)
         {
         }
     }

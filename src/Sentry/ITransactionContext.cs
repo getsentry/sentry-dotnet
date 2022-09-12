@@ -11,9 +11,9 @@ namespace Sentry
         string Name { get; }
 
         /// <summary>
-        /// TransactionSourceType.
+        /// The source of the transaction name.
         /// </summary>
-        TransactionNameSource? Source { get; }
+        TransactionNameSource NameSource { get; }
 
         /// <summary>
         /// Whether the parent transaction of this transaction has been sampled.

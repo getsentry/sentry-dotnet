@@ -51,6 +51,9 @@ namespace Sentry
         public string Name { get; private set; }
 
         /// <inheritdoc />
+        public TransactionNameSource NameSource { get; }
+
+        /// <inheritdoc />
         public bool? IsParentSampled { get; set; }
 
         /// <inheritdoc />
@@ -61,11 +64,6 @@ namespace Sentry
 
         /// <inheritdoc />
         public string? Distribution { get; set; }
-
-        /// <summary>
-        /// SourceType
-        /// </summary>
-        public TransactionNameSource? Source { get; set; }
 
         /// <inheritdoc />
         public DateTimeOffset StartTimestamp { get; private set; } = DateTimeOffset.UtcNow;
@@ -189,17 +187,29 @@ namespace Sentry
         // instead just parse the trace context and resolve them later.
         // Hence why we need a constructor that doesn't take the operation to avoid
         // overwriting it.
-        private Transaction(string name)
+        private Transaction(string name, TransactionNameSource nameSource)
         {
             EventId = SentryId.Create();
             Name = name;
+            NameSource = nameSource;
         }
 
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(string name, string operation)
-            : this(name)
+            : this(name, TransactionNameSource.Custom)
+        {
+            SpanId = SpanId.Create();
+            TraceId = SentryId.Create();
+            Operation = operation;
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="Transaction"/>.
+        /// </summary>
+        public Transaction(string name, string operation, TransactionNameSource nameSource)
+            : this(name, nameSource)
         {
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
@@ -210,7 +220,7 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(ITransaction tracer)
-            : this(tracer.Name)
+            : this(tracer.Name, tracer.NameSource)
         {
             // Contexts have to be set first because other fields use that
             Contexts = tracer.Contexts;
@@ -219,7 +229,6 @@ namespace Sentry
             SpanId = tracer.SpanId;
             TraceId = tracer.TraceId;
             Operation = tracer.Operation;
-            Source = tracer.Source;
             Platform = tracer.Platform;
             Release = tracer.Release;
             Distribution = tracer.GetDistribution();
@@ -275,16 +284,12 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("dist", Distribution);
             writer.WriteStringIfNotWhiteSpace("transaction", Name);
 
-            if (Source != null)
-            {
-                writer.WritePropertyName("transaction_info");
-                writer.WriteStartObject();
-                writer.WritePropertyName("source");
-                writer.WriteStringValue(Source.ToString()!.ToLowerInvariant());
-                writer.WriteEndObject();
-            }
+            writer.WritePropertyName("transaction_info");
+            writer.WriteStartObject();
+            writer.WritePropertyName("source");
+            writer.WriteStringValue(NameSource.ToString().ToLowerInvariant());
+            writer.WriteEndObject();
 
-            writer.WriteStringIfNotWhiteSpace("transaction", Name);
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteStringIfNotNull("timestamp", EndTimestamp);
             writer.WriteSerializableIfNotNull("request", _request, logger);
@@ -308,12 +313,8 @@ namespace Sentry
         {
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var name = json.GetProperty("transaction").GetStringOrThrow();
-            var sourceValue = json.GetPropertyOrNull("transaction_info")?.GetPropertyOrNull("source")?.GetString();
-            TransactionNameSource? source = null;
-            if (sourceValue != null)
-            {
-                source = (TransactionNameSource)Enum.Parse(typeof(TransactionNameSource), sourceValue, true);
-            }
+            var nameSourceValue = json.GetPropertyOrNull("transaction_info")?.GetPropertyOrNull("source")?.GetString();
+            var nameSource = nameSourceValue?.ParseEnum<TransactionNameSource>() ?? TransactionNameSource.Custom;
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
@@ -334,9 +335,8 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()
                 ?.ToDictionary();
 
-            return new Transaction(name)
+            return new Transaction(name, nameSource)
             {
-                Source = source,
                 EventId = eventId,
                 StartTimestamp = startTimestamp,
                 EndTimestamp = endTimestamp,

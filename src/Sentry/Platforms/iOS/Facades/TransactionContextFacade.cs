@@ -13,6 +13,8 @@ internal class TransactionContextFacade : ITransactionContext
 
     public string Name => _context.Name;
 
+    public TransactionNameSource NameSource => _context.NameSource.ToTransactionNameSource();
+
     public bool? IsParentSampled => _context.ParentSampled.ToNullableBoolean();
 
     public SpanId SpanId => _context.SpanId.ToSpanId();
@@ -24,8 +26,6 @@ internal class TransactionContextFacade : ITransactionContext
     public string Operation => _context.Operation;
 
     public string? Description => _context.Description;
-
-    public TransactionNameSource? Source => _context.NameSource.ToTransactionNameSource();
 
     public SpanStatus? Status => _context.Status.ToSpanStatus();
 
