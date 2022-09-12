@@ -104,7 +104,7 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(source), source.Name(), message: default)
         };
 
-    public static SentryCocoa.TransactionNameSource ToJavaTransactionNameSource(this TransactionNameSource source) =>
+    public static SentryCocoa.TransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
         source switch
         {
             TransactionNameSource.Custom => SentryCocoa.TransactionNameSource.Custom!,
