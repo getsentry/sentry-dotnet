@@ -19,7 +19,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void IsEnabled_StartsOfFalse()
+    public void IsEnabled_StartsOffFalse()
     {
         Assert.False(SentrySdk.IsEnabled);
     }
