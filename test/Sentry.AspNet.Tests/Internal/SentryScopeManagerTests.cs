@@ -1,5 +1,7 @@
 using Sentry.AspNet.Internal;
 
+namespace Sentry.AspNet.Tests.Internal;
+
 public class SentryScopeManagerTests
 {
     static SentryScopeManager GetSut() => new(

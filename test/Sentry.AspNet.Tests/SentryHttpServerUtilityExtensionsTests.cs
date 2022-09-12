@@ -1,4 +1,4 @@
-using Sentry.AspNet;
+namespace Sentry.AspNet.Tests;
 
 public class SentryHttpServerUtilityExtensionsTests
 {
