@@ -22,7 +22,10 @@ public class HttpContextExtensionsTests
     {
         // Arrange
         using var _ = SentrySdk.UseHub(new Hub(
-            new SentryOptions { Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647" },
+            new SentryOptions
+            {
+                Dsn = ValidDsn
+            },
             Substitute.For<ISentryClient>()
         ));
 
@@ -43,7 +46,7 @@ public class HttpContextExtensionsTests
         using var _ = SentrySdk.UseHub(new Hub(
             new SentryOptions
             {
-                Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647"
+                Dsn = ValidDsn
             },
             Substitute.For<ISentryClient>()
         ));
