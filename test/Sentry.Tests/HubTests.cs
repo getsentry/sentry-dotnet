@@ -288,7 +288,7 @@ public class HubTests
         var fileSystem = new FakeFileSystem();
         using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
 
-        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output, SentryLevel.Debug);
+        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output);
 
         var options = new SentryOptions
         {

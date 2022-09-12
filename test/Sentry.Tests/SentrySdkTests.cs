@@ -15,7 +15,7 @@ public class SentrySdkTests : IDisposable
 
     public SentrySdkTests(ITestOutputHelper testOutputHelper)
     {
-        _logger = new TestOutputDiagnosticLogger(testOutputHelper);
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(testOutputHelper);
     }
 
     [Fact]

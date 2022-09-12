@@ -28,9 +28,12 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         public string RawMessage { get; set; }
     }
 
-    public TestOutputDiagnosticLogger(
-        ITestOutputHelper testOutputHelper,
-        SentryLevel minimumLevel = SentryLevel.Debug)
+    public TestOutputDiagnosticLogger(ITestOutputHelper testOutputHelper)
+        : this(testOutputHelper, SentryLevel.Debug)
+    {
+    }
+
+    public TestOutputDiagnosticLogger(ITestOutputHelper testOutputHelper, SentryLevel minimumLevel)
     {
         _testOutputHelper = testOutputHelper;
         _minimumLevel = minimumLevel;
