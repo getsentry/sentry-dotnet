@@ -11,7 +11,11 @@ public class SentryClientTests
 {
     private class Fixture
     {
-        public SentryOptions SentryOptions { get; set; } = new();
+        public SentryOptions SentryOptions { get; set; } = new()
+        {
+            AttachStacktrace = false
+        };
+
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; set; } = Substitute.For<IClientReportRecorder>();
 
@@ -336,26 +340,27 @@ public class SentryClientTests
         {
             Dsn = ValidDsn,
             SampleRate = sampleRate,
-            MaxQueueItems = int.MaxValue
+            AttachStacktrace = false,
+            Transport = Substitute.For<ITransport>()
         });
 
         // Act
         var eventIds = Enumerable
-            .Range(0, 1_000)
+            .Range(0, 1000)
             .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
-            .ToArray();
+            .ToList();
 
         var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
         var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
 
         // Assert
         sampledInEventsCount.Should().BeCloseTo(
-            (int)(sampleRate * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
+            (int)(sampleRate * eventIds.Count),
+            (uint)(allowedRelativeDeviation * eventIds.Count));
 
         sampledOutEventsCount.Should().BeCloseTo(
-            (int)((1 - sampleRate) * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
+            (int)((1 - sampleRate) * eventIds.Count),
+            (uint)(allowedRelativeDeviation * eventIds.Count));
     }
 
     [Fact]
