@@ -54,7 +54,9 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         sentryClient.Received(2).CaptureTransaction(
-            Arg.Is<Transaction>(transaction => transaction.Name == "GET /person/{id}"));
+            Arg.Is<Transaction>(transaction =>
+                transaction.Name == "GET /person/{id}" &&
+                transaction.NameSource == TransactionNameSource.Route));
     }
 
     [Fact]
@@ -99,7 +101,8 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         transaction.Should().NotBeNull();
-        transaction?.Name.Should().Be("GET /person/{id}");
+        transaction.Name.Should().Be("GET /person/{id}");
+        ((IHasTransactionNameSource)transaction).NameSource.Should().Be(TransactionNameSource.Route);
     }
 
     [Fact]
@@ -138,6 +141,7 @@ public class SentryTracingMiddlewareTests
         // Assert
         sentryClient.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Name == "GET /person/{id}" &&
+            t.NameSource == TransactionNameSource.Route &&
             t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
             t.ParentSpanId == SpanId.Parse("1000000000000000") &&
             t.IsSampled == false
@@ -188,9 +192,9 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         transaction.Should().NotBeNull();
-        transaction?.Request.Method.Should().Be("GET");
-        transaction?.Request.Url.Should().Be("http://localhost/person/13");
-        transaction?.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
+        transaction.Request.Method.Should().Be("GET");
+        transaction.Request.Url.Should().Be("http://localhost/person/13");
+        transaction.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
     }
 
     [Fact]
@@ -302,7 +306,7 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         Assert.True(hub.ExceptionToSpanMap.TryGetValue(exception, out var span));
-        Assert.Equal(SpanStatus.InternalError, span.Status);
+        Assert.Equal(SpanStatus.InternalError, span?.Status);
     }
 
     [Fact]
@@ -345,7 +349,8 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         transaction.Should().NotBeNull();
-        transaction?.Name.Should().Be($"GET {expectedName}");
+        transaction.Name.Should().Be($"GET {expectedName}");
+        transaction.NameSource.Should().Be(TransactionNameSource.Route);
     }
 
     [Fact]
@@ -386,7 +391,8 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         transaction.Should().NotBeNull();
-        transaction?.Name.Should().Be("Unknown Route");
+        transaction.Name.Should().Be("Unknown Route");
+        transaction.NameSource.Should().Be(TransactionNameSource.Route);
     }
 }
 

@@ -44,8 +44,8 @@ public static class HttpContextExtensions
         const string transactionOperation = "http.server";
 
         var transactionContext = traceHeader is not null
-            ? new TransactionContext(transactionName, transactionOperation, traceHeader)
-            : new TransactionContext(transactionName, transactionOperation);
+            ? new TransactionContext(transactionName, transactionOperation, traceHeader, TransactionNameSource.Url)
+            : new TransactionContext(transactionName, transactionOperation, TransactionNameSource.Url);
 
         var transaction = SentrySdk.StartTransaction(transactionContext);
 

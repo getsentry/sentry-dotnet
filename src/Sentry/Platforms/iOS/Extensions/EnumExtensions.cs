@@ -93,4 +93,9 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
 
+    // These align, so we can just cast
+    public static TransactionNameSource ToTransactionNameSource(this SentryCocoa.SentryTransactionNameSource source) =>
+        (TransactionNameSource)source;
+    public static SentryCocoa.SentryTransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
+        (SentryCocoa.SentryTransactionNameSource)source;
 }
