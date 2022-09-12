@@ -94,7 +94,7 @@ internal static class EnumExtensions
         };
 
     public static TransactionNameSource ToTransactionNameSource(this SentryCocoa.SentryTransactionNameSource source) =>
-        source.Name() switch
+        source switch
         {
             SentryCocoa.SentryTransactionNameSource.Custom => TransactionNameSource.Custom,
             SentryCocoa.SentryTransactionNameSource.Url => TransactionNameSource.Url,
@@ -114,5 +114,4 @@ internal static class EnumExtensions
             TransactionNameSource.Task => SentryCocoa.SentryTransactionNameSource.Task!,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
         };
-
 }
