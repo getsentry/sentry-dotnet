@@ -117,55 +117,46 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Init_EmptyDsn_LogsWarning()
     {
-        var logger = Substitute.For<IDiagnosticLogger>();
-        _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
-
         var options = new SentryOptions
         {
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             Debug = true
         };
 
         using (SentrySdk.Init(options))
         {
-            logger.Received(1).Log(SentryLevel.Warning, "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+            _logger.Received(1).Log(SentryLevel.Warning, "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
         }
     }
 
     [Fact]
     public void Init_DsnWithSecret_LogsWarning()
     {
-        var logger = Substitute.For<IDiagnosticLogger>();
-        _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
-
         var options = new SentryOptions
         {
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             Debug = true,
             Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647"
         };
 
         using (SentrySdk.Init(options))
         {
-            logger.Received(1).Log(SentryLevel.Warning, "The provided DSN that contains a secret key. This is not required and will be ignored.");
+            _logger.Received(1).Log(SentryLevel.Warning, "The provided DSN that contains a secret key. This is not required and will be ignored.");
         }
     }
 
     [Fact]
     public void Init_EmptyDsnDisabledDiagnostics_DoesNotLogWarning()
     {
-        var logger = Substitute.For<IDiagnosticLogger>();
-        _ = logger.IsEnabled(SentryLevel.Warning).Returns(true);
-
         var options = new SentryOptions
         {
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             Debug = false,
         };
 
         using (SentrySdk.Init(options))
         {
-            logger.DidNotReceive().Log(Arg.Any<SentryLevel>(), Arg.Any<string>());
+            _logger.DidNotReceive().Log(Arg.Is(SentryLevel.Warning), Arg.Any<string>());
         }
     }
 
@@ -686,26 +677,23 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_GlobalModeOn_NoWarningOrErrorLogged()
     {
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             IsGlobalModeEnabled = true,
             Debug = true
         };
 
         SentrySdk.InitHub(options);
 
-        logger.DidNotReceive().Log(
+        _logger.DidNotReceive().Log(
             SentryLevel.Warning,
             Arg.Any<string>(),
             Arg.Any<Exception>(),
             Arg.Any<object[]>());
 
-        logger.DidNotReceive().Log(
+        _logger.DidNotReceive().Log(
             SentryLevel.Error,
             Arg.Any<string>(),
             Arg.Any<Exception>(),
@@ -715,26 +703,23 @@ public class SentrySdkTests : IDisposable
     [SkippableFact]
     public void InitHub_GlobalModeOff_NoWarningOrErrorLogged()
     {
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             IsGlobalModeEnabled = false,
             Debug = true
         };
 
         SentrySdk.InitHub(options);
 
-        logger.DidNotReceive().Log(
+        _logger.DidNotReceive().Log(
             SentryLevel.Warning,
             Arg.Any<string>(),
             Arg.Any<Exception>(),
             Arg.Any<object[]>());
 
-        logger.DidNotReceive().Log(
+        _logger.DidNotReceive().Log(
             SentryLevel.Error,
             Arg.Any<string>(),
             Arg.Any<Exception>(),
@@ -744,18 +729,17 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_DebugEnabled_DebugLogsLogged()
     {
-        var logger = Substitute.For<IDiagnosticLogger>();
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
-        _ = SentrySdk.InitHub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            DiagnosticLogger = logger,
+            DiagnosticLogger = _logger,
             IsGlobalModeEnabled = true,
             Debug = true
-        });
+        };
 
-        logger.Received().Log(
+        SentrySdk.InitHub(options);
+
+        _logger.Received().Log(
             SentryLevel.Debug,
             Arg.Any<string>(),
             Arg.Any<Exception>(),
