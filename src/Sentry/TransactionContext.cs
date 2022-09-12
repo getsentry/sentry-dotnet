@@ -36,6 +36,7 @@ namespace Sentry
             IsParentSampled = isParentSampled;
             Source = source;
         }
+
         /// <summary>
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>
@@ -86,7 +87,7 @@ namespace Sentry
             string name,
             string operation,
             SentryTraceHeader traceHeader)
-            : this(traceHeader.SpanId, traceHeader.TraceId, name, operation, traceHeader.IsSampled)
+            : this(SpanId.Create(), traceHeader.SpanId, traceHeader.TraceId, name, operation, "", null, traceHeader.IsSampled, traceHeader.IsSampled)
         {
         }
 
