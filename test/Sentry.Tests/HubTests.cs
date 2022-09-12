@@ -14,17 +14,16 @@ public class HubTests
         _output = output;
     }
 
-    [SkippableFact]
+    [Fact]
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
         // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            BackgroundWorker = new FakeBackgroundWorker()
+            BackgroundWorker = new FakeBackgroundWorker(),
+            IsGlobalModeEnabled = false
         };
-
-        Skip.If(options.IsGlobalModeEnabled);
 
         var hub = new Hub(options);
 
@@ -957,7 +956,7 @@ public class HubTests
         scopeManager.DidNotReceiveWithAnyArgs().PushScope();
     }
 
-    [SkippableFact]
+    [Fact]
     public void Ctor_GlobalModeFalse_DoesPushScope()
     {
         // Arrange
@@ -969,8 +968,6 @@ public class HubTests
             IsGlobalModeEnabled = false,
             Dsn = ValidDsn,
         };
-
-        Skip.If(options.IsGlobalModeEnabled);
 
         _ = new Hub(options, scopeManager: scopeManager);
 

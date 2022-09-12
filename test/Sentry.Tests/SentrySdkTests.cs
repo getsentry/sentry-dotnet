@@ -421,15 +421,14 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
-    [SkippableFact]
+    [Fact]
     public void WithScope_InvokedWithNewScope()
     {
         var options = new SentryOptions
         {
-            Dsn = ValidDsn
+            Dsn = ValidDsn,
+            IsGlobalModeEnabled = false
         };
-
-        Skip.If(options.IsGlobalModeEnabled);
 
         using (SentrySdk.Init(options))
         {
@@ -650,7 +649,7 @@ public class SentrySdkTests : IDisposable
         await sut.FlushAsync(TimeSpan.FromDays(1));
     }
 
-    [SkippableFact]
+    [Fact]
     public void InitHub_GlobalModeOff_AsyncLocalContainer()
     {
         // Act
@@ -659,8 +658,6 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             IsGlobalModeEnabled = false
         };
-
-        Skip.If(options.IsGlobalModeEnabled);
 
         var sut = SentrySdk.InitHub(options);
 
@@ -686,7 +683,7 @@ public class SentrySdkTests : IDisposable
         hub.ScopeManager.ScopeStackContainer.Should().BeOfType<GlobalScopeStackContainer>();
     }
 
-    [SkippableFact]
+    [Fact]
     public void InitHub_GlobalModeOn_NoWarningOrErrorLogged()
     {
         var logger = Substitute.For<IDiagnosticLogger>();
@@ -697,11 +694,8 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
             IsGlobalModeEnabled = true,
-            Debug = true,
-            DetectStartupTime = StartupTimeDetectionMode.Fast // `.Best` would actually trigger a warning log on Android
+            Debug = true
         };
-
-        Skip.If(options.IsGlobalModeEnabled);
 
         SentrySdk.InitHub(options);
 
@@ -731,8 +725,6 @@ public class SentrySdkTests : IDisposable
             IsGlobalModeEnabled = false,
             Debug = true
         };
-
-        Skip.If(options.IsGlobalModeEnabled);
 
         SentrySdk.InitHub(options);
 
