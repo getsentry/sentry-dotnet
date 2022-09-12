@@ -93,25 +93,25 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
 
-    public static TransactionNameSource ToTransactionNameSource(this SentryCocoa.TransactionNameSource source) =>
+    public static TransactionNameSource ToTransactionNameSource(this Cocoa.Protocol.TransactionNameSource source) =>
         source.Name() switch
         {
-            SentryCocoa.TransactionNameSource.Custom => TransactionNameSource.Custom,
-            SentryCocoa.TransactionNameSource.Url => TransactionNameSource.Url,
-            SentryCocoa.TransactionNameSource.Route => TransactionNameSource.Route,
-            SentryCocoa.TransactionNameSource.View => TransactionNameSource.View,
-            SentryCocoa.TransactionNameSource.Task => TransactionNameSource.Task,
+            Cocoa.Protocol.TransactionNameSource.Custom => TransactionNameSource.Custom,
+            Cocoa.Protocol.TransactionNameSource.Url => TransactionNameSource.Url,
+            Cocoa.Protocol.TransactionNameSource.Route => TransactionNameSource.Route,
+            Cocoa.Protocol.TransactionNameSource.View => TransactionNameSource.View,
+            Cocoa.Protocol.TransactionNameSource.Task => TransactionNameSource.Task,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source.Name(), message: default)
         };
 
-    public static SentryCocoa.TransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
+    public static Cocoa.Protocol.TransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
         source switch
         {
-            TransactionNameSource.Custom => SentryCocoa.TransactionNameSource.Custom!,
-            TransactionNameSource.Url => SentryCocoa.TransactionNameSource.Url!,
-            TransactionNameSource.Route => SentryCocoa.TransactionNameSource.Route!,
-            TransactionNameSource.View => SentryCocoa.TransactionNameSource.View!,
-            TransactionNameSource.Task => SentryCocoa.TransactionNameSource.Task!,
+            TransactionNameSource.Custom => Cocoa.Protocol.TransactionNameSource.Custom!,
+            TransactionNameSource.Url => Cocoa.Protocol.TransactionNameSource.Url!,
+            TransactionNameSource.Route => Cocoa.Protocol.TransactionNameSource.Route!,
+            TransactionNameSource.View => Cocoa.Protocol.TransactionNameSource.View!,
+            TransactionNameSource.Task => Cocoa.Protocol.TransactionNameSource.Task!,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
         };
 
