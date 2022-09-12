@@ -1,7 +1,6 @@
 using System.Net.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
-using xRetry;
 
 #pragma warning disable CS0618
 
@@ -29,6 +28,12 @@ public class SentryClientTests
     }
 
     private readonly Fixture _fixture = new();
+    private readonly ITestOutputHelper _output;
+
+    public SentryClientTests(ITestOutputHelper output)
+    {
+        _output = output;
+    }
 
     [Fact]
     public void CaptureEvent_ExceptionFiltered_EmptySentryId()
@@ -327,19 +332,16 @@ public class SentryClientTests
         Assert.Same(@event, received);
     }
 
-    [RetryTheory(maxRetries: 3)]
+    [Theory]
     [InlineData(0.25f)]
     [InlineData(0.50f)]
     [InlineData(0.75f)]
     public void CaptureEvent_WithSampleRate_AppropriateDistribution(float sampleRate)
     {
-        // Note: This test expects an approximate uniform distribution of random numbers.
-        //       Therefore, we'll retry a few times using the RetryTheory attribute from xRetry.
-
-        // 15% deviation is ok
+        // Arrange
+        const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
 
-        // Arrange
         var client = new SentryClient(new SentryOptions
         {
             Dsn = ValidDsn,
@@ -348,19 +350,25 @@ public class SentryClientTests
             Transport = Substitute.For<ITransport>()
         });
 
-        // Act
-        const int numEvents = 1000;
-        var eventIds = Enumerable
-            .Range(0, numEvents)
-            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
-            .ToList();
+        // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
+        TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
+        {
+            // Act
+            var eventIds = Enumerable
+                .Range(0, numEvents)
+                .Select(i => client.CaptureEvent(new SentryEvent
+                {
+                    Message = $"Test[{i}]"
+                }))
+                .ToList();
 
-        var countSampled = eventIds.Count(e => e != SentryId.Empty);
+            var countSampled = eventIds.Count(e => e != SentryId.Empty);
 
-        // Assert
-        var expectedSampled = (int)(sampleRate * numEvents);
-        const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
-        countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
+            // Assert
+            var expectedSampled = (int)(sampleRate * numEvents);
+            const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
+            countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
+        });
     }
 
     [Fact]
