@@ -94,8 +94,28 @@ namespace Sentry
         /// <summary>
         /// Initializes an instance of <see cref="TransactionContext"/>.
         /// </summary>
+        public TransactionContext(
+            string name,
+            string operation,
+            SentryTraceHeader traceHeader,
+            TransactionNameSource? source)
+            : this(SpanId.Create(), traceHeader.SpanId, traceHeader.TraceId, name, operation, "", null, traceHeader.IsSampled, traceHeader.IsSampled, source)
+        {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="TransactionContext"/>.
+        /// </summary>
         public TransactionContext(string name, string operation)
-            : this(name, operation, (bool?)null)
+            : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, null, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="TransactionContext"/>.
+        /// </summary>
+        public TransactionContext(string name, string operation, TransactionNameSource? source)
+            : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, null, null, source)
         {
         }
     }
