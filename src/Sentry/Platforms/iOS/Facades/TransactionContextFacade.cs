@@ -13,6 +13,8 @@ internal class TransactionContextFacade : ITransactionContext
 
     public string Name => _context.Name;
 
+    public TransactionNameSource NameSource => _context.NameSource.ToTransactionNameSource();
+
     public bool? IsParentSampled => _context.ParentSampled.ToNullableBoolean();
 
     public SpanId SpanId => _context.SpanId.ToSpanId();

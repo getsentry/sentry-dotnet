@@ -12,7 +12,7 @@ namespace Sentry
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
+    public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution, IHasTransactionNameSource
     {
         /// <summary>
         /// Transaction's event ID.
@@ -49,6 +49,9 @@ namespace Sentry
 
         /// <inheritdoc />
         public string Name { get; private set; }
+
+        /// <inheritdoc />
+        public TransactionNameSource NameSource { get; }
 
         /// <inheritdoc />
         public bool? IsParentSampled { get; set; }
@@ -184,17 +187,29 @@ namespace Sentry
         // instead just parse the trace context and resolve them later.
         // Hence why we need a constructor that doesn't take the operation to avoid
         // overwriting it.
-        private Transaction(string name)
+        private Transaction(string name, TransactionNameSource nameSource)
         {
             EventId = SentryId.Create();
             Name = name;
+            NameSource = nameSource;
         }
 
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(string name, string operation)
-            : this(name)
+            : this(name, TransactionNameSource.Custom)
+        {
+            SpanId = SpanId.Create();
+            TraceId = SentryId.Create();
+            Operation = operation;
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="Transaction"/>.
+        /// </summary>
+        public Transaction(string name, string operation, TransactionNameSource nameSource)
+            : this(name, nameSource)
         {
             SpanId = SpanId.Create();
             TraceId = SentryId.Create();
@@ -205,7 +220,7 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(ITransaction tracer)
-            : this(tracer.Name)
+            : this(tracer.Name, tracer is IHasTransactionNameSource t ? t.NameSource : TransactionNameSource.Custom)
         {
             // Contexts have to be set first because other fields use that
             Contexts = tracer.Contexts;
@@ -268,6 +283,13 @@ namespace Sentry
             writer.WriteStringIfNotWhiteSpace("release", Release);
             writer.WriteStringIfNotWhiteSpace("dist", Distribution);
             writer.WriteStringIfNotWhiteSpace("transaction", Name);
+
+            writer.WritePropertyName("transaction_info");
+            writer.WriteStartObject();
+            writer.WritePropertyName("source");
+            writer.WriteStringValue(NameSource.ToString().ToLowerInvariant());
+            writer.WriteEndObject();
+
             writer.WriteString("start_timestamp", StartTimestamp);
             writer.WriteStringIfNotNull("timestamp", EndTimestamp);
             writer.WriteSerializableIfNotNull("request", _request, logger);
@@ -291,6 +313,8 @@ namespace Sentry
         {
             var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
             var name = json.GetProperty("transaction").GetStringOrThrow();
+            var nameSourceValue = json.GetPropertyOrNull("transaction_info")?.GetPropertyOrNull("source")?.GetString();
+            var nameSource = nameSourceValue?.ParseEnum<TransactionNameSource>() ?? TransactionNameSource.Custom;
             var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
             var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
             var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
@@ -311,7 +335,7 @@ namespace Sentry
             var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()
                 ?.ToDictionary();
 
-            return new Transaction(name)
+            return new Transaction(name, nameSource)
             {
                 EventId = eventId,
                 StartTimestamp = startTimestamp,
