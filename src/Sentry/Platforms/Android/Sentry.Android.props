@@ -40,6 +40,7 @@
     <Using Include="Java.Lang.Integer" Alias="JavaInteger" />
     <Using Include="Java.Lang.Long" Alias="JavaLong" />
     <Using Include="Java.Lang.Object" Alias="JavaObject" />
+    <Using Include="Java.Lang.String" Alias="JavaString" />
     <Using Include="Java.Lang.Throwable" Alias="Throwable" />
     <Using Include="Java.IO.InputStreamReader" Alias="JavaInputStreamReader" />
     <Using Include="Java.IO.OutputStreamWriter" Alias="JavaOutputStreamWriter" />
