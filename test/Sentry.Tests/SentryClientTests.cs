@@ -1,6 +1,7 @@
 using System.Net.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
+using xRetry;
 
 #pragma warning disable CS0618
 
@@ -326,12 +327,15 @@ public class SentryClientTests
         Assert.Same(@event, received);
     }
 
-    [Theory]
+    [RetryTheory(maxRetries: 3)]
     [InlineData(0.25f)]
     [InlineData(0.50f)]
     [InlineData(0.75f)]
     public void CaptureEvent_WithSampleRate_AppropriateDistribution(float sampleRate)
     {
+        // Note: This test expects an approximate uniform distribution of random numbers.
+        //       Therefore, we'll retry a few times using the RetryTheory attribute from xRetry.
+
         // 15% deviation is ok
         const double allowedRelativeDeviation = 0.15;
 
@@ -345,22 +349,18 @@ public class SentryClientTests
         });
 
         // Act
+        const int numEvents = 1000;
         var eventIds = Enumerable
-            .Range(0, 1000)
+            .Range(0, numEvents)
             .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
             .ToList();
 
-        var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
-        var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
+        var countSampled = eventIds.Count(e => e != SentryId.Empty);
 
         // Assert
-        sampledInEventsCount.Should().BeCloseTo(
-            (int)(sampleRate * eventIds.Count),
-            (uint)(allowedRelativeDeviation * eventIds.Count));
-
-        sampledOutEventsCount.Should().BeCloseTo(
-            (int)((1 - sampleRate) * eventIds.Count),
-            (uint)(allowedRelativeDeviation * eventIds.Count));
+        var expectedSampled = (int)(sampleRate * numEvents);
+        const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
+        countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
     }
 
     [Fact]
