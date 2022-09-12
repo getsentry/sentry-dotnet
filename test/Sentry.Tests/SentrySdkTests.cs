@@ -742,6 +742,7 @@ public class SentrySdkTests : IDisposable
         hub.ScopeManager.ScopeStackContainer.Should().BeOfType<GlobalScopeStackContainer>();
     }
 
+#if !__MOBILE__ // On mobile, we'll always have logs from the Android/iOS SDK, so we can't reliably test for silence.
     [Fact]
     public void InitHub_GlobalModeOn_NoWarningOrErrorLogged()
     {
@@ -770,7 +771,7 @@ public class SentrySdkTests : IDisposable
             Arg.Any<object[]>());
     }
 
-    [SkippableFact]
+    [Fact]
     public void InitHub_GlobalModeOff_NoWarningOrErrorLogged()
     {
         var options = new SentryOptions
@@ -797,6 +798,7 @@ public class SentrySdkTests : IDisposable
             Arg.Any<Exception>(),
             Arg.Any<object[]>());
     }
+#endif
 
     [Fact]
     public void InitHub_DebugEnabled_DebugLogsLogged()
