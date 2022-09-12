@@ -12,7 +12,7 @@ namespace Sentry
     /// <summary>
     /// Sentry performance transaction.
     /// </summary>
-    public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
+    public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution, IHasTransactionNameSource
     {
         /// <summary>
         /// Transaction's event ID.
@@ -220,7 +220,7 @@ namespace Sentry
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
         public Transaction(ITransaction tracer)
-            : this(tracer.Name, tracer.NameSource)
+            : this(tracer.Name, tracer is IHasTransactionNameSource t ? t.NameSource : TransactionNameSource.Custom)
         {
             // Contexts have to be set first because other fields use that
             Contexts = tracer.Contexts;

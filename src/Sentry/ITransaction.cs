@@ -14,12 +14,6 @@ namespace Sentry
         new string Name { get; set; }
 
         /// <summary>
-        /// Transaction name source.
-        /// </summary>
-        // 'new' because it adds a setter
-        new TransactionNameSource NameSource { get; set; }
-
-        /// <summary>
         /// Whether the parent transaction of this transaction has been sampled.
         /// </summary>
         // 'new' because it adds a setter

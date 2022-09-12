@@ -3,7 +3,7 @@ namespace Sentry
     /// <summary>
     /// Transaction metadata used for sampling.
     /// </summary>
-    public class TransactionContext : SpanContext, ITransactionContext
+    public class TransactionContext : SpanContext, ITransactionContext, IHasTransactionNameSource
     {
         /// <inheritdoc />
         public string Name { get; }
