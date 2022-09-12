@@ -18,9 +18,13 @@ public static class TestHelpers
             }
             catch (XunitException)
             {
-                output?.WriteLine(i == maxAttempts
-                    ? $"Attempt #{i} failed. Max attempts reached."
-                    : $"Attempt #{i} failed. Retrying.");
+                if (i == maxAttempts)
+                {
+                    output?.WriteLine($"Attempt #{i} failed. Max attempts reached.");
+                    throw;
+                }
+
+                output?.WriteLine($"Attempt #{i} failed. Retrying.");
             }
         }
     }
@@ -39,9 +43,13 @@ public static class TestHelpers
             }
             catch (XunitException)
             {
-                output?.WriteLine(i == maxAttempts
-                    ? $"Attempt #{i} failed. Max attempts reached."
-                    : $"Attempt #{i} failed. Retrying.");
+                if (i == maxAttempts)
+                {
+                    output?.WriteLine($"Attempt #{i} failed. Max attempts reached.");
+                    throw;
+                }
+
+                output?.WriteLine($"Attempt #{i} failed. Retrying.");
             }
         }
     }
