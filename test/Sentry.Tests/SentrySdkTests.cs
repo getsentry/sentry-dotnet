@@ -33,11 +33,15 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void LastEventId_SetToEventId()
     {
-        using (SentrySdk.Init(ValidDsn))
+        using var _ = SentrySdk.Init(o =>
         {
-            var id = SentrySdk.CaptureMessage("test");
-            Assert.Equal(id, SentrySdk.LastEventId);
-        }
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
+
+        var id = SentrySdk.CaptureMessage("test");
+        Assert.Equal(id, SentrySdk.LastEventId);
     }
 
     [Fact]
@@ -47,6 +51,8 @@ public class SentrySdkTests : IDisposable
         {
             o.Dsn = ValidDsn;
             o.TracesSampleRate = 1.0;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
         });
 
         var id = SentrySdk.CaptureMessage("test");
@@ -64,10 +70,14 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Init_ValidDsn_EnablesSdk()
     {
-        using (SentrySdk.Init(ValidDsn))
+        using var _ = SentrySdk.Init(o =>
         {
-            Assert.True(SentrySdk.IsEnabled);
-        }
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
+
+        Assert.True(SentrySdk.IsEnabled);
     }
 
     [Fact]
@@ -76,6 +86,8 @@ public class SentrySdkTests : IDisposable
         using var _ = SentrySdk.Init(o =>
         {
             o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
         });
 
         Assert.True(SentrySdk.IsEnabled);
@@ -136,7 +148,9 @@ public class SentrySdkTests : IDisposable
         {
             DiagnosticLogger = _logger,
             Debug = true,
-            Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647"
+            Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647",
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
         };
 
         using (SentrySdk.Init(options))
@@ -163,7 +177,12 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Init_MultipleCalls_ReplacesHubWithLatest()
     {
-        var first = SentrySdk.Init(ValidDsn);
+        var first = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
         SentrySdk.AddBreadcrumb("test", "category");
         var called = false;
         SentrySdk.ConfigureScope(p =>
@@ -174,7 +193,12 @@ public class SentrySdkTests : IDisposable
         Assert.True(called);
         called = false;
 
-        var second = SentrySdk.Init(ValidDsn);
+        var second = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
         SentrySdk.ConfigureScope(p =>
         {
             called = true;
@@ -186,6 +210,7 @@ public class SentrySdkTests : IDisposable
         second.Dispose();
     }
 
+#if !__MOBILE__ // TOO SLOW ON MOBILE
     [SkippableTheory]
     [InlineData(true)] // InitCacheFlushTimeout is more than enough time to process all messages
     [InlineData(false)] // InitCacheFlushTimeout is less time than needed to process all messages
@@ -219,7 +244,8 @@ public class SentrySdkTests : IDisposable
                 DiagnosticLogger = _logger,
                 Dsn = ValidDsn,
                 CacheDirectoryPath = cachePath,
-                FileSystem = fileSystem
+                FileSystem = fileSystem,
+                AutoSessionTracking = false
             },
             startWorker: false);
         await using (initialTransport)
@@ -273,6 +299,7 @@ public class SentrySdkTests : IDisposable
                 o.FileSystem = fileSystem;
                 o.InitCacheFlushTimeout = initFlushTimeout;
                 o.Transport = transport;
+                o.AutoSessionTracking = false;
                 options = o;
             });
 
@@ -305,11 +332,17 @@ public class SentrySdkTests : IDisposable
             await cachingTransport!.StopWorkerAsync();
         }
     }
+#endif
 
     [Fact]
     public void Disposable_MultipleCalls_NoOp()
     {
-        var disposable = SentrySdk.Init();
+        var disposable = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
         disposable.Dispose();
         disposable.Dispose();
         Assert.False(SentrySdk.IsEnabled);
@@ -318,8 +351,18 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Dispose_DisposingFirst_DoesntAffectSecond()
     {
-        var first = SentrySdk.Init(ValidDsn);
-        var second = SentrySdk.Init(ValidDsn);
+        var first = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
+        var second = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
         SentrySdk.AddBreadcrumb("test", "category");
         first.Dispose();
         var called = false;
@@ -385,20 +428,24 @@ public class SentrySdkTests : IDisposable
     public async Task ConfigureScope_OnTask_PropagatedToCaller()
     {
         const string expected = "test";
-        using (SentrySdk.Init(ValidDsn))
+        using var _ = SentrySdk.Init(o =>
         {
-            await ModifyScope();
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
 
-            string actual = null;
-            SentrySdk.ConfigureScope(s => actual = s.Breadcrumbs.First().Message);
+        await ModifyScope();
 
-            Assert.Equal(expected, actual);
+        string actual = null;
+        SentrySdk.ConfigureScope(s => actual = s.Breadcrumbs.First().Message);
 
-            async Task ModifyScope()
-            {
-                await Task.Yield();
-                SentrySdk.AddBreadcrumb(expected);
-            }
+        Assert.Equal(expected, actual);
+
+        async Task ModifyScope()
+        {
+            await Task.Yield();
+            SentrySdk.AddBreadcrumb(expected);
         }
     }
 
@@ -418,24 +465,24 @@ public class SentrySdkTests : IDisposable
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            IsGlobalModeEnabled = false
+            IsGlobalModeEnabled = false,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
         };
 
-        using (SentrySdk.Init(options))
-        {
-            Scope expected = null;
-            SentrySdk.ConfigureScope(s => expected = s);
+        using var _ = SentrySdk.Init(options);
 
-            Scope actual = null;
+        Scope expected = null;
+        SentrySdk.ConfigureScope(s => expected = s);
+
+        Scope actual = null;
 #pragma warning disable CS0618
-            SentrySdk.WithScope(s => actual = s);
+        SentrySdk.WithScope(s => actual = s);
 #pragma warning restore CS0618
-            Assert.NotNull(actual);
 
-            Assert.NotSame(expected, actual);
-
-            SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
-        }
+        Assert.NotNull(actual);
+        Assert.NotSame(expected, actual);
+        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
     }
 
     [Fact]
@@ -444,38 +491,41 @@ public class SentrySdkTests : IDisposable
         const string expected = "test";
         var worker = Substitute.For<IBackgroundWorker>();
 
-        using (SentrySdk.Init(o =>
-               {
-                   o.Dsn = ValidDsn;
-                   o.BackgroundWorker = worker;
-               }))
+        using var _ = SentrySdk.Init(o =>
         {
-            SentrySdk.CaptureEvent(new SentryEvent(), s => s.AddBreadcrumb(expected));
+            o.Dsn = ValidDsn;
+            o.BackgroundWorker = worker;
+            o.AutoSessionTracking = false;
+        });
+        SentrySdk.CaptureEvent(new SentryEvent(), s => s.AddBreadcrumb(expected));
 
-            worker.EnqueueEnvelope(
-                Arg.Is<Envelope>(e => e.Items
-                    .Select(i => i.Payload)
-                    .OfType<JsonSerializable>()
-                    .Select(i => i.Source)
-                    .OfType<SentryEvent>()
-                    .Single()
-                    .Breadcrumbs
-                    .Single()
-                    .Message == expected));
-        }
+        worker.EnqueueEnvelope(
+            Arg.Is<Envelope>(e => e.Items
+                .Select(i => i.Payload)
+                .OfType<JsonSerializable>()
+                .Select(i => i.Source)
+                .OfType<SentryEvent>()
+                .Single()
+                .Breadcrumbs
+                .Single()
+                .Message == expected));
     }
 
     [Fact]
     public void CaptureEvent_WithConfiguredScope_ScopeOnlyAppliesOnlyOnce()
     {
-        using (SentrySdk.Init(ValidDsn))
+        using var _ = SentrySdk.Init(o =>
         {
-            var callbackCounter = 0;
-            SentrySdk.CaptureEvent(new SentryEvent(), _ => callbackCounter++);
-            SentrySdk.CaptureEvent(new SentryEvent());
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
 
-            Assert.Equal(1, callbackCounter);
-        }
+        var callbackCounter = 0;
+        SentrySdk.CaptureEvent(new SentryEvent(), _ => callbackCounter++);
+        SentrySdk.CaptureEvent(new SentryEvent());
+
+        Assert.Equal(1, callbackCounter);
     }
 
     [Fact]
@@ -487,55 +537,67 @@ public class SentrySdkTests : IDisposable
         {
             Dsn = ValidDsn,
             DiagnosticLogger = logger,
-            Debug = true
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
         };
 
-        using (SentrySdk.Init(options))
-        {
-            SentrySdk.CaptureEvent(new SentryEvent(), (null as Action<Scope>)!);
+        using var _ = SentrySdk.Init(options);
+        SentrySdk.CaptureEvent(new SentryEvent(), (null as Action<Scope>)!);
 
-            logger.Entries.Any(e =>
-                    e.Level == SentryLevel.Error &&
-                    e.Message == "Failure to capture event: {0}")
-                .Should()
-                .BeTrue();
-        }
+        logger.Entries.Any(e =>
+                e.Level == SentryLevel.Error &&
+                e.Message == "Failure to capture event: {0}")
+            .Should()
+            .BeTrue();
     }
 
     [Fact]
     public void CaptureEvent_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
-        var scopeCallbackWasInvoked = false;
-        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
+        using var _ = SentrySdk.Init(o =>
         {
-            SentrySdk.CaptureEvent(new SentryEvent(), _ => scopeCallbackWasInvoked = true);
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
 
-            Assert.True(scopeCallbackWasInvoked);
-        }
+        var scopeCallbackWasInvoked = false;
+        SentrySdk.CaptureEvent(new SentryEvent(), _ => scopeCallbackWasInvoked = true);
+
+        Assert.True(scopeCallbackWasInvoked);
     }
 
     [Fact]
     public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
-        var scopeCallbackWasInvoked = false;
-        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
+        using var _ = SentrySdk.Init(o =>
         {
-            SentrySdk.CaptureException(new Exception(), _ => scopeCallbackWasInvoked = true);
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
 
-            Assert.True(scopeCallbackWasInvoked);
-        }
+        var scopeCallbackWasInvoked = false;
+        SentrySdk.CaptureException(new Exception(), _ => scopeCallbackWasInvoked = true);
+
+        Assert.True(scopeCallbackWasInvoked);
     }
 
     [Fact]
     public void CaptureMessage_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
-        var scopeCallbackWasInvoked = false;
-        using (SentrySdk.Init(o => o.Dsn = ValidDsn))
+        using var _ = SentrySdk.Init(o =>
         {
-            SentrySdk.CaptureMessage("TestMessage", _ => scopeCallbackWasInvoked = true);
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
 
-            Assert.True(scopeCallbackWasInvoked);
-        }
+        var scopeCallbackWasInvoked = false;
+        SentrySdk.CaptureMessage("TestMessage", _ => scopeCallbackWasInvoked = true);
+
+        Assert.True(scopeCallbackWasInvoked);
     }
 
     [Fact]
@@ -566,27 +628,27 @@ public class SentrySdkTests : IDisposable
     public void CaptureMessage_SdkInitialized_IncludesScope()
     {
         var worker = Substitute.For<IBackgroundWorker>();
-        const string expected = "test";
-        using (SentrySdk.Init(o =>
-               {
-                   o.Dsn = ValidDsn;
-                   o.BackgroundWorker = worker;
-               }))
+        using var _ = SentrySdk.Init(o =>
         {
-            SentrySdk.AddBreadcrumb(expected);
-            _ = SentrySdk.CaptureMessage("message");
+            o.Dsn = ValidDsn;
+            o.BackgroundWorker = worker;
+            o.AutoSessionTracking = false;
+        });
 
-            _ = worker.EnqueueEnvelope(
-                Arg.Is<Envelope>(e => e.Items
-                    .Select(i => i.Payload)
-                    .OfType<JsonSerializable>()
-                    .Select(i => i.Source)
-                    .OfType<SentryEvent>()
-                    .Single()
-                    .Breadcrumbs
-                    .Single()
-                    .Message == expected));
-        }
+        const string expected = "test";
+        SentrySdk.AddBreadcrumb(expected);
+        SentrySdk.CaptureMessage("message");
+
+        worker.Received(1).EnqueueEnvelope(
+            Arg.Is<Envelope>(e => e.Items
+                .Select(i => i.Payload)
+                .OfType<JsonSerializable>()
+                .Select(i => i.Source)
+                .OfType<SentryEvent>()
+                .Single()
+                .Breadcrumbs
+                .Single()
+                .Message == expected));
     }
 
     [Fact]
@@ -643,34 +705,40 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_GlobalModeOff_AsyncLocalContainer()
     {
-        // Act
+        // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            IsGlobalModeEnabled = false
+            IsGlobalModeEnabled = false,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
         };
 
+        // Act
         var sut = SentrySdk.InitHub(options);
 
-        var hub = (Hub)sut;
-
         // Assert
+        var hub = (Hub)sut;
         hub.ScopeManager.ScopeStackContainer.Should().BeOfType<AsyncLocalScopeStackContainer>();
     }
 
     [Fact]
     public void InitHub_GlobalModeOn_GlobalContainer()
     {
-        // Act
-        var sut = SentrySdk.InitHub(new SentryOptions
+        // Arrange
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            IsGlobalModeEnabled = true
-        });
+            IsGlobalModeEnabled = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
+        };
 
-        var hub = (Hub)sut;
+        // Act
+        var sut = SentrySdk.InitHub(options);
 
         // Assert
+        var hub = (Hub)sut;
         hub.ScopeManager.ScopeStackContainer.Should().BeOfType<GlobalScopeStackContainer>();
     }
 
@@ -682,7 +750,9 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             IsGlobalModeEnabled = true,
-            Debug = true
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
         };
 
         SentrySdk.InitHub(options);
@@ -708,7 +778,9 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             IsGlobalModeEnabled = false,
-            Debug = true
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
         };
 
         SentrySdk.InitHub(options);
@@ -734,7 +806,9 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             IsGlobalModeEnabled = true,
-            Debug = true
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>()
         };
 
         SentrySdk.InitHub(options);
