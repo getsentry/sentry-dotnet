@@ -9,6 +9,10 @@
 - Update Sentry Cocoa SDK to version 7.24.1 ([#1912](https://github.com/getsentry/sentry-dotnet/pull/1912))
 - Add TransactionNameSource annotation ([#1910](https://github.com/getsentry/sentry-dotnet/pull/1910))
 
+## Fixes
+
+- Reduce lock contention when sampling ([#1915](https://github.com/getsentry/sentry-dotnet/pull/1915))
+
 ## 3.21.0
 
 _Includes Sentry.Maui Preview 3_
