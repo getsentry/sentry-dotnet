@@ -3,7 +3,8 @@ using System.Collections.Generic;
 namespace Sentry
 {
     /// <summary>
-    /// Context used by a dynamic sampler to determine whether a transaction should be sampled.
+    /// Context information passed into a <see cref="SentryOptions.TracesSampler"/> function,
+    /// which can be used to determine whether a transaction should be sampled.
     /// </summary>
     public class TransactionSamplingContext
     {
