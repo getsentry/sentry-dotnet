@@ -347,6 +347,7 @@ public class SentryClientTests
             Dsn = ValidDsn,
             SampleRate = sampleRate,
             AttachStacktrace = false,
+            AutoSessionTracking = false,
             Transport = Substitute.For<ITransport>()
         });
 

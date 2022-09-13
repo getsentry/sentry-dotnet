@@ -1,7 +1,6 @@
-#if ANDROID
-using Java.Util.Concurrent;
-#else
 using System;
+
+#if !NET6_0_OR_GREATER
 using System.Threading;
 #endif
 
@@ -16,14 +15,7 @@ namespace Sentry.Internal
             _ => NextDouble() < rate
         };
 
-#if ANDROID
-        // We use the Java implementation because there were device test failures with the .NET one
-        // related to uneven distribution when run on Android
-        public static int Next(int minValue, int maxValue) => ThreadLocalRandom.Current()!.NextInt(minValue, maxValue);
-        public static int Next() => ThreadLocalRandom.Current()!.NextInt();
-        public static double NextDouble() => ThreadLocalRandom.Current()!.NextDouble();
-        public static void NextBytes(byte[] bytes) => ThreadLocalRandom.Current()!.NextBytes(bytes);
-#elif NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
         public static int Next(int minValue, int maxValue) => Random.Shared.Next(minValue, maxValue);
         public static int Next() => Random.Shared.Next();
         public static double NextDouble() => Random.Shared.NextDouble();
