@@ -60,8 +60,15 @@ public class ProcessInfoTests
         Assert.NotNull(sut.StartupTime);
     }
 
+#if __MOBILE__
     [Fact]
-    public void Options_DefaultOptionValue_IsBestMode()
+    public void Options_DefaultOptionValue_OnMobile_IsFastMode()
+    {
+        Assert.Equal(StartupTimeDetectionMode.Fast, new SentryOptions().DetectStartupTime);
+    }
+#else
+    [Fact]
+    public void Options_DefaultOptionValue_OnNonMobile_IsBestMode()
     {
         Assert.Equal(StartupTimeDetectionMode.Best, new SentryOptions().DetectStartupTime);
     }
@@ -108,4 +115,5 @@ public class ProcessInfoTests
 
         Assert.Equal(fastCallbackInvoked, DateTimeOffset.MaxValue == sut.StartupTime);
     }
+#endif
 }

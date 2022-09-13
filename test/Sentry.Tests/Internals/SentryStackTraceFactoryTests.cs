@@ -168,7 +168,13 @@ public class SentryStackTraceFactoryTests
         }
 
         var expected = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
-        Assert.Equal(expected, sut.Create(exception)!.Frames[0].FileName);
+        var path = sut.Create(exception)?.Frames[0].FileName;
+
+#if __MOBILE__
+        // We don't get file paths on mobile unless we've got a debugger attached.
+        Skip.If(string.IsNullOrEmpty(path));
+#endif
+        Assert.Equal(expected, path);
     }
 
     [Theory]
@@ -196,6 +202,7 @@ public class SentryStackTraceFactoryTests
     [SkippableTheory]
     [InlineData(StackTraceMode.Original)]
     [InlineData(StackTraceMode.Enhanced)]
+    [Trait("Category", "Verify")]
     public Task MethodGeneric(StackTraceMode mode)
     {
         // TODO: Mono gives different results.  Investigate why.

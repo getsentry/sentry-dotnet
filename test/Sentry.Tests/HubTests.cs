@@ -18,11 +18,14 @@ public class HubTests
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            BackgroundWorker = new FakeBackgroundWorker()
-        });
+            BackgroundWorker = new FakeBackgroundWorker(),
+            IsGlobalModeEnabled = false
+        };
+
+        var hub = new Hub(options);
 
         // Act & assert
         using (hub.PushScope())
@@ -285,7 +288,7 @@ public class HubTests
         var fileSystem = new FakeFileSystem();
         using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
 
-        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output, SentryLevel.Debug);
+        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output);
 
         var options = new SentryOptions
         {
@@ -960,11 +963,13 @@ public class HubTests
         var scopeManager = Substitute.For<IInternalScopeManager>();
 
         // Act
-        _ = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             IsGlobalModeEnabled = false,
             Dsn = ValidDsn,
-        }, scopeManager: scopeManager);
+        };
+
+        _ = new Hub(options, scopeManager: scopeManager);
 
         // Assert
         scopeManager.Received(1).PushScope();

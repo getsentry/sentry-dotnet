@@ -11,7 +11,11 @@ public class SentryClientTests
 {
     private class Fixture
     {
-        public SentryOptions SentryOptions { get; set; } = new();
+        public SentryOptions SentryOptions { get; set; } = new()
+        {
+            AttachStacktrace = false
+        };
+
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; set; } = Substitute.For<IClientReportRecorder>();
 
@@ -24,6 +28,12 @@ public class SentryClientTests
     }
 
     private readonly Fixture _fixture = new();
+    private readonly ITestOutputHelper _output;
+
+    public SentryClientTests(ITestOutputHelper output)
+    {
+        _output = output;
+    }
 
     [Fact]
     public void CaptureEvent_ExceptionFiltered_EmptySentryId()
@@ -322,106 +332,48 @@ public class SentryClientTests
         Assert.Same(@event, received);
     }
 
-    [Fact]
-    public void CaptureEvent_Sampling50Percent_EqualDistribution()
+    [Theory]
+    [InlineData(0.25f)]
+    [InlineData(0.50f)]
+    [InlineData(0.75f)]
+    public void CaptureEvent_WithSampleRate_AppropriateDistribution(float sampleRate)
     {
-        // 15% deviation is ok
+        // Arrange
+        const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
 
-        // Arrange
         var client = new SentryClient(new SentryOptions
         {
             Dsn = ValidDsn,
-            SampleRate = 0.5f,
-            MaxQueueItems = int.MaxValue
+            SampleRate = sampleRate,
+            AttachStacktrace = false,
+            AutoSessionTracking = false,
+            Transport = Substitute.For<ITransport>()
         });
 
-        // Act
-        var eventIds = Enumerable
-            .Range(0, 1_000)
-            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
-            .ToArray();
-
-        var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
-        var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
-
-        // Assert
-        sampledInEventsCount.Should().BeCloseTo(
-            (int)(0.5 * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
-
-        sampledOutEventsCount.Should().BeCloseTo(
-            (int)(0.5 * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
-    }
-
-    [Fact]
-    public void CaptureEvent_Sampling25Percent_AppropriateDistribution()
-    {
-        // 15% deviation is ok
-        const double allowedRelativeDeviation = 0.15;
-
-        // Arrange
-        var client = new SentryClient(new SentryOptions
+        // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
+        TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
         {
-            Dsn = ValidDsn,
-            SampleRate = 0.25f,
-            MaxQueueItems = int.MaxValue
+            // Act
+            var eventIds = Enumerable
+                .Range(0, numEvents)
+                .Select(i => client.CaptureEvent(new SentryEvent
+                {
+                    Message = $"Test[{i}]"
+                }))
+                .ToList();
+
+            var countSampled = eventIds.Count(e => e != SentryId.Empty);
+
+            // Assert
+            var expectedSampled = (int)(sampleRate * numEvents);
+            const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
+            countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
         });
-
-        // Act
-        var eventIds = Enumerable
-            .Range(0, 1_000)
-            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
-            .ToArray();
-
-        var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
-        var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
-
-        // Assert
-        sampledInEventsCount.Should().BeCloseTo(
-            (int)(0.25 * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
-
-        sampledOutEventsCount.Should().BeCloseTo(
-            (int)(0.75 * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
     }
 
     [Fact]
-    public void CaptureEvent_Sampling75Percent_AppropriateDistribution()
-    {
-        // 15% deviation is ok
-        const double allowedRelativeDeviation = 0.15;
-
-        // Arrange
-        var client = new SentryClient(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            SampleRate = 0.75f,
-            MaxQueueItems = int.MaxValue
-        });
-
-        // Act
-        var eventIds = Enumerable
-            .Range(0, 1_000)
-            .Select(i => client.CaptureEvent(new SentryEvent { Message = $"Test[{i}]" }))
-            .ToArray();
-
-        var sampledInEventsCount = eventIds.Count(e => e != SentryId.Empty);
-        var sampledOutEventsCount = eventIds.Count(e => e == SentryId.Empty);
-
-        // Assert
-        sampledInEventsCount.Should().BeCloseTo(
-            (int)(0.75 * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
-
-        sampledOutEventsCount.Should().BeCloseTo(
-            (int)(0.25 * eventIds.Length),
-            (uint)(allowedRelativeDeviation * eventIds.Length));
-    }
-
-    [Fact]
+    [Trait("Category", "Verify")]
     public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
     {
         var error = new Exception("Exception message!");
@@ -432,7 +384,7 @@ public class SentryClientTests
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(@event);
 
-        return Verifier.Verify(@event.Breadcrumbs);
+        return Verify(@event.Breadcrumbs);
     }
 
     [Fact]

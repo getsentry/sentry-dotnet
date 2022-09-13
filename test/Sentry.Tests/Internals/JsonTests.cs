@@ -175,37 +175,6 @@ public class JsonTests
         Assert.Equal(expectedSerializedData, serializedString);
     }
 
-    [Fact]
-    public void WriteDynamicValue_ClassWithTimeZone_SerializedClassWithTimeZoneInfo()
-    {
-        // Arrange
-        var timeZone = TimeZoneInfo.CreateCustomTimeZone(
-            "tz_id",
-            TimeSpan.FromHours(2),
-            "my timezone",
-            "my timezone");
-        var expectedSerializedData = new[]
-        {
-            "\"Id\":1,\"Data\":\"1234\"",
-            "\"Id\":\"tz_id\"",
-            "\"DisplayName\":\"my timezone\"",
-            "\"StandardName\":\"my timezone\"",
-#if NET6_0
-            "\"BaseUtcOffset\":\"02:00:00\"",
-#else
-            "\"BaseUtcOffset\":{\"Ticks\":72000000000,\"Days\":0,\"Hours\":2,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0",
-            "\"TotalHours\":2,\"TotalMilliseconds\":7200000,\"TotalMinutes\":120,\"TotalSeconds\":7200},",
-#endif
-        };
-        var data = new DataWithSerializableObject<TimeZoneInfo>(timeZone);
-
-        // Act
-        var serializedString = data.ToJsonString(_testOutputLogger);
-
-        // Assert
-        Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
-    }
-
     private class NonSerializableValue
     {
 #pragma warning disable CA1822 // Mark members as static

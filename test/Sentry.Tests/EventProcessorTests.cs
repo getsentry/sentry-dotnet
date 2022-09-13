@@ -3,6 +3,7 @@ using Sentry.Testing;
 namespace Sentry.Tests;
 
 [UsesVerify]
+[Trait("Category", "Verify")]
 public class EventProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;

@@ -37,24 +37,29 @@ namespace Sentry
         internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
 #if __MOBILE__
+        private bool _isGlobalModeEnabled = true;
         /// <summary>
         /// Specifies whether to use global scope management mode.
-        /// Always <c>true</c> for mobile targets.
+        /// Should be <c>true</c> for client applications and <c>false</c> for server applications.
+        /// The default is <c>true</c> for mobile targets.
         /// </summary>
         public bool IsGlobalModeEnabled
         {
-            get => true;
+            get => _isGlobalModeEnabled;
             set
             {
-                if (value is false)
+                _isGlobalModeEnabled = value;
+                if (!value)
                 {
-                    _diagnosticLogger?.LogWarning("Cannot disable Global Mode on {0}", DeviceInfo.PlatformName);
+                    _diagnosticLogger?.LogWarning("Global Mode should usually be enabled on {0}", DeviceInfo.PlatformName);
                 }
             }
         }
 #else
         /// <summary>
         /// Specifies whether to use global scope management mode.
+        /// Should be <c>true</c> for client applications and <c>false</c> for server applications.
+        /// The default is <c>false</c>.
         /// </summary>
         public bool IsGlobalModeEnabled { get; set; }
 #endif
