@@ -342,14 +342,17 @@ public class SentryClientTests
         const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
 
-        var client = new SentryClient(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
             SampleRate = sampleRate,
             AttachStacktrace = false,
             AutoSessionTracking = false,
             Transport = Substitute.For<ITransport>()
-        });
+        };
+
+        var randomValuesFactory = new IsolatedRandomValuesFactory();
+        var client = new SentryClient(options, randomValuesFactory);
 
         // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
@@ -363,9 +366,8 @@ public class SentryClientTests
                 }))
                 .ToList();
 
-            var countSampled = eventIds.Count(e => e != SentryId.Empty);
-
             // Assert
+            var countSampled = eventIds.Count(e => e != SentryId.Empty);
             var expectedSampled = (int)(sampleRate * numEvents);
             const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
             countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);

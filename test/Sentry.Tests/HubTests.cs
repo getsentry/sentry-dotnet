@@ -567,100 +567,43 @@ public class HubTests
         transaction.IsSampled.Should().BeFalse();
     }
 
-    [Fact]
-    public void StartTransaction_StaticSampling_50PercentDistribution()
+    [Theory]
+    [InlineData(0.25f)]
+    [InlineData(0.50f)]
+    [InlineData(0.75f)]
+    public void StartTransaction_StaticSampling_AppropriateDistribution(float sampleRate)
     {
-        // 15% deviation is ok
+        // Arrange
+        const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
 
-        // Arrange
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            TracesSampleRate = 0.5
-        });
+            TracesSampleRate = sampleRate,
+            AttachStacktrace = false,
+            AutoSessionTracking = false,
+            Transport = Substitute.For<ITransport>()
+        };
 
-        // Act
-        var transactions = Enumerable
-            .Range(0, 1_000)
-            .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
-            .ToArray();
+        var randomValuesFactory = new IsolatedRandomValuesFactory();
+        var hub = new Hub(options, randomValuesFactory: randomValuesFactory);
 
-        var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
-        var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
-
-        // Assert
-        transactionsSampledIn.Length.Should().BeCloseTo(
-            (int)(0.5 * transactions.Length),
-            (uint)(allowedRelativeDeviation * transactions.Length));
-
-        transactionsSampledOut.Length.Should().BeCloseTo(
-            (int)(0.5 * transactions.Length),
-            (uint)(allowedRelativeDeviation * transactions.Length));
-    }
-
-    [Fact]
-    public void StartTransaction_StaticSampling_25PercentDistribution()
-    {
-        // 15% deviation is ok
-        const double allowedRelativeDeviation = 0.15;
-
-        // Arrange
-        var hub = new Hub(new SentryOptions
+        // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
+        TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
         {
-            Dsn = ValidDsn,
-            TracesSampleRate = 0.25
+            // Act
+            var transactions = Enumerable
+                .Range(0, numEvents)
+                .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
+                .ToList();
+
+            // Assert
+            var countSampled = transactions.Count(t => t.IsSampled == true);
+            var expectedSampled = (int)(sampleRate * numEvents);
+            const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
+            countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
         });
-
-        // Act
-        var transactions = Enumerable
-            .Range(0, 1_000)
-            .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
-            .ToArray();
-
-        var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
-        var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
-
-        // Assert
-        transactionsSampledIn.Length.Should().BeCloseTo(
-            (int)(0.25 * transactions.Length),
-            (uint)(allowedRelativeDeviation * transactions.Length));
-
-        transactionsSampledOut.Length.Should().BeCloseTo(
-            (int)(0.75 * transactions.Length),
-            (uint)(allowedRelativeDeviation * transactions.Length));
-    }
-
-    [Fact]
-    public void StartTransaction_StaticSampling_75PercentDistribution()
-    {
-        // 15% deviation is ok
-        const double allowedRelativeDeviation = 0.15;
-
-        // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 0.75
-        });
-
-        // Act
-        var transactions = Enumerable
-            .Range(0, 1_000)
-            .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
-            .ToArray();
-
-        var transactionsSampledIn = transactions.Where(t => t.IsSampled == true).ToArray();
-        var transactionsSampledOut = transactions.Where(t => t.IsSampled == false).ToArray();
-
-        // Assert
-        transactionsSampledIn.Length.Should().BeCloseTo(
-            (int)(0.75 * transactions.Length),
-            (uint)(allowedRelativeDeviation * transactions.Length));
-
-        transactionsSampledOut.Length.Should().BeCloseTo(
-            (int)(0.25 * transactions.Length),
-            (uint)(allowedRelativeDeviation * transactions.Length));
     }
 
     [Fact]
