@@ -4,7 +4,6 @@ using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.Testing;
-using Sentry.Tests.Protocol;
 using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests;
@@ -85,10 +84,16 @@ public class SentrySdkTests : IDisposable
     public void Init_ValidDsnWithSecret_EnablesSdk()
     {
         // Note: Sentry has dropped the use of secrets, but this should still work.
-        using (SentrySdk.Init(DsnTests.ValidDsnWithSecret))
+        using var _ = SentrySdk.Init(o =>
         {
-            Assert.True(SentrySdk.IsEnabled);
-        }
+#pragma warning disable CS0618
+            o.Dsn = ValidDsnWithSecret;
+#pragma warning restore CS0618
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+        });
+
+        Assert.True(SentrySdk.IsEnabled);
     }
 
     [Fact]

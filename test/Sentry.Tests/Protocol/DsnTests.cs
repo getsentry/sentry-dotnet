@@ -2,8 +2,6 @@ namespace Sentry.Tests.Protocol;
 
 public class DsnTests
 {
-    internal const string ValidDsnWithSecret = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647";
-
     [Fact]
     public void ToString_SameAsInput()
     {
@@ -22,8 +20,11 @@ public class DsnTests
     [Fact]
     public void Ctor_SampleValidDsnWithSecret_CorrectlyConstructs()
     {
+        // Note: Sentry has dropped the use of secrets, but this should still work.
+#pragma warning disable CS0618
         var dsn = Dsn.Parse(ValidDsnWithSecret);
         Assert.Equal(ValidDsnWithSecret, dsn.ToString());
+#pragma warning restore CS0618
     }
 
     [Fact]
@@ -143,7 +144,10 @@ public class DsnTests
     [Fact]
     public void TryParse_SampleValidDsnWithSecret_Succeeds()
     {
+        // Note: Sentry has dropped the use of secrets, but this should still work.
+#pragma warning disable CS0618
         Assert.NotNull(Dsn.TryParse(ValidDsnWithSecret));
+#pragma warning restore CS0618
     }
 
     [Fact]
