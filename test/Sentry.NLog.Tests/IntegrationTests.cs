@@ -6,6 +6,7 @@ using Sentry.Testing;
 namespace Sentry.NLog.Tests;
 
 [UsesVerify]
+[Collection("Sequential")]
 public class IntegrationTests
 {
     [Fact]

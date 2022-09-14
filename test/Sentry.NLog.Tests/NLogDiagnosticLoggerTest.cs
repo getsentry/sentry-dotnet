@@ -1,5 +1,6 @@
 namespace Sentry.NLog.Tests;
 
+[Collection("Sequential")]
 public class NLogDiagnosticLoggerTest
 {
     [Fact]
