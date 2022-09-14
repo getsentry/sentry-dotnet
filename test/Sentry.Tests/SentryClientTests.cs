@@ -341,6 +341,8 @@ public class SentryClientTests
         // Arrange
         const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
+        const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
+        var expectedSampled = (int)(sampleRate * numEvents);
 
         var options = new SentryOptions
         {
@@ -358,18 +360,17 @@ public class SentryClientTests
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
         {
             // Act
-            var eventIds = Enumerable
-                .Range(0, numEvents)
-                .Select(i => client.CaptureEvent(new SentryEvent
+            var countSampled = 0;
+            for (var i = 0; i < numEvents; i++)
+            {
+                var id = client.CaptureMessage($"Test[{i}]");
+                if (id != SentryId.Empty)
                 {
-                    Message = $"Test[{i}]"
-                }))
-                .ToList();
+                    countSampled++;
+                }
+            }
 
             // Assert
-            var countSampled = eventIds.Count(e => e != SentryId.Empty);
-            var expectedSampled = (int)(sampleRate * numEvents);
-            const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
             countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
         });
     }

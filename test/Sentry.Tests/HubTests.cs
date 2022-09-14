@@ -576,6 +576,8 @@ public class HubTests
         // Arrange
         const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
+        const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
+        var expectedSampled = (int)(sampleRate * numEvents);
 
         var options = new SentryOptions
         {
@@ -593,15 +595,17 @@ public class HubTests
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
         {
             // Act
-            var transactions = Enumerable
-                .Range(0, numEvents)
-                .Select(i => hub.StartTransaction($"name[{i}]", $"operation[{i}]"))
-                .ToList();
+            var countSampled = 0;
+            for (var i = 0; i < numEvents; i++)
+            {
+                var transaction = hub.StartTransaction($"name[{i}]", $"operation[{i}]");
+                if (transaction.IsSampled == true)
+                {
+                    countSampled++;
+                }
+            }
 
             // Assert
-            var countSampled = transactions.Count(t => t.IsSampled == true);
-            var expectedSampled = (int)(sampleRate * numEvents);
-            const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
             countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
         });
     }
