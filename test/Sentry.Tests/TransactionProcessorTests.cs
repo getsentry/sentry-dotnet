@@ -4,6 +4,7 @@ namespace Sentry.Tests;
 
 [UsesVerify]
 [Trait("Category", "Verify")]
+[Collection(nameof(SentrySdkCollection))]
 public class TransactionProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;

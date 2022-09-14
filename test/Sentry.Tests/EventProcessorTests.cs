@@ -1,9 +1,10 @@
-using Sentry.Testing;
+﻿using Sentry.Testing;
 
 namespace Sentry.Tests;
 
 [UsesVerify]
 [Trait("Category", "Verify")]
+[Collection(nameof(SentrySdkCollection))]
 public class EventProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;
