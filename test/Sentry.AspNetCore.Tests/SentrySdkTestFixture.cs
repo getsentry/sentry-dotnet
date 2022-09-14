@@ -15,7 +15,7 @@ public abstract class SentrySdkTestFixture : IDisposable
 
     public Action<IServiceCollection> ConfigureServices { get; set; }
     public Action<IApplicationBuilder> ConfigureApp { get; set; }
-    public Action<IWebHostBuilder> ConfigureWehHost { get; set; }
+    public Action<IWebHostBuilder> ConfigureWebHost { get; set; }
 
     public LastExceptionFilter LastExceptionFilter { get; private set; }
 
@@ -61,7 +61,7 @@ public abstract class SentrySdkTestFixture : IDisposable
             });
         });
 
-        ConfigureWehHost?.Invoke(builder);
+        ConfigureWebHost?.Invoke(builder);
         ConfigureBuilder(builder);
 
         TestServer = new TestServer(builder);

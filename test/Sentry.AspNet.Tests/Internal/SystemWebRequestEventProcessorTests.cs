@@ -1,5 +1,7 @@
 using Sentry.AspNet.Internal;
 
+namespace Sentry.AspNet.Tests.Internal;
+
 public class SystemWebRequestEventProcessorTests :
     HttpContextTest
 {

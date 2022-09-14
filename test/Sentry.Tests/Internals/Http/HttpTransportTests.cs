@@ -777,6 +777,7 @@ public class HttpTransportTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public Task ProcessEnvelope_ShouldAttachClientReport()
     {
         var options = new SentryOptions();

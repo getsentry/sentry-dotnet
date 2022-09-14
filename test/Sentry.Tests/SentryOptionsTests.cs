@@ -1,6 +1,6 @@
 using System.IO.Compression;
 using System.Net;
-#if NET461
+#if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
 using Xunit.Sdk;
 #endif
@@ -30,7 +30,14 @@ public class SentryOptionsTests
         Assert.Null(sut.Transport);
     }
 
-#if NET461
+    [Fact]
+    public void AttachStackTrace_ByDefault_True()
+    {
+        var sut = new SentryOptions();
+        Assert.True(sut.AttachStacktrace);
+    }
+
+#if NETFRAMEWORK
     [SkippableFact(typeof(IsTypeException))]
     public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
     {

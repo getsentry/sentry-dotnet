@@ -4,7 +4,7 @@
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>6.3.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>6.4.1</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <LangVersion>10</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
@@ -40,6 +40,7 @@
     <Using Include="Java.Lang.Integer" Alias="JavaInteger" />
     <Using Include="Java.Lang.Long" Alias="JavaLong" />
     <Using Include="Java.Lang.Object" Alias="JavaObject" />
+    <Using Include="Java.Lang.String" Alias="JavaString" />
     <Using Include="Java.Lang.Throwable" Alias="Throwable" />
     <Using Include="Java.IO.InputStreamReader" Alias="JavaInputStreamReader" />
     <Using Include="Java.IO.OutputStreamWriter" Alias="JavaOutputStreamWriter" />

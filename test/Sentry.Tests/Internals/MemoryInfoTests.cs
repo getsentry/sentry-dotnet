@@ -15,6 +15,7 @@ public class MemoryInfoTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public Task WriteTo()
     {
 #if NET5_0_OR_GREATER

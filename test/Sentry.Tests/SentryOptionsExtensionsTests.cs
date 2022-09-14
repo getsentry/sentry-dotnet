@@ -1,4 +1,4 @@
-#if NET461
+#if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
 #endif
 
@@ -16,7 +16,7 @@ public class SentryOptionsExtensionsTests
             p => p.GetType() == typeof(DuplicateEventDetectionEventProcessor));
     }
 
-#if NET461
+#if NETFRAMEWORK
     [Fact]
     public void DisableNetFxInstallationsEventProcessor_RemovesDisableNetFxInstallationsEventProcessorEventProcessor()
     {
@@ -159,6 +159,34 @@ public class SentryOptionsExtensionsTests
         Sut.AddEventProcessorProvider(() => new[] { first, second });
         Assert.Contains(Sut.GetAllEventProcessors(), actual => actual == first);
         Assert.Contains(Sut.GetAllEventProcessors(), actual => actual == second);
+    }
+
+    [Fact]
+    public void AddTransactionProcessor_StoredInOptions()
+    {
+        var expected = Substitute.For<ISentryTransactionProcessor>();
+        Sut.AddTransactionProcessor(expected);
+        Assert.Contains(Sut.TransactionProcessors!, actual => actual == expected);
+    }
+
+    [Fact]
+    public void AddTransactionProcessors_StoredInOptions()
+    {
+        var first = Substitute.For<ISentryTransactionProcessor>();
+        var second = Substitute.For<ISentryTransactionProcessor>();
+        Sut.AddTransactionProcessors(new[] { first, second });
+        Assert.Contains(Sut.TransactionProcessors!, actual => actual == first);
+        Assert.Contains(Sut.TransactionProcessors, actual => actual == second);
+    }
+
+    [Fact]
+    public void AddTransactionProcessorProvider_StoredInOptions()
+    {
+        var first = Substitute.For<ISentryTransactionProcessor>();
+        var second = Substitute.For<ISentryTransactionProcessor>();
+        Sut.AddTransactionProcessorProvider(() => new[] { first, second });
+        Assert.Contains(Sut.GetAllTransactionProcessors(), actual => actual == first);
+        Assert.Contains(Sut.GetAllTransactionProcessors(), actual => actual == second);
     }
 
     [Fact]

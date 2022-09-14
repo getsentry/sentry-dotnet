@@ -37,24 +37,29 @@ namespace Sentry
         internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
 #if __MOBILE__
+        private bool _isGlobalModeEnabled = true;
         /// <summary>
         /// Specifies whether to use global scope management mode.
-        /// Always <c>true</c> for mobile targets.
+        /// Should be <c>true</c> for client applications and <c>false</c> for server applications.
+        /// The default is <c>true</c> for mobile targets.
         /// </summary>
         public bool IsGlobalModeEnabled
         {
-            get => true;
+            get => _isGlobalModeEnabled;
             set
             {
-                if (value is false)
+                _isGlobalModeEnabled = value;
+                if (!value)
                 {
-                    _diagnosticLogger?.LogWarning("Cannot disable Global Mode on {0}", DeviceInfo.PlatformName);
+                    _diagnosticLogger?.LogWarning("Global Mode should usually be enabled on {0}", DeviceInfo.PlatformName);
                 }
             }
         }
 #else
         /// <summary>
         /// Specifies whether to use global scope management mode.
+        /// Should be <c>true</c> for client applications and <c>false</c> for server applications.
+        /// The default is <c>false</c>.
         /// </summary>
         public bool IsGlobalModeEnabled { get; set; }
 #endif
@@ -92,6 +97,11 @@ namespace Sentry
         internal List<ISentryEventExceptionProcessor>? ExceptionProcessors { get; set; }
 
         /// <summary>
+        /// A list of transaction processors
+        /// </summary>
+        internal List<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
+
+        /// <summary>
         /// A list of event processors
         /// </summary>
         internal List<ISentryEventProcessor>? EventProcessors { get; set; }
@@ -100,6 +110,11 @@ namespace Sentry
         /// A list of providers of <see cref="ISentryEventProcessor"/>
         /// </summary>
         internal List<Func<IEnumerable<ISentryEventProcessor>>>? EventProcessorsProviders { get; set; }
+
+        /// <summary>
+        /// A list of providers of <see cref="ISentryTransactionProcessor"/>
+        /// </summary>
+        internal List<Func<IEnumerable<ISentryTransactionProcessor>>>? TransactionProcessorsProviders { get; set; }
 
         /// <summary>
         /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
@@ -182,12 +197,13 @@ namespace Sentry
         public string? ServerName { get; set; }
 
         /// <summary>
-        /// Whether to send the stack trace of a event captured without an exception
+        /// Whether to send the stack trace of a event captured without an exception.
+        /// As of version 3.22.0, the default is <c>true</c>.
         /// </summary>
         /// <remarks>
         /// Append stack trace of the call to the SDK to capture a message or event without Exception
         /// </remarks>
-        public bool AttachStacktrace { get; set; }
+        public bool AttachStacktrace { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the maximum breadcrumbs.
@@ -682,6 +698,10 @@ namespace Sentry
 
             EventProcessorsProviders = new () {
                 () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
+            };
+
+            TransactionProcessorsProviders = new () {
+                () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
             };
 
             ExceptionProcessorsProviders = new () {

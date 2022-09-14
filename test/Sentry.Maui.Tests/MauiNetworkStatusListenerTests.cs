@@ -61,29 +61,23 @@ public class MauiNetworkStatusListenerTests
         var connectivity = Substitute.For<IConnectivity>();
         connectivity.NetworkAccess.Returns(access);
 
-        try
+        using var cts = new CancellationTokenSource();
+        var listener = new MauiNetworkStatusListener(connectivity, _options);
+
+        var task = listener.WaitForNetworkOnlineAsync(cts.Token);
+        connectivity.ConnectivityChanged += Raise.EventWith(default, new ConnectivityChangedEventArgs(access, default));
+
+        cts.CancelAfter(TimeSpan.FromMilliseconds(500));
+
+        if (expected)
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-            var listener = new MauiNetworkStatusListener(connectivity, _options);
-
-            await Task.WhenAll(
-                listener.WaitForNetworkOnlineAsync(cts.Token),
-                Task.Run(async () =>
-                {
-                    // Yield to make sure the first task runs and is waiting before we raise the event
-                    await Task.Yield();
-                    connectivity.ConnectivityChanged +=
-                        Raise.EventWith(default, new ConnectivityChangedEventArgs(access, default));
-                }, cts.Token));
-
-            // If we timed-out waiting (to simulate being offline), then cancellation will be requested
-            Assert.Equal(expected, !cts.IsCancellationRequested);
-
-            // No point in waiting any longer
-            cts.Cancel();
+            // If we expected to be online, then this should complete without throwing.
+            await task;
         }
-        catch (OperationCanceledException)
+        else
         {
+            // If we expected to be offline, then we'll time out and get a cancellation exception.
+            await Assert.ThrowsAsync<TaskCanceledException>(() => task);
         }
     }
 

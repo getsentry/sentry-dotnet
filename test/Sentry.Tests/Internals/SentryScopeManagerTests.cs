@@ -6,7 +6,10 @@ public class SentryScopeManagerTests
 {
     private class Fixture
     {
-        public SentryOptions SentryOptions { get; set; } = new();
+        public SentryOptions SentryOptions { get; set; } = new()
+        {
+            IsGlobalModeEnabled = false
+        };
 
         public ISentryClient Client { get; set; } = Substitute.For<ISentryClient>();
 

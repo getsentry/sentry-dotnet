@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using System.Diagnostics;
 #pragma warning disable CS0618
 
@@ -24,7 +25,7 @@ public class SentrySdkCrashTests
     {
         var assembly = typeof(Testing.CrashableApp.Program).Assembly;
 
-#if NET461
+#if NETFRAMEWORK
         var filename = assembly.Location;
         var arguments = crashType.ToString();
 #else
@@ -46,3 +47,4 @@ public class SentrySdkCrashTests
         stderr = process.StandardError.ReadToEnd();
     }
 }
+#endif

@@ -33,6 +33,23 @@ namespace Sentry
         }
 
         /// <summary>
+        /// Invokes all transaction processor providers available.
+        /// </summary>
+        /// <param name="scope">The Scope which holds the processor providers.</param>
+        public static IEnumerable<ISentryTransactionProcessor> GetAllTransactionProcessors(this Scope scope)
+        {
+            foreach (var processor in scope.Options.GetAllTransactionProcessors())
+            {
+                yield return processor;
+            }
+
+            foreach (var processor in scope.TransactionProcessors)
+            {
+                yield return processor;
+            }
+        }
+
+        /// <summary>
         /// Invokes all exception processor providers available.
         /// </summary>
         /// <param name="scope">The Scope which holds the processor providers.</param>
@@ -96,6 +113,35 @@ namespace Sentry
             foreach (var processor in processors)
             {
                 scope.EventProcessors.Add(processor);
+            }
+        }
+
+        /// <summary>
+        /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
+        /// </summary>
+        /// <param name="scope">The Scope to hold the processor.</param>
+        /// <param name="processor">The transaction processor.</param>
+        public static void AddTransactionProcessor(this Scope scope, ISentryTransactionProcessor processor)
+            => scope.TransactionProcessors.Add(processor);
+
+        /// <summary>
+        /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
+        /// </summary>
+        /// <param name="scope">The Scope to hold the processor.</param>
+        /// <param name="processor">The transaction processor.</param>
+        public static void AddTransactionProcessor(this Scope scope, Func<Transaction, Transaction?> processor)
+            => scope.AddTransactionProcessor(new DelegateTransactionProcessor(processor));
+
+        /// <summary>
+        /// Adds transaction processors which are invoked when creating a <see cref="Transaction"/>.
+        /// </summary>
+        /// <param name="scope">The Scope to hold the processor.</param>
+        /// <param name="processors">The transaction processors.</param>
+        public static void AddTransactionProcessors(this Scope scope, IEnumerable<ISentryTransactionProcessor> processors)
+        {
+            foreach (var processor in processors)
+            {
+                scope.TransactionProcessors.Add(processor);
             }
         }
 

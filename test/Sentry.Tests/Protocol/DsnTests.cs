@@ -30,14 +30,14 @@ public class DsnTests
     public void Ctor_NotUri_ThrowsUriFormatException()
     {
         var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse("Not a URI"));
-        Assert.Equal("Invalid URI: The format of the URI could not be determined.", ex.Message);
+        ex.Message.Should().BeOneOf("net_uri_BadFormat", "Invalid URI: The format of the URI could not be determined.");
     }
 
     [Fact]
     public void Ctor_DisableSdk_ThrowsUriFormatException()
     {
         var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(Constants.DisableSdkDsnValue));
-        Assert.Equal("Invalid URI: The URI is empty.", ex.Message);
+        ex.Message.Should().BeOneOf("net_uri_EmptyUri", "Invalid URI: The URI is empty.");
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class DsnTests
     {
         var @case = new DsnTestCase { Scheme = null };
         var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(@case));
-        Assert.Equal("Invalid URI: The format of the URI could not be determined.", ex.Message);
+        ex.Message.Should().BeOneOf("net_uri_BadFormat", "Invalid URI: The format of the URI could not be determined.");
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class DsnTests
     {
         var @case = new DsnTestCase { Port = -1 };
         var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(@case));
-        Assert.Equal("Invalid URI: Invalid port specified.", ex.Message);
+        ex.Message.Should().BeOneOf("net_uri_BadPort", "Invalid URI: Invalid port specified.");
     }
 
     [Fact]
@@ -118,20 +118,20 @@ public class DsnTests
     {
         var @case = new DsnTestCase { Host = null };
         var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(@case));
-        Assert.Equal("Invalid URI: The hostname could not be parsed.", ex.Message);
+        ex.Message.Should().BeOneOf("net_uri_BadHostName", "Invalid URI: The hostname could not be parsed.");
     }
 
     [Fact]
     public void Ctor_EmptyStringDsn_ThrowsUriFormatException()
     {
         var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(string.Empty));
-        Assert.Equal("Invalid URI: The URI is empty.", ex.Message);
+        ex.Message.Should().BeOneOf("net_uri_EmptyUri", "Invalid URI: The URI is empty.");
     }
 
     [Fact]
     public void Ctor_NullDsn_ThrowsArgumentNull()
     {
-        _ = Assert.Throws<ArgumentNullException>(() => Dsn.Parse(null));
+        Assert.Throws<ArgumentNullException>(() => Dsn.Parse(null!));
     }
 
     [Fact]

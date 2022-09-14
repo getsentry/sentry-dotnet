@@ -3,10 +3,6 @@ using System.Net.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 
-#if NETCOREAPP2_1
-using System.Reflection;
-#endif
-
 namespace Sentry.Tests;
 
 public class HubTests
@@ -22,11 +18,14 @@ public class HubTests
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            BackgroundWorker = new FakeBackgroundWorker()
-        });
+            BackgroundWorker = new FakeBackgroundWorker(),
+            IsGlobalModeEnabled = false
+        };
+
+        var hub = new Hub(options);
 
         // Act & assert
         using (hub.PushScope())
@@ -289,7 +288,7 @@ public class HubTests
         var fileSystem = new FakeFileSystem();
         using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
 
-        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output, SentryLevel.Debug);
+        var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output);
 
         var options = new SentryOptions
         {
@@ -335,11 +334,7 @@ public class HubTests
 
             logger.Received().Log(SentryLevel.Error,
                 "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
-#if NETCOREAPP2_1
-                Arg.Is<TargetInvocationException>(e => e.InnerException is InvalidDataException),
-#else
                 Arg.Any<InvalidDataException>(),
-#endif
                 Arg.Any<object[]>());
 
         }
@@ -968,11 +963,13 @@ public class HubTests
         var scopeManager = Substitute.For<IInternalScopeManager>();
 
         // Act
-        _ = new Hub(new SentryOptions
+        var options = new SentryOptions
         {
             IsGlobalModeEnabled = false,
             Dsn = ValidDsn,
-        }, scopeManager: scopeManager);
+        };
+
+        _ = new Hub(options, scopeManager: scopeManager);
 
         // Assert
         scopeManager.Received(1).PushScope();

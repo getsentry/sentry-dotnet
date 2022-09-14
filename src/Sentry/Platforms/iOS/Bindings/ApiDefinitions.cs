@@ -813,6 +813,10 @@ interface SentryOptions
     [Export ("enabled")]
     bool Enabled { get; set; }
 
+	// @property (assign, nonatomic) BOOL enableCrashHandler;
+	[Export ("enableCrashHandler")]
+	bool EnableCrashHandler { get; set; }
+
     // @property (assign, nonatomic) NSUInteger maxBreadcrumbs;
     [Export ("maxBreadcrumbs")]
     nuint MaxBreadcrumbs { get; set; }
@@ -894,6 +898,10 @@ interface SentryOptions
     [Export ("attachScreenshot")]
     bool AttachScreenshot { get; set; }
 
+	// @property (assign, nonatomic) BOOL attachViewHierarchy;
+	[Export ("attachViewHierarchy")]
+	bool AttachViewHierarchy { get; set; }
+
     // @property (assign, nonatomic) BOOL enableUserInteractionTracing;
     [Export ("enableUserInteractionTracing")]
     bool EnableUserInteractionTracing { get; set; }
@@ -954,7 +962,19 @@ interface SentryOptions
     [Export ("enableCoreDataTracking")]
     bool EnableCoreDataTracking { get; set; }
 
-    // @property (assign, nonatomic) BOOL enableProfiling;
+	// @property (nonatomic, strong) NSNumber * _Nullable profilesSampleRate;
+	[NullAllowed, Export ("profilesSampleRate", ArgumentSemantic.Strong)]
+	NSNumber ProfilesSampleRate { get; set; }
+
+	// @property (nonatomic) SentryTracesSamplerCallback _Nullable profilesSampler;
+	[NullAllowed, Export ("profilesSampler", ArgumentSemantic.Assign)]
+	Func<SentrySamplingContext, NSNumber?> ProfilesSampler { get; set; }
+
+	// @property (readonly, assign, nonatomic) BOOL isProfilingEnabled;
+	[Export ("isProfilingEnabled")]
+	bool IsProfilingEnabled { get; }
+
+	// @property (assign, nonatomic) BOOL enableProfiling __attribute__((deprecated("Use profilesSampleRate or profilesSampler instead. This property will be removed in a future version of the SDK")));
     [Export ("enableProfiling")]
     bool EnableProfiling { get; set; }
 
@@ -981,10 +1001,10 @@ interface SentryOptions
 [Internal]
 interface SentryIntegrationProtocol
 {
-    // @required -(void)installWithOptions:(SentryOptions * _Nonnull)options;
+	// @required -(BOOL)installWithOptions:(SentryOptions * _Nonnull)options;
     [Abstract]
     [Export ("installWithOptions:")]
-    void InstallWithOptions (SentryOptions options);
+	bool InstallWithOptions (SentryOptions options);
 
     // @optional -(void)uninstall;
     [Export ("uninstall")]
@@ -1168,10 +1188,6 @@ interface SentryHub
     [Export ("endSessionWithTimestamp:")]
     void EndSessionWithTimestamp (NSDate timestamp);
 
-    // // @property (nonatomic, strong) NSMutableArray<NSObject<SentryIntegrationProtocol> *> * _Nonnull installedIntegrations;
-    // [Export ("installedIntegrations", ArgumentSemantic.Strong)]
-    // NSMutableArray<SentryIntegrationProtocol> InstalledIntegrations { get; set; }
-
     // -(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event __attribute__((swift_name("capture(event:)")));
     [Export ("captureEvent:")]
     SentryId CaptureEvent (SentryEvent @event);
@@ -1252,10 +1268,9 @@ interface SentryHub
     [Export ("bindClient:")]
     void BindClient ([NullAllowed] SentryClient client);
 
-    // -(id _Nullable)getIntegration:(NSString * _Nonnull)integrationName;
-    [Export ("getIntegration:")]
-    [return: NullAllowed]
-    NSObject GetIntegration (string integrationName);
+	// -(BOOL)hasIntegration:(NSString * _Nonnull)integrationName;
+	[Export ("hasIntegration:")]
+	bool HasIntegration (string integrationName);
 
     // -(BOOL)isIntegrationInstalled:(Class _Nonnull)integrationClass;
     [Export ("isIntegrationInstalled:")]
@@ -1945,6 +1960,10 @@ interface SentryTransactionContext
     [Export ("name")]
     string Name { get; }
 
+	// @property (readonly, nonatomic) SentryTransactionNameSource nameSource;
+	[Export ("nameSource")]
+	SentryTransactionNameSource NameSource { get; }
+
     // @property (nonatomic) SentrySampleDecision parentSampled;
     [Export ("parentSampled", ArgumentSemantic.Assign)]
     SentrySampleDecision ParentSampled { get; set; }
@@ -1971,8 +1990,8 @@ interface SentryTransactionContext
 [Internal]
 interface SentryUser : SentrySerializable //, INSCopying
 {
-    // @property (copy, atomic) NSString * _Nonnull userId;
-    [Export ("userId")]
+	// @property (copy, atomic) NSString * _Nullable userId;
+	[NullAllowed, Export ("userId")]
     string UserId { get; set; }
 
     // @property (copy, atomic) NSString * _Nullable email;

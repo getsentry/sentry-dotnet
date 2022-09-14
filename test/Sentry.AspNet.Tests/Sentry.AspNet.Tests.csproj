@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFrameworks>net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.Web" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNet\Sentry.AspNet.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />

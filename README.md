@@ -66,9 +66,7 @@ That means [they are compatible with](https://docs.microsoft.com/dotnet/standard
 Of those, we run our unit and integration tests against the following:
 
 * .NET 6 on Windows, macOS and Linux
-* .NET 5 on Windows, macOS and Linux
 * .NET Core 3.1 on Windows, macOS and Linux
-* .NET Core 2.1 on Windows, macOS and Linux
 * .NET Framework 4.8 on Windows
 * Mono 6.12 on macOS and Linux
 

@@ -26,7 +26,8 @@ public class TransactionTests
             SpanStatus.AlreadyExists,
             null, // sampling isn't serialized and getting FluentAssertions
                   // to ignore that on Spans and contexts isn't really straight forward
-            true);
+            true,
+            TransactionNameSource.Component);
 
         var transaction = new TransactionTracer(DisabledHub.Instance, context)
         {
@@ -46,7 +47,7 @@ public class TransactionTests
                     [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
                     [".NET Framework Full"] = "\"v4.8\""
                 }
-            },
+            }
         };
 
         // Don't overwrite the contexts object as it contains trace data.

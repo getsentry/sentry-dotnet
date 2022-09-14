@@ -1,38 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;netcoreapp3.0;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFrameworks>net6.0;netcoreapp3.1;net48;net6.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">10.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <ProjectReference Include="..\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <!-- Run netcoreapp3.1 against netcoreapp3.0 target of Sentry -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <ProjectReference Update="..\..\src\Sentry\Sentry.csproj" SetTargetFramework="TargetFramework=netcoreapp3.0" />
-  </ItemGroup>
-
-  <!-- Run netcoreapp3.0 against netstandard2.1 target of Sentry -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <ProjectReference Update="..\..\src\Sentry\Sentry.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
-    <!-- NET Core 3.0's built-in STJ is lower version which causes conflicts, so we have to explicitly reference it -->
-    <PackageReference Include="System.Text.Json" Version="5.0.2" />
-    <!-- Ben.Demystifier uses S.R.M v5 and also requires it via package reference when on nca3.x -->
-    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
-  </ItemGroup>
-
-  <!-- DiagnosticSource Tests -->
-  <!-- netcoreapp3.0 skipped since it'll target NET standard on Sentry. -->
-  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.0' and '$(TargetFramework)' != 'netcoreapp2.1' and !$(TargetFramework.StartsWith('net4'))">
-    <Compile Include="..\Sentry.DiagnosticSource.Tests\*.cs">
-      <Link>Internals\DiagnosticSource\%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Include="..\Sentry.Diagnostics.DiagnosticSource.Tests\Integration\**\*.cs">
-      <Link>Internals\DiagnosticSource\Integration\%(RecursiveDir)\%(Filename)%(Extension)</Link>
-    </Compile>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+    <ProjectReference Include="..\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj" />
   </ItemGroup>
 
   <Import Project="..\..\src\Sentry\buildTransitive\Sentry.props" />

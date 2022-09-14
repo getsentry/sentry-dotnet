@@ -15,7 +15,7 @@ public class CachingTransportTests
 
     public CachingTransportTests(ITestOutputHelper testOutputHelper)
     {
-        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(testOutputHelper, SentryLevel.Debug);
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(testOutputHelper);
     }
 
     [Fact]

@@ -1,5 +1,7 @@
 using System.Web;
 
+namespace Sentry.AspNet.Tests;
+
 public abstract class HttpContextTest :
     IDisposable
 {

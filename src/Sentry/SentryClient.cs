@@ -116,9 +116,11 @@ namespace Sentry
                                     "to properly finalize the transaction and send it to Sentry.");
             }
 
+
             // Sampling decision MUST have been made at this point
             Debug.Assert(transaction.IsSampled != null,
                 "Attempt to capture transaction without sampling decision.");
+
 
             if (transaction.IsSampled != true)
             {

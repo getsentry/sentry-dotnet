@@ -92,4 +92,26 @@ internal static class EnumExtensions
             SpanStatus.Unauthenticated => Java.SpanStatus.Unauthenticated!,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
+
+    public static TransactionNameSource ToTransactionNameSource(this Java.Protocol.TransactionNameSource source) =>
+        source.Name() switch
+        {
+            "CUSTOM" => TransactionNameSource.Custom,
+            "URL" => TransactionNameSource.Url,
+            "ROUTE" => TransactionNameSource.Route,
+            "VIEW" => TransactionNameSource.View,
+            "TASK" => TransactionNameSource.Task,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source.Name(), message: default)
+        };
+
+    public static Java.Protocol.TransactionNameSource ToJavaTransactionNameSource(this TransactionNameSource source) =>
+        source switch
+        {
+            TransactionNameSource.Custom => Java.Protocol.TransactionNameSource.Custom!,
+            TransactionNameSource.Url => Java.Protocol.TransactionNameSource.Url!,
+            TransactionNameSource.Route => Java.Protocol.TransactionNameSource.Route!,
+            TransactionNameSource.View => Java.Protocol.TransactionNameSource.View!,
+            TransactionNameSource.Task => Java.Protocol.TransactionNameSource.Task!,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
+        };
 }

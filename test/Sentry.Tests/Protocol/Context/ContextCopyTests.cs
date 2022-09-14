@@ -1,6 +1,7 @@
 namespace Sentry.Tests.Protocol.Context;
 
 [UsesVerify]
+[Trait("Category", "Verify")]
 public class ContextCopyTests
 {
     [Fact]

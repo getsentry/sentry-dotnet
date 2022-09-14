@@ -111,7 +111,7 @@ public class SentryTargetTests
                     </extensions>
                     <targets>
                         <target type='Sentry' name='sentry' dsn='{ValidDsn}'>
-                            <user username=""myUser"">
+                            <user username='myUser'>
                                 <other name='mood' layout='joyous'/>
                             </user>
                         </target>
@@ -126,10 +126,13 @@ public class SentryTargetTests
         var t = logFactory.Configuration.FindTargetByName("sentry") as SentryTarget;
         Assert.NotNull(t);
         Assert.Equal(ValidDsn, t.Options.Dsn);
-        Assert.Equal("'myUser'", t.User.Username.ToString());
-        Assert.NotEmpty(t.User.Other);
-        Assert.Equal("mood", t.User.Other[0].Name);
-        Assert.Equal("'joyous'", t.User.Other[0].Layout.ToString());
+        Assert.Equal("myUser", t.User?.Username?.ToString());
+
+        var other = t.User?.Other;
+        Assert.NotNull(other);
+        Assert.NotEmpty(other);
+        Assert.Equal("mood", other[0].Name);
+        Assert.Equal("joyous", other[0].Layout.ToString());
     }
 
     [Fact]
@@ -389,7 +392,7 @@ public class SentryTargetTests
 
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal($"{logger.Name}: {message}", b.Message);
-        Assert.Equal("b", b.Data["a"]);
+        Assert.Equal("b", b.Data?["a"]);
     }
 
     [Fact]
@@ -727,7 +730,7 @@ public class SentryTargetTests
         {
             Username = "${logger:shortName=true}",
         };
-        sentryTarget.User.Other.Add(new TargetPropertyWithContext("mood", "joyous"));
+        sentryTarget.User.Other!.Add(new TargetPropertyWithContext("mood", "joyous"));
 
         var logger = factory.GetLogger("sentry");
         logger.Fatal(DefaultMessage);

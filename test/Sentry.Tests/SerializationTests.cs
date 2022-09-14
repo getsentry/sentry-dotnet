@@ -14,6 +14,7 @@ public class SerializationTests
 
     [Theory]
     [MemberData(nameof(GetData))]
+    [Trait("Category", "Verify")]
     public async Task Serialization(string name, object target)
     {
         var json = target.ToJsonString(_testOutputLogger);

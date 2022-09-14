@@ -14,6 +14,7 @@ public class SentryEventTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public async Task SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
         var ex = new Exception("exception message");

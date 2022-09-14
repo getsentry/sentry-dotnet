@@ -30,7 +30,7 @@ public class BackgroundWorkerTests
         {
             // Use the test output logger, but spy on it so we can check received calls.
             // See "Test spies" at https://nsubstitute.github.io/help/partial-subs/
-            Logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(outputHelper, SentryLevel.Debug);
+            Logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(outputHelper);
             // Logger = Substitute.For<IDiagnosticLogger>();
             // Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
 

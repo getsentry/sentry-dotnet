@@ -1,5 +1,7 @@
 using System.Web;
 
+namespace Sentry.AspNet.Tests;
+
 public static class HttpContextBuilder
 {
     public static HttpContext Build(int responseStatusCode = 200)
