@@ -98,12 +98,7 @@ namespace Sentry
         /// <summary>
         /// Whether a <see cref="User"/> has been set to the object with any of its fields non null.
         /// </summary>
-        public static bool HasUser(this IEventLike eventLike)
-            => eventLike.User.Email is not null
-               || eventLike.User.Id is not null
-               || eventLike.User.Username is not null
-               || eventLike.User.InternalOther?.Count > 0
-               || eventLike.User.IpAddress is not null;
+        public static bool HasUser(this IEventLike eventLike) => eventLike.User.HasAnyData();
 
         /// <summary>
         /// Sets the fingerprint to the object.

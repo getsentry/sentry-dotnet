@@ -17,9 +17,10 @@ public class UserTests
         var sut = new User
         {
             Id = "user-id",
+            Username = "user-name",
             Email = "test@sentry.io",
             IpAddress = "::1",
-            Username = "user-name",
+            Segment = "A1",
             Other = new Dictionary<string, string> { { "testCustomValueKey", "testCustomValue" } }
         };
 
@@ -27,10 +28,11 @@ public class UserTests
 
         Assert.Equal(
             "{" +
-            "\"email\":\"test@sentry.io\"," +
             "\"id\":\"user-id\"," +
-            "\"ip_address\":\"::1\"," +
             "\"username\":\"user-name\"," +
+            "\"email\":\"test@sentry.io\"," +
+            "\"ip_address\":\"::1\"," +
+            "\"segment\":\"A1\"," +
             "\"other\":{\"testCustomValueKey\":\"testCustomValue\"}" +
             "}",
             actual);
@@ -45,6 +47,7 @@ public class UserTests
             Email = "emal@sentry.io",
             IpAddress = "::1",
             Username = "user",
+            Segment = "segment",
             Other = new Dictionary<string, string>
             {
                 {"testCustomValueKey", "testCustomValue"}
@@ -54,9 +57,10 @@ public class UserTests
         var clone = sut.Clone();
 
         Assert.Equal(sut.Id, clone.Id);
-        Assert.Equal(sut.Email, clone.Email);
-        Assert.Same(sut.IpAddress, clone.IpAddress);
         Assert.Equal(sut.Username, clone.Username);
+        Assert.Equal(sut.Email, clone.Email);
+        Assert.Equal(sut.IpAddress, clone.IpAddress);
+        Assert.Equal(sut.Segment, clone.Segment);
         Assert.Equal(sut.Other, clone.Other);
     }
 
@@ -65,7 +69,6 @@ public class UserTests
     public void SerializeObject_TestCase_SerializesAsExpected((User user, string serialized) @case)
     {
         var actual = @case.user.ToJsonString(_testOutputLogger);
-
         Assert.Equal(@case.serialized, actual);
     }
 
@@ -73,14 +76,12 @@ public class UserTests
     {
         yield return new object[] { (new User(), "{}") };
         yield return new object[] { (new User { Id = "some id" }, "{\"id\":\"some id\"}") };
+        yield return new object[] { (new User { Username = "some username" }, "{\"username\":\"some username\"}") };
         yield return new object[] { (new User { Email = "some email" }, "{\"email\":\"some email\"}") };
         yield return new object[] { (new User { IpAddress = "some ipAddress" }, "{\"ip_address\":\"some ipAddress\"}") };
-        yield return new object[] { (new User { Username = "some username" }, "{\"username\":\"some username\"}") };
-        yield return new object[] { (new User {Other = new Dictionary<string, string>
-            {
-                {"testCustomValueKey", "testCustomValue"}
-            }
+        yield return new object[] { (new User { Segment = "some segment" }, "{\"segment\":\"some segment\"}") };
 
-        }, "{\"other\":{\"testCustomValueKey\":\"testCustomValue\"}}") };
+        var other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}};
+        yield return new object[] { (new User { Other = other }, "{\"other\":{\"testCustomValueKey\":\"testCustomValue\"}}")};
     }
 }

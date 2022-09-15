@@ -15,32 +15,16 @@ namespace Sentry
     {
         internal Action<User>? PropertyChanged { get; set; }
 
-        private string? _email;
-
-        /// <summary>
-        /// The email address of the user.
-        /// </summary>
-        /// <value>
-        /// The user's email address.
-        /// </value>
-        public string? Email
-        {
-            get => _email;
-            set
-            {
-                _email = value;
-                PropertyChanged?.Invoke(this);
-            }
-        }
-
         private string? _id;
+        private string? _username;
+        private string? _email;
+        private string? _ipAddress;
+        private string? _segment;
+        private IDictionary<string, string>? _other;
 
         /// <summary>
         /// The unique ID of the user.
         /// </summary>
-        /// <value>
-        /// The unique identifier.
-        /// </value>
         public string? Id
         {
             get => _id;
@@ -51,32 +35,9 @@ namespace Sentry
             }
         }
 
-        private string? _ipAddress;
-
-        /// <summary>
-        /// The IP of the user.
-        /// </summary>
-        /// <value>
-        /// The user's IP address.
-        /// </value>
-        public string? IpAddress
-        {
-            get => _ipAddress;
-            set
-            {
-                _ipAddress = value;
-                PropertyChanged?.Invoke(this);
-            }
-        }
-
-        private string? _username;
-
         /// <summary>
         /// The username of the user.
         /// </summary>
-        /// <value>
-        /// The user's username.
-        /// </value>
         public string? Username
         {
             get => _username;
@@ -87,15 +48,56 @@ namespace Sentry
             }
         }
 
-        internal IDictionary<string, string>? InternalOther { get; private set; }
+        /// <summary>
+        /// The email address of the user.
+        /// </summary>
+        public string? Email
+        {
+            get => _email;
+            set
+            {
+                _email = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        /// <summary>
+        /// The IP address of the user.
+        /// </summary>
+        public string? IpAddress
+        {
+            get => _ipAddress;
+            set
+            {
+                _ipAddress = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
+
+        /// <summary>
+        /// The segment the user belongs to.
+        /// </summary>
+        public string? Segment
+        {
+            get => _segment;
+            set
+            {
+                _segment = value;
+                PropertyChanged?.Invoke(this);
+            }
+        }
 
         /// <summary>
         /// Additional information about the user.
         /// </summary>
         public IDictionary<string, string> Other
         {
-            get => InternalOther ??= new Dictionary<string, string>();
-            set => InternalOther = value;
+            get => _other ??= new Dictionary<string, string>();
+            set
+            {
+                _other = value;
+                PropertyChanged?.Invoke(this);
+            }
         }
 
         /// <summary>
@@ -105,9 +107,7 @@ namespace Sentry
         public User Clone()
         {
             var user = new User();
-
             CopyTo(user);
-
             return user;
         }
 
@@ -118,26 +118,36 @@ namespace Sentry
                 return;
             }
 
-            user.Email ??= Email;
             user.Id ??= Id;
             user.Username ??= Username;
+            user.Email ??= Email;
             user.IpAddress ??= IpAddress;
+            user.Segment ??= Segment;
 
-            user.InternalOther ??= InternalOther?.ToDictionary(
+            user._other ??= _other?.ToDictionary(
                 entry => entry.Key,
                 entry => entry.Value);
         }
+
+        internal bool HasAnyData() =>
+            Id is not null ||
+            Username is not null ||
+            Email is not null ||
+            IpAddress is not null ||
+            Segment is not null ||
+            _other?.Count > 0;
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
         {
             writer.WriteStartObject();
 
-            writer.WriteStringIfNotWhiteSpace("email", Email);
             writer.WriteStringIfNotWhiteSpace("id", Id);
-            writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
             writer.WriteStringIfNotWhiteSpace("username", Username);
-            writer.WriteStringDictionaryIfNotEmpty("other", InternalOther!);
+            writer.WriteStringIfNotWhiteSpace("email", Email);
+            writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
+            writer.WriteStringIfNotWhiteSpace("segment", Segment);
+            writer.WriteStringDictionaryIfNotEmpty("other", _other!);
 
             writer.WriteEndObject();
         }
@@ -147,19 +157,21 @@ namespace Sentry
         /// </summary>
         public static User FromJson(JsonElement json)
         {
-            var email = json.GetPropertyOrNull("email")?.GetString();
             var id = json.GetPropertyOrNull("id")?.GetString();
-            var ip = json.GetPropertyOrNull("ip_address")?.GetString();
             var username = json.GetPropertyOrNull("username")?.GetString();
+            var email = json.GetPropertyOrNull("email")?.GetString();
+            var ip = json.GetPropertyOrNull("ip_address")?.GetString();
+            var segment = json.GetPropertyOrNull("segment")?.GetString();
             var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
 
             return new User
             {
-                Email = email,
                 Id = id,
-                IpAddress = ip,
                 Username = username,
-                InternalOther = other?.WhereNotNullValue().ToDictionary()
+                Email = email,
+                IpAddress = ip,
+                Segment = segment,
+                _other = other?.WhereNotNullValue().ToDictionary()
             };
         }
     }
