@@ -41,25 +41,31 @@ public class SentryClientTests
         _output = output;
     }
 
-    [Fact]
-    public void CaptureEvent_ExceptionFiltered_EmptySentryId()
+    [Theory]
+    [MemberData(nameof(ExceptionFilterTestCases))]
+    public void CaptureEvent_ExceptionFilteredForType(Exception exception, bool shouldFilter)
     {
         _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
 
         var sut = _fixture.GetSut();
+        var result = sut.CaptureException(exception);
 
-        // Filtered out for it's the exact filtered type
-        Assert.Equal(default, sut.CaptureException(new SystemException()));
-        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-
-        // Filtered for it's a derived type
-        Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
-        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-
-        // Not filtered since it's not in the inheritance chain
-        Assert.NotEqual(default, sut.CaptureException(new Exception()));
-        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        Assert.Equal(shouldFilter, result == default);
+        _fixture.BackgroundWorker.Received(result == default ? 0 : 1).EnqueueEnvelope(Arg.Any<Envelope>());
     }
+
+    public static IEnumerable<object[]> ExceptionFilterTestCases =>
+        new List<object[]>
+        {
+            // Filtered out for it's the exact filtered type
+            new object[] {new SystemException(), true},
+
+            // Filtered for it's a derived type
+            new object[] {new ArithmeticException(), true},
+
+            // Not filtered since it's not in the inheritance chain
+            new object[] {new Exception(), false}
+        };
 
     [Fact]
     public void CaptureEvent_IdReturnedToString_NoDashes()
