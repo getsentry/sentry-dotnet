@@ -449,10 +449,11 @@ public sealed class SentryTarget : TargetWithContext
 
         var user = new User
         {
-            Email = User.Email?.Render(logEvent),
             Id = User.Id?.Render(logEvent),
-            IpAddress = User.IpAddress?.Render(logEvent),
             Username = User.Username?.Render(logEvent),
+            Email = User.Email?.Render(logEvent),
+            IpAddress = User.IpAddress?.Render(logEvent),
+            Segment = User.Segment?.Render(logEvent)
         };
 
         if (User.Other?.Count > 0)

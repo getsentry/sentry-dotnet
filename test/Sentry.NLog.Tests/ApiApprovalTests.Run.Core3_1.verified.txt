@@ -1,4 +1,4 @@
-[assembly: System.CLSCompliant(true)]
+﻿[assembly: System.CLSCompliant(true)]
 namespace NLog
 {
     public static class ConfigurationExtensions
@@ -49,6 +49,7 @@ namespace Sentry.NLog
         public NLog.Layouts.Layout? IpAddress { get; set; }
         [NLog.Config.ArrayParameter(typeof(NLog.Targets.TargetPropertyWithContext?), "other")]
         public System.Collections.Generic.IList<NLog.Targets.TargetPropertyWithContext>? Other { get; }
+        public NLog.Layouts.Layout? Segment { get; set; }
         public NLog.Layouts.Layout? Username { get; set; }
     }
     [NLog.Targets.Target("Sentry")]
