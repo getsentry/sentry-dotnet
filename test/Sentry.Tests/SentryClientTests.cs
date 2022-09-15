@@ -341,33 +341,39 @@ public class SentryClientTests
         // Arrange
         const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
+        const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
+        var expectedSampled = (int)(sampleRate * numEvents);
 
-        var client = new SentryClient(new SentryOptions
+        var worker = Substitute.For<IBackgroundWorker>();
+        worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
+
+        var options = new SentryOptions
         {
             Dsn = ValidDsn,
             SampleRate = sampleRate,
             AttachStacktrace = false,
             AutoSessionTracking = false,
-            Transport = Substitute.For<ITransport>()
-        });
+            BackgroundWorker = worker
+        };
 
         // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
         {
-            // Act
-            var eventIds = Enumerable
-                .Range(0, numEvents)
-                .Select(i => client.CaptureEvent(new SentryEvent
-                {
-                    Message = $"Test[{i}]"
-                }))
-                .ToList();
+            var randomValuesFactory = new IsolatedRandomValuesFactory();
+            var client = new SentryClient(options, randomValuesFactory);
 
-            var countSampled = eventIds.Count(e => e != SentryId.Empty);
+            // Act
+            var countSampled = 0;
+            for (var i = 0; i < numEvents; i++)
+            {
+                var id = client.CaptureMessage($"Test[{i}]");
+                if (id != SentryId.Empty)
+                {
+                    countSampled++;
+                }
+            }
 
             // Assert
-            var expectedSampled = (int)(sampleRate * numEvents);
-            const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
             countSampled.Should().BeCloseTo(expectedSampled, allowedDeviation);
         });
     }

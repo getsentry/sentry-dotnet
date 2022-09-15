@@ -16,6 +16,7 @@ namespace Sentry.Internal
         private readonly ISystemClock _clock;
         private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
+        private readonly RandomValuesFactory _randomValuesFactory;
         private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
@@ -36,7 +37,8 @@ namespace Sentry.Internal
             ISentryClient? client = null,
             ISessionManager? sessionManager = null,
             ISystemClock? clock = null,
-            IInternalScopeManager? scopeManager = null)
+            IInternalScopeManager? scopeManager = null,
+            RandomValuesFactory? randomValuesFactory = null)
         {
             if (string.IsNullOrWhiteSpace(options.Dsn))
             {
@@ -47,7 +49,8 @@ namespace Sentry.Internal
             options.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
             _options = options;
-            _ownedClient = client ?? new SentryClient(options);
+            _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
+            _ownedClient = client ?? new SentryClient(options, _randomValuesFactory);
             _clock = clock ?? SystemClock.Clock;
             _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
@@ -129,13 +132,13 @@ namespace Sentry.Internal
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
-                    transaction.IsSampled = SynchronizedRandom.NextBool(sampleRate);
+                    transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 }
             }
 
             // Random sampling runs only if the sampling decision hasn't
             // been made already.
-            transaction.IsSampled ??= SynchronizedRandom.NextBool(_options.TracesSampleRate);
+            transaction.IsSampled ??= _randomValuesFactory.NextBool(_options.TracesSampleRate);
 
             // A sampled out transaction still appears fully functional to the user
             // but will be dropped by the client and won't reach Sentry's servers.
