@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry.Internal
@@ -82,8 +83,24 @@ namespace Sentry.Internal
 
         internal IEnumerable<SentryException> CreateSentryException(Exception exception)
         {
-            return exception.EnumerateChainedExceptions(_options)
-                .Select(BuildSentryException);
+            var exceptions = exception
+                .EnumerateChainedExceptions(_options)
+                .Select(BuildSentryException)
+                .ToList();
+
+            // If we've filtered out the aggregate exception, we'll need to copy over details from it.
+            if (exception is AggregateException && !_options.KeepAggregateException)
+            {
+                var original = BuildSentryException(exception);
+
+                // Exceptions are sent from oldest to newest, so the details belong on the LAST exception.
+                var last = exceptions.Last();
+                last.Stacktrace = original.Stacktrace;
+                last.Mechanism = original.Mechanism;
+                original.Data.TryCopyTo(last.Data);
+            }
+
+            return exceptions;
         }
 
         private SentryException BuildSentryException(Exception innerException)

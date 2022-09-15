@@ -175,11 +175,54 @@ public class MainExceptionProcessorTests
             .ScrubLines(x => x.Contains("One or more errors occurred"));
     }
 
+    [Fact]
+    public void Process_AggregateException()
+    {
+        var sut = _fixture.GetSut();
+        _fixture.SentryStackTraceFactory = _fixture.SentryOptions.SentryStackTraceFactory;
+        var evt = new SentryEvent();
+        sut.Process(BuildAggregateException(), evt);
+
+        var last = evt.SentryExceptions!.Last();
+        Assert.NotNull(last.Stacktrace);
+        Assert.False(last.Mechanism?.Handled);
+        Assert.NotNull(last.Mechanism?.Type);
+        Assert.NotEmpty(last.Data);
+    }
+
+    [Fact]
+    public void Process_AggregateException_Keep()
+    {
+        _fixture.SentryOptions.KeepAggregateException = true;
+        _fixture.SentryStackTraceFactory = _fixture.SentryOptions.SentryStackTraceFactory;
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        sut.Process(BuildAggregateException(), evt);
+
+        var last = evt.SentryExceptions!.Last();
+        Assert.NotNull(last.Stacktrace);
+        Assert.False(last.Mechanism?.Handled);
+        Assert.NotNull(last.Mechanism?.Type);
+        Assert.NotEmpty(last.Data);
+    }
+
     private static AggregateException BuildAggregateException()
     {
-        return new AggregateException(
-            new Exception("Inner message1"),
-            new Exception("Inner message2"));
+        try
+        {
+            // Throwing will put a stack trace on the exception
+            throw new AggregateException(
+                new Exception("Inner message1"),
+                new Exception("Inner message2"));
+        }
+        catch (AggregateException ex)
+        {
+            // Add extra data to test fully
+            ex.Data[Mechanism.HandledKey] = false;
+            ex.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
+            ex.Data["foo"] = "bar";
+            return ex;
+        }
     }
 
     [Fact]

@@ -12,6 +12,12 @@
   {
     Type: System.AggregateException,
     Value: ,
-    Mechanism: {}
+    Mechanism: {
+      Type: AppDomain.UnhandledException,
+      Handled: false
+    },
+    Data: {
+      foo: bar
+    }
   }
 ]
