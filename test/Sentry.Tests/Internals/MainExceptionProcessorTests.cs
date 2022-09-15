@@ -215,13 +215,13 @@ public class MainExceptionProcessorTests
                 new Exception("Inner message1"),
                 new Exception("Inner message2"));
         }
-        catch (AggregateException ex)
+        catch (AggregateException exception)
         {
             // Add extra data to test fully
-            ex.Data[Mechanism.HandledKey] = false;
-            ex.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
-            ex.Data["foo"] = "bar";
-            return ex;
+            exception.Data[Mechanism.HandledKey] = false;
+            exception.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
+            exception.Data["foo"] = "bar";
+            return exception;
         }
     }
 
@@ -251,11 +251,11 @@ public class MainExceptionProcessorTests
     {
         //Assert
         var sut = _fixture.GetSut();
-        var invalidTag = new KeyValuePair<string, int>("Tag1", 1234);
+        var invalidTag1 = new KeyValuePair<string, int>("Tag1", 1234);
         var invalidTag2 = new KeyValuePair<string, int?>("Tag2", null);
         var invalidTag3 = new KeyValuePair<string, string>("", "abcd");
 
-        var expectedTag = new KeyValuePair<string, object>("Exception[0][sentry:tag:Tag1]", 1234);
+        var expectedTag1 = new KeyValuePair<string, object>("Exception[0][sentry:tag:Tag1]", 1234);
         var expectedTag2 = new KeyValuePair<string, object>("Exception[0][sentry:tag:Tag2]", null);
         var expectedTag3 = new KeyValuePair<string, object>("Exception[0][sentry:tag:]", "abcd");
 
@@ -263,14 +263,14 @@ public class MainExceptionProcessorTests
         var evt = new SentryEvent();
 
         //Act
-        ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{invalidTag.Key}", invalidTag.Value);
+        ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{invalidTag1.Key}", invalidTag1.Value);
         ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{invalidTag2.Key}", invalidTag2.Value);
         ex.AddSentryTag(invalidTag3.Key, invalidTag3.Value);
 
         sut.Process(ex, evt);
 
         //Assert
-        Assert.Single(evt.Extra, expectedTag);
+        Assert.Single(evt.Extra, expectedTag1);
         Assert.Single(evt.Extra, expectedTag2);
         Assert.Single(evt.Extra, expectedTag3);
     }
@@ -338,17 +338,17 @@ public class MainExceptionProcessorTests
     {
         //Assert
         var sut = _fixture.GetSut();
-        var invalidData = new KeyValuePair<string, string>("sentry:attachment:filename", "./path");
+        var invalidData1 = new KeyValuePair<string, string>("sentry:attachment:filename", "./path");
         var invalidData2 = new KeyValuePair<string, int?>("sentry:unsupported:value", null);
 
-        var expectedData = new KeyValuePair<string, object>($"Exception[0][{invalidData.Key}]", invalidData.Value);
+        var expectedData = new KeyValuePair<string, object>($"Exception[0][{invalidData1.Key}]", invalidData1.Value);
         var expectedData2 = new KeyValuePair<string, object>($"Exception[0][{invalidData2.Key}]", invalidData2.Value);
 
         var ex = new Exception();
         var evt = new SentryEvent();
 
         //Act
-        ex.Data.Add(invalidData.Key, invalidData.Value);
+        ex.Data.Add(invalidData1.Key, invalidData1.Value);
         ex.Data.Add(invalidData2.Key, invalidData2.Value);
         sut.Process(ex, evt);
 
