@@ -7,7 +7,8 @@
 - `SentryOptions.AttachStackTrace` is now enabled by default. ([#1907](https://github.com/getsentry/sentry-dotnet/pull/1907))
 - Update Sentry Android SDK to version 6.4.1 ([#1911](https://github.com/getsentry/sentry-dotnet/pull/1911))
 - Update Sentry Cocoa SDK to version 7.24.1 ([#1912](https://github.com/getsentry/sentry-dotnet/pull/1912))
-- Add TransactionNameSource annotation ([#1910](https://github.com/getsentry/sentry-dotnet/pull/1910))
+- Add `TransactionNameSource` annotation ([#1910](https://github.com/getsentry/sentry-dotnet/pull/1910))
+- Add `User.Segment` property ([#1920](https://github.com/getsentry/sentry-dotnet/pull/1920))
 
 ## Fixes
 
