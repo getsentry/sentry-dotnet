@@ -13,18 +13,24 @@ public class SentryClientTests
     {
         public SentryOptions SentryOptions { get; set; } = new()
         {
-            AttachStacktrace = false
+            AttachStacktrace = false,
+            AutoSessionTracking = false
         };
 
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
-        public IClientReportRecorder ClientReportRecorder { get; set; } = Substitute.For<IClientReportRecorder>();
+        public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
 
         public Fixture()
         {
             SentryOptions.ClientReportRecorder = ClientReportRecorder;
+            BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
         }
 
-        public SentryClient GetSut() => new(SentryOptions, BackgroundWorker);
+        public SentryClient GetSut()
+        {
+            var randomValuesFactory = new IsolatedRandomValuesFactory();
+            return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory);
+        }
     }
 
     private readonly Fixture _fixture = new();
@@ -39,7 +45,6 @@ public class SentryClientTests
     public void CaptureEvent_ExceptionFiltered_EmptySentryId()
     {
         _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
-        _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
         var sut = _fixture.GetSut();
 
@@ -118,7 +123,6 @@ public class SentryClientTests
     {
         var expectedId = Guid.NewGuid();
         var expectedEvent = new SentryEvent(eventId: expectedId);
-        _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
         var sut = _fixture.GetSut();
 
@@ -131,7 +135,6 @@ public class SentryClientTests
     {
         var expectedId = Guid.NewGuid();
         var expectedEvent = new SentryEvent(eventId: expectedId);
-        _ = _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
 
         var sut = _fixture.GetSut();
 
@@ -191,9 +194,6 @@ public class SentryClientTests
     {
         _fixture.SentryOptions.BeforeSend = _ => null;
 
-        var transport = Substitute.For<ITransport>();
-        _fixture.SentryOptions.Transport = transport;
-
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
 
@@ -209,9 +209,6 @@ public class SentryClientTests
 
         _fixture.SentryOptions.AddEventProcessor(processor);
 
-        var transport = Substitute.For<ITransport>();
-        _fixture.SentryOptions.Transport = transport;
-
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
 
@@ -226,9 +223,6 @@ public class SentryClientTests
         filter.Filter(Arg.Any<Exception>()).Returns(true);
 
         _fixture.SentryOptions.AddExceptionFilter(filter);
-
-        var transport = Substitute.For<ITransport>();
-        _fixture.SentryOptions.Transport = transport;
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureException(new Exception());
@@ -287,9 +281,6 @@ public class SentryClientTests
     {
         _fixture.SentryOptions.SampleRate = float.Epsilon;
 
-        var transport = Substitute.For<ITransport>();
-        _fixture.SentryOptions.Transport = transport;
-
         var @event = new SentryEvent();
 
         var sut = _fixture.GetSut();
@@ -343,26 +334,13 @@ public class SentryClientTests
         const double allowedRelativeDeviation = 0.15;
         const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
         var expectedSampled = (int)(sampleRate * numEvents);
-
-        var worker = Substitute.For<IBackgroundWorker>();
-        worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
-
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            SampleRate = sampleRate,
-            AttachStacktrace = false,
-            AutoSessionTracking = false,
-            BackgroundWorker = worker
-        };
+        _fixture.SentryOptions.SampleRate = sampleRate;
 
         // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
         {
-            var randomValuesFactory = new IsolatedRandomValuesFactory();
-            var client = new SentryClient(options, randomValuesFactory);
-
             // Act
+            var client = _fixture.GetSut();
             var countSampled = 0;
             for (var i = 0; i < numEvents; i++)
             {
@@ -745,30 +723,5 @@ public class SentryClientTests
 
         var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
         _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
-    }
-
-    [Fact]
-    public async Task SentryClient_WithCachingTransport_RecordsDiscardedEvents()
-    {
-        var fileSystem = new FakeFileSystem();
-        using var cacheDirectory = new TempDirectory(fileSystem);
-        _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
-        _fixture.SentryOptions.FileSystem = fileSystem;
-        _fixture.SentryOptions.Dsn = ValidDsn;
-
-        var innerTransport = Substitute.For<ITransport>();
-        var cachingTransport = CachingTransport.Create(innerTransport, _fixture.SentryOptions);
-        _fixture.SentryOptions.Transport = cachingTransport;
-        await cachingTransport.StopWorkerAsync();
-
-        // This will drop the event and record a discard
-        _fixture.SentryOptions.BeforeSend = _ => null;
-
-        var sut = _fixture.GetSut();
-        _ = sut.CaptureEvent(new SentryEvent());
-        await cachingTransport.FlushAsync();
-
-        _fixture.ClientReportRecorder.Received(1)
-            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
     }
 }
