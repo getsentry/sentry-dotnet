@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry.Internal
@@ -24,9 +25,7 @@ namespace Sentry.Internal
         {
             _options.LogDebug("Running processor on exception: {0}", exception.Message);
 
-            var sentryExceptions = CreateSentryException(exception)
-                // Otherwise realization happens on the worker thread before sending event.
-                .ToList();
+            var sentryExceptions = CreateSentryExceptions(exception);
 
             MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
 
@@ -80,18 +79,34 @@ namespace Sentry.Internal
             }
         }
 
-        internal IEnumerable<SentryException> CreateSentryException(Exception exception)
+        internal List<SentryException> CreateSentryExceptions(Exception exception)
         {
-            return exception.EnumerateChainedExceptions(_options)
-                .Select(BuildSentryException);
+            var exceptions = exception
+                .EnumerateChainedExceptions(_options)
+                .Select(BuildSentryException)
+                .ToList();
+
+            // If we've filtered out the aggregate exception, we'll need to copy over details from it.
+            if (exception is AggregateException && !_options.KeepAggregateException)
+            {
+                var original = BuildSentryException(exception);
+
+                // Exceptions are sent from oldest to newest, so the details belong on the LAST exception.
+                var last = exceptions.Last();
+                last.Stacktrace = original.Stacktrace;
+                last.Mechanism = original.Mechanism;
+                original.Data.TryCopyTo(last.Data);
+            }
+
+            return exceptions;
         }
 
         private SentryException BuildSentryException(Exception innerException)
         {
             var sentryEx = new SentryException
             {
-                Type = innerException.GetType()?.FullName,
-                Module = innerException.GetType()?.Assembly?.FullName,
+                Type = innerException.GetType().FullName,
+                Module = innerException.GetType().Assembly.FullName,
                 Value = innerException.Message,
                 ThreadId = Environment.CurrentManagedThreadId,
                 Mechanism = GetMechanism(innerException)
