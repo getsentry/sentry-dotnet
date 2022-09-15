@@ -24,7 +24,7 @@ public class ScopeExtensionsTests
     public void HasUser_NullUser_ReturnsFalse()
     {
         var sut = _fixture.GetSut();
-        sut.User = null;
+        sut.User = null!;
         Assert.False(sut.HasUser());
     }
 
@@ -53,6 +53,14 @@ public class ScopeExtensionsTests
     }
 
     [Fact]
+    public void HasUser_UserWithEmail_ReturnsTrue()
+    {
+        var sut = _fixture.GetSut();
+        sut.User.Email = "test";
+        Assert.True(sut.HasUser());
+    }
+
+    [Fact]
     public void HasUser_UserWithIpAddress_ReturnsTrue()
     {
         var sut = _fixture.GetSut();
@@ -61,10 +69,10 @@ public class ScopeExtensionsTests
     }
 
     [Fact]
-    public void HasUser_UserWithEmail_ReturnsTrue()
+    public void HasUser_UserWithSegment_ReturnsTrue()
     {
         var sut = _fixture.GetSut();
-        sut.User.Email = "test";
+        sut.User.Segment = "test";
         Assert.True(sut.HasUser());
     }
 
@@ -408,8 +416,8 @@ public class ScopeExtensionsTests
         Assert.Equal(expectedMessage, actual.Message);
         Assert.Equal(expectedCategory, actual.Category);
         Assert.Equal(expectedType, actual.Type);
-        Assert.Equal(expectedData.key, actual.Data.Single().Key);
-        Assert.Equal(expectedData.value, actual.Data.Single().Value);
+        Assert.Equal(expectedData.key, actual.Data?.Single().Key);
+        Assert.Equal(expectedData.value, actual.Data?.Single().Value);
         Assert.Equal(expectedLevel, actual.Level);
     }
 #endif
@@ -435,8 +443,8 @@ public class ScopeExtensionsTests
         Assert.Equal(expectedMessage, actual.Message);
         Assert.Equal(expectedCategory, actual.Category);
         Assert.Equal(expectedType, actual.Type);
-        Assert.Equal(expectedData.Single().Key, actual.Data.Single().Key);
-        Assert.Equal(expectedData.Single().Value, actual.Data.Single().Value);
+        Assert.Equal(expectedData.Single().Key, actual.Data?.Single().Key);
+        Assert.Equal(expectedData.Single().Value, actual.Data?.Single().Value);
         Assert.Equal(expectedLevel, actual.Level);
     }
 
@@ -464,8 +472,8 @@ public class ScopeExtensionsTests
         Assert.Equal(expectedMessage, actual.Message);
         Assert.Equal(expectedCategory, actual.Category);
         Assert.Equal(expectedType, actual.Type);
-        Assert.Equal(expectedData.Single().Key, actual.Data.Single().Key);
-        Assert.Equal(expectedData.Single().Value, actual.Data.Single().Value);
+        Assert.Equal(expectedData.Single().Key, actual.Data?.Single().Key);
+        Assert.Equal(expectedData.Single().Value, actual.Data?.Single().Value);
         Assert.Equal(expectedLevel, actual.Level);
     }
 
@@ -510,10 +518,10 @@ public class ScopeExtensionsTests
         // Assert
         var attachment = Assert.Single(scope.Attachments);
 
-        Assert.Equal(expectedStream, attachment?.Content.GetStream());
-        Assert.Equal(expectedFileName, attachment?.FileName);
-        Assert.Equal(expectedType, attachment?.Type);
-        Assert.Equal(expectedContentType, attachment?.ContentType);
+        Assert.Equal(expectedStream, attachment.Content.GetStream());
+        Assert.Equal(expectedFileName, attachment.FileName);
+        Assert.Equal(expectedType, attachment.Type);
+        Assert.Equal(expectedContentType, attachment.ContentType);
     }
 
     [Fact]
@@ -554,9 +562,9 @@ public class ScopeExtensionsTests
 
         // Assert
         var attachment = Assert.Single(scope.Attachments);
-        using var stream = attachment?.Content.GetStream();
+        using var stream = attachment.Content.GetStream();
 
-        Assert.Equal("MyFile.txt", attachment?.FileName);
+        Assert.Equal("MyFile.txt", attachment.FileName);
         Assert.Equal(12, stream.Length);
     }
 
@@ -564,7 +572,7 @@ public class ScopeExtensionsTests
     public void Apply_Null_Target_DoesNotThrow()
     {
         var sut = _fixture.GetSut();
-        sut.Apply(null);
+        sut.Apply(null!);
     }
 
     [Fact]

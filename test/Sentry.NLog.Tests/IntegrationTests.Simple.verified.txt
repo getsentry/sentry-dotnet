@@ -44,10 +44,11 @@
             Request: {},
             Contexts: {},
             User: {
-              Email: ,
               Id: myId,
-              IpAddress: ,
               Username: ,
+              Email: ,
+              IpAddress: ,
+              Segment: ,
               Other: {
                 mood: joyous
               }

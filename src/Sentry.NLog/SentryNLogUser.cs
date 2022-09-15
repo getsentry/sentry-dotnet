@@ -27,6 +27,11 @@ public class SentryNLogUser
     public Layout? IpAddress { get; set; }
 
     /// <summary>
+    /// A <see cref="Layout"/> used to dynamically specify the segment of a user for a sentry event.
+    /// </summary>
+    public Layout? Segment { get; set; }
+
+    /// <summary>
     /// Additional information about the user
     /// </summary>
     /// <summary>

@@ -1,9 +1,4 @@
-﻿using NLog;
-using NLog.Config;
-using NLog.Targets;
-using Sentry.Testing;
-
-namespace Sentry.NLog.Tests;
+﻿namespace Sentry.NLog.Tests;
 
 [UsesVerify]
 public class IntegrationTests
@@ -31,6 +26,7 @@ public class IntegrationTests
                     Username = "${scopeproperty:item=username}",
                     Email = "${scopeproperty:item=email}",
                     IpAddress = "${scopeproperty:item=ipAddress}",
+                    Segment = "${scopeproperty:item=segment}",
                     Other =
                     {
                         new TargetPropertyWithContext("mood", "joyous")
