@@ -12,7 +12,6 @@ namespace Sentry.AspNetCore
     /// </summary>
     internal class SentryTracingMiddleware
     {
-        internal const string UnknownRouteTransactionName = "Unknown Route";
         private const string OperationName = "http.server";
 
         private readonly RequestDelegate _next;
@@ -161,10 +160,26 @@ namespace Sentry.AspNetCore
 
                     var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
 
-                    // If no Name was found for Transaction, fallback to UnknownRoute name.
+                    // If no Name was found for Transaction, then we don't have the route.
                     if (transaction.Name == string.Empty)
                     {
-                        transaction.Name = UnknownRouteTransactionName;
+                        var method = context.Request.Method.ToUpperInvariant();
+
+                        // If we've set a TransactionNameProvider, use that here
+                        var customTransactionName = context.TryGetCustomTransactionName();
+                        if (!string.IsNullOrEmpty(customTransactionName))
+                        {
+                            transaction.Name = $"{method} {customTransactionName}";
+                            ((TransactionTracer)transaction).NameSource = TransactionNameSource.Custom;
+                        }
+                        else
+                        {
+                            // Finally, fallback to using the URL path.
+                            // e.g. "GET /pets/1"
+                            var path = context.Request.Path;
+                            transaction.Name = $"{method} {path}";
+                            ((TransactionTracer)transaction).NameSource = TransactionNameSource.Url;
+                        }
                     }
 
                     if (exception is null)
