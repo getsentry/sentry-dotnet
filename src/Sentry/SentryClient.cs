@@ -21,6 +21,7 @@ namespace Sentry
     public class SentryClient : ISentryClient, IDisposable
     {
         private readonly SentryOptions _options;
+        private readonly RandomValuesFactory _randomValuesFactory;
 
         // Internal for testing.
         internal IBackgroundWorker Worker { get; }
@@ -36,13 +37,22 @@ namespace Sentry
         /// </summary>
         /// <param name="options">The configuration for this client.</param>
         public SentryClient(SentryOptions options)
-            : this(options, null) { }
+            : this(options, null, null) { }
 
         internal SentryClient(
             SentryOptions options,
-            IBackgroundWorker? worker)
+            RandomValuesFactory? randomValuesFactory)
+            : this(options, null, randomValuesFactory)
+        {
+        }
+
+        internal SentryClient(
+            SentryOptions options,
+            IBackgroundWorker? worker,
+            RandomValuesFactory? randomValuesFactory = null)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
+            _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
 
             options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
@@ -150,7 +160,7 @@ namespace Sentry
         {
             if (_options.SampleRate != null)
             {
-                if (!SynchronizedRandom.NextBool(_options.SampleRate.Value))
+                if (!_randomValuesFactory.NextBool(_options.SampleRate.Value))
                 {
                     _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
                     _options.LogDebug("Event sampled.");

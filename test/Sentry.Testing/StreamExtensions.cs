@@ -6,10 +6,11 @@ public static class StreamExtensions
     {
         var remainingLength = length;
         var buffer = new byte[81920];
+        var random = new Random();
 
         while (remainingLength > 0)
         {
-            SynchronizedRandom.NextBytes(buffer);
+            random.NextBytes(buffer);
 
             var bytesToCopy = (int)Math.Min(remainingLength, buffer.Length);
             await stream.WriteAsync(buffer, 0, bytesToCopy);
