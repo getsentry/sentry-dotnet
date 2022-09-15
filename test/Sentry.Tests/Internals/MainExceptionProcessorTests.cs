@@ -49,7 +49,7 @@ public class MainExceptionProcessorTests
         sut.Process(ex, evt);
 
         Assert.Equal(2, evt.Extra.Count);
-        Assert.Contains(evt.Extra, p => p.Key == expectedKey && (int)p.Value == expectedValue);
+        Assert.Contains(evt.Extra, p => p.Key == expectedKey && p.Value is expectedValue);
     }
 
     [Fact]
@@ -251,9 +251,9 @@ public class MainExceptionProcessorTests
     {
         //Assert
         var sut = _fixture.GetSut();
-        var InvalidTag = new KeyValuePair<string, int>("Tag1", 1234);
-        var InvalidTag2 = new KeyValuePair<string, int?>("Tag2", null);
-        var InvalidTag3 = new KeyValuePair<string, string>("", "abcd");
+        var invalidTag = new KeyValuePair<string, int>("Tag1", 1234);
+        var invalidTag2 = new KeyValuePair<string, int?>("Tag2", null);
+        var invalidTag3 = new KeyValuePair<string, string>("", "abcd");
 
         var expectedTag = new KeyValuePair<string, object>("Exception[0][sentry:tag:Tag1]", 1234);
         var expectedTag2 = new KeyValuePair<string, object>("Exception[0][sentry:tag:Tag2]", null);
@@ -263,9 +263,9 @@ public class MainExceptionProcessorTests
         var evt = new SentryEvent();
 
         //Act
-        ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{InvalidTag.Key}", InvalidTag.Value);
-        ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{InvalidTag2.Key}", InvalidTag2.Value);
-        ex.AddSentryTag(InvalidTag3.Key, InvalidTag3.Value);
+        ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{invalidTag.Key}", invalidTag.Value);
+        ex.Data.Add($"{MainExceptionProcessor.ExceptionDataTagKey}{invalidTag2.Key}", invalidTag2.Value);
+        ex.AddSentryTag(invalidTag3.Key, invalidTag3.Value);
 
         sut.Process(ex, evt);
 
@@ -338,18 +338,18 @@ public class MainExceptionProcessorTests
     {
         //Assert
         var sut = _fixture.GetSut();
-        var InvalidData = new KeyValuePair<string, string>("sentry:attachment:filename", "./path");
-        var InvalidData2 = new KeyValuePair<string, int?>("sentry:unsupported:value", null);
+        var invalidData = new KeyValuePair<string, string>("sentry:attachment:filename", "./path");
+        var invalidData2 = new KeyValuePair<string, int?>("sentry:unsupported:value", null);
 
-        var expectedData = new KeyValuePair<string, object>($"Exception[0][{InvalidData.Key}]", InvalidData.Value);
-        var expectedData2 = new KeyValuePair<string, object>($"Exception[0][{InvalidData2.Key}]", InvalidData2.Value);
+        var expectedData = new KeyValuePair<string, object>($"Exception[0][{invalidData.Key}]", invalidData.Value);
+        var expectedData2 = new KeyValuePair<string, object>($"Exception[0][{invalidData2.Key}]", invalidData2.Value);
 
         var ex = new Exception();
         var evt = new SentryEvent();
 
         //Act
-        ex.Data.Add(InvalidData.Key, InvalidData.Value);
-        ex.Data.Add(InvalidData2.Key, InvalidData2.Value);
+        ex.Data.Add(invalidData.Key, invalidData.Value);
+        ex.Data.Add(invalidData2.Key, invalidData2.Value);
         sut.Process(ex, evt);
 
         //Assert

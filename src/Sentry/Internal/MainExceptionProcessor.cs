@@ -107,8 +107,8 @@ namespace Sentry.Internal
         {
             var sentryEx = new SentryException
             {
-                Type = innerException.GetType()?.FullName,
-                Module = innerException.GetType()?.Assembly?.FullName,
+                Type = innerException.GetType().FullName,
+                Module = innerException.GetType().Assembly.FullName,
                 Value = innerException.Message,
                 ThreadId = Environment.CurrentManagedThreadId,
                 Mechanism = GetMechanism(innerException)
