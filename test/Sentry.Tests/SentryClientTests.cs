@@ -344,21 +344,24 @@ public class SentryClientTests
         const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
         var expectedSampled = (int)(sampleRate * numEvents);
 
+        var worker = Substitute.For<IBackgroundWorker>();
+        worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
+
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
             SampleRate = sampleRate,
             AttachStacktrace = false,
             AutoSessionTracking = false,
-            Transport = Substitute.For<ITransport>()
+            BackgroundWorker = worker
         };
-
-        var randomValuesFactory = new IsolatedRandomValuesFactory();
-        var client = new SentryClient(options, randomValuesFactory);
 
         // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
         {
+            var randomValuesFactory = new IsolatedRandomValuesFactory();
+            var client = new SentryClient(options, randomValuesFactory);
+
             // Act
             var countSampled = 0;
             for (var i = 0; i < numEvents; i++)
