@@ -25,9 +25,7 @@ namespace Sentry.Internal
         {
             _options.LogDebug("Running processor on exception: {0}", exception.Message);
 
-            var sentryExceptions = CreateSentryException(exception)
-                // Otherwise realization happens on the worker thread before sending event.
-                .ToList();
+            var sentryExceptions = CreateSentryException(exception);
 
             MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
 
@@ -81,7 +79,7 @@ namespace Sentry.Internal
             }
         }
 
-        internal IEnumerable<SentryException> CreateSentryException(Exception exception)
+        internal List<SentryException> CreateSentryException(Exception exception)
         {
             var exceptions = exception
                 .EnumerateChainedExceptions(_options)
