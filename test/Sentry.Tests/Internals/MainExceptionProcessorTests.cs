@@ -144,7 +144,7 @@ public class MainExceptionProcessorTests
             Data = { [new object()] = new object() }
         };
 
-        var actual = sut.CreateSentryException(ex);
+        var actual = sut.CreateSentryExceptions(ex);
 
         Assert.Empty(actual.Single().Data);
     }
@@ -156,7 +156,7 @@ public class MainExceptionProcessorTests
         var sut = _fixture.GetSut();
         var aggregateException = BuildAggregateException();
 
-        var sentryException = sut.CreateSentryException(aggregateException);
+        var sentryException = sut.CreateSentryExceptions(aggregateException);
 
         return Verify(sentryException);
     }
@@ -169,7 +169,7 @@ public class MainExceptionProcessorTests
         var sut = _fixture.GetSut();
         var aggregateException = BuildAggregateException();
 
-        var sentryException = sut.CreateSentryException(aggregateException);
+        var sentryException = sut.CreateSentryExceptions(aggregateException);
 
         return Verify(sentryException)
             .ScrubLines(x => x.Contains("One or more errors occurred"));

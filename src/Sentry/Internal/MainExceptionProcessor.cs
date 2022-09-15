@@ -25,7 +25,7 @@ namespace Sentry.Internal
         {
             _options.LogDebug("Running processor on exception: {0}", exception.Message);
 
-            var sentryExceptions = CreateSentryException(exception);
+            var sentryExceptions = CreateSentryExceptions(exception);
 
             MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
 
@@ -79,7 +79,7 @@ namespace Sentry.Internal
             }
         }
 
-        internal List<SentryException> CreateSentryException(Exception exception)
+        internal List<SentryException> CreateSentryExceptions(Exception exception)
         {
             var exceptions = exception
                 .EnumerateChainedExceptions(_options)
