@@ -161,14 +161,25 @@ namespace Sentry.AspNetCore
                     var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
 
                     // If no Name was found for Transaction, then we don't have the route.
-                    // Fallback to the URL path.
                     if (transaction.Name == string.Empty)
                     {
-                        // e.g. "GET /pets/1"
                         var method = context.Request.Method.ToUpperInvariant();
-                        var path = context.Request.Path;
-                        transaction.Name = $"{method} {path}";
-                        ((TransactionTracer)transaction).NameSource = TransactionNameSource.Url;
+
+                        // If we've set a TransactionNameProvider, use that here
+                        var customTransactionName = context.TryGetCustomTransactionName();
+                        if (!string.IsNullOrEmpty(customTransactionName))
+                        {
+                            transaction.Name = $"{method} {customTransactionName}";
+                            ((TransactionTracer)transaction).NameSource = TransactionNameSource.Custom;
+                        }
+                        else
+                        {
+                            // Finally, fallback to using the URL path.
+                            // e.g. "GET /pets/1"
+                            var path = context.Request.Path;
+                            transaction.Name = $"{method} {path}";
+                            ((TransactionTracer)transaction).NameSource = TransactionNameSource.Url;
+                        }
                     }
 
                     if (exception is null)

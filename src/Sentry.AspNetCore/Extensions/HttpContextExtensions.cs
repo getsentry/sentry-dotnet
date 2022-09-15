@@ -23,15 +23,11 @@ namespace Sentry.AspNetCore.Extensions
                 return formattedRoute;
             }
 #endif
-            if (LegacyRouteFormat(context) is { } legacyFormat)
-            {
-                return legacyFormat;
-            }
-
-            var sentryRouteName = context.Features.Get<TransactionNameProvider>();
-
-            return sentryRouteName?.Invoke(context);
+            return LegacyRouteFormat(context);
         }
+
+        public static string? TryGetCustomTransactionName(this HttpContext context) =>
+            context.Features.Get<TransactionNameProvider>()?.Invoke(context);
 
         // Internal for testing.
         internal static string? NewRouteFormat(string? routePattern, HttpContext context)
