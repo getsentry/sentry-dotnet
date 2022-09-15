@@ -211,12 +211,11 @@ public class HttpContextExtensionsTests
     {
         // Arrange
         var expectedName = "abc";
-        TransactionNameProvider sentryRouteName = _ => expectedName;
         var httpContext = Fixture.GetSut();
-        httpContext.Features.Set(sentryRouteName);
+        httpContext.Features.Set((TransactionNameProvider) (_ => expectedName));
 
         // Act
-        var filteredRoute = httpContext.TryGetRouteTemplate();
+        var filteredRoute = httpContext.TryGetCustomTransactionName();
 
         // Assert
         Assert.Equal(expectedName, filteredRoute);

@@ -350,11 +350,11 @@ public class SentryTracingMiddlewareTests
         // Assert
         transaction.Should().NotBeNull();
         transaction.Name.Should().Be($"GET {expectedName}");
-        transaction.NameSource.Should().Be(TransactionNameSource.Route);
+        transaction.NameSource.Should().Be(TransactionNameSource.Custom);
     }
 
     [Fact]
-    public async Task Transaction_TransactionNameProviderSetUnset_UnknownTransactionNameSet()
+    public async Task Transaction_TransactionNameProviderSetUnset_TransactionNameSetToUrlPath()
     {
         // Arrange
         Transaction transaction = null;
@@ -391,8 +391,8 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         transaction.Should().NotBeNull();
-        transaction.Name.Should().Be("Unknown Route");
-        transaction.NameSource.Should().Be(TransactionNameSource.Route);
+        transaction.Name.Should().Be("GET /person/13.bmp");
+        transaction.NameSource.Should().Be(TransactionNameSource.Url);
     }
 }
 

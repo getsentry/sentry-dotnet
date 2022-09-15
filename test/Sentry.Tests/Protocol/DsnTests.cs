@@ -281,13 +281,15 @@ public class DsnTests
 
     private class DsnTestCase
     {
+        private static readonly Random Random = new();
+
         public string Scheme { get; set; } = "https";
         public string PublicKey { get; set; } = Guid.NewGuid().ToString("N");
         public string SecretKey { get; set; } = Guid.NewGuid().ToString("N");
         public string Host { get; set; } = "sentry.io";
         public string Path { get; set; } = "/some-path";
-        public int? Port { get; set; } = SynchronizedRandom.Next(1, 65535);
-        public string ProjectId { get; set; } = SynchronizedRandom.Next().ToString();
+        public int? Port { get; set; } = Random.Next(1, 65535);
+        public string ProjectId { get; set; } = Random.Next().ToString();
 
         public string CredentialSeparator { private get; set; } = ":";
         public string UserInfoSeparator { private get; set; } = "@";

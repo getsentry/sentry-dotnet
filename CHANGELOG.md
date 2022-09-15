@@ -9,6 +9,8 @@
 - Update Sentry Cocoa SDK to version 7.24.1 ([#1912](https://github.com/getsentry/sentry-dotnet/pull/1912))
 - Add `TransactionNameSource` annotation ([#1910](https://github.com/getsentry/sentry-dotnet/pull/1910))
 - Add `User.Segment` property ([#1920](https://github.com/getsentry/sentry-dotnet/pull/1920))
+- Add TransactionNameSource annotation ([#1910](https://github.com/getsentry/sentry-dotnet/pull/1910))
+- Use URL path in transaction names instead of "Unknown Route" ([#1919](https://github.com/getsentry/sentry-dotnet/pull/1919))
 
 ## Fixes
 
