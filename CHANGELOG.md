@@ -14,6 +14,7 @@
 ## Fixes
 
 - Reduce lock contention when sampling ([#1915](https://github.com/getsentry/sentry-dotnet/pull/1915))
+- Dont send transaction for OPTIONS web request ([#1921](https://github.com/getsentry/sentry-dotnet/pull/1921))
 
 ## 3.21.0
 

@@ -20,49 +20,5 @@
       }
     }
   },
-  Payloads: [
-    {
-      Source: {
-        Name: OPTIONS /Target,
-        NameSource: Url,
-        Platform: csharp,
-        Operation: http.server,
-        Description: ,
-        Status: Ok,
-        IsSampled: true,
-        Request: {
-          Method: OPTIONS,
-          QueryString: 
-        },
-        Contexts: {
-          trace: {
-            Operation: http.server,
-            Description: ,
-            Status: Ok,
-            IsSampled: true
-          }
-        },
-        User: {},
-        Environment: production,
-        Breadcrumbs: [
-          {
-            Message: Request starting HTTP/1.1 OPTIONS http://localhost/Target - -,
-            Data: {
-              eventId: 1
-            },
-            Category: Microsoft.AspNetCore.Hosting.Diagnostics
-          },
-          {
-            Message: CORS policy execution successful.,
-            Data: {
-              eventId: PolicySuccess
-            },
-            Category: Microsoft.AspNetCore.Cors.Infrastructure.CorsService
-          }
-        ],
-        Tags: {},
-        IsFinished: true
-      }
-    }
-  ]
+  Payloads: []
 }
