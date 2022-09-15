@@ -46,6 +46,7 @@ public class SentryClientTests
     public void CaptureEvent_ExceptionFilteredForType(Exception exception, bool shouldFilter)
     {
         _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
+        _fixture.SentryOptions.AddExceptionFilterForType<ApplicationException>();
 
         var sut = _fixture.GetSut();
         var result = sut.CaptureException(exception);
@@ -64,7 +65,19 @@ public class SentryClientTests
             new object[] {new ArithmeticException(), true},
 
             // Not filtered since it's not in the inheritance chain
-            new object[] {new Exception(), false}
+            new object[] {new Exception(), false},
+
+            // Filtered because it's the only exception under an aggregate exception
+            new object[] {new AggregateException(new SystemException()), true},
+
+            // Filtered because all exceptions under the aggregate exception are the filtered or derived type
+            new object[] {new AggregateException(new SystemException(), new ArithmeticException()), true},
+
+            // Filtered because all exceptions under the aggregate exception are covered by all of the filters
+            new object[] {new AggregateException(new SystemException(), new ApplicationException()), true},
+
+            // Not filtered because there's an exception under the aggregate not covered by the filters
+            new object[] {new AggregateException(new SystemException(), new Exception()), false}
         };
 
     [Fact]
