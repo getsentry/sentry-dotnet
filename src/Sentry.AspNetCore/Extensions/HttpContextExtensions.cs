@@ -162,7 +162,7 @@ namespace Sentry.AspNetCore.Extensions
 
             var method = context.Request.Method.ToUpperInvariant();
 
-            // e.g. "GET /pets/1"
+            // e.g. "GET /pets/{id}"
             return $"{method} {route}";
         }
     }
