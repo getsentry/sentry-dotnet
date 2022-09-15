@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Net.Http;
 using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -51,6 +52,12 @@ namespace Sentry.AspNetCore
 
         private ITransaction? TryStartTransaction(HttpContext context)
         {
+            if (context.Request.Method == HttpMethod.Options.Method)
+            {
+                _options.LogInfo("No transaction started due to Options request.");
+                return null;
+            }
+
             try
             {
                 var hub = _getHub();
