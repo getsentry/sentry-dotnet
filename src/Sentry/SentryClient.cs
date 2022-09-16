@@ -168,15 +168,13 @@ namespace Sentry
                 }
             }
 
-            if (@event.Exception != null && _options.ExceptionFilters?.Count > 0)
+            var filteredExceptions = ApplyExceptionFilters(@event.Exception);
+            if (filteredExceptions?.Count > 0)
             {
-                if (_options.ExceptionFilters.Any(f => f.Filter(@event.Exception)))
-                {
-                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
-                    _options.LogInfo("Event with exception of type '{0}' was dropped by an exception filter.",
-                        @event.Exception.GetType());
-                    return SentryId.Empty;
-                }
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+                _options.LogInfo("Event was dropped by one or more exception filters for exception(s): {0}",
+                    string.Join(", ", filteredExceptions.Select(e => e.GetType()).Distinct()));
+                return SentryId.Empty;
             }
 
             scope ??= new Scope(_options);
@@ -230,6 +228,34 @@ namespace Sentry
             return CaptureEnvelope(Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, scope.Attachments, scope.SessionUpdate))
                 ? processedEvent.EventId
                 : SentryId.Empty;
+        }
+
+        private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
+        {
+            var filters = _options.ExceptionFilters;
+            if (exception == null || filters == null || filters.Count == 0)
+            {
+                // There was nothing to filter.
+                return null;
+            }
+
+            if (filters.Any(f => f.Filter(exception)))
+            {
+                // The event should be filtered based on the given exception
+                return new[] {exception};
+            }
+
+            if (exception is AggregateException aggregate &&
+                aggregate.InnerExceptions.All(e => ApplyExceptionFilters(e) != null))
+            {
+                // All inner exceptions of the aggregate matched a filter, so the event should be filtered.
+                // Note that _options.KeepAggregateException is not relevant here.  Even if we want to keep aggregate
+                // exceptions, we would still never send one if all of its children are supposed to be filtered.
+                return aggregate.InnerExceptions;
+            }
+
+            // The event should not be filtered.
+            return null;
         }
 
         /// <summary>
