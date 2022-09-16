@@ -17,6 +17,7 @@
 - Dont send transaction for OPTIONS web request ([#1921](https://github.com/getsentry/sentry-dotnet/pull/1921))
 - Fix missing details when aggregate exception is filtered out ([#1922](https://github.com/getsentry/sentry-dotnet/pull/1922))
 - Exception filters should consider child exceptions of an `AggregateException` ([#1924](https://github.com/getsentry/sentry-dotnet/pull/1924))
+- Add Blazor WASM detection to set IsGlobalModeEnabled to true ([#1931](https://github.com/getsentry/sentry-dotnet/pull/1931))
 
 ## 3.21.0
 
