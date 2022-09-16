@@ -60,7 +60,7 @@ namespace Sentry
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// Should be <c>true</c> for client applications and <c>false</c> for server applications.
-        /// The default is <c>false</c>.
+        /// The default is <c>false</c>. The default for Blazor WASM, MAUI, and Mobile apps is <c>true</c>.
         /// </summary>
         public bool IsGlobalModeEnabled { get; set; }
 #if(NET5_0_OR_GREATER)
