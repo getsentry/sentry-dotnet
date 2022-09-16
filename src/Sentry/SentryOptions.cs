@@ -246,9 +246,13 @@ namespace Sentry
         }
 
         /// <summary>
-        /// The release version of the application.
+        /// The release information for the application.
+        /// Can be anything, but generally should be either a semantic version string in the format
+        /// <c>package@version</c> or <c>package@version+build</c>, or a commit SHA from a version control system.
         /// </summary>
         /// <example>
+        /// MyApp@1.2.3
+        /// MyApp@1.2.3+foo
         /// 721e41770371db95eee98ca2707686226b993eda
         /// 14.1.16.32451
         /// </example>
