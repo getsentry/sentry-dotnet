@@ -13,6 +13,7 @@ using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
+using System.Runtime.InteropServices;
 
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internals.DiagnosticSource;
@@ -62,6 +63,9 @@ namespace Sentry
         /// The default is <c>false</c>.
         /// </summary>
         public bool IsGlobalModeEnabled { get; set; }
+#if(NET5_0_OR_GREATER)
+            = RuntimeInformation.RuntimeIdentifier == "browser-wasm";
+#endif
 #endif
 
         /// <summary>
