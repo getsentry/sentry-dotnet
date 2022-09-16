@@ -42,11 +42,13 @@ public class SentryClientTests
     }
 
     [Theory]
-    [MemberData(nameof(ExceptionFilterTestCases))]
-    public void CaptureEvent_ExceptionFilteredForType(Exception exception, bool shouldFilter)
+    [MemberData(nameof(GetExceptionFilterTestCases))]
+    public void CaptureEvent_ExceptionFilteredForType(bool shouldFilter, Exception exception, params IExceptionFilter[] filters)
     {
-        _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
-        _fixture.SentryOptions.AddExceptionFilterForType<ApplicationException>();
+        foreach (var filter in filters)
+        {
+            _fixture.SentryOptions.AddExceptionFilter(filter);
+        }
 
         var sut = _fixture.GetSut();
         var result = sut.CaptureException(exception);
@@ -55,30 +57,77 @@ public class SentryClientTests
         _fixture.BackgroundWorker.Received(result == default ? 0 : 1).EnqueueEnvelope(Arg.Any<Envelope>());
     }
 
-    public static IEnumerable<object[]> ExceptionFilterTestCases =>
-        new List<object[]>
+    public static IEnumerable<object[]> GetExceptionFilterTestCases()
+    {
+        var systemExceptionFilter = new ExceptionTypeFilter<SystemException>();
+        var applicationExceptionFilter = new ExceptionTypeFilter<ApplicationException>();
+        var aggregateExceptionFilter = new ExceptionTypeFilter<AggregateException>();
+
+        // Filtered out for it's the exact filtered type
+        yield return new object[]
         {
-            // Filtered out for it's the exact filtered type
-            new object[] {new SystemException(), true},
-
-            // Filtered for it's a derived type
-            new object[] {new ArithmeticException(), true},
-
-            // Not filtered since it's not in the inheritance chain
-            new object[] {new Exception(), false},
-
-            // Filtered because it's the only exception under an aggregate exception
-            new object[] {new AggregateException(new SystemException()), true},
-
-            // Filtered because all exceptions under the aggregate exception are the filtered or derived type
-            new object[] {new AggregateException(new SystemException(), new ArithmeticException()), true},
-
-            // Filtered because all exceptions under the aggregate exception are covered by all of the filters
-            new object[] {new AggregateException(new SystemException(), new ApplicationException()), true},
-
-            // Not filtered because there's an exception under the aggregate not covered by the filters
-            new object[] {new AggregateException(new SystemException(), new Exception()), false}
+            true,
+            new SystemException(),
+            systemExceptionFilter
         };
+
+        // Filtered for it's a derived type
+        yield return new object[]
+        {
+            true,
+            new ArithmeticException(),
+            systemExceptionFilter
+        };
+
+        // Not filtered since it's not in the inheritance chain
+        yield return new object[]
+        {
+            false,
+            new Exception(),
+            systemExceptionFilter
+        };
+
+        // Filtered because it's the only exception under an aggregate exception
+        yield return new object[]
+        {
+            true,
+            new AggregateException(new SystemException()),
+            systemExceptionFilter
+        };
+
+        // Filtered because all exceptions under the aggregate exception are the filtered or derived type
+        yield return new object[]
+        {
+            true,
+            new AggregateException(new SystemException(), new ArithmeticException()),
+            systemExceptionFilter
+        };
+
+        // Filtered because all exceptions under the aggregate exception are covered by all of the filters
+        yield return new object[]
+        {
+            true,
+            new AggregateException(new SystemException(), new ApplicationException()),
+            systemExceptionFilter,
+            applicationExceptionFilter
+        };
+
+        // Not filtered because there's an exception under the aggregate not covered by the filters
+        yield return new object[]
+        {
+            false,
+            new AggregateException(new SystemException(), new Exception()),
+            systemExceptionFilter
+        };
+
+        // Filtered because we're specifically filtering out aggregate exceptions (strange, but should work)
+        yield return new object[]
+        {
+            true,
+            new AggregateException(),
+            aggregateExceptionFilter
+        };
+    }
 
     [Fact]
     public void CaptureEvent_IdReturnedToString_NoDashes()

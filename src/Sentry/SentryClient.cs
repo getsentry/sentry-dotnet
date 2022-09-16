@@ -235,19 +235,27 @@ namespace Sentry
             var filters = _options.ExceptionFilters;
             if (exception == null || filters == null || filters.Count == 0)
             {
+                // There was nothing to filter.
                 return null;
             }
 
-            // Note that _options.KeepAggregateException is not relevant here.  Even if we want to keep aggregate
-            // exceptions, we would still never send one if all of its children are supposed to be filtered.
-            if (exception is AggregateException aggregate)
+            if (filters.Any(f => f.Filter(exception)))
             {
-                return aggregate.InnerExceptions.All(e => ApplyExceptionFilters(e) != null)
-                    ? aggregate.InnerExceptions
-                    : null;
+                // The event should be filtered based on the given exception
+                return new[] {exception};
             }
 
-            return filters.Any(f => f.Filter(exception)) ? new[] {exception} : null;
+            if (exception is AggregateException aggregate &&
+                aggregate.InnerExceptions.All(e => ApplyExceptionFilters(e) != null))
+            {
+                // All inner exceptions of the aggregate matched a filter, so the event should be filtered.
+                // Note that _options.KeepAggregateException is not relevant here.  Even if we want to keep aggregate
+                // exceptions, we would still never send one if all of its children are supposed to be filtered.
+                return aggregate.InnerExceptions;
+            }
+
+            // The event should not be filtered.
+            return null;
         }
 
         /// <summary>
