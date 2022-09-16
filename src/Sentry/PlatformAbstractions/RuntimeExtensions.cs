@@ -32,6 +32,13 @@ namespace Sentry.PlatformAbstractions
         /// <returns>True if it's Mono, otherwise false.</returns>
         public static bool IsMono(this Runtime runtime) => runtime.StartsWith("Mono");
 
+        /// <summary>
+        /// Is the runtime instance Browser Web Assembly.
+        /// </summary>
+        /// <param name="runtime">The runtime instance to check.</param>
+        /// <returns>True if it's Browser WASM, otherwise false.</returns>
+        internal static bool IsBrowserWasm(this Runtime runtime) => runtime.Identifier == "browser-wasm";
+
         private static bool StartsWith(this Runtime? runtime, string runtimeName) =>
             runtime?.Name?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true ||
             runtime?.Raw?.StartsWith(runtimeName, StringComparison.OrdinalIgnoreCase) == true;
