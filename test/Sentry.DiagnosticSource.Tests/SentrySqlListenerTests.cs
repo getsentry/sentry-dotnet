@@ -114,7 +114,32 @@ public class SentrySqlListenerTests
         // Assert
         var spans = _fixture.Spans.Where(s => s.Operation != "abc");
         Assert.NotEmpty(spans);
+
         Assert.True(GetValidator(key)(_fixture.Spans.First()));
+    }
+
+    [Theory]
+    [InlineData(SqlMicrosoftBeforeExecuteCommand, true)]
+    [InlineData(SqlDataBeforeExecuteCommand, true)]
+    [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, false)]
+    [InlineData(SqlDataWriteConnectionOpenBeforeCommand, false)]
+    public void OnNext_KnownButNotSampled_SpanNotCreated(string key, bool addConnectionSpan)
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        _fixture.Tracer.IsSampled = false;
+        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        if (addConnectionSpan)
+        {
+            _fixture.Tracer.StartChild("abc").SetExtra(ConnectionExtraKey, Guid.Empty);
+        }
+
+        // Act
+        interceptor.OnNext(
+            new(key,
+                new { OperationId = Guid.NewGuid(), ConnectionId = Guid.NewGuid(), Command = new { CommandText = "" } }));
+
+        Assert.Empty(_fixture.Tracer.Spans);
     }
 
     [Theory]
