@@ -56,7 +56,7 @@ namespace Sentry
         public const string Platform = "csharp";
         public const int ProtocolVersion = 7;
     }
-    public sealed class Contexts : System.Collections.Concurrent.ConcurrentDictionary<string, object>, Sentry.IJsonSerializable
+    public sealed class Contexts : System.Collections.Concurrent.ConcurrentDictionary<string, object?>, Sentry.IJsonSerializable
     {
         public Contexts() { }
         public Sentry.Protocol.App App { get; }
