@@ -294,7 +294,7 @@ namespace Sentry.Protocol
         /// </summary>
         internal void UpdateFrom(Device source) => ((IUpdatable<Device>)this).UpdateFrom(source);
 
-        void IUpdatable.UpdateFrom(object source)
+        void IUpdatable.UpdateFrom(object? source)
         {
             if (source is Device device)
             {

@@ -46,7 +46,7 @@ namespace Sentry.Protocol
         /// </summary>
         internal void UpdateFrom(Browser source) => ((IUpdatable<Browser>)this).UpdateFrom(source);
 
-        void IUpdatable.UpdateFrom(object source)
+        void IUpdatable.UpdateFrom(object? source)
         {
             if (source is Browser browser)
             {

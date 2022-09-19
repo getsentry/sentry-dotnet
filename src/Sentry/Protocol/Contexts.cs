@@ -15,7 +15,7 @@ namespace Sentry
     /// Represents Sentry's structured Context.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
-    public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerializable
+    public sealed class Contexts : ConcurrentDictionary<string, object?>, IJsonSerializable
     {
         /// <summary>
         /// Describes the application.
@@ -159,11 +159,7 @@ namespace Sentry
                 else
                 {
                     // Unknown context - parse as dictionary
-                    var dynamicContext = value.GetDynamicOrNull();
-                    if (dynamicContext is not null)
-                    {
-                        result[name] = dynamicContext;
-                    }
+                    result[name] = value.GetDynamicOrNull();
                 }
             }
 

@@ -8,6 +8,6 @@ namespace Sentry.Internal
 
     internal interface IUpdatable
     {
-        void UpdateFrom(object source);
+        void UpdateFrom(object? source);
     }
 }

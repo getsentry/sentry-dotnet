@@ -8,7 +8,7 @@ namespace Sentry.Internal.Extensions
     internal static class CollectionsExtensions
     {
         public static TValue GetOrCreate<TValue>(
-            this ConcurrentDictionary<string, object> dictionary,
+            this ConcurrentDictionary<string, object?> dictionary,
             string key)
             where TValue : class, new()
         {
@@ -17,6 +17,11 @@ namespace Sentry.Internal.Extensions
             if (value is TValue casted)
             {
                 return casted;
+            }
+
+            if (value == null)
+            {
+                throw new($"Expected a type of {typeof(TValue)} to exist for the key '{key}'. Instead found a null. The likely cause of this is that the value for '{key}' has been incorrectly set to an instance of a different type.");
             }
 
             throw new($"Expected a type of {typeof(TValue)} to exist for the key '{key}'. Instead found a {value.GetType()}. The likely cause of this is that the value for '{key}' has been incorrectly set to an instance of a different type.");

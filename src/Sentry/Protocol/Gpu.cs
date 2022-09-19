@@ -151,7 +151,7 @@ namespace Sentry.Protocol
         /// </summary>
         internal void UpdateFrom(Gpu source) => ((IUpdatable<Gpu>)this).UpdateFrom(source);
 
-        void IUpdatable.UpdateFrom(object source)
+        void IUpdatable.UpdateFrom(object? source)
         {
             if (source is Gpu gpu)
             {
