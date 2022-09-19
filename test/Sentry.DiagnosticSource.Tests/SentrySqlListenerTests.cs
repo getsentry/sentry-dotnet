@@ -119,20 +119,14 @@ public class SentrySqlListenerTests
     }
 
     [Theory]
-    [InlineData(SqlMicrosoftBeforeExecuteCommand, true)]
-    [InlineData(SqlDataBeforeExecuteCommand, true)]
-    [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, false)]
-    [InlineData(SqlDataWriteConnectionOpenBeforeCommand, false)]
-    public void OnNext_KnownButNotSampled_SpanNotCreated(string key, bool addConnectionSpan)
+    [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand)]
+    [InlineData(SqlDataWriteConnectionOpenBeforeCommand)]
+    public void OnNext_KnownButNotSampled_SpanNotCreated(string key)
     {
         // Arrange
         var hub = _fixture.Hub;
         _fixture.Tracer.IsSampled = false;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
-        if (addConnectionSpan)
-        {
-            _fixture.Tracer.StartChild("abc").SetExtra(ConnectionExtraKey, Guid.Empty);
-        }
 
         // Act
         interceptor.OnNext(
