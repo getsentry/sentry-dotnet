@@ -490,14 +490,18 @@ public class EnvelopeTests
         var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
         var @event = new SentryEvent(ex, timestamp, id)
         {
-            User = new User { Id = "user-id" },
-            Request = new Request { Method = "POST" },
-            Contexts = new Contexts { ["context_key"] = "context_value" },
-            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" },
+            User = new() { Id = "user-id" },
+            Request = new() { Method = "POST" },
+            Contexts = new()
+            {
+                ["context_key"] = "context_value",
+                ["context_key_with_null_value"] = null
+            },
+            Sdk = new() { Name = "SDK-test", Version = "1.0.0" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
             Logger = "logger",
-            Message = new SentryMessage
+            Message = new()
             {
                 Message = "message",
                 Formatted = "structured_message"
@@ -525,6 +529,10 @@ public class EnvelopeTests
 
         using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
 
+        var payload = (JsonSerializable) envelopeRoundtrip.Items[0].Payload;
+        var sentryEvent = (SentryEvent) payload.Source;
+        Assert.True(sentryEvent.Contexts.ContainsKey("context_key_with_null_value"));
+        Assert.Null(sentryEvent.Contexts["context_key_with_null_value"]);
         // Assert
         envelopeRoundtrip.Should().BeEquivalentTo(envelope);
     }
