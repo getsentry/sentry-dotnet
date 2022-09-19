@@ -581,7 +581,11 @@ public class EnvelopeTests
         var @event = new SentryEvent
         {
             Message = "Test",
-            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
+            Sdk = new()
+            {
+                Name = "SDK-test",
+                Version = "1.0.0"
+            }
         };
 
         using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});

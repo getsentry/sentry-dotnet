@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Sentry.Testing;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
@@ -140,6 +141,25 @@ public class ContextsTests
             ["Bar"] = 42,
             ["Baz"] = "kek"
         });
+    }
+
+    [Fact]
+    public void SerializeObject_Null_Should_Not_Be_Ignored()
+    {
+        // Arrange
+        var contexts = new Contexts
+        {
+            ["key"] = null
+        };
+
+        // Act
+        var json = contexts.ToJsonString(_testOutputLogger);
+        var roundtrip = Json.Parse(json, Contexts.FromJson);
+
+        // Assert
+        json.Should().Be("{\"key\":null}");
+
+        roundtrip["key"].Should().BeNull();
     }
 
     [Fact]
