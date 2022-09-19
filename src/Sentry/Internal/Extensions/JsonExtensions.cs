@@ -11,7 +11,7 @@ namespace Sentry.Internal.Extensions
     {
         // The Json options with a preset of rules that will remove dangerous and problematic
         // data from the serialized object.
-        private static JsonSerializerOptions serializerOption = new()
+        internal static readonly JsonSerializerOptions SerializerOptions = new()
         {
             Converters =
             {
@@ -344,7 +344,7 @@ namespace Sentry.Internal.Extensions
             }
             else
             {
-                JsonSerializer.Serialize(writer, value, serializerOption);
+                JsonSerializer.Serialize(writer, value, SerializerOptions);
             }
         }
 
