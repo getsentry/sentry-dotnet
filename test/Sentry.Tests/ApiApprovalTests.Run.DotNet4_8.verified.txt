@@ -520,6 +520,7 @@ namespace Sentry
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
         public bool UseAsyncFileIO { get; set; }
+        public void AddJsonConverter(System.Text.Json.Serialization.JsonConverter converter) { }
     }
     public static class SentryOptionsExtensions
     {
