@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Sentry.Extensibility;
 using Sentry.Http;
@@ -702,9 +703,25 @@ namespace Sentry
 
             // only add if we don't have this instance already
             var converters = JsonExtensions.SerializerOptions.Converters;
-            if (!converters.Contains(converter))
+            if (converters.Contains(converter))
+            {
+                return;
+            }
+
+            try
             {
                 converters.Add(converter);
+            }
+            catch (InvalidOperationException)
+            {
+                // If we've already started using the serializer, then it's too late to add more converters.
+                // The following exception message may occur (depending on STJ version):
+                // "Serializer options cannot be changed once serialization or deserialization has occurred."
+                // We'll swallow this, because it's likely to only have occurred in our own unit tests,
+                // or in a scenario where the Sentry SDK has been initialized multiple times,
+                // in which case we have the converter from the first initialization already.
+                // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
+                // See https://github.com/dotnet/runtime/pull/74431
             }
         }
 
