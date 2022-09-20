@@ -11,7 +11,12 @@ namespace Sentry.Internal.Extensions
     {
         // The Json options with a preset of rules that will remove dangerous and problematic
         // data from the serialized object.
-        internal static readonly JsonSerializerOptions SerializerOptions = new()
+        internal static JsonSerializerOptions SerializerOptions { get; private set; } = GetSerializerOptions();
+
+        // For testing, we need a way to reset the options instance when we add custom converters.
+        internal static void ResetSerializerOptions() => SerializerOptions = GetSerializerOptions();
+
+        private static JsonSerializerOptions GetSerializerOptions() => new()
         {
             Converters =
             {

@@ -36,6 +36,7 @@ public class SerializationTests
         yield return new object[] {"nested UIntPtr", new {Value = (UIntPtr)3}};
         yield return new object[] {"nested nullable UIntPtr", new {Value = (IntPtr?)3}};
 
+        JsonExtensions.ResetSerializerOptions();
         new SentryOptions().AddJsonConverter(new CustomObjectConverter());
         yield return new object[] {"custom object with value", new CustomObject("test")};
         yield return new object[] {"custom object with null", new CustomObject(null)};
