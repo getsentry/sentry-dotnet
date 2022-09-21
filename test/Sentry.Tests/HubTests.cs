@@ -263,14 +263,16 @@ public class HubTests
         public string Thrower => throw new InvalidDataException();
     }
 
+#if !__MOBILE__
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
-        // This test has proven to be flaky, so we'll retry it a few times.
+        // This test has proven to be flaky, so we'll skip it on mobile targets.
+        // We'll also retry it a few times when we run it for non-mobile targets.
         // As long as it doesn't consistently fail, that should be good enough.
-        // TODO: The retry can be removed if we can confidently figure out the source of the flakiness.
+        // TODO: The retry and/or #if can be removed if we can confidently figure out the source of the flakiness.
         await TestHelpers.RetryTestAsync(
             maxAttempts: 3,
             _output,
@@ -362,6 +364,7 @@ public class HubTests
             }
         }
     }
+#endif
 
     [Fact]
     public void CaptureEvent_SessionActive_ExceptionReportsError()
