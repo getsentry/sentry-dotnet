@@ -263,7 +263,7 @@ public class HubTests
         public string Thrower => throw new InvalidDataException();
     }
 
-    #if !__MOBILE__
+#if !__MOBILE__
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
