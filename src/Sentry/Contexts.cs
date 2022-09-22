@@ -8,7 +8,6 @@ using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry
 {
     /// <summary>

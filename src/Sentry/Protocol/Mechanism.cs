@@ -3,7 +3,6 @@ using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry.Protocol
 {
     /// <summary>
