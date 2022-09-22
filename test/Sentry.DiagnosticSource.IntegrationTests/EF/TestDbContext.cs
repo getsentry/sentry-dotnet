@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+namespace Sentry.DiagnosticSource.IntegrationTests.EF;
+
 public class TestDbContext :
     DbContext
 {
