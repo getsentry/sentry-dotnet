@@ -90,7 +90,7 @@ namespace Sentry.Internal.DiagnosticSource
         {
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction is not {} transaction || transaction.IsSampled != true)
+                if (scope.Transaction is not {IsSampled: true} transaction)
                 {
                     return;
                 }
