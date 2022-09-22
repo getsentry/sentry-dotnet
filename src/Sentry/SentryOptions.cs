@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Sentry.Extensibility;
 using Sentry.Http;
@@ -18,7 +17,7 @@ using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 #endif
 
 namespace Sentry
@@ -26,7 +25,11 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
+#if __MOBILE__
     public partial class SentryOptions
+#else
+    public class SentryOptions
+#endif
     {
         private Dictionary<string, string>? _defaultTags;
 
@@ -505,7 +508,7 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
-        /// Sets the filesystem instance to use. Defaults to the actual <see cref="Internal.FileSystem"/>.
+        /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
         /// Used for testing.
         /// </summary>
         internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;

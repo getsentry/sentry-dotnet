@@ -1,8 +1,6 @@
-// ReSharper disable once CheckNamespace
-
 using Sentry.Testing;
 
-namespace Sentry.Protocol.Tests.Exceptions;
+namespace Sentry.Tests.Protocol.Exceptions;
 
 public class MechanismTests
 {

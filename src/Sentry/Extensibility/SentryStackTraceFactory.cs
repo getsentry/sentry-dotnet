@@ -114,13 +114,18 @@ namespace Sentry.Extensibility
                 yield break;
             }
 
+            Debug.Assert(frames != null);
+
             var firstFrame = true;
             foreach (var stackFrame in frames)
             {
+
+#if !NET5_0_OR_GREATER
                 if (stackFrame is null)
                 {
                     continue;
                 }
+#endif
 
                 // Remove the frames until the call for capture with the SDK
                 if (firstFrame

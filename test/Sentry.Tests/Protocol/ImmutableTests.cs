@@ -1,3 +1,5 @@
+using Sentry.Tests.Helpers.Reflection;
+
 namespace Sentry.Tests.Protocol;
 
 public abstract class ImmutableTests<TType>

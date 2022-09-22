@@ -401,7 +401,9 @@ namespace Sentry.Protocol
             var timezoneName = json.GetPropertyOrNull("timezone_display_name")?.GetString() ?? timezoneId;
 
             if (string.IsNullOrWhiteSpace(timezoneId))
+            {
                 return null;
+            }
 
             try
             {

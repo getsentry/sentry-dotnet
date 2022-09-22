@@ -5,7 +5,7 @@ using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry
+namespace Sentry.Internal
 {
     internal sealed class MemoryInfo : IJsonSerializable
     {
