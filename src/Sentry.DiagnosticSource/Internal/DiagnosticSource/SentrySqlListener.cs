@@ -90,7 +90,7 @@ namespace Sentry.Internal.DiagnosticSource
         {
             _hub.ConfigureScope(scope =>
             {
-                if (scope.Transaction is not { } transaction)
+                if (scope.Transaction is not {IsSampled: true} transaction)
                 {
                     return;
                 }
@@ -103,7 +103,7 @@ namespace Sentry.Internal.DiagnosticSource
                 }
 
                 if (type == SentrySqlSpanType.Execution &&
-                    value.GetProperty<Guid>(ConnectionKey) is { } connectionId)
+                    value.GetProperty<Guid>(ConnectionKey) is var connectionId)
                 {
                     var span = TryStartChild(
                         TryGetConnectionSpan(scope, connectionId) ?? transaction,
