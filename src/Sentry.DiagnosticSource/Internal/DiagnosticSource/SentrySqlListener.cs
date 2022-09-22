@@ -5,7 +5,7 @@ using System.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.Internals.DiagnosticSource
+namespace Sentry.Internal.DiagnosticSource
 {
     internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
     {

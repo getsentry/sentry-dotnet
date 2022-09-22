@@ -46,7 +46,7 @@
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
-    <Compile Include="..\Sentry.DiagnosticSource\Internals\**\*.cs">
+    <Compile Include="..\Sentry.DiagnosticSource\Internal\**\*.cs">
       <Link>Internal\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>

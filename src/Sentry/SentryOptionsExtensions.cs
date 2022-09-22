@@ -13,7 +13,7 @@ using Sentry.Internal.Extensions;
 using Sentry.PlatformAbstractions;
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 #endif
 namespace Sentry
 {

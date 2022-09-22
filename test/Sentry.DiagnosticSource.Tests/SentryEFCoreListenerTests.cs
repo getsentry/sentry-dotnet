@@ -1,5 +1,5 @@
-using Sentry.Internals.DiagnosticSource;
-using static Sentry.Internals.DiagnosticSource.SentryEFCoreListener;
+using Sentry.Internal.DiagnosticSource;
+using static Sentry.Internal.DiagnosticSource.SentryEFCoreListener;
 
 namespace Sentry.DiagnosticSource.Tests;
 

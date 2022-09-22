@@ -18,7 +18,7 @@ using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 #endif
 
 namespace Sentry
