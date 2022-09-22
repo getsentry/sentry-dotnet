@@ -18,7 +18,11 @@ namespace Sentry
     /// It allows safe static access to a client and scope management.
     /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
     /// </remarks>
+#if __MOBILE__
     public static partial class SentrySdk
+#else
+    public static class SentrySdk
+#endif
     {
         private static IHub _hub = DisabledHub.Instance;
 

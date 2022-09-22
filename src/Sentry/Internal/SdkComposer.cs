@@ -1,7 +1,4 @@
 using System;
-#if !NET6_0_OR_GREATER
-using System.Threading.Tasks;
-#endif
 using Sentry.Extensibility;
 using Sentry.Internal.Http;
 
@@ -15,7 +12,9 @@ namespace Sentry.Internal
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             if (options.Dsn is null)
+            {
                 throw new ArgumentException("No DSN defined in the SentryOptions");
+            }
         }
 
         private ITransport CreateTransport()
