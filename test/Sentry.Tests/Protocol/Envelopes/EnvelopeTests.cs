@@ -500,7 +500,7 @@ public class EnvelopeTests
             Message = new SentryMessage
             {
                 Message = "message",
-                Formatted = "structured_message"
+                Formatted = "Foo"
             },
             Modules = { { "module_key", "module_value" } },
             Release = "release",
