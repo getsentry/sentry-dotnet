@@ -492,7 +492,11 @@ public class EnvelopeTests
         {
             User = new User { Id = "user-id" },
             Request = new Request { Method = "POST" },
-            Contexts = new Contexts { ["context_key"] = "context_value" },
+            Contexts = new Contexts
+            {
+                ["context_key"] = "context_value",
+                ["context_key_with_null_value"] = null
+            },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" },
             Environment = "environment",
             Level = SentryLevel.Fatal,

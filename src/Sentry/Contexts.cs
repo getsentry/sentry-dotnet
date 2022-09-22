@@ -113,7 +113,8 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) => writer.WriteDictionaryValue(this!, logger);
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
+            writer.WriteDictionaryValue(this!, logger, includeNullValues: false);
 
         /// <summary>
         /// Parses from JSON.

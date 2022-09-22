@@ -156,15 +156,29 @@ namespace Sentry.Internal.Extensions
         public static void WriteDictionaryValue(
             this Utf8JsonWriter writer,
             IEnumerable<KeyValuePair<string, object?>>? dic,
-            IDiagnosticLogger? logger)
+            IDiagnosticLogger? logger,
+            bool includeNullValues = true)
         {
             if (dic is not null)
             {
                 writer.WriteStartObject();
 
-                foreach (var (key, value) in dic)
+                if (includeNullValues)
                 {
-                    writer.WriteDynamic(key, value, logger);
+                    foreach (var (key, value) in dic)
+                    {
+                        writer.WriteDynamic(key, value, logger);
+                    }
+                }
+                else
+                {
+                    foreach (var (key, value) in dic)
+                    {
+                        if (value is not null)
+                        {
+                            writer.WriteDynamic(key, value, logger);
+                        }
+                    }
                 }
 
                 writer.WriteEndObject();
