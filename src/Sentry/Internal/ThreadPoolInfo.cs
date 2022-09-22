@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Sentry.Extensibility;
 
-namespace Sentry
+namespace Sentry.Internal
 {
     internal sealed class ThreadPoolInfo : IJsonSerializable
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using Sentry.Extensibility;
 
-namespace Sentry.Internals.DiagnosticSource
+namespace Sentry.Internal.DiagnosticSource
 {
     /// <summary>
     /// Class that consumes Entity Framework Core events.

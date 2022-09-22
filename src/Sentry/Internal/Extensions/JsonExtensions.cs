@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal.JsonConverters;
 
 namespace Sentry.Internal.Extensions
 {

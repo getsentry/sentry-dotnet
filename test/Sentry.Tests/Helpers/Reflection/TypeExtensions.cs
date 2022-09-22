@@ -6,18 +6,15 @@ internal static class TypeExtensions
 {
     public static void AssertImmutable(this Type type)
     {
-        if (type.IsPrimitive)
+        if (type.IsPrimitive ||
+            type == typeof(string) ||
+            type == typeof(DateTimeOffset) ||
+            type == typeof(DateTime) ||
+            type.IsEnum ||
+            type.Name.StartsWith("IImmutable"))
+        {
             return;
-        if (type == typeof(string))
-            return;
-        if (type == typeof(DateTimeOffset))
-            return;
-        if (type == typeof(DateTime))
-            return;
-        if (type.IsEnum)
-            return;
-        if (type.Name.StartsWith("IImmutable"))
-            return;
+        }
 
         var fieldInfos = type.GetFields(BindingFlags.Public
                                         | BindingFlags.NonPublic

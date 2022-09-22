@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 
 [UsesVerify]
 public class SqlListenerTests : IClassFixture<LocalDbFixture>

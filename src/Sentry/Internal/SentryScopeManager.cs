@@ -8,12 +8,11 @@ namespace Sentry.Internal
 {
     internal sealed class SentryScopeManager : IInternalScopeManager
     {
-        // Internal for testing
         public IScopeStackContainer ScopeStackContainer { get; }
 
         private readonly SentryOptions _options;
 
-        internal KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
+        private KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
         {
             get => ScopeStackContainer.Stack ??= NewStack();
             set => ScopeStackContainer.Stack = value;

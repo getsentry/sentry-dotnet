@@ -27,7 +27,9 @@ namespace Sentry.Internal
             if (exception == null)
             {
                 _options.LogDebug("No Exception to collect Mono stack trace.");
-                return base.Create(exception);
+
+                // ReSharper disable once RedundantArgumentDefaultValue
+                return base.Create(null);
             }
 
             List<StackFrameData>? frames = null;

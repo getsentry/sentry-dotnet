@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 
-namespace Sentry.Internals.DiagnosticSource
+namespace Sentry.Internal.DiagnosticSource
 {
     internal class SentryDiagnosticListenerIntegration : ISdkIntegration
     {

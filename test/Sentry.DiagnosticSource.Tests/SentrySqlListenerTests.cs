@@ -1,6 +1,6 @@
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 using Sentry.Testing;
-using static Sentry.Internals.DiagnosticSource.SentrySqlListener;
+using static Sentry.Internal.DiagnosticSource.SentrySqlListener;
 
 namespace Sentry.DiagnosticSource.Tests;
 

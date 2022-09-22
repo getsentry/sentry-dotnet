@@ -17,7 +17,6 @@ namespace Sentry.Internal
         private readonly ISessionManager _sessionManager;
         private readonly SentryOptions _options;
         private readonly RandomValuesFactory _randomValuesFactory;
-        private readonly IDisposable _rootScope;
         private readonly Enricher _enricher;
 
         private int _isPersistedSessionRecovered;
@@ -56,10 +55,11 @@ namespace Sentry.Internal
 
             ScopeManager = scopeManager ?? new SentryScopeManager(options, _ownedClient);
 
-            _rootScope = options.IsGlobalModeEnabled
-                ? DisabledHub.Instance
+            if (!options.IsGlobalModeEnabled)
+            {
                 // Push the first scope so the async local starts from here
-                : PushScope();
+                PushScope();
+            }
 
             _enricher = new Enricher(options);
 
@@ -412,7 +412,7 @@ namespace Sentry.Internal
             }
 
             _ownedClient.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
-            //Dont dispose of _rootScope and ScopeManager since we want dangling transactions to still be able to access tags.
+            //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
         }
 
         public SentryId LastEventId
