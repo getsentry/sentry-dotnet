@@ -1,6 +1,6 @@
 using Sentry.Internal.DiagnosticSource;
 
-namespace Sentry.DiagnosticSource.Internals;
+namespace Sentry.DiagnosticSource.Tests;
 
 public class DiagnosticsSentryOptionsExtensionsTests
 {

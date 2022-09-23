@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using DiffEngine;
-using LocalDb;
+
+namespace Sentry.DiagnosticSource.IntegrationTests;
 
 public sealed class LocalDbFixture : IDisposable
 {
