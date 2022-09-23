@@ -48,5 +48,14 @@ namespace Sentry.Internal.Extensions
         /// (It prevents us having to have two different resharper ignore comments depending on target framework.)
         /// </remarks>
         public static bool IsNull(this object? o) => o is null;
+
+        public static object? GetProperty(this object obj, string name) =>
+            obj.GetType().GetProperty(name)?.GetValue(obj);
+
+        public static Guid? GetGuidProperty(this object obj, string name) =>
+            obj.GetProperty(name) as Guid?;
+
+        public static string? GetStringProperty(this object obj, string name) =>
+            obj.GetProperty(name) as string;
     }
 }
