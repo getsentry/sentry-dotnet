@@ -10,3 +10,5 @@ fi
 
 dotnet test -c Release -l $testLogger \
     /p:CopyLocalLockFileAssemblies=true
+
+// test
