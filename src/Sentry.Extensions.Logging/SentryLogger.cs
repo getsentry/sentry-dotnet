@@ -77,6 +77,10 @@ internal sealed class SentryLogger : ILogger
                     {
                         @event.SetTag(property.Key, integerTagValue.ToString());
                     }
+                    else if (property.Value is long longIntegerValue)
+                    {
+                        @event.SetTag(property.Key, longIntegerValue.ToString());
+                    }
                     else if (property.Value is float floatTagValue)
                     {
                         @event.SetTag(property.Key, floatTagValue.ToString());
