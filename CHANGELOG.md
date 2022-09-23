@@ -20,6 +20,7 @@
 - Exception filters should consider child exceptions of an `AggregateException` ([#1924](https://github.com/getsentry/sentry-dotnet/pull/1924))
 - Add Blazor WASM detection to set IsGlobalModeEnabled to true ([#1931](https://github.com/getsentry/sentry-dotnet/pull/1931))
 - Respect Transaction.IsSampled in SqlListener ([#1933](https://github.com/getsentry/sentry-dotnet/pull/1933))
+- Support `long` for message template tags in SentryLogger ([#1945](https://github.com/getsentry/sentry-dotnet/pull/1945))
 
 ## 3.21.0
 
