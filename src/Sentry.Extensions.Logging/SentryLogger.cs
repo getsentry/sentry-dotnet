@@ -54,7 +54,7 @@ internal sealed class SentryLogger : ILogger
                 Level = logLevel.ToSentryLevel()
             };
 
-            if (state is IEnumerable<KeyValuePair<string, object>> pairs)
+            if (state is IEnumerable<KeyValuePair<string, object?>> pairs)
             {
                 foreach (var property in pairs)
                 {
@@ -69,30 +69,29 @@ internal sealed class SentryLogger : ILogger
                         continue;
                     }
 
-                    if (property.Value is string stringTagValue)
+                    switch (property.Value)
                     {
-                        @event.SetTag(property.Key, stringTagValue);
-                    }
-                    else if (property.Value is int integerTagValue)
-                    {
-                        @event.SetTag(property.Key, integerTagValue.ToString());
-                    }
-                    else if (property.Value is long longIntegerValue)
-                    {
-                        @event.SetTag(property.Key, longIntegerValue.ToString());
-                    }
-                    else if (property.Value is float floatTagValue)
-                    {
-                        @event.SetTag(property.Key, floatTagValue.ToString());
-                    }
-                    else if (property.Value is double doubleTagValue)
-                    {
-                        @event.SetTag(property.Key, doubleTagValue.ToString());
-                    }
-                    else if (property.Value is Guid guidTagValue &&
-                             guidTagValue != Guid.Empty)
-                    {
-                        @event.SetTag(property.Key, guidTagValue.ToString());
+                        case string stringTagValue:
+                            @event.SetTag(property.Key, stringTagValue);
+                            break;
+
+                        case Guid guidTagValue when guidTagValue != Guid.Empty:
+                            @event.SetTag(property.Key, guidTagValue.ToString());
+                            break;
+
+                        case Enum enumValue:
+                            @event.SetTag(property.Key, enumValue.ToString());
+                            break;
+
+                        default:
+                        {
+                            if (property.Value?.GetType().IsPrimitive == true)
+                            {
+                                @event.SetTag(property.Key, property.Value.ToString()!);
+                            }
+
+                            break;
+                        }
                     }
                 }
             }

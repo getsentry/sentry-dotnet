@@ -76,9 +76,11 @@ public class SentryLoggerTests
             new("fooString", "bar"),
             new("fooInteger", 1234),
             new("fooLong", 1234L),
+            new("fooUShort", (ushort)1234),
             new("fooDouble", (double)1234),
             new("fooFloat", (float)1234.123),
-            new("fooGuid", guidValue)
+            new("fooGuid", guidValue),
+            new("fooEnum", UriKind.Absolute) // any enum, just an example
         };
         var sut = _fixture.GetSut();
 
@@ -89,9 +91,11 @@ public class SentryLoggerTests
                 e => e.Tags["fooString"] == "bar" &&
                      e.Tags["fooInteger"] == "1234" &&
                      e.Tags["fooLong"] == "1234" &&
+                     e.Tags["fooUShort"] == "1234" &&
                      e.Tags["fooDouble"] == "1234" &&
                      e.Tags["fooFloat"] == "1234.123" &&
-                     e.Tags["fooGuid"] == guidValue.ToString()));
+                     e.Tags["fooGuid"] == guidValue.ToString() &&
+                     e.Tags["fooEnum"] == "Absolute"));
     }
 
     [Fact]
