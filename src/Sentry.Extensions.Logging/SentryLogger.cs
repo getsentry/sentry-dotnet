@@ -89,7 +89,6 @@ internal sealed class SentryLogger : ILogger
                             {
                                 @event.SetTag(property.Key, property.Value.ToString()!);
                             }
-
                             break;
                         }
                     }
