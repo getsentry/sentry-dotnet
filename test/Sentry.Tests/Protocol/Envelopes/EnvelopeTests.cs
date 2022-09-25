@@ -534,6 +534,47 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public async Task Null_context_should_not_effect_length_header()
+    {
+        async Task<Envelope> Roundtrip(SentryEvent sentryEvent)
+        {
+            using var envelope = Envelope.FromEvent(sentryEvent);
+
+            using var stream = new MemoryStream();
+            await envelope.SerializeAsync(stream, _testOutputLogger);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return await Envelope.DeserializeAsync(stream);
+        }
+
+        // Arrange
+        var eventWithNoNull = new SentryEvent
+        {
+            Contexts = new()
+            {
+                ["context_key"] = "context_value"
+            },
+        };
+        var eventWithNull = new SentryEvent
+        {
+            Contexts = new()
+            {
+                ["context_key"] = "context_value",
+                ["context_key_with_null_value"] = null
+            },
+        };
+
+        using var roundtripWithNoNull = await Roundtrip(eventWithNoNull);
+        using var roundtripWithNull = await Roundtrip(eventWithNull);
+
+        var lengthWithNoNull = roundtripWithNoNull.Items[0].TryGetLength()!;
+        var lengthWithNull = roundtripWithNull.Items[0].TryGetLength()!;
+
+        // Assert
+        Assert.Equal(lengthWithNoNull, lengthWithNull);
+    }
+
+    [Fact]
     public async Task Roundtrip_WithEvent_WithAttachment_Success()
     {
         // Arrange
