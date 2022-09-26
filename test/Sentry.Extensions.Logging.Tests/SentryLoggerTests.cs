@@ -106,16 +106,12 @@ public class SentryLoggerTests
                 new("fooDouble", 12345.123d),
                 new("fooFloat", (float)12345.123),
             };
-            var sut = _fixture.GetSut();
+            var sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category");
 
-            sut.Log<object>(LogLevel.Critical, default, props, null, null);
-
-            _ = _fixture.Hub.Received(1)
-                .CaptureEvent(Arg.Is<SentryEvent>(
-                    e =>
-                        e.Tags["fooInteger"] == "12345" &&
-                        e.Tags["fooDouble"] == "12345.123" &&
-                        e.Tags["fooFloat"] == "12345.123"));
+            var tags = sentryEvent.Tags;
+            Assert.Equal("12345", tags["fooInteger"]);
+            Assert.Equal("12345.123", tags["fooDouble"]);
+            Assert.Equal("12345.123", tags["fooFloat"]);
         }
         finally
         {
