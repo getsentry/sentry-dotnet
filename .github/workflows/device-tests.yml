@@ -58,7 +58,7 @@ jobs:
 
       - name: Test
         timeout-minutes: 30
-        uses: reactivecircus/android-emulator-runner@b390b0e1166697ae57c242a0a33c29ca9f5ae078
+        uses: reactivecircus/android-emulator-runner@d7b53ddc6e44254e1f4cf4a6ad67345837027a66
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }} # We don't need the Google APIs, but the default images are not available for 32+
