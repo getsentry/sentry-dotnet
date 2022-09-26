@@ -548,14 +548,16 @@ public class EnvelopeTests
         }
 
         // Arrange
-        var eventWithNoNull = new SentryEvent
+        var sentryId = SentryId.Create();
+        var timestamp = DateTimeOffset.Now;
+        var eventWithNoNull = new SentryEvent(eventId: sentryId, timestamp: timestamp)
         {
             Contexts = new()
             {
                 ["context_key"] = "context_value"
             },
         };
-        var eventWithNull = new SentryEvent(eventId: SentryId.Empty)
+        var eventWithNull = new SentryEvent(eventId: sentryId, timestamp: timestamp)
         {
             Contexts = new()
             {
