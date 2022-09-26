@@ -76,7 +76,7 @@ internal sealed class SentryLogger : ILogger
                     }
                     else if (property.Value is int integerTagValue)
                     {
-                        @event.SetTag(property.Key, integerTagValue.ToString());
+                        @event.SetTag(property.Key, integerTagValue.ToString(CultureInfo.InvariantCulture));
                     }
                     else if (property.Value is float floatTagValue)
                     {
