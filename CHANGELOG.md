@@ -11,6 +11,7 @@
 - Use URL path in transaction names instead of "Unknown Route" ([#1919](https://github.com/getsentry/sentry-dotnet/pull/1919))
 - Add `User.Segment` property ([#1920](https://github.com/getsentry/sentry-dotnet/pull/1920))
 - Add support for custom `JsonConverter`s ([#1934](https://github.com/getsentry/sentry-dotnet/pull/1934))
+- Support more types for message template tags in SentryLogger ([#1945](https://github.com/getsentry/sentry-dotnet/pull/1945))
 
 ## Fixes
 
@@ -21,6 +22,7 @@
 - Add Blazor WASM detection to set IsGlobalModeEnabled to true ([#1931](https://github.com/getsentry/sentry-dotnet/pull/1931))
 - Respect Transaction.IsSampled in SqlListener ([#1933](https://github.com/getsentry/sentry-dotnet/pull/1933))
 - Ignore null Context values ([#1942](https://github.com/getsentry/sentry-dotnet/pull/1942))
+- Tags should not differ based on current culture ([#1949](https://github.com/getsentry/sentry-dotnet/pull/1949))
 
 ## 3.21.0
 
