@@ -99,6 +99,34 @@ public class SentryLoggerTests
     }
 
     [Fact]
+    public void Culture_does_not_effect_tags()
+    {
+        var props = new List<KeyValuePair<string, object>>
+        {
+            new("fooInteger", 12345),
+            new("fooDouble", 12345.123d),
+            new("fooFloat", 1234.123f),
+        };
+        SentryEvent sentryEvent;
+        var culture = Thread.CurrentThread.CurrentCulture;
+
+        try
+        {
+            Thread.CurrentThread.CurrentCulture = new("da-DK");
+            sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category");
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = culture;
+        }
+
+        var tags = sentryEvent.Tags;
+        Assert.Equal("12345", tags["fooInteger"]);
+        Assert.Equal("12345.123", tags["fooDouble"]);
+        Assert.Equal("1234.123", tags["fooFloat"]);
+    }
+
+    [Fact]
     public void Log_WithEmptyGuidProperty_DoesntSetTagInEvent()
     {
         var props = new List<KeyValuePair<string, object>>
