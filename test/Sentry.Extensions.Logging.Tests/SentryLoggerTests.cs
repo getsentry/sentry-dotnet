@@ -99,7 +99,7 @@ public class SentryLoggerTests
         {
             new("fooInteger", 12345),
             new("fooDouble", 12345.123d),
-            new("fooFloat", (float)12345.123),
+            new("fooFloat", 12345.123f),
         };
         SentryEvent sentryEvent;
         var culture = Thread.CurrentThread.CurrentCulture;

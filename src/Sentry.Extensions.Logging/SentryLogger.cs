@@ -110,11 +110,11 @@ internal sealed class SentryLogger : ILogger
                 }
                 else if (property.Value is float floatTagValue)
                 {
-                    @event.SetTag(property.Key, floatTagValue.ToString(CultureInfo.InvariantCulture));
+                    @event.SetTag(property.Key, floatTagValue.ToString("R", CultureInfo.InvariantCulture));
                 }
                 else if (property.Value is double doubleTagValue)
                 {
-                    @event.SetTag(property.Key, doubleTagValue.ToString(CultureInfo.InvariantCulture));
+                    @event.SetTag(property.Key, doubleTagValue.ToString("R", CultureInfo.InvariantCulture));
                 }
                 else if (property.Value is Guid guidTagValue &&
                          guidTagValue != Guid.Empty)
