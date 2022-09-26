@@ -5,6 +5,8 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggerTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
     private class Fixture
     {
         public string CategoryName { get; set; } = "SomeApp";
@@ -22,6 +24,12 @@ public class SentryLoggerTests
     }
 
     private readonly Fixture _fixture = new();
+
+    public SentryLoggerTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+
     private const string BreadcrumbType = null;
 
     [Fact]
@@ -90,6 +98,37 @@ public class SentryLoggerTests
                      e.Tags["fooDouble"] == "1234" &&
                      e.Tags["fooFloat"] == "1234.123" &&
                      e.Tags["fooGuid"] == guidValue.ToString()));
+    }
+
+    [Fact]
+    public void Culture_does_not_effect_tags()
+    {
+        var culture = Thread.CurrentThread.CurrentCulture;
+
+        try
+        {
+            Thread.CurrentThread.CurrentCulture = new("da-DK");
+            var props = new List<KeyValuePair<string, object>>
+            {
+                new("fooInteger", 12345),
+                new("fooDouble", 12345.123d),
+                new("fooFloat", (float)12345.123),
+            };
+            var sut = _fixture.GetSut();
+
+            sut.Log<object>(LogLevel.Critical, default, props, null, null);
+
+            _ = _fixture.Hub.Received(1)
+                .CaptureEvent(Arg.Is<SentryEvent>(
+                    e =>
+                        e.Tags["fooInteger"] == "12345" &&
+                        e.Tags["fooDouble"] == "12345.123" &&
+                        e.Tags["fooFloat"] == "12345.123"));
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = culture;
+        }
     }
 
     [Fact]

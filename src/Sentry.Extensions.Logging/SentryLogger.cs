@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
 
@@ -79,11 +80,11 @@ internal sealed class SentryLogger : ILogger
                     }
                     else if (property.Value is float floatTagValue)
                     {
-                        @event.SetTag(property.Key, floatTagValue.ToString());
+                        @event.SetTag(property.Key, floatTagValue.ToString(CultureInfo.InvariantCulture));
                     }
                     else if (property.Value is double doubleTagValue)
                     {
-                        @event.SetTag(property.Key, doubleTagValue.ToString());
+                        @event.SetTag(property.Key, doubleTagValue.ToString(CultureInfo.InvariantCulture));
                     }
                     else if (property.Value is Guid guidTagValue &&
                              guidTagValue != Guid.Empty)
