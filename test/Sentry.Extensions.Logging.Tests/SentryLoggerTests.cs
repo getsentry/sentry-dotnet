@@ -22,7 +22,6 @@ public class SentryLoggerTests
     }
 
     private readonly Fixture _fixture = new();
-
     private const string BreadcrumbType = null;
 
     [Fact]
