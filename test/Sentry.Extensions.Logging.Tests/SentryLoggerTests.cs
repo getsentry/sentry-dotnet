@@ -95,28 +95,29 @@ public class SentryLoggerTests
     [Fact]
     public void Culture_does_not_effect_tags()
     {
+        var props = new List<KeyValuePair<string, object>>
+        {
+            new("fooInteger", 12345),
+            new("fooDouble", 12345.123d),
+            new("fooFloat", (float)12345.123),
+        };
+        SentryEvent sentryEvent;
         var culture = Thread.CurrentThread.CurrentCulture;
 
         try
         {
             Thread.CurrentThread.CurrentCulture = new("da-DK");
-            var props = new List<KeyValuePair<string, object>>
-            {
-                new("fooInteger", 12345),
-                new("fooDouble", 12345.123d),
-                new("fooFloat", (float)12345.123),
-            };
-            var sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category");
-
-            var tags = sentryEvent.Tags;
-            Assert.Equal("12345", tags["fooInteger"]);
-            Assert.Equal("12345.123", tags["fooDouble"]);
-            Assert.Equal("12345.123", tags["fooFloat"]);
+            sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category");
         }
         finally
         {
             Thread.CurrentThread.CurrentCulture = culture;
         }
+
+        var tags = sentryEvent.Tags;
+        Assert.Equal("12345", tags["fooInteger"]);
+        Assert.Equal("12345.123", tags["fooDouble"]);
+        Assert.Equal("12345.123", tags["fooFloat"]);
     }
 
     [Fact]
