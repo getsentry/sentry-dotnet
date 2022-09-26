@@ -100,26 +100,50 @@ internal sealed class SentryLogger : ILogger
                     continue;
                 }
 
-                if (property.Value is string stringTagValue)
+                // if (property.Value is string stringTagValue)
+                // {
+                //     @event.SetTag(property.Key, stringTagValue);
+                // }
+                // else if (property.Value is int integerTagValue)
+                // {
+                //     @event.SetTag(property.Key, integerTagValue.ToString(CultureInfo.InvariantCulture));
+                // }
+                // else if (property.Value is float floatTagValue)
+                // {
+                //     @event.SetTag(property.Key, floatTagValue.ToString("R", CultureInfo.InvariantCulture));
+                // }
+                // else if (property.Value is double doubleTagValue)
+                // {
+                //     @event.SetTag(property.Key, doubleTagValue.ToString("R", CultureInfo.InvariantCulture));
+                // }
+                // else if (property.Value is Guid guidTagValue &&
+                //          guidTagValue != Guid.Empty)
+                // {
+                //     @event.SetTag(property.Key, guidTagValue.ToString());
+                // }
+
+                switch (property.Value)
                 {
-                    @event.SetTag(property.Key, stringTagValue);
-                }
-                else if (property.Value is int integerTagValue)
-                {
-                    @event.SetTag(property.Key, integerTagValue.ToString(CultureInfo.InvariantCulture));
-                }
-                else if (property.Value is float floatTagValue)
-                {
-                    @event.SetTag(property.Key, floatTagValue.ToString("R", CultureInfo.InvariantCulture));
-                }
-                else if (property.Value is double doubleTagValue)
-                {
-                    @event.SetTag(property.Key, doubleTagValue.ToString("R", CultureInfo.InvariantCulture));
-                }
-                else if (property.Value is Guid guidTagValue &&
-                         guidTagValue != Guid.Empty)
-                {
-                    @event.SetTag(property.Key, guidTagValue.ToString());
+                    case string stringTagValue:
+                        @event.SetTag(property.Key, stringTagValue);
+                        break;
+
+                    case Guid guidTagValue when guidTagValue != Guid.Empty:
+                        @event.SetTag(property.Key, guidTagValue.ToString());
+                        break;
+
+                    case Enum enumValue:
+                        @event.SetTag(property.Key, enumValue.ToString());
+                        break;
+
+                    default:
+                    {
+                        if (property.Value?.GetType().IsPrimitive == true)
+                        {
+                            @event.SetTag(property.Key, Convert.ToString(property.Value, CultureInfo.InvariantCulture)!);
+                        }
+                        break;
+                    }
                 }
             }
         }
