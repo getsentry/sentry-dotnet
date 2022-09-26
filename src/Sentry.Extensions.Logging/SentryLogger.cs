@@ -100,28 +100,6 @@ internal sealed class SentryLogger : ILogger
                     continue;
                 }
 
-                // if (property.Value is string stringTagValue)
-                // {
-                //     @event.SetTag(property.Key, stringTagValue);
-                // }
-                // else if (property.Value is int integerTagValue)
-                // {
-                //     @event.SetTag(property.Key, integerTagValue.ToString(CultureInfo.InvariantCulture));
-                // }
-                // else if (property.Value is float floatTagValue)
-                // {
-                //     @event.SetTag(property.Key, floatTagValue.ToString("R", CultureInfo.InvariantCulture));
-                // }
-                // else if (property.Value is double doubleTagValue)
-                // {
-                //     @event.SetTag(property.Key, doubleTagValue.ToString("R", CultureInfo.InvariantCulture));
-                // }
-                // else if (property.Value is Guid guidTagValue &&
-                //          guidTagValue != Guid.Empty)
-                // {
-                //     @event.SetTag(property.Key, guidTagValue.ToString());
-                // }
-
                 switch (property.Value)
                 {
                     case string stringTagValue:
