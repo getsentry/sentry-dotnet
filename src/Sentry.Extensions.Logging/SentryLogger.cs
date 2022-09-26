@@ -114,18 +114,6 @@ internal sealed class SentryLogger : ILogger
                         @event.SetTag(property.Key, enumValue.ToString());
                         break;
 
-                    // Handle floating point values directly due to differences in the default behavior across frameworks.
-                    // Using G17 or G9 based on guidance in documentation.
-                    // See https://learn.microsoft.com/dotnet/standard/base-types/standard-numeric-format-strings#general-format-specifier-g
-
-                    case double doubleValue:
-                        @event.SetTag(property.Key, doubleValue.ToString("G17", CultureInfo.InvariantCulture));
-                        break;
-
-                    case float floatValue:
-                        @event.SetTag(property.Key, floatValue.ToString("G9", CultureInfo.InvariantCulture));
-                        break;
-
                     default:
                     {
                         if (property.Value?.GetType().IsPrimitive == true)

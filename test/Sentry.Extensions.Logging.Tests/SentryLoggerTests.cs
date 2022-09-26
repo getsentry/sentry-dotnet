@@ -105,7 +105,7 @@ public class SentryLoggerTests
         {
             new("fooInteger", 12345),
             new("fooDouble", 12345.123d),
-            new("fooFloat", 12345.123f),
+            new("fooFloat", 1234.123f),
         };
         SentryEvent sentryEvent;
         var culture = Thread.CurrentThread.CurrentCulture;
@@ -123,7 +123,7 @@ public class SentryLoggerTests
         var tags = sentryEvent.Tags;
         Assert.Equal("12345", tags["fooInteger"]);
         Assert.Equal("12345.123", tags["fooDouble"]);
-        Assert.Equal("12345.123", tags["fooFloat"]);
+        Assert.Equal("1234.123", tags["fooFloat"]);
     }
 
     [Fact]
