@@ -5,8 +5,6 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggerTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
     private class Fixture
     {
         public string CategoryName { get; set; } = "SomeApp";
@@ -24,11 +22,6 @@ public class SentryLoggerTests
     }
 
     private readonly Fixture _fixture = new();
-
-    public SentryLoggerTests(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
 
     private const string BreadcrumbType = null;
 
