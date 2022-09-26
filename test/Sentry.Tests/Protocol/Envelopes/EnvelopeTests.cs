@@ -555,7 +555,7 @@ public class EnvelopeTests
                 ["context_key"] = "context_value"
             },
         };
-        var eventWithNull = new SentryEvent
+        var eventWithNull = new SentryEvent(eventId: SentryId.Empty)
         {
             Contexts = new()
             {
