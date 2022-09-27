@@ -492,7 +492,11 @@ public class EnvelopeTests
         {
             User = new User { Id = "user-id" },
             Request = new Request { Method = "POST" },
-            Contexts = new Contexts { ["context_key"] = "context_value" },
+            Contexts = new Contexts
+            {
+                ["context_key"] = "context_value",
+                ["context_key_with_null_value"] = null
+            },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
@@ -527,6 +531,49 @@ public class EnvelopeTests
 
         // Assert
         envelopeRoundtrip.Should().BeEquivalentTo(envelope);
+    }
+
+    [Fact]
+    public async Task Null_context_should_not_effect_length_header()
+    {
+        async Task<Envelope> Roundtrip(SentryEvent sentryEvent)
+        {
+            using var envelope = Envelope.FromEvent(sentryEvent);
+
+            using var stream = new MemoryStream();
+            await envelope.SerializeAsync(stream, _testOutputLogger);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return await Envelope.DeserializeAsync(stream);
+        }
+
+        // Arrange
+        var sentryId = SentryId.Create();
+        var timestamp = DateTimeOffset.Now;
+        var eventWithNoNull = new SentryEvent(eventId: sentryId, timestamp: timestamp)
+        {
+            Contexts = new()
+            {
+                ["context_key"] = "context_value"
+            },
+        };
+        var eventWithNull = new SentryEvent(eventId: sentryId, timestamp: timestamp)
+        {
+            Contexts = new()
+            {
+                ["context_key"] = "context_value",
+                ["context_key_with_null_value"] = null
+            },
+        };
+
+        using var roundtripWithNoNull = await Roundtrip(eventWithNoNull);
+        using var roundtripWithNull = await Roundtrip(eventWithNull);
+
+        var lengthWithNoNull = roundtripWithNoNull.Items[0].TryGetLength()!;
+        var lengthWithNull = roundtripWithNull.Items[0].TryGetLength()!;
+
+        // Assert
+        Assert.Equal(lengthWithNoNull, lengthWithNull);
     }
 
     [Fact]
