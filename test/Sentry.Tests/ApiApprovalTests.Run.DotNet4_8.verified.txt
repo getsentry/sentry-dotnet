@@ -18,20 +18,6 @@ namespace Sentry
         UnrealContext = 3,
         UnrealLogs = 4,
     }
-    public class BaggageHeader
-    {
-        public string? SentryEnvironment { get; set; }
-        public string? SentryPublicKey { get; set; }
-        public string? SentryRelease { get; set; }
-        public double? SentrySampleRate { get; set; }
-        public Sentry.SentryId? SentryTraceId { get; set; }
-        public string? SentryTransactionName { get; set; }
-        public string? SentryUserSegment { get; set; }
-        public string? GetValue(string key) { }
-        public void SetValue(string key, string? value) { }
-        public override string ToString() { }
-        public static Sentry.BaggageHeader? TryParse(string baggage, bool onlySentry = false) { }
-    }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
     public sealed class Breadcrumb : Sentry.IJsonSerializable
     {

@@ -14,7 +14,7 @@ public class BaggageHeaderTests
             "sentry-release=foo@abc+123," +
             "sentry-environment=production," +
             "sentry-user_segment=segment-a," +
-            "sentry-transaction=something%2cI%20think," +
+            "sentry-transaction=something%2c%20I%20think," +
             "sentry-other_value1=Am%C3%A9lie," +
             "sentry-other_value2=Foo%20Bar%20Baz," +
             "other-vendor-value-1=foo," +
@@ -22,8 +22,7 @@ public class BaggageHeaderTests
 
         Assert.NotNull(header);
 
-        return VerifyHeader(header)
-            .AppendValue("SentryOtherValue1", header.GetValue("sentry-other_value1")!);
+        return VerifyHeader(header);
     }
 
     [Fact]
@@ -32,17 +31,21 @@ public class BaggageHeaderTests
     {
         // Taken from https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#baggage
         var header = BaggageHeader.TryParse(
-            "other-vendor-value-1=foo;bar;baz, sentry-trace_id=771a43a4192642f0b136d5159a501700, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=0.01337, sentry-user_id=Am%C3%A9lie, other-vendor-value-2=foo;bar;");
+            "other-vendor-value-1=foo;bar;baz, " +
+            "sentry-trace_id=771a43a4192642f0b136d5159a501700, " +
+            "sentry-public_key=49d0f7386ad645858ae85020e393bef3, " +
+            "sentry-sample_rate=0.01337, " +
+            "sentry-user_id=Am%C3%A9lie, " +
+            "other-vendor-value-2=foo;bar;");
 
         return VerifyHeader(header);
     }
 
     private static SettingsTask VerifyHeader(BaggageHeader header)
     {
-        return Verify(header)
+        return Verify(header.Members)
             .DontScrubGuids()
-            .AddExtraSettings(x => x.Converters.Add(new SentryIdConverter()))
-            .AppendValue("items", header.GetRawMembers());
+            .AddExtraSettings(x => x.Converters.Add(new SentryIdConverter()));
     }
 
     private class SentryIdConverter : WriteOnlyJsonConverter<SentryId>

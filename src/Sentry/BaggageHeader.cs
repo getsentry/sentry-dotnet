@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -12,143 +10,33 @@ namespace Sentry
     /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#baggage"/>
     /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#baggage-header"/>
     /// <seealso href="https://www.w3.org/TR/baggage/"/>
-    public class BaggageHeader
+    internal class BaggageHeader
     {
-        private readonly IDictionary<string, string> _members;
         internal const string HttpHeaderName = "baggage";
         private const string SentryKeyPrefix = "sentry-";
 
-        private BaggageHeader(IDictionary<string, string>? members = null)
-        {
-            _members = members ?? new Dictionary<string, string>();
-        }
+        // https://www.w3.org/TR/baggage/#baggage-string
+        // "Uniqueness of keys between multiple list-members in a baggage-string is not guaranteed."
+        // "The order of duplicate entries SHOULD be preserved when mutating the list."
 
-        internal IReadOnlyDictionary<string, string> GetRawMembers() =>
-            _members.OrderBy(x => x.Key).ToDictionary();
+        public IReadOnlyList<KeyValuePair<string, string>> Members { get; }
 
-        internal IReadOnlyDictionary<string, string> GetSentryMembers() =>
-            _members
-                .Where(x => x.Key.StartsWith(SentryKeyPrefix))
-                .OrderBy(x => x.Key)
+        private BaggageHeader(IEnumerable<KeyValuePair<string, string>> members) =>
+            Members = members.ToList().AsReadOnly();
+
+        // We can safely return a dictionary of Sentry members, as we are in control over the keys added.
+        // Just to be safe though, we'll group by key and only take the first of each one.
+        public IReadOnlyDictionary<string, string> GetSentryMembers() =>
+            Members
+                .Where(kvp => kvp.Key.StartsWith(SentryKeyPrefix))
+                .GroupBy(kvp => kvp.Key, kvp => kvp.Value)
                 .ToDictionary(
 #if NETCOREAPP || NETSTANDARD2_1
-                    _ => _.Key[SentryKeyPrefix.Length..],
+                    g => g.Key[SentryKeyPrefix.Length..],
 #else
-                    _ => _.Key.Substring(SentryKeyPrefix.Length),
+                    g => g.Key.Substring(SentryKeyPrefix.Length),
 #endif
-                    _ => Uri.UnescapeDataString(_.Value));
-
-        /// <summary>
-        /// Gets a value from the list members of the baggage header, if it exists.
-        /// </summary>
-        /// <param name="key">The key of the list member.</param>
-        /// <returns>The value of the list member if found, or <c>null</c> otherwise.</returns>
-        public string? GetValue(string key) => _members.TryGetValue(key, out var value)
-            ? Uri.UnescapeDataString(value)
-            : null;
-
-        /// <summary>
-        /// Sets a value for the a list member of the baggage header.
-        /// </summary>
-        /// <param name="key">The key of the list member.</param>
-        /// <param name="value">The value of the list member.</param>
-        /// <remarks>
-        /// Only non-null members will be added to the list.
-        /// Attempting to set a <c>null</c> value will remove the member from the list if it exists.
-        /// Attempting to set a value that is already present in the list will overwrite the existing value.
-        /// </remarks>
-        public void SetValue(string key, string? value)
-        {
-            if (IsValidKey(key))
-            {
-                throw new ArgumentException("The provided key is invalid.", nameof(key));
-            }
-
-            SetValueInternal(key, value);
-        }
-
-        private void SetValueInternal(string key, string? value)
-        {
-            if (value is null)
-            {
-                _members.Remove(key);
-            }
-            else
-            {
-                _members[key] = Uri.EscapeDataString(value);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the Sentry trace ID in the list members of the baggage header.
-        /// </summary>
-        public SentryId? SentryTraceId
-        {
-            get => _members.TryGetValue(SentryKeyPrefix + "trace_id", out var value)
-                ? Guid.TryParse(value, out var traceId)
-                    ? new SentryId(traceId)
-                    : null
-                : null;
-            set => SetValueInternal(SentryKeyPrefix + "trace_id", value?.ToString());
-        }
-
-        /// <summary>
-        /// Gets or sets the Sentry public key in the list members of the baggage header.
-        /// </summary>
-        public string? SentryPublicKey
-        {
-            get => GetValue(SentryKeyPrefix + "public_key");
-            set => SetValueInternal(SentryKeyPrefix + "public_key", value);
-        }
-
-        /// <summary>
-        /// Gets or sets the Sentry sample rate in the list members of the baggage header.
-        /// </summary>
-        public double? SentrySampleRate
-        {
-            get => _members.TryGetValue(SentryKeyPrefix + "sample_rate", out var value)
-                ? double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var sampleRate)
-                    ? sampleRate
-                    : null
-                : null;
-            set => SetValueInternal(SentryKeyPrefix + "sample_rate", value?.ToString(CultureInfo.InvariantCulture));
-        }
-
-        /// <summary>
-        /// Gets or sets the Sentry release in the list members of the baggage header.
-        /// </summary>
-        public string? SentryRelease
-        {
-            get => GetValue(SentryKeyPrefix + "release");
-            set => SetValueInternal(SentryKeyPrefix + "release", value);
-        }
-
-        /// <summary>
-        /// Gets or sets the Sentry environment in the list members of the baggage header.
-        /// </summary>
-        public string? SentryEnvironment
-        {
-            get => GetValue(SentryKeyPrefix + "environment");
-            set => SetValueInternal(SentryKeyPrefix + "environment", value);
-        }
-
-        /// <summary>
-        /// Gets or sets the Sentry user segment in the list members of the baggage header.
-        /// </summary>
-        public string? SentryUserSegment
-        {
-            get => GetValue(SentryKeyPrefix + "user_segment");
-            set => SetValueInternal(SentryKeyPrefix + "user_segment", value);
-        }
-
-        /// <summary>
-        /// Gets or sets the Sentry transaction name in the list members of the baggage header.
-        /// </summary>
-        public string? SentryTransactionName
-        {
-            get => GetValue(SentryKeyPrefix + "transaction");
-            set => SetValueInternal(SentryKeyPrefix + "transaction", value);
-        }
+                    g => g.First());
 
         /// <summary>
         /// Creates the baggage header string based on the members of this instance.
@@ -156,12 +44,12 @@ namespace Sentry
         /// <returns>The baggage header string.</returns>
         public override string ToString()
         {
-            // the item keys do not require special encoding
-            // the item value are already encoded correctly, so we can just return them
-            var items = _members
-                .OrderBy(x => x.Key)
-                .Select(x => $"{x.Key}={x.Value}");
-            return string.Join(", ", items);
+            // The keys do not require special encoding.  The values are percent-encoded.
+            // The results should not be sorted, as the baggage spec says original ordering should be preserved.
+            var members = Members.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}");
+
+            // Whitespace after delimiter is optional by the spec, but typical by convention.
+            return string.Join(", ", members);
         }
 
         /// <summary>
@@ -181,7 +69,7 @@ namespace Sentry
             // "key1=value1;property1;property2, key2 = value2, key3=value3; propertyKey=propertyValue"
 
             var items = baggage.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            var resultItems = new Dictionary<string, string>(items.Length);
+            var members = new List<KeyValuePair<string, string>>(items.Length);
 
             foreach (var item in items)
             {
@@ -203,35 +91,19 @@ namespace Sentry
 
                 if (!onlySentry || key.StartsWith(SentryKeyPrefix))
                 {
-                    resultItems.Add(key, value);
+                    // Values are percent-encoded.  Decode them before storing.
+                    members.Add(new KeyValuePair<string, string>(key, Uri.UnescapeDataString(value)));
                 }
             }
 
-            return resultItems.Count == 0 ? null : new BaggageHeader(resultItems);
+            return members.Count == 0 ? null : new BaggageHeader(members);
         }
 
-        public static BaggageHeader Create(IReadOnlyCollection<KeyValuePair<string, string>> members)
-        {
-            var items = new Dictionary<string, string>(members.Count);
+        public static BaggageHeader Create(IEnumerable<KeyValuePair<string, string>> members) =>
+            new(members.Where(member => IsValidKey(member.Key)));
 
-            foreach (var member in members)
-            {
-                if (!IsValidKey(member.Key))
-                {
-                    // drop members with invalid keys
-                    continue;
-                }
-
-                items.Add(member.Key, Uri.EscapeDataString(member.Value));
-            }
-
-            return new BaggageHeader(items);
-        }
-
-        public static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders)
-        {
-            throw new NotImplementedException();
-        }
+        public static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders) =>
+            new(baggageHeaders.SelectMany(x => x.Members));
 
         private static bool IsValidKey(string key)
         {
