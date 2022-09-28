@@ -117,6 +117,8 @@ namespace Sentry
 
         internal IReadOnlyDictionary<string, string> GetItems() => _items;
 
+        internal BaggageHeader ToBaggageHeader() => BaggageHeader.Create(_items);
+
         internal static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage)
         {
             var items = baggage.GetSentryMembers();

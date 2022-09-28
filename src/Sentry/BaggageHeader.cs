@@ -18,9 +18,9 @@ namespace Sentry
         internal const string HttpHeaderName = "baggage";
         private const string SentryKeyPrefix = "sentry-";
 
-        private BaggageHeader(IDictionary<string, string> members)
+        private BaggageHeader(IDictionary<string, string>? members = null)
         {
-            _members = members;
+            _members = members ?? new Dictionary<string, string>();
         }
 
         internal IReadOnlyDictionary<string, string> GetRawMembers() =>
@@ -181,7 +181,7 @@ namespace Sentry
             // "key1=value1;property1;property2, key2 = value2, key3=value3; propertyKey=propertyValue"
 
             var items = baggage.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            var resultItems = new Dictionary<string, string>(items.Length, StringComparer.Ordinal);
+            var resultItems = new Dictionary<string, string>(items.Length);
 
             foreach (var item in items)
             {
@@ -208,6 +208,29 @@ namespace Sentry
             }
 
             return resultItems.Count == 0 ? null : new BaggageHeader(resultItems);
+        }
+
+        public static BaggageHeader Create(IReadOnlyCollection<KeyValuePair<string, string>> members)
+        {
+            var items = new Dictionary<string, string>(members.Count);
+
+            foreach (var member in members)
+            {
+                if (!IsValidKey(member.Key))
+                {
+                    // drop members with invalid keys
+                    continue;
+                }
+
+                items.Add(member.Key, Uri.EscapeDataString(member.Value));
+            }
+
+            return new BaggageHeader(items);
+        }
+
+        public static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders)
+        {
+            throw new NotImplementedException();
         }
 
         private static bool IsValidKey(string key)

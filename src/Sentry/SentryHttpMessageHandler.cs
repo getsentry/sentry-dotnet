@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -58,15 +60,24 @@ namespace Sentry
 
             if (transaction is TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc})
             {
+                var baggage = dsc.ToBaggageHeader();
+
                 // Set baggage header(s)
                 if (request.Headers.TryGetValues(BaggageHeader.HttpHeaderName, out var baggageHeaders))
                 {
-                    // TODO: merge baggage headers and add sentry's from the DSC
+                    // Merge baggage headers, including ours.
+                    var allBaggage = baggageHeaders
+                        .Select(s => BaggageHeader.TryParse(s))
+                        .ExceptNulls()
+                        .Append(baggage);
+                    baggage = BaggageHeader.Merge(allBaggage);
+
+                    // Remove the existing header so we can replace it.
+                    request.Headers.Remove(BaggageHeader.HttpHeaderName);
                 }
-                else
-                {
-                    // TODO: Add Sentry's baggage header from DSC
-                }
+
+                // Set baggage header
+                request.Headers.Add(BaggageHeader.HttpHeaderName, baggage.ToString());
             }
 
             // Prevent null reference exception in the following call
