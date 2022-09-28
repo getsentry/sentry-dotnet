@@ -1,0 +1,25 @@
+﻿{
+  target: {
+    SentryTraceId: 771a43a4192642f0b136d5159a501700,
+    SentryPublicKey: 49d0f7386ad645858ae85020e393bef3,
+    SentrySampleRate: 0.01337,
+    SentryRelease: foo@abc+123,
+    SentryEnvironment: production,
+    SentryUserSegment: segment-a,
+    SentryTransactionName: something,I think
+  },
+  items: {
+    other-vendor-value-1: foo,
+    other-vendor-value-2: foo;bar;,
+    sentry-environment: production,
+    sentry-other_value1: Am%C3%A9lie,
+    sentry-other_value2: Foo%20Bar%20Baz,
+    sentry-public_key: 49d0f7386ad645858ae85020e393bef3,
+    sentry-release: foo@abc+123,
+    sentry-sample_rate: 0.01337,
+    sentry-trace_id: 771a43a4192642f0b136d5159a501700,
+    sentry-transaction: something%2cI%20think,
+    sentry-user_segment: segment-a
+  },
+  SentryOtherValue1: Amélie
+}

@@ -18,6 +18,20 @@ namespace Sentry
         UnrealContext = 3,
         UnrealLogs = 4,
     }
+    public class BaggageHeader
+    {
+        public string? SentryEnvironment { get; set; }
+        public string? SentryPublicKey { get; set; }
+        public string? SentryRelease { get; set; }
+        public double? SentrySampleRate { get; set; }
+        public Sentry.SentryId? SentryTraceId { get; set; }
+        public string? SentryTransactionName { get; set; }
+        public string? SentryUserSegment { get; set; }
+        public string? GetValue(string key) { }
+        public void SetValue(string key, string? value) { }
+        public override string ToString() { }
+        public static Sentry.BaggageHeader? TryParse(string baggage, bool onlySentry = false) { }
+    }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
     public sealed class Breadcrumb : Sentry.IJsonSerializable
     {
@@ -108,6 +122,16 @@ namespace Sentry
     {
         public DsnAttribute(string dsn) { }
         public string Dsn { get; }
+    }
+    public class DynamicSamplingContext
+    {
+        public string? Environment { get; }
+        public string PublicKey { get; }
+        public string? Release { get; }
+        public double SampleRate { get; }
+        public Sentry.SentryId TraceId { get; }
+        public string? TransactionName { get; }
+        public string? UserSegment { get; }
     }
     public static class EventLikeExtensions
     {
@@ -840,6 +864,7 @@ namespace Sentry
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
+        public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Span> Spans { get; }
@@ -909,6 +934,7 @@ namespace Sentry
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
+        public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }

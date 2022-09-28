@@ -1,0 +1,15 @@
+﻿{
+  target: {
+    SentryTraceId: 771a43a4192642f0b136d5159a501700,
+    SentryPublicKey: 49d0f7386ad645858ae85020e393bef3,
+    SentrySampleRate: 0.01337
+  },
+  items: {
+    other-vendor-value-1: foo;bar;baz,
+    other-vendor-value-2: foo;bar;,
+    sentry-public_key: 49d0f7386ad645858ae85020e393bef3,
+    sentry-sample_rate: 0.01337,
+    sentry-trace_id: 771a43a4192642f0b136d5159a501700,
+    sentry-user_id: Am%C3%A9lie
+  }
+}
