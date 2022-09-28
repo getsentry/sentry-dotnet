@@ -4,6 +4,7 @@ namespace Sentry.Tests;
 public class BaggageHeaderTests
 {
     [Fact]
+    [Trait("Category", "Verify")]
     public Task Parse_Full()
     {
         var header = BaggageHeader.TryParse(
@@ -26,6 +27,7 @@ public class BaggageHeaderTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public Task Parse_FromExample()
     {
         // Taken from https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#baggage
