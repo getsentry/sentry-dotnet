@@ -69,4 +69,19 @@ namespace Sentry
         /// </example>
         Task
     }
+
+    internal static class TransactionNameSourceExtensions
+    {
+        /// <summary>
+        /// Determines if the <paramref name="transactionNameSource"/> is considered "high quality"
+        /// for purposes of dynamic sampling.
+        /// </summary>
+        /// <remarks>
+        /// Currently, only <see cref="TransactionNameSource.Url"/> is considered low quality,
+        /// and the others are high quality, but this may change in the future.
+        /// </remarks>
+        /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#note-on-low-quality-transaction-names"/>
+        public static bool IsHighQuality(this TransactionNameSource transactionNameSource) =>
+            transactionNameSource != TransactionNameSource.Url;
+    }
 }

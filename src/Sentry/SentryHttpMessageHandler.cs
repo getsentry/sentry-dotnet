@@ -49,12 +49,24 @@ namespace Sentry
             CancellationToken cancellationToken)
         {
             // Set trace header if it hasn't already been set
-            if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) &&
-                _hub.GetTraceHeader() is { } traceHeader)
+            if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
             {
-                request.Headers.Add(
-                    SentryTraceHeader.HttpHeaderName,
-                    traceHeader.ToString());
+                request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
+            }
+
+            var transaction = _hub.GetSpan();
+
+            if (transaction is TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc})
+            {
+                // Set baggage header(s)
+                if (request.Headers.TryGetValues(BaggageHeader.HttpHeaderName, out var baggageHeaders))
+                {
+                    // TODO: merge baggage headers and add sentry's from the DSC
+                }
+                else
+                {
+                    // TODO: Add Sentry's baggage header from DSC
+                }
             }
 
             // Prevent null reference exception in the following call
@@ -66,7 +78,7 @@ namespace Sentry
 
             // Start a span that tracks this request
             // (may be null if transaction is not set on the scope)
-            var span = _hub.GetSpan()?.StartChild(
+            var span = transaction?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
                 $"{requestMethod} {url}");
@@ -84,8 +96,7 @@ namespace Sentry
                 _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 
                 // This will handle unsuccessful status codes as well
-                span?.Finish(
-                    SpanStatusConverter.FromHttpStatusCode(response.StatusCode));
+                span?.Finish(SpanStatusConverter.FromHttpStatusCode(response.StatusCode));
 
                 return response;
             }

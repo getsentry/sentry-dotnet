@@ -96,9 +96,15 @@ namespace Sentry
         public bool? IsSampled
         {
             get => Contexts.Trace.IsSampled;
-            // Internal for unit tests
-            internal set => Contexts.Trace.IsSampled = value;
+            internal set
+            {
+                Contexts.Trace.IsSampled = value;
+                SampleRate ??= value == null ? null : value.Value ? 1.0 : 0.0;
+            }
         }
+
+        /// <inheritdoc />
+        public double? SampleRate { get; internal set; }
 
         /// <inheritdoc />
         public SentryLevel? Level { get; set; }
@@ -181,6 +187,8 @@ namespace Sentry
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
 
+        internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
+
         // This constructor is used for deserialization purposes.
         // It's required because some of the fields are mapped on 'contexts.trace'.
         // When deserializing, we don't parse those fields explicitly, but
@@ -247,6 +255,13 @@ namespace Sentry
             _extra = tracer.Extra.ToDictionary();
             _tags = tracer.Tags.ToDictionary();
             _spans = tracer.Spans.Select(s => new Span(s)).ToArray();
+
+            // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
+            if (tracer is TransactionTracer transactionTracer)
+            {
+                SampleRate = transactionTracer.SampleRate;
+                DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+            }
         }
 
         /// <inheritdoc />

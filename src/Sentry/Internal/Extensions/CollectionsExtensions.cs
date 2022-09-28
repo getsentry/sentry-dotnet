@@ -56,5 +56,9 @@ namespace Sentry.Internal.Extensions
 
         public static IReadOnlyList<T> AsReadOnly<T>(this IList<T> list) =>
             list as IReadOnlyList<T> ?? new ReadOnlyCollection<T>(list);
+
+        public static IReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+            where TKey : notnull =>
+            new ReadOnlyDictionary<TKey, TValue>(dictionary);
     }
 }
