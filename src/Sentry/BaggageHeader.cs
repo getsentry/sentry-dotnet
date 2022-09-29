@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
@@ -92,7 +93,7 @@ namespace Sentry
                 if (!onlySentry || key.StartsWith(SentryKeyPrefix))
                 {
                     // Values are percent-encoded.  Decode them before storing.
-                    members.Add(new KeyValuePair<string, string>(key, Uri.UnescapeDataString(value)));
+                    members.Add(key, Uri.UnescapeDataString(value));
                 }
             }
 

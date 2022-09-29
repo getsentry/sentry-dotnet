@@ -42,5 +42,13 @@
   {
     Key: other-vendor-value-2,
     Value: foo;bar;
+  },
+  {
+    Key: dup-value,
+    Value: something
+  },
+  {
+    Key: dup-value,
+    Value: something
   }
 ]
