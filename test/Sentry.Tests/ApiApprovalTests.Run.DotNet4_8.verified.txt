@@ -109,16 +109,6 @@ namespace Sentry
         public DsnAttribute(string dsn) { }
         public string Dsn { get; }
     }
-    public class DynamicSamplingContext
-    {
-        public string? Environment { get; }
-        public string PublicKey { get; }
-        public string? Release { get; }
-        public double SampleRate { get; }
-        public Sentry.SentryId TraceId { get; }
-        public string? TransactionName { get; }
-        public string? UserSegment { get; }
-    }
     public static class EventLikeExtensions
     {
         public static bool HasUser(this Sentry.IEventLike eventLike) { }

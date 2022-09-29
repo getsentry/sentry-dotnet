@@ -228,7 +228,7 @@ namespace Sentry.Protocol.Envelopes
             if (transaction.DynamicSamplingContext is { } dsc)
             {
                 header = CreateHeader(transaction.EventId, extraCapacity: 1);
-                header["trace"] = dsc.GetItems();
+                header["trace"] = dsc.Items;
             }
             else
             {

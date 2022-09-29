@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -10,20 +9,18 @@ namespace Sentry
     /// Provides the Dynamic Sampling Context for a transaction.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context"/>
-    public class DynamicSamplingContext
+    internal class DynamicSamplingContext
     {
-        // All values are stored in a dictionary, because it is possible to have other than those explicitly defined
-        // in this class.  For example, the context can come from a baggage header with other Sentry- prefixed keys.
-        private readonly IReadOnlyDictionary<string, string> _items;
+        public IReadOnlyDictionary<string, string> Items { get; }
 
-        private DynamicSamplingContext(IReadOnlyDictionary<string, string> items) => _items = items;
+        public bool IsEmpty => Items.Count == 0;
+
+        private DynamicSamplingContext(IReadOnlyDictionary<string, string> items) => Items = items;
 
         /// <summary>
         /// Gets an empty <see cref="DynamicSamplingContext"/> that can be used to "freeze" the DSC on a transaction.
         /// </summary>
-        internal static readonly DynamicSamplingContext Empty = new(new Dictionary<string, string>().AsReadOnly());
-
-        internal bool IsEmpty => _items.Count == 0;
+        public static readonly DynamicSamplingContext Empty = new(new Dictionary<string, string>().AsReadOnly());
 
         private DynamicSamplingContext(
             SentryId traceId,
@@ -78,14 +75,12 @@ namespace Sentry
                 items.Add("transaction", transactionName);
             }
 
-            _items = items;
+            Items = items;
         }
 
-        internal IReadOnlyDictionary<string, string> GetItems() => _items;
+        public BaggageHeader ToBaggageHeader() => BaggageHeader.Create(Items, useSentryPrefix: true);
 
-        internal BaggageHeader ToBaggageHeader() => BaggageHeader.Create(_items, useSentryPrefix: true);
-
-        internal static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage)
+        public static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage)
         {
             var items = baggage.GetSentryMembers();
 
@@ -113,7 +108,7 @@ namespace Sentry
             return new DynamicSamplingContext(items);
         }
 
-        internal static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options)
+        public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options)
         {
             // These should already be set on the transaction.
             var publicKey = Dsn.Parse(options.Dsn!).PublicKey;
@@ -139,10 +134,10 @@ namespace Sentry
 
     internal static class DynamicSamplingContextExtensions
     {
-        internal static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage)
+        public static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage)
             => DynamicSamplingContext.CreateFromBaggageHeader(baggage);
 
-        internal static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options)
+        public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options)
             => DynamicSamplingContext.CreateFromTransaction(transaction, options);
     }
 }
