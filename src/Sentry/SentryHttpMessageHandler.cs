@@ -56,29 +56,7 @@ namespace Sentry
                 request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
             }
 
-            var transaction = _hub.GetSpan();
-
-            if (transaction is TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc})
-            {
-                var baggage = dsc.ToBaggageHeader();
-
-                // Set baggage header(s)
-                if (request.Headers.TryGetValues(BaggageHeader.HttpHeaderName, out var baggageHeaders))
-                {
-                    // Merge baggage headers, including ours.
-                    var allBaggage = baggageHeaders
-                        .Select(s => BaggageHeader.TryParse(s))
-                        .ExceptNulls()
-                        .Append(baggage);
-                    baggage = BaggageHeader.Merge(allBaggage);
-
-                    // Remove the existing header so we can replace it.
-                    request.Headers.Remove(BaggageHeader.HttpHeaderName);
-                }
-
-                // Set baggage header
-                request.Headers.Add(BaggageHeader.HttpHeaderName, baggage.ToString());
-            }
+            AddBaggageHeader(request);
 
             // Prevent null reference exception in the following call
             // in case the user didn't set an inner handler.
@@ -89,7 +67,7 @@ namespace Sentry
 
             // Start a span that tracks this request
             // (may be null if transaction is not set on the scope)
-            var span = transaction?.StartChild(
+            var span = _hub.GetSpan()?.StartChild(
                 "http.client",
                 // e.g. "GET https://example.com"
                 $"{requestMethod} {url}");
@@ -116,6 +94,39 @@ namespace Sentry
                 span?.Finish(ex);
                 throw;
             }
+        }
+
+        private void AddBaggageHeader(HttpRequestMessage request)
+        {
+            var transaction = _hub.GetSpan();
+            if (transaction is not TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc})
+            {
+                return;
+            }
+
+            var baggage = dsc.ToBaggageHeader();
+
+            if (request.Headers.TryGetValues(BaggageHeader.HttpHeaderName, out var baggageHeaders))
+            {
+                var headers = baggageHeaders.ToList();
+                if (headers.Any(h => h.StartsWith(BaggageHeader.SentryKeyPrefix)))
+                {
+                    // The Sentry headers have already been added to this request.  Do nothing.
+                    return;
+                }
+
+                // Merge existing baggage headers with ours.
+                var allBaggage = headers
+                    .Select(s => BaggageHeader.TryParse(s)).ExceptNulls()
+                    .Append(baggage);
+                baggage = BaggageHeader.Merge(allBaggage);
+
+                // Remove the existing header so we can replace it with the merged one.
+                request.Headers.Remove(BaggageHeader.HttpHeaderName);
+            }
+
+            // Set the baggage header
+            request.Headers.Add(BaggageHeader.HttpHeaderName, baggage.ToString());
         }
     }
 }

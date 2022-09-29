@@ -13,7 +13,7 @@ namespace Sentry
     internal class BaggageHeader
     {
         internal const string HttpHeaderName = "baggage";
-        private const string SentryKeyPrefix = "sentry-";
+        internal const string SentryKeyPrefix = "sentry-";
 
         // https://www.w3.org/TR/baggage/#baggage-string
         // "Uniqueness of keys between multiple list-members in a baggage-string is not guaranteed."
