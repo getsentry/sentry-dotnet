@@ -8,9 +8,8 @@ namespace Sentry
     /// <summary>
     /// Baggage Header for dynamic sampling.
     /// </summary>
-    /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#baggage"/>
-    /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#baggage-header"/>
-    /// <seealso href="https://www.w3.org/TR/baggage/"/>
+    /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context"/>
+    /// <seealso href="https://www.w3.org/TR/baggage"/>
     internal class BaggageHeader
     {
         internal const string HttpHeaderName = "baggage";
@@ -100,8 +99,19 @@ namespace Sentry
             return members.Count == 0 ? null : new BaggageHeader(members);
         }
 
-        public static BaggageHeader Create(IEnumerable<KeyValuePair<string, string>> members) =>
-            new(members.Where(member => IsValidKey(member.Key)));
+        public static BaggageHeader Create(
+            IEnumerable<KeyValuePair<string, string>> items,
+            bool useSentryPrefix = false)
+        {
+            var members = items.Where(member => IsValidKey(member.Key));
+
+            if (useSentryPrefix)
+            {
+                members = members.Select(kvp => new KeyValuePair<string, string>(SentryKeyPrefix + kvp.Key, kvp.Value));
+            }
+
+            return new BaggageHeader(members);
+        }
 
         public static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders) =>
             new(baggageHeaders.SelectMany(x => x.Members));

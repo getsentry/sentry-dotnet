@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -33,7 +34,7 @@ namespace Sentry
             string? userSegment = null,
             string? transactionName = null)
         {
-            // Validate and set required fields
+            // Validate and set required values
             if (traceId == SentryId.Empty)
             {
                 throw new ArgumentOutOfRangeException(nameof(traceId));
@@ -56,7 +57,7 @@ namespace Sentry
                 ["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture)
             };
 
-            // Set optional fields
+            // Set optional values
             if (!string.IsNullOrWhiteSpace(release))
             {
                 items.Add("release", release);
@@ -80,44 +81,9 @@ namespace Sentry
             _items = items;
         }
 
-        /// <summary>
-        /// Gets the trace ID of the Dynamic Sampling Context.
-        /// </summary>
-        public SentryId TraceId => SentryId.Parse(_items["trace_id"]);
-
-        /// <summary>
-        /// Gets the public key of the Dynamic Sampling Context.
-        /// </summary>
-        public string PublicKey => _items["public_key"];
-
-        /// <summary>
-        /// Gets the sample rate of the Dynamic Sampling Context.
-        /// </summary>
-        public double SampleRate => double.Parse(_items["sample_rate"], CultureInfo.InvariantCulture);
-
-        /// <summary>
-        /// Gets the release of the Dynamic Sampling Context, or <c>null</c> if none was set.
-        /// </summary>
-        public string? Release => _items.TryGetValue("release", out var value) ? value : null;
-
-        /// <summary>
-        /// Gets the environment of the Dynamic Sampling Context, or <c>null</c> if none was set.
-        /// </summary>
-        public string? Environment => _items.TryGetValue("environment", out var value) ? value : null;
-
-        /// <summary>
-        /// Gets the user segment of the Dynamic Sampling Context, or <c>null</c> if none was set.
-        /// </summary>
-        public string? UserSegment => _items.TryGetValue("user_segment", out var value) ? value : null;
-
-        /// <summary>
-        /// Gets the transaction name of the Dynamic Sampling Context, or <c>null</c> if none was set.
-        /// </summary>
-        public string? TransactionName => _items.TryGetValue("transaction", out var value) ? value : null;
-
         internal IReadOnlyDictionary<string, string> GetItems() => _items;
 
-        internal BaggageHeader ToBaggageHeader() => BaggageHeader.Create(_items);
+        internal BaggageHeader ToBaggageHeader() => BaggageHeader.Create(_items, useSentryPrefix: true);
 
         internal static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage)
         {

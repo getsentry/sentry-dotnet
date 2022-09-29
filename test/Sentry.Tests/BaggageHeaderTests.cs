@@ -69,6 +69,42 @@ public class BaggageHeaderTests
     }
 
     [Fact]
+    public void BaggageHeader_Create()
+    {
+        var header = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"foo", "123"},
+            {"bar", "456"}
+        });
+
+        var expected = new List<KeyValuePair<string, string>>
+        {
+            {"foo", "123"},
+            {"bar", "456"}
+        };
+
+        Assert.Equal(expected, header.Members);
+    }
+
+    [Fact]
+    public void BaggageHeader_Create_WithSentryPrefix()
+    {
+        var header = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"foo", "123"},
+            {"bar", "456"}
+        }, useSentryPrefix: true);
+
+        var expected = new List<KeyValuePair<string, string>>
+        {
+            {"sentry-foo", "123"},
+            {"sentry-bar", "456"}
+        };
+
+        Assert.Equal(expected, header.Members);
+    }
+
+    [Fact]
     public void BaggageHeader_ToString()
     {
         var header = BaggageHeader.Create(new List<KeyValuePair<string, string>>
