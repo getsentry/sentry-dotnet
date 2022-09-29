@@ -1,0 +1,253 @@
+namespace Sentry.Tests;
+
+public class DynamicSamplingContextTests
+{
+    [Fact]
+    public void EmptyContext()
+    {
+        var dsc = DynamicSamplingContext.Empty;
+
+        Assert.True(dsc.IsEmpty);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_TraceId_Missing()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_TraceId_EmptyGuid()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "00000000000000000000000000000000"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_TraceId_Invalid()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "not-a-guid"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_PublicKey_Missing()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-sample_rate", "1.0"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_PublicKey_Blank()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", " "},
+            {"sentry-sample_rate", "1.0"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_SampleRate_Missing()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_SampleRate_Invalid()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "not-a-number"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_SampleRate_TooLow()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "-0.1"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_SampleRate_TooHigh()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.1"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_Valid_Minimum()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.NotNull(dsc);
+        Assert.Equal(3, dsc.Items.Count);
+        Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("1.0", Assert.Contains("sample_rate", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromBaggage_Valid_Complete()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"},
+            {"sentry-release", "test@1.0.0+abc"},
+            {"sentry-environment", "production"},
+            {"sentry-user_segment", "Group B"},
+            {"sentry-transaction", "GET /person/{id}"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.NotNull(dsc);
+        Assert.Equal(7, dsc.Items.Count);
+        Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("1.0", Assert.Contains("sample_rate", dsc.Items));
+        Assert.Equal("test@1.0.0+abc", Assert.Contains("release", dsc.Items));
+        Assert.Equal("production", Assert.Contains("environment", dsc.Items));
+        Assert.Equal("Group B", Assert.Contains("user_segment", dsc.Items));
+        Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+    }
+
+    [Fact]
+    public void ToBaggageHeader()
+    {
+        var original = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"},
+            {"sentry-release", "test@1.0.0+abc"},
+            {"sentry-environment", "production"},
+            {"sentry-user_segment", "Group B"},
+            {"sentry-transaction", "GET /person/{id}"}
+        });
+
+        var dsc = original.CreateDynamicSamplingContext();
+
+        var result = dsc?.ToBaggageHeader();
+
+        Assert.NotNull(dsc);
+        Assert.Equal(original.Members, result.Members);
+    }
+
+    [Fact]
+    public void CreateFromTransaction()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "foo@2.4.5",
+            Environment = "staging"
+        };
+
+        var hub = Substitute.For<IHub>();
+        var ctx = Substitute.For<ITransactionContext>();
+
+        var traceId = SentryId.Create();
+        ctx.TraceId.Returns(traceId);
+
+        var transaction = new TransactionTracer(hub, ctx)
+        {
+            Name = "GET /person/{id}",
+            NameSource = TransactionNameSource.Route,
+            IsSampled = true,
+            SampleRate = 0.5,
+            User =
+            {
+                Segment = "Group A"
+            },
+        };
+
+        var dsc = transaction.CreateDynamicSamplingContext(options);
+
+        Assert.NotNull(dsc);
+        Assert.Equal(7, dsc.Items.Count);
+        Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
+        Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
+        Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
+        Assert.Equal("Group A", Assert.Contains("user_segment", dsc.Items));
+        Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+    }
+}
