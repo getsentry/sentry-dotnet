@@ -59,6 +59,9 @@ namespace Sentry.AspNetCore
                 return null;
             }
 
+            // Note: If there are multiple baggage headers, they will be joined with comma delimiters,
+            // and can thus be treated as a single baggage header.
+
             _options.LogDebug("Received baggage header '{0}'.", value);
 
             try
