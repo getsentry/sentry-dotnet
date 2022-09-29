@@ -214,6 +214,85 @@ public class SentryTracingMiddlewareTests
     }
 
     [Fact]
+    public async Task Baggage_header_propagates_to_outbound_requests()
+    {
+        // incoming baggage header
+        const string incomingBaggage =
+            "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+            "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rate=0.5, " +
+            "foo-bar=abc123";
+
+        // other baggage already on the outbound request (manually in this test, but in theory by some other middleware)
+        const string existingOutboundBaggage = "other-value=abc123";
+
+        // we expect this to be the result on outbound requests
+        const string expectedOutboundBaggage =
+            "other-value=abc123, " +
+            "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+            "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rate=0.5";
+
+        // Note that we "play nice" with existing headers on the outbound request, but we do not propagate other
+        // non-Sentry headers on the inbound request.  The expectation is that the other vendor would add their
+        // own middleware to do that.
+
+        // Arrange
+        var sentryClient = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+
+        HttpRequestHeaders outboundRequestHeaders = null;
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+                app.UseSentryTracing();
+
+                app.UseEndpoints(routes => routes.Map("/person/{id}", async _ =>
+                {
+                    // simulate an outbound request and capture the request headers
+                    using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+                    using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+                    using var client = new HttpClient(sentryHandler);
+                    client.DefaultRequestHeaders.Add("baggage", existingOutboundBaggage);
+                    await client.GetAsync("https://localhost/");
+                    using var request = innerHandler.GetRequests().Single();
+                    outboundRequestHeaders = request.Headers;
+                }));
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+        {
+            Headers =
+            {
+                {"baggage", incomingBaggage}
+            }
+        };
+
+        await client.SendAsync(request);
+
+        // Assert
+        Assert.NotNull(outboundRequestHeaders);
+        outboundRequestHeaders.Should().Contain(h =>
+            h.Key == "baggage" &&
+            h.Value.First() == expectedOutboundBaggage);
+    }
+
+    [Fact]
     public async Task Transaction_is_automatically_populated_with_request_data()
     {
         // Arrange
