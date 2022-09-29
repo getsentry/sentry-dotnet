@@ -293,6 +293,66 @@ public class SentryTracingMiddlewareTests
     }
 
     [Fact]
+    public async Task Baggage_header_sets_dynamic_sampling_context()
+    {
+        // incoming baggage header
+        const string baggage =
+            "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+            "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rate=0.5";
+
+        // Arrange
+        TransactionTracer transaction = null;
+
+        var sentryClient = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+                app.UseSentryTracing();
+
+                app.UseEndpoints(routes =>
+                {
+                    routes.Map("/person/{id}", _ =>
+                    {
+                        transaction = hub.GetSpan() as TransactionTracer;
+                        return Task.CompletedTask;
+                    });
+                });
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+        {
+            Headers =
+            {
+                {"baggage", baggage}
+            }
+        };
+
+        await client.SendAsync(request);
+
+        // Assert
+        var dsc = transaction?.DynamicSamplingContext;
+        Assert.NotNull(dsc);
+        Assert.Equal(baggage, dsc.ToBaggageHeader().ToString());
+    }
+
+    [Fact]
     public async Task Transaction_is_automatically_populated_with_request_data()
     {
         // Arrange
