@@ -292,13 +292,9 @@ namespace Sentry.Protocol.Envelopes
                 prevByte = curByte;
             }
 
-            var header = Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull);
-            if (header == null)
-            {
-                throw new InvalidOperationException("Envelope item header is malformed.");
-            }
-
-            return header;
+            return
+                Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
+                ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
         private static async Task<ISerializable> DeserializePayloadAsync(
