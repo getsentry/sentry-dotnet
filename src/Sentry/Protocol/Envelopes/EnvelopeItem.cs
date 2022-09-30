@@ -138,7 +138,7 @@ namespace Sentry.Protocol.Envelopes
 
             var payloadBuffer = await BufferPayloadAsync(logger, cancellationToken).ConfigureAwait(false);
 #if NET461 || NETSTANDARD2_0
-                using (payloadBuffer)
+            using (payloadBuffer)
 #else
             await using (payloadBuffer.ConfigureAwait(false))
 #endif
