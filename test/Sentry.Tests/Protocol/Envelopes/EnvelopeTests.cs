@@ -130,7 +130,7 @@ public class EnvelopeTests
             new[]
             {
                 new EnvelopeItem(
-                    new Dictionary<string, object>{["type"] = "fake", ["length"] = 75L},
+                    new Dictionary<string, object>{["type"] = "fake"},
                     new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
                         .ToMemoryStream())
                 )
@@ -260,7 +260,6 @@ public class EnvelopeTests
                     new Dictionary<string, object>
                     {
                         ["type"] = "attachment",
-                        ["length"] = 13L,
                         ["content_type"] = "text/plain",
                         ["filename"] = "hello.txt"
                     },
@@ -271,7 +270,6 @@ public class EnvelopeTests
                     new Dictionary<string, object>
                     {
                         ["type"] = "event",
-                        ["length"] = 41L,
                         ["content_type"] = "application/json",
                         ["filename"] = "application.log"
                     },
@@ -383,8 +381,7 @@ public class EnvelopeTests
                 new EnvelopeItem(
                     new Dictionary<string, object>
                     {
-                        ["type"] = "attachment",
-                        ["length"] = 0L
+                        ["type"] = "attachment"
                     },
                     new StreamSerializable(new MemoryStream())
                 ),
@@ -392,8 +389,7 @@ public class EnvelopeTests
                 new EnvelopeItem(
                     new Dictionary<string, object>
                     {
-                        ["type"] = "attachment",
-                        ["length"] = 0L
+                        ["type"] = "attachment"
                     },
                     new StreamSerializable(new MemoryStream())
                 )

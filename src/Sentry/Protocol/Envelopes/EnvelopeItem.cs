@@ -273,7 +273,7 @@ namespace Sentry.Protocol.Envelopes
             return new EnvelopeItem(header, new JsonSerializable(report));
         }
 
-        private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
+        private static async Task<Dictionary<string, object?>> DeserializeHeaderAsync(
             Stream stream,
             CancellationToken cancellationToken = default)
         {
@@ -297,11 +297,6 @@ namespace Sentry.Protocol.Envelopes
             {
                 throw new InvalidOperationException("Envelope item header is malformed.");
             }
-
-            // Always remove the length header on deserialization so it will get re-calculated if later serialized.
-            // We cannot trust the length to be identical when round-tripped.
-            // See https://github.com/getsentry/sentry-dotnet/issues/1956
-            header.Remove(LengthKey);
 
             return header;
         }
@@ -403,6 +398,11 @@ namespace Sentry.Protocol.Envelopes
                     break;
                 }
             }
+
+            // Always remove the length header on deserialization so it will get re-calculated if later serialized.
+            // We cannot trust the length to be identical when round-tripped.
+            // See https://github.com/getsentry/sentry-dotnet/issues/1956
+            header.Remove(LengthKey);
 
             return new EnvelopeItem(header, payload);
         }
