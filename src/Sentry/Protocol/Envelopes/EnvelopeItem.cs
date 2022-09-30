@@ -128,77 +128,49 @@ namespace Sentry.Protocol.Envelopes
             writer.Flush();
         }
 
-        private Task SerializeHeaderAsync(
-            Stream stream,
-            IDiagnosticLogger? logger,
-            CancellationToken cancellationToken) =>
-            SerializeHeaderAsync(stream, Header, logger, cancellationToken);
-
-        private void SerializeHeader(Stream stream, IDiagnosticLogger? logger) =>
-            SerializeHeader(stream, Header, logger);
-
         /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
+        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger,
+            CancellationToken cancellationToken = default)
         {
-            // Length is known
-            if (TryGetLength() != null)
-            {
-                // Header
-                await SerializeHeaderAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+            // Always calculate the length of the payload, as Sentry will reject envelopes that have incorrect lengths
+            // in item headers. Don't trust any previously calculated value to be correct.
+            // See https://github.com/getsentry/sentry-dotnet/issues/1956
 
-                // Payload
-                await Payload.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-            }
-            // Length is NOT known (need to calculate)
-            else
-            {
-                var payloadBuffer = await BufferPayloadAsync(logger, cancellationToken).ConfigureAwait(false);
+            var payloadBuffer = await BufferPayloadAsync(logger, cancellationToken).ConfigureAwait(false);
 #if NET461 || NETSTANDARD2_0
                 using (payloadBuffer)
 #else
-                await using (payloadBuffer.ConfigureAwait(false))
+            await using (payloadBuffer.ConfigureAwait(false))
 #endif
-                {
-                    // Header
-                    var headerWithLength = Header.ToDictionary();
-                    headerWithLength[LengthKey] = payloadBuffer.Length;
-                    await SerializeHeaderAsync(stream, headerWithLength, logger, cancellationToken).ConfigureAwait(false);
-                    await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+            {
+                // Header
+                var headerWithLength = Header.ToDictionary();
+                headerWithLength[LengthKey] = payloadBuffer.Length;
+                await SerializeHeaderAsync(stream, headerWithLength, logger, cancellationToken).ConfigureAwait(false);
+                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
 
-                    // Payload
-                    await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
-                }
+                // Payload
+                await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
             }
         }
 
         /// <inheritdoc />
         public void Serialize(Stream stream, IDiagnosticLogger? logger)
         {
-            // Length is known
-            if (TryGetLength() != null)
-            {
-                // Header
-                SerializeHeader(stream, logger);
-                stream.WriteByte((byte)'\n');
+            // Always calculate the length of the payload, as Sentry will reject envelopes that have incorrect lengths
+            // in item headers. Don't trust any previously calculated value to be correct.
+            // See https://github.com/getsentry/sentry-dotnet/issues/1956
 
-                // Payload
-                Payload.Serialize(stream, logger);
-            }
-            // Length is NOT known (need to calculate)
-            else
-            {
-                using var payloadBuffer = BufferPayload(logger);
+            using var payloadBuffer = BufferPayload(logger);
 
-                // Header
-                var headerWithLength = Header.ToDictionary();
-                headerWithLength[LengthKey] = payloadBuffer.Length;
-                SerializeHeader(stream, headerWithLength, logger);
-                stream.WriteByte((byte)'\n');
+            // Header
+            var headerWithLength = Header.ToDictionary();
+            headerWithLength[LengthKey] = payloadBuffer.Length;
+            SerializeHeader(stream, headerWithLength, logger);
+            stream.WriteByte((byte)'\n');
 
-                // Payload
-                payloadBuffer.CopyTo(stream);
-            }
+            // Payload
+            payloadBuffer.CopyTo(stream);
         }
 
         /// <inheritdoc />
@@ -320,9 +292,18 @@ namespace Sentry.Protocol.Envelopes
                 prevByte = curByte;
             }
 
-            return
-                Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
-                ?? throw new InvalidOperationException("Envelope item header is malformed.");
+            var header = Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull);
+            if (header == null)
+            {
+                throw new InvalidOperationException("Envelope item header is malformed.");
+            }
+
+            // Always remove the length header on deserialization so it will get re-calculated if later serialized.
+            // We cannot trust the length to be identical when round-tripped.
+            // See https://github.com/getsentry/sentry-dotnet/issues/1956
+            header.Remove(LengthKey);
+
+            return header;
         }
 
         private static async Task<ISerializable> DeserializePayloadAsync(
