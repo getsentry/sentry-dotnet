@@ -90,7 +90,7 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = hub.GetSpan() as ITransactionData;
+                        transaction = (ITransactionData) hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });
@@ -327,7 +327,7 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = hub.GetSpan() as TransactionTracer;
+                        transaction = (TransactionTracer) hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });
@@ -381,7 +381,7 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = hub.GetSpan() as ITransactionData;
+                        transaction = (ITransactionData) hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });

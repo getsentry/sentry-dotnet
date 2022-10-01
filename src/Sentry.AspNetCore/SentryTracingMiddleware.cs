@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
-using Sentry.Internal;
 
 namespace Sentry.AspNetCore
 {
