@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -22,7 +23,7 @@ namespace Sentry
         public IReadOnlyList<KeyValuePair<string, string>> Members { get; }
 
         private BaggageHeader(IEnumerable<KeyValuePair<string, string>> members) =>
-            Members = members.ToList().AsReadOnly();
+            Members = members.ToList();
 
         // We can safely return a dictionary of Sentry members, as we are in control over the keys added.
         // Just to be safe though, we'll group by key and only take the first of each one.
@@ -71,21 +72,35 @@ namespace Sentry
             var items = baggage.Split(',', StringSplitOptions.RemoveEmptyEntries);
             var members = new List<KeyValuePair<string, string>>(items.Length);
 
+            var logger = SentrySdk.CurrentOptions?.DiagnosticLogger;
+
             foreach (var item in items)
             {
                 // Per baggage spec, the value may contain = characters, so limit the split to 2 parts.
                 var parts = item.Split('=', 2);
                 if (parts.Length != 2)
                 {
-                    // malformed, missing separator, key, or value
+                    logger?.LogWarning(
+                        "The baggage header has an item without a '=' separator, and it will be discarded. " +
+                        "The item is: \"{0}\"", item);
                     continue;
                 }
 
                 var key = parts[0].Trim();
-                var value = parts[1].Trim();
-                if (key.Length == 0 || value.Length == 0)
+                if (key.Length == 0)
                 {
-                    // malformed, key or value found empty
+                    logger?.LogWarning(
+                        "The baggage header has an item with an empty key, and it will be discarded. " +
+                        "The item is: \"{0}\"", item);
+                    continue;
+                }
+
+                var value = parts[1].Trim();
+                if (value.Length == 0)
+                {
+                    logger?.LogWarning(
+                        "The baggage header has an item with an empty value, and it will be discarded. " +
+                        "The item is: \"{0}\"", item);
                     continue;
                 }
 
