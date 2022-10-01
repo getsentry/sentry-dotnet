@@ -23,6 +23,7 @@
 - Respect Transaction.IsSampled in SqlListener ([#1933](https://github.com/getsentry/sentry-dotnet/pull/1933))
 - Ignore null Context values ([#1942](https://github.com/getsentry/sentry-dotnet/pull/1942))
 - Tags should not differ based on current culture ([#1949](https://github.com/getsentry/sentry-dotnet/pull/1949))
+- Always recalculate payload length ([#1957](https://github.com/getsentry/sentry-dotnet/pull/1957))
 
 ## 3.21.0
 
