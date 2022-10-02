@@ -7,7 +7,7 @@ using var _ = SentrySdk.Init(o =>
     o.IsGlobalModeEnabled = true;
     o.AutoSessionTracking = true;
     o.Environment = "development";
-    o.Release = "the release";
+    o.Release = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
 });
 
 var tran = SentrySdk.StartTransaction("name5", "operation5");
