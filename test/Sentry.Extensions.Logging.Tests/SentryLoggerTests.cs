@@ -75,9 +75,12 @@ public class SentryLoggerTests
         {
             new("fooString", "bar"),
             new("fooInteger", 1234),
+            new("fooLong", 1234L),
+            new("fooUShort", (ushort)1234),
             new("fooDouble", (double)1234),
             new("fooFloat", (float)1234.123),
-            new("fooGuid", guidValue)
+            new("fooGuid", guidValue),
+            new("fooEnum", UriKind.Absolute) // any enum, just an example
         };
         var sut = _fixture.GetSut();
 
@@ -87,9 +90,40 @@ public class SentryLoggerTests
             .CaptureEvent(Arg.Is<SentryEvent>(
                 e => e.Tags["fooString"] == "bar" &&
                      e.Tags["fooInteger"] == "1234" &&
+                     e.Tags["fooLong"] == "1234" &&
+                     e.Tags["fooUShort"] == "1234" &&
                      e.Tags["fooDouble"] == "1234" &&
                      e.Tags["fooFloat"] == "1234.123" &&
-                     e.Tags["fooGuid"] == guidValue.ToString()));
+                     e.Tags["fooGuid"] == guidValue.ToString() &&
+                     e.Tags["fooEnum"] == "Absolute"));
+    }
+
+    [Fact]
+    public void Culture_does_not_effect_tags()
+    {
+        var props = new List<KeyValuePair<string, object>>
+        {
+            new("fooInteger", 12345),
+            new("fooDouble", 12345.123d),
+            new("fooFloat", 1234.123f),
+        };
+        SentryEvent sentryEvent;
+        var culture = Thread.CurrentThread.CurrentCulture;
+
+        try
+        {
+            Thread.CurrentThread.CurrentCulture = new("da-DK");
+            sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category");
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = culture;
+        }
+
+        var tags = sentryEvent.Tags;
+        Assert.Equal("12345", tags["fooInteger"]);
+        Assert.Equal("12345.123", tags["fooDouble"]);
+        Assert.Equal("1234.123", tags["fooFloat"]);
     }
 
     [Fact]

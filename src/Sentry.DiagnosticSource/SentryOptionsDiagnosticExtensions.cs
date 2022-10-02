@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Linq;
 using Sentry.Extensibility;
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 
 namespace Sentry
 {

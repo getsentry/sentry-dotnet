@@ -8,7 +8,6 @@ using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
-// ReSharper disable once CheckNamespace
 namespace Sentry
 {
     /// <summary>
@@ -114,7 +113,8 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) => writer.WriteDictionaryValue(this!, logger);
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
+            writer.WriteDictionaryValue(this!, logger, includeNullValues: false);
 
         /// <summary>
         /// Parses from JSON.

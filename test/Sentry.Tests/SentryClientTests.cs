@@ -41,24 +41,92 @@ public class SentryClientTests
         _output = output;
     }
 
-    [Fact]
-    public void CaptureEvent_ExceptionFiltered_EmptySentryId()
+    [Theory]
+    [MemberData(nameof(GetExceptionFilterTestCases))]
+    public void CaptureEvent_ExceptionFilteredForType(bool shouldFilter, Exception exception, params IExceptionFilter[] filters)
     {
-        _fixture.SentryOptions.AddExceptionFilterForType<SystemException>();
+        foreach (var filter in filters)
+        {
+            _fixture.SentryOptions.AddExceptionFilter(filter);
+        }
 
         var sut = _fixture.GetSut();
+        var result = sut.CaptureException(exception);
+
+        Assert.Equal(shouldFilter, result == default);
+        _fixture.BackgroundWorker.Received(result == default ? 0 : 1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    public static IEnumerable<object[]> GetExceptionFilterTestCases()
+    {
+        var systemExceptionFilter = new ExceptionTypeFilter<SystemException>();
+        var applicationExceptionFilter = new ExceptionTypeFilter<ApplicationException>();
+        var aggregateExceptionFilter = new ExceptionTypeFilter<AggregateException>();
 
         // Filtered out for it's the exact filtered type
-        Assert.Equal(default, sut.CaptureException(new SystemException()));
-        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        yield return new object[]
+        {
+            true,
+            new SystemException(),
+            systemExceptionFilter
+        };
 
         // Filtered for it's a derived type
-        Assert.Equal(default, sut.CaptureException(new ArithmeticException()));
-        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        yield return new object[]
+        {
+            true,
+            new ArithmeticException(),
+            systemExceptionFilter
+        };
 
         // Not filtered since it's not in the inheritance chain
-        Assert.NotEqual(default, sut.CaptureException(new Exception()));
-        _ = _fixture.BackgroundWorker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        yield return new object[]
+        {
+            false,
+            new Exception(),
+            systemExceptionFilter
+        };
+
+        // Filtered because it's the only exception under an aggregate exception
+        yield return new object[]
+        {
+            true,
+            new AggregateException(new SystemException()),
+            systemExceptionFilter
+        };
+
+        // Filtered because all exceptions under the aggregate exception are the filtered or derived type
+        yield return new object[]
+        {
+            true,
+            new AggregateException(new SystemException(), new ArithmeticException()),
+            systemExceptionFilter
+        };
+
+        // Filtered because all exceptions under the aggregate exception are covered by all of the filters
+        yield return new object[]
+        {
+            true,
+            new AggregateException(new SystemException(), new ApplicationException()),
+            systemExceptionFilter,
+            applicationExceptionFilter
+        };
+
+        // Not filtered because there's an exception under the aggregate not covered by the filters
+        yield return new object[]
+        {
+            false,
+            new AggregateException(new SystemException(), new Exception()),
+            systemExceptionFilter
+        };
+
+        // Filtered because we're specifically filtering out aggregate exceptions (strange, but should work)
+        yield return new object[]
+        {
+            true,
+            new AggregateException(),
+            aggregateExceptionFilter
+        };
     }
 
     [Fact]

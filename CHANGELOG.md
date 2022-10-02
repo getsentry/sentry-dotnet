@@ -10,12 +10,20 @@
 - Add `TransactionNameSource` annotation ([#1910](https://github.com/getsentry/sentry-dotnet/pull/1910))
 - Use URL path in transaction names instead of "Unknown Route" ([#1919](https://github.com/getsentry/sentry-dotnet/pull/1919))
 - Add `User.Segment` property ([#1920](https://github.com/getsentry/sentry-dotnet/pull/1920))
+- Add support for custom `JsonConverter`s ([#1934](https://github.com/getsentry/sentry-dotnet/pull/1934))
+- Support more types for message template tags in SentryLogger ([#1945](https://github.com/getsentry/sentry-dotnet/pull/1945))
 
 ## Fixes
 
 - Reduce lock contention when sampling ([#1915](https://github.com/getsentry/sentry-dotnet/pull/1915))
 - Dont send transaction for OPTIONS web request ([#1921](https://github.com/getsentry/sentry-dotnet/pull/1921))
 - Fix missing details when aggregate exception is filtered out ([#1922](https://github.com/getsentry/sentry-dotnet/pull/1922))
+- Exception filters should consider child exceptions of an `AggregateException` ([#1924](https://github.com/getsentry/sentry-dotnet/pull/1924))
+- Add Blazor WASM detection to set IsGlobalModeEnabled to true ([#1931](https://github.com/getsentry/sentry-dotnet/pull/1931))
+- Respect Transaction.IsSampled in SqlListener ([#1933](https://github.com/getsentry/sentry-dotnet/pull/1933))
+- Ignore null Context values ([#1942](https://github.com/getsentry/sentry-dotnet/pull/1942))
+- Tags should not differ based on current culture ([#1949](https://github.com/getsentry/sentry-dotnet/pull/1949))
+- Always recalculate payload length ([#1957](https://github.com/getsentry/sentry-dotnet/pull/1957))
 
 ## 3.21.0
 

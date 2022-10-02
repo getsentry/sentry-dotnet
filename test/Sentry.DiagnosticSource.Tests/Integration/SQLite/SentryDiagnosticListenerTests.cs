@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 
 namespace Sentry.DiagnosticSource.Tests.Integration.SQLite;
 

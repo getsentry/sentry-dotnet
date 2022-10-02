@@ -18,16 +18,20 @@ namespace Sentry
     /// It allows safe static access to a client and scope management.
     /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
     /// </remarks>
+#if __MOBILE__
     public static partial class SentrySdk
+#else
+    public static class SentrySdk
+#endif
     {
-        private static IHub _hub = DisabledHub.Instance;
+        private static IHub CurrentHub = DisabledHub.Instance;
 
-        internal static SentryOptions? CurrentOptions => _hub is Hub hub ? hub.Options : null;
+        internal static SentryOptions? CurrentOptions => CurrentHub is Hub hub ? hub.Options : null;
 
         /// <summary>
         /// Last event id recorded in the current scope.
         /// </summary>
-        public static SentryId LastEventId { [DebuggerStepThrough] get => _hub.LastEventId; }
+        public static SentryId LastEventId { [DebuggerStepThrough] get => CurrentHub.LastEventId; }
 
         internal static IHub InitHub(SentryOptions options)
         {
@@ -110,7 +114,7 @@ namespace Sentry
 
         internal static IDisposable UseHub(IHub hub)
         {
-            var oldHub = Interlocked.Exchange(ref _hub, hub);
+            var oldHub = Interlocked.Exchange(ref CurrentHub, hub);
             (oldHub as IDisposable)?.Dispose();
             return new DisposeHandle(hub);
         }
@@ -119,7 +123,7 @@ namespace Sentry
         /// Flushes events queued up.
         /// </summary>
         [DebuggerStepThrough]
-        public static Task FlushAsync(TimeSpan timeout) => _hub.FlushAsync(timeout);
+        public static Task FlushAsync(TimeSpan timeout) => CurrentHub.FlushAsync(timeout);
 
         /// <summary>
         /// Close the SDK.
@@ -132,7 +136,7 @@ namespace Sentry
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static void Close()
         {
-            var oldHub = Interlocked.Exchange(ref _hub, DisabledHub.Instance);
+            var oldHub = Interlocked.Exchange(ref CurrentHub, DisabledHub.Instance);
             (oldHub as IDisposable)?.Dispose();
             ProcessInfo.Instance = null;
         }
@@ -144,7 +148,7 @@ namespace Sentry
 
             public void Dispose()
             {
-                _ = Interlocked.CompareExchange(ref _hub, DisabledHub.Instance, _localHub);
+                _ = Interlocked.CompareExchange(ref CurrentHub, DisabledHub.Instance, _localHub);
                 (_localHub as IDisposable)?.Dispose();
 
                 _localHub = null!;
@@ -154,7 +158,7 @@ namespace Sentry
         /// <summary>
         /// Whether the SDK is enabled or not.
         /// </summary>
-        public static bool IsEnabled { [DebuggerStepThrough] get => _hub.IsEnabled; }
+        public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed.
@@ -165,21 +169,21 @@ namespace Sentry
         /// <param name="state">A state object to be added to the scope.</param>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
-        public static IDisposable PushScope<TState>(TState state) => _hub.PushScope(state);
+        public static IDisposable PushScope<TState>(TState state) => CurrentHub.PushScope(state);
 
         /// <summary>
         /// Creates a new scope that will terminate when disposed.
         /// </summary>
         /// <returns>A disposable that when disposed, ends the created scope.</returns>
         [DebuggerStepThrough]
-        public static IDisposable PushScope() => _hub.PushScope();
+        public static IDisposable PushScope() => CurrentHub.PushScope();
 
         /// <summary>
         /// Binds the client to the current scope.
         /// </summary>
         /// <param name="client">The client.</param>
         [DebuggerStepThrough]
-        public static void BindClient(ISentryClient client) => _hub.BindClient(client);
+        public static void BindClient(ISentryClient client) => CurrentHub.BindClient(client);
 
         /// <summary>
         /// Adds a breadcrumb to the current Scope.
@@ -212,7 +216,7 @@ namespace Sentry
             string? type = null,
             IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
-            => _hub.AddBreadcrumb(message, category, type, data, level);
+            => CurrentHub.AddBreadcrumb(message, category, type, data, level);
 
         /// <summary>
         /// Adds a breadcrumb to the current scope.
@@ -236,7 +240,7 @@ namespace Sentry
             string? type = null,
             IDictionary<string, string>? data = null,
             BreadcrumbLevel level = default)
-            => _hub.AddBreadcrumb(clock, message, category, type, data, level);
+            => CurrentHub.AddBreadcrumb(clock, message, category, type, data, level);
 
         /// <summary>
         /// Runs the callback with a new scope which gets dropped at the end.
@@ -250,7 +254,7 @@ namespace Sentry
                   "that provide a callback to a configurable scope.")]
         [DebuggerStepThrough]
         public static void WithScope(Action<Scope> scopeCallback)
-            => _hub.WithScope(scopeCallback);
+            => CurrentHub.WithScope(scopeCallback);
 
         /// <summary>
         /// Configures the scope through the callback.
@@ -258,7 +262,7 @@ namespace Sentry
         /// <param name="configureScope">The configure scope callback.</param>
         [DebuggerStepThrough]
         public static void ConfigureScope(Action<Scope> configureScope)
-            => _hub.ConfigureScope(configureScope);
+            => CurrentHub.ConfigureScope(configureScope);
 
         /// <summary>
         /// Configures the scope asynchronously.
@@ -267,7 +271,7 @@ namespace Sentry
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
         public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
-            => _hub.ConfigureScopeAsync(configureScope);
+            => CurrentHub.ConfigureScopeAsync(configureScope);
 
         /// <summary>
         /// Captures the event.
@@ -276,7 +280,7 @@ namespace Sentry
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureEvent(SentryEvent evt)
-            => _hub.CaptureEvent(evt);
+            => CurrentHub.CaptureEvent(evt);
 
         /// <summary>
         /// Captures the event using the specified scope.
@@ -287,7 +291,7 @@ namespace Sentry
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
-            => _hub.CaptureEvent(evt, scope);
+            => CurrentHub.CaptureEvent(evt, scope);
 
         /// <summary>
         /// Captures an event with a configurable scope.
@@ -301,7 +305,7 @@ namespace Sentry
         [DebuggerStepThrough]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
-            => _hub.CaptureEvent(evt, configureScope);
+            => CurrentHub.CaptureEvent(evt, configureScope);
 
         /// <summary>
         /// Captures the exception.
@@ -310,7 +314,7 @@ namespace Sentry
         /// <returns>The Id of the even.t</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureException(Exception exception)
-            => _hub.CaptureException(exception);
+            => CurrentHub.CaptureException(exception);
 
         /// <summary>
         /// Captures the exception with a configurable scope.
@@ -323,7 +327,7 @@ namespace Sentry
         /// <returns>The Id of the even.t</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
-            => _hub.CaptureException(exception, configureScope);
+            => CurrentHub.CaptureException(exception, configureScope);
 
         /// <summary>
         /// Captures the message.
@@ -333,7 +337,7 @@ namespace Sentry
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureMessage(string message, SentryLevel level = SentryLevel.Info)
-            => _hub.CaptureMessage(message, level);
+            => CurrentHub.CaptureMessage(message, level);
 
         /// <summary>
         /// Captures the message with a configurable scope.
@@ -347,7 +351,7 @@ namespace Sentry
         /// <returns>The Id of the event.</returns>
         [DebuggerStepThrough]
         public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
-            => _hub.CaptureMessage(message, configureScope, level);
+            => CurrentHub.CaptureMessage(message, configureScope, level);
 
         /// <summary>
         /// Captures a user feedback.
@@ -355,7 +359,7 @@ namespace Sentry
         /// <param name="userFeedback">The user feedback to send to Sentry.</param>
         [DebuggerStepThrough]
         public static void CaptureUserFeedback(UserFeedback userFeedback)
-            => _hub.CaptureUserFeedback(userFeedback);
+            => CurrentHub.CaptureUserFeedback(userFeedback);
 
         /// <summary>
         /// Captures a user feedback.
@@ -366,21 +370,21 @@ namespace Sentry
         /// <param name="name">The optional username.</param>
         [DebuggerStepThrough]
         public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
-            => _hub.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
+            => CurrentHub.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
 
         /// <summary>
         /// Captures a transaction.
         /// </summary>
         [DebuggerStepThrough]
         public static void CaptureTransaction(Transaction transaction)
-            => _hub.CaptureTransaction(transaction);
+            => CurrentHub.CaptureTransaction(transaction);
 
         /// <summary>
         /// Captures a session update.
         /// </summary>
         [DebuggerStepThrough]
         public static void CaptureSession(SessionUpdate sessionUpdate)
-            => _hub.CaptureSession(sessionUpdate);
+            => CurrentHub.CaptureSession(sessionUpdate);
 
         /// <summary>
         /// Starts a transaction.
@@ -389,35 +393,35 @@ namespace Sentry
         public static ITransaction StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
-            => _hub.StartTransaction(context, customSamplingContext);
+            => CurrentHub.StartTransaction(context, customSamplingContext);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
         public static ITransaction StartTransaction(ITransactionContext context)
-            => _hub.StartTransaction(context);
+            => CurrentHub.StartTransaction(context);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
         public static ITransaction StartTransaction(string name, string operation)
-            => _hub.StartTransaction(name, operation);
+            => CurrentHub.StartTransaction(name, operation);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
         public static ITransaction StartTransaction(string name, string operation, string? description)
-            => _hub.StartTransaction(name, operation, description);
+            => CurrentHub.StartTransaction(name, operation, description);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
         [DebuggerStepThrough]
         public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
-            => _hub.StartTransaction(name, operation, traceHeader);
+            => CurrentHub.StartTransaction(name, operation, traceHeader);
 
         /// <summary>
         /// Binds specified exception the specified span.
@@ -427,41 +431,41 @@ namespace Sentry
         /// </remarks>
         [DebuggerStepThrough]
         public static void BindException(Exception exception, ISpan span)
-            => _hub.BindException(exception, span);
+            => CurrentHub.BindException(exception, span);
 
         /// <summary>
         /// Gets the last active span.
         /// </summary>
         [DebuggerStepThrough]
         public static ISpan? GetSpan()
-            => _hub.GetSpan();
+            => CurrentHub.GetSpan();
 
         /// <summary>
         /// Gets the Sentry trace header.
         /// </summary>
         [DebuggerStepThrough]
         public static SentryTraceHeader? GetTraceHeader()
-            => _hub.GetTraceHeader();
+            => CurrentHub.GetTraceHeader();
 
         /// <inheritdoc cref="IHub.StartSession"/>
         [DebuggerStepThrough]
         public static void StartSession()
-            => _hub.StartSession();
+            => CurrentHub.StartSession();
 
         /// <inheritdoc cref="IHub.EndSession"/>
         [DebuggerStepThrough]
         public static void EndSession(SessionEndStatus status = SessionEndStatus.Exited)
-            => _hub.EndSession(status);
+            => CurrentHub.EndSession(status);
 
         /// <inheritdoc cref="IHub.PauseSession"/>
         [DebuggerStepThrough]
         public static void PauseSession()
-            => _hub.PauseSession();
+            => CurrentHub.PauseSession();
 
         /// <inheritdoc cref="IHub.ResumeSession"/>
         [DebuggerStepThrough]
         public static void ResumeSession()
-            => _hub.ResumeSession();
+            => CurrentHub.ResumeSession();
 
         /// <summary>
         /// Deliberately crashes an application, which is useful for testing and demonstration purposes.

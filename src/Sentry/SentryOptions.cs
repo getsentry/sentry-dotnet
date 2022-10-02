@@ -5,17 +5,19 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.PlatformAbstractions;
 using static Sentry.Constants;
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 #endif
 
 namespace Sentry
@@ -23,7 +25,11 @@ namespace Sentry
     /// <summary>
     /// Sentry SDK options
     /// </summary>
+#if __MOBILE__
     public partial class SentryOptions
+#else
+    public class SentryOptions
+#endif
     {
         private Dictionary<string, string>? _defaultTags;
 
@@ -59,9 +65,9 @@ namespace Sentry
         /// <summary>
         /// Specifies whether to use global scope management mode.
         /// Should be <c>true</c> for client applications and <c>false</c> for server applications.
-        /// The default is <c>false</c>.
+        /// The default is <c>false</c>. The default for Blazor WASM, MAUI, and Mobile apps is <c>true</c>.
         /// </summary>
-        public bool IsGlobalModeEnabled { get; set; }
+        public bool IsGlobalModeEnabled { get; set; } = Runtime.Current.IsBrowserWasm();
 #endif
 
         /// <summary>
@@ -246,9 +252,13 @@ namespace Sentry
         }
 
         /// <summary>
-        /// The release version of the application.
+        /// The release information for the application.
+        /// Can be anything, but generally should be either a semantic version string in the format
+        /// <c>package@version</c> or <c>package@version+build</c>, or a commit SHA from a version control system.
         /// </summary>
         /// <example>
+        /// MyApp@1.2.3
+        /// MyApp@1.2.3+foo
         /// 721e41770371db95eee98ca2707686226b993eda
         /// 14.1.16.32451
         /// </example>
@@ -498,7 +508,7 @@ namespace Sentry
         public string? CacheDirectoryPath { get; set; }
 
         /// <summary>
-        /// Sets the filesystem instance to use. Defaults to the actual <see cref="Internal.FileSystem"/>.
+        /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
         /// Used for testing.
         /// </summary>
         internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;
@@ -674,6 +684,49 @@ namespace Sentry
         /// Set KeepAggregateException to true to include the root <see cref="AggregateException"/>.
         /// </summary>
         public bool KeepAggregateException { get; set; }
+
+        /// <summary>
+        /// Adds a <see cref="JsonConverter"/> to be used when serializing or deserializing
+        /// objects to JSON with this SDK.  For example, when custom context data might use
+        /// a data type that requires custom serialization logic.
+        /// </summary>
+        /// <param name="converter">The <see cref="JsonConverter"/> to add.</param>
+        /// <remarks>
+        /// This currently modifies a static list, so will affect any instance of the Sentry SDK.
+        /// If that becomes problematic, we will have to refactor all serialization code to be
+        /// able to accept an instance of <see cref="SentryOptions"/>.
+        /// </remarks>
+        public void AddJsonConverter(JsonConverter converter)
+        {
+            // protect against null because user may not have nullability annotations enabled
+            if (converter == null!)
+            {
+                throw new ArgumentNullException(nameof(converter));
+            }
+
+            // only add if we don't have this instance already
+            var converters = JsonExtensions.SerializerOptions.Converters;
+            if (converters.Contains(converter))
+            {
+                return;
+            }
+
+            try
+            {
+                converters.Add(converter);
+            }
+            catch (InvalidOperationException)
+            {
+                // If we've already started using the serializer, then it's too late to add more converters.
+                // The following exception message may occur (depending on STJ version):
+                // "Serializer options cannot be changed once serialization or deserialization has occurred."
+                // We'll swallow this, because it's likely to only have occurred in our own unit tests,
+                // or in a scenario where the Sentry SDK has been initialized multiple times,
+                // in which case we have the converter from the first initialization already.
+                // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
+                // See https://github.com/dotnet/runtime/pull/74431
+            }
+        }
 
         /// <summary>
         /// Provides a mechanism to convey network status to the caching transport, so that it does not attempt

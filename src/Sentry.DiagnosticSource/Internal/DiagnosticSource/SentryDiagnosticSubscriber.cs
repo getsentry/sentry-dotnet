@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using Sentry.Extensibility;
 
-namespace Sentry.Internals.DiagnosticSource
+namespace Sentry.Internal.DiagnosticSource
 {
     /// <summary>
     /// Class that subscribes to specific listeners from DiagnosticListener.

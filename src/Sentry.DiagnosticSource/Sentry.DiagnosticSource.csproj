@@ -9,7 +9,7 @@
     <Description>
       Official Diagnostic.Listener integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time. Note: This package is not needed when using Sentry with .NET Core 3 or higher.
     </Description>
-
+    <RootNamespace>Sentry</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

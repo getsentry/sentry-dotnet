@@ -1,6 +1,6 @@
-using Sentry.Internals.DiagnosticSource;
+using Sentry.Internal.DiagnosticSource;
 using Sentry.Testing;
-using static Sentry.Internals.DiagnosticSource.SentrySqlListener;
+using static Sentry.Internal.DiagnosticSource.SentrySqlListener;
 
 namespace Sentry.DiagnosticSource.Tests;
 
@@ -114,7 +114,26 @@ public class SentrySqlListenerTests
         // Assert
         var spans = _fixture.Spans.Where(s => s.Operation != "abc");
         Assert.NotEmpty(spans);
+
         Assert.True(GetValidator(key)(_fixture.Spans.First()));
+    }
+
+    [Theory]
+    [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand)]
+    [InlineData(SqlDataWriteConnectionOpenBeforeCommand)]
+    public void OnNext_KnownButNotSampled_SpanNotCreated(string key)
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        _fixture.Tracer.IsSampled = false;
+        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+
+        // Act
+        interceptor.OnNext(
+            new(key,
+                new { OperationId = Guid.NewGuid(), ConnectionId = Guid.NewGuid(), Command = new { CommandText = "" } }));
+
+        Assert.Empty(_fixture.Tracer.Spans);
     }
 
     [Theory]

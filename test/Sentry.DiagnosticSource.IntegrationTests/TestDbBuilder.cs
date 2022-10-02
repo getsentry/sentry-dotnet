@@ -1,7 +1,8 @@
-using System.Data;
-using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Sentry.DiagnosticSource.IntegrationTests.EF;
+
+namespace Sentry.DiagnosticSource.IntegrationTests;
 
 public static class TestDbBuilder
 {

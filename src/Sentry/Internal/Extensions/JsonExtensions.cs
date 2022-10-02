@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal.JsonConverters;
 
 namespace Sentry.Internal.Extensions
 {
@@ -11,7 +12,12 @@ namespace Sentry.Internal.Extensions
     {
         // The Json options with a preset of rules that will remove dangerous and problematic
         // data from the serialized object.
-        private static JsonSerializerOptions serializerOption = new()
+        internal static JsonSerializerOptions SerializerOptions { get; private set; } = GetSerializerOptions();
+
+        // For testing, we need a way to reset the options instance when we add custom converters.
+        internal static void ResetSerializerOptions() => SerializerOptions = GetSerializerOptions();
+
+        private static JsonSerializerOptions GetSerializerOptions() => new()
         {
             Converters =
             {
@@ -150,15 +156,29 @@ namespace Sentry.Internal.Extensions
         public static void WriteDictionaryValue(
             this Utf8JsonWriter writer,
             IEnumerable<KeyValuePair<string, object?>>? dic,
-            IDiagnosticLogger? logger)
+            IDiagnosticLogger? logger,
+            bool includeNullValues = true)
         {
             if (dic is not null)
             {
                 writer.WriteStartObject();
 
-                foreach (var (key, value) in dic)
+                if (includeNullValues)
                 {
-                    writer.WriteDynamic(key, value, logger);
+                    foreach (var (key, value) in dic)
+                    {
+                        writer.WriteDynamic(key, value, logger);
+                    }
+                }
+                else
+                {
+                    foreach (var (key, value) in dic)
+                    {
+                        if (value is not null)
+                        {
+                            writer.WriteDynamic(key, value, logger);
+                        }
+                    }
                 }
 
                 writer.WriteEndObject();
@@ -344,7 +364,7 @@ namespace Sentry.Internal.Extensions
             }
             else
             {
-                JsonSerializer.Serialize(writer, value, serializerOption);
+                JsonSerializer.Serialize(writer, value, SerializerOptions);
             }
         }
 

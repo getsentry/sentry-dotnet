@@ -286,7 +286,9 @@ public class SentryScopeManagerTests
         async Task Test(int i)
         {
             if (i > 5)
+            {
                 return;
+            }
 
             AssertTagCount(i);
             using (sut.PushScope())

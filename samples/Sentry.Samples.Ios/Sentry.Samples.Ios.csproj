@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
-    <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
 
   <!--

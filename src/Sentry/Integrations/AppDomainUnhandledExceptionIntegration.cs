@@ -1,8 +1,11 @@
 using System;
-using System.Runtime.ExceptionServices;
 using System.Security;
 using Sentry.Internal;
 using Sentry.Protocol;
+
+#if !NET6_0_OR_GREATER
+using System.Runtime.ExceptionServices;
+#endif
 
 namespace Sentry.Integrations
 {

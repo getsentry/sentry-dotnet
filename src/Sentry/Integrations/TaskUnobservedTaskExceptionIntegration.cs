@@ -1,8 +1,11 @@
-using System.Runtime.ExceptionServices;
 using System.Security;
 using System.Threading.Tasks;
 using Sentry.Internal;
 using Sentry.Protocol;
+
+#if !NET6_0_OR_GREATER
+using System.Runtime.ExceptionServices;
+#endif
 
 namespace Sentry.Integrations
 {
@@ -27,11 +30,11 @@ namespace Sentry.Integrations
         [SecurityCritical]
         internal void Handle(object? sender, UnobservedTaskExceptionEventArgs e)
         {
-            if (e.Exception != null)
+            if (e.Exception is { } ex)
             {
-                e.Exception.Data[Mechanism.HandledKey] = false;
-                e.Exception.Data[Mechanism.MechanismKey] = "UnobservedTaskException";
-                _ = _hub?.CaptureException(e.Exception);
+                ex.Data[Mechanism.HandledKey] = false;
+                ex.Data[Mechanism.MechanismKey] = "UnobservedTaskException";
+                _ = _hub?.CaptureException(ex);
             }
         }
     }

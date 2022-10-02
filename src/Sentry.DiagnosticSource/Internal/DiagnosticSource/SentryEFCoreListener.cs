@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using Sentry.Extensibility;
 
-namespace Sentry.Internals.DiagnosticSource
+namespace Sentry.Internal.DiagnosticSource
 {
     /// <summary>
     /// Class that consumes Entity Framework Core events.
@@ -123,55 +123,34 @@ namespace Sentry.Internals.DiagnosticSource
         {
             try
             {
-                //Query compiler Span
-                if (value.Key is EFQueryStartCompiling or EFQueryCompiling)
+                switch (value.Key)
                 {
-                    AddSpan(SentryEFSpanType.QueryCompiler, "db.query.compile", FilterNewLineValue(value.Value));
-                    return;
-                }
+                    // Query compiler span
+                    case EFQueryStartCompiling or EFQueryCompiling:
+                        AddSpan(SentryEFSpanType.QueryCompiler, "db.query.compile", FilterNewLineValue(value.Value));
+                        break;
+                    case EFQueryCompiled:
+                        TakeSpan(SentryEFSpanType.QueryCompiler)?.Finish(SpanStatus.Ok);
+                        break;
 
-                if (value.Key == EFQueryCompiled)
-                {
-                    TakeSpan(SentryEFSpanType.QueryCompiler)?.Finish(SpanStatus.Ok);
-                    return;
-                }
+                    // Connection span (A transaction may or may not show a connection with it.)
+                    case EFConnectionOpening when _logConnectionEnabled:
+                        AddSpan(SentryEFSpanType.Connection, "db.connection", null);
+                        break;
+                    case EFConnectionClosed when _logConnectionEnabled:
+                        TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
+                        break;
 
-                //Connection Span
-                //A transaction may or may not show a connection with it.
-
-                if (_logConnectionEnabled && value.Key == EFConnectionOpening)
-                {
-                    AddSpan(SentryEFSpanType.Connection, "db.connection", null);
-                    return;
-                }
-
-                if (_logConnectionEnabled && value.Key == EFConnectionClosed)
-                {
-                    TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
-                    return;
-                }
-
-                // return if not Query Execution Span
-                if (!_logQueryEnabled)
-                {
-                    return;
-                }
-
-                if (value.Key == EFCommandExecuting)
-                {
-                    AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
-                    return;
-                }
-
-                if (value.Key == EFCommandFailed)
-                {
-                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
-                    return;
-                }
-
-                if (value.Key == EFCommandExecuted)
-                {
-                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
+                    // Query Execution span
+                    case EFCommandExecuting when _logQueryEnabled:
+                        AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
+                        break;
+                    case EFCommandFailed when _logQueryEnabled:
+                        TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
+                        break;
+                    case EFCommandExecuted when _logQueryEnabled:
+                        TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -181,7 +160,7 @@ namespace Sentry.Internals.DiagnosticSource
         }
 
         /// <summary>
-        /// Get the Query with error message and remove the uneeded values.
+        /// Get the Query with error message and remove the unneeded values.
         /// </summary>
         /// <example>
         /// Compiling query model:
@@ -194,7 +173,12 @@ namespace Sentry.Internals.DiagnosticSource
         internal static string? FilterNewLineValue(object? value)
         {
             var str = value?.ToString();
+#if NETCOREAPP
+            return str?[(str.IndexOf('\n') + 1)..];
+#else
             return str?.Substring(str.IndexOf('\n') + 1);
+#endif
+
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
 
@@ -47,57 +48,7 @@ internal sealed class SentryLogger : ILogger
 
         if (ShouldCaptureEvent(logLevel, eventId, exception))
         {
-            var @event = new SentryEvent(exception)
-            {
-                Logger = CategoryName,
-                Message = message,
-                Level = logLevel.ToSentryLevel()
-            };
-
-            if (state is IEnumerable<KeyValuePair<string, object>> pairs)
-            {
-                foreach (var property in pairs)
-                {
-                    if (property.Key == "{OriginalFormat}" && property.Value is string template)
-                    {
-                        // Original format found, use Sentry logEntry interface
-                        @event.Message = new SentryMessage
-                        {
-                            Formatted = message,
-                            Message = template
-                        };
-                        continue;
-                    }
-
-                    if (property.Value is string stringTagValue)
-                    {
-                        @event.SetTag(property.Key, stringTagValue);
-                    }
-                    else if (property.Value is int integerTagValue)
-                    {
-                        @event.SetTag(property.Key, integerTagValue.ToString());
-                    }
-                    else if (property.Value is float floatTagValue)
-                    {
-                        @event.SetTag(property.Key, floatTagValue.ToString());
-                    }
-                    else if (property.Value is double doubleTagValue)
-                    {
-                        @event.SetTag(property.Key, doubleTagValue.ToString());
-                    }
-                    else if (property.Value is Guid guidTagValue &&
-                             guidTagValue != Guid.Empty)
-                    {
-                        @event.SetTag(property.Key, guidTagValue.ToString());
-                    }
-                }
-            }
-
-            var tuple = eventId.ToTupleOrNull();
-            if (tuple.HasValue)
-            {
-                @event.SetTag(tuple.Value.name, tuple.Value.value);
-            }
+            var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName);
 
             _ = _hub.CaptureEvent(@event);
         }
@@ -123,6 +74,65 @@ internal sealed class SentryLogger : ILogger
                 data,
                 logLevel.ToBreadcrumbLevel());
         }
+    }
+
+    internal static SentryEvent CreateEvent<TState>(LogLevel logLevel, EventId id, TState state, Exception? exception, string? message, string category)
+    {
+        var @event = new SentryEvent(exception)
+        {
+            Logger = category,
+            Message = message,
+            Level = logLevel.ToSentryLevel()
+        };
+
+        if (state is IEnumerable<KeyValuePair<string, object>> pairs)
+        {
+            foreach (var property in pairs)
+            {
+                if (property.Key == "{OriginalFormat}" && property.Value is string template)
+                {
+                    // Original format found, use Sentry logEntry interface
+                    @event.Message = new SentryMessage
+                    {
+                        Formatted = message,
+                        Message = template
+                    };
+                    continue;
+                }
+
+                switch (property.Value)
+                {
+                    case string stringTagValue:
+                        @event.SetTag(property.Key, stringTagValue);
+                        break;
+
+                    case Guid guidTagValue when guidTagValue != Guid.Empty:
+                        @event.SetTag(property.Key, guidTagValue.ToString());
+                        break;
+
+                    case Enum enumValue:
+                        @event.SetTag(property.Key, enumValue.ToString());
+                        break;
+
+                    default:
+                    {
+                        if (property.Value?.GetType().IsPrimitive == true)
+                        {
+                            @event.SetTag(property.Key, Convert.ToString(property.Value, CultureInfo.InvariantCulture)!);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        var tuple = id.ToTupleOrNull();
+        if (tuple.HasValue)
+        {
+            @event.SetTag(tuple.Value.name, tuple.Value.value);
+        }
+
+        return @event;
     }
 
     private bool ShouldCaptureEvent(
