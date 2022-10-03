@@ -574,6 +574,16 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
+        /// <summary>
+        /// A customizable list of <see cref="TracePropagationTarget"/> objects, each containing either a
+        /// substring or regular expression pattern that can be used to control which outgoing HTTP requests
+        /// will have the <c>sentry-trace</c> and <c>baggage</c> headers propagated, for purposes of distributed tracing.
+        /// The default value is <c>null</c>, which indicates that the headers will be propagated to ALL targets.
+        /// To disable propagation completely, set this value to an empty collection.
+        /// </summary>
+        /// <seealso href="https://develop.sentry.dev/sdk/performance/#tracepropagationtargets"/>
+        public ICollection<TracePropagationTarget>? TracePropagationTargets { get; set; } = null;
+
         private StackTraceMode? _stackTraceMode;
 
         /// <summary>

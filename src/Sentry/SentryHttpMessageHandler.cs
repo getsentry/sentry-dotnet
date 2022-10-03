@@ -15,6 +15,7 @@ namespace Sentry
     public class SentryHttpMessageHandler : DelegatingHandler
     {
         private readonly IHub _hub;
+        private readonly SentryOptions? _options;
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
@@ -22,6 +23,7 @@ namespace Sentry
         public SentryHttpMessageHandler(IHub hub)
         {
             _hub = hub;
+            _options = hub.GetSentryOptions();
         }
 
         /// <summary>
@@ -50,20 +52,18 @@ namespace Sentry
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            // Set trace header if it hasn't already been set
-            if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
-            {
-                request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
-            }
-
-            AddBaggageHeader(request);
-
             // Prevent null reference exception in the following call
             // in case the user didn't set an inner handler.
             InnerHandler ??= new HttpClientHandler();
 
             var requestMethod = request.Method.Method.ToUpperInvariant();
             var url = request.RequestUri?.ToString() ?? string.Empty;
+
+            if (ShouldPropagateTrace(url))
+            {
+                AddSentryTraceHeader(request);
+                AddBaggageHeader(request);
+            }
 
             // Start a span that tracks this request
             // (may be null if transaction is not set on the scope)
@@ -93,6 +93,21 @@ namespace Sentry
             {
                 span?.Finish(ex);
                 throw;
+            }
+        }
+
+        private bool ShouldPropagateTrace(string url)
+        {
+            var targets = _options?.TracePropagationTargets;
+            return targets?.Any(t => t.IsMatch(url)) is null or true;
+        }
+
+        private void AddSentryTraceHeader(HttpRequestMessage request)
+        {
+            // Set trace header if it hasn't already been set
+            if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
+            {
+                request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
             }
         }
 

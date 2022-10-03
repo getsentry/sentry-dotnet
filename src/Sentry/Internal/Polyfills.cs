@@ -27,6 +27,9 @@ internal static partial class PolyfillExtensions
 
     public static bool Contains(this string str, char c) => str.IndexOf(c) >= 0;
 
+    public static bool Contains(this string str, string value, StringComparison comparisonType) =>
+        str.IndexOf(value, comparisonType) >= 0;
+
     public static Task CopyToAsync(this Stream stream, Stream destination, CancellationToken cancellationToken) =>
         stream.CopyToAsync(destination, 81920, cancellationToken);
 
