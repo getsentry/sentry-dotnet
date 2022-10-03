@@ -54,7 +54,7 @@ public class EnvelopeTests
 
         var message = "Header event_id is null";
 #if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
         Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
@@ -74,7 +74,7 @@ public class EnvelopeTests
         var message = "Header event_id has incorrect type: System.Int32";
 
 #if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
         Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
@@ -94,7 +94,7 @@ public class EnvelopeTests
         var message = "Header event_id is not a GUID: not-guid";
 
 #if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
         Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
@@ -115,7 +115,7 @@ public class EnvelopeTests
         var message = "Envelope contains an empty event_id header";
 
 #if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
         Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
