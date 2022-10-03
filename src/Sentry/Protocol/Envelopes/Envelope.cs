@@ -87,7 +87,7 @@ namespace Sentry.Protocol.Envelopes
             if (guid == Guid.Empty)
             {
                 Error($"Envelope contains an empty {EventIdKey} header");
-                return null;
+                return SentryId.Empty;
             }
 
             return new SentryId(guid);
