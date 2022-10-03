@@ -1424,7 +1424,9 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() { }
         public void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Obsolete]
         public Sentry.SentryId? TryGetEventId() { }
+        public Sentry.SentryId? TryGetEventId(Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.Envelope> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
         public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.Attachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
         public static Sentry.Protocol.Envelopes.Envelope FromSession(Sentry.SessionUpdate sessionUpdate) { }

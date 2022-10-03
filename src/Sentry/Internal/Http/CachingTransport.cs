@@ -297,7 +297,7 @@ namespace Sentry.Internal.Http
 
                 try
                 {
-                    _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId());
+                    _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId(_options.DiagnosticLogger));
 
                     await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
                 }
@@ -396,7 +396,7 @@ namespace Sentry.Internal.Http
                 _isolatedCacheDirectoryPath,
                 $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_" + // timestamp for variance & sorting
                 $"{Guid.NewGuid().GetHashCode() % 1_0000}_" + // random 1-4 digits for extra variance
-                $"{envelope.TryGetEventId()}_" + // event ID (may be empty)
+                $"{envelope.TryGetEventId(_options.DiagnosticLogger)}_" + // event ID (may be empty)
                 $"{envelope.GetHashCode()}" + // envelope hash code
                 $".{EnvelopeFileExt}");
 
@@ -434,7 +434,7 @@ namespace Sentry.Internal.Http
             if (clientReport != null)
             {
                 envelope = envelope.WithItem(EnvelopeItem.FromClientReport(clientReport));
-                _options.LogDebug("Attached client report to envelope {0}.", envelope.TryGetEventId());
+                _options.LogDebug("Attached client report to envelope {0}.", envelope.TryGetEventId(_options.DiagnosticLogger));
             }
 
             try
