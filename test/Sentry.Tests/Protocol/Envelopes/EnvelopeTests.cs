@@ -55,7 +55,7 @@ public class EnvelopeTests
         var message = "Header event_id is null";
 #if DEBUG
         var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
-        Assert.StartsWith("Header event_id is null", exception.Message);
+        Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
         Assert.Null(id);
@@ -75,7 +75,7 @@ public class EnvelopeTests
 
 #if DEBUG
         var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
-        Assert.StartsWith(message", exception.Message);
+        Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
         Assert.Null(id);
@@ -95,7 +95,7 @@ public class EnvelopeTests
 
 #if DEBUG
         var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
-        Assert.StartsWith(message", exception.Message);
+        Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
         Assert.Null(id);
@@ -116,7 +116,7 @@ public class EnvelopeTests
 
 #if DEBUG
         var exception = Assert.ThrowsAny<Exception>(()=>envelope.TryGetEventId(logger));
-        Assert.StartsWith(message", exception.Message);
+        Assert.StartsWith(message, exception.Message);
 #else
         var id = envelope.TryGetEventId(logger);
         Assert.Equal(SentryId.Empty, id);
