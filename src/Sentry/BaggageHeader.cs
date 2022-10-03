@@ -16,6 +16,8 @@ namespace Sentry
         internal const string HttpHeaderName = "baggage";
         internal const string SentryKeyPrefix = "sentry-";
 
+        internal static IDiagnosticLogger? Logger { get; set; } = SentrySdk.CurrentOptions?.DiagnosticLogger;
+
         // https://www.w3.org/TR/baggage/#baggage-string
         // "Uniqueness of keys between multiple list-members in a baggage-string is not guaranteed."
         // "The order of duplicate entries SHOULD be preserved when mutating the list."
@@ -72,15 +74,13 @@ namespace Sentry
             var items = baggage.Split(',', StringSplitOptions.RemoveEmptyEntries);
             var members = new List<KeyValuePair<string, string>>(items.Length);
 
-            var logger = SentrySdk.CurrentOptions?.DiagnosticLogger;
-
             foreach (var item in items)
             {
                 // Per baggage spec, the value may contain = characters, so limit the split to 2 parts.
                 var parts = item.Split('=', 2);
                 if (parts.Length != 2)
                 {
-                    logger?.LogWarning(
+                    Logger?.LogWarning(
                         "The baggage header has an item without a '=' separator, and it will be discarded. " +
                         "The item is: \"{0}\"", item);
                     continue;
@@ -89,7 +89,7 @@ namespace Sentry
                 var key = parts[0].Trim();
                 if (key.Length == 0)
                 {
-                    logger?.LogWarning(
+                    Logger?.LogWarning(
                         "The baggage header has an item with an empty key, and it will be discarded. " +
                         "The item is: \"{0}\"", item);
                     continue;
@@ -98,7 +98,7 @@ namespace Sentry
                 var value = parts[1].Trim();
                 if (value.Length == 0)
                 {
-                    logger?.LogWarning(
+                    Logger?.LogWarning(
                         "The baggage header has an item with an empty value, and it will be discarded. " +
                         "The item is: \"{0}\"", item);
                     continue;
