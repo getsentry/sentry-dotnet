@@ -24,7 +24,7 @@
 - Ignore null Context values ([#1942](https://github.com/getsentry/sentry-dotnet/pull/1942))
 - Tags should not differ based on current culture ([#1949](https://github.com/getsentry/sentry-dotnet/pull/1949))
 - Always recalculate payload length ([#1957](https://github.com/getsentry/sentry-dotnet/pull/1957))
-- More defensive on eventid header response ([#1959](https://github.com/getsentry/sentry-dotnet/pull/1959))
+- More defensive on `event_id` header response ([#1959](https://github.com/getsentry/sentry-dotnet/pull/1959))
 
 ## 3.21.0
 
