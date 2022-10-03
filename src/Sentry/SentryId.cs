@@ -39,7 +39,7 @@ namespace Sentry
         [Conditional("DEBUG")]
         private void AssertNotEmpty()
         {
-            Debug.Assert(_guid != Guid.Empty, "Not supported on SentryId.Empty");
+            Debug.Assert(_guid != Guid.Empty, "Dont use this API with Guid.Empty. Instead use SentryId.Empty");
         }
 
         /// <inheritdoc />
@@ -63,6 +63,7 @@ namespace Sentry
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
+            logger?.LogError("WriteTo should not be called on SentryId.Empty");
             AssertNotEmpty();
             writer.WriteStringValue(ToString());
         }
