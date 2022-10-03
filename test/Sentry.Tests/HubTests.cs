@@ -74,8 +74,8 @@ public class HubTests
         var actualId = hub.CaptureMessage("test");
 
         // Assert
-        Assert.Equal(Guid.Empty, (Guid)actualId);
-        Assert.Equal(Guid.Empty, (Guid)hub.LastEventId);
+        Assert.Equal(SentryId.Empty, actualId);
+        Assert.Equal(SentryId.Empty, hub.LastEventId);
     }
 
     [Fact]

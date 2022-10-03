@@ -22,7 +22,7 @@ public class DisabledHubTests
 
     [Fact]
     public void CaptureEvent_EmptyGuid()
-        => Assert.Equal(Guid.Empty, (Guid)DisabledHub.Instance.CaptureEvent(null!));
+        => Assert.Equal(SentryId.Empty, DisabledHub.Instance.CaptureEvent(null!));
 
     [Fact]
     public void ConfigureScope_NoOp() => DisabledHub.Instance.ConfigureScope(null!);

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.Json;
 using Sentry.Extensibility;
 
@@ -14,12 +15,16 @@ namespace Sentry
         /// <summary>
         /// An empty sentry id.
         /// </summary>
-        public static readonly SentryId Empty = Guid.Empty;
+        public static readonly SentryId Empty = new();
 
         /// <summary>
         /// Creates a new instance of a Sentry Id.
         /// </summary>
-        public SentryId(Guid guid) => _guid = guid;
+        public SentryId(Guid guid)
+        {
+            Debug.Assert(guid != Guid.Empty, "Dont use this API with Guid.Empty. Instead use SentryId.Empty");
+            _guid = guid;
+        }
 
         /// <summary>
         /// Sentry Id in the format Sentry recognizes.
@@ -31,6 +36,12 @@ namespace Sentry
         /// <returns>String representation of the event id.</returns>
         public override string ToString() => _guid.ToString("n");
 
+        [Conditional("DEBUG")]
+        private void AssertNotEmpty()
+        {
+            Debug.Assert(_guid != Guid.Empty, "Not supported on SentryId.Empty");
+        }
+
         /// <inheritdoc />
         public bool Equals(SentryId other) => _guid.Equals(other._guid);
 
@@ -38,7 +49,11 @@ namespace Sentry
         public override bool Equals(object? obj) => obj is SentryId other && Equals(other);
 
         /// <inheritdoc />
-        public override int GetHashCode() => _guid.GetHashCode();
+        public override int GetHashCode()
+        {
+            AssertNotEmpty();
+            return _guid.GetHashCode();
+        }
 
         /// <summary>
         /// Generates a new Sentry ID.
@@ -46,7 +61,11 @@ namespace Sentry
         public static SentryId Create() => new(Guid.NewGuid());
 
         /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) => writer.WriteStringValue(ToString());
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+        {
+            AssertNotEmpty();
+            writer.WriteStringValue(ToString());
+        }
 
         /// <summary>
         /// Parses from string.
@@ -60,9 +79,9 @@ namespace Sentry
         {
             var id = json.GetString();
 
-            return !string.IsNullOrWhiteSpace(id)
-                ? Parse(id)
-                : Empty;
+            return string.IsNullOrWhiteSpace(id)
+                ? Empty
+                : Parse(id);
         }
 
         /// <summary>
@@ -78,7 +97,11 @@ namespace Sentry
         /// <summary>
         /// The <see cref="Guid"/> from the <see cref="SentryId"/>.
         /// </summary>
-        public static implicit operator Guid(SentryId sentryId) => sentryId._guid;
+        public static implicit operator Guid(SentryId sentryId)
+        {
+            sentryId.AssertNotEmpty();
+            return sentryId._guid;
+        }
 
         /// <summary>
         /// A <see cref="SentryId"/> from a <see cref="Guid"/>.

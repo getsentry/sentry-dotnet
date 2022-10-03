@@ -205,7 +205,15 @@ namespace Sentry
         {
             Exception = exception;
             Timestamp = timestamp ?? DateTimeOffset.UtcNow;
-            EventId = eventId != default ? eventId : SentryId.Create();
+            if (eventId == default)
+            {
+                EventId = SentryId.Create();
+            }
+            else
+            {
+                EventId = eventId;
+            }
+
             Platform = Constants.Platform;
         }
 
