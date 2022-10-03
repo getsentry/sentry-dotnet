@@ -26,7 +26,7 @@ namespace Sentry
     {
         private static IHub CurrentHub = DisabledHub.Instance;
 
-        internal static SentryOptions? CurrentOptions => CurrentHub is Hub hub ? hub.Options : null;
+        internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
 
         /// <summary>
         /// Last event id recorded in the current scope.
