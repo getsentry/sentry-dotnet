@@ -50,6 +50,30 @@ namespace Sentry.AspNetCore
             }
         }
 
+        private BaggageHeader? TryGetBaggageHeader(HttpContext context)
+        {
+            var value = context.Request.Headers.GetValueOrDefault(BaggageHeader.HttpHeaderName);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            // Note: If there are multiple baggage headers, they will be joined with comma delimiters,
+            // and can thus be treated as a single baggage header.
+
+            _options.LogDebug("Received baggage header '{0}'.", value);
+
+            try
+            {
+                return BaggageHeader.TryParse(value, onlySentry: true);
+            }
+            catch (Exception ex)
+            {
+                _options.LogError("Invalid baggage header '{0}'.", ex, value);
+                return null;
+            }
+        }
+
         private ITransaction? TryStartTransaction(HttpContext context)
         {
             if (context.Request.Method == HttpMethod.Options.Method)
@@ -65,18 +89,14 @@ namespace Sentry.AspNetCore
                 // Attempt to start a transaction from the trace header if it exists
                 var traceHeader = TryGetSentryTraceHeader(context);
 
-                // It's important to try and set the transaction name
-                // to some value here so that it's available for use
-                // in sampling.
-                // At a later stage, we will try to get the transaction name
-                // again, to account for the other middlewares that may have
-                // ran after ours.
-                var transactionName =
-                    context.TryGetTransactionName();
+                // It's important to try and set the transaction name to some value here so that it's available for use
+                // in sampling.  At a later stage, we will try to get the transaction name again, to account for the
+                // other middlewares that may have ran after ours.
+                var transactionName = context.TryGetTransactionName() ?? string.Empty;
 
                 var transactionContext = traceHeader is not null
-                    ? new TransactionContext(transactionName ?? string.Empty, OperationName, traceHeader, TransactionNameSource.Route)
-                    : new TransactionContext(transactionName ?? string.Empty, OperationName, TransactionNameSource.Route);
+                    ? new TransactionContext(transactionName, OperationName, traceHeader, TransactionNameSource.Route)
+                    : new TransactionContext(transactionName, OperationName, TransactionNameSource.Route);
 
                 var customSamplingContext = new Dictionary<string, object?>(4, StringComparer.Ordinal)
                 {
@@ -86,7 +106,22 @@ namespace Sentry.AspNetCore
                     [SamplingExtensions.KeyForHttpContext] = context,
                 };
 
-                var transaction = hub.StartTransaction(transactionContext, customSamplingContext);
+                // Set the Dynamic Sampling Context from the baggage header, if it exists.
+                var baggageHeader = TryGetBaggageHeader(context);
+                var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
+
+                if (traceHeader is { } && baggageHeader is null)
+                {
+                    // We received a sentry-trace header without a baggage header, which indicates the request
+                    // originated from an older SDK that doesn't support dynamic sampling.
+                    // Set DynamicSamplingContext.Empty to "freeze" the DSC on the transaction.
+                    // See:
+                    // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#freezing-dynamic-sampling-context
+                    // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#unified-propagation-mechanism
+                    dynamicSamplingContext = DynamicSamplingContext.Empty;
+                }
+
+                var transaction = hub.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
 
                 _options.LogInfo(
                     "Started transaction with span ID '{0}' and trace ID '{1}'.",

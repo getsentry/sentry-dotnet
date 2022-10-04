@@ -26,7 +26,7 @@ namespace Sentry
     {
         private static IHub CurrentHub = DisabledHub.Instance;
 
-        internal static SentryOptions? CurrentOptions => CurrentHub is Hub hub ? hub.Options : null;
+        internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
 
         /// <summary>
         /// Last event id recorded in the current scope.
@@ -394,6 +394,16 @@ namespace Sentry
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
             => CurrentHub.StartTransaction(context, customSamplingContext);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        [DebuggerStepThrough]
+        internal static ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext,
+            DynamicSamplingContext? dynamicSamplingContext)
+            => CurrentHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext);
 
         /// <summary>
         /// Starts a transaction.

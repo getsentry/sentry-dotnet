@@ -57,5 +57,11 @@ namespace Sentry.Internal.Extensions
 
         public static string? GetStringProperty(this object obj, string name) =>
             obj.GetProperty(name) as string;
+
+        public static void Add<TKey, TValue>(
+            this ICollection<KeyValuePair<TKey, TValue>> collection,
+            TKey key,
+            TValue value) =>
+            collection.Add(new KeyValuePair<TKey, TValue>(key, value));
     }
 }

@@ -517,6 +517,7 @@ namespace Sentry
         public string? ServerName { get; set; }
         public System.TimeSpan ShutdownTimeout { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
+        public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
         public double TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
@@ -815,6 +816,13 @@ namespace Sentry
         public StreamAttachmentContent(System.IO.Stream stream) { }
         public System.IO.Stream GetStream() { }
     }
+    [System.ComponentModel.TypeConverter(typeof(Sentry.TracePropagationTargetTypeConverter))]
+    public class TracePropagationTarget
+    {
+        public TracePropagationTarget(System.Text.RegularExpressions.Regex regex) { }
+        public TracePropagationTarget(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
+        public override string ToString() { }
+    }
     public class Transaction : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.IJsonSerializable, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public Transaction(Sentry.ITransaction tracer) { }
@@ -840,6 +848,7 @@ namespace Sentry
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
+        public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Span> Spans { get; }
@@ -909,6 +918,7 @@ namespace Sentry
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
+        public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }
