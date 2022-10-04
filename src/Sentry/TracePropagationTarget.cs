@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -11,6 +13,7 @@ namespace Sentry
     /// The pattern can either be a substring or a regular expression.
     /// </summary>
     /// <seealso href="https://develop.sentry.dev/sdk/performance/#tracepropagationtargets"/>
+    [TypeConverter(typeof(TracePropagationTargetTypeConverter))]
     public class TracePropagationTarget
     {
         private readonly Regex? _regex;
@@ -87,5 +90,23 @@ namespace Sentry
     {
         public static bool ShouldPropagateTrace(this IEnumerable<TracePropagationTarget>? targets, string url) =>
             targets?.Any(t => t.IsMatch(url)) is null or true;
+    }
+
+    internal class TracePropagationTargetTypeConverter : TypeConverter
+    {
+        // This class allows the TracePropagationTargets option to be set from config, such as appSettings.json
+
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+        {
+            return sourceType == typeof(string);
+        }
+
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+        {
+            var s = (string)value;
+            return s.StartsWith("regex:")
+                ? TracePropagationTarget.CreateFromRegex(s.Substring(6))
+                : TracePropagationTarget.CreateFromSubstring(s);
+        }
     }
 }
