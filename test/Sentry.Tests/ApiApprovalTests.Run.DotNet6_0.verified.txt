@@ -816,6 +816,7 @@ namespace Sentry
         public StreamAttachmentContent(System.IO.Stream stream) { }
         public System.IO.Stream GetStream() { }
     }
+    [System.ComponentModel.TypeConverter(typeof(Sentry.TracePropagationTargetTypeConverter))]
     public class TracePropagationTarget
     {
         public override string ToString() { }
