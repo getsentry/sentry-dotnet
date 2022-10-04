@@ -156,13 +156,26 @@ public class SentryTracingMiddlewareTests
         ));
     }
 
-    [Fact]
-    public async Task TraceID_from_trace_header_propagates_to_outbound_requests()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TraceID_from_trace_header_propagates_to_outbound_requests(bool shouldPropagate)
     {
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        };
+
+        if (!shouldPropagate)
+        {
+            options.TracePropagationTargets = Array.Empty<TracePropagationTarget>();
+        }
+
+        var hub = new Hub(options, sentryClient);
 
         HttpRequestHeaders outboundRequestHeaders = null;
 
@@ -208,13 +221,22 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         Assert.NotNull(outboundRequestHeaders);
-        outboundRequestHeaders.Should().Contain(h =>
-            h.Key == "sentry-trace" &&
-            h.Value.First().StartsWith("75302ac48a024bde9a3b3734a82e36c8-"));
+        if (shouldPropagate)
+        {
+            outboundRequestHeaders.Should().Contain(h =>
+                h.Key == "sentry-trace" &&
+                h.Value.First().StartsWith("75302ac48a024bde9a3b3734a82e36c8-"));
+        }
+        else
+        {
+            outboundRequestHeaders.Should().NotContain(h => h.Key == "sentry-trace");
+        }
     }
 
-    [Fact]
-    public async Task Baggage_header_propagates_to_outbound_requests()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Baggage_header_propagates_to_outbound_requests(bool shouldPropagate)
     {
         // incoming baggage header
         const string incomingBaggage =
@@ -227,11 +249,19 @@ public class SentryTracingMiddlewareTests
         const string existingOutboundBaggage = "other-value=abc123";
 
         // we expect this to be the result on outbound requests
-        const string expectedOutboundBaggage =
-            "other-value=abc123, " +
-            "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
-            "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
-            "sentry-sample_rate=0.5";
+        string expectedOutboundBaggage;
+        if (shouldPropagate)
+        {
+            expectedOutboundBaggage =
+                "other-value=abc123, " +
+                "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+                "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+                "sentry-sample_rate=0.5";
+        }
+        else
+        {
+            expectedOutboundBaggage = "other-value=abc123";
+        }
 
         // Note that we "play nice" with existing headers on the outbound request, but we do not propagate other
         // non-Sentry headers on the inbound request.  The expectation is that the other vendor would add their
@@ -240,7 +270,18 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        };
+
+        if (!shouldPropagate)
+        {
+            options.TracePropagationTargets = Array.Empty<TracePropagationTarget>();
+        }
+
+        var hub = new Hub(options, sentryClient);
 
         HttpRequestHeaders outboundRequestHeaders = null;
 
