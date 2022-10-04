@@ -59,7 +59,7 @@ namespace Sentry
             var requestMethod = request.Method.Method.ToUpperInvariant();
             var url = request.RequestUri?.ToString() ?? string.Empty;
 
-            if (ShouldPropagateTrace(url))
+            if ((_options?.TracePropagationTargets).ShouldPropagateTrace(url))
             {
                 AddSentryTraceHeader(request);
                 AddBaggageHeader(request);
@@ -94,12 +94,6 @@ namespace Sentry
                 span?.Finish(ex);
                 throw;
             }
-        }
-
-        private bool ShouldPropagateTrace(string url)
-        {
-            var targets = _options?.TracePropagationTargets;
-            return targets?.Any(t => t.IsMatch(url)) is null or true;
         }
 
         private void AddSentryTraceHeader(HttpRequestMessage request)

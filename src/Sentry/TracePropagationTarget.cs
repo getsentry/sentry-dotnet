@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Sentry
@@ -53,7 +55,7 @@ namespace Sentry
             var regexOptions =
                 RegexOptions.Compiled |
                 RegexOptions.CultureInvariant |
-                (caseSensitive ? RegexOptions.IgnoreCase : RegexOptions.None);
+                (caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
 
             var regex = new Regex(pattern, regexOptions);
             return new TracePropagationTarget(regex);
@@ -79,5 +81,11 @@ namespace Sentry
         internal bool IsMatch(string url) =>
             _regex?.IsMatch(url) == true ||
             (_substring != null && url.Contains(_substring, _stringComparison));
+    }
+
+    internal static class TracePropagationTargetExtensions
+    {
+        public static bool ShouldPropagateTrace(this IEnumerable<TracePropagationTarget>? targets, string url) =>
+            targets?.Any(t => t.IsMatch(url)) is null or true;
     }
 }
