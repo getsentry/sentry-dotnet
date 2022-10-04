@@ -26,11 +26,23 @@ namespace Sentry
             _options = hub.GetSentryOptions();
         }
 
+        internal SentryHttpMessageHandler(IHub hub, SentryOptions options)
+        {
+            _hub = hub;
+            _options = options;
+        }
+
         /// <summary>
         /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
         /// </summary>
         public SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub)
             : this(hub)
+        {
+            InnerHandler = innerHandler;
+        }
+
+        internal SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub, SentryOptions options)
+            : this(hub, options)
         {
             InnerHandler = innerHandler;
         }
