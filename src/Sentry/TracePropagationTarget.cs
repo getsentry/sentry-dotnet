@@ -20,93 +20,90 @@ namespace Sentry
         private readonly string? _substring;
         private readonly StringComparison _stringComparison;
 
-        private TracePropagationTarget(string substring, StringComparison comparison)
+        /// <summary>
+        /// Constructs a <see cref="TracePropagationTarget"/> instance that will match when the provided
+        /// <paramref name="substringOrRegexPattern"/> is either found as a substring within the outgoing request URL,
+        /// or matches as a regular expression pattern against the outgoing request URL.
+        /// </summary>
+        /// <param name="substringOrRegexPattern">The substring or regular expression pattern to match on.</param>
+        /// <param name="comparison">The string comparison type to use when matching.</param>
+        public TracePropagationTarget(
+            string substringOrRegexPattern,
+            StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            _substring = substring;
+            _substring = substringOrRegexPattern;
             _stringComparison = comparison;
-        }
-
-        private TracePropagationTarget(Regex regex) => _regex = regex;
-
-        /// <summary>
-        /// Creates a <see cref="TracePropagationTarget"/> instance that will match when the provided
-        /// <paramref name="substring"/> is contained within the outgoing request URL.
-        /// </summary>
-        /// <param name="substring">The substring to match.</param>
-        /// <param name="caseSensitive">
-        /// Whether the matching is case sensitive. Defaults to <c>false</c> (case insensitive).
-        /// </param>
-        /// <returns>The constructed <see cref="TracePropagationTarget"/> instance.</returns>
-        public static TracePropagationTarget CreateFromSubstring(string substring, bool caseSensitive = false) =>
-            new(substring, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Creates a <see cref="TracePropagationTarget"/> instance that will match when the provided
-        /// <paramref name="pattern"/> is a regular expression pattern that matches the outgoing request URL.
-        /// </summary>
-        /// <param name="pattern">The regular expression pattern to match.</param>
-        /// <param name="caseSensitive">
-        /// Whether the matching is case sensitive. Defaults to <c>false</c> (case insensitive).
-        /// </param>
-        /// <returns>The constructed <see cref="TracePropagationTarget"/> instance.</returns>
-        /// <remarks>
-        /// Sets <see cref="RegexOptions.Compiled"/> and <see cref="RegexOptions.CultureInvariant"/> always.
-        /// Sets <see cref="RegexOptions.IgnoreCase"/> when <paramref name="caseSensitive"/> is <c>true</c>.
-        /// </remarks>
-        public static TracePropagationTarget CreateFromRegex(string pattern, bool caseSensitive = false)
-        {
-            var regexOptions =
-                RegexOptions.Compiled |
-                RegexOptions.CultureInvariant |
-                (caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
-
-            var regex = new Regex(pattern, regexOptions);
-            return new TracePropagationTarget(regex);
+            _regex = TryParseRegex(substringOrRegexPattern, comparison);
         }
 
         /// <summary>
-        /// Creates a <see cref="TracePropagationTarget"/> instance that will match when the provided
-        /// <paramref name="regex"/> is a regular expression object that matches the outgoing request URL.
+        /// Constructs a <see cref="TracePropagationTarget"/> instance that will match when the provided
+        /// <paramref name="regex"/> object matches the outgoing request URL.
         /// </summary>
-        /// <param name="regex">The regular expression object to match.</param>
-        /// <returns>The constructed <see cref="TracePropagationTarget"/> instance.</returns>
+        /// <param name="regex"></param>
         /// <remarks>
-        /// Use this overload when you need to control the regular expression matching options.
+        /// Use this constructor when you need to control the regular expression matching options.
         /// We recommend setting at least <see cref="RegexOptions.Compiled"/> for performance, and
         /// <see cref="RegexOptions.CultureInvariant"/> (unless you have culture-specific matching needs).
-        /// The <see cref="CreateFromRegex(string,bool)"/> overload sets these by default.
+        /// The <see cref="TracePropagationTarget(string, StringComparison)"/> constructor sets these by default.
         /// </remarks>
-        public static TracePropagationTarget CreateFromRegex(Regex regex) => new(regex);
+        public TracePropagationTarget(Regex regex) => _regex = regex;
 
         /// <inheritdoc />
         public override string ToString() => _substring ?? _regex?.ToString() ?? "";
 
         internal bool IsMatch(string url) =>
-            _regex?.IsMatch(url) == true ||
-            (_substring != null && url.Contains(_substring, _stringComparison));
+            _substring == ".*" || // perf shortcut
+            (_substring != null && url.Contains(_substring, _stringComparison)) ||
+            _regex?.IsMatch(url) == true;
+
+        private static Regex? TryParseRegex(string pattern, StringComparison comparison)
+        {
+            try
+            {
+                var regexOptions = RegexOptions.Compiled;
+
+                if (comparison is
+                    StringComparison.InvariantCulture or
+                    StringComparison.InvariantCultureIgnoreCase or
+                    StringComparison.Ordinal or
+                    StringComparison.OrdinalIgnoreCase)
+                {
+                    regexOptions |= RegexOptions.CultureInvariant;
+                }
+
+                if (comparison is
+                    StringComparison.CurrentCultureIgnoreCase or
+                    StringComparison.InvariantCultureIgnoreCase or
+                    StringComparison.OrdinalIgnoreCase)
+                {
+                    regexOptions |= RegexOptions.IgnoreCase;
+                }
+
+                return new Regex(pattern, regexOptions);
+            }
+            catch
+            {
+                // not a valid regex
+                return null;
+            }
+        }
     }
 
     internal static class TracePropagationTargetExtensions
     {
-        public static bool ShouldPropagateTrace(this IEnumerable<TracePropagationTarget>? targets, string url) =>
-            targets?.Any(t => t.IsMatch(url)) is null or true;
+        public static bool ShouldPropagateTrace(this IEnumerable<TracePropagationTarget> targets, string url) =>
+            targets.Any(t => t.IsMatch(url));
     }
 
     internal class TracePropagationTargetTypeConverter : TypeConverter
     {
         // This class allows the TracePropagationTargets option to be set from config, such as appSettings.json
 
-        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
-        {
-            return sourceType == typeof(string);
-        }
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
+            sourceType == typeof(string);
 
-        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
-        {
-            var s = (string)value;
-            return s.StartsWith("regex:")
-                ? TracePropagationTarget.CreateFromRegex(s.Substring(6))
-                : TracePropagationTarget.CreateFromSubstring(s);
-        }
+        public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) =>
+            new TracePropagationTarget((string)value);
     }
 }

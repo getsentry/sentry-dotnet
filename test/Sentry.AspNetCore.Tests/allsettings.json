@@ -15,7 +15,7 @@
     "TracePropagationTargets": [
       "foo",
       "bar",
-      "regex:^abc.*ghi$"
+      "^abc.*ghi$"
     ]
   }
 }

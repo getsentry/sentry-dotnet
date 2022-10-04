@@ -71,7 +71,7 @@ namespace Sentry
             var requestMethod = request.Method.Method.ToUpperInvariant();
             var url = request.RequestUri?.ToString() ?? string.Empty;
 
-            if ((_options?.TracePropagationTargets).ShouldPropagateTrace(url))
+            if (_options?.TracePropagationTargets.ShouldPropagateTrace(url) is true or null)
             {
                 AddSentryTraceHeader(request);
                 AddBaggageHeader(request);

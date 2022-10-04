@@ -172,7 +172,7 @@ public class SentryTracingMiddlewareTests
 
         if (!shouldPropagate)
         {
-            options.TracePropagationTargets = Array.Empty<TracePropagationTarget>();
+            options.TracePropagationTargets.Clear();
         }
 
         var hub = new Hub(options, sentryClient);
@@ -278,7 +278,7 @@ public class SentryTracingMiddlewareTests
 
         if (!shouldPropagate)
         {
-            options.TracePropagationTargets = Array.Empty<TracePropagationTarget>();
+            options.TracePropagationTargets.Clear();
         }
 
         var hub = new Hub(options, sentryClient);

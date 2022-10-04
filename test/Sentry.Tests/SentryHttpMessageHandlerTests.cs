@@ -38,7 +38,7 @@ public class SentryHttpMessageHandlerTests
         {
             TracePropagationTargets = new List<TracePropagationTarget>
             {
-                TracePropagationTarget.CreateFromSubstring("localhost")
+                new("localhost")
             }
         };
 
@@ -69,7 +69,7 @@ public class SentryHttpMessageHandlerTests
         {
             TracePropagationTargets = new List<TracePropagationTarget>
             {
-                TracePropagationTarget.CreateFromSubstring("foo")
+                new("foo")
             }
         };
 

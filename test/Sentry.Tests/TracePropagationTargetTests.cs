@@ -7,7 +7,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Substring_Matches()
     {
-        var target = TracePropagationTarget.CreateFromSubstring("cde");
+        var target = new TracePropagationTarget("cde");
         var isMatch = target.IsMatch("abcdef");
         Assert.True(isMatch);
     }
@@ -15,7 +15,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Substring_Doesnt_Match()
     {
-        var target = TracePropagationTarget.CreateFromSubstring("xyz");
+        var target = new TracePropagationTarget("xyz");
         var isMatch = target.IsMatch("abcdef");
         Assert.False(isMatch);
     }
@@ -23,7 +23,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Substring_Matches_CaseInsensitive_ByDefault()
     {
-        var target = TracePropagationTarget.CreateFromSubstring("cDe");
+        var target = new TracePropagationTarget("cDe");
         var isMatch = target.IsMatch("ABCdEF");
         Assert.True(isMatch);
     }
@@ -31,7 +31,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Substring_Matches_CaseSensitive()
     {
-        var target = TracePropagationTarget.CreateFromSubstring("CdE", caseSensitive: true);
+        var target = new TracePropagationTarget("CdE", StringComparison.Ordinal);
         var isMatch = target.IsMatch("ABCdEF");
         Assert.True(isMatch);
     }
@@ -39,7 +39,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Substring_Doesnt_Match_WhenCaseSensitive()
     {
-        var target = TracePropagationTarget.CreateFromSubstring("cDe", caseSensitive: true);
+        var target = new TracePropagationTarget("cDe", StringComparison.Ordinal);
         var isMatch = target.IsMatch("ABCdEF");
         Assert.False(isMatch);
     }
@@ -48,7 +48,7 @@ public class TracePropagationTargetTests
     public void Regex_Object_Matches()
     {
         var regex = new Regex("^abc.*ghi$");
-        var target = TracePropagationTarget.CreateFromRegex(regex);
+        var target = new TracePropagationTarget(regex);
         var isMatch = target.IsMatch("abcdefghi");
         Assert.True(isMatch);
     }
@@ -57,7 +57,7 @@ public class TracePropagationTargetTests
     public void Regex_Object_Doesnt_Match()
     {
         var regex = new Regex("^abc.*ghi$");
-        var target = TracePropagationTarget.CreateFromRegex(regex);
+        var target = new TracePropagationTarget(regex);
         var isMatch = target.IsMatch("abcdef");
         Assert.False(isMatch);
     }
@@ -65,7 +65,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Regex_Pattern_Matches()
     {
-        var target = TracePropagationTarget.CreateFromRegex("^abc.*ghi$");
+        var target = new TracePropagationTarget("^abc.*ghi$");
         var isMatch = target.IsMatch("abcdefghi");
         Assert.True(isMatch);
     }
@@ -73,7 +73,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Regex_Pattern_Matches_CaseInsensitive_ByDefault()
     {
-        var target = TracePropagationTarget.CreateFromRegex("^abc.*ghi$");
+        var target = new TracePropagationTarget("^abc.*ghi$");
         var isMatch = target.IsMatch("aBcDeFgHi");
         Assert.True(isMatch);
     }
@@ -81,7 +81,7 @@ public class TracePropagationTargetTests
     [Fact]
     public void Regex_Pattern_Matches_CaseSensitive()
     {
-        var target = TracePropagationTarget.CreateFromRegex("^aBc.*gHi$", caseSensitive: true);
+        var target = new TracePropagationTarget("^aBc.*gHi$", StringComparison.Ordinal);
         var isMatch = target.IsMatch("aBcDeFgHi");
         Assert.True(isMatch);
     }
@@ -89,16 +89,29 @@ public class TracePropagationTargetTests
     [Fact]
     public void Regex_Pattern_Doesnt_Match_WhenCaseSensitive()
     {
-        var target = TracePropagationTarget.CreateFromRegex("^abc.*ghi$", caseSensitive: true);
+        var target = new TracePropagationTarget("^abc.*ghi$", StringComparison.Ordinal);
         var isMatch = target.IsMatch("aBcDeFgHi");
         Assert.False(isMatch);
     }
 
     [Fact]
-    public void SentryOptions_TracePropagationTargets_DefaultNull()
+    public void SentryOptions_TracePropagationTargets_DefaultAll()
     {
         var options = new SentryOptions();
-        Assert.Null(options.TracePropagationTargets);
+        Assert.Equal(1, options.TracePropagationTargets.Count);
+        Assert.Equal(".*", options.TracePropagationTargets[0].ToString());
+    }
+
+    [Fact]
+    public void SentryOptions_TracePropagationTargets_AddRemovesDefault()
+    {
+        var options = new SentryOptions();
+        options.TracePropagationTargets.Add(new TracePropagationTarget("foo"));
+        options.TracePropagationTargets.Add(new TracePropagationTarget("bar"));
+
+        Assert.Equal(2, options.TracePropagationTargets.Count);
+        Assert.Equal("foo", options.TracePropagationTargets[0].ToString());
+        Assert.Equal("bar", options.TracePropagationTargets[1].ToString());
     }
 
     [Fact]
@@ -139,9 +152,9 @@ public class TracePropagationTargetTests
         {
             TracePropagationTargets = new List<TracePropagationTarget>
             {
-                TracePropagationTarget.CreateFromSubstring("foo"),
-                TracePropagationTarget.CreateFromSubstring("localhost"),
-                TracePropagationTarget.CreateFromSubstring("bar")
+                new("foo"),
+                new("localhost"),
+                new("bar")
             }
         };
 
@@ -156,9 +169,9 @@ public class TracePropagationTargetTests
         {
             TracePropagationTargets = new List<TracePropagationTarget>
             {
-                TracePropagationTarget.CreateFromSubstring("foo"),
-                TracePropagationTarget.CreateFromSubstring("localhost"),
-                TracePropagationTarget.CreateFromSubstring("bar")
+                new("foo"),
+                new("localhost"),
+                new("bar")
             }
         };
 
@@ -173,9 +186,9 @@ public class TracePropagationTargetTests
         {
             TracePropagationTargets = new List<TracePropagationTarget>
             {
-                TracePropagationTarget.CreateFromSubstring("foo"),
-                TracePropagationTarget.CreateFromSubstring("localhost"),
-                TracePropagationTarget.CreateFromSubstring("bar")
+                new("foo"),
+                new("localhost"),
+                new("bar")
             }
         };
 

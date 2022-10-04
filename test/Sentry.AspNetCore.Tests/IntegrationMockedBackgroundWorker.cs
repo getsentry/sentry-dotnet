@@ -270,7 +270,7 @@ public class IntegrationMockedBackgroundWorker : SentrySdkTestFixture
         Assert.Equal("Staging", options.Environment);
         Assert.Equal(1, options.TracesSampleRate);
 
-        var targets = options.TracePropagationTargets?.Select(t => t.ToString());
+        var targets = options.TracePropagationTargets.Select(t => t.ToString());
         Assert.Equal(new[] {"foo", "bar", "^abc.*ghi$"}, targets);
     }
 

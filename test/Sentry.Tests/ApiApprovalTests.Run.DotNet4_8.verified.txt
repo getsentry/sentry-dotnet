@@ -516,7 +516,7 @@ namespace Sentry
         public string? ServerName { get; set; }
         public System.TimeSpan ShutdownTimeout { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
-        public System.Collections.Generic.ICollection<Sentry.TracePropagationTarget>? TracePropagationTargets { get; set; }
+        public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
         public double TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
@@ -818,10 +818,9 @@ namespace Sentry
     [System.ComponentModel.TypeConverter(typeof(Sentry.TracePropagationTargetTypeConverter))]
     public class TracePropagationTarget
     {
+        public TracePropagationTarget(System.Text.RegularExpressions.Regex regex) { }
+        public TracePropagationTarget(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
         public override string ToString() { }
-        public static Sentry.TracePropagationTarget CreateFromRegex(System.Text.RegularExpressions.Regex regex) { }
-        public static Sentry.TracePropagationTarget CreateFromRegex(string pattern, bool caseSensitive = false) { }
-        public static Sentry.TracePropagationTarget CreateFromSubstring(string substring, bool caseSensitive = false) { }
     }
     public class Transaction : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.IJsonSerializable, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
