@@ -82,15 +82,6 @@ namespace Sentry.Protocol.Envelopes
         /// <returns>The file name or null.</returns>
         public string? TryGetFileName() => Header.GetValueOrDefault(FileNameKey) as string;
 
-        private async Task<MemoryStream> BufferPayloadAsync(IDiagnosticLogger? logger, CancellationToken cancellationToken)
-        {
-            var buffer = new MemoryStream();
-            await Payload.SerializeAsync(buffer, logger, cancellationToken).ConfigureAwait(false);
-            buffer.Seek(0, SeekOrigin.Begin);
-
-            return buffer;
-        }
-
         private MemoryStream BufferPayload(IDiagnosticLogger? logger)
         {
             var buffer = new MemoryStream();
@@ -136,13 +127,17 @@ namespace Sentry.Protocol.Envelopes
             // in item headers. Don't trust any previously calculated value to be correct.
             // See https://github.com/getsentry/sentry-dotnet/issues/1956
 
-            var payloadBuffer = await BufferPayloadAsync(logger, cancellationToken).ConfigureAwait(false);
+            // NOTE: Previously we used BufferPayloadAsync, but since we buffer from in-memory objects to a MemoryStream
+            // there's no advantage to doing so asynchronously.  We will get better perf from a synchronous approach.
+            var payloadBuffer = BufferPayload(logger);
 #if NET461 || NETSTANDARD2_0
             using (payloadBuffer)
 #else
             await using (payloadBuffer.ConfigureAwait(false))
 #endif
             {
+                // Write to the outbound stream asynchronously. It's likely either an HttpRequestStream or a FileStream.
+
                 // Header
                 var headerWithLength = Header.ToDictionary();
                 headerWithLength[LengthKey] = payloadBuffer.Length;
