@@ -98,11 +98,7 @@ namespace Sentry.Protocol.Envelopes
             CancellationToken cancellationToken)
         {
             var writer = new Utf8JsonWriter(stream);
-#if NET461 || NETSTANDARD2_0
-            using (writer)
-#else
             await using (writer.ConfigureAwait(false))
-#endif
             {
                 writer.WriteDictionaryValue(header, logger);
                 await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
