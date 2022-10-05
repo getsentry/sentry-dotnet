@@ -138,7 +138,7 @@ namespace Sentry.Protocol.Envelopes
                 var headerWithLength = Header.ToDictionary();
                 headerWithLength[LengthKey] = payloadBuffer.Length;
                 await SerializeHeaderAsync(stream, headerWithLength, logger, cancellationToken).ConfigureAwait(false);
-                await stream.WriteNewlineAsync( cancellationToken).ConfigureAwait(false);
+                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
 
                 // Payload
                 await payloadBuffer.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
