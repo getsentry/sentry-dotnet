@@ -268,23 +268,10 @@ namespace Sentry.Protocol.Envelopes
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            var buffer = new List<byte>();
-
-            var prevByte = default(int);
-            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false))
-            {
-                // Break if found an unescaped newline
-                if (curByte == '\n' && prevByte != '\\')
-                {
-                    break;
-                }
-
-                buffer.Add(curByte);
-                prevByte = curByte;
-            }
+            var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
 
             return
-                Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
+                Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope item header is malformed.");
         }
 
@@ -377,14 +364,7 @@ namespace Sentry.Protocol.Envelopes
             var payload = await DeserializePayloadAsync(stream, header, cancellationToken).ConfigureAwait(false);
 
             // Swallow trailing newlines (some envelopes may have them after payloads)
-            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false))
-            {
-                if (curByte != '\n')
-                {
-                    stream.Position--;
-                    break;
-                }
-            }
+            await stream.SkipNewlinesAsync(cancellationToken).ConfigureAwait(false);
 
             // Always remove the length header on deserialization so it will get re-calculated if later serialized.
             // We cannot trust the length to be identical when round-tripped.
