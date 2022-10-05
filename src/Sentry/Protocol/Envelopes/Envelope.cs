@@ -97,13 +97,13 @@ namespace Sentry.Protocol.Envelopes
         {
             // Header
             await SerializeHeaderAsync(stream, logger, clock, cancellationToken).ConfigureAwait(false);
-            await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+            await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
 
             // Items
             foreach (var item in Items)
             {
                 await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -115,13 +115,13 @@ namespace Sentry.Protocol.Envelopes
         {
             // Header
             SerializeHeader(stream, logger, clock);
-            stream.WriteByte((byte)'\n');
+            stream.WriteNewline();
 
             // Items
             foreach (var item in Items)
             {
                 item.Serialize(stream, logger);
-                stream.WriteByte((byte)'\n');
+                stream.WriteNewline();
             }
         }
 

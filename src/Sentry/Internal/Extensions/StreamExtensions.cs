@@ -38,16 +38,15 @@ namespace Sentry.Internal.Extensions
             return result;
         }
 
-        public static async Task WriteByteAsync(
-            this Stream stream,
-            byte value,
-            CancellationToken cancellationToken = default)
-        {
-            using var buffer = new PooledBuffer<byte>(1);
-            buffer.Array[0] = value;
+        // pre-creating this buffer leads to an optimized path when writing
+        private static readonly byte[] NewlineBuffer = {(byte)'\n'};
 
-            await stream.WriteAsync(buffer.Array, 0, 1, cancellationToken).ConfigureAwait(false);
-        }
+        public static async Task WriteNewlineAsync(this Stream stream, CancellationToken cancellationToken = default) =>
+#pragma warning disable CA1835 // the byte-array implementation of WriteAsync is more direct than using ReadOnlyMemory<byte>
+            await stream.WriteAsync(NewlineBuffer, 0, 1, cancellationToken).ConfigureAwait(false);
+#pragma warning restore CA1835
+
+        public static void WriteNewline(this Stream stream) => stream.Write(NewlineBuffer, 0, 1);
 
         public static long? TryGetLength(this Stream stream)
         {
