@@ -9,6 +9,7 @@
 - Update Sentry Cocoa SDK to version 7.24.1 ([#1912](https://github.com/getsentry/sentry-dotnet/pull/1912))
 - Add `TransactionNameSource` annotation ([#1910](https://github.com/getsentry/sentry-dotnet/pull/1910))
 - Use URL path in transaction names instead of "Unknown Route" ([#1919](https://github.com/getsentry/sentry-dotnet/pull/1919))
+  - NOTE: This change effectively ungroups transactions that were previously grouped together under "Unkown Route".
 - Add `User.Segment` property ([#1920](https://github.com/getsentry/sentry-dotnet/pull/1920))
 - Add support for custom `JsonConverter`s ([#1934](https://github.com/getsentry/sentry-dotnet/pull/1934))
 - Support more types for message template tags in SentryLogger ([#1945](https://github.com/getsentry/sentry-dotnet/pull/1945))
