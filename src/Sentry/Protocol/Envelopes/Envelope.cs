@@ -44,16 +44,16 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Attempts to extract the value of "event_id" header if it's present.
         /// </summary>
-        [Obsolete]
         public SentryId? TryGetEventId()
         {
-            return TryGetEventId(null);
+            var logger = SentrySdk.CurrentOptions?.DiagnosticLogger;
+            return TryGetEventId(logger);
         }
 
         /// <summary>
         /// Attempts to extract the value of "event_id" header if it's present.
         /// </summary>
-        public SentryId? TryGetEventId(IDiagnosticLogger? logger)
+        internal SentryId? TryGetEventId(IDiagnosticLogger? logger)
         {
             void Error(string message)
             {
