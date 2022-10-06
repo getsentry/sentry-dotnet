@@ -104,6 +104,7 @@ public class TransactionProcessorTests
             Transport = transport,
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
-            AttachStacktrace = false
+            AttachStacktrace = false,
+            Release = "Sentry.Tests@1.0.0"
         };
 }

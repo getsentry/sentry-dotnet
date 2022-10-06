@@ -19,42 +19,42 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-12]
 
     steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            submodules: recursive
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-        - name: Setup Environment
-          uses: ./.github/actions/environment
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
-        - name: Build Native Dependencies
-          uses: ./.github/actions/buildnative
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
 
-        - name: Build
-          run: dotnet build -c Release --nologo /p:CopyLocalLockFileAssemblies=true
+      - name: Build
+        run: dotnet build -c Release --nologo /p:CopyLocalLockFileAssemblies=true
 
-        - name: Test
-          run: dotnet test -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+      - name: Test
+        run: dotnet test -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
-        - name: Pack
-          # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
-          if: startsWith(matrix.os, 'macos')
-          run: dotnet pack -c Release --no-build --nologo
+      - name: Pack
+        # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
+        if: startsWith(matrix.os, 'macos')
+        run: dotnet pack -c Release --no-build --nologo
 
-        - name: Upload Verify Results
-          if: failure()
-          uses: actions/upload-artifact@v3
-          with:
-            name: verify-test-results
-            path: |
-              **/*.received.*
+      - name: Upload Verify Results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: verify-test-results
+          path: |
+            **/*.received.*
 
-        - name: Archive Artifacts
-          # only archive on macos since we only pack on macos. See Pack step.
-          if: startsWith(matrix.os, 'macos')
-          uses: actions/upload-artifact@v3
-          with:
-            name: ${{ github.sha }}
-            if-no-files-found: error
-            path: |
-              ${{ github.workspace }}/src/**/Release/*.nupkg
+      - name: Archive Artifacts
+        # only archive on macos since we only pack on macos. See Pack step.
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            ${{ github.workspace }}/src/**/Release/*.nupkg

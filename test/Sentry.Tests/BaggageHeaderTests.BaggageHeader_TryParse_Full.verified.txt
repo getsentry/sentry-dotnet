@@ -1,0 +1,54 @@
+﻿[
+  {
+    Key: sentry-trace_id,
+    Value: 771a43a4192642f0b136d5159a501700
+  },
+  {
+    Key: sentry-public_key,
+    Value: 49d0f7386ad645858ae85020e393bef3
+  },
+  {
+    Key: sentry-sample_rate,
+    Value: 0.01337
+  },
+  {
+    Key: sentry-release,
+    Value: foo@abc+123
+  },
+  {
+    Key: sentry-environment,
+    Value: production
+  },
+  {
+    Key: sentry-user_segment,
+    Value: segment-a
+  },
+  {
+    Key: sentry-transaction,
+    Value: something, I think
+  },
+  {
+    Key: sentry-other_value1,
+    Value: Amélie
+  },
+  {
+    Key: sentry-other_value2,
+    Value: Foo Bar Baz
+  },
+  {
+    Key: other-vendor-value-1,
+    Value: foo
+  },
+  {
+    Key: other-vendor-value-2,
+    Value: foo;bar;
+  },
+  {
+    Key: dup-value,
+    Value: something
+  },
+  {
+    Key: dup-value,
+    Value: something
+  }
+]

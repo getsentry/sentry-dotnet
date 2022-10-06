@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: nikeee/docfx-action@b9c2cf92e3b4aa06878a1410833a8828b4bdcd26
+      - uses: nikeee/docfx-action@b9c2cf92e3b4aa06878a1410833a8828b4bdcd26 # pin@v1.0.0
         name: Build Documentation
         with:
           args: docs/docfx.json
-      - uses: peaceiris/actions-gh-pages@v3
+      - uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305 # pin@v3
         name: Publish to GitHub Pages
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -26,4 +26,3 @@ jobs:
         with:
           name: docs
           path: docs/_site
-

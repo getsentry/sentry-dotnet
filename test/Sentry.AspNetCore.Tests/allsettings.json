@@ -8,8 +8,14 @@
     "MinimumEventLevel": "Critical",
     "InitializeSdk": "false",
     "MaxBreadcrumbs": "999",
-    "SampleRate": "1",
+    "SampleRate": 1.0,
     "Release": "7f5d9a1",
-    "Environment": "Staging"
+    "Environment": "Staging",
+    "TracesSampleRate": 1.0,
+    "TracePropagationTargets": [
+      "foo",
+      "bar",
+      "^abc.*ghi$"
+    ]
   }
 }

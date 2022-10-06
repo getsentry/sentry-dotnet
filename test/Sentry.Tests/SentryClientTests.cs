@@ -13,6 +13,7 @@ public class SentryClientTests
     {
         public SentryOptions SentryOptions { get; set; } = new()
         {
+            Dsn = ValidDsn,
             AttachStacktrace = false,
             AutoSessionTracking = false
         };
