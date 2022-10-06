@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,15 +7,60 @@ namespace Sentry.Internal.Extensions
 {
     internal static class StreamExtensions
     {
-        public static async IAsyncEnumerable<byte> ReadAllBytesAsync(
+        public static async Task<byte[]> ReadLineAsync(
             this Stream stream,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default)
         {
+            // This approach avoids reading one byte at a time.
+
+            const int size = 128;
+            using var buffer = new PooledBuffer<byte>(size);
+
+            using var result = new MemoryStream(capacity: size);
+
+            var overreach = 0;
+            var found = false;
+            while (!found)
+            {
+                var bytesRead = await stream.ReadAsync(buffer.Array, 0, size, cancellationToken).ConfigureAwait(false);
+                if (bytesRead <= 0)
+                {
+                    break;
+                }
+
+                for (var i = 0; i < bytesRead; i++)
+                {
+                    if (buffer.Array[i] != '\n')
+                    {
+                        continue;
+                    }
+
+                    found = true;
+                    overreach = bytesRead - i - 1;
+                    bytesRead = i;
+                    break;
+                }
+
+                result.Write(buffer.Array, 0, bytesRead);
+            }
+
+            stream.Position -= overreach;
+            return result.ToArray();
+        }
+
+        public static async Task SkipNewlinesAsync(this Stream stream, CancellationToken cancellationToken = default)
+        {
+            // We probably have very few newline characters to skip, so reading one byte at a time is fine here.
+
             using var buffer = new PooledBuffer<byte>(1);
 
             while (await stream.ReadAsync(buffer.Array, 0, 1, cancellationToken).ConfigureAwait(false) > 0)
             {
-                yield return buffer.Array[0];
+                if (buffer.Array[0] != '\n')
+                {
+                    stream.Position--;
+                    return;
+                }
             }
         }
 
@@ -38,16 +81,15 @@ namespace Sentry.Internal.Extensions
             return result;
         }
 
-        public static async Task WriteByteAsync(
-            this Stream stream,
-            byte value,
-            CancellationToken cancellationToken = default)
-        {
-            using var buffer = new PooledBuffer<byte>(1);
-            buffer.Array[0] = value;
+        // pre-creating this buffer leads to an optimized path when writing
+        private static readonly byte[] NewlineBuffer = {(byte)'\n'};
 
-            await stream.WriteAsync(buffer.Array, 0, 1, cancellationToken).ConfigureAwait(false);
-        }
+        public static Task WriteNewlineAsync(this Stream stream, CancellationToken cancellationToken = default) =>
+#pragma warning disable CA1835 // the byte-array implementation of WriteAsync is more direct than using ReadOnlyMemory<byte>
+            stream.WriteAsync(NewlineBuffer, 0, 1, cancellationToken);
+#pragma warning restore CA1835
+
+        public static void WriteNewline(this Stream stream) => stream.Write(NewlineBuffer, 0, 1);
 
         public static long? TryGetLength(this Stream stream)
         {
