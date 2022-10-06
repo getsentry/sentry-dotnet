@@ -57,32 +57,32 @@ namespace Sentry.Protocol.Envelopes
                 logger?.LogError(message);
             }
 
-            if (!Header.TryGetValue(EventIdKey, out var value))
+            if (!Header.TryGetValue("event_id", out var value))
             {
                 return null;
             }
 
             if (value == null)
             {
-                Error($"Header {EventIdKey} is null");
+                Error("Header event_id is null");
                 return null;
             }
 
             if (value is not string valueString)
             {
-                Error($"Header {EventIdKey} has incorrect type: {value.GetType()}");
+                Error($"Header event_id has incorrect type: {value.GetType()}");
                 return null;
             }
 
             if (!Guid.TryParse(valueString, out var guid))
             {
-                Error($"Header {EventIdKey} is not a GUID: {value}");
+                Error($"Header event_id is not a GUID: {value}");
                 return null;
             }
 
             if (guid == Guid.Empty)
             {
-                Error($"Envelope contains an empty {EventIdKey} header");
+                Error("Envelope contains an empty event_id header");
                 return SentryId.Empty;
             }
 
