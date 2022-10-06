@@ -5,7 +5,6 @@ using Sentry.Http;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 using Sentry.Tests.Helpers;
-#pragma warning disable CS0612
 
 namespace Sentry.Tests.Internals.Http;
 
