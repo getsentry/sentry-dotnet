@@ -27,6 +27,7 @@
 - Tags should not differ based on current culture ([#1949](https://github.com/getsentry/sentry-dotnet/pull/1949))
 - Always recalculate payload length ([#1957](https://github.com/getsentry/sentry-dotnet/pull/1957))
 - Fix issues with envelope deserialization ([#1965](https://github.com/getsentry/sentry-dotnet/pull/1965))
+- Fix reported error count on a crashed session update ([#1972](https://github.com/getsentry/sentry-dotnet/pull/1972))
 
 ## 3.21.0
 
