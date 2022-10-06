@@ -302,7 +302,7 @@ public class TransactionTests
     }
 
     [Fact]
-    public void Finish_NoStatus_DefaultsToUnknown()
+    public void Finish_NoStatus_DefaultsToOk()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -312,7 +312,7 @@ public class TransactionTests
         transaction.Finish();
 
         // Assert
-        transaction.Status.Should().Be(SpanStatus.UnknownError);
+        transaction.Status.Should().Be(SpanStatus.Ok);
     }
 
     [Fact]
@@ -330,5 +330,36 @@ public class TransactionTests
 
         // Assert
         transaction.Status.Should().Be(SpanStatus.DataLoss);
+    }
+
+    [Fact]
+    public void Finish_ChildSpan_NoStatus_DefaultsToOk()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "my name", "my op");
+        var span = transaction.StartChild("child op");
+
+        // Act
+        span.Finish();
+
+        // Assert
+        span.Status.Should().Be(SpanStatus.Ok);
+    }
+
+    [Fact]
+    public void Finish_ChildSpan_StatusSet_DoesNotOverride()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "my name", "my op");
+        var span = transaction.StartChild("child op");
+        span.Status = SpanStatus.DataLoss;
+
+        // Act
+        span.Finish();
+
+        // Assert
+        span.Status.Should().Be(SpanStatus.DataLoss);
     }
 }
