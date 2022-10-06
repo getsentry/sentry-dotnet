@@ -97,13 +97,13 @@ namespace Sentry.Protocol.Envelopes
         {
             // Header
             await SerializeHeaderAsync(stream, logger, clock, cancellationToken).ConfigureAwait(false);
-            await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+            await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
 
             // Items
             foreach (var item in Items)
             {
                 await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -115,13 +115,13 @@ namespace Sentry.Protocol.Envelopes
         {
             // Header
             SerializeHeader(stream, logger, clock);
-            stream.WriteByte((byte)'\n');
+            stream.WriteNewline();
 
             // Items
             foreach (var item in Items)
             {
                 item.Serialize(stream, logger);
-                stream.WriteByte((byte)'\n');
+                stream.WriteNewline();
             }
         }
 
@@ -277,23 +277,10 @@ namespace Sentry.Protocol.Envelopes
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            var buffer = new List<byte>();
-
-            var prevByte = default(int);
-            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false))
-            {
-                // Break if found an unescaped newline
-                if (curByte == '\n' && prevByte != '\\')
-                {
-                    break;
-                }
-
-                buffer.Add(curByte);
-                prevByte = curByte;
-            }
+            var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
 
             var header =
-                Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
+                Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
 
             // The sent_at header should not be included in the result
