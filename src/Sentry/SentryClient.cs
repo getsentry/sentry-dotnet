@@ -23,8 +23,8 @@ namespace Sentry
         private readonly SentryOptions _options;
         private readonly RandomValuesFactory _randomValuesFactory;
 
-        // Internal for testing.
         internal IBackgroundWorker Worker { get; }
+        internal SentryOptions Options => _options;
 
         /// <summary>
         /// Whether the client is enabled.

@@ -627,7 +627,7 @@ public class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSampling_SampledIn()
+    public void StartTransaction_TracesSampler_SampledIn()
     {
         // Arrange
         var hub = new Hub(new SentryOptions
@@ -644,7 +644,7 @@ public class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSampling_SampledOut()
+    public void StartTransaction_TracesSampler_SampledOut()
     {
         // Arrange
         var hub = new Hub(new SentryOptions
@@ -661,7 +661,7 @@ public class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSampling_WithCustomContext_SampledIn()
+    public void StartTransaction_TracesSampler_WithCustomContext_SampledIn()
     {
         // Arrange
         var hub = new Hub(new SentryOptions
@@ -680,7 +680,7 @@ public class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSampling_WithCustomContext_SampledOut()
+    public void StartTransaction_TracesSampler_WithCustomContext_SampledOut()
     {
         // Arrange
         var hub = new Hub(new SentryOptions
@@ -699,7 +699,7 @@ public class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSampling_FallbackToStatic_SampledIn()
+    public void StartTransaction_TracesSampler_FallbackToStatic_SampledIn()
     {
         // Arrange
         var hub = new Hub(new SentryOptions
@@ -717,7 +717,7 @@ public class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSampling_FallbackToStatic_SampledOut()
+    public void StartTransaction_TracesSampler_FallbackToStatic_SampledOut()
     {
         // Arrange
         var hub = new Hub(new SentryOptions

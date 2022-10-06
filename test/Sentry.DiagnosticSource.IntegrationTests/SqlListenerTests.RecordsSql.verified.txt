@@ -35,6 +35,7 @@
       Description: ,
       Status: UnknownError,
       IsSampled: true,
+      SampleRate: 1.0,
       Request: {},
       Contexts: {
         trace: {

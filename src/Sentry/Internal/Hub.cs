@@ -119,6 +119,12 @@ namespace Sentry.Internal
         public ITransaction StartTransaction(
             ITransactionContext context,
             IReadOnlyDictionary<string, object?> customSamplingContext)
+            => StartTransaction(context, customSamplingContext, null);
+
+        internal ITransaction StartTransaction(
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext,
+            DynamicSamplingContext? dynamicSamplingContext)
         {
             var transaction = new TransactionTracer(this, context);
 
@@ -133,16 +139,24 @@ namespace Sentry.Internal
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
                     transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                    transaction.SampleRate = sampleRate;
                 }
             }
 
-            // Random sampling runs only if the sampling decision hasn't
-            // been made already.
-            transaction.IsSampled ??= _randomValuesFactory.NextBool(_options.TracesSampleRate);
+            // Random sampling runs only if the sampling decision hasn't been made already.
+            if (transaction.IsSampled == null)
+            {
+                transaction.IsSampled = _randomValuesFactory.NextBool(_options.TracesSampleRate);
+                transaction.SampleRate = _options.TracesSampleRate;
+            }
+
+            // Use the provided DSC, or create one based on this transaction.
+            // This must be done AFTER the sampling decision has been made.
+            transaction.DynamicSamplingContext =
+                dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
 
             // A sampled out transaction still appears fully functional to the user
             // but will be dropped by the client and won't reach Sentry's servers.
-
             return transaction;
         }
 

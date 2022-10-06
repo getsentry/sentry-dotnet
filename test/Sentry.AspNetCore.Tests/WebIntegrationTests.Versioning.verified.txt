@@ -10,6 +10,7 @@
         Description: ,
         Status: Ok,
         IsSampled: true,
+        SampleRate: 1.0,
         Request: {
           Method: GET,
           QueryString: 

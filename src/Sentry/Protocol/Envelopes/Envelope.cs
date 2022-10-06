@@ -18,10 +18,6 @@ namespace Sentry.Protocol.Envelopes
     /// </summary>
     public sealed class Envelope : ISerializable, IDisposable
     {
-        private const string SdkKey = "sdk";
-        private const string EventIdKey = "event_id";
-        private const string SentAtKey = "sent_at";
-
         /// <summary>
         /// Header associated with the envelope.
         /// </summary>
@@ -101,7 +97,7 @@ namespace Sentry.Protocol.Envelopes
         {
             // Append the sent_at header, except when writing to disk
             var headerItems = !stream.IsFileStream()
-                ? Header.Append(SentAtKey, clock.GetUtcNow())
+                ? Header.Append("sent_at", clock.GetUtcNow())
                 : Header;
 
             var writer = new Utf8JsonWriter(stream);
@@ -121,7 +117,7 @@ namespace Sentry.Protocol.Envelopes
         {
             // Append the sent_at header, except when writing to disk
             var headerItems = !stream.IsFileStream()
-                ? Header.Append(SentAtKey, clock.GetUtcNow())
+                ? Header.Append("sent_at", clock.GetUtcNow())
                 : Header;
 
             using var writer = new Utf8JsonWriter(stream);
@@ -144,13 +140,13 @@ namespace Sentry.Protocol.Envelopes
         {
             // Header
             await SerializeHeaderAsync(stream, logger, clock, cancellationToken).ConfigureAwait(false);
-            await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+            await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
 
             // Items
             foreach (var item in Items)
             {
                 await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-                await stream.WriteByteAsync((byte)'\n', cancellationToken).ConfigureAwait(false);
+                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -162,13 +158,13 @@ namespace Sentry.Protocol.Envelopes
         {
             // Header
             SerializeHeader(stream, logger, clock);
-            stream.WriteByte((byte)'\n');
+            stream.WriteNewline();
 
             // Items
             foreach (var item in Items)
             {
                 item.Serialize(stream, logger);
-                stream.WriteByte((byte)'\n');
+                stream.WriteNewline();
             }
         }
 
@@ -176,30 +172,25 @@ namespace Sentry.Protocol.Envelopes
         public void Dispose() => Items.DisposeAll();
 
         // limited SDK information (no packages)
-        private static readonly IReadOnlyDictionary<string, string?> SdkHeader = new Dictionary<string, string?>(2, StringComparer.Ordinal)
-        {
-            ["name"] = SdkVersion.Instance.Name,
-            ["version"] = SdkVersion.Instance.Version
-        };
-
-        private static readonly IReadOnlyDictionary<string, object?> DefaultHeader = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-        {
-            ["sdk"] = SdkHeader
-        };
-
-        private static IReadOnlyDictionary<string, object?> CreateHeader(SentryId? eventId = null)
-        {
-            if (eventId is null)
+        private static readonly IReadOnlyDictionary<string, string?> SdkHeader =
+            new Dictionary<string, string?>(2, StringComparer.Ordinal)
             {
-                return DefaultHeader;
-            }
+                ["name"] = SdkVersion.Instance.Name,
+                ["version"] = SdkVersion.Instance.Version
+            }.AsReadOnly();
 
-            return new Dictionary<string, object?>(2, StringComparer.Ordinal)
+        private static readonly IReadOnlyDictionary<string, object?> DefaultHeader =
+            new Dictionary<string, object?>(1, StringComparer.Ordinal)
             {
-                [SdkKey] = SdkHeader,
-                [EventIdKey] = eventId.Value.ToString()
+                ["sdk"] = SdkHeader
+            }.AsReadOnly();
+
+        private static Dictionary<string, object?> CreateHeader(SentryId eventId, int extraCapacity = 0) =>
+            new(2 + extraCapacity, StringComparer.Ordinal)
+            {
+                ["sdk"] = SdkHeader,
+                ["event_id"] = eventId.ToString()
             };
-        }
 
         /// <summary>
         /// Creates an envelope that contains a single event.
@@ -276,7 +267,16 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromTransaction(Transaction transaction)
         {
-            var header = CreateHeader(transaction.EventId);
+            Dictionary<string, object?> header;
+            if (transaction.DynamicSamplingContext is { } dsc)
+            {
+                header = CreateHeader(transaction.EventId, extraCapacity: 1);
+                header["trace"] = dsc.Items;
+            }
+            else
+            {
+                header = CreateHeader(transaction.EventId);
+            }
 
             var items = new[]
             {
@@ -291,7 +291,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromSession(SessionUpdate sessionUpdate)
         {
-            var header = CreateHeader();
+            var header = DefaultHeader;
 
             var items = new[]
             {
@@ -306,7 +306,7 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         internal static Envelope FromClientReport(ClientReport clientReport)
         {
-            var header = CreateHeader();
+            var header = DefaultHeader;
 
             var items = new[]
             {
@@ -320,27 +320,14 @@ namespace Sentry.Protocol.Envelopes
             Stream stream,
             CancellationToken cancellationToken = default)
         {
-            var buffer = new List<byte>();
-
-            var prevByte = default(int);
-            await foreach (var curByte in stream.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false))
-            {
-                // Break if found an unescaped newline
-                if (curByte == '\n' && prevByte != '\\')
-                {
-                    break;
-                }
-
-                buffer.Add(curByte);
-                prevByte = curByte;
-            }
+            var buffer = await stream.ReadLineAsync(cancellationToken).ConfigureAwait(false);
 
             var header =
-                Json.Parse(buffer.ToArray(), JsonExtensions.GetDictionaryOrNull)
+                Json.Parse(buffer, JsonExtensions.GetDictionaryOrNull)
                 ?? throw new InvalidOperationException("Envelope header is malformed.");
 
             // The sent_at header should not be included in the result
-            header.Remove(SentAtKey);
+            header.Remove("sent_at");
 
             return header;
         }

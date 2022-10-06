@@ -12,6 +12,7 @@
 - Add `User.Segment` property ([#1920](https://github.com/getsentry/sentry-dotnet/pull/1920))
 - Add support for custom `JsonConverter`s ([#1934](https://github.com/getsentry/sentry-dotnet/pull/1934))
 - Support more types for message template tags in SentryLogger ([#1945](https://github.com/getsentry/sentry-dotnet/pull/1945))
+- Support Dynamic Sampling ([#1953](https://github.com/getsentry/sentry-dotnet/pull/1953))
 
 ## Fixes
 
@@ -24,6 +25,7 @@
 - Ignore null Context values ([#1942](https://github.com/getsentry/sentry-dotnet/pull/1942))
 - Tags should not differ based on current culture ([#1949](https://github.com/getsentry/sentry-dotnet/pull/1949))
 - Always recalculate payload length ([#1957](https://github.com/getsentry/sentry-dotnet/pull/1957))
+- Fix issues with envelope deserialization ([#1965](https://github.com/getsentry/sentry-dotnet/pull/1965))
 
 ## 3.21.0
 
