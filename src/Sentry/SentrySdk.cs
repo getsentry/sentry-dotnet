@@ -60,6 +60,12 @@ namespace Sentry
             // Initialize bundled platform SDKs here
 #if ANDROID
             InitSentryAndroidSdk(options);
+#elif __IOS__ && HOTRESTART
+            // https://learn.microsoft.com/en-us/dotnet/maui/deployment/hot-restart#prevent-code-from-executing
+            options.LogWarning(
+                "\"Hot Restart\" deployment mode detected. The Sentry Cocoa SDK will not be loaded because " +
+                "static iOS libraries and frameworks are not supported in this mode. This reduces some of the " +
+                "Sentry SDK's capabilities, such as being able to capture native crashes.");
 #elif __IOS__
             InitSentryCocoaSdk(options);
 #endif
