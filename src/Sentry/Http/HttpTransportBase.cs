@@ -280,31 +280,56 @@ namespace Sentry.Http
 
         private void HandleSuccess(Envelope envelope)
         {
-            var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
                 var payload = envelope.SerializeToString(_options.DiagnosticLogger, _clock);
-                _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}", eventId, payload);
+                LogEnvelopeSent(envelope, payload);
             }
             else
             {
-                _options.LogInfo("Envelope '{0}' successfully received by Sentry.", eventId);
+                LogEnvelopeSent(envelope);
             }
         }
 
         private async Task HandleSuccessAsync(Envelope envelope, CancellationToken cancellationToken)
         {
-            var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
             if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
             {
                 var payload = await envelope.SerializeToStringAsync(_options.DiagnosticLogger, _clock, cancellationToken)
                     .ConfigureAwait(false);
 
-                _options.LogDebug("Envelope '{0}' sent successfully. Payload:\n{1}", eventId, payload);
+                LogEnvelopeSent(envelope, payload);
             }
             else
             {
-                _options.LogInfo("Envelope '{0}' successfully received by Sentry.", eventId);
+                LogEnvelopeSent(envelope);
+            }
+        }
+
+        private void LogEnvelopeSent(Envelope envelope, string? payload = null)
+        {
+            var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
+            if (payload == null)
+            {
+                if (eventId == null)
+                {
+                    _options.LogInfo("Envelope for session successfully received.", eventId);
+                }
+                else
+                {
+                    _options.LogInfo("Envelope '{0}' successfully received.", eventId);
+                }
+            }
+            else
+            {
+                if (eventId == null)
+                {
+                    _options.LogDebug("Envelope for session successfully received. Content:\n{1}", eventId, payload);
+                }
+                else
+                {
+                    _options.LogDebug("Envelope '{0}' successfully received. Content:\n{1}", eventId, payload);
+                }
             }
         }
 
