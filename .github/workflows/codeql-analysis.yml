@@ -32,7 +32,7 @@ jobs:
           languages: csharp
 
       - name: Build
-        run: dotnet build --nologo
+        run: dotnet build SentrySourceOnly.slnf --nologo
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@e0e5ded33cabb451ae0a9768fc7b0410bad9ad44 # pin@v2
