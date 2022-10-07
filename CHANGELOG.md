@@ -1,6 +1,31 @@
 # Changelog
 
-## Unreleased
+## 3.22.0
+
+### Various fixes & improvements
+
+- Fix reported error count on a crashed session update (#1972) by @mattjohnsonpint
+- Set default trace status to `ok` instead of `unknown_error` (#1970) by @mattjohnsonpint
+- Fix issues with envelope deserialization (#1965) by @mattjohnsonpint
+- Support Dynamic Sampling (#1953) by @mattjohnsonpint
+- Always recalculate payload length (#1957) by @mattjohnsonpint
+- ignore null context values (#1942) by @SimonCropp
+- tags should not differ based on current culture (#1949) by @SimonCropp
+- Support long for message template tags in SentryLogger (#1945) by @babyjohn42
+- respect IsSampled in SqlListener (#1933) by @SimonCropp
+- chore: reuse danger workflow (#1936) by @vaind
+- Add support for custom JsonConverters (#1934) by @mattjohnsonpint
+- Add Blazor WASM detection to set IsGlobalModeEnabled to true (#1931) by @SimonCropp
+- Exception filters should consider child exceptions of an `AggregateException` (#1924) by @mattjohnsonpint
+- Fix missing details when aggregate exception is filtered out (#1922) by @mattjohnsonpint
+- dont send transaction for OPTIONS web request (#1921) by @SimonCropp
+- Add `User.Segment` property (#1920) by @mattjohnsonpint
+- Use URL path in transaction names instead of "Unknown Route" (#1919) by @mattjohnsonpint
+- Reduce lock contention when sampling (#1915) by @mattjohnsonpint
+- Add TransactionNameSource annotation (#1910) by @SimonCropp
+- Update Sentry Cocoa SDK to 7.24.1 (#1912) by @mattjohnsonpint
+- Update Sentry Android SDK to version 6.4.1  (#1911) by @mattjohnsonpint
+- Attach stacktrace by default (#1907) by @mattjohnsonpint
 
 ## Features
 
