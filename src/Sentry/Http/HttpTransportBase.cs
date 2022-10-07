@@ -313,7 +313,7 @@ namespace Sentry.Http
             {
                 if (eventId == null)
                 {
-                    _options.LogInfo("Envelope for session successfully received.", eventId);
+                    _options.LogInfo("Envelope successfully received.", eventId);
                 }
                 else
                 {
@@ -324,11 +324,11 @@ namespace Sentry.Http
             {
                 if (eventId == null)
                 {
-                    _options.LogDebug("Envelope for session successfully received. Content:\n{1}", eventId, payload);
+                    _options.LogDebug("Envelope successfully received. Content: {1}", eventId, payload);
                 }
                 else
                 {
-                    _options.LogDebug("Envelope '{0}' successfully received. Content:\n{1}", eventId, payload);
+                    _options.LogDebug("Envelope '{0}' successfully received. Content: {1}", eventId, payload);
                 }
             }
         }
