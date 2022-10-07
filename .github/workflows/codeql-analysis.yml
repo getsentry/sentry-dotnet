@@ -34,8 +34,11 @@ jobs:
         with:
           languages: csharp
 
+      - name: Restore .NET Dependencies
+        run: dotnet restore SentrySourceOnly.slnf --nologo
+
       - name: Build
-        run: dotnet build SentrySourceOnly.slnf --nologo
+        run: dotnet build SentrySourceOnly.slnf --no-restore --nologo
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@e0e5ded33cabb451ae0a9768fc7b0410bad9ad44 # pin@v2

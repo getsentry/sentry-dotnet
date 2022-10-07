@@ -25,8 +25,11 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
+      - name: Restore .NET Dependencies
+        run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
+
       - name: Build Android Test App
-        run: dotnet build -c Release -f net6.0-android test/Sentry.Maui.Device.TestApp
+        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net6.0-android --no-restore --nologo
 
       - name: Upload Android Test App
         uses: actions/upload-artifact@v3

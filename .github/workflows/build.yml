@@ -33,8 +33,11 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
+      - name: Restore .NET Dependencies
+        run: dotnet restore --nologo
+
       - name: Build
-        run: dotnet build -c Release --nologo /p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry.sln -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
 
       - name: Test
         run: dotnet test -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
