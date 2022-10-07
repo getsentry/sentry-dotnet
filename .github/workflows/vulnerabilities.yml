@@ -30,5 +30,10 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore --nologo
 
+      # The dotnet list package command doesn't change its exit code on detection, so tee to a file and scan it
+      # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
       - name: List vulnerable packages
-        run: dotnet list package --vulnerable --include-transitive
+        shell: bash
+        run: |
+          dotnet list package --vulnerable --include-transitive | tee vulnerable.txt
+          sh -c "! grep 'has the following vulnerable packages' vulnerable.txt"
