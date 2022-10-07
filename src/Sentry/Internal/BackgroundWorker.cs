@@ -123,7 +123,7 @@ namespace Sentry.Internal
                         // Cancellation requested and no timeout allowed, so exit even if there are more items
                         catch (OperationCanceledException) when (_options.ShutdownTimeout == TimeSpan.Zero)
                         {
-                            _options.LogDebug("Exiting immediately due to 0 shutdown timeout. #{0} in queue.", _queue.Count);
+                            _options.LogDebug("Exiting immediately due to 0 shutdown timeout. {0} items in queue.", _queue.Count);
 
                             shutdownTimeout.Cancel();
 
@@ -133,7 +133,7 @@ namespace Sentry.Internal
                         catch (OperationCanceledException)
                         {
                             _options.LogDebug(
-                                "Shutdown scheduled. Stopping by: {0}. #{1} in queue.",
+                                "Shutdown scheduled. Stopping by: {0}. {1} items in queue.",
                                 _options.ShutdownTimeout,
                                 _queue.Count);
 
@@ -156,8 +156,8 @@ namespace Sentry.Internal
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.LogDebug(
-                                "Envelope {0} handed off to transport. #{1} in queue.",
-                                eventId,
+                                "Envelope {0} handed off to transport. {1} items in queue.",
+                                envelope.TryGetEventId(),
                                 _queue.Count);
 
                             await task.ConfigureAwait(false);
@@ -165,7 +165,7 @@ namespace Sentry.Internal
                         catch (OperationCanceledException)
                         {
                             _options.LogInfo(
-                                "Shutdown token triggered. Time to exit. #{0} in queue.",
+                                "Shutdown token triggered. Time to exit. {0} items in queue.",
                                 _queue.Count);
 
                             return;
@@ -173,7 +173,7 @@ namespace Sentry.Internal
                         catch (Exception exception)
                         {
                             _options.LogError(
-                                "Error while processing envelope (event ID: '{0}'). #{1} in queue.",
+                                "Error while processing envelope (event ID: '{0}'). {1} items in queue.",
                                 exception,
                                 eventId,
                                 _queue.Count);
