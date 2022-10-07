@@ -361,7 +361,7 @@ namespace Sentry
         {
             if (status == SessionEndStatus.Crashed)
             {
-                // This just increments the errors count, as crashed sessions should report a count of 1 per:
+                // increments the errors count, as crashed sessions should report a count of 1 per:
                 // https://develop.sentry.dev/sdk/sessions/#session-update-payload
                 session.ReportError();
             }
