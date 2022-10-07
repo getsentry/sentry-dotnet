@@ -313,22 +313,22 @@ namespace Sentry.Http
             {
                 if (eventId == null)
                 {
-                    _options.LogInfo("Envelope successfully received.", eventId);
+                    _options.LogInfo("Envelope successfully sent.", eventId);
                 }
                 else
                 {
-                    _options.LogInfo("Envelope '{0}' successfully received.", eventId);
+                    _options.LogInfo("Envelope '{0}' successfully sent.", eventId);
                 }
             }
             else
             {
                 if (eventId == null)
                 {
-                    _options.LogDebug("Envelope successfully received. Content: {1}", eventId, payload);
+                    _options.LogDebug("Envelope successfully sent. Content: {1}", eventId, payload);
                 }
                 else
                 {
-                    _options.LogDebug("Envelope '{0}' successfully received. Content: {1}", eventId, payload);
+                    _options.LogDebug("Envelope '{0}' successfully sent. Content: {1}", eventId, payload);
                 }
             }
         }
