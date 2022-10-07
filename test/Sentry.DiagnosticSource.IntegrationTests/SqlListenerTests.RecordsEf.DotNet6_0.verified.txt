@@ -33,7 +33,7 @@
       Platform: csharp,
       Operation: my operation,
       Description: ,
-      Status: UnknownError,
+      Status: Ok,
       IsSampled: true,
       SampleRate: 1.0,
       Request: {},
@@ -41,7 +41,7 @@
         trace: {
           Operation: my operation,
           Description: ,
-          Status: UnknownError,
+          Status: Ok,
           IsSampled: true
         }
       },
