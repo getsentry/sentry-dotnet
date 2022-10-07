@@ -40,7 +40,7 @@ jobs:
         run: dotnet build Sentry.sln -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
 
       - name: Test
-        run: dotnet test -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+        run: dotnet test SentryNoSamples.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
       - name: Pack
         # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
