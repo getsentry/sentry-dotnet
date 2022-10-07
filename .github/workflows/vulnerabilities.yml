@@ -26,10 +26,9 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
-      # Everything above here is the same as the main build.
       # We only need to restore to check for vulnerable packages
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Restore .NET Dependencies
+        run: dotnet restore --nologo
 
       - name: List vulnerable packages
         run: dotnet list package --vulnerable --include-transitive
