@@ -288,14 +288,6 @@ public class SentryMiddlewareTests
     }
 
     [Fact]
-    public void Ctor_NullRequestDelegate_ThrowsArgumentNullException()
-    {
-        _fixture.RequestDelegate = null;
-        var ex = Assert.Throws<ArgumentNullException>(() => _fixture.GetSut());
-        Assert.Equal("next", ex.ParamName);
-    }
-
-    [Fact]
     public void Ctor_NullHubAccessor_ThrowsArgumentNullException()
     {
         _fixture.HubAccessor = null;
