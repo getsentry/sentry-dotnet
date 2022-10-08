@@ -11,4 +11,11 @@
     <PackageReference Include="Google.Cloud.Functions.Hosting" Version="1.0.0" />
   </ItemGroup>
 
+  <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="5.0.1" Condition="$(TargetFramework) == 'net5.0'"/>
+    <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" Condition="$(TargetFramework) == 'net6.0'"/>
+  </ItemGroup>
+
 </Project>
