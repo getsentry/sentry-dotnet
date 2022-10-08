@@ -653,6 +653,24 @@ public class SentryMiddlewareTests
     }
 
     [Fact]
+    public void PopulateScope_DoesNotDuplicateEventProcessorsWhenPopulateMultipleTimes()
+    {
+        var customProcessor = Substitute.For<ISentryEventProcessor>();
+        var eventProcessors = new List<ISentryEventProcessor>() {
+            customProcessor
+        };
+        _fixture.EventProcessors = eventProcessors;
+
+        var sut = _fixture.GetSut();
+
+        var scope = new Scope();
+        sut.PopulateScope(_fixture.HttpContext, scope);
+        sut.PopulateScope(_fixture.HttpContext, scope);
+
+        Assert.Single(scope.GetAllEventProcessors().Where(c => c == customProcessor));
+    }
+
+    [Fact]
     public void PopulateScope_AddExceptionEventProcessors()
     {
         var customEventExceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
@@ -667,5 +685,22 @@ public class SentryMiddlewareTests
         sut.PopulateScope(_fixture.HttpContext, scope);
 
         Assert.Contains(customEventExceptionProcessor, scope.GetAllExceptionProcessors());
+    }
+    [Fact]
+    public void PopulateScope_DoesNotDuplicateExceptionEventProcessorsWhenPopulateMultipleTimes()
+    {
+        var customEventExceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+        var eventExceptionProcessors = new List<ISentryEventExceptionProcessor>() {
+            customEventExceptionProcessor
+        };
+        _fixture.EventExceptionProcessors = eventExceptionProcessors;
+
+        var sut = _fixture.GetSut();
+
+        var scope = new Scope();
+        sut.PopulateScope(_fixture.HttpContext, scope);
+        sut.PopulateScope(_fixture.HttpContext, scope);
+
+        Assert.Single(scope.GetAllExceptionProcessors().Where(c => c == customEventExceptionProcessor));
     }
 }

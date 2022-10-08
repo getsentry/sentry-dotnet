@@ -167,11 +167,13 @@ internal class SentryMiddleware : IMiddleware
     {
         if (_eventProcessors != null)
         {
-            scope.AddEventProcessors(_eventProcessors);
+            var toAdd = _eventProcessors.Except(scope.GetAllEventProcessors());
+            scope.AddEventProcessors(toAdd);
         }
         if (_eventExceptionProcessors != null)
         {
-            scope.AddExceptionProcessors(_eventExceptionProcessors);
+            var toAdd = _eventExceptionProcessors.Except(scope.GetAllExceptionProcessors());
+            scope.AddExceptionProcessors(toAdd);
         }
 
         scope.Sdk.Name = Constants.SdkName;
