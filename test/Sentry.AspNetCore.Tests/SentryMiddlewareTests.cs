@@ -23,6 +23,8 @@ public class SentryMiddlewareTests
         public IHostingEnvironment HostingEnvironment { get; set; } = Substitute.For<IHostingEnvironment>();
         public ILogger<SentryMiddleware> Logger { get; set; } = Substitute.For<ILogger<SentryMiddleware>>();
         public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
+        public IEnumerable<ISentryEventProcessor> EventProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventProcessor>>();
+        public IEnumerable<ISentryEventExceptionProcessor> EventExceptionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventExceptionProcessor>>();
         public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
         public Scope Scope { get; set; }
 
@@ -43,11 +45,12 @@ public class SentryMiddlewareTests
 
         public SentryMiddleware GetSut()
             => new(
-                RequestDelegate,
                 HubAccessor,
                 Microsoft.Extensions.Options.Options.Create(Options),
                 HostingEnvironment,
-                Logger);
+                Logger,
+                EventExceptionProcessors,
+                EventProcessors);
     }
 
     private readonly Fixture _fixture = new();
@@ -60,7 +63,7 @@ public class SentryMiddlewareTests
 
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         await _fixture.RequestDelegate.Received(1).Invoke(_fixture.HttpContext);
     }
 
@@ -71,7 +74,7 @@ public class SentryMiddlewareTests
 
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         _ = _fixture.Hub.DidNotReceive().PushScope();
     }
 
@@ -84,7 +87,7 @@ public class SentryMiddlewareTests
         var sut = _fixture.GetSut();
 
         var actual = await Assert.ThrowsAsync<Exception>(
-            async () => await sut.InvokeAsync(_fixture.HttpContext));
+            async () => await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate));
 
         Assert.Same(expected, actual);
     }
@@ -101,7 +104,7 @@ public class SentryMiddlewareTests
         var sut = _fixture.GetSut();
 
         var actual = await Assert.ThrowsAsync<Exception>(
-            async () => await sut.InvokeAsync(_fixture.HttpContext));
+            async () => await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate));
 
         Assert.Same(expected, actual);
     }
@@ -115,7 +118,7 @@ public class SentryMiddlewareTests
 
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
@@ -129,7 +132,7 @@ public class SentryMiddlewareTests
         _ = _fixture.HttpContext.Features.Get<IExceptionHandlerFeature>().Returns(feature);
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         _ = _fixture.Hub.Received().CaptureEvent(Arg.Any<SentryEvent>());
         Assert.Equal("IExceptionHandlerFeature", exception.Data[Mechanism.MechanismKey]);
@@ -145,7 +148,7 @@ public class SentryMiddlewareTests
 
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         _fixture.Hub.Received().ConfigureScope(Arg.Any<Action<Scope>>());
     }
@@ -167,7 +170,7 @@ public class SentryMiddlewareTests
 
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         Assert.True(verified);
     }
@@ -183,7 +186,7 @@ public class SentryMiddlewareTests
 
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         scope.Evaluate();
 
@@ -198,7 +201,7 @@ public class SentryMiddlewareTests
 
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         _ = _fixture.Hub.Received(1).PushScope();
         disposable.Received(1).Dispose();
@@ -215,7 +218,7 @@ public class SentryMiddlewareTests
         var sut = _fixture.GetSut();
 
         _ = await Assert.ThrowsAsync<Exception>(
-            async () => await sut.InvokeAsync(_fixture.HttpContext));
+            async () => await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate));
 
         _ = _fixture.Hub.Received(1).PushScope();
         disposable.Received(1).Dispose();
@@ -321,7 +324,7 @@ public class SentryMiddlewareTests
                 invoked = true;
             });
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         Assert.True(invoked);
     }
@@ -347,7 +350,7 @@ public class SentryMiddlewareTests
                 invoked = true;
             });
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         Assert.True(invoked);
     }
@@ -373,7 +376,7 @@ public class SentryMiddlewareTests
                 invoked = true;
             });
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         Assert.True(invoked);
     }
@@ -388,7 +391,7 @@ public class SentryMiddlewareTests
         _ = _fixture.HttpContext.Request.Returns(request);
         _ = request.HttpContext.Returns(_fixture.HttpContext);
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         request.DidNotReceive().Body = Arg.Any<Stream>();
     }
@@ -404,7 +407,7 @@ public class SentryMiddlewareTests
         _ = _fixture.HttpContext.Request.Returns(request);
         _ = request.HttpContext.Returns(_fixture.HttpContext);
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         request.DidNotReceive().Body = Arg.Any<Stream>();
     }
@@ -436,7 +439,7 @@ public class SentryMiddlewareTests
         _ = response.HttpContext.Returns(_fixture.HttpContext);
         response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
     }
@@ -451,7 +454,7 @@ public class SentryMiddlewareTests
         _ = response.HttpContext.Returns(_fixture.HttpContext);
         response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
     }
@@ -466,7 +469,7 @@ public class SentryMiddlewareTests
         _ = response.HttpContext.Returns(_fixture.HttpContext);
         response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
     }
@@ -483,7 +486,7 @@ public class SentryMiddlewareTests
         _ = response.HttpContext.Returns(_fixture.HttpContext);
         response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         await _fixture.Hub.DidNotReceive().FlushAsync(Arg.Any<TimeSpan>());
     }
@@ -500,7 +503,7 @@ public class SentryMiddlewareTests
         _ = response.HttpContext.Returns(_fixture.HttpContext);
         response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         await _fixture.Hub.Received(1).FlushAsync(timeout);
     }
@@ -517,7 +520,7 @@ public class SentryMiddlewareTests
         _ = response.HttpContext.Returns(_fixture.HttpContext);
         response.When(r => r.OnCompleted(Arg.Any<Func<Task>>())).Do(info => info.Arg<Func<Task>>()());
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         await _fixture.Hub.Received(1).FlushAsync(timeout);
     }
@@ -535,7 +538,7 @@ public class SentryMiddlewareTests
         // Act
         try
         {
-            await sut.InvokeAsync(_fixture.HttpContext);
+            await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         }
         catch (Exception ex) when (ex.Message == expectedExceptionMessage)
         { }
@@ -557,14 +560,14 @@ public class SentryMiddlewareTests
         // Act
         try
         {
-            await sut.InvokeAsync(_fixture.HttpContext);
+            await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         }
         catch (Exception ex) when (ex.Message == expectedExceptionMessage)
         { }
 
         try
         {
-            await sut.InvokeAsync(_fixture.HttpContext);
+            await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         }
         catch (Exception ex) when (ex.Message == expectedExceptionMessage)
         { }
@@ -587,7 +590,7 @@ public class SentryMiddlewareTests
         // Act
         try
         {
-            await sut.InvokeAsync(_fixture.HttpContext);
+            await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         }
         catch (Exception ex) when (ex.Message == expectedExceptionMessage)
         { }
@@ -600,7 +603,7 @@ public class SentryMiddlewareTests
         // Act
         try
         {
-            await sut.InvokeAsync(_fixture.HttpContext);
+            await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         }
         catch { }
 
@@ -614,7 +617,7 @@ public class SentryMiddlewareTests
     {
         var sut = _fixture.GetSut();
 
-        await sut.InvokeAsync(_fixture.HttpContext);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
         Assert.NotEqual(SentryId.Empty, _fixture.Scope.LastEventId);
     }
@@ -629,7 +632,7 @@ public class SentryMiddlewareTests
 
         try
         {
-            await sut.InvokeAsync(_fixture.HttpContext);
+            await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         }
         catch
         {
