@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+## Fixes
+
+- Bump dependency versions ([#1977](https://github.com/getsentry/sentry-dotnet/pull/1977))
+  - Only impacts users of `Sentry.Google.Cloud.Functions`
+
 ## 3.22.0
 
 ## Features
