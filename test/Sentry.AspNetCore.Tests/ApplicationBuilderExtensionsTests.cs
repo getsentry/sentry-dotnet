@@ -59,17 +59,6 @@ public class ApplicationBuilderExtensionsTests
     }
 
     [Fact]
-    public void UseSentry_SentryEventProcessor_AccessibleThroughSentryOptions()
-    {
-        var sut = _fixture.GetSut();
-
-        _ = sut.UseSentry();
-
-        Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllEventProcessors(),
-            actual => actual == _fixture.SentryEventProcessor);
-    }
-
-    [Fact]
     public void UseSentry_OriginalEventProcessor_StillAvailable()
     {
         var originalProviders = _fixture.SentryAspNetCoreOptions.EventProcessorsProviders;
@@ -83,22 +72,12 @@ public class ApplicationBuilderExtensionsTests
     }
 
     [Fact]
-    public void UseSentry_SentryEventExceptionProcessor_AccessibleThroughSentryOptions()
-    {
-        var sut = _fixture.GetSut();
-
-        _ = sut.UseSentry();
-
-        Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllExceptionProcessors(),
-            actual => actual == _fixture.SentryEventExceptionProcessor);
-    }
-
-    [Fact]
     public void UseSentry_OriginalEventExceptionProcessor_StillAvailable()
     {
         var originalProviders = _fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders;
 
         var sut = _fixture.GetSut();
+
 
         _ = sut.UseSentry();
 
