@@ -20,10 +20,9 @@ public partial class IntegrationsTests
         _ = await HttpClient.GetAsync("/throw");
 
         // First resolve only to decided if worth patching SentryOptions
-        Assert.Equal(3, processorsResolved.Count);
-        _ = processorsResolved[0].DidNotReceive().Process(Arg.Any<SentryEvent>());
+        Assert.Equal(2, processorsResolved.Count);
+        _ = processorsResolved[0].Received(1).Process(Arg.Any<SentryEvent>());
         _ = processorsResolved[1].Received(1).Process(Arg.Any<SentryEvent>());
-        _ = processorsResolved[2].Received(1).Process(Arg.Any<SentryEvent>());
     }
 
     [Fact]

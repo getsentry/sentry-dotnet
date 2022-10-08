@@ -58,16 +58,17 @@ public class ApplicationBuilderExtensionsTests
         Assert.Same(diagnosticLogger, _fixture.SentryAspNetCoreOptions.DiagnosticLogger);
     }
 
-    [Fact]
-    public void UseSentry_SentryEventProcessor_AccessibleThroughSentryOptions()
-    {
-        var sut = _fixture.GetSut();
+    // TODO: Need new test for this
+    // [Fact]
+    // public void UseSentry_SentryEventProcessor_AccessibleThroughSentryOptions()
+    // {
+    //     var sut = _fixture.GetSut();
 
-        _ = sut.UseSentry();
+    //     _ = sut.UseSentry();
 
-        Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllEventProcessors(),
-            actual => actual == _fixture.SentryEventProcessor);
-    }
+    //     Assert.Contains(_fixture.SentryAspNetCoreOptions.GetAllEventProcessors(),
+    //         actual => actual == _fixture.SentryEventProcessor);
+    // }
 
     [Fact]
     public void UseSentry_OriginalEventProcessor_StillAvailable()
