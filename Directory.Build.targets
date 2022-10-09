@@ -1,4 +1,12 @@
 <Project>
+
+  <!-- In CI, only build Android on Linux to reduce build time. -->
+  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' And !$([MSBuild]::IsOSPlatform('Linux'))">
+    <TargetFrameworks>$(TargetFrameworks.Replace('net6.0-android','')</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks.Replace(';;',';')</TargetFrameworks>
+    <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-android'"></TargetFramework>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
     <Using Remove="System.Net.Http" />
