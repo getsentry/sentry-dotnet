@@ -9,10 +9,6 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Using Include="Android.App.Activity" Alias="Activity" />
-  </ItemGroup>
-
   <!--
     In a real project, use the PackageReference and set the version to the latest release.
     Use that instead of the ProjectReference.
@@ -27,7 +23,7 @@
     This next section is to build an empty assembly instead of the actual sample app when not building on Linux in our CI.
     It is not needed in a real application.
   -->
-  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true'">
+  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' And !$([MSBuild]::IsOSPlatform('Linux'))">
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
     <DefaultItemExcludes>**\*</DefaultItemExcludes>
