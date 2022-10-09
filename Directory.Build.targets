@@ -1,9 +1,16 @@
 <Project>
 
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
   <!-- In CI, only build Android on Linux to reduce build time. -->
+  <Target Name="_AdjustTargetFrameworkItems" BeforeTargets="_ComputeTargetFrameworkItems">
+    <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' And !$([MSBuild]::IsOSPlatform('Linux'))">
+      <TargetFrameworks>$([MSBuild]::Unescape($(TargetFrameworks.Replace('net6.0-android',''))))</TargetFrameworks>
+    </PropertyGroup>
+  </Target>
   <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' And !$([MSBuild]::IsOSPlatform('Linux'))">
-    <TargetFrameworks>$(TargetFrameworks.Replace('net6.0-android','')</TargetFrameworks>
-    <TargetFrameworks>$(TargetFrameworks.Replace(';;',';')</TargetFrameworks>
     <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-android'"></TargetFramework>
   </PropertyGroup>
 
