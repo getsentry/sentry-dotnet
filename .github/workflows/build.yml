@@ -47,8 +47,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: verify-test-results
-          path: |
-            **/*.received.*
+          path: "**/*.received.*"
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
       # We use macOS for that so we we get all the iOS/macCatalyst targets in the packages
