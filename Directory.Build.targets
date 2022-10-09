@@ -1,35 +1,19 @@
 <Project>
 
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
-
   <!-- In CI, only build Android on Linux to reduce build time. -->
   <Target Name="_AdjustTargetFrameworkItems" BeforeTargets="_ComputeTargetFrameworkItems">
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+      <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' And !$([MSBuild]::IsOSPlatform('Linux'))">
       <TargetFrameworks>$([MSBuild]::Unescape($(TargetFrameworks.Replace('net6.0-android',''))))</TargetFrameworks>
     </PropertyGroup>
   </Target>
-  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' And !$([MSBuild]::IsOSPlatform('Linux'))">
-    <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-android'"></TargetFramework>
-  </PropertyGroup>
 
-  <!-- Don't try to build iOS/Mac targets on Linux -->
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-    <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-ios'"></TargetFramework>
-    <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'"></TargetFramework>
-  </PropertyGroup>
-
-  <!-- If we've not targeted anything, build an empty assembly instead of failing. -->
-  <PropertyGroup Condition="'$(TargetFramework)' == ''">
-    <TargetFramework>net6.0</TargetFramework>
-    <OutputType>Library</OutputType>
-    <DefaultItemExcludes>**\*</DefaultItemExcludes>
-  </PropertyGroup>
-
+  <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
   <ItemGroup>
-    <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
     <Using Remove="System.Net.Http" />
     <Using Remove="System.Net.Http.Json" />
   </ItemGroup>
+
 </Project>
