@@ -14,11 +14,13 @@
     <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-android'"></TargetFramework>
   </PropertyGroup>
 
-  <!--
-    If we've not targeted anything, build an empty assembly instead of failing.
-    For example, the iOS & macCatalyst sample apps only build on a Mac.
-    Also, we skip Android targets on non-Linux machines in CI for faster build times.
-  -->
+  <!-- Don't try to build iOS/Mac targets on Linux -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-ios'"></TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-maccatalyst'"></TargetFramework>
+  </PropertyGroup>
+
+  <!-- If we've not targeted anything, build an empty assembly instead of failing. -->
   <PropertyGroup Condition="'$(TargetFramework)' == ''">
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
