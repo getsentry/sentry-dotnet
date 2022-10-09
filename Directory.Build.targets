@@ -7,6 +7,17 @@
     <TargetFramework Condition="'$(TargetFramework)' == 'net6.0-android'"></TargetFramework>
   </PropertyGroup>
 
+  <!--
+    If we've not targeted anything, build an empty assembly instead of failing.
+    For example, the iOS & macCatalyst sample apps only build on a Mac.
+    Also, we skip Android targets on non-Linux machines in CI for faster build times.
+  -->
+  <PropertyGroup Condition="'$(TargetFramework)' == ''">
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <DefaultItemExcludes>**\*</DefaultItemExcludes>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
     <Using Remove="System.Net.Http" />
