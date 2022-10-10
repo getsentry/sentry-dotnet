@@ -1,6 +1,3 @@
-using System.Runtime.InteropServices;
-using Sentry.Internal.DiagnosticSource;
-
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
 [UsesVerify]
@@ -29,17 +26,12 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        var database = await _fixture.SqlInstance.Build();
-#if NET5_0_OR_GREATER
-        await using (database)
-#else
-        using (database)
-#endif
+        using (var database = await _fixture.SqlInstance.Build())
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureException(new Exception("my exception"));
+            hub.CaptureException(new("my exception"));
             await TestDbBuilder.AddData(database);
             await TestDbBuilder.GetData(database);
             transaction.Finish();
@@ -49,8 +41,69 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
+
 #endif
 
+#if NET6_0_OR_GREATER
+    [SkippableFact]
+    public async Task Logging()
+    {
+        Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+        var transport = new RecordingTransport();
+        void ApplyOptions(SentryOptions sentryOptions)
+        {
+            sentryOptions.TracesSampleRate = 1;
+            sentryOptions.Transport = transport;
+            sentryOptions.Dsn = ValidDsn;
+            sentryOptions.DiagnosticLevel = SentryLevel.Debug;
+        }
+
+        var options = new SentryOptions();
+        ApplyOptions(options);
+
+        options.AddIntegration(new SentryDiagnosticListenerIntegration());
+
+        var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
+
+        using var database = await _fixture.SqlInstance.Build();
+        var builder = new DbContextOptionsBuilder<TestDbContext>();
+        builder.UseSqlServer(database);
+        builder.UseLoggerFactory(loggerFactory);
+        builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        using var dbContext = new TestDbContext(builder.Options);
+        dbContext.Add(
+            new TestEntity
+            {
+                Property = "Value"
+            });
+        await dbContext.SaveChangesAsync();
+        using (var hub = new Hub(options))
+        {
+            var transaction = hub.StartTransaction("my transaction", "my operation");
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+            hub.CaptureException(new("my exception"));
+
+            dbContext.Add(
+                new TestEntity
+                {
+                    Property = "Value1"
+                });
+            try
+            {
+                await dbContext.SaveChangesAsync();
+            }
+            catch
+            {
+            }
+            transaction.Finish();
+        }
+
+        await Verify(transport.Payloads)
+            .IgnoreStandardSentryMembers()
+            .UniqueForRuntimeAndVersion();
+    }
+
+#endif
     [SkippableFact]
     public async Task RecordsEf()
     {
@@ -66,17 +119,12 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        var database = await _fixture.SqlInstance.Build();
-#if NET5_0_OR_GREATER
-        await using (database)
-#else
-        using (database)
-#endif
+        using (var database = await _fixture.SqlInstance.Build())
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureException(new Exception("my exception"));
+            hub.CaptureException(new("my exception"));
             await TestDbBuilder.AddEfData(database);
             await TestDbBuilder.GetEfData(database);
             transaction.Finish();
@@ -87,4 +135,5 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             .UniqueForRuntimeAndVersion();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
+
 }
