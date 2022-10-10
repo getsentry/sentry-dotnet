@@ -101,6 +101,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         var result = await Verify(transport.Payloads)
             .ScrubInlineGuids()
+            .IgnoreMember<SentryEvent>(_=>_.SentryThreads)
             .ScrubLinesWithReplace(line =>
             {
                 if (line.StartsWith("Executed DbCommand ("))
