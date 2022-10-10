@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
 [UsesVerify]
@@ -63,18 +65,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        var loggerFactory = LoggerFactory.Create(_ =>
-        {
-            _.AddSentry(loggingOptions =>
-            {
-                ApplyOptions(loggingOptions);
-                loggingOptions.AddLogEntryFilter((category, level, eventId, exception)
-                    =>
-                {
-                    return eventId.Id == CoreEventId.SaveChangesFailed;
-                });
-            });
-        });
+        var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
 
         await using var database = await _fixture.SqlInstance.Build();
         var builder = new DbContextOptionsBuilder<TestDbContext>();
@@ -121,6 +112,31 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             })
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain("An error occurred while saving the entity changes", result.Text);
+    }
+
+    [Fact]
+    public void ShouldIgnoreAllErrorAndExceptionIds()
+    {
+        var eventIds = typeof(CoreEventId).GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(x => x.FieldType == typeof(EventId))
+            .ToList();
+        Assert.NotEmpty(eventIds);
+        foreach (var field in eventIds)
+        {
+            var eventId = (EventId)field.GetValue(null)!;
+            var isEfExceptionMessage = SentryLogger.IsEfExceptionMessage(eventId);
+            var name = field.Name;
+            if (name.EndsWith("Exception") ||
+                name.EndsWith("Error") ||
+                name.EndsWith("Failed"))
+            {
+                Assert.True(isEfExceptionMessage, eventId.Name);
+            }
+            else
+            {
+                Assert.False(isEfExceptionMessage, eventId.Name);
+            }
+        }
     }
 
 #endif
