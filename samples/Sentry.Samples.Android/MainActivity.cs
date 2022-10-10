@@ -2,7 +2,7 @@
 namespace Sentry.Samples.Android;
 
 [Activity(Label = "@string/app_name", MainLauncher = true)]
-public class MainActivity : global::Android.App.Activity
+public class MainActivity : Activity
 {
     protected override void OnCreate(Bundle? savedInstanceState)
     {

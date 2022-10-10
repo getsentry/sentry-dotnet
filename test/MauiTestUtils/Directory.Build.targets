@@ -1,7 +1,5 @@
 <Project>
 
-  <Import Project="..\Directory.Build.targets" />
-
   <PropertyGroup>
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
   </PropertyGroup>

@@ -8,18 +8,18 @@
 
   <!-- configure xunit -->
   <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('windows')) AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))==''">
-    <Content Include="$(MSBuildThisFileDirectory)xunit.runner.json">
+    <Content Include="..\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows')) AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))==''">
-    <Content Include="$(MSBuildThisFileDirectory)xunit.runner.windows.json">
+    <Content Include="..\xunit.runner.windows.json">
       <Link>xunit.runner.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='android'">
-    <AndroidAsset Include="$(MSBuildThisFileDirectory)xunit.runner.json" />
+    <AndroidAsset Include="..\xunit.runner.json" />
   </ItemGroup>
 
 </Project>
