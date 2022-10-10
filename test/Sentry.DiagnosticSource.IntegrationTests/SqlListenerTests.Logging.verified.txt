@@ -1,0 +1,510 @@
+﻿[
+  {
+    Source: {
+      Message: {
+        Message: Failed executing DbCommand ({elapsed}ms) [Parameters=[{parameters}], CommandType='{commandType}', CommandTimeout='{commandTimeout}']{newLine}{commandText},
+        Formatted:
+Failed executing DbCommand (4ms) [Parameters=[@p0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+      },
+      Logger: Microsoft.EntityFrameworkCore.Database.Command,
+      Platform: csharp,
+      SentryExceptions: [],
+      SentryThreads: [
+        {
+          Name: .NET ThreadPool Worker,
+          Crashed: false,
+          Current: true,
+          Stacktrace: {
+            Frames: [
+              {
+                Function: void Thread.StartCallback(),
+                InApp: false
+              },
+              {
+                Function: void WorkerThread.WorkerThreadStart(),
+                InApp: false
+              },
+              {
+                Function: bool ThreadPoolWorkQueue.Dispatch(),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishSlow(bool userDelegateExecute),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishStageTwo(),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishStageThree(),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishContinuations(),
+                InApp: false
+              },
+              {
+                Function: void Task.RunContinuations(object continuationObject),
+                InApp: false
+              },
+              {
+                Function: void Task.RunOrQueueCompletionAction(ITaskCompletionAction completionAction, bool allowInlining),
+                InApp: false
+              },
+              {
+                Function: void UnwrapPromise<TResult>.Invoke(Task completingTask),
+                InApp: false
+              },
+              {
+                Function: void UnwrapPromise<TResult>.ProcessCompletedOuterTask(Task task),
+                InApp: false
+              },
+              {
+                Function: void UnwrapPromise<TResult>.ProcessInnerTask(Task task),
+                InApp: false
+              },
+              {
+                Function: bool UnwrapPromise<TResult>.TrySetFromTask(Task task, bool lookForOce),
+                InApp: false
+              },
+              {
+                Function: bool Task.TrySetException(object exceptionObject),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishSlow(bool userDelegateExecute),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishStageTwo(),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishStageThree(),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishContinuations(),
+                InApp: false
+              },
+              {
+                Function: void Task.RunContinuations(object continuationObject),
+                InApp: false
+              },
+              {
+                Function: void ContinueWithTaskContinuation.Run(Task completedTask, bool canInlineContinuationTask),
+                InApp: false
+              },
+              {
+                Function: void TaskContinuation.InlineIfPossibleOrElseQueue(Task task, bool needsProtection),
+                InApp: false
+              },
+              {
+                Function: bool TaskScheduler.TryRunInline(Task task, bool taskWasPreviouslyQueued),
+                InApp: false
+              },
+              {
+                Function: bool ThreadPoolTaskScheduler.TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishSlow(bool userDelegateExecute),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishStageTwo(),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishStageThree(),
+                InApp: false
+              },
+              {
+                Function: void Task.FinishContinuations(),
+                InApp: false
+              },
+              {
+                Function: void Task.RunContinuations(object continuationObject),
+                InApp: false
+              },
+              {
+                Function: void AwaitTaskContinuation.RunOrScheduleAction(IAsyncStateMachineBox box, bool allowInlining),
+                InApp: false
+              },
+              {
+                Function: void AsyncStateMachineBox<TStateMachine>.MoveNext(Thread threadPoolThread) x 2,
+                InApp: false
+              },
+              {
+                Function: void AsyncStateMachineBox<TStateMachine>.ExecutionContextCallback(object s),
+                InApp: false
+              },
+              {
+                Function: async Task<RelationalDataReader> RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken),
+                InApp: false
+              },
+              {
+                Function: Task RelationalCommandDiagnosticsLogger.CommandErrorAsync(IRelationalConnection connection, DbCommand command, DbContext context, DbCommandMethod executeMethod, Guid commandId, Guid connectionId, Exception exception, DateTimeOffset startTime, TimeSpan duration, CommandSource commandSource, CancellationToken cancellationToken),
+                InApp: false
+              },
+              {
+                Function: void RelationalCommandDiagnosticsLogger.LogCommandError(DbCommand command, TimeSpan duration, EventDefinition<string, string, CommandType, int, string, string> definition),
+                InApp: false
+              },
+              {
+                Function: void EventDefinition<TParam1, TParam2, TParam3, TParam4, TParam5, TParam6>.Log<TLoggerCategory>(IDiagnosticsLogger<TLoggerCategory> logger, TParam1 arg1, TParam2 arg2, TParam3 arg3, TParam4 arg4, TParam5 arg5, TParam6 arg6),
+                InApp: false
+              },
+              {
+                Function: Action<ILogger, Exception> LoggerMessage.Define(LogLevel logLevel, EventId eventId, string formatString, LogDefineOptions options)+(ILogger logger, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Exception exception) => { },
+                InApp: false
+              },
+              {
+                Function: void <>c__DisplayClass20_0<T1, T2, T3, T4, T5, T6>.<Define>g__Log|0(?)+Log(ILogger logger, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Exception exception),
+                InApp: false
+              },
+              {
+                Function: void Logger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter),
+                InApp: false
+              },
+              {
+                Function: void Logger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)+LoggerLog(LogLevel logLevel, EventId eventId, ILogger logger, Exception exception, Func<TState, Exception, string> formatter, ref List<Exception> exceptions, in TState state),
+                InApp: false
+              }
+            ]
+          }
+        }
+      ],
+      Level: error,
+      Request: {},
+      Contexts: {},
+      User: {},
+      Environment: production,
+      Breadcrumbs: [
+        {
+          Message: Entity Framework Core 6.0.8 initialized 'TestDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:6.0.8' with options: NoTracking ,
+          Data: {
+            eventId: Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized
+          },
+          Category: Microsoft.EntityFrameworkCore.Infrastructure
+        },
+        {
+          Message:
+Executed DbCommand (26ms) [Parameters=[@p0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
+          Data: {
+            eventId: Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted
+          },
+          Category: Microsoft.EntityFrameworkCore.Database.Command
+        }
+      ],
+      Tags: {
+        commandText:
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
+        commandTimeout: 30,
+        commandType: Text,
+        elapsed: 4,
+        eventId: Microsoft.EntityFrameworkCore.Database.Command.CommandError,
+        newLine:
+,
+        parameters: @p0='?' (Size = 450)
+      }
+    }
+  },
+  {
+    Source: {
+      Exception: {
+        Message: An error occurred while saving the entity changes. See the inner exception for details.,
+        Type: DbUpdateException,
+        InnerException: {
+          Type: SqlException,
+          Errors: [
+            {
+              Source: Core Microsoft SqlClient Data Provider,
+              Number: 2601,
+              State: 1,
+              Class: 14,
+              Server: (LocalDb)\SqlListenerTestsDotNet6_0,
+              Message: Cannot insert duplicate key row in object 'dbo.TestEntities' with unique index 'IX_TestEntities_Property'. The duplicate key value is (Value).,
+              Procedure: ,
+              LineNumber: 2
+            },
+            {
+              Source: Core Microsoft SqlClient Data Provider,
+              Number: 3621,
+              Server: (LocalDb)\SqlListenerTestsDotNet6_0,
+              Message: The statement has been terminated.,
+              Procedure: ,
+              LineNumber: 2
+            }
+          ],
+          ClientConnectionId: Guid_1,
+          Class: 14,
+          LineNumber: 2,
+          Number: 2601,
+          Procedure: ,
+          Server: (LocalDb)\SqlListenerTestsDotNet6_0,
+          State: 1,
+          IsTransient: false,
+          ErrorCode: -2146232060,
+          Message:
+Cannot insert duplicate key row in object 'dbo.TestEntities' with unique index 'IX_TestEntities_Property'. The duplicate key value is (Value).
+The statement has been terminated.,
+          Data: {
+            HelpLink.ProdName: Microsoft SQL Server,
+            HelpLink.ProdVer: 15.00.4153,
+            HelpLink.EvtSrc: MSSQLServer,
+            HelpLink.EvtID: 2601,
+            HelpLink.BaseHelpUrl: https://go.microsoft.com/fwlink,
+            HelpLink.LinkId: 20476
+          }
+        },
+        Entries: [
+          {
+            EntryProperties: {
+              Id: {
+                OriginalValue: -2147482646,
+                CurrentValue: -2147482646,
+                IsTemporary: true,
+                IsModified: false
+              },
+              Property: {
+                OriginalValue: Value,
+                CurrentValue: Value,
+                IsTemporary: false,
+                IsModified: false
+              }
+            },
+            State: Added
+          }
+        ]
+      },
+      Message: {
+        Message: An exception occurred in the database while saving changes for context type '{contextType}'.{newline}{error},
+        Formatted:
+An exception occurred in the database while saving changes for context type 'Sentry.DiagnosticSource.IntegrationTests.EF.TestDbContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.TestEntities' with unique index 'IX_TestEntities_Property'. The duplicate key value is (Value).
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlCommand.<>c.<ExecuteDbDataReaderAsync>b__208_0(Task`1 result)
+   at System.Threading.Tasks.ContinuationResultTaskFromResultTask`2.InnerInvoke()
+   at System.Threading.Tasks.Task.<>c.<.cctor>b__272_0(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+ClientConnectionId:Guid_1
+Error Number:2601,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      },
+      Logger: Microsoft.EntityFrameworkCore.Update,
+      Platform: csharp,
+      SentryExceptions: [
+        {
+          Type: Microsoft.Data.SqlClient.SqlException,
+          Value:
+Cannot insert duplicate key row in object 'dbo.TestEntities' with unique index 'IX_TestEntities_Property'. The duplicate key value is (Value).
+The statement has been terminated.,
+          Stacktrace: {
+            Frames: [
+              {
+                Function: async Task ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken),
+                InApp: false
+              },
+              {
+                Function: async Task<RelationalDataReader> RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken) x 2,
+                InApp: false
+              },
+              {
+                Function: void ContinuationResultTaskFromResultTask<TAntecedentResult, TResult>.InnerInvoke(),
+                InApp: false
+              },
+              {
+                Function: Task<DbDataReader> SqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)+(Task<SqlDataReader> result) => { },
+                InApp: false
+              }
+            ]
+          },
+          Mechanism: {},
+          Data: {
+            HelpLink.BaseHelpUrl: https://go.microsoft.com/fwlink,
+            HelpLink.EvtID: 2601,
+            HelpLink.EvtSrc: MSSQLServer,
+            HelpLink.LinkId: 20476,
+            HelpLink.ProdName: Microsoft SQL Server,
+            HelpLink.ProdVer: 15.00.4153
+          }
+        },
+        {
+          Type: Microsoft.EntityFrameworkCore.DbUpdateException,
+          Value: An error occurred while saving the entity changes. See the inner exception for details.,
+          Stacktrace: {
+            Frames: [
+              {
+                Function: async Task<int> DbContext.SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken),
+                InApp: false
+              },
+              {
+                Function: async Task<TResult> SqlServerExecutionStrategy.ExecuteAsync<TState, TResult>(TState state, Func<DbContext, TState, CancellationToken, Task<TResult>> operation, Func<DbContext, TState, CancellationToken, Task<ExecutionResult<TResult>>> verifySucceeded, CancellationToken cancellationToken),
+                InApp: false
+              },
+              {
+                Function: async Task<int> StateManager.SaveChangesAsync(IList<IUpdateEntry> entriesToSave, CancellationToken cancellationToken) x 2,
+                InApp: false
+              },
+              {
+                Function: async Task<int> BatchExecutor.ExecuteAsync(IEnumerable<ModificationCommandBatch> commandBatches, IRelationalConnection connection, CancellationToken cancellationToken) x 3,
+                InApp: false
+              },
+              {
+                Function: async Task ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken),
+                InApp: false
+              }
+            ]
+          },
+          Mechanism: {}
+        }
+      ],
+      SentryThreads: [],
+      Level: error,
+      Request: {},
+      Contexts: {},
+      User: {},
+      Environment: production,
+      Breadcrumbs: [
+        {
+          Message: Entity Framework Core 6.0.8 initialized 'TestDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:6.0.8' with options: NoTracking ,
+          Data: {
+            eventId: Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized
+          },
+          Category: Microsoft.EntityFrameworkCore.Infrastructure
+        },
+        {
+          Message:
+Executed DbCommand (26ms) [Parameters=[@p0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
+          Data: {
+            eventId: Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted
+          },
+          Category: Microsoft.EntityFrameworkCore.Database.Command
+        },
+        {
+          Message:
+Failed executing DbCommand (4ms) [Parameters=[@p0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
+          Data: {
+            eventId: Microsoft.EntityFrameworkCore.Database.Command.CommandError
+          },
+          Category: Microsoft.EntityFrameworkCore.Database.Command,
+          Level: error
+        }
+      ],
+      Extra: {
+        Exception[0][HelpLink.BaseHelpUrl]: https://go.microsoft.com/fwlink,
+        Exception[0][HelpLink.EvtID]: 2601,
+        Exception[0][HelpLink.EvtSrc]: MSSQLServer,
+        Exception[0][HelpLink.LinkId]: 20476,
+        Exception[0][HelpLink.ProdName]: Microsoft SQL Server,
+        Exception[0][HelpLink.ProdVer]: 15.00.4153
+      },
+      Tags: {
+        eventId: Microsoft.EntityFrameworkCore.Update.SaveChangesFailed,
+        newline:
+
+      }
+    }
+  },
+  {
+    Source: {
+      Name: my transaction,
+      Platform: csharp,
+      Operation: my operation,
+      Description: ,
+      Status: Ok,
+      IsSampled: true,
+      SampleRate: 1.0,
+      Request: {},
+      Contexts: {
+        trace: {
+          Operation: my operation,
+          Description: ,
+          Status: Ok,
+          IsSampled: true
+        }
+      },
+      User: {},
+      Environment: production,
+      Spans: [
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Status: DeadlineExceeded,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Description:
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+
+,
+          Status: InternalError,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2
+          }
+        }
+      ],
+      IsFinished: true
+    }
+  }
+]

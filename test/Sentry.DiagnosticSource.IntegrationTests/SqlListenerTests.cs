@@ -65,12 +65,12 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
 
-        using var database = await _fixture.SqlInstance.Build();
+        await using var database = await _fixture.SqlInstance.Build();
         var builder = new DbContextOptionsBuilder<TestDbContext>();
         builder.UseSqlServer(database);
         builder.UseLoggerFactory(loggerFactory);
         builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        using var dbContext = new TestDbContext(builder.Options);
+        await using var dbContext = new TestDbContext(builder.Options);
         dbContext.Add(
             new TestEntity
             {
@@ -81,12 +81,11 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureException(new("my exception"));
 
             dbContext.Add(
                 new TestEntity
                 {
-                    Property = "Value1"
+                    Property = "Value"
                 });
             try
             {
@@ -99,8 +98,8 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         }
 
         await Verify(transport.Payloads)
-            .IgnoreStandardSentryMembers()
-            .UniqueForRuntimeAndVersion();
+            .ScrubInlineGuids()
+            .IgnoreStandardSentryMembers();
     }
 
 #endif
