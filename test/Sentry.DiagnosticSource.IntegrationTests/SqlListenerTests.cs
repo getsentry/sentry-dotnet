@@ -63,7 +63,18 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
-        var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
+        var loggerFactory = LoggerFactory.Create(_ =>
+        {
+            _.AddSentry(loggingOptions =>
+            {
+                ApplyOptions(loggingOptions);
+                loggingOptions.AddLogEntryFilter((category, level, eventId, exception)
+                    =>
+                {
+                    return eventId.Id == CoreEventId.SaveChangesFailed;
+                });
+            });
+        });
 
         await using var database = await _fixture.SqlInstance.Build();
         var builder = new DbContextOptionsBuilder<TestDbContext>();
@@ -97,9 +108,19 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             transaction.Finish();
         }
 
-        await Verify(transport.Payloads)
+        var result = await Verify(transport.Payloads)
             .ScrubInlineGuids()
+            .ScrubLinesWithReplace(line =>
+            {
+                if (line.StartsWith("Executed DbCommand ("))
+                {
+                    return "Executed DbCommand";
+                }
+
+                return line;
+            })
             .IgnoreStandardSentryMembers();
+        Assert.DoesNotContain("An error occurred while saving the entity changes", result.Text);
     }
 
 #endif
