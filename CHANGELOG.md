@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ## 3.22.0
 
 ## Features
