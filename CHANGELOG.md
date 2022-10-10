@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+## Fixes
+
+- Exclude EF error message from logging ([#1980](https://github.com/getsentry/sentry-dotnet/pull/1980))
+
 ## 3.22.0
 
 ## Features
@@ -29,6 +35,7 @@
 - Fix issues with envelope deserialization ([#1965](https://github.com/getsentry/sentry-dotnet/pull/1965))
 - Set default trace status to `ok` instead of `unknown_error` ([#1970](https://github.com/getsentry/sentry-dotnet/pull/1970))
 - Fix reported error count on a crashed session update ([#1972](https://github.com/getsentry/sentry-dotnet/pull/1972))
+
 
 ## 3.21.0
 
