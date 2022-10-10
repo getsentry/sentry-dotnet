@@ -10,12 +10,6 @@
     <ProjectReference Include="..\..\src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj" />
   </ItemGroup>
 
-  <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->
-  <!-- <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0"/>
-  </ItemGroup> -->
-
   <ItemGroup>
     <None Update="*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
