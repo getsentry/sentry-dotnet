@@ -2,9 +2,9 @@
   {
     Source: {
       Message: {
-        Message: Failed executing DbCommand ({elapsed}ms) [Parameters=[{parameters}], CommandType='{commandType}', CommandTimeout='{commandTimeout}']{newLine}{commandText},
+        Message: Failed executing DbCommand,
         Formatted:
-Failed executing DbCommand (4ms) [Parameters=[@p0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+Failed executing DbCommand
 SET NOCOUNT ON;
 INSERT INTO [TestEntities] ([Property])
 VALUES (@p0);

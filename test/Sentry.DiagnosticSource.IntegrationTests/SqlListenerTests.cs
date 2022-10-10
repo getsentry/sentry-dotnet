@@ -108,6 +108,11 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
                     return "Executed DbCommand";
                 }
 
+                if (line.StartsWith("Failed executing DbCommand ("))
+                {
+                    return "Failed executing DbCommand";
+                }
+
                 return line;
             })
             .IgnoreStandardSentryMembers();
