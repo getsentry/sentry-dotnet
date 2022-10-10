@@ -48,7 +48,7 @@
     <Using Include="Java.Util.HashMap" Alias="JavaHashMap" />
   </ItemGroup>
 
-  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences" Condition="'$(ContinuousIntegrationBuild)' != 'true' Or $([MSBuild]::IsOSPlatform('Linux'))">
+  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar"
       DestinationFolder="$(SentryAndroidSdkDirectory)"
