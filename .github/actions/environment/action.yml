@@ -13,7 +13,7 @@ runs:
     # Note, the following is needed on the windows-2019 image only.  All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
     - name: Install .NET 6 SDK
       uses: actions/setup-dotnet@v3
-      if: runner.os != 'Windows'
+      if: runner.os == 'Windows'
       env:
         # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs
         DOTNET_INSTALL_DIR: C:\Program Files\dotnet
