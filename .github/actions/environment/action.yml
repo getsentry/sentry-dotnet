@@ -10,10 +10,11 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
-    - name: Temp
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: "echo %PATH%"
+    - name: Set Java Version
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
 
     # Note, the following is needed on the windows-2019 image only.  All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
     - name: Install .NET 6 SDK
