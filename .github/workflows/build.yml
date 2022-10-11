@@ -16,7 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
-        os: [ubuntu-latest, windows-latest, macos-12]
+        # Using windows-2019 because windows-latest is much slower and we don't need anything in particular from it.
+        os: [ubuntu-latest, windows-2019, macos-12]
 
     steps:
       - name: Cancel Previous Runs
