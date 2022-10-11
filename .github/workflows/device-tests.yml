@@ -82,7 +82,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@d7b53ddc6e44254e1f4cf4a6ad67345837027a66 # pin@v2
         with:
           api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }} # We don't need the Google APIs, but the default images are not available for 32+
+          # We don't need the Google APIs, but the default images are not available for 32+
+          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }}
           force-avd-creation: false
           ram-size: 2048M
           arch: x86_64
@@ -96,7 +97,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@d7b53ddc6e44254e1f4cf4a6ad67345837027a66 # pin@v2
         with:
           api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }} # We don't need the Google APIs, but the default images are not available for 32+
+          # We don't need the Google APIs, but the default images are not available for 32+
+          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }}
           force-avd-creation: false
           ram-size: 2048M
           arch: x86_64

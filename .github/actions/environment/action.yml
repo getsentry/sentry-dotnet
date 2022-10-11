@@ -28,7 +28,8 @@ runs:
 
     - name: Dependency Caching
       uses: actions/cache@v3
-      if: runner.os != 'Windows' # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
+      # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
+      if: runner.os != 'Windows'
       with:
         path: ~/.nuget/packages
         # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.
