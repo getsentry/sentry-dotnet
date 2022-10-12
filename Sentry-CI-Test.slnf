@@ -1,0 +1,22 @@
+{
+  "solution": {
+    "path": "Sentry.sln",
+    "projects": [
+      "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
+      "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
+      "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
+      "test\\Sentry.DiagnosticSource.IntegrationTests\\Sentry.DiagnosticSource.IntegrationTests.csproj",
+      "test\\Sentry.DiagnosticSource.Tests\\Sentry.DiagnosticSource.Tests.csproj",
+      "test\\Sentry.EntityFramework.Tests\\Sentry.EntityFramework.Tests.csproj",
+      "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
+      "test\\Sentry.Google.Cloud.Functions.Tests\\Sentry.Google.Cloud.Functions.Tests.csproj",
+      "test\\Sentry.Log4Net.Tests\\Sentry.Log4Net.Tests.csproj",
+      "test\\Sentry.Maui.Tests\\Sentry.Maui.Tests.csproj",
+      "test\\Sentry.NLog.Tests\\Sentry.NLog.Tests.csproj",
+      "test\\Sentry.Serilog.Tests\\Sentry.Serilog.Tests.csproj",
+      "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
+      "test\\Sentry.Testing\\Sentry.Testing.csproj",
+      "test\\Sentry.Tests\\Sentry.Tests.csproj"
+    ]
+  }
+}

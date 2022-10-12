@@ -10,9 +10,27 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    - name: Set Java Version
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    # Note, the following is needed on the windows-2019 image only.
+    # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
+    - name: Install .NET 6 SDK
+      uses: actions/setup-dotnet@v3
+      if: runner.os == 'Windows'
+      env:
+        # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs
+        DOTNET_INSTALL_DIR: C:\Program Files\dotnet
+      with:
+        dotnet-version: 6.x.x
+
     - name: Dependency Caching
       uses: actions/cache@v3
-      if: runner.os != 'Windows' # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
+      # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
+      if: runner.os != 'Windows'
       with:
         path: ~/.nuget/packages
         # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.

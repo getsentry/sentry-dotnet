@@ -15,7 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
-        os: [ubuntu-latest, windows-latest, macos-12]
+        # Using windows-2019 because windows-latest is much slower and we don't need anything in particular from it.
+        os: [ubuntu-latest, windows-2019, macos-12]
 
     steps:
       - name: Checkout
@@ -26,10 +27,14 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
-      # Everything above here is the same as the main build.
       # We only need to restore to check for vulnerable packages
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Restore .NET Dependencies
+        run: dotnet restore --nologo
 
+      # The dotnet list package command doesn't change its exit code on detection, so tee to a file and scan it
+      # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
       - name: List vulnerable packages
-        run: dotnet list package --vulnerable --include-transitive
+        shell: bash
+        run: |
+          dotnet list package --vulnerable --include-transitive | tee vulnerable.txt
+          sh -c "! grep 'has the following vulnerable packages' vulnerable.txt"
