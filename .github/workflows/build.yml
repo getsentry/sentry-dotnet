@@ -55,7 +55,7 @@ jobs:
 
       - name: Create Nuget Packages (release only)
         if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
-        run: dotnet pack SentrySourceOnly.slnf -c Release --no-build --nologo
+        run: dotnet pack Sentry-CI-Pack.slnf -c Release --no-build --nologo
 
       - name: Archive Nuget Packages (release only)
         if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
