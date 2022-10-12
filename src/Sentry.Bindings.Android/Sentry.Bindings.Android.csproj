@@ -6,7 +6,15 @@
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
     <SentryAndroidSdkVersion>6.4.1</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
+    <Description>.NET Bindings for the Sentry Android SDK</Description>
   </PropertyGroup>
+
+  <!-- Use a separate readme, and don't add the changelog to the nuget. -->
+  <ItemGroup>
+    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+    <PackageReference Remove="SIL.ReleaseTasks" />
+  </ItemGroup>
 
   <ItemGroup>
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />

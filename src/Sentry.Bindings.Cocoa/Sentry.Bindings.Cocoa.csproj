@@ -5,7 +5,15 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+    <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
   </PropertyGroup>
+
+  <!-- Use a separate readme, and don't add the changelog to the nuget. -->
+  <ItemGroup>
+    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+    <PackageReference Remove="SIL.ReleaseTasks" />
+  </ItemGroup>
 
   <PropertyGroup>
     <SentryCocoaSdkVersion>7.24.1</SentryCocoaSdkVersion>
