@@ -22,7 +22,13 @@ internal static partial class PolyfillExtensions
     public static string[] Split(this string str, char c, StringSplitOptions options = StringSplitOptions.None) =>
         str.Split(new[] {c}, options);
 
+    public static string[] Split(this string str, char c, int count, StringSplitOptions options = StringSplitOptions.None) =>
+        str.Split(new[] {c}, count, options);
+
     public static bool Contains(this string str, char c) => str.IndexOf(c) >= 0;
+
+    public static bool Contains(this string str, string value, StringComparison comparisonType) =>
+        str.IndexOf(value, comparisonType) >= 0;
 
     public static Task CopyToAsync(this Stream stream, Stream destination, CancellationToken cancellationToken) =>
         stream.CopyToAsync(destination, 81920, cancellationToken);

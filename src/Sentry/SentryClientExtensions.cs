@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel;
+using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry
 {
@@ -59,5 +61,14 @@ namespace Sentry
                 client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
             }
         }
+
+        internal static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
+            clientOrHub switch
+            {
+                SentryClient client => client.Options,
+                Hub hub => hub.Options,
+                HubAdapter => SentrySdk.CurrentOptions,
+                _ => null
+            };
     }
 }

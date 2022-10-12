@@ -143,6 +143,25 @@ public class ContextsTests
     }
 
     [Fact]
+    public void SerializeObject_Null_Should_Be_Ignored()
+    {
+        // Arrange
+        var contexts = new Contexts
+        {
+            ["key"] = null
+        };
+
+        // Act
+        var json = contexts.ToJsonString(_testOutputLogger);
+        var roundtrip = Json.Parse(json, Contexts.FromJson);
+
+        // Assert
+        json.Should().Be("{}");
+
+        roundtrip.ContainsKey("key").Should().BeFalse();
+    }
+
+    [Fact]
     public void Ctor_SingleBrowserPropertySet_SerializeSingleProperty()
     {
         var sut = new Contexts

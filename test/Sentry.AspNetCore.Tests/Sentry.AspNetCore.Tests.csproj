@@ -11,16 +11,20 @@
 
   <ItemGroup Condition="$(TargetFramework) == 'net48'">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.2.0" />
+
+    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
+    <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.2.6" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.28" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.29" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.9" />
     <PackageReference Include="Verify.AspNetCore" Version="1.5.0" />
     <PackageReference Include="Verify.Http" Version="2.5.0" />
   </ItemGroup>

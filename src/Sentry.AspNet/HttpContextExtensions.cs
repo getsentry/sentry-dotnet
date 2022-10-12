@@ -1,6 +1,6 @@
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Web;
+using Sentry.Extensibility;
 
 namespace Sentry.AspNet;
 
@@ -12,20 +12,47 @@ public static class HttpContextExtensions
 {
     private const string HttpContextTransactionItemName = "__SentryTransaction";
 
-    private static SentryTraceHeader? TryGetTraceHeader(NameValueCollection headers)
+    private static SentryTraceHeader? TryGetSentryTraceHeader(HttpContext context, SentryOptions? options)
     {
-        var traceHeader = headers.Get(SentryTraceHeader.HttpHeaderName);
-        if (traceHeader == null)
+        var value = context.Request.Headers.Get(SentryTraceHeader.HttpHeaderName);
+        if (string.IsNullOrWhiteSpace(value))
         {
             return null;
         }
 
+        options?.LogDebug("Received Sentry trace header '{0}'.", value);
+
         try
         {
-            return SentryTraceHeader.Parse(traceHeader);
+            return SentryTraceHeader.Parse(value);
         }
-        catch
+        catch (Exception ex)
         {
+            options?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+            return null;
+        }
+    }
+
+    private static BaggageHeader? TryGetBaggageHeader(HttpContext context, SentryOptions? options)
+    {
+        var value = context.Request.Headers.Get(SentryTraceHeader.HttpHeaderName);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        // Note: If there are multiple baggage headers, they will be joined with comma delimiters,
+        // and can thus be treated as a single baggage header.
+
+        options?.LogDebug("Received baggage header '{0}'.", value);
+
+        try
+        {
+            return BaggageHeader.TryParse(value, onlySentry: true);
+        }
+        catch (Exception ex)
+        {
+            options?.LogError("Invalid baggage header '{0}'.", ex, value);
             return null;
         }
     }
@@ -37,8 +64,9 @@ public static class HttpContextExtensions
     {
         var method = httpContext.Request.HttpMethod;
         var path = httpContext.Request.Path;
+        var options = SentrySdk.CurrentOptions;
 
-        var traceHeader = TryGetTraceHeader(httpContext.Request.Headers);
+        var traceHeader = TryGetSentryTraceHeader(httpContext, options);
 
         var transactionName = $"{method} {path}";
         const string transactionOperation = "http.server";
@@ -47,7 +75,29 @@ public static class HttpContextExtensions
             ? new TransactionContext(transactionName, transactionOperation, traceHeader, TransactionNameSource.Url)
             : new TransactionContext(transactionName, transactionOperation, TransactionNameSource.Url);
 
-        var transaction = SentrySdk.StartTransaction(transactionContext);
+        var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+        {
+            ["__HttpMethod"] = method,
+            ["__HttpPath"] = path,
+            ["__HttpContext"] = httpContext,
+        };
+
+        // Set the Dynamic Sampling Context from the baggage header, if it exists.
+        var baggageHeader = TryGetBaggageHeader(httpContext, options);
+        var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
+
+        if (traceHeader is { } && baggageHeader is null)
+        {
+            // We received a sentry-trace header without a baggage header, which indicates the request
+            // originated from an older SDK that doesn't support dynamic sampling.
+            // Set DynamicSamplingContext.Empty to "freeze" the DSC on the transaction.
+            // See:
+            // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#freezing-dynamic-sampling-context
+            // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#unified-propagation-mechanism
+            dynamicSamplingContext = DynamicSamplingContext.Empty;
+        }
+
+        var transaction = SentrySdk.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
 
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;

@@ -166,7 +166,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void EndSession_ActiveSessionExists_EndsSession()
+    public void EndSession_ActiveSessionExists_ExitedStatus_EndsSession()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -180,6 +180,25 @@ public class GlobalSessionManagerTests : IDisposable
         // Assert
         session.Should().NotBeNull();
         sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Exited);
+        sessionUpdate?.ErrorCount.Should().Be(0);
+    }
+
+    [Fact]
+    public void EndSession_ActiveSessionExists_CrashedStatus_EndsSession()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+
+        sut.StartSession();
+        var session = sut.CurrentSession;
+
+        // Act
+        var sessionUpdate = sut.EndSession(SessionEndStatus.Crashed);
+
+        // Assert
+        session.Should().NotBeNull();
+        sessionUpdate?.EndStatus.Should().Be(SessionEndStatus.Crashed);
+        sessionUpdate?.ErrorCount.Should().Be(1);
     }
 
     [Fact]

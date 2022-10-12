@@ -1,5 +1,6 @@
 #if NETCOREAPP3_1_OR_GREATER
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
+using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -19,7 +21,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -67,7 +69,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn }, sentryClient);
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -88,7 +90,7 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = hub.GetSpan() as ITransactionData;
+                        transaction = (ITransactionData) hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });
@@ -111,7 +113,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -134,7 +136,13 @@ public class SentryTracingMiddlewareTests
         var client = server.CreateClient();
 
         // Act
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13") { Headers = { { "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0" } } };
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+        {
+            Headers =
+            {
+                {"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"}
+            }
+        };
 
         await client.SendAsync(request);
 
@@ -148,15 +156,198 @@ public class SentryTracingMiddlewareTests
         ));
     }
 
-    [Fact]
-    public async Task Transaction_is_automatically_populated_with_request_data()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TraceID_from_trace_header_propagates_to_outbound_requests(bool shouldPropagate)
     {
         // Arrange
-        ITransactionData transaction = null;
+        var sentryClient = Substitute.For<ISentryClient>();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        };
+
+        if (!shouldPropagate)
+        {
+            options.TracePropagationTargets.Clear();
+        }
+
+        var hub = new Hub(options, sentryClient);
+
+        HttpRequestHeaders outboundRequestHeaders = null;
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+                app.UseSentryTracing();
+
+                app.UseEndpoints(routes => routes.Map("/person/{id}", async _ =>
+                {
+                    // simulate an outbound request and capture the request headers
+                    using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+                    using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+                    using var client = new HttpClient(sentryHandler);
+                    await client.GetAsync("https://localhost/");
+                    using var request = innerHandler.GetRequests().Single();
+                    outboundRequestHeaders = request.Headers;
+                }));
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+        {
+            Headers =
+            {
+                {"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000"}
+            }
+        };
+
+        await client.SendAsync(request);
+
+        // Assert
+        Assert.NotNull(outboundRequestHeaders);
+        if (shouldPropagate)
+        {
+            outboundRequestHeaders.Should().Contain(h =>
+                h.Key == "sentry-trace" &&
+                h.Value.First().StartsWith("75302ac48a024bde9a3b3734a82e36c8-"));
+        }
+        else
+        {
+            outboundRequestHeaders.Should().NotContain(h => h.Key == "sentry-trace");
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Baggage_header_propagates_to_outbound_requests(bool shouldPropagate)
+    {
+        // incoming baggage header
+        const string incomingBaggage =
+            "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+            "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rate=0.5, " +
+            "foo-bar=abc123";
+
+        // other baggage already on the outbound request (manually in this test, but in theory by some other middleware)
+        const string existingOutboundBaggage = "other-value=abc123";
+
+        // we expect this to be the result on outbound requests
+        string expectedOutboundBaggage;
+        if (shouldPropagate)
+        {
+            expectedOutboundBaggage =
+                "other-value=abc123, " +
+                "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+                "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+                "sentry-sample_rate=0.5";
+        }
+        else
+        {
+            expectedOutboundBaggage = "other-value=abc123";
+        }
+
+        // Note that we "play nice" with existing headers on the outbound request, but we do not propagate other
+        // non-Sentry headers on the inbound request.  The expectation is that the other vendor would add their
+        // own middleware to do that.
+
+        // Arrange
+        var sentryClient = Substitute.For<ISentryClient>();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1
+        };
+
+        if (!shouldPropagate)
+        {
+            options.TracePropagationTargets.Clear();
+        }
+
+        var hub = new Hub(options, sentryClient);
+
+        HttpRequestHeaders outboundRequestHeaders = null;
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+                app.UseSentryTracing();
+
+                app.UseEndpoints(routes => routes.Map("/person/{id}", async _ =>
+                {
+                    // simulate an outbound request and capture the request headers
+                    using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+                    using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+                    using var client = new HttpClient(sentryHandler);
+                    client.DefaultRequestHeaders.Add("baggage", existingOutboundBaggage);
+                    await client.GetAsync("https://localhost/");
+                    using var request = innerHandler.GetRequests().Single();
+                    outboundRequestHeaders = request.Headers;
+                }));
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+        {
+            Headers =
+            {
+                {"baggage", incomingBaggage}
+            }
+        };
+
+        await client.SendAsync(request);
+
+        // Assert
+        Assert.NotNull(outboundRequestHeaders);
+        outboundRequestHeaders.Should().Contain(h =>
+            h.Key == "baggage" &&
+            h.Value.First() == expectedOutboundBaggage);
+    }
+
+    [Fact]
+    public async Task Baggage_header_sets_dynamic_sampling_context()
+    {
+        // incoming baggage header
+        const string baggage =
+            "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+            "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rate=0.5";
+
+        // Arrange
+        TransactionTracer transaction = null;
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -177,7 +368,61 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = hub.GetSpan() as ITransactionData;
+                        transaction = (TransactionTracer) hub.GetSpan();
+                        return Task.CompletedTask;
+                    });
+                });
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
+        {
+            Headers =
+            {
+                {"baggage", baggage}
+            }
+        };
+
+        await client.SendAsync(request);
+
+        // Assert
+        var dsc = transaction?.DynamicSamplingContext;
+        Assert.NotNull(dsc);
+        Assert.Equal(baggage, dsc.ToBaggageHeader().ToString());
+    }
+
+    [Fact]
+    public async Task Transaction_is_automatically_populated_with_request_data()
+    {
+        // Arrange
+        ITransactionData transaction = null;
+
+        var sentryClient = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+                app.UseSentryTracing();
+
+                app.UseEndpoints(routes =>
+                {
+                    routes.Map("/person/{id}", _ =>
+                    {
+                        transaction = (ITransactionData) hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });
@@ -206,7 +451,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions
+        var hub = new Hub(new SentryOptions
         {
             Dsn = ValidDsn,
             TracesSampler = ctx =>
@@ -255,18 +500,12 @@ public class SentryTracingMiddlewareTests
     public async Task Transaction_binds_exception_thrown()
     {
         // Arrange
-        TransactionSamplingContext samplingContext = null;
-
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Internal.Hub(new SentryOptions
+        var hub = new Hub(new SentryOptions
         {
             Dsn = ValidDsn,
-            TracesSampler = ctx =>
-            {
-                samplingContext = ctx;
-                return 1;
-            }
+            TracesSampler = _ => 1.0
         }, sentryClient);
         var exception = new Exception();
 

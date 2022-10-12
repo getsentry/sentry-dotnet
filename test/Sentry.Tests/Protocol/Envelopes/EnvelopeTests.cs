@@ -130,7 +130,7 @@ public class EnvelopeTests
             new[]
             {
                 new EnvelopeItem(
-                    new Dictionary<string, object>{["type"] = "fake", ["length"] = 75L},
+                    new Dictionary<string, object>{["type"] = "fake"},
                     new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
                         .ToMemoryStream())
                 )
@@ -260,7 +260,6 @@ public class EnvelopeTests
                     new Dictionary<string, object>
                     {
                         ["type"] = "attachment",
-                        ["length"] = 13L,
                         ["content_type"] = "text/plain",
                         ["filename"] = "hello.txt"
                     },
@@ -271,7 +270,6 @@ public class EnvelopeTests
                     new Dictionary<string, object>
                     {
                         ["type"] = "event",
-                        ["length"] = 41L,
                         ["content_type"] = "application/json",
                         ["filename"] = "application.log"
                     },
@@ -383,8 +381,7 @@ public class EnvelopeTests
                 new EnvelopeItem(
                     new Dictionary<string, object>
                     {
-                        ["type"] = "attachment",
-                        ["length"] = 0L
+                        ["type"] = "attachment"
                     },
                     new StreamSerializable(new MemoryStream())
                 ),
@@ -392,8 +389,7 @@ public class EnvelopeTests
                 new EnvelopeItem(
                     new Dictionary<string, object>
                     {
-                        ["type"] = "attachment",
-                        ["length"] = 0L
+                        ["type"] = "attachment"
                     },
                     new StreamSerializable(new MemoryStream())
                 )
@@ -492,7 +488,11 @@ public class EnvelopeTests
         {
             User = new User { Id = "user-id" },
             Request = new Request { Method = "POST" },
-            Contexts = new Contexts { ["context_key"] = "context_value" },
+            Contexts = new Contexts
+            {
+                ["context_key"] = "context_value",
+                ["context_key_with_null_value"] = null
+            },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
@@ -527,6 +527,49 @@ public class EnvelopeTests
 
         // Assert
         envelopeRoundtrip.Should().BeEquivalentTo(envelope);
+    }
+
+    [Fact]
+    public async Task Null_context_should_not_effect_length_header()
+    {
+        async Task<Envelope> Roundtrip(SentryEvent sentryEvent)
+        {
+            using var envelope = Envelope.FromEvent(sentryEvent);
+
+            using var stream = new MemoryStream();
+            await envelope.SerializeAsync(stream, _testOutputLogger);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return await Envelope.DeserializeAsync(stream);
+        }
+
+        // Arrange
+        var sentryId = SentryId.Create();
+        var timestamp = DateTimeOffset.Now;
+        var eventWithNoNull = new SentryEvent(eventId: sentryId, timestamp: timestamp)
+        {
+            Contexts = new()
+            {
+                ["context_key"] = "context_value"
+            },
+        };
+        var eventWithNull = new SentryEvent(eventId: sentryId, timestamp: timestamp)
+        {
+            Contexts = new()
+            {
+                ["context_key"] = "context_value",
+                ["context_key_with_null_value"] = null
+            },
+        };
+
+        using var roundtripWithNoNull = await Roundtrip(eventWithNoNull);
+        using var roundtripWithNull = await Roundtrip(eventWithNull);
+
+        var lengthWithNoNull = roundtripWithNoNull.Items[0].TryGetLength()!;
+        var lengthWithNull = roundtripWithNull.Items[0].TryGetLength()!;
+
+        // Assert
+        Assert.Equal(lengthWithNoNull, lengthWithNull);
     }
 
     [Fact]
@@ -765,5 +808,50 @@ public class EnvelopeTests
         // Assert
         output.Should().Be(
             "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+    }
+
+    [Fact]
+    public async Task Serialization_RoundTrip_RecalculatesLengthHeader()
+    {
+        // See https://github.com/getsentry/sentry-dotnet/issues/1956
+
+        // Arrange
+        var dto = new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.FromHours(1));
+        var evt = new SentryEvent(timestamp: DateTimeOffset.MaxValue);
+        evt.Sdk = new SdkVersion
+        {
+            Name = "test",
+            Version = "0.0.0"
+        };
+        evt.SetExtra("foo", dto);
+        var envelope = Envelope.FromEvent(evt);
+
+        // Act
+        var serialized1 = await envelope.SerializeToStringAsync(_testOutputLogger);
+
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(serialized1);
+        await writer.FlushAsync();
+        stream.Seek(0, SeekOrigin.Begin);
+        var deserialized = await Envelope.DeserializeAsync(stream);
+        var serialized2 = await deserialized.SerializeToStringAsync(_testOutputLogger);
+
+        // Assert
+
+        Assert.False(deserialized.Items[0].Header.ContainsKey("length"),
+            "The length header should not have been deserialized.");
+
+        // these are the actual lengths
+        var length1 = serialized1.Split('\n', StringSplitOptions.RemoveEmptyEntries).Last().Length;
+        var length2 = serialized2.Split('\n', StringSplitOptions.RemoveEmptyEntries).Last().Length;
+
+        // the header should contain those lengths
+        Assert.Contains($@"{{""type"":""event"",""length"":{length1}}}", serialized1);
+        Assert.Contains($@"{{""type"":""event"",""length"":{length2}}}", serialized2);
+
+        // this is the main difference between them
+        Assert.Contains(@"{""foo"":""2020-01-01T00:00:00+01:00""}", serialized1);
+        Assert.Contains(@"{""foo"":""2020-01-01T00:00:00\u002B01:00""}", serialized2);
     }
 }

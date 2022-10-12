@@ -83,8 +83,15 @@ namespace Sentry
         public bool? IsSampled
         {
             get => Contexts.Trace.IsSampled;
-            internal set => Contexts.Trace.IsSampled = value;
+            internal set
+            {
+                Contexts.Trace.IsSampled = value;
+                SampleRate ??= value == null ? null : value.Value ? 1.0 : 0.0;
+            }
         }
+
+        /// <inheritdoc />
+        public double? SampleRate { get; internal set; }
 
         /// <inheritdoc />
         public SentryLevel? Level { get; set; }
@@ -161,6 +168,8 @@ namespace Sentry
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
 
+        internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
+
         /// <summary>
         /// Initializes an instance of <see cref="Transaction"/>.
         /// </summary>
@@ -183,7 +192,7 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="Transaction"/>.
+        /// Initializes an instance of <see cref="TransactionTracer"/>.
         /// </summary>
         public TransactionTracer(IHub hub, ITransactionContext context)
         {
@@ -242,7 +251,7 @@ namespace Sentry
         /// <inheritdoc />
         public void Finish()
         {
-            Status ??= SpanStatus.UnknownError;
+            Status ??= SpanStatus.Ok;
             EndTimestamp = _stopwatch.CurrentDateTimeOffset;
 
             foreach (var span in _spans)

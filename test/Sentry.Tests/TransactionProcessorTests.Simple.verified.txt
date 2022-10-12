@@ -39,6 +39,14 @@
       event_id: Guid_2,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: Sentry.Tests@1.0.0,
+        sample_rate: 1,
+        trace_id: Guid_3,
+        transaction: my transaction
       }
     },
     Items: [
@@ -52,15 +60,16 @@
             Platform: csharp,
             Operation: my operation,
             Description: ,
-            Status: UnknownError,
+            Status: Ok,
             IsSampled: true,
+            SampleRate: 1.0,
             Request: {},
             Contexts: {
               key: value,
               trace: {
                 Operation: my operation,
                 Description: ,
-                Status: UnknownError,
+                Status: Ok,
                 IsSampled: true
               }
             },

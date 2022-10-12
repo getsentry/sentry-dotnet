@@ -18,21 +18,27 @@ jobs:
       fail-fast: false
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@9f10b1b9fa56e99e4c5d12c2a085c8a0c37ab0ac # Tag: 0.10.1
 
-    - name: Setup Environment
-      uses: ./.github/actions/environment
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: csharp
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
-    - name: Build
-      run: dotnet build --nologo
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@807578363a7869ca324a79039e6db9c843e0e100 # pin@v2
+        with:
+          languages: csharp
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      - name: Restore .NET Dependencies
+        run: dotnet restore Sentry-CI-CodeQL.slnf --nologo
+
+      - name: Build
+        run: dotnet build Sentry-CI-CodeQL.slnf --no-restore --nologo
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@807578363a7869ca324a79039e6db9c843e0e100 # pin@v2

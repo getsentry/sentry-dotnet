@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry
@@ -191,5 +192,14 @@ namespace Sentry
                         Level = level
                     },
                     configureScope);
+
+        internal static ITransaction StartTransaction(
+            this IHub hub,
+            ITransactionContext context,
+            IReadOnlyDictionary<string, object?> customSamplingContext,
+            DynamicSamplingContext? dynamicSamplingContext)
+            => hub is Hub fullHub
+                ? fullHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext)
+                : hub.StartTransaction(context, customSamplingContext);
     }
 }
