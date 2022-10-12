@@ -1,5 +1,13 @@
 # Changelog
 
+# Unreleased
+
+## Fixes
+
+- Split Android and Cocoa bindings into separate projects ([#1983](https://github.com/getsentry/sentry-dotnet/pull/1983))
+  - NuGet package `Sentry` now depends on `Sentry.Bindings.Android` for `net6.0-android` targets.
+  - NuGet package `Sentry` now depends on `Sentry.Bindings.Cocoa` for `net6.0-ios` and `net6.0-maccatalyst` targets.
+
 ## 3.22.0
 
 ## Features

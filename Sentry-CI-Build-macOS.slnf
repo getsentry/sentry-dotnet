@@ -25,6 +25,8 @@
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
+      "src\\Sentry.Bindings.Android\\Sentry.Bindings.Android.csproj",
+      "src\\Sentry.Bindings.Cocoa\\Sentry.Bindings.Cocoa.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
