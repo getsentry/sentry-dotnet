@@ -50,6 +50,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
+
         void ApplyOptions(SentryOptions sentryOptions)
         {
             sentryOptions.TracesSampleRate = 1;
@@ -94,12 +95,13 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             catch
             {
             }
+
             transaction.Finish();
         }
 
         var result = await Verify(transport.Payloads)
             .ScrubInlineGuids()
-            .IgnoreMember<SentryEvent>(_=>_.SentryThreads)
+            .IgnoreMember<SentryEvent>(_ => _.SentryThreads)
             .ScrubLinesWithReplace(line =>
             {
                 if (line.StartsWith("Executed DbCommand ("))
@@ -112,7 +114,8 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
                     return "Failed executing DbCommand";
                 }
 
-                return line;
+                var efVersion = typeof(DbContext).Assembly.GetName().Version.ToString(3);
+                return line.Replace(efVersion, "");
             })
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain("An error occurred while saving the entity changes", result.Text);
@@ -144,6 +147,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
     }
 
 #endif
+
     [SkippableFact]
     public async Task RecordsEf()
     {
@@ -175,5 +179,4 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             .UniqueForRuntimeAndVersion();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
-
 }

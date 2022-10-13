@@ -22,7 +22,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
       Environment: production,
       Breadcrumbs: [
         {
-          Message: Entity Framework Core 6.0.8 initialized 'TestDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:6.0.8' with options: NoTracking ,
+          Message: Entity Framework Core  initialized 'TestDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:' with options: NoTracking ,
           Data: {
             eventId: Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized
           },
