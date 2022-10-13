@@ -165,17 +165,8 @@ internal class SentryMiddleware : IMiddleware
 
     internal void PopulateScope(HttpContext context, Scope scope)
     {
-        if (_eventProcessors != null)
-        {
-            var toAdd = _eventProcessors.Except(scope.GetAllEventProcessors());
-            scope.AddEventProcessors(toAdd);
-        }
-        if (_eventExceptionProcessors != null)
-        {
-            var toAdd = _eventExceptionProcessors.Except(scope.GetAllExceptionProcessors());
-            scope.AddExceptionProcessors(toAdd);
-        }
-
+        scope.AddEventProcessors(_eventProcessors.Except(scope.GetAllEventProcessors()));
+        scope.AddExceptionProcessors(_eventExceptionProcessors.Except(scope.GetAllExceptionProcessors()));
         scope.Sdk.Name = Constants.SdkName;
         scope.Sdk.Version = NameAndVersion.Version;
 
