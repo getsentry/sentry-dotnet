@@ -14,19 +14,19 @@ runs:
     - name: Build C Project
       if: runner.os == 'Linux' || runner.os == 'macOS'
       shell: bash
-      run: src/Sentry/Platforms/Android/C/build.sh
+      run: lib/sentrysupplemental/build.sh
 
     - name: Build C Project
       if: runner.os == 'Windows'
       shell: cmd
-      run: src\Sentry\Platforms\Android\C\build.cmd
+      run: lib\sentrysupplemental\build.cmd
 
     - name: Build Java Project
       if: runner.os == 'Linux' || runner.os == 'macOS'
       shell: bash
-      run: src/Sentry/Platforms/Android/Java/build.sh
+      run: lib/sentry-android-supplemental/build.sh
 
     - name: Build Java Project
       if: runner.os == 'Windows'
       shell: cmd
-      run: src\Sentry\Platforms\Android\Java\build.cmd
+      run: lib\sentry-android-supplemental\build.cmd

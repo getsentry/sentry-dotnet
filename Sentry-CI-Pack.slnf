@@ -1,0 +1,22 @@
+{
+  "solution": {
+    "path": "Sentry.sln",
+    "projects": [
+      "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
+      "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
+      "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
+      "src\\Sentry.Bindings.Android\\Sentry.Bindings.Android.csproj",
+      "src\\Sentry.Bindings.Cocoa\\Sentry.Bindings.Cocoa.csproj",
+      "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
+      "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
+      "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
+      "src\\Sentry.Google.Cloud.Functions\\Sentry.Google.Cloud.Functions.csproj",
+      "src\\Sentry.Log4Net\\Sentry.Log4Net.csproj",
+      "src\\Sentry.Maui\\Sentry.Maui.csproj",
+      "src\\Sentry.NLog\\Sentry.NLog.csproj",
+      "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
+      "src\\Sentry.Tunnel\\Sentry.Tunnel.csproj",
+      "src\\Sentry\\Sentry.csproj"
+    ]
+  }
+}
