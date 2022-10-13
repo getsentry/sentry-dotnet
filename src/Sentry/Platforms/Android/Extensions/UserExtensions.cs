@@ -14,7 +14,8 @@ internal static class UserExtensions
             Id = user.Id,
             IpAddress = user.IpAddress,
             Username = user.Username,
-            Other = user.Others ?? EmptyDictionary
+            Segment = user.Segment,
+            Other = user.Data ?? EmptyDictionary
         };
 
     public static JavaSdk.Protocol.User ToJavaUser(this User user) =>
@@ -24,6 +25,7 @@ internal static class UserExtensions
             Id = user.Id,
             IpAddress = user.IpAddress,
             Username = user.Username,
-            Others = user.Other.Count == 0 ? null : user.Other
+            Segment = user.Segment,
+            Data = user.Other.Count == 0 ? null : user.Other
         };
 }
