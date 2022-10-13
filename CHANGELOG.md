@@ -2,6 +2,8 @@
 
 # Unreleased
 
+- Update bundled Android SDK to version 6.5.0 ([#1984](https://github.com/getsentry/sentry-dotnet/pull/1984))
+
 ## Fixes
 
 - Split Android and Cocoa bindings into separate projects ([#1983](https://github.com/getsentry/sentry-dotnet/pull/1983))
