@@ -22,7 +22,7 @@ internal static class DeviceExtensions
         }
     }
 
-    public static void ApplyFromSentryAndroidSdk(this Device device, Java.Protocol.Device d)
+    public static void ApplyFromSentryAndroidSdk(this Device device, JavaSdk.Protocol.Device d)
     {
         // We already have these above
         // device.Manufacturer ??= d.Manufacturer;
@@ -66,7 +66,7 @@ internal static class DeviceExtensions
 
     }
 
-    public static DeviceOrientation ToDeviceOrientation(this Java.Protocol.Device.DeviceOrientation orientation) =>
+    public static DeviceOrientation ToDeviceOrientation(this JavaSdk.Protocol.Device.DeviceOrientation orientation) =>
         orientation.Name() switch
         {
             "PORTRAIT" => DeviceOrientation.Portrait,
