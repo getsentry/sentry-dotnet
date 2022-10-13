@@ -1,6 +1,8 @@
+using Sentry.JavaSdk.Android.Core;
+
 namespace Sentry.Android.Callbacks;
 
-internal class OptionsConfigurationCallback : JavaObject, Java.Sentry.IOptionsConfiguration
+internal class OptionsConfigurationCallback : JavaObject, JavaSdk.Sentry.IOptionsConfiguration
 {
     private readonly Action<SentryAndroidOptions> _configureOptions;
 

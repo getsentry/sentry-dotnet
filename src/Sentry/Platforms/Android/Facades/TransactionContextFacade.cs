@@ -4,9 +4,9 @@ namespace Sentry.Android.Facades;
 
 internal class TransactionContextFacade : ITransactionContext
 {
-    private readonly Java.TransactionContext _context;
+    private readonly JavaSdk.TransactionContext _context;
 
-    internal TransactionContextFacade(Java.TransactionContext context)
+    internal TransactionContextFacade(JavaSdk.TransactionContext context)
     {
         _context = context;
     }

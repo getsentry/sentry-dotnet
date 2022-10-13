@@ -9,7 +9,7 @@ internal static class SentryEventExtensions
      * then deserializing back to an object on the other side.  It is not expected to be performant, as this code is only
      * used when a BeforeSend option is set, and then only when an event is captured by the Java SDK (which should be
      * relatively rare).
-     * 
+     *
      * This approach avoids having to write to/from methods for the entire object graph.  However, it's also important to
      * recognize that there's not necessarily a one-to-one mapping available on all objects (even through serialization)
      * between the two SDKs, so some optional details may be lost when roundtripping.  That's generally OK, as this is
@@ -17,11 +17,11 @@ internal static class SentryEventExtensions
      * updating the objects on either side.
      */
 
-    public static SentryEvent ToSentryEvent(this Java.SentryEvent sentryEvent, Java.SentryOptions javaOptions)
+    public static SentryEvent ToSentryEvent(this JavaSdk.SentryEvent sentryEvent, JavaSdk.SentryOptions javaOptions)
     {
         using var stream = new MemoryStream();
         using var streamWriter = new JavaOutputStreamWriter(stream);
-        using var jsonWriter = new Java.JsonObjectWriter(streamWriter, javaOptions.MaxDepth);
+        using var jsonWriter = new JavaSdk.JsonObjectWriter(streamWriter, javaOptions.MaxDepth);
         sentryEvent.Serialize(jsonWriter, javaOptions.Logger);
         jsonWriter.Flush();
         stream.Seek(0, SeekOrigin.Begin);
@@ -30,7 +30,7 @@ internal static class SentryEventExtensions
         return SentryEvent.FromJson(json.RootElement, sentryEvent.Throwable);
     }
 
-    public static Java.SentryEvent ToJavaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, Java.SentryOptions javaOptions)
+    public static JavaSdk.SentryEvent ToJavaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, JavaSdk.SentryOptions javaOptions)
     {
         using var stream = new MemoryStream();
         using var jsonWriter = new Utf8JsonWriter(stream);
@@ -39,8 +39,8 @@ internal static class SentryEventExtensions
         stream.Seek(0, SeekOrigin.Begin);
 
         using var streamReader = new JavaInputStreamReader(stream);
-        using var jsonReader = new Java.JsonObjectReader(streamReader);
-        using var deserializer = new Java.SentryEvent.Deserializer();
+        using var jsonReader = new JavaSdk.JsonObjectReader(streamReader);
+        using var deserializer = new JavaSdk.SentryEvent.Deserializer();
         return deserializer.Deserialize(jsonReader, javaOptions.Logger);
     }
 }
