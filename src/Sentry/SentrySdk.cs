@@ -503,11 +503,11 @@ namespace Sentry
 
 #if ANDROID
                 case CrashType.Java:
-                    Sentry.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
+                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
                     break;
 
                 case CrashType.JavaBackgroundThread:
-                    Sentry.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
+                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
                     break;
 
                 case CrashType.Native:
