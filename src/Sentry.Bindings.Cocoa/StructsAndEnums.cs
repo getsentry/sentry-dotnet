@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace SentryCocoa;
+namespace Sentry.CocoaSdk;
 
 [Native]
 internal enum SentryLogLevel : long

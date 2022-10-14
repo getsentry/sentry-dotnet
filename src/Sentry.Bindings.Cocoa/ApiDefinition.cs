@@ -2,7 +2,7 @@ using System;
 using Foundation;
 using ObjCRuntime;
 
-namespace SentryCocoa;
+namespace Sentry.CocoaSdk;
 
 [Static]
 [Internal]

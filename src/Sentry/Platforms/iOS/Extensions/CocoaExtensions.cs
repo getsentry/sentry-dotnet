@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using SentryCocoa;
 
 namespace Sentry.iOS.Extensions;
 
@@ -25,7 +24,7 @@ internal static class CocoaExtensions
             return null;
         }
 
-        if (obj is ISentrySerializable serializable)
+        if (obj is CocoaSdk.ISentrySerializable serializable)
         {
             // For types that implement Sentry Cocoa's SentrySerializable protocol (interface),
             // We should call that first, and then serialize the result to JSON later.
