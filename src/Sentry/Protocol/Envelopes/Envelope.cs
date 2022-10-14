@@ -100,6 +100,7 @@ namespace Sentry.Protocol.Envelopes
             {
                 Error("Envelope contains an empty event_id header");
                 _eventId = SentryId.Empty;
+                return _eventId;
             }
 
             _eventId = new SentryId(guid);
