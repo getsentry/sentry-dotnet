@@ -94,6 +94,21 @@ interface PrivateSentrySdkOnly
     [Export ("setSdkName:andVersionString:")]
     void SetSdkName (string sdkName, string versionString);
 
+    // +(void)setSdkName:(NSString * _Nonnull)sdkName;
+    [Static]
+    [Export ("setSdkName:")]
+    void SetSdkName (string sdkName);
+
+    // +(NSString * _Nonnull)getSdkName;
+    [Static]
+    [Export ("getSdkName")]
+    string SdkName { get; }
+
+    // +(NSString * _Nonnull)getSdkVersionString;
+    [Static]
+    [Export ("getSdkVersionString")]
+    string SdkVersionString { get; }
+
     // @property (copy, nonatomic, class) SentryOnAppStartMeasurementAvailable _Nullable onAppStartMeasurementAvailable;
     [Static]
     [NullAllowed, Export ("onAppStartMeasurementAvailable", ArgumentSemantic.Copy)]
@@ -337,6 +352,10 @@ interface SentryClient
     // -(void)captureEnvelope:(SentryEnvelope * _Nonnull)envelope __attribute__((swift_name("capture(envelope:)")));
     [Export ("captureEnvelope:")]
     void CaptureEnvelope (SentryEnvelope envelope);
+
+    // -(void)flush:(NSTimeInterval)timeout __attribute__((swift_name("flush(timeout:)")));
+    [Export ("flush:")]
+    void Flush (double timeout);
 }
 
 // @interface SentryCrashExceptionApplication : NSObject
@@ -993,6 +1012,10 @@ interface SentryOptions
     // @property (assign, nonatomic) BOOL enableAutoBreadcrumbTracking;
     [Export ("enableAutoBreadcrumbTracking")]
     bool EnableAutoBreadcrumbTracking { get; set; }
+
+    // @property (retain, nonatomic) NSArray * _Nonnull tracePropagationTargets;
+    [Export ("tracePropagationTargets", ArgumentSemantic.Retain)]
+    NSObject[] TracePropagationTargets { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>
@@ -1146,6 +1169,16 @@ interface SentrySpan : SentrySerializable
     [Export ("removeTagForKey:")]
     void RemoveTagForKey (string key);
 
+    // @required -(void)setMeasurement:(NSString * _Nonnull)name value:(NSNumber * _Nonnull)value __attribute__((swift_name("setMeasurement(name:value:)")));
+    [Abstract]
+    [Export ("setMeasurement:value:")]
+    void SetMeasurement (string name, NSNumber value);
+
+    // @required -(void)setMeasurement:(NSString * _Nonnull)name value:(NSNumber * _Nonnull)value unit:(SentryMeasurementUnit * _Nonnull)unit __attribute__((swift_name("setMeasurement(name:value:unit:)")));
+    [Abstract]
+    [Export ("setMeasurement:value:unit:")]
+    void SetMeasurement (string name, NSNumber value, SentryMeasurementUnit unit);
+
     // @required -(void)finish;
     [Abstract]
     [Export ("finish")]
@@ -1283,6 +1316,10 @@ interface SentryHub
     // -(void)captureEnvelope:(SentryEnvelope * _Nonnull)envelope __attribute__((swift_name("capture(envelope:)")));
     [Export ("captureEnvelope:")]
     void CaptureEnvelope (SentryEnvelope envelope);
+
+    // -(void)flush:(NSTimeInterval)timeout __attribute__((swift_name("flush(timeout:)")));
+    [Export ("flush:")]
+    void Flush (double timeout);
 }
 
 // @interface SentryId : NSObject
@@ -1306,6 +1343,167 @@ interface SentryId
     [Static]
     [Export ("empty", ArgumentSemantic.Strong)]
     SentryId Empty { get; }
+}
+
+// @interface SentryMeasurementUnit : NSObject <NSCopying>
+[BaseType (typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryMeasurementUnit // : INSCopying
+{
+    // -(instancetype _Nonnull)initWithUnit:(NSString * _Nonnull)unit;
+    [Export ("initWithUnit:")]
+    NativeHandle Constructor (string unit);
+
+    // @property (readonly, copy) NSString * _Nonnull unit;
+    [Export ("unit")]
+    string Unit { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnit * _Nonnull none;
+    [Static]
+    [Export ("none", ArgumentSemantic.Copy)]
+    SentryMeasurementUnit None { get; }
+}
+
+// @interface SentryMeasurementUnitDuration : SentryMeasurementUnit
+[BaseType (typeof(SentryMeasurementUnit))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryMeasurementUnitDuration
+{
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull nanosecond;
+    [Static]
+    [Export ("nanosecond", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Nanosecond { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull microsecond;
+    [Static]
+    [Export ("microsecond", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Microsecond { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull millisecond;
+    [Static]
+    [Export ("millisecond", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Millisecond { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull second;
+    [Static]
+    [Export ("second", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Second { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull minute;
+    [Static]
+    [Export ("minute", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Minute { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull hour;
+    [Static]
+    [Export ("hour", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Hour { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull day;
+    [Static]
+    [Export ("day", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Day { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitDuration * _Nonnull week;
+    [Static]
+    [Export ("week", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitDuration Week { get; }
+}
+
+// @interface SentryMeasurementUnitInformation : SentryMeasurementUnit
+[BaseType (typeof(SentryMeasurementUnit))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryMeasurementUnitInformation
+{
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull bit;
+    [Static]
+    [Export ("bit", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Bit { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull byte;
+    [Static]
+    [Export ("byte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Byte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull kilobyte;
+    [Static]
+    [Export ("kilobyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Kilobyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull kibibyte;
+    [Static]
+    [Export ("kibibyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Kibibyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull megabyte;
+    [Static]
+    [Export ("megabyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Megabyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull mebibyte;
+    [Static]
+    [Export ("mebibyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Mebibyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull gigabyte;
+    [Static]
+    [Export ("gigabyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Gigabyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull gibibyte;
+    [Static]
+    [Export ("gibibyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Gibibyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull terabyte;
+    [Static]
+    [Export ("terabyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Terabyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull tebibyte;
+    [Static]
+    [Export ("tebibyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Tebibyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull petabyte;
+    [Static]
+    [Export ("petabyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Petabyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull pebibyte;
+    [Static]
+    [Export ("pebibyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Pebibyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull exabyte;
+    [Static]
+    [Export ("exabyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Exabyte { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitInformation * _Nonnull exbibyte;
+    [Static]
+    [Export ("exbibyte", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitInformation Exbibyte { get; }
+}
+
+// @interface SentryMeasurementUnitFraction : SentryMeasurementUnit
+[BaseType (typeof(SentryMeasurementUnit))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryMeasurementUnitFraction
+{
+    // @property (readonly, copy, class) SentryMeasurementUnitFraction * _Nonnull ratio;
+    [Static]
+    [Export ("ratio", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitFraction Ratio { get; }
+
+    // @property (readonly, copy, class) SentryMeasurementUnitFraction * _Nonnull percent;
+    [Static]
+    [Export ("percent", ArgumentSemantic.Copy)]
+    SentryMeasurementUnitFraction Percent { get; }
 }
 
 // @interface SentryMechanism : NSObject <SentrySerializable>
@@ -1563,6 +1761,11 @@ interface SentrySdk
     [Static]
     [Export ("crash")]
     void Crash ();
+
+    // +(void)flush:(NSTimeInterval)timeout __attribute__((swift_name("flush(timeout:)")));
+    [Static]
+    [Export ("flush:")]
+    void Flush (double timeout);
 
     // +(void)close;
     [Static]
@@ -2005,6 +2208,10 @@ interface SentryUser : SentrySerializable //, INSCopying
     // @property (copy, atomic) NSString * _Nullable ipAddress;
     [NullAllowed, Export ("ipAddress")]
     string IpAddress { get; set; }
+
+    // @property (copy, atomic) NSString * _Nullable segment;
+    [NullAllowed, Export ("segment")]
+    string Segment { get; set; }
 
     // @property (atomic, strong) NSDictionary<NSString *,id> * _Nullable data;
     [NullAllowed, Export ("data", ArgumentSemantic.Strong)]
