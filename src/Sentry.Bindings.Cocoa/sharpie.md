@@ -9,6 +9,7 @@ However, the files are not purely auto-generated.  Several modifications have be
 
 - Everything has been made internal, either via the `internal` keyword, or the `[Internal]` binding attribute.
 - Named delegates have been replaced with `Func<T>` or `Action<T>` to work around https://github.com/xamarin/xamarin-macios/issues/15299
+- `INSCopying` interfaces have been commented out, to resolve nullability error
 - Items that Sharpie marked with `[Verify]` have been resolved, except for:
   - `NSErrorFromSentryError` and its containing class has been commented out, as we aren't using it presently and it needs verification
 

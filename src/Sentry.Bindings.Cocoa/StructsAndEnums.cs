@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace SentryCocoa;
+namespace Sentry.CocoaSdk;
 
 [Native]
 internal enum SentryLogLevel : long
@@ -25,21 +25,21 @@ internal enum SentryLevel : ulong
 [Native]
 internal enum SentryPermissionStatus : long
 {
-	Unknown = 0,
-	Granted,
-	Partial,
-	Denied
+    Unknown = 0,
+    Granted,
+    Partial,
+    Denied
 }
 
 [Native]
 internal enum SentryTransactionNameSource : long
 {
-	Custom = 0,
-	Url,
-	Route,
-	View,
-	Component,
-	Task
+    Custom = 0,
+    Url,
+    Route,
+    View,
+    Component,
+    Task
 }
 
 [Native]
@@ -66,12 +66,21 @@ internal enum SentryError : long
 
 // internal static class CFunctions
 // {
-// 	// extern NSError * _Nullable NSErrorFromSentryError (SentryError error, NSString * _Nonnull description) __attribute__((visibility("default")));
-// 	[DllImport ("__Internal")]
-// 	[Verify (PlatformInvoke)]
-//     [Internal]
-// 	[return: NullAllowed]
-// 	static extern NSError NSErrorFromSentryError (SentryError error, NSString description);
+//     // extern NSError * _Nullable NSErrorFromSentryError (SentryError error, NSString * _Nonnull description) __attribute__((visibility("default")));
+//     [DllImport ("__Internal")]
+//     [Verify (PlatformInvoke)]
+//     [return: NullAllowed]
+//     static extern NSError NSErrorFromSentryError (SentryError error, NSString description);
+
+//     // extern NSString * _Nonnull nameForSentrySampleDecision (SentrySampleDecision decision);
+//     [DllImport ("__Internal")]
+//     [Verify (PlatformInvoke)]
+//     static extern NSString nameForSentrySampleDecision (SentrySampleDecision decision);
+
+//     // extern NSString * _Nonnull nameForSentrySpanStatus (SentrySpanStatus status);
+//     [DllImport ("__Internal")]
+//     [Verify (PlatformInvoke)]
+//     static extern NSString nameForSentrySpanStatus (SentrySpanStatus status);
 // }
 
 [Native]
