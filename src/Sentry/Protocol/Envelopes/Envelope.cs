@@ -18,6 +18,9 @@ namespace Sentry.Protocol.Envelopes
     /// </summary>
     public sealed class Envelope : ISerializable, IDisposable
     {
+        // caches the event id from the header
+        private SentryId? _eventId;
+
         /// <summary>
         /// Header associated with the envelope.
         /// </summary>
@@ -33,6 +36,13 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public Envelope(IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
         {
+            Header = header;
+            Items = items;
+        }
+
+        private Envelope(SentryId? eventId, IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
+        {
+            _eventId = eventId;
             Header = header;
             Items = items;
         }
@@ -55,6 +65,12 @@ namespace Sentry.Protocol.Envelopes
             {
                 Debug.Fail(message);
                 logger?.LogError(message);
+            }
+
+            if (_eventId != null)
+            {
+                // use the cached value
+                return _eventId;
             }
 
             if (!Header.TryGetValue("event_id", out var value))
@@ -83,10 +99,12 @@ namespace Sentry.Protocol.Envelopes
             if (guid == Guid.Empty)
             {
                 Error("Envelope contains an empty event_id header");
-                return SentryId.Empty;
+                _eventId = SentryId.Empty;
+                return _eventId;
             }
 
-            return new SentryId(guid);
+            _eventId = new SentryId(guid);
+            return _eventId;
         }
 
         private async Task SerializeHeaderAsync(
@@ -201,7 +219,8 @@ namespace Sentry.Protocol.Envelopes
             IReadOnlyCollection<Attachment>? attachments = null,
             SessionUpdate? sessionUpdate = null)
         {
-            var header = CreateHeader(@event.EventId);
+            var eventId = @event.EventId;
+            var header = CreateHeader(eventId);
 
             var items = new List<EnvelopeItem>
             {
@@ -244,7 +263,7 @@ namespace Sentry.Protocol.Envelopes
                 items.Add(EnvelopeItem.FromSession(sessionUpdate));
             }
 
-            return new Envelope(header, items);
+            return new Envelope(eventId, header, items);
         }
 
         /// <summary>
@@ -252,14 +271,15 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = CreateHeader(sentryUserFeedback.EventId);
+            var eventId = sentryUserFeedback.EventId;
+            var header = CreateHeader(eventId);
 
             var items = new[]
             {
                 EnvelopeItem.FromUserFeedback(sentryUserFeedback)
             };
 
-            return new Envelope(header, items);
+            return new Envelope(eventId, header, items);
         }
 
         /// <summary>
@@ -267,15 +287,16 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromTransaction(Transaction transaction)
         {
+            var eventId = transaction.EventId;
             Dictionary<string, object?> header;
             if (transaction.DynamicSamplingContext is { } dsc)
             {
-                header = CreateHeader(transaction.EventId, extraCapacity: 1);
+                header = CreateHeader(eventId, extraCapacity: 1);
                 header["trace"] = dsc.Items;
             }
             else
             {
-                header = CreateHeader(transaction.EventId);
+                header = CreateHeader(eventId);
             }
 
             var items = new[]
@@ -283,7 +304,7 @@ namespace Sentry.Protocol.Envelopes
                 EnvelopeItem.FromTransaction(transaction)
             };
 
-            return new Envelope(header, items);
+            return new Envelope(eventId, header, items);
         }
 
         /// <summary>
@@ -360,7 +381,7 @@ namespace Sentry.Protocol.Envelopes
         {
             var items = Items.ToList();
             items.Add(item);
-            return new Envelope(Header, items);
+            return new Envelope(_eventId, Header, items);
         }
     }
 }
