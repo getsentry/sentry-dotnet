@@ -69,7 +69,7 @@ namespace Sentry.Protocol.Envelopes
 
             if (_eventId != null)
             {
-                // used the cached value
+                // use the cached value
                 return _eventId;
             }
 
