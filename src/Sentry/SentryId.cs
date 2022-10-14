@@ -63,7 +63,11 @@ namespace Sentry
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
-            logger?.LogError("WriteTo should not be called on SentryId.Empty");
+            if (_guid == Guid.Empty)
+            {
+                logger?.LogError("WriteTo should not be called on SentryId.Empty");
+            }
+
             AssertNotEmpty();
             writer.WriteStringValue(ToString());
         }
