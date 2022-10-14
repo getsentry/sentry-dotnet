@@ -34,7 +34,7 @@ internal class IosEventProcessor : ISentryEventProcessor, IDisposable
     {
         // This will populate an event with all of the information we need, without actually capturing that event.
         var @event = new CocoaSdk.SentryEvent();
-        CocoaSdk.SentrySdk.ConfigureScope(scope =>
+        SentryCocoaSdk.ConfigureScope(scope =>
         {
             scope.ApplyToEvent(@event, 0);
         });

@@ -25,7 +25,7 @@ internal class TransactionContextFacade : ITransactionContext
 
     public string Operation => _context.Operation;
 
-    public string? Description => _context.Description;
+    public string Description => _context.Description;
 
     public SpanStatus? Status => _context.Status.ToSpanStatus();
 
