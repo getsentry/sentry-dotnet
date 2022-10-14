@@ -142,6 +142,7 @@ internal sealed class SentryLogger : ILogger
         => _options.MinimumEventLevel != LogLevel.None
            && logLevel >= _options.MinimumEventLevel
            && !IsFromSentry()
+           && !IsEfExceptionMessage(eventId)
            && _options.Filters.All(
                f => !f.Filter(
                    CategoryName,
@@ -156,6 +157,7 @@ internal sealed class SentryLogger : ILogger
         => _options.MinimumBreadcrumbLevel != LogLevel.None
            && logLevel >= _options.MinimumBreadcrumbLevel
            && !IsFromSentry()
+           && !IsEfExceptionMessage(eventId)
            && _options.Filters.All(
                f => !f.Filter(
                    CategoryName,
@@ -179,5 +181,14 @@ internal sealed class SentryLogger : ILogger
 #endif
 
         return CategoryName.StartsWith("Sentry.", StringComparison.Ordinal);
+    }
+
+    internal static bool IsEfExceptionMessage(EventId eventId)
+    {
+        return eventId.Name is
+                "Microsoft.EntityFrameworkCore.Update.SaveChangesFailed" or
+                "Microsoft.EntityFrameworkCore.Query.QueryIterationFailed" or
+                "Microsoft.EntityFrameworkCore.Query.InvalidIncludePathError" or
+                "Microsoft.EntityFrameworkCore.Update.OptimisticConcurrencyException";
     }
 }

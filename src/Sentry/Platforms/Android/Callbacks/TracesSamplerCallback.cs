@@ -2,7 +2,7 @@ using Sentry.Android.Extensions;
 
 namespace Sentry.Android.Callbacks;
 
-internal class TracesSamplerCallback : JavaObject, Java.SentryOptions.ITracesSamplerCallback
+internal class TracesSamplerCallback : JavaObject, JavaSdk.SentryOptions.ITracesSamplerCallback
 {
     private readonly Func<TransactionSamplingContext, double?> _tracesSampler;
 
@@ -11,7 +11,7 @@ internal class TracesSamplerCallback : JavaObject, Java.SentryOptions.ITracesSam
         _tracesSampler = tracesSampler;
     }
 
-    public JavaDouble? Sample(Java.SamplingContext c)
+    public JavaDouble? Sample(JavaSdk.SamplingContext c)
     {
         var context = c.ToTransactionSamplingContext();
         return (JavaDouble?)_tracesSampler.Invoke(context);

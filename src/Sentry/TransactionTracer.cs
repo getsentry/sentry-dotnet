@@ -251,7 +251,7 @@ namespace Sentry
         /// <inheritdoc />
         public void Finish()
         {
-            Status ??= SpanStatus.UnknownError;
+            Status ??= SpanStatus.Ok;
             EndTimestamp = _stopwatch.CurrentDateTimeOffset;
 
             foreach (var span in _spans)
