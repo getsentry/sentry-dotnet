@@ -16,9 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
-        os: [ubuntu-latest, windows-latest, macos-12]
+        # Using windows-2019 because windows-latest is much slower and we don't need anything in particular from it.
+        os: [ubuntu-latest, windows-2019, macos-12]
 
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@9f10b1b9fa56e99e4c5d12c2a085c8a0c37ab0ac # Tag: 0.10.1
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -30,28 +34,31 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
+      - name: Restore .NET Dependencies
+        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+
       - name: Build
-        run: dotnet build -c Release --nologo /p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
 
       - name: Test
-        run: dotnet test -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
-
-      - name: Pack
-        # Only pack in one build environment.  We'll use macOS so we can build for ios/maccatalyst targets
-        if: startsWith(matrix.os, 'macos')
-        run: dotnet pack -c Release --no-build --nologo
+        run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
       - name: Upload Verify Results
         if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: verify-test-results
-          path: |
-            **/*.received.*
+          path: "**/*.received.*"
 
-      - name: Archive Artifacts
-        # only archive on macos since we only pack on macos. See Pack step.
-        if: startsWith(matrix.os, 'macos')
+      # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
+      # We use macOS for that so we we get all the iOS/macCatalyst targets in the packages
+
+      - name: Create Nuget Packages (release only)
+        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        run: dotnet pack Sentry-CI-Pack.slnf -c Release --no-build --nologo
+
+      - name: Archive Nuget Packages (release only)
+        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}

@@ -2,25 +2,12 @@
 
   <PropertyGroup>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
-    <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
-    <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>6.4.1</SentryAndroidSdkVersion>
-    <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <LangVersion>10</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="$(MSBuildThisFileDirectory)Transforms\*.xml" />
-    <TransformFile Include="$(MSBuildThisFileDirectory)Transforms\*.xml" />
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
-    <AndroidLibrary Include="$(MSBuildThisFileDirectory)Java\bin\sentry-android-supplemental.jar" />
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\arm64-v8a\libsentrysupplemental.so" Abi="arm64-v8a" />
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\armeabi-v7a\libsentrysupplemental.so" Abi="armeabi-v7a" />
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\x86\libsentrysupplemental.so" Abi="x86" />
-    <AndroidNativeLibrary Include="$(MSBuildThisFileDirectory)\C\bin\x86_64\libsentrysupplemental.so" Abi="x86_64" />
+    <ProjectReference Include="..\Sentry.Bindings.Android\Sentry.Bindings.Android.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,26 +34,5 @@
     <Using Include="Java.Util.Date" Alias="JavaDate" />
     <Using Include="Java.Util.HashMap" Alias="JavaHashMap" />
   </ItemGroup>
-
-  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">
-    <DownloadFile
-      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar"
-      DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar')"
-      Retries="3"
-    />
-    <DownloadFile
-      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
-      DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar')"
-      Retries="3"
-    />
-    <DownloadFile
-      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar"
-      DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar')"
-      Retries="3"
-    />
-  </Target>
 
 </Project>

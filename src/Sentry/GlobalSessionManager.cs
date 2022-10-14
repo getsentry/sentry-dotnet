@@ -359,6 +359,13 @@ namespace Sentry
 
         private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
         {
+            if (status == SessionEndStatus.Crashed)
+            {
+                // increments the errors count, as crashed sessions should report a count of 1 per:
+                // https://develop.sentry.dev/sdk/sessions/#session-update-payload
+                session.ReportError();
+            }
+
             AddSessionBreadcrumb("Ending Sentry Session");
             _options.LogInfo("Ended session (SID: {0}; DID: {1}) with status '{2}'.",
                 session.Id, session.DistinctId, status);

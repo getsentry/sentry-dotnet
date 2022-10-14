@@ -1,0 +1,117 @@
+﻿[
+  {
+    Source: {
+      Message: {
+        Message: Failed executing DbCommand,
+        Formatted:
+Failed executing DbCommand
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+      },
+      Logger: Microsoft.EntityFrameworkCore.Database.Command,
+      Platform: csharp,
+      SentryExceptions: [],
+      Level: error,
+      Request: {},
+      Contexts: {},
+      User: {},
+      Environment: production,
+      Breadcrumbs: [
+        {
+          Message: Entity Framework Core  initialized 'TestDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:' with options: NoTracking ,
+          Data: {
+            eventId: Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized
+          },
+          Category: Microsoft.EntityFrameworkCore.Infrastructure
+        },
+        {
+          Message:
+Executed DbCommand
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
+          Data: {
+            eventId: Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted
+          },
+          Category: Microsoft.EntityFrameworkCore.Database.Command
+        }
+      ],
+      Tags: {
+        commandText:
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
+        commandTimeout: 30,
+        commandType: Text,
+        eventId: Microsoft.EntityFrameworkCore.Database.Command.CommandError,
+        newLine:
+,
+        parameters: @p0='?' (Size = 450)
+      }
+    }
+  },
+  {
+    Source: {
+      Name: my transaction,
+      Platform: csharp,
+      Operation: my operation,
+      Description: ,
+      Status: Ok,
+      IsSampled: true,
+      SampleRate: 1.0,
+      Request: {},
+      Contexts: {
+        trace: {
+          Operation: my operation,
+          Description: ,
+          Status: Ok,
+          IsSampled: true
+        }
+      },
+      User: {},
+      Environment: production,
+      Spans: [
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Status: DeadlineExceeded,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Description:
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+
+,
+          Status: InternalError,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2
+          }
+        }
+      ],
+      IsFinished: true
+    }
+  }
+]
