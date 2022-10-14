@@ -11,6 +11,7 @@ internal static class UserExtensions
             Id = user.UserId,
             IpAddress = user.IpAddress,
             Username = user.Username,
+            Segment = user.Segment,
             Other = user.Data.ToStringDictionary(logger)
         };
 
@@ -22,6 +23,7 @@ internal static class UserExtensions
             UserId = user.Id,
             IpAddress = user.IpAddress,
             Username = user.Username,
+            Segment = user.Segment,
             Data = user.Other.ToNullableNSDictionary()
         };
 
