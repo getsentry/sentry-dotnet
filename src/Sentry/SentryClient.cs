@@ -267,7 +267,7 @@ namespace Sentry
         {
             if (Worker.EnqueueEnvelope(envelope))
             {
-                _options.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId());
+                _options.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId(_options.DiagnosticLogger));
                 return true;
             }
 

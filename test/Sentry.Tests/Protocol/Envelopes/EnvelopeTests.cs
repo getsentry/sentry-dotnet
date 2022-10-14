@@ -17,6 +17,114 @@ public class EnvelopeTests
     }
 
     [Fact]
+    public void TryGetEventId()
+    {
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var id = envelope.TryGetEventId(logger);
+
+        Assert.Equal("12c2d058d58442709aa2eca08bf20986", id.Value!.ToString());
+        Assert.Empty(logger.Entries);
+    }
+
+    [Fact]
+    public void TryGetEventId_none()
+    {
+        using var envelope = new Envelope(
+            new Dictionary<string, object>(),
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var id = envelope.TryGetEventId(logger);
+
+        Assert.Null(id);
+        Assert.Empty(logger.Entries);
+    }
+
+    [Fact]
+    public void TryGetEventId_null()
+    {
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = null },
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var message = "Header event_id is null";
+#if DEBUG
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
+        Assert.StartsWith(message, exception.Message);
+#else
+        var id = envelope.TryGetEventId(logger);
+        Assert.Null(id);
+        Assert.Equal(message, logger.Entries.Single().Message);
+#endif
+    }
+
+    [Fact]
+    public void TryGetEventId_incorrect_type()
+    {
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = 10 },
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var message = "Header event_id has incorrect type: System.Int32";
+
+#if DEBUG
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
+        Assert.StartsWith(message, exception.Message);
+#else
+        var id = envelope.TryGetEventId(logger);
+        Assert.Null(id);
+        Assert.Equal(message, logger.Entries.Single().Message);
+#endif
+    }
+
+    [Fact]
+    public void TryGetEventId_parse_failure()
+    {
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "not-guid" },
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var message = "Header event_id is not a GUID: not-guid";
+
+#if DEBUG
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
+        Assert.StartsWith(message, exception.Message);
+#else
+        var id = envelope.TryGetEventId(logger);
+        Assert.Null(id);
+        Assert.Equal(message, logger.Entries.Single().Message);
+#endif
+    }
+
+    [Fact]
+    public void TryGetEventId_empty_guid()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "00000000-0000-0000-0000-000000000000" },
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var message = "Envelope contains an empty event_id header";
+
+#if DEBUG
+        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
+        Assert.StartsWith(message, exception.Message);
+#else
+        var id = envelope.TryGetEventId(logger);
+        Assert.Equal(SentryId.Empty, id);
+        Assert.Equal(message, logger.Entries.Single().Message);
+#endif
+    }
+
+    [Fact]
     public async Task Serialization_EnvelopeWithoutItems_Success()
     {
         // Arrange

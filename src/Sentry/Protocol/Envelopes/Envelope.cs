@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -39,12 +40,54 @@ namespace Sentry.Protocol.Envelopes
         /// <summary>
         /// Attempts to extract the value of "event_id" header if it's present.
         /// </summary>
-        public SentryId? TryGetEventId() =>
-            Header.TryGetValue("event_id", out var value) &&
-            value is string valueString &&
-            Guid.TryParse(valueString, out var guid)
-                ? new SentryId(guid)
-                : null;
+        public SentryId? TryGetEventId()
+        {
+            var logger = SentrySdk.CurrentOptions?.DiagnosticLogger;
+            return TryGetEventId(logger);
+        }
+
+        /// <summary>
+        /// Attempts to extract the value of "event_id" header if it's present.
+        /// </summary>
+        internal SentryId? TryGetEventId(IDiagnosticLogger? logger)
+        {
+            void Error(string message)
+            {
+                Debug.Fail(message);
+                logger?.LogError(message);
+            }
+
+            if (!Header.TryGetValue("event_id", out var value))
+            {
+                return null;
+            }
+
+            if (value == null)
+            {
+                Error("Header event_id is null");
+                return null;
+            }
+
+            if (value is not string valueString)
+            {
+                Error($"Header event_id has incorrect type: {value.GetType()}");
+                return null;
+            }
+
+            if (!Guid.TryParse(valueString, out var guid))
+            {
+                Error($"Header event_id is not a GUID: {value}");
+                return null;
+            }
+
+            if (guid == Guid.Empty)
+            {
+                Error("Envelope contains an empty event_id header");
+                return SentryId.Empty;
+            }
+
+            return new SentryId(guid);
+        }
 
         private async Task SerializeHeaderAsync(
             Stream stream,

@@ -68,15 +68,16 @@ namespace Sentry.Internal
                 throw new ObjectDisposedException(nameof(BackgroundWorker));
             }
 
+            var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
             if (Interlocked.Increment(ref _currentItems) > _maxItems)
             {
                 Interlocked.Decrement(ref _currentItems);
                 _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
-                _options.LogInfo("Discarding envelope {0} because the queue is full.", envelope.TryGetEventId());
+                _options.LogInfo("Discarding envelope {0} because the queue is full.", eventId);
                 return false;
             }
 
-            _options.LogDebug("Enqueuing envelope {0}", envelope.TryGetEventId());
+            _options.LogDebug("Enqueuing envelope {0}", eventId);
             _queue.Enqueue(envelope);
 
             if (process)
@@ -142,8 +143,10 @@ namespace Sentry.Internal
                         }
                     }
 
-                    if (_queue.TryPeek(out var envelope)) // Work with the envelope while it's in the queue
+                    // Work with the envelope while it's in the queue
+                    if (_queue.TryPeek(out var envelope))
                     {
+                        var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
                         try
                         {
                             // Dispose inside try/catch
@@ -153,8 +156,8 @@ namespace Sentry.Internal
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.LogDebug(
-                                "Envelope {0} handed off to transport. {1} items in queue.",
-                                envelope.TryGetEventId(),
+                                "Envelope handed off to transport (event ID: '{0}'). {1} items in queue.",
+                                eventId,
                                 _queue.Count);
 
                             await task.ConfigureAwait(false);
@@ -172,12 +175,12 @@ namespace Sentry.Internal
                             _options.LogError(
                                 "Error while processing envelope (event ID: '{0}'). {1} items in queue.",
                                 exception,
-                                envelope.TryGetEventId(),
+                                eventId,
                                 _queue.Count);
                         }
                         finally
                         {
-                            _options.LogDebug("De-queueing event {0}", envelope.TryGetEventId());
+                            _options.LogDebug("De-queueing event {0}", eventId);
                             _queue.TryDequeue(out _);
                             Interlocked.Decrement(ref _currentItems);
                             OnFlushObjectReceived?.Invoke(envelope, EventArgs.Empty);
@@ -317,7 +320,7 @@ namespace Sentry.Internal
                 catch (Exception exception)
                 {
                     _options.LogError("Error while sending final client report (event ID: '{0}').",
-                        exception, envelope.TryGetEventId());
+                        exception, envelope.TryGetEventId(_options.DiagnosticLogger));
                 }
             }
         }
