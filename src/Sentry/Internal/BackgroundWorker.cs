@@ -156,8 +156,8 @@ namespace Sentry.Internal
                             var task = _transport.SendEnvelopeAsync(envelope, shutdownTimeout.Token);
 
                             _options.LogDebug(
-                                "Envelope {0} handed off to transport. {1} items in queue.",
-                                envelope.TryGetEventId(),
+                                "Envelope handed off to transport (event ID: '{0}'). {1} items in queue.",
+                                eventId,
                                 _queue.Count);
 
                             await task.ConfigureAwait(false);
