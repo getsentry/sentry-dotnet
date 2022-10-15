@@ -10,7 +10,7 @@ public static class VerifyExtensions
                 _.Converters.Add(new SpansConverter());
                 _.Converters.Add(new ContextsConverter());
             })
-            .IgnoreMember("version")
+            .IgnoreMembers("version", "elapsed")
             .IgnoreMembersWithType<SdkVersion>()
             .IgnoreMembersWithType<DateTimeOffset>()
             .IgnoreMembersWithType<SpanId>()

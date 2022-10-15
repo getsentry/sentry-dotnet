@@ -2,7 +2,7 @@ using Sentry.Android.Extensions;
 
 namespace Sentry.Android.Callbacks;
 
-internal class BeforeBreadcrumbCallback : JavaObject, Java.SentryOptions.IBeforeBreadcrumbCallback
+internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBeforeBreadcrumbCallback
 {
     private readonly Func<Breadcrumb, Breadcrumb?> _beforeBreadcrumb;
 
@@ -11,7 +11,7 @@ internal class BeforeBreadcrumbCallback : JavaObject, Java.SentryOptions.IBefore
         _beforeBreadcrumb = beforeBreadcrumb;
     }
 
-    public Java.Breadcrumb? Execute(Java.Breadcrumb b, Java.Hint h)
+    public JavaSdk.Breadcrumb? Execute(JavaSdk.Breadcrumb b, JavaSdk.Hint h)
     {
         // Note: Hint is unused due to:
         // https://github.com/getsentry/sentry-dotnet/issues/1469

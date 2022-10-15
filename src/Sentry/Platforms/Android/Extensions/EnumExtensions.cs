@@ -2,7 +2,7 @@ namespace Sentry.Android.Extensions;
 
 internal static class EnumExtensions
 {
-    public static SentryLevel ToSentryLevel(this Java.SentryLevel level) =>
+    public static SentryLevel ToSentryLevel(this JavaSdk.SentryLevel level) =>
         level.Name() switch
         {
             "DEBUG" => SentryLevel.Debug,
@@ -13,18 +13,18 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(level), level.Name(), message: default)
         };
 
-    public static Java.SentryLevel ToJavaSentryLevel(this SentryLevel level) =>
+    public static JavaSdk.SentryLevel ToJavaSentryLevel(this SentryLevel level) =>
         level switch
         {
-            SentryLevel.Debug => Java.SentryLevel.Debug!,
-            SentryLevel.Info => Java.SentryLevel.Info!,
-            SentryLevel.Warning => Java.SentryLevel.Warning!,
-            SentryLevel.Error => Java.SentryLevel.Error!,
-            SentryLevel.Fatal => Java.SentryLevel.Fatal!,
+            SentryLevel.Debug => JavaSdk.SentryLevel.Debug!,
+            SentryLevel.Info => JavaSdk.SentryLevel.Info!,
+            SentryLevel.Warning => JavaSdk.SentryLevel.Warning!,
+            SentryLevel.Error => JavaSdk.SentryLevel.Error!,
+            SentryLevel.Fatal => JavaSdk.SentryLevel.Fatal!,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, message: default)
         };
 
-    public static BreadcrumbLevel ToBreadcrumbLevel(this Java.SentryLevel level) =>
+    public static BreadcrumbLevel ToBreadcrumbLevel(this JavaSdk.SentryLevel level) =>
         level.Name() switch
         {
             "DEBUG" => BreadcrumbLevel.Debug,
@@ -35,18 +35,18 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(level), level.Name(), message: default)
         };
 
-    public static Java.SentryLevel ToJavaSentryLevel(this BreadcrumbLevel level) =>
+    public static JavaSdk.SentryLevel ToJavaSentryLevel(this BreadcrumbLevel level) =>
         level switch
         {
-            BreadcrumbLevel.Debug => Java.SentryLevel.Debug!,
-            BreadcrumbLevel.Info => Java.SentryLevel.Info!,
-            BreadcrumbLevel.Warning => Java.SentryLevel.Warning!,
-            BreadcrumbLevel.Error => Java.SentryLevel.Error!,
-            BreadcrumbLevel.Critical => Java.SentryLevel.Fatal!,
+            BreadcrumbLevel.Debug => JavaSdk.SentryLevel.Debug!,
+            BreadcrumbLevel.Info => JavaSdk.SentryLevel.Info!,
+            BreadcrumbLevel.Warning => JavaSdk.SentryLevel.Warning!,
+            BreadcrumbLevel.Error => JavaSdk.SentryLevel.Error!,
+            BreadcrumbLevel.Critical => JavaSdk.SentryLevel.Fatal!,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, message: default)
         };
 
-    public static SpanStatus ToSpanStatus(this Java.SpanStatus status) =>
+    public static SpanStatus ToSpanStatus(this JavaSdk.SpanStatus status) =>
         status.Name() switch
         {
             "OK" => SpanStatus.Ok,
@@ -70,30 +70,30 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(status), status.Name(), message: default)
         };
 
-    public static Java.SpanStatus ToJavaSpanStatus(this SpanStatus status) =>
+    public static JavaSdk.SpanStatus ToJavaSpanStatus(this SpanStatus status) =>
         status switch
         {
-            SpanStatus.Ok => Java.SpanStatus.Ok!,
-            SpanStatus.Cancelled => Java.SpanStatus.Cancelled!,
-            SpanStatus.InternalError => Java.SpanStatus.InternalError!,
-            SpanStatus.UnknownError => Java.SpanStatus.UnknownError!,
-            SpanStatus.InvalidArgument => Java.SpanStatus.InvalidArgument!,
-            SpanStatus.DeadlineExceeded => Java.SpanStatus.DeadlineExceeded!,
-            SpanStatus.NotFound => Java.SpanStatus.NotFound!,
-            SpanStatus.AlreadyExists => Java.SpanStatus.AlreadyExists!,
-            SpanStatus.PermissionDenied => Java.SpanStatus.PermissionDenied!,
-            SpanStatus.ResourceExhausted => Java.SpanStatus.ResourceExhausted!,
-            SpanStatus.FailedPrecondition => Java.SpanStatus.FailedPrecondition!,
-            SpanStatus.Aborted => Java.SpanStatus.Aborted!,
-            SpanStatus.OutOfRange => Java.SpanStatus.OutOfRange!,
-            SpanStatus.Unimplemented => Java.SpanStatus.Unimplemented!,
-            SpanStatus.Unavailable => Java.SpanStatus.Unavailable!,
-            SpanStatus.DataLoss => Java.SpanStatus.DataLoss!,
-            SpanStatus.Unauthenticated => Java.SpanStatus.Unauthenticated!,
+            SpanStatus.Ok => JavaSdk.SpanStatus.Ok!,
+            SpanStatus.Cancelled => JavaSdk.SpanStatus.Cancelled!,
+            SpanStatus.InternalError => JavaSdk.SpanStatus.InternalError!,
+            SpanStatus.UnknownError => JavaSdk.SpanStatus.UnknownError!,
+            SpanStatus.InvalidArgument => JavaSdk.SpanStatus.InvalidArgument!,
+            SpanStatus.DeadlineExceeded => JavaSdk.SpanStatus.DeadlineExceeded!,
+            SpanStatus.NotFound => JavaSdk.SpanStatus.NotFound!,
+            SpanStatus.AlreadyExists => JavaSdk.SpanStatus.AlreadyExists!,
+            SpanStatus.PermissionDenied => JavaSdk.SpanStatus.PermissionDenied!,
+            SpanStatus.ResourceExhausted => JavaSdk.SpanStatus.ResourceExhausted!,
+            SpanStatus.FailedPrecondition => JavaSdk.SpanStatus.FailedPrecondition!,
+            SpanStatus.Aborted => JavaSdk.SpanStatus.Aborted!,
+            SpanStatus.OutOfRange => JavaSdk.SpanStatus.OutOfRange!,
+            SpanStatus.Unimplemented => JavaSdk.SpanStatus.Unimplemented!,
+            SpanStatus.Unavailable => JavaSdk.SpanStatus.Unavailable!,
+            SpanStatus.DataLoss => JavaSdk.SpanStatus.DataLoss!,
+            SpanStatus.Unauthenticated => JavaSdk.SpanStatus.Unauthenticated!,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
 
-    public static TransactionNameSource ToTransactionNameSource(this Java.Protocol.TransactionNameSource source) =>
+    public static TransactionNameSource ToTransactionNameSource(this JavaSdk.Protocol.TransactionNameSource source) =>
         source.Name() switch
         {
             "CUSTOM" => TransactionNameSource.Custom,
@@ -104,14 +104,14 @@ internal static class EnumExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(source), source.Name(), message: default)
         };
 
-    public static Java.Protocol.TransactionNameSource ToJavaTransactionNameSource(this TransactionNameSource source) =>
+    public static JavaSdk.Protocol.TransactionNameSource ToJavaTransactionNameSource(this TransactionNameSource source) =>
         source switch
         {
-            TransactionNameSource.Custom => Java.Protocol.TransactionNameSource.Custom!,
-            TransactionNameSource.Url => Java.Protocol.TransactionNameSource.Url!,
-            TransactionNameSource.Route => Java.Protocol.TransactionNameSource.Route!,
-            TransactionNameSource.View => Java.Protocol.TransactionNameSource.View!,
-            TransactionNameSource.Task => Java.Protocol.TransactionNameSource.Task!,
+            TransactionNameSource.Custom => JavaSdk.Protocol.TransactionNameSource.Custom!,
+            TransactionNameSource.Url => JavaSdk.Protocol.TransactionNameSource.Url!,
+            TransactionNameSource.Route => JavaSdk.Protocol.TransactionNameSource.Route!,
+            TransactionNameSource.View => JavaSdk.Protocol.TransactionNameSource.View!,
+            TransactionNameSource.Task => JavaSdk.Protocol.TransactionNameSource.Task!,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
         };
 }

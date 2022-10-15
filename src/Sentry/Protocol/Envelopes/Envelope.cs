@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -17,6 +18,9 @@ namespace Sentry.Protocol.Envelopes
     /// </summary>
     public sealed class Envelope : ISerializable, IDisposable
     {
+        // caches the event id from the header
+        private SentryId? _eventId;
+
         /// <summary>
         /// Header associated with the envelope.
         /// </summary>
@@ -36,15 +40,75 @@ namespace Sentry.Protocol.Envelopes
             Items = items;
         }
 
+        private Envelope(SentryId? eventId, IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
+        {
+            _eventId = eventId;
+            Header = header;
+            Items = items;
+        }
+
         /// <summary>
         /// Attempts to extract the value of "event_id" header if it's present.
         /// </summary>
-        public SentryId? TryGetEventId() =>
-            Header.TryGetValue("event_id", out var value) &&
-            value is string valueString &&
-            Guid.TryParse(valueString, out var guid)
-                ? new SentryId(guid)
-                : null;
+        public SentryId? TryGetEventId()
+        {
+            var logger = SentrySdk.CurrentOptions?.DiagnosticLogger;
+            return TryGetEventId(logger);
+        }
+
+        /// <summary>
+        /// Attempts to extract the value of "event_id" header if it's present.
+        /// </summary>
+        internal SentryId? TryGetEventId(IDiagnosticLogger? logger)
+        {
+            void Error(string message)
+            {
+// On mobile platforms, Debug.Fail will crash the app
+#if !__MOBILE__
+                Debug.Fail(message);
+#endif
+                logger?.LogError(message);
+            }
+
+            if (_eventId != null)
+            {
+                // use the cached value
+                return _eventId;
+            }
+
+            if (!Header.TryGetValue("event_id", out var value))
+            {
+                return null;
+            }
+
+            if (value == null)
+            {
+                Error("Header event_id is null");
+                return null;
+            }
+
+            if (value is not string valueString)
+            {
+                Error($"Header event_id has incorrect type: {value.GetType()}");
+                return null;
+            }
+
+            if (!Guid.TryParse(valueString, out var guid))
+            {
+                Error($"Header event_id is not a GUID: {value}");
+                return null;
+            }
+
+            if (guid == Guid.Empty)
+            {
+                Error("Envelope contains an empty event_id header");
+                _eventId = SentryId.Empty;
+                return _eventId;
+            }
+
+            _eventId = new SentryId(guid);
+            return _eventId;
+        }
 
         private async Task SerializeHeaderAsync(
             Stream stream,
@@ -158,7 +222,8 @@ namespace Sentry.Protocol.Envelopes
             IReadOnlyCollection<Attachment>? attachments = null,
             SessionUpdate? sessionUpdate = null)
         {
-            var header = CreateHeader(@event.EventId);
+            var eventId = @event.EventId;
+            var header = CreateHeader(eventId);
 
             var items = new List<EnvelopeItem>
             {
@@ -201,7 +266,7 @@ namespace Sentry.Protocol.Envelopes
                 items.Add(EnvelopeItem.FromSession(sessionUpdate));
             }
 
-            return new Envelope(header, items);
+            return new Envelope(eventId, header, items);
         }
 
         /// <summary>
@@ -209,14 +274,15 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
         {
-            var header = CreateHeader(sentryUserFeedback.EventId);
+            var eventId = sentryUserFeedback.EventId;
+            var header = CreateHeader(eventId);
 
             var items = new[]
             {
                 EnvelopeItem.FromUserFeedback(sentryUserFeedback)
             };
 
-            return new Envelope(header, items);
+            return new Envelope(eventId, header, items);
         }
 
         /// <summary>
@@ -224,15 +290,16 @@ namespace Sentry.Protocol.Envelopes
         /// </summary>
         public static Envelope FromTransaction(Transaction transaction)
         {
+            var eventId = transaction.EventId;
             Dictionary<string, object?> header;
             if (transaction.DynamicSamplingContext is { } dsc)
             {
-                header = CreateHeader(transaction.EventId, extraCapacity: 1);
+                header = CreateHeader(eventId, extraCapacity: 1);
                 header["trace"] = dsc.Items;
             }
             else
             {
-                header = CreateHeader(transaction.EventId);
+                header = CreateHeader(eventId);
             }
 
             var items = new[]
@@ -240,7 +307,7 @@ namespace Sentry.Protocol.Envelopes
                 EnvelopeItem.FromTransaction(transaction)
             };
 
-            return new Envelope(header, items);
+            return new Envelope(eventId, header, items);
         }
 
         /// <summary>
@@ -317,7 +384,7 @@ namespace Sentry.Protocol.Envelopes
         {
             var items = Items.ToList();
             items.Add(item);
-            return new Envelope(Header, items);
+            return new Envelope(_eventId, Header, items);
         }
     }
 }

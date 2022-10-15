@@ -3,6 +3,7 @@ using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
+using Sentry.JavaSdk.Android.Core;
 using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
@@ -93,7 +94,7 @@ public static partial class SentrySdk
                 if (options.HttpProxy is System.Net.WebProxy proxy)
                 {
                     var creds = proxy.Credentials as System.Net.NetworkCredential;
-                    o.SetProxy(new Java.SentryOptions.Proxy
+                    o.SetProxy(new JavaSdk.SentryOptions.Proxy
                     {
                         Host = proxy.Address?.Host,
                         Port = proxy.Address?.Port.ToString(CultureInfo.InvariantCulture),
@@ -166,7 +167,7 @@ public static partial class SentrySdk
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
-        options.CrashedLastRun = () => Java.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
+        options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
 

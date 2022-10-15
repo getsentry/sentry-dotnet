@@ -1,6 +1,3 @@
-using System.Runtime.InteropServices;
-using DiffEngine;
-
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
 public sealed class LocalDbFixture : IDisposable
@@ -14,7 +11,7 @@ public sealed class LocalDbFixture : IDisposable
             return;
         }
 
-        SqlInstance = new SqlInstance(
+        SqlInstance = new(
             name: "SqlListenerTests" + Namer.RuntimeAndVersion,
             buildTemplate: TestDbBuilder.CreateTable);
     }
