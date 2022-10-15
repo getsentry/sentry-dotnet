@@ -47,6 +47,9 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
         // Make sure custom factory was used instead of default one
         _ = factory.Received().CreateLogger(Arg.Any<string>());
 
+        // Invoke request to make sure Sentry is initialized
+        await HttpClient.GetAsync("/");
+
         Assert.True(SentrySdk.IsEnabled);
 
         await TestServer.Host.StopAsync();

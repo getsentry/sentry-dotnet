@@ -73,6 +73,7 @@ public class SentryStartup : FunctionsStartup
     {
         base.ConfigureServices(context, services);
         services.AddTransient<IStartupFilter, SentryStartupFilter>();
+        services.AddTransient<SentryMiddleware>();
     }
 
     /// <summary>

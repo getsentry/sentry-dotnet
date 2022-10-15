@@ -99,7 +99,10 @@ public static class SentryWebHostBuilderExtensions
 
         });
 
-        _ = builder.ConfigureServices(c => _ = c.AddTransient<IStartupFilter, SentryStartupFilter>());
+        _ = builder.ConfigureServices(c => _ =
+            c.AddTransient<IStartupFilter, SentryStartupFilter>()
+             .AddTransient<SentryMiddleware>()
+        );
 
         return builder;
     }

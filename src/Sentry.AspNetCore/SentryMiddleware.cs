@@ -18,14 +18,14 @@ namespace Sentry.AspNetCore;
 /// <summary>
 /// Sentry middleware for ASP.NET Core
 /// </summary>
-internal class SentryMiddleware
+internal class SentryMiddleware : IMiddleware
 {
-    private readonly RequestDelegate _next;
     private readonly Func<IHub> _getHub;
     private readonly SentryAspNetCoreOptions _options;
     private readonly IHostingEnvironment _hostingEnvironment;
     private readonly ILogger<SentryMiddleware> _logger;
-
+    private readonly IEnumerable<ISentryEventExceptionProcessor> _eventExceptionProcessors;
+    private readonly IEnumerable<ISentryEventProcessor> _eventProcessors;
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
 
@@ -34,40 +34,44 @@ internal class SentryMiddleware
     /// <summary>
     /// Initializes a new instance of the <see cref="SentryMiddleware"/> class.
     /// </summary>
-    /// <param name="next">The next.</param>
     /// <param name="getHub">The sentry Hub accessor.</param>
     /// <param name="options">The options for this integration</param>
     /// <param name="hostingEnvironment">The hosting environment.</param>
     /// <param name="logger">Sentry logger.</param>
+    /// <param name="eventExceptionProcessors">Custom Event Exception Processors</param>
+    /// <param name="eventProcessors">Custom Event Processors</param>
     /// <exception cref="ArgumentNullException">
     /// next
     /// or
     /// sentry
     /// </exception>
     public SentryMiddleware(
-        RequestDelegate next,
         Func<IHub> getHub,
         IOptions<SentryAspNetCoreOptions> options,
         IHostingEnvironment hostingEnvironment,
-        ILogger<SentryMiddleware> logger)
+        ILogger<SentryMiddleware> logger,
+        IEnumerable<ISentryEventExceptionProcessor> eventExceptionProcessors,
+        IEnumerable<ISentryEventProcessor> eventProcessors)
     {
-        _next = next ?? throw new ArgumentNullException(nameof(next));
         _getHub = getHub ?? throw new ArgumentNullException(nameof(getHub));
         _options = options.Value;
         _hostingEnvironment = hostingEnvironment;
         _logger = logger;
+        _eventExceptionProcessors = eventExceptionProcessors;
+        _eventProcessors = eventProcessors;
     }
 
     /// <summary>
     /// Handles the <see cref="HttpContext"/> while capturing any errors
     /// </summary>
     /// <param name="context">The context.</param>
-    public async Task InvokeAsync(HttpContext context)
+    /// <param name="next">Delegate to next middleware.</param>
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         var hub = _getHub();
         if (!hub.IsEnabled)
         {
-            await _next(context).ConfigureAwait(false);
+            await next(context).ConfigureAwait(false);
             return;
         }
 
@@ -92,7 +96,6 @@ internal class SentryMiddleware
                 // sent to Sentry. This avoid the cost on error-free requests.
                 // In case of event, all data made available through the HTTP Context at the time of the
                 // event creation will be sent to Sentry
-
                 scope.OnEvaluating += (_, _) =>
                 {
                     SyncOptionsScope(hub);
@@ -108,7 +111,7 @@ internal class SentryMiddleware
 
             try
             {
-                await _next(context).ConfigureAwait(false);
+                await next(context).ConfigureAwait(false);
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).
                 var exceptionFeature = context.Features.Get<IExceptionHandlerFeature?>();
@@ -134,7 +137,7 @@ internal class SentryMiddleware
 
             // Some environments disables the application after sending a request,
             // making the OnCompleted flush to not work.
-             Task FlushBeforeCompleted() => hub.FlushAsync(timeout: _options.FlushTimeout);
+            Task FlushBeforeCompleted() => hub.FlushAsync(timeout: _options.FlushTimeout);
 
             void CaptureException(Exception e, SentryId eventId, string mechanism)
             {
@@ -162,6 +165,8 @@ internal class SentryMiddleware
 
     internal void PopulateScope(HttpContext context, Scope scope)
     {
+        scope.AddEventProcessors(_eventProcessors.Except(scope.GetAllEventProcessors()));
+        scope.AddExceptionProcessors(_eventExceptionProcessors.Except(scope.GetAllExceptionProcessors()));
         scope.Sdk.Name = Constants.SdkName;
         scope.Sdk.Version = NameAndVersion.Version;
 
