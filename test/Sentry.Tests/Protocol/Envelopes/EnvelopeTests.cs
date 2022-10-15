@@ -1,5 +1,10 @@
 using Sentry.Testing;
 
+#if DEBUG && !__MOBILE__
+using Sentry.PlatformAbstractions;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
+#endif
+
 namespace Sentry.Tests.Protocol.Envelopes;
 
 public class EnvelopeTests
@@ -44,84 +49,40 @@ public class EnvelopeTests
         Assert.Empty(logger.Entries);
     }
 
-    [Fact]
-    public void TryGetEventId_null()
-    {
-        using var envelope = new Envelope(
-            new Dictionary<string, object> { ["event_id"] = null },
-            Array.Empty<EnvelopeItem>());
-        var logger = new InMemoryDiagnosticLogger();
-
-        var message = "Header event_id is null";
-#if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
-        Assert.StartsWith(message, exception.Message);
-#else
-        var id = envelope.TryGetEventId(logger);
-        Assert.Null(id);
-        Assert.Equal(message, logger.Entries.Single().Message);
-#endif
-    }
-
-    [Fact]
-    public void TryGetEventId_incorrect_type()
-    {
-        using var envelope = new Envelope(
-            new Dictionary<string, object> { ["event_id"] = 10 },
-            Array.Empty<EnvelopeItem>());
-        var logger = new InMemoryDiagnosticLogger();
-
-        var message = "Header event_id has incorrect type: System.Int32";
-
-#if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
-        Assert.StartsWith(message, exception.Message);
-#else
-        var id = envelope.TryGetEventId(logger);
-        Assert.Null(id);
-        Assert.Equal(message, logger.Entries.Single().Message);
-#endif
-    }
-
-    [Fact]
-    public void TryGetEventId_parse_failure()
-    {
-        using var envelope = new Envelope(
-            new Dictionary<string, object> { ["event_id"] = "not-guid" },
-            Array.Empty<EnvelopeItem>());
-        var logger = new InMemoryDiagnosticLogger();
-
-        var message = "Header event_id is not a GUID: not-guid";
-
-#if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
-        Assert.StartsWith(message, exception.Message);
-#else
-        var id = envelope.TryGetEventId(logger);
-        Assert.Null(id);
-        Assert.Equal(message, logger.Entries.Single().Message);
-#endif
-    }
-
-    [Fact]
-    public void TryGetEventId_empty_guid()
+    [Theory]
+    [InlineData(null, false, "Header event_id is null")]
+    [InlineData(10, false, "Header event_id has incorrect type: System.Int32")]
+    [InlineData("not-guid", false, "Header event_id is not a GUID: not-guid")]
+    [InlineData("00000000-0000-0000-0000-000000000000", true, "Envelope contains an empty event_id header")]
+    public void TryGetEventId_Errors(object value, bool expectEmpty, string message)
     {
         // Arrange
         using var envelope = new Envelope(
-            new Dictionary<string, object> { ["event_id"] = "00000000-0000-0000-0000-000000000000" },
+            new Dictionary<string, object> { ["event_id"] = value },
             Array.Empty<EnvelopeItem>());
+
         var logger = new InMemoryDiagnosticLogger();
 
-        var message = "Envelope contains an empty event_id header";
-
-#if DEBUG
-        var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
-        Assert.StartsWith(message, exception.Message);
-#else
-        var id = envelope.TryGetEventId(logger);
-        Assert.Equal(SentryId.Empty, id);
-        Assert.Equal(message, logger.Entries.Single().Message);
+#if DEBUG && !__MOBILE__
+        if (!Runtime.Current.IsMono())
+        {
+            // Test for the exception thrown by Debug.Fail (doesn't throw on Mono)
+            var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
+            Assert.Contains(message, exception.Message);
+            return;
+        }
 #endif
+
+        var id = envelope.TryGetEventId(logger);
+        Assert.Equal(message, logger.Entries.Single().Message);
+        if (expectEmpty)
+        {
+            Assert.Equal(SentryId.Empty, id);
+        }
+        else
+        {
+            Assert.Null(id);
+        }
     }
 
     [Fact]
