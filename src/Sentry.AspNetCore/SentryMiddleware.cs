@@ -26,6 +26,8 @@ internal class SentryMiddleware : IMiddleware
     private readonly ILogger<SentryMiddleware> _logger;
     private readonly IEnumerable<ISentryEventExceptionProcessor> _eventExceptionProcessors;
     private readonly IEnumerable<ISentryEventProcessor> _eventProcessors;
+    private readonly IEnumerable<ISentryTransactionProcessor> _transactionProcessors;
+
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentryMiddleware).Assembly.GetNameAndVersion();
 
@@ -40,6 +42,7 @@ internal class SentryMiddleware : IMiddleware
     /// <param name="logger">Sentry logger.</param>
     /// <param name="eventExceptionProcessors">Custom Event Exception Processors</param>
     /// <param name="eventProcessors">Custom Event Processors</param>
+    /// <param name="transactionProcessors">Custom Transaction Processors</param>
     /// <exception cref="ArgumentNullException">
     /// next
     /// or
@@ -51,7 +54,8 @@ internal class SentryMiddleware : IMiddleware
         IHostingEnvironment hostingEnvironment,
         ILogger<SentryMiddleware> logger,
         IEnumerable<ISentryEventExceptionProcessor> eventExceptionProcessors,
-        IEnumerable<ISentryEventProcessor> eventProcessors)
+        IEnumerable<ISentryEventProcessor> eventProcessors,
+        IEnumerable<ISentryTransactionProcessor> transactionProcessors)
     {
         _getHub = getHub ?? throw new ArgumentNullException(nameof(getHub));
         _options = options.Value;
@@ -59,6 +63,7 @@ internal class SentryMiddleware : IMiddleware
         _logger = logger;
         _eventExceptionProcessors = eventExceptionProcessors;
         _eventProcessors = eventProcessors;
+        _transactionProcessors = transactionProcessors;
     }
 
     /// <summary>
@@ -139,12 +144,12 @@ internal class SentryMiddleware : IMiddleware
             // making the OnCompleted flush to not work.
             Task FlushBeforeCompleted() => hub.FlushAsync(timeout: _options.FlushTimeout);
 
-            void CaptureException(Exception e, SentryId eventId, string mechanism)
+            void CaptureException(Exception e, SentryId evtId, string mechanism)
             {
                 e.Data[Mechanism.HandledKey] = false;
                 e.Data[Mechanism.MechanismKey] = mechanism;
 
-                var evt = new SentryEvent(e, eventId: eventId);
+                var evt = new SentryEvent(e, eventId: evtId);
 
                 _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 
@@ -167,6 +172,7 @@ internal class SentryMiddleware : IMiddleware
     {
         scope.AddEventProcessors(_eventProcessors.Except(scope.GetAllEventProcessors()));
         scope.AddExceptionProcessors(_eventExceptionProcessors.Except(scope.GetAllExceptionProcessors()));
+        scope.AddTransactionProcessors(_transactionProcessors.Except(scope.GetAllTransactionProcessors()));
         scope.Sdk.Name = Constants.SdkName;
         scope.Sdk.Version = NameAndVersion.Version;
 
