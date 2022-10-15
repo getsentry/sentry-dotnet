@@ -6,6 +6,7 @@
 
 - Update bundled Android SDK to version 6.5.0 ([#1984](https://github.com/getsentry/sentry-dotnet/pull/1984))
 - Update bundled Cocoa SDK to version 7.28.0 ([#1988](https://github.com/getsentry/sentry-dotnet/pull/1988))
+- Allow custom processors to be added as a scoped dependency ([#1979](https://github.com/getsentry/sentry-dotnet/pull/1979))
 
 ### Fixes
 
