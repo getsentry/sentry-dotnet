@@ -63,7 +63,10 @@ namespace Sentry.Protocol.Envelopes
         {
             void Error(string message)
             {
+// On mobile platforms, Debug.Fail will crash the app
+#if !__MOBILE__
                 Debug.Fail(message);
+#endif
                 logger?.LogError(message);
             }
 
