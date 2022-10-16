@@ -30,6 +30,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
         public IEnumerable<ISentryEventProcessor> EventProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventProcessor>>();
         public IEnumerable<ISentryEventExceptionProcessor> EventExceptionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventExceptionProcessor>>();
+        public IEnumerable<ISentryTransactionProcessor> TransactionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryTransactionProcessor>>();
         private readonly IDisposable _disposable;
 
         public Fixture()
@@ -60,7 +61,8 @@ public class MiddlewareLoggerIntegration : IDisposable
                 HostingEnvironment,
                 MiddlewareLogger,
                 EventExceptionProcessors,
-                EventProcessors);
+                EventProcessors,
+                TransactionProcessors);
 
         public void Dispose() => _disposable.Dispose();
     }

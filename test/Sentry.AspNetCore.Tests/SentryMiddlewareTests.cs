@@ -25,6 +25,7 @@ public class SentryMiddlewareTests
         public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
         public IEnumerable<ISentryEventProcessor> EventProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventProcessor>>();
         public IEnumerable<ISentryEventExceptionProcessor> EventExceptionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventExceptionProcessor>>();
+        public IEnumerable<ISentryTransactionProcessor> TransactionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryTransactionProcessor>>();
         public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
         public Scope Scope { get; set; }
 
@@ -50,7 +51,8 @@ public class SentryMiddlewareTests
                 HostingEnvironment,
                 Logger,
                 EventExceptionProcessors,
-                EventProcessors);
+                EventProcessors,
+                TransactionProcessors);
     }
 
     private readonly Fixture _fixture = new();
@@ -597,7 +599,10 @@ public class SentryMiddlewareTests
         {
             await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
         }
-        catch { }
+        catch
+        {
+            //
+        }
 
         // Assert
         firstHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
@@ -686,6 +691,7 @@ public class SentryMiddlewareTests
 
         Assert.Contains(customEventExceptionProcessor, scope.GetAllExceptionProcessors());
     }
+
     [Fact]
     public void PopulateScope_DoesNotDuplicateExceptionEventProcessorsWhenPopulateMultipleTimes()
     {
@@ -702,5 +708,40 @@ public class SentryMiddlewareTests
         sut.PopulateScope(_fixture.HttpContext, scope);
 
         Assert.Single(scope.GetAllExceptionProcessors().Where(c => c == customEventExceptionProcessor));
+    }
+
+    [Fact]
+    public void PopulateScope_AddTransactionProcessors()
+    {
+        var customTransactionProcessor = Substitute.For<ISentryTransactionProcessor>();
+        var transactionProcessors = new List<ISentryTransactionProcessor>() {
+            customTransactionProcessor
+        };
+        _fixture.TransactionProcessors = transactionProcessors;
+
+        var sut = _fixture.GetSut();
+
+        var scope = new Scope();
+        sut.PopulateScope(_fixture.HttpContext, scope);
+
+        Assert.Contains(customTransactionProcessor, scope.GetAllTransactionProcessors());
+    }
+
+    [Fact]
+    public void PopulateScope_DoesNotDuplicateTransactionProcessorsWhenPopulateMultipleTimes()
+    {
+        var customTransactionProcessor = Substitute.For<ISentryTransactionProcessor>();
+        var transactionProcessors = new List<ISentryTransactionProcessor>() {
+            customTransactionProcessor
+        };
+        _fixture.TransactionProcessors = transactionProcessors;
+
+        var sut = _fixture.GetSut();
+
+        var scope = new Scope();
+        sut.PopulateScope(_fixture.HttpContext, scope);
+        sut.PopulateScope(_fixture.HttpContext, scope);
+
+        Assert.Single(scope.GetAllTransactionProcessors().Where(c => c == customTransactionProcessor));
     }
 }
