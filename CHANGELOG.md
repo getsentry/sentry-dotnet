@@ -15,6 +15,7 @@
   - NuGet package `Sentry` now depends on `Sentry.Bindings.Android` for `net6.0-android` targets.
   - NuGet package `Sentry` now depends on `Sentry.Bindings.Cocoa` for `net6.0-ios` and `net6.0-maccatalyst` targets.
 - Exclude EF error message from logging ([#1980](https://github.com/getsentry/sentry-dotnet/pull/1980))
+- Ensure logs with lower levels are captured by `Sentry.Extensions.Logging` ([#1992](https://github.com/getsentry/sentry-dotnet/pull/1992))
 
 ## 3.22.0
 
