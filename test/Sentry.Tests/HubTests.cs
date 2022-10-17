@@ -471,7 +471,8 @@ public class HubTests
 
         await Verify(worker.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMember("Stacktrace");
+            .IgnoreMember("Stacktrace")
+            .IgnoreMember<SentryThread>(_ => _.Name);
     }
 
     [Fact]
