@@ -437,6 +437,7 @@ public class HubTests
     }
 
     [Fact]
+    [Trait("Category", "Verify")]
     public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
     {
         // Arrange
