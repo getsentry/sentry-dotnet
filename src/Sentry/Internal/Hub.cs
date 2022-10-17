@@ -315,13 +315,14 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                if (evt.HasUnhandledException)
+                var hasUnhandledException = evt.HasUnhandledException();
+                if (hasUnhandledException)
                 {
                     // Event contains a terminal exception -> end session as crashed
                     _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
                     actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
                 }
-                else if (evt.HasException)
+                else if (evt.HasException())
                 {
                     // Event contains a non-terminal exception -> report error
                     // (this might return null if the session has already reported errors before)
@@ -332,7 +333,7 @@ namespace Sentry.Internal
                 actualScope.LastEventId = id;
                 actualScope.SessionUpdate = null;
 
-                if (evt.HasUnhandledException)
+                if (hasUnhandledException)
                 {
                     // Event contains a terminal exception -> finish any current transaction as aborted
                     // Do this *after* the event was captured, so that the event is still linked to the transaction.

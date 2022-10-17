@@ -175,12 +175,13 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
-        internal bool HasException => Exception is not null || SentryExceptions?.Any() == true;
+        internal bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
 
-        internal bool HasUnhandledException => (SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
-                                               // Before event is processed by the client and SentryExceptions created.
-                                               // See: AppDomainUnhandledExceptionIntegration
-                                               || Exception?.Data[Mechanism.HandledKey] is false;
+        internal bool HasUnhandledException() =>
+            (SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
+            // Before event is processed by the client and SentryExceptions created.
+            // See: AppDomainUnhandledExceptionIntegration
+            || Exception?.Data[Mechanism.HandledKey] is false;
 
         /// <summary>
         /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
