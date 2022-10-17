@@ -315,31 +315,30 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                switch (evt)
+                if (evt.HasUnhandledException)
                 {
-                    // Event contains a terminal exception -> end session as crashed and mark transaction as aborted
-                    case var e when e.HasUnhandledException:
-                        actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-                        if (actualScope.Transaction != null)
-                        {
-                            actualScope.Transaction.Status = SpanStatus.Aborted;
-                        }
-
-                        break;
+                    // Event contains a terminal exception -> end session as crashed
+                    _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
+                    actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                }
+                else if (evt.HasException)
+                {
                     // Event contains a non-terminal exception -> report error
                     // (this might return null if the session has already reported errors before)
-                    case var e when e.HasException:
-                        actualScope.SessionUpdate = _sessionManager.ReportError();
-                        break;
-                    default:
-                        // Event doesn't contain any kind of exception -> no reason to attach session update
-                        actualScope.SessionUpdate = null;
-                        break;
+                    actualScope.SessionUpdate = _sessionManager.ReportError();
                 }
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
                 actualScope.SessionUpdate = null;
+
+                if (evt.HasUnhandledException)
+                {
+                    // Event contains a terminal exception -> finish any current transaction as aborted
+                    // Do this *after* the event was captured, so that the event is still linked to the transaction.
+                    _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
+                    actualScope.Transaction?.Finish(SpanStatus.Aborted);
+                }
 
                 return id;
             }

@@ -446,7 +446,8 @@ public class HubTests
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            Release = "release"
+            Release = "release",
+            TracesSampleRate = 1.0
         };
         var client = new SentryClient(options, worker);
         var hub = new Hub(options, client);

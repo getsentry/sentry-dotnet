@@ -52,7 +52,11 @@
             Level: error,
             TransactionName: my transaction,
             Request: {},
-            Contexts: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
             User: {},
             Environment: production
           }
@@ -71,6 +75,52 @@
             IsInitial: false,
             SequenceNumber: 1,
             EndStatus: Crashed
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      event_id: Guid_3,
+      sdk: {
+        name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: release,
+        sample_rate: 1,
+        trace_id: Guid_4,
+        transaction: my transaction
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: transaction
+        },
+        Payload: {
+          Source: {
+            Name: my transaction,
+            Platform: csharp,
+            Operation: my operation,
+            Description: ,
+            Status: Aborted,
+            IsSampled: true,
+            SampleRate: 1.0,
+            Request: {},
+            Contexts: {
+              trace: {
+                Operation: my operation,
+                Description: ,
+                Status: Aborted,
+                IsSampled: true
+              }
+            },
+            User: {},
+            Environment: production,
+            IsFinished: true
           }
         }
       }
