@@ -322,7 +322,7 @@ namespace Sentry.Internal
                         actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
                         if (actualScope.Transaction != null)
                         {
-                          //  actualScope.Transaction.Status = SpanStatus.Aborted;
+                            actualScope.Transaction.Status = SpanStatus.Aborted;
                         }
 
                         break;

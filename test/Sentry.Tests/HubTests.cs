@@ -450,6 +450,8 @@ public class HubTests
         var client = new SentryClient(options, worker);
         var hub = new Hub(options, client);
 
+        var transaction = hub.StartTransaction("my transaction", "my operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
         hub.StartSession();
 
         // Act
@@ -468,18 +470,8 @@ public class HubTests
         });
 
         await Verify(worker.Envelopes)
-            .IgnoreStandardSentryMembers();
-        // // Assert
-        // worker.Received().EnqueueEnvelope(
-        //     Arg.Is<Envelope>(e =>
-        //         e.Items
-        //             .Select(i => i.Payload)
-        //             .OfType<JsonSerializable>()
-        //             .Select(i => i.Source)
-        //             .OfType<SessionUpdate>()
-        //             .Single()
-        //             .EndStatus == SessionEndStatus.Crashed
-        //     ));
+            .IgnoreStandardSentryMembers()
+            .IgnoreMember("Stacktrace");
     }
 
     [Fact]
