@@ -2,7 +2,7 @@ namespace Sentry.Testing;
 
 public class FakeBackgroundWorker : IBackgroundWorker
 {
-    private List<Envelope> _envelopes = new();
+    private readonly List<Envelope> _envelopes = new();
 
     public IEnumerable<Envelope> Envelopes => _envelopes;
     public int QueuedItems => _envelopes.Count;
