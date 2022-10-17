@@ -315,20 +315,27 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                actualScope.SessionUpdate = evt switch
+                switch (evt)
                 {
-                    // Event contains a terminal exception -> end session as crashed
-                    var e when e.HasUnhandledException =>
-                        _sessionManager.EndSession(SessionEndStatus.Crashed),
+                    // Event contains a terminal exception -> end session as crashed and mark transaction as aborted
+                    case var e when e.HasUnhandledException:
+                        actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                        if (actualScope.Transaction != null)
+                        {
+                          //  actualScope.Transaction.Status = SpanStatus.Aborted;
+                        }
 
+                        break;
                     // Event contains a non-terminal exception -> report error
                     // (this might return null if the session has already reported errors before)
-                    var e when e.HasException =>
-                        _sessionManager.ReportError(),
-
-                    // Event doesn't contain any kind of exception -> no reason to attach session update
-                    _ => null
-                };
+                    case var e when e.HasException:
+                        actualScope.SessionUpdate = _sessionManager.ReportError();
+                        break;
+                    default:
+                        // Event doesn't contain any kind of exception -> no reason to attach session update
+                        actualScope.SessionUpdate = null;
+                        break;
+                }
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;

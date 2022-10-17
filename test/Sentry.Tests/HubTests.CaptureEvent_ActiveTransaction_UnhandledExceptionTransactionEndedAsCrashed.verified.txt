@@ -1,0 +1,398 @@
+﻿[
+  {
+    Header: {
+      sdk: {
+        name: sentry.dotnet
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: session
+        },
+        Payload: {
+          Source: {
+            DistinctId: Guid_1,
+            Release: release,
+            Environment: production,
+            IsInitial: true
+          }
+        }
+      }
+    ]
+  },
+  {
+    Header: {
+      event_id: Guid_2,
+      sdk: {
+        name: sentry.dotnet
+      }
+    },
+    Items: [
+      {
+        Header: {
+          type: event
+        },
+        Payload: {
+          Source: {
+            Platform: csharp,
+            SentryExceptions: [
+              {
+                Mechanism: {
+                  Handled: false
+                }
+              }
+            ],
+            SentryThreads: [
+              {
+                Crashed: false,
+                Current: true,
+                Stacktrace: {
+                  Frames: [
+                    {
+                      Function: object CrossAppDomainSink.DoTransitionDispatchCallback(object[] args),
+                      InApp: false
+                    },
+                    {
+                      Function: byte[] CrossAppDomainSink.DoDispatch(byte[] reqStmBuff, SmuggledMethodCallMessage smuggledMcm, out SmuggledMethodReturnMessage smuggledMrm),
+                      InApp: false
+                    },
+                    {
+                      Function: IMessage ChannelServices.SyncDispatchMessage(IMessage msg),
+                      InApp: false
+                    },
+                    {
+                      Function: IMessage CrossContextChannel.SyncProcessMessage(IMessage reqMsg),
+                      InApp: false
+                    },
+                    {
+                      Function: object Thread.InternalCrossContextCallback(Context ctx, IntPtr ctxID, int appDomainID, InternalCrossContextDelegate ftnToCall, object[] args),
+                      InApp: false
+                    },
+                    {
+                      Function: object CrossContextChannel.SyncProcessMessageCallback(object[] args),
+                      InApp: false
+                    },
+                    {
+                      Function: IMessage ServerContextTerminatorSink.SyncProcessMessage(IMessage reqMsg),
+                      InApp: false
+                    },
+                    {
+                      Function: IMessage ServerObjectTerminatorSink.SyncProcessMessage(IMessage reqMsg),
+                      InApp: false
+                    },
+                    {
+                      Function: IMessage StackBuilderSink.SyncProcessMessage(IMessage msg),
+                      InApp: false
+                    },
+                    {
+                      Function: object StackBuilderSink._PrivateProcessMessage(IntPtr md, object[] args, object server, out object[] outArgs),
+                      InApp: false
+                    },
+                    {
+                      Function: void XUnitRunner.RunTests(TestRunRequest request, ITestDiscoverySink discoverySink, ITestExecutionSink executionSink),
+                      InApp: true
+                    },
+                    {
+                      Function: void Executor.RunAll(),
+                      InApp: true
+                    },
+                    {
+                      Function: void XunitTestFrameworkExecutor.RunTestCases(IEnumerable<IXunitTestCase> testCases, IMessageSink executionMessageSink, ITestFrameworkExecutionOptions executionOptions),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncVoidMethodBuilder.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async void XunitTestFrameworkExecutor.RunTestCases(IEnumerable<IXunitTestCase> testCases, IMessageSink executionMessageSink, ITestFrameworkExecutionOptions executionOptions),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestAssemblyRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestAssemblyRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> XunitTestAssemblyRunner.RunTestCollectionsAsync(IMessageBus messageBus, CancellationTokenSource cancellationTokenSource),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> XunitTestAssemblyRunner.RunTestCollectionsAsync(IMessageBus messageBus, CancellationTokenSource cancellationTokenSource),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestAssemblyRunner<TTestCase>.RunTestCollectionsAsync(IMessageBus messageBus, CancellationTokenSource cancellationTokenSource),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestAssemblyRunner<TTestCase>.RunTestCollectionsAsync(IMessageBus messageBus, CancellationTokenSource cancellationTokenSource),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestCollectionRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestCollectionRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestCollectionRunner<TTestCase>.RunTestClassesAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestCollectionRunner<TTestCase>.RunTestClassesAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestClassRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestClassRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestClassRunner<TTestCase>.RunTestMethodsAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestClassRunner<TTestCase>.RunTestMethodsAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestMethodRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestMethodRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestMethodRunner<TTestCase>.RunTestCasesAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestMethodRunner<TTestCase>.RunTestCasesAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> XunitTestMethodRunner.RunTestCaseAsync(IXunitTestCase testCase),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestCaseRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestCaseRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<RunSummary> TestRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<RunSummary> TestRunner<TTestCase>.RunAsync(),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<T> ExceptionAggregator.RunAsync<T>(Func<Task<T>> code),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<T> ExceptionAggregator.RunAsync<T>(Func<Task<T>> code),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<Tuple<decimal, string>> XunitTestRunner.InvokeTestAsync(ExceptionAggregator aggregator),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<Tuple<decimal, string>> XunitTestRunner.InvokeTestAsync(ExceptionAggregator aggregator),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<T> ExceptionAggregator.RunAsync<T>(Func<Task<T>> code),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<T> ExceptionAggregator.RunAsync<T>(Func<Task<T>> code),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<decimal> TestInvoker<TTestCase>.RunAsync()+() => { },
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<decimal> TestInvoker<TTestCase>.RunAsync()+(?) => { },
+                      InApp: true
+                    },
+                    {
+                      Function: Task<decimal> TestInvoker<TTestCase>.InvokeTestMethodAsync(object testClassInstance),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder<TResult>.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<decimal> TestInvoker<TTestCase>.InvokeTestMethodAsync(object testClassInstance),
+                      InApp: true
+                    },
+                    {
+                      Function: Task ExceptionAggregator.RunAsync(Func<Task> code),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task ExceptionAggregator.RunAsync(Func<Task> code),
+                      InApp: true
+                    },
+                    {
+                      Function: Task ExecutionTimer.AggregateAsync(Func<Task> asyncAction),
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task ExecutionTimer.AggregateAsync(Func<Task> asyncAction),
+                      InApp: true
+                    },
+                    {
+                      Function: Task<decimal> TestInvoker<TTestCase>.InvokeTestMethodAsync(object testClassInstance)+() => { },
+                      InApp: true
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    },
+                    {
+                      Function: async Task<decimal> TestInvoker<TTestCase>.InvokeTestMethodAsync(object testClassInstance)+(?) => { },
+                      InApp: true
+                    },
+                    {
+                      Function: object TestInvoker<TTestCase>.CallTestMethod(object testClassInstance),
+                      InApp: true
+                    },
+                    {
+                      Function: object RuntimeMethodInfo.Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture),
+                      InApp: false
+                    },
+                    {
+                      Function: object RuntimeMethodInfo.UnsafeInvokeInternal(object obj, object[] parameters, object[] arguments),
+                      InApp: false
+                    },
+                    {
+                      Function: object RuntimeMethodHandle.InvokeMethod(object target, object[] arguments, Signature sig, bool constructor),
+                      InApp: true
+                    },
+                    {
+                      Function: Task HubTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed(),
+                      InApp: false
+                    },
+                    {
+                      Function: void AsyncTaskMethodBuilder.Start<TStateMachine>(ref TStateMachine stateMachine),
+                      InApp: false
+                    }
+                  ]
+                }
+              }
+            ],
+            Level: error,
+            Request: {},
+            Contexts: {},
+            User: {},
+            Environment: production
+          }
+        }
+      },
+      {
+        Header: {
+          type: session
+        },
+        Payload: {
+          Source: {
+            DistinctId: Guid_1,
+            Release: release,
+            Environment: production,
+            ErrorCount: 1,
+            IsInitial: false,
+            SequenceNumber: 1,
+            EndStatus: Crashed
+          }
+        }
+      }
+    ]
+  }
+]
