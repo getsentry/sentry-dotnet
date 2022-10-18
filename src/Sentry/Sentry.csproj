@@ -7,8 +7,6 @@
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <DefineConstants>$(AdditionalConstants)</DefineConstants>
-    <!-- Files under Platforms are excluded by default, but included below as appropriate for each platform -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\Platforms\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
@@ -22,10 +20,9 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
-  <!-- Platform-specific code included here -->
-  <Import Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" Project="Platforms\Android\Sentry.Android.props" />
-  <Import Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" Project="Platforms\iOS\Sentry.iOS.props" />
-  <Import Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" Project="Platforms\iOS\Sentry.iOS.props" />
+  <!-- Platform-specific props included here -->
+  <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
+  <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 
   <!-- Ben.Demystifier -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">

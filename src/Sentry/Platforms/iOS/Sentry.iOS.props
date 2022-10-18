@@ -3,16 +3,10 @@
   <PropertyGroup>
     <LangVersion>10</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">10.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Bindings.Cocoa\Sentry.Bindings.Cocoa.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

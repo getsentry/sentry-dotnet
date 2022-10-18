@@ -3,9 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;netcoreapp3.1;net48;net6.0-android</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">10.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
-    <AndroidAsset Include="appsettings.json" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" Condition="'$(TargetPlatformIdentifier)' == ''" />
+    <AndroidAsset Include="appsettings.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   </ItemGroup>
 
 </Project>
