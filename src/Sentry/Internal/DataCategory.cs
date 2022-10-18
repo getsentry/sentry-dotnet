@@ -2,7 +2,7 @@ using System;
 
 namespace Sentry.Internal
 {
-    internal readonly struct DataCategory : IEquatable<DataCategory>, IComparable<DataCategory>, IEnumeration
+    internal readonly struct DataCategory : IEnumeration<DataCategory>
     {
         // See https://develop.sentry.dev/sdk/rate-limiting/#definitions for list
         public static DataCategory Attachment = new("attachment");

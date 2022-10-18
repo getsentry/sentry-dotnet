@@ -2,7 +2,7 @@ using System;
 
 namespace Sentry.Internal
 {
-    internal readonly struct DiscardReason : IEquatable<DiscardReason>, IComparable<DiscardReason>, IEnumeration
+    internal readonly struct DiscardReason : IEnumeration<DiscardReason>
     {
         // See https://develop.sentry.dev/sdk/client-reports/ for list
         public static DiscardReason BeforeSend = new("before_send");

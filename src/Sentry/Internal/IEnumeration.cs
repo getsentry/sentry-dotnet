@@ -6,4 +6,8 @@ namespace Sentry.Internal
     {
         internal string Value { get; }
     }
+
+    internal interface IEnumeration<T> : IEquatable<T>, IComparable<T>, IEnumeration
+    {
+    }
 }
