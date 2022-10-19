@@ -101,6 +101,7 @@ internal static class EnumExtensions
             "ROUTE" => TransactionNameSource.Route,
             "VIEW" => TransactionNameSource.View,
             "TASK" => TransactionNameSource.Task,
+            "COMPONENT" => TransactionNameSource.Component,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source.Name(), message: default)
         };
 
@@ -112,6 +113,7 @@ internal static class EnumExtensions
             TransactionNameSource.Route => JavaSdk.Protocol.TransactionNameSource.Route,
             TransactionNameSource.View => JavaSdk.Protocol.TransactionNameSource.View,
             TransactionNameSource.Task => JavaSdk.Protocol.TransactionNameSource.Task,
+            TransactionNameSource.Component => JavaSdk.Protocol.TransactionNameSource.Component,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
         };
 }
