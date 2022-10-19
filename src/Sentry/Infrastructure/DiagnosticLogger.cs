@@ -29,7 +29,10 @@ namespace Sentry.Infrastructure
             // Note, linefeed and newline chars are removed to guard against log injection attacks.
             // See https://github.com/getsentry/sentry-dotnet/security/code-scanning/5
 
-            var formattedMessage = ScrubNewlines(string.Format(message, args));
+            // Important: Only format the string if there are args passed.
+            // Otherwise, a pre-formatted string that contains braces can cause a FormatException.
+            var text = args.Length == 0 ? message : string.Format(message, args);
+            var formattedMessage = ScrubNewlines(text);
 
             var completeMessage = exception == null
                 ? $"{logLevel,7}: {formattedMessage}"
