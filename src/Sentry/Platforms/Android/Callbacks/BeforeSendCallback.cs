@@ -1,5 +1,4 @@
 using Sentry.Android.Extensions;
-using Sentry.Extensibility;
 
 namespace Sentry.Android.Callbacks;
 

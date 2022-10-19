@@ -13,6 +13,9 @@
   <attr path="/api/package/class[@visibility='public']" name="visibility">internal</attr>
   <attr path="/api/package/interface[@visibility='public']" name="visibility">internal</attr>
 
+  <!-- Fix nullability of enum field values -->
+  <attr path="/api/package/class[@extends='java.lang.Enum']/field" name="not-null">true</attr>
+
   <!-- Assign .NET namespaces for all Java packages imported -->
   <attr path="/api/package[@name='io.sentry']" name="managedName">Sentry.JavaSdk</attr>
   <attr path="/api/package[@name='io.sentry.android.core']" name="managedName">Sentry.JavaSdk.Android.Core</attr>
