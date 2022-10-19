@@ -1,5 +1,3 @@
-using Sentry.Extensibility;
-
 namespace Sentry.Android.Extensions;
 
 internal static class SentryEventExtensions

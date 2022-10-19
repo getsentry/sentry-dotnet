@@ -6,7 +6,7 @@ internal static class BreadcrumbExtensions
     {
         var data = breadcrumb.Data
             .WorkaroundKeyIteratorBug()
-            .ToDictionary(x => x.Key, x => x.Value?.ToString() ?? "");
+            .ToDictionary(x => x.Key, x => x.Value.ToString());
 
         return new(breadcrumb.Timestamp.ToDateTimeOffset(),
             breadcrumb.Message,
@@ -31,8 +31,7 @@ internal static class BreadcrumbExtensions
             var javaData = javaBreadcrumb.Data;
             foreach (var item in data)
             {
-                var value = item.Value ?? "";
-                javaData.Add(item.Key, value!);
+                javaData.Add(item.Key, item.Value!);
             }
         }
 
