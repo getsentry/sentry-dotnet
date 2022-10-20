@@ -315,24 +315,31 @@ namespace Sentry.Internal
                     evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
                 }
 
-                actualScope.SessionUpdate = evt switch
+                var hasUnhandledException = evt.HasUnhandledException();
+                if (hasUnhandledException)
                 {
                     // Event contains a terminal exception -> end session as crashed
-                    var e when e.HasUnhandledException =>
-                        _sessionManager.EndSession(SessionEndStatus.Crashed),
-
+                    _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
+                    actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                }
+                else if (evt.HasException())
+                {
                     // Event contains a non-terminal exception -> report error
                     // (this might return null if the session has already reported errors before)
-                    var e when e.HasException =>
-                        _sessionManager.ReportError(),
-
-                    // Event doesn't contain any kind of exception -> no reason to attach session update
-                    _ => null
-                };
+                    actualScope.SessionUpdate = _sessionManager.ReportError();
+                }
 
                 var id = currentScope.Value.CaptureEvent(evt, actualScope);
                 actualScope.LastEventId = id;
                 actualScope.SessionUpdate = null;
+
+                if (hasUnhandledException)
+                {
+                    // Event contains a terminal exception -> finish any current transaction as aborted
+                    // Do this *after* the event was captured, so that the event is still linked to the transaction.
+                    _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
+                    actualScope.Transaction?.Finish(SpanStatus.Aborted);
+                }
 
                 return id;
             }

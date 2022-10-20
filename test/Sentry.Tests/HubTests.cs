@@ -5,6 +5,7 @@ using Sentry.Testing;
 
 namespace Sentry.Tests;
 
+[UsesVerify]
 public class HubTests
 {
     private readonly ITestOutputHelper _output;
@@ -329,7 +330,10 @@ public class HubTests
             var evt = new SentryEvent
             {
                 Contexts = {[expectedContextKey] = new EvilContext()},
-                Message = new SentryMessage {Formatted = expectedMessage}
+                Message = new()
+                {
+                    Formatted = expectedMessage
+                }
             };
 
             hub.CaptureEvent(evt);
@@ -405,9 +409,18 @@ public class HubTests
         hub.StartSession();
 
         // Act
-        hub.CaptureEvent(new SentryEvent
+        hub.CaptureEvent(new()
         {
-            SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new()
+                    {
+                        Handled = false
+                    }
+                }
+            }
         });
 
         // Assert
@@ -421,6 +434,47 @@ public class HubTests
                     .Single()
                     .EndStatus == SessionEndStatus.Crashed
             ));
+    }
+
+    [Fact]
+    [Trait("Category", "Verify")]
+    public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
+    {
+        // Arrange
+        var worker = new FakeBackgroundWorker();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "release",
+            TracesSampleRate = 1.0
+        };
+        var client = new SentryClient(options, worker);
+        var hub = new Hub(options, client);
+
+        var transaction = hub.StartTransaction("my transaction", "my operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+        hub.StartSession();
+
+        // Act
+        hub.CaptureEvent(new()
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new()
+                    {
+                        Handled = false
+                    }
+                }
+            }
+        });
+
+        await Verify(worker.Envelopes)
+            .IgnoreStandardSentryMembers()
+            .IgnoreMember("Stacktrace")
+            .IgnoreMember<SentryThread>(_ => _.Name);
     }
 
     [Fact]
