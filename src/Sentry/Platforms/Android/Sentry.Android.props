@@ -1,17 +1,12 @@
 <Project>
 
   <PropertyGroup>
-    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <LangVersion>10</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Bindings.Android\Sentry.Bindings.Android.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

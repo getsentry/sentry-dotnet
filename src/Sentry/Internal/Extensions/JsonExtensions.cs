@@ -611,7 +611,7 @@ namespace Sentry.Internal.Extensions
         public static void WriteString(
             this Utf8JsonWriter writer,
             string propertyName,
-            Enumeration? value)
+            IEnumeration? value)
         {
             if (value == null)
             {

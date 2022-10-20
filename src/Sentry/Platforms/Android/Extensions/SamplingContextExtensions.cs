@@ -10,12 +10,9 @@ internal static class SamplingContextExtensions
     {
         var transactionContext = new TransactionContextFacade(context.TransactionContext);
 
-        //var customSamplingContext = context.CustomSamplingContext?.Data
-        //    .ToDictionary(x => x.Key, x => (object?)x.Value) ?? EmptyObjectDictionary;
+        var customSamplingContext = context.CustomSamplingContext?.Data
+            .ToDictionary(x => x.Key, x => (object?)x.Value) ?? EmptyObjectDictionary;
 
-        var customSamplingContext = ((IReadOnlyDictionary<string, object?>?)context.CustomSamplingContext?.Data)
-             ?? EmptyObjectDictionary;
-
-        return new(transactionContext, customSamplingContext);
+        return new TransactionSamplingContext(transactionContext, customSamplingContext);
     }
 }
