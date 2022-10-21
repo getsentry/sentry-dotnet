@@ -1,3 +1,5 @@
+using Sentry.Testing;
+
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -7,14 +9,11 @@ public class OrderOfExecutionTests
     public async Task Event()
     {
         var events = new List<string>();
-        var transport = new RecordingTransport();
         var options = new SentryOptions
         {
             TracesSampleRate = 1,
-            Debug = true,
-            Transport = transport,
+            Transport = new FakeTransport(),
             Dsn = ValidDsn,
-            AttachStacktrace = false
         };
         AddGlobalCapture(options, events);
 
