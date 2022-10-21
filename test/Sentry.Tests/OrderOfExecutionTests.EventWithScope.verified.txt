@@ -1,4 +1,5 @@
 ﻿[
   global EventProcessor,
+  scoped EventProcessor,
   global BeforeSend
 ]

@@ -9,23 +9,76 @@ public class OrderOfExecutionTests
     public async Task Event()
     {
         var events = new List<string>();
+        var options = GetOptions();
+        AddGlobalCapture(options, events);
+
+        var hub = SentrySdk.InitHub(options);
+        hub.CaptureEvent(new());
+
+        await Verify(events);
+    }
+
+    [Fact]
+    public async Task EventWithScope()
+    {
+        var events = new List<string>();
+        var options = GetOptions();
+        AddGlobalCapture(options, events);
+
+        var hub = SentrySdk.InitHub(options);
+        hub.CaptureEvent(new(), _ => AddScopedCapture(_, events));
+
+        await Verify(events);
+    }
+
+    [Fact]
+    public async Task Transaction()
+    {
+        var events = new List<string>();
+        var options = GetOptions();
+        AddGlobalCapture(options, events);
+
+        var hub = SentrySdk.InitHub(options);
+        hub.CaptureTransaction(new("name", "operation"));
+
+        await Verify(events);
+    }
+
+    [Fact]
+    public async Task Exception()
+    {
+        var events = new List<string>();
+        var options = GetOptions();
+        AddGlobalCapture(options, events);
+
+        var hub = SentrySdk.InitHub(options);
+        hub.CaptureException(new());
+
+        await Verify(events);
+    }
+
+    [Fact]
+    public async Task ExceptionWithScope()
+    {
+        var events = new List<string>();
+        var options = GetOptions();
+        AddGlobalCapture(options, events);
+
+        var hub = SentrySdk.InitHub(options);
+        hub.CaptureException(new(), _ => AddScopedCapture(_, events));
+
+        await Verify(events);
+    }
+
+    private static SentryOptions GetOptions()
+    {
         var options = new SentryOptions
         {
             TracesSampleRate = 1,
             Transport = new FakeTransport(),
             Dsn = ValidDsn,
         };
-        AddGlobalCapture(options, events);
-
-        var hub = SentrySdk.InitHub(options);
-        hub.CaptureEvent(
-            new(),
-            _ =>
-            {
-                AddScopedCapture(_, events);
-            });
-
-        await Verify(events);
+        return options;
     }
 
     static void AddScopedCapture(Scope scope, List<string> events)
@@ -41,11 +94,6 @@ public class OrderOfExecutionTests
         options.BeforeSend += _ =>
         {
             events.Add("global BeforeSend");
-            return _;
-        };
-        options.BeforeBreadcrumb += _ =>
-        {
-            events.Add("global BeforeBreadcrumb");
             return _;
         };
         options.TracesSampler += _ =>
