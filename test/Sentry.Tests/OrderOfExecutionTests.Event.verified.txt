@@ -1,4 +1,0 @@
-﻿[
-  global EventProcessor,
-  global BeforeSend
-]

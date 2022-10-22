@@ -1,8 +1,0 @@
-﻿[
-  global ExceptionFilter,
-  global EventExceptionProcessor,
-  scoped EventExceptionProcessor,
-  global EventProcessor,
-  scoped EventProcessor,
-  global BeforeSend
-]

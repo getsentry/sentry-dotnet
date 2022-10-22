@@ -39,7 +39,10 @@ public class OrderOfExecutionTests
         AddGlobalCapture(options, events);
 
         var hub = SentrySdk.InitHub(options);
-        hub.CaptureTransaction(new("name", "operation"));
+        var transaction = hub.StartTransaction("name", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+      //  hub.CaptureMessage("TheMessage");
+        transaction.Finish();
 
         await Verify(events);
     }
@@ -52,21 +55,31 @@ public class OrderOfExecutionTests
         AddGlobalCapture(options, events);
 
         var hub = SentrySdk.InitHub(options);
+        var transaction = hub.StartTransaction("name", "operation");
+        hub.ConfigureScope(scope =>
+        {
+            scope.Transaction = transaction;
+            AddScopedCapture(scope, events);
+        });
         hub.CaptureException(new());
-
+        transaction.Finish();
         await Verify(events);
     }
-
-    [Fact]
-    public async Task ExceptionWithScope()
+    public async Task RunTest(Action )
     {
         var events = new List<string>();
         var options = GetOptions();
         AddGlobalCapture(options, events);
 
         var hub = SentrySdk.InitHub(options);
-        hub.CaptureException(new(), _ => AddScopedCapture(_, events));
-
+        var transaction = hub.StartTransaction("name", "operation");
+        hub.ConfigureScope(scope =>
+        {
+            scope.Transaction = transaction;
+            AddScopedCapture(scope, events);
+        });
+        hub.CaptureException(new());
+        transaction.Finish();
         await Verify(events);
     }
 
