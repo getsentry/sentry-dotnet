@@ -53,4 +53,4 @@ runs:
     - name: Install Tizen Workload
       if: runner.os == 'macOS'
       shell: bash
-        run: "curl -sSL https://raw.githubusercontent.com/Samsung/Tizen.NET/main/workload/scripts/workload-install.sh | sudo bash"
+      run: "curl -sSL https://raw.githubusercontent.com/Samsung/Tizen.NET/main/workload/scripts/workload-install.sh | sudo bash"
