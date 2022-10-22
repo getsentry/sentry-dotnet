@@ -83,7 +83,7 @@ public static class SentryMauiAppBuilderExtensions
                 return true;
             }));
 #elif ANDROID
-            events.AddAndroid(android => android.OnApplicationCreating(application =>
+            events.AddAndroid(lifecycle => lifecycle.OnApplicationCreating(application =>
                 (application as MauiApplication)?.BindMauiEvents()));
 #elif WINDOWS
             events.AddWindows(lifecycle => lifecycle.OnLaunching((application, _) =>
