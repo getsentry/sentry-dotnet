@@ -1,11 +1,14 @@
 ﻿[
   global TracesSampler,
+  SessionManager StartSession,
+  SessionManager ReportError,
   global ExceptionFilter,
   global EventExceptionProcessor,
   scoped EventExceptionProcessor,
   global EventProcessor,
   scoped EventProcessor,
   global BeforeSend,
+  SessionManager EndSession Exited,
   global TransactionProcessor,
   scoped TransactionProcessor
 ]

@@ -32,30 +32,34 @@ public class OrderOfExecutionTests
     static async Task RunTest(Action<IHub, List<string>> action)
     {
         var events = new List<string>();
-        var options = GetOptions();
+        var options = GetOptions(events);
         AddGlobalCapture(options, events);
 
-        var hub = SentrySdk.InitHub(options);
+        var hub = new Hub(
+            options,
+            sessionManager: new SessionManager(events));
         var transaction = hub.StartTransaction("name", "operation");
         hub.ConfigureScope(scope =>
         {
             scope.Transaction = transaction;
             AddScopedCapture(scope, events);
         });
+        hub.StartSession();
         action(hub, events);
+        hub.EndSession();
         transaction.Finish();
         await Verify(events);
     }
 
-    static SentryOptions GetOptions()
+    static SentryOptions GetOptions(List<string> events)
     {
-        var options = new SentryOptions
+        return new()
         {
             TracesSampleRate = 1,
             Transport = new FakeTransport(),
             Dsn = ValidDsn,
+            ClientReportRecorder = new ClientReportRecorder(events)
         };
-        return options;
     }
 
     static void AddScopedCapture(Scope scope, List<string> events)
@@ -123,6 +127,71 @@ public class OrderOfExecutionTests
         void AddEvent(string name)
         {
             events.Add($"{context} {name}");
+        }
+    }
+
+    class SessionManager : ISessionManager
+    {
+        List<string> events;
+        Session session;
+
+        public SessionManager(List<string> events) =>
+            this.events = events;
+
+        public bool IsSessionActive { get; }
+
+        public SessionUpdate TryRecoverPersistedSession()
+        {
+            throw new NotImplementedException();
+        }
+
+        public SessionUpdate StartSession()
+        {
+            events.Add("SessionManager StartSession");
+            session = new(null, "release", null);
+            return session.CreateUpdate(true, DateTimeOffset.UtcNow);
+        }
+
+        public SessionUpdate EndSession(DateTimeOffset timestamp, SessionEndStatus status)
+        {
+            events.Add($"SessionManager EndSession {status}");
+            return session.CreateUpdate(false, timestamp, status);
+        }
+
+        public SessionUpdate EndSession(SessionEndStatus status) =>
+            EndSession(DateTimeOffset.UtcNow, status);
+
+        public void PauseSession() =>
+            throw new NotImplementedException();
+
+        public IReadOnlyList<SessionUpdate> ResumeSession() =>
+            throw new NotImplementedException();
+
+        public SessionUpdate ReportError()
+        {
+            events.Add("SessionManager ReportError");
+            session.ReportError();
+            return session.CreateUpdate(false, DateTimeOffset.UtcNow);
+        }
+    }
+
+    class ClientReportRecorder : IClientReportRecorder
+    {
+        List<string> events;
+
+        public ClientReportRecorder(List<string> events) =>
+            this.events = events;
+
+        public void RecordDiscardedEvent(DiscardReason reason, DataCategory category) =>
+            events.Add($"Discard ClientReport. {reason} {category}");
+
+        public ClientReport GenerateClientReport()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Load(ClientReport report)
+        {
         }
     }
 }

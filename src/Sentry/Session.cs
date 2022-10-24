@@ -75,7 +75,8 @@ namespace Sentry
         /// <summary>
         /// Reports an error on the session.
         /// </summary>
-        public void ReportError() => Interlocked.Increment(ref _errorCount);
+        public void ReportError() =>
+            Interlocked.Increment(ref _errorCount);
 
         internal SessionUpdate CreateUpdate(
             bool isInitial,
