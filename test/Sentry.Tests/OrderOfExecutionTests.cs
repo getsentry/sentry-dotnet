@@ -48,7 +48,7 @@ public class OrderOfExecutionTests
         };
         if (alwaysDrop)
         {
-          //  options.SampleRate = float.Epsilon;
+           // options.SampleRate = float.Epsilon;
         }
         options.BeforeSend += _ =>
         {
@@ -89,7 +89,7 @@ public class OrderOfExecutionTests
                     transport.Envelopes
                 })
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("Stacktrace", "Release")
+            .IgnoreMembers("Stacktrace", "release")
             .UseParameters(alwaysDrop);
     }
 

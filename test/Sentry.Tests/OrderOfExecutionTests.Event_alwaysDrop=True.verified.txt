@@ -23,6 +23,7 @@
           },
           Payload: {
             Source: {
+              Release: release,
               IsInitial: true
             }
           }
@@ -79,6 +80,7 @@
           },
           Payload: {
             Source: {
+              Release: release,
               IsInitial: false,
               SequenceNumber: 1,
               EndStatus: Exited
@@ -96,7 +98,6 @@
         trace: {
           environment: production,
           public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-          release: ReSharperTestRunner@2.11.1.88,
           sample_rate: 1,
           trace_id: Guid_3,
           transaction: name
