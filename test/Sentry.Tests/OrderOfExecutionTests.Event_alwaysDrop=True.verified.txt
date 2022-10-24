@@ -2,9 +2,7 @@
   events: [
     global TracesSampler,
     SessionManager StartSession,
-    global EventProcessor,
-    scoped EventProcessor,
-    global BeforeSend,
+    Discard ClientReport. sample_rate error,
     SessionManager EndSession Exited,
     global TransactionProcessor,
     scoped TransactionProcessor
@@ -25,43 +23,6 @@
             Source: {
               Release: release,
               IsInitial: true
-            }
-          }
-        }
-      ]
-    },
-    {
-      Header: {
-        event_id: Guid_1,
-        sdk: {
-          name: sentry.dotnet
-        }
-      },
-      Items: [
-        {
-          Header: {
-            type: event
-          },
-          Payload: {
-            Source: {
-              Platform: csharp,
-              SentryExceptions: [],
-              SentryThreads: [
-                {
-                  Crashed: false,
-                  Current: true
-                }
-              ],
-              Level: error,
-              TransactionName: name,
-              Request: {},
-              Contexts: {
-                trace: {
-                  Operation: 
-                }
-              },
-              User: {},
-              Environment: production
             }
           }
         }
@@ -91,7 +52,7 @@
     },
     {
       Header: {
-        event_id: Guid_2,
+        event_id: Guid_1,
         sdk: {
           name: sentry.dotnet
         },
@@ -99,7 +60,7 @@
           environment: production,
           public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
           sample_rate: 1,
-          trace_id: Guid_3,
+          trace_id: Guid_2,
           transaction: name
         }
       },

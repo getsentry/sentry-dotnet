@@ -48,7 +48,7 @@ public class OrderOfExecutionTests
         };
         if (alwaysDrop)
         {
-           // options.SampleRate = float.Epsilon;
+           options.SampleRate = float.Epsilon;
         }
         options.BeforeSend += _ =>
         {
