@@ -1,77 +1,55 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests;
 
 [UsesVerify]
 public class OrderOfExecutionTests
 {
-    [Fact]
-    public Task Event() =>
-        RunTest((hub, events) => hub.CaptureEvent(new()));
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task Event(bool alwaysDrop) =>
+        RunTest(
+            (hub, events) => hub.CaptureEvent(new()),
+            alwaysDrop);
 
-    [Fact]
-    public Task EventWithScope() =>
-        RunTest((hub, events) => hub.CaptureEvent(new(), _ => AddScopedCapture(_, events)));
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task Exception(bool alwaysDrop) =>
+        RunTest(
+            (hub, events) => hub.CaptureException(new()),
+            alwaysDrop);
 
-    [Fact]
-    public Task Exception() =>
-        RunTest((hub, events) => hub.CaptureException(new()));
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task Message(bool alwaysDrop) =>
+        RunTest(
+            (hub, events) => hub.CaptureMessage("The message"),
+            alwaysDrop);
 
-    [Fact]
-    public Task ExceptionWithScope() =>
-        RunTest((hub, events) => hub.CaptureException(new(), _ => AddScopedCapture(_, events)));
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task UserFeedback(bool alwaysDrop) =>
+        RunTest(
+            (hub, events) => hub.CaptureUserFeedback(new(SentryId.Create(), "Use Feedback", null, null)),
+            alwaysDrop);
 
-    [Fact]
-    public Task Message() =>
-        RunTest((hub, events) => hub.CaptureMessage("The message"));
-
-    [Fact]
-    public Task MessageWithScope() =>
-        RunTest((hub, events) => hub.CaptureMessage("The message", _ => AddScopedCapture(_, events)));
-
-    static async Task RunTest(Action<IHub, List<string>> action)
+    static async Task RunTest(Action<IHub, List<string>> action, bool alwaysDrop)
     {
         var events = new List<string>();
-        var options = GetOptions(events);
-        AddGlobalCapture(options, events);
-
-        var hub = new Hub(
-            options,
-            sessionManager: new SessionManager(events));
-        var transaction = hub.StartTransaction("name", "operation");
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
-            AddScopedCapture(scope, events);
-        });
-        hub.StartSession();
-        action(hub, events);
-        hub.EndSession();
-        transaction.Finish();
-        await Verify(events);
-    }
-
-    static SentryOptions GetOptions(List<string> events)
-    {
-        return new()
+        var transport = new RecordingTransport();
+        var options = new SentryOptions
         {
             TracesSampleRate = 1,
-            Transport = new FakeTransport(),
+            Transport = transport,
             Dsn = ValidDsn,
             ClientReportRecorder = new ClientReportRecorder(events)
         };
-    }
-
-    static void AddScopedCapture(Scope scope, List<string> events)
-    {
-        var capture = new Capture("scoped", events);
-        scope.AddExceptionProcessor(capture);
-        scope.AddEventProcessor(capture);
-        scope.AddTransactionProcessor(capture);
-    }
-
-    static void AddGlobalCapture(SentryOptions options, List<string> events)
-    {
+        if (alwaysDrop)
+        {
+          //  options.SampleRate = float.Epsilon;
+        }
         options.BeforeSend += _ =>
         {
             events.Add("global BeforeSend");
@@ -82,11 +60,37 @@ public class OrderOfExecutionTests
             events.Add("global TracesSampler");
             return null;
         };
-        var capture = new Capture("global", events);
-        options.AddExceptionFilter(capture);
-        options.AddExceptionProcessor(capture);
-        options.AddEventProcessor(capture);
-        options.AddTransactionProcessor(capture);
+        var globalCapture = new Capture("global", events);
+        options.AddExceptionFilter(globalCapture);
+        options.AddExceptionProcessor(globalCapture);
+        options.AddEventProcessor(globalCapture);
+        options.AddTransactionProcessor(globalCapture);
+
+        var hub = new Hub(
+            options,
+            sessionManager: new SessionManager(events));
+        var transaction = hub.StartTransaction("name", "operation");
+        hub.ConfigureScope(scope =>
+        {
+            scope.Transaction = transaction;
+            var scopedCapture = new Capture("scoped", events);
+            scope.AddExceptionProcessor(scopedCapture);
+            scope.AddEventProcessor(scopedCapture);
+            scope.AddTransactionProcessor(scopedCapture);
+        });
+        hub.StartSession();
+        action(hub, events);
+        hub.EndSession();
+        transaction.Finish();
+        await Verify(
+                new
+                {
+                    events,
+                    transport.Envelopes
+                })
+            .IgnoreStandardSentryMembers()
+            .IgnoreMembers("Stacktrace", "Release")
+            .UseParameters(alwaysDrop);
     }
 
     class Capture :
