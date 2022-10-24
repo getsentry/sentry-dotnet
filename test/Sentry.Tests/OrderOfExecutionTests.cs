@@ -6,49 +6,22 @@ namespace Sentry.Tests;
 public class OrderOfExecutionTests
 {
     [Fact]
-    public async Task Event()
-    {
-        var events = new List<string>();
-        var options = GetOptions();
-        AddGlobalCapture(options, events);
-
-        var hub = SentrySdk.InitHub(options);
-        hub.CaptureEvent(new());
-
-        await Verify(events);
-    }
+    public Task Event() =>
+        RunTest((hub, events) => hub.CaptureEvent(new()));
 
     [Fact]
-    public async Task EventWithScope()
-    {
-        var events = new List<string>();
-        var options = GetOptions();
-        AddGlobalCapture(options, events);
-
-        var hub = SentrySdk.InitHub(options);
-        hub.CaptureEvent(new(), _ => AddScopedCapture(_, events));
-
-        await Verify(events);
-    }
+    public Task EventWithScope() =>
+        RunTest((hub, events) => hub.CaptureEvent(new(), _ => AddScopedCapture(_, events)));
 
     [Fact]
-    public async Task Transaction()
-    {
-        var events = new List<string>();
-        var options = GetOptions();
-        AddGlobalCapture(options, events);
-
-        var hub = SentrySdk.InitHub(options);
-        var transaction = hub.StartTransaction("name", "operation");
-        hub.ConfigureScope(scope => scope.Transaction = transaction);
-      //  hub.CaptureMessage("TheMessage");
-        transaction.Finish();
-
-        await Verify(events);
-    }
+    public Task Exception() =>
+        RunTest((hub, events) => hub.CaptureException(new()));
 
     [Fact]
-    public async Task Exception()
+    public Task Message() =>
+        RunTest((hub, events) => hub.CaptureMessage("The message"));
+
+    static async Task RunTest(Action<IHub, List<string>> action)
     {
         var events = new List<string>();
         var options = GetOptions();
@@ -61,29 +34,12 @@ public class OrderOfExecutionTests
             scope.Transaction = transaction;
             AddScopedCapture(scope, events);
         });
-        hub.CaptureException(new());
-        transaction.Finish();
-        await Verify(events);
-    }
-    public async Task RunTest(Action )
-    {
-        var events = new List<string>();
-        var options = GetOptions();
-        AddGlobalCapture(options, events);
-
-        var hub = SentrySdk.InitHub(options);
-        var transaction = hub.StartTransaction("name", "operation");
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
-            AddScopedCapture(scope, events);
-        });
-        hub.CaptureException(new());
+        action(hub, events);
         transaction.Finish();
         await Verify(events);
     }
 
-    private static SentryOptions GetOptions()
+    static SentryOptions GetOptions()
     {
         var options = new SentryOptions
         {
@@ -162,4 +118,3 @@ public class OrderOfExecutionTests
         }
     }
 }
-
