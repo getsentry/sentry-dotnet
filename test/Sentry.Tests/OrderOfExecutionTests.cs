@@ -18,8 +18,16 @@ public class OrderOfExecutionTests
         RunTest((hub, events) => hub.CaptureException(new()));
 
     [Fact]
+    public Task ExceptionWithScope() =>
+        RunTest((hub, events) => hub.CaptureException(new(), _ => AddScopedCapture(_, events)));
+
+    [Fact]
     public Task Message() =>
         RunTest((hub, events) => hub.CaptureMessage("The message"));
+
+    [Fact]
+    public Task MessageWithScope() =>
+        RunTest((hub, events) => hub.CaptureMessage("The message", _ => AddScopedCapture(_, events)));
 
     static async Task RunTest(Action<IHub, List<string>> action)
     {

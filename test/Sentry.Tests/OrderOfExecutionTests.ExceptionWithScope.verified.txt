@@ -1,0 +1,13 @@
+﻿[
+  global TracesSampler,
+  global ExceptionFilter,
+  global EventExceptionProcessor,
+  scoped EventExceptionProcessor,
+  scoped EventExceptionProcessor,
+  global EventProcessor,
+  scoped EventProcessor,
+  scoped EventProcessor,
+  global BeforeSend,
+  global TransactionProcessor,
+  scoped TransactionProcessor
+]

@@ -1,0 +1,9 @@
+﻿[
+  global TracesSampler,
+  global EventProcessor,
+  scoped EventProcessor,
+  scoped EventProcessor,
+  global BeforeSend,
+  global TransactionProcessor,
+  scoped TransactionProcessor
+]
