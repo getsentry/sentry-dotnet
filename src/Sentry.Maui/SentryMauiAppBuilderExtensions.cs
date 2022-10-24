@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.LifecycleEvents;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
@@ -60,6 +61,43 @@ public static class SentryMauiAppBuilderExtensions
 
         services.AddSentry<SentryMauiOptions>();
 
+        builder.RegisterMauiEventsBinder();
+
         return builder;
+    }
+
+    private static void RegisterMauiEventsBinder(this MauiAppBuilder builder)
+    {
+        // Bind to MAUI events during the platform-specific application creating events.
+        // Note that we used to do this in SentryMauiInitializer, but that approach caused the
+        // IApplication instance to be constructed earlier than normal, having the side-effect
+        // of interfering with a common approach to static DI in App.xaml.cs or AppShell.xaml.cs.
+        // See https://github.com/getsentry/sentry-dotnet/issues/2001
+
+        builder.ConfigureLifecycleEvents(events =>
+        {
+#if __IOS__
+            events.AddiOS(lifecycle => lifecycle.WillFinishLaunching((application, _) =>
+            {
+                (application.Delegate as MauiUIApplicationDelegate)?.BindMauiEvents();
+                return true;
+            }));
+#elif ANDROID
+            events.AddAndroid(lifecycle => lifecycle.OnApplicationCreating(application =>
+                (application as MauiApplication)?.BindMauiEvents()));
+#elif WINDOWS
+            events.AddWindows(lifecycle => lifecycle.OnLaunching((application, _) =>
+                (application as MauiWinUIApplication)?.BindMauiEvents()));
+#elif TIZEN
+            events.AddTizen(lifecycle => lifecycle.OnCreate(application =>
+                (application as MauiApplication)?.BindMauiEvents()));
+#endif
+        });
+    }
+
+    private static void BindMauiEvents(this IPlatformApplication application)
+    {
+        var binder = application.Services.GetRequiredService<MauiEventsBinder>();
+        binder.BindMauiEvents();
     }
 }
