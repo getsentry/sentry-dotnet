@@ -100,6 +100,38 @@ public class MeasurementTests
     }
 
     [Fact]
+    public void Json_IntValue_WithNone()
+    {
+        var m = new Measurement(int.MaxValue, MeasurementUnit.None);
+        var json = m.ToJsonString();
+        Assert.Equal("{\"value\":2147483647}", json);
+    }
+
+    [Fact]
+    public void Json_LongValue_WithNone()
+    {
+        var m = new Measurement(long.MaxValue, MeasurementUnit.None);
+        var json = m.ToJsonString();
+        Assert.Equal("{\"value\":9223372036854775807}", json);
+    }
+
+    [Fact]
+    public void Json_ULongValue_WithNone()
+    {
+        var m = new Measurement(ulong.MaxValue, MeasurementUnit.None);
+        var json = m.ToJsonString();
+        Assert.Equal("{\"value\":18446744073709551615}", json);
+    }
+
+    [Fact]
+    public void Json_DoubleValue_WithNone()
+    {
+        var m = new Measurement(double.MaxValue, MeasurementUnit.None);
+        var json = m.ToJsonString();
+        Assert.Equal("{\"value\":1.7976931348623157E+308}", json);
+    }
+
+    [Fact]
     public void Json_IntValue_WithUnit()
     {
         var m = new Measurement(int.MaxValue, MeasurementUnit.Duration.Second);
