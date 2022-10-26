@@ -11,8 +11,9 @@ namespace Sentry
     public class SpanTracer : ISpan
     {
         private readonly IHub _hub;
-        private readonly TransactionTracer _transaction;
         private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+
+        internal TransactionTracer Transaction { get; }
 
         /// <inheritdoc />
         public SpanId SpanId { get; }
@@ -77,8 +78,7 @@ namespace Sentry
             string operation)
         {
             _hub = hub;
-            _transaction = transaction;
-
+            Transaction = transaction;
             SpanId = SpanId.Create();
             ParentSpanId = parentSpanId;
             TraceId = traceId;
@@ -87,7 +87,7 @@ namespace Sentry
 
         /// <inheritdoc />
         public ISpan StartChild(string operation) =>
-            _transaction.StartChild(SpanId, operation);
+            Transaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
         public void Finish()
