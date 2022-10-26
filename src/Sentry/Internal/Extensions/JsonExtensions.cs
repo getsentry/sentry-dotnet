@@ -52,6 +52,26 @@ namespace Sentry.Internal.Extensions
             return result;
         }
 
+        public static Dictionary<string, TValue>? GetDictionaryOrNull<TValue>(
+            this JsonElement json,
+            Func<JsonElement, TValue> factory)
+            where TValue : IJsonSerializable?
+        {
+            if (json.ValueKind != JsonValueKind.Object)
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, TValue>();
+
+            foreach (var (name, value) in json.EnumerateObject())
+            {
+                result[name] = factory(value);
+            }
+
+            return result;
+        }
+
         public static Dictionary<string, string?>? GetStringDictionaryOrNull(this JsonElement json)
         {
             if (json.ValueKind != JsonValueKind.Object)
@@ -189,6 +209,37 @@ namespace Sentry.Internal.Extensions
             }
         }
 
+        public static void WriteDictionaryValue<TValue>(
+            this Utf8JsonWriter writer,
+            IEnumerable<KeyValuePair<string, TValue>>? dic,
+            IDiagnosticLogger? logger,
+            bool includeNullValues = true)
+            where TValue : IJsonSerializable?
+        {
+            if (dic is not null)
+            {
+                writer.WriteStartObject();
+
+                foreach (var (key, value) in dic)
+                {
+                    if (value is not null)
+                    {
+                        writer.WriteSerializable(key, value, logger);
+                    }
+                    else if (includeNullValues)
+                    {
+                        writer.WriteNull(key);
+                    }
+                }
+
+                writer.WriteEndObject();
+            }
+            else
+            {
+                writer.WriteNullValue();
+            }
+        }
+
         public static void WriteStringDictionaryValue(
             this Utf8JsonWriter writer,
             IEnumerable<KeyValuePair<string, string?>>? dic)
@@ -215,6 +266,17 @@ namespace Sentry.Internal.Extensions
             string propertyName,
             IEnumerable<KeyValuePair<string, object?>>? dic,
             IDiagnosticLogger? logger)
+        {
+            writer.WritePropertyName(propertyName);
+            writer.WriteDictionaryValue(dic, logger);
+        }
+
+        public static void WriteDictionary<TValue>(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            IEnumerable<KeyValuePair<string, TValue>>? dic,
+            IDiagnosticLogger? logger)
+            where TValue : IJsonSerializable?
         {
             writer.WritePropertyName(propertyName);
             writer.WriteDictionaryValue(dic, logger);
@@ -552,10 +614,24 @@ namespace Sentry.Internal.Extensions
             IEnumerable<KeyValuePair<string, object?>>? dic,
             IDiagnosticLogger? logger)
         {
-            var asDictionary = dic as IReadOnlyDictionary<string, object?> ?? dic?.ToDictionary();
-            if (asDictionary is not null && asDictionary.Count > 0)
+            var dictionary = dic as IReadOnlyDictionary<string, object?> ?? dic?.ToDictionary();
+            if (dictionary is not null && dictionary.Count > 0)
             {
-                writer.WriteDictionary(propertyName, asDictionary, logger);
+                writer.WriteDictionary(propertyName, dictionary, logger);
+            }
+        }
+
+        public static void WriteDictionaryIfNotEmpty<TValue>(
+            this Utf8JsonWriter writer,
+            string propertyName,
+            IEnumerable<KeyValuePair<string, TValue>>? dic,
+            IDiagnosticLogger? logger)
+            where TValue : IJsonSerializable?
+        {
+            var dictionary = dic as IReadOnlyDictionary<string, TValue> ?? dic?.ToDictionary();
+            if (dictionary is not null && dictionary.Count > 0)
+            {
+                writer.WriteDictionary(propertyName, dictionary, logger);
             }
         }
 
@@ -564,10 +640,10 @@ namespace Sentry.Internal.Extensions
             string propertyName,
             IEnumerable<KeyValuePair<string, string?>>? dic)
         {
-            var asDictionary = dic as IReadOnlyDictionary<string, string?> ?? dic?.ToDictionary();
-            if (asDictionary is not null && asDictionary.Count > 0)
+            var dictionary = dic as IReadOnlyDictionary<string, string?> ?? dic?.ToDictionary();
+            if (dictionary is not null && dictionary.Count > 0)
             {
-                writer.WriteStringDictionary(propertyName, asDictionary);
+                writer.WriteStringDictionary(propertyName, dictionary);
             }
         }
 
@@ -577,10 +653,10 @@ namespace Sentry.Internal.Extensions
             IEnumerable<object?>? arr,
             IDiagnosticLogger? logger)
         {
-            var asList = arr as IReadOnlyList<object?> ?? arr?.ToArray();
-            if (asList is not null && asList.Count > 0)
+            var list = arr as IReadOnlyList<object?> ?? arr?.ToArray();
+            if (list is not null && list.Count > 0)
             {
-                writer.WriteArray(propertyName, asList, logger);
+                writer.WriteArray(propertyName, list, logger);
             }
         }
 
@@ -589,10 +665,10 @@ namespace Sentry.Internal.Extensions
             string propertyName,
             IEnumerable<string?>? arr)
         {
-            var asList = arr as IReadOnlyList<string?> ?? arr?.ToArray();
-            if (asList is not null && asList.Count > 0)
+            var list = arr as IReadOnlyList<string?> ?? arr?.ToArray();
+            if (list is not null && list.Count > 0)
             {
-                writer.WriteStringArray(propertyName, asList);
+                writer.WriteStringArray(propertyName, list);
             }
         }
 
