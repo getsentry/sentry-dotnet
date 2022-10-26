@@ -66,6 +66,9 @@ public class TransactionTests
         transaction.SetExtra("extra_key", "extra_value");
         transaction.Fingerprint = new[] { "fingerprint" };
         transaction.SetTag("tag_key", "tag_value");
+        transaction.SetMeasurement("measurement_1", 111);
+        transaction.SetMeasurement("measurement_2", 2.34, MeasurementUnit.Custom("things"));
+        transaction.SetMeasurement("measurement_3", 333, MeasurementUnit.Information.Terabyte);
 
         var child1 = transaction.StartChild("child_op123", "child_desc123");
         child1.Status = SpanStatus.Unimplemented;

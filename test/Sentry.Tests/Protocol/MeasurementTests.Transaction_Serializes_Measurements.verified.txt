@@ -1,0 +1,56 @@
+﻿{
+  contexts: {
+    trace: {
+      op: operation,
+      trace_id: Guid_1,
+      type: trace
+    }
+  },
+  event_id: Guid_2,
+  measurements: {
+    a: {
+      value: 2147483647
+    },
+    b: {
+      unit: second,
+      value: 2147483647
+    },
+    c: {
+      value: 9223372036854775807
+    },
+    d: {
+      unit: kilobyte,
+      value: 9223372036854775807
+    },
+    e: {
+      value: 18446744073709551615
+    },
+    f: {
+      unit: exbibyte,
+      value: 18446744073709551615
+    },
+    g: {
+      value: 1.7976931348623157E+308
+    },
+    h: {
+      unit: foo,
+      value: 1.7976931348623157E+308
+    },
+    i: {
+      unit: ratio,
+      value: 0.5
+    },
+    j: {
+      unit: percent,
+      value: 88.25
+    }
+  },
+  platform: csharp,
+  sdk: {},
+  start_timestamp: DateTime_1,
+  transaction: name,
+  transaction_info: {
+    source: custom
+  },
+  type: transaction
+}

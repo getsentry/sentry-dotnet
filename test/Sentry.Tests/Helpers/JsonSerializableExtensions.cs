@@ -3,10 +3,10 @@ using System.Text.Json;
 
 internal static class JsonSerializableExtensions
 {
-    public static string ToJsonString(this IJsonSerializable serializable, IDiagnosticLogger logger) =>
+    public static string ToJsonString(this IJsonSerializable serializable, IDiagnosticLogger logger = null) =>
         WriteToJsonString(writer => writer.WriteSerializableValue(serializable, logger));
 
-    public static string ToJsonString(this object @object, IDiagnosticLogger logger) =>
+    public static string ToJsonString(this object @object, IDiagnosticLogger logger = null) =>
         WriteToJsonString(writer => writer.WriteDynamicValue(@object, logger));
 
     private static string WriteToJsonString(Action<Utf8JsonWriter> writeAction)
