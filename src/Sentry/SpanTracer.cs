@@ -58,14 +58,13 @@ namespace Sentry
         public void UnsetTag(string key) =>
             (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
-        private ConcurrentDictionary<string, object?> _data = new();
+        private readonly ConcurrentDictionary<string, object?> _data = new();
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object?> Extra => _data;
 
         /// <inheritdoc />
-        public void SetExtra(string key, object? value) =>
-            _data[key] = value;
+        public void SetExtra(string key, object? value) => _data[key] = value;
 
         /// <summary>
         /// Initializes an instance of <see cref="SpanTracer"/>.
@@ -86,8 +85,7 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public ISpan StartChild(string operation) =>
-            Transaction.StartChild(SpanId, operation);
+        public ISpan StartChild(string operation) => Transaction.StartChild(SpanId, operation);
 
         /// <inheritdoc />
         public void Finish()
@@ -111,13 +109,9 @@ namespace Sentry
         }
 
         /// <inheritdoc />
-        public void Finish(Exception exception) =>
-            Finish(exception, SpanStatusConverter.FromException(exception));
+        public void Finish(Exception exception) => Finish(exception, SpanStatusConverter.FromException(exception));
 
         /// <inheritdoc />
-        public SentryTraceHeader GetTraceHeader() => new(
-            TraceId,
-            SpanId,
-            IsSampled);
+        public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
     }
 }
