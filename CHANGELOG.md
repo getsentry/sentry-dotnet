@@ -21,6 +21,7 @@
 - Fix bug with pre-formatted strings passed to diagnostic loggers ([#2004](https://github.com/getsentry/sentry-dotnet/pull/2004))
 - Fix DI issue by binding to MAUI using lifecycle events ([#2006](https://github.com/getsentry/sentry-dotnet/pull/2006))
 - Unhide `SentryEvent.Exception` ([#2011](https://github.com/getsentry/sentry-dotnet/pull/2011))
+- Bump `Google.Cloud.Functions.Hosting` to version 1.1.0 ([#2015](https://github.com/getsentry/sentry-dotnet/pull/2015))
 
 ## 3.22.0
 
