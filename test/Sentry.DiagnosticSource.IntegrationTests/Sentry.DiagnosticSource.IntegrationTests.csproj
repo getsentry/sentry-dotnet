@@ -5,24 +5,24 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="Verify.EntityFramework" Version="6.6.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.10" />
+    <PackageReference Include="Verify.EntityFramework" Version="6.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.*" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.*" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net48' ">
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.29" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.29" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.*" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LocalDb" Version="13.9.4" />
+    <PackageReference Include="LocalDb" Version="13.*" />
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />

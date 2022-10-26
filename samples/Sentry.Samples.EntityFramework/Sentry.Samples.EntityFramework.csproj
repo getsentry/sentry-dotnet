@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
-    <PackageReference Include="Effort.EF6" Version="2.2.16" />
+    <PackageReference Include="EntityFramework" Version="6.*" />
+    <PackageReference Include="Effort.EF6" Version="2.*" />
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
   </ItemGroup>
 

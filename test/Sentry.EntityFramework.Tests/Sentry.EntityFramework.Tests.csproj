@@ -10,9 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
-    <PackageReference Include="Effort.EF6" Version="2.2.16" />
-    <PackageReference Include="EfClassicLocalDb" Version="13.9.4" />
+    <PackageReference Include="EntityFramework" Version="6.*" />
+    <PackageReference Include="Effort.EF6" Version="2.*" />
+    <PackageReference Include="EfClassicLocalDb" Version="13.*" />
 
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
