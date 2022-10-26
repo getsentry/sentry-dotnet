@@ -10,6 +10,7 @@
 - Support DI for custom transaction processors ([#1993](https://github.com/getsentry/sentry-dotnet/pull/1993))
 - Mark Transaction as aborted when unhandled exception occurs ([#1996](https://github.com/getsentry/sentry-dotnet/pull/1996))
 - Build Windows and Tizen targets for `Sentry.Maui` ([#2005](https://github.com/getsentry/sentry-dotnet/pull/2005))
+- Add `ISpan.GetTransaction` convenience method ([#2014](https://github.com/getsentry/sentry-dotnet/pull/2014))
 
 ### Fixes
 
