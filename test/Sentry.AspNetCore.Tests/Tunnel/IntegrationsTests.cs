@@ -28,13 +28,16 @@ public class IntegrationsTests : IDisposable
         _server = new TestServer(builder);
     }
 
-    [Fact]
-    public async Task TunnelMiddleware_CanForwardValidEnvelope()
+    [Theory]
+    [InlineData("sentry.io")]
+    [InlineData("ingest.sentry.io")]
+    [InlineData("o12345.ingest.sentry.io")]
+    public async Task TunnelMiddleware_CanForwardValidEnvelope(string host)
     {
         var requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "/tunnel")
         {
             Content = new StringContent(
-            @"{""sent_at"":""2021-01-01T00:00:00.000Z"",""sdk"":{""name"":""sentry.javascript.browser"",""version"":""6.8.0""},""dsn"":""https://dns@sentry.io/1""}
+            @"{""sent_at"":""2021-01-01T00:00:00.000Z"",""sdk"":{""name"":""sentry.javascript.browser"",""version"":""6.8.0""},""dsn"":""https://dns@" + host + @"/1""}
 {""type"":""session""}
 {""sid"":""fda00e933162466c849962eaea0cfaff""}")
         };
