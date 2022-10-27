@@ -1,0 +1,118 @@
+﻿{
+  events: [
+    global TracesSampler,
+    SessionManager StartSession,
+    SessionManager EndSession Exited,
+    global TransactionProcessor,
+    scoped TransactionProcessor
+  ],
+  Envelopes: [
+    {
+      Header: {
+        sdk: {
+          name: sentry.dotnet
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: session
+          },
+          Payload: {
+            Source: {
+              Release: release,
+              IsInitial: true
+            }
+          }
+        }
+      ]
+    },
+    {
+      Header: {
+        event_id: Guid_1,
+        sdk: {
+          name: sentry.dotnet
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: user_report
+          },
+          Payload: {
+            Source: {
+              Name: Use Feedback
+            }
+          }
+        }
+      ]
+    },
+    {
+      Header: {
+        sdk: {
+          name: sentry.dotnet
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: session
+          },
+          Payload: {
+            Source: {
+              Release: release,
+              IsInitial: false,
+              SequenceNumber: 1,
+              EndStatus: Exited
+            }
+          }
+        }
+      ]
+    },
+    {
+      Header: {
+        event_id: Guid_2,
+        sdk: {
+          name: sentry.dotnet
+        },
+        trace: {
+          environment: production,
+          public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+          sample_rate: 1,
+          trace_id: Guid_3,
+          transaction: name
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: transaction
+          },
+          Payload: {
+            Source: {
+              Name: name,
+              Platform: csharp,
+              Operation: operation,
+              Description: ,
+              Status: Ok,
+              IsSampled: true,
+              SampleRate: 1.0,
+              Request: {},
+              Contexts: {
+                trace: {
+                  Operation: operation,
+                  Description: ,
+                  Status: Ok,
+                  IsSampled: true
+                }
+              },
+              User: {},
+              Environment: production,
+              IsFinished: true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -4,44 +4,49 @@ namespace Sentry.Tests;
 public class OrderOfExecutionTests
 {
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public Task Event(bool alwaysDrop) =>
+    [MemberData(nameof(GetData))]
+    public Task Event(bool alwaysDrop,bool  sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureEvent(new()),
-            alwaysDrop);
+            alwaysDrop, sampleOut);
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public Task Exception(bool alwaysDrop) =>
+    [MemberData(nameof(GetData))]
+    public Task Exception(bool alwaysDrop, bool sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureException(new()),
-            alwaysDrop);
+            alwaysDrop, sampleOut);
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public Task Message(bool alwaysDrop) =>
+    [MemberData(nameof(GetData))]
+    public Task Message(bool alwaysDrop, bool sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureMessage("The message"),
-            alwaysDrop);
+            alwaysDrop, sampleOut);
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public Task UserFeedback(bool alwaysDrop) =>
+    [MemberData(nameof(GetData))]
+    public Task UserFeedback(bool alwaysDrop, bool sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureUserFeedback(new(SentryId.Create(), "Use Feedback", null, null)),
-            alwaysDrop);
+            alwaysDrop, sampleOut);
 
-    static async Task RunTest(Action<IHub, List<string>> action, bool alwaysDrop)
+    public static IEnumerable<object[]> GetData()
+    {
+        foreach (var alwaysDrop in new[] {true, false})
+        foreach (var sampleOut in new[] {true, false})
+        {
+            yield return new object[] {alwaysDrop, sampleOut};
+        }
+    }
+    static async Task RunTest(Action<IHub, List<string>> action, bool alwaysDrop, bool sampleOut)
     {
         var events = new List<string>();
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
             TracesSampleRate = 1,
+            //SampleRate = sampleOut ? 0 : 1,
             Transport = transport,
             Dsn = ValidDsn,
             ClientReportRecorder = new ClientReportRecorder(events)
@@ -90,7 +95,7 @@ public class OrderOfExecutionTests
                 })
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("Stacktrace", "release")
-            .UseParameters(alwaysDrop);
+            .UseParameters(alwaysDrop, sampleOut);
     }
 
     class Capture :
