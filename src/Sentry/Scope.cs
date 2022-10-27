@@ -211,7 +211,7 @@ public class Scope : IEventLike, IHasDistribution
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETSTANDARD2_0 || NET461
+#if NETSTANDARD2_0 || NETFRAMEWORK
         private ConcurrentBag<Attachment> _attachments = new();
 #else
     private readonly ConcurrentBag<Attachment> _attachments = new();
@@ -311,7 +311,7 @@ public class Scope : IEventLike, IHasDistribution
     /// </summary>
     public void ClearAttachments()
     {
-#if NETSTANDARD2_0 || NET461
+#if NETSTANDARD2_0 || NETFRAMEWORK
             Interlocked.Exchange(ref _attachments, new());
 #else
         _attachments.Clear();

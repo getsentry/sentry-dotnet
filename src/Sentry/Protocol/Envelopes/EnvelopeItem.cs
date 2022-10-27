@@ -121,7 +121,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // NOTE: Previously we used BufferPayloadAsync, but since we buffer from in-memory objects to a MemoryStream
         // there's no advantage to doing so asynchronously.  We will get better perf from a synchronous approach.
         var payloadBuffer = BufferPayload(logger);
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             using (payloadBuffer)
 #else
         await using (payloadBuffer.ConfigureAwait(false))

@@ -32,7 +32,7 @@ public class DefaultSentryScopeStateProcessor : ISentryScopeStateProcessor
                         k.Value.ToString()!)));
                 break;
             }
-#if !NET461
+#if !NETFRAMEWORK
             case ValueTuple<string, string> tupleStringString:
                 if (!string.IsNullOrEmpty(tupleStringString.Item2))
                 {

@@ -5,7 +5,7 @@ using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-#if NET461
+#if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
 #endif
 
@@ -58,7 +58,7 @@ namespace Sentry
         public static void DisableTaskUnobservedTaskExceptionCapture(this SentryOptions options) =>
             options.RemoveIntegration<TaskUnobservedTaskExceptionIntegration>();
 
-#if NET461
+#if NETFRAMEWORK
         /// <summary>
         /// Disables the list addition of .Net Frameworks into events.
         /// </summary>

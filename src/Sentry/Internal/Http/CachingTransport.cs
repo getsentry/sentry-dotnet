@@ -279,7 +279,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
         _options.LogDebug("Reading cached envelope: {0}", file);
 
         var stream = _fileSystem.OpenFileForReading(file);
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             using (stream)
 #else
         await using (stream.ConfigureAwait(false))
@@ -401,7 +401,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
         EnsureFreeSpaceInCache();
 
         var stream = _fileSystem.CreateFileForWriting(envelopeFilePath);
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             using(stream)
 #else
         await using (stream.ConfigureAwait(false))

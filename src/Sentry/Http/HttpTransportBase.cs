@@ -427,7 +427,7 @@ public abstract class HttpTransportBase
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 
                 var envelopeFile = File.Create(destination);
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
                     using (envelopeFile)
 #else
                 await using (envelopeFile)

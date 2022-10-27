@@ -13,7 +13,7 @@ internal static class SerializableExtensions
         CancellationToken cancellationToken = default)
     {
         var stream = new MemoryStream();
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             using (stream)
 #else
         await using (stream.ConfigureAwait(false))

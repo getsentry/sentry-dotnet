@@ -797,7 +797,7 @@ namespace Sentry
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
                 new TaskUnobservedTaskExceptionIntegration(),
-#if NET461
+#if NETFRAMEWORK
                 new NetFxInstallationsIntegration(),
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION

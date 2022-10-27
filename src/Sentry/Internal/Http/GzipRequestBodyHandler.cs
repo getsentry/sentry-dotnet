@@ -78,7 +78,7 @@ internal class GzipRequestBodyHandler : DelegatingHandler
         protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
         {
             var gzipStream = new GZipStream(stream, _compressionLevel, leaveOpen: true);
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             using (gzipStream)
 #else
                 await using (gzipStream.ConfigureAwait(false))

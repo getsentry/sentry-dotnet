@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using Sentry.Internal.Http;
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
 internal static partial class PolyfillExtensions
 {
     public static string[] Split(this string str, char c, StringSplitOptions options = StringSplitOptions.None) =>
@@ -67,7 +67,7 @@ namespace System.Collections.Generic
 }
 #endif
 
-#if NET461
+#if NETFRAMEWORK
 namespace System.Linq
 {
     internal static class PolyfillExtensions

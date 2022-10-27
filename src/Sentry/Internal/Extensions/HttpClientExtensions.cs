@@ -10,7 +10,7 @@ internal static class HttpClientExtensions
         CancellationToken cancellationToken = default)
     {
         var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             using (stream)
 #else
         await using (stream.ConfigureAwait(false))

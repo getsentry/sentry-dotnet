@@ -44,7 +44,7 @@ internal class StackFrameData
 
     public static bool TryParse(
         string line,
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             out StackFrameData? stackFrame)
 #else
         [NotNullWhen(true)] out StackFrameData? stackFrame)
@@ -92,7 +92,7 @@ internal class StackFrameData
 
     private static bool ExtractSignatures(
         string str,
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             out string? typeFullName,
             out string? methodSignature)
 #else

@@ -50,7 +50,7 @@ internal class GzipBufferedRequestBodyHandler : DelegatingHandler
         if (request.Content is not null)
         {
             var gzipStream = new GZipStream(memoryStream, _compressionLevel, leaveOpen: true);
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
                 using (gzipStream)
 #else
             await using (gzipStream)

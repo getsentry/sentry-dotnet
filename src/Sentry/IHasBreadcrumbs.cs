@@ -26,7 +26,7 @@ public interface IHasBreadcrumbs
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class HasBreadcrumbsExtensions
 {
-#if !NET461
+#if !NETFRAMEWORK
     /// <summary>
     /// Adds a breadcrumb to the object.
     /// </summary>
