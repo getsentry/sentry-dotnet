@@ -32,7 +32,6 @@
       "src\\Sentry.Maui\\Sentry.Maui.csproj",
       "src\\Sentry.NLog\\Sentry.NLog.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
-      "src\\Sentry.Tunnel\\Sentry.Tunnel.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
