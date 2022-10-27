@@ -3,11 +3,24 @@ namespace Sentry.Tests;
 public class MeasurementUnitTests
 {
     [Fact]
-    public void DefaultNone()
+    public void DefaultEmpty()
     {
         MeasurementUnit m = new();
-        Assert.Equal(MeasurementUnit.None, m);
         Assert.Equal("", m.ToString());
+    }
+
+    [Fact]
+    public void NoneDiffersFromEmpty()
+    {
+        MeasurementUnit m = new();
+        Assert.NotEqual(MeasurementUnit.None, m);
+    }
+
+    [Fact]
+    public void CanUseNoneUnit()
+    {
+        var m = MeasurementUnit.None;
+        Assert.Equal("none", m.ToString());
     }
 
     [Fact]

@@ -40,9 +40,7 @@ namespace Sentry
         /// <param name="transaction">The transaction.</param>
         /// <param name="name">The name of the measurement.</param>
         /// <param name="value">The value of the measurement.</param>
-        /// <param name="unit">
-        /// The optional unit of the measurement.  Defaults to <see cref="MeasurementUnit.None" />.
-        /// </param>
+        /// <param name="unit">The optional unit of the measurement.</param>
         public static void SetMeasurement(this ITransactionData transaction, string name, int value,
             MeasurementUnit unit = default) =>
             (transaction as IHasMeasurements)?.SetMeasurement(name, new Measurement(value, unit));

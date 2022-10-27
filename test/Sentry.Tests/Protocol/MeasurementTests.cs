@@ -3,12 +3,14 @@ namespace Sentry.Tests.Protocol;
 [UsesVerify]
 public class MeasurementTests
 {
+    private static readonly MeasurementUnit EmptyUnit = new();
+
     [Fact]
     public void Constructor_IntValue()
     {
         var m = new Measurement(int.MaxValue);
         Assert.Equal(int.MaxValue, m.Value);
-        Assert.Equal(MeasurementUnit.None, m.Unit);
+        Assert.Equal(EmptyUnit, m.Unit);
     }
 
     [Fact]
@@ -16,7 +18,7 @@ public class MeasurementTests
     {
         var m = new Measurement(long.MaxValue);
         Assert.Equal(long.MaxValue, m.Value);
-        Assert.Equal(MeasurementUnit.None, m.Unit);
+        Assert.Equal(EmptyUnit, m.Unit);
     }
 
     [Fact]
@@ -24,7 +26,7 @@ public class MeasurementTests
     {
         var m = new Measurement(ulong.MaxValue);
         Assert.Equal(ulong.MaxValue, m.Value);
-        Assert.Equal(MeasurementUnit.None, m.Unit);
+        Assert.Equal(EmptyUnit, m.Unit);
     }
 
     [Fact]
@@ -32,7 +34,7 @@ public class MeasurementTests
     {
         var m = new Measurement(double.MaxValue);
         Assert.Equal(double.MaxValue, m.Value);
-        Assert.Equal(MeasurementUnit.None, m.Unit);
+        Assert.Equal(EmptyUnit, m.Unit);
     }
 
     [Fact]
@@ -104,7 +106,7 @@ public class MeasurementTests
     {
         var m = new Measurement(int.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":2147483647}", json);
+        Assert.Equal("{\"value\":2147483647,\"unit\":\"none\"}", json);
     }
 
     [Fact]
@@ -112,7 +114,7 @@ public class MeasurementTests
     {
         var m = new Measurement(long.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":9223372036854775807}", json);
+        Assert.Equal("{\"value\":9223372036854775807,\"unit\":\"none\"}", json);
     }
 
     [Fact]
@@ -120,7 +122,7 @@ public class MeasurementTests
     {
         var m = new Measurement(ulong.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":18446744073709551615}", json);
+        Assert.Equal("{\"value\":18446744073709551615,\"unit\":\"none\"}", json);
     }
 
     [Fact]
@@ -128,7 +130,7 @@ public class MeasurementTests
     {
         var m = new Measurement(double.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":1.7976931348623157E+308}", json);
+        Assert.Equal("{\"value\":1.7976931348623157E+308,\"unit\":\"none\"}", json);
     }
 
     [Fact]
@@ -184,7 +186,7 @@ public class MeasurementTests
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
             t.Measurements["foo"].Value.Equals(int.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.None)));
+            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
     }
 
     [Fact]
@@ -208,7 +210,7 @@ public class MeasurementTests
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
             t.Measurements["foo"].Value.Equals(long.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.None)));
+            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
     }
 
     [Fact]
@@ -232,7 +234,7 @@ public class MeasurementTests
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
             t.Measurements["foo"].Value.Equals(ulong.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.None)));
+            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
     }
 
     [Fact]
@@ -256,7 +258,7 @@ public class MeasurementTests
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
             t.Measurements["foo"].Value.Equals(double.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.None)));
+            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
     }
 
     [Fact]
@@ -362,6 +364,7 @@ public class MeasurementTests
         var transaction = new Transaction("name", "operation");
         transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
+        transaction.SetMeasurement("_", 0, MeasurementUnit.None);
         transaction.SetMeasurement("a", int.MaxValue);
         transaction.SetMeasurement("b", int.MaxValue, MeasurementUnit.Duration.Second);
         transaction.SetMeasurement("c", long.MaxValue);

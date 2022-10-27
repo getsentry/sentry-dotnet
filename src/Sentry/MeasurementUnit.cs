@@ -24,9 +24,9 @@ namespace Sentry
         }
 
         /// <summary>
-        /// Represents an untyped measurement unit, used for measurements that have no natural unit.
+        /// A special measurement unit that is used for measurements that have no natural unit.
         /// </summary>
-        public static MeasurementUnit None = new();
+        public static MeasurementUnit None = new("none");
 
         /// <summary>
         /// Creates a custom measurement unit.
@@ -39,12 +39,17 @@ namespace Sentry
         {
             if (name == null)
             {
-                return None;
+                return new MeasurementUnit();
             }
 
             name = name.Trim();
 
             if (name.Length == 0)
+            {
+                return new MeasurementUnit();
+            }
+
+            if (name.Equals("none", StringComparison.OrdinalIgnoreCase))
             {
                 return None;
             }

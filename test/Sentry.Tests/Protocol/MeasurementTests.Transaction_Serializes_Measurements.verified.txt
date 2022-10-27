@@ -43,6 +43,10 @@
     j: {
       unit: percent,
       value: 88.25
+    },
+    _: {
+      unit: none,
+      value: 0
     }
   },
   platform: csharp,
