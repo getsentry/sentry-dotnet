@@ -1,4 +1,4 @@
-#if NET461
+#if NETFRAMEWORK
 using Microsoft.Win32;
 
 namespace Sentry.PlatformAbstractions

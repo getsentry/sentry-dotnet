@@ -10,7 +10,6 @@
     <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
     <AssemblyName>Sentry.Maui.Device.TestApp</AssemblyName>
     <UseMaui>true</UseMaui>
-    <ImplicitUsings>enable</ImplicitUsings>
 
     <!-- Display name -->
     <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>

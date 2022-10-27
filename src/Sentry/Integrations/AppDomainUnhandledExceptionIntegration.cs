@@ -1,4 +1,3 @@
-using System;
 using System.Security;
 using Sentry.Internal;
 using Sentry.Protocol;

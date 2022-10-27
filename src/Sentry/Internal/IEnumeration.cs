@@ -1,13 +1,10 @@
-using System;
+namespace Sentry.Internal;
 
-namespace Sentry.Internal
+internal interface IEnumeration : IComparable
 {
-    internal interface IEnumeration : IComparable
-    {
-        internal string Value { get; }
-    }
+    internal string Value { get; }
+}
 
-    internal interface IEnumeration<T> : IEquatable<T>, IComparable<T>, IEnumeration
-    {
-    }
+internal interface IEnumeration<T> : IEquatable<T>, IComparable<T>, IEnumeration
+{
 }

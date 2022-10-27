@@ -1,8 +1,5 @@
 #if !NETFRAMEWORK
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Sentry.PlatformAbstractions
 {
     /// <summary>
