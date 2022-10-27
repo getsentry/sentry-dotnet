@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
@@ -27,7 +26,6 @@ namespace Sentry
         /// The information from this exception is used by the Sentry SDK
         /// to add the relevant data to the event prior to sending to Sentry.
         /// </remarks>
-        [EditorBrowsable(EditorBrowsableState.Never)]
         public Exception? Exception { get; }
 
         /// <summary>

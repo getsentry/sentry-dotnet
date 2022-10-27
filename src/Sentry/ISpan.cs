@@ -68,5 +68,16 @@ namespace Sentry
 
             return child;
         }
+
+        /// <summary>
+        /// Gets the transaction that this span belongs to.
+        /// </summary>
+        public static ITransaction GetTransaction(this ISpan span) =>
+            span switch
+            {
+                ITransaction transaction => transaction,
+                SpanTracer tracer => tracer.Transaction,
+                _ => throw new ArgumentOutOfRangeException(nameof(span), span, null)
+            };
     }
 }

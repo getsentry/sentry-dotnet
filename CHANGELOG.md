@@ -10,6 +10,7 @@
 - Support DI for custom transaction processors ([#1993](https://github.com/getsentry/sentry-dotnet/pull/1993))
 - Mark Transaction as aborted when unhandled exception occurs ([#1996](https://github.com/getsentry/sentry-dotnet/pull/1996))
 - Build Windows and Tizen targets for `Sentry.Maui` ([#2005](https://github.com/getsentry/sentry-dotnet/pull/2005))
+- Add `ISpan.GetTransaction` convenience method ([#2014](https://github.com/getsentry/sentry-dotnet/pull/2014))
 
 ### Fixes
 
@@ -20,6 +21,9 @@
 - Ensure logs with lower levels are captured by `Sentry.Extensions.Logging` ([#1992](https://github.com/getsentry/sentry-dotnet/pull/1992))
 - Fix bug with pre-formatted strings passed to diagnostic loggers ([#2004](https://github.com/getsentry/sentry-dotnet/pull/2004))
 - Fix DI issue by binding to MAUI using lifecycle events ([#2006](https://github.com/getsentry/sentry-dotnet/pull/2006))
+- Unhide `SentryEvent.Exception` ([#2011](https://github.com/getsentry/sentry-dotnet/pull/2011))
+- Bump `Google.Cloud.Functions.Hosting` to version 1.1.0 ([#2015](https://github.com/getsentry/sentry-dotnet/pull/2015))
+- Fix default host issue for the Sentry Tunnel middleware ([#2019](https://github.com/getsentry/sentry-dotnet/pull/2019))
 
 ## 3.22.0
 
