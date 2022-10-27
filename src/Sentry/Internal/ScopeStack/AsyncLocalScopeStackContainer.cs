@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Threading;
-
 namespace Sentry.Internal.ScopeStack;
 
 internal class AsyncLocalScopeStackContainer : IScopeStackContainer

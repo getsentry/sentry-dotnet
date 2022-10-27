@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.Extensibility;
 
 /// <summary>

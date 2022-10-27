@@ -1,8 +1,5 @@
-using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol.Envelopes;

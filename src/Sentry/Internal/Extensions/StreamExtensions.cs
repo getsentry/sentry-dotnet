@@ -1,8 +1,3 @@
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class StreamExtensions

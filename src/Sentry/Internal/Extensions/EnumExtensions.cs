@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class EnumExtensions

@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.Internal;
 // NOTE: We only need this interface because IEventLike is public and thus we can't
 // add more properties without introducing a potentially breaking change.

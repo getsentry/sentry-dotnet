@@ -1,4 +1,3 @@
-using System;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http;

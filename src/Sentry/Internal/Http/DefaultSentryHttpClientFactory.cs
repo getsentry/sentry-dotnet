@@ -1,4 +1,3 @@
-using System;
 using System.IO.Compression;
 using System.Net.Http;
 using Sentry.Extensibility;

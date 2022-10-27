@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.NetworkInformation;
-using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;

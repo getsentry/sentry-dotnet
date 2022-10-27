@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Sentry.Internal.ScopeStack;
 
 internal interface IScopeStackContainer

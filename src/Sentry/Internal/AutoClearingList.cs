@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 
 namespace Sentry.Internal;
 // Workaround for the fact that setting a list in config options appends instead of replaces.

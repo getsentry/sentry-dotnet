@@ -1,5 +1,4 @@
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Sentry.Samples.AspNetCore.Blazor.Wasm;
 

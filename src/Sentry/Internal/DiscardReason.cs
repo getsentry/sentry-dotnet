@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.Internal;
 
 internal readonly struct DiscardReason : IEnumeration<DiscardReason>

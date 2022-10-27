@@ -1,6 +1,3 @@
-using System.Threading;
-using System.Collections.Generic;
-using System;
 using Sentry.Extensibility;
 
 namespace Sentry.Internal.DiagnosticSource;

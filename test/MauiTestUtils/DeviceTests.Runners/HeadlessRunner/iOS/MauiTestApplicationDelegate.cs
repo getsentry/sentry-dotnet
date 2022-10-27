@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Foundation;
-using Microsoft.DotNet.XHarness.iOS.Shared.Execution;
-using Microsoft.DotNet.XHarness.TestRunners.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Hosting;
 using ObjCRuntime;

@@ -1,5 +1,3 @@
-using System;
-
 #if !NET6_0_OR_GREATER
 using System.Threading;
 #endif

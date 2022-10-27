@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Extensibility;

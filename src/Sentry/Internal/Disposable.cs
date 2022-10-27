@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.Internal;
 
 internal class Disposable : IDisposable

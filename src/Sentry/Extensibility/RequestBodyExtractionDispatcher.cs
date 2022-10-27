@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Extensibility;

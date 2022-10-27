@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using ObjCRuntime;
 using UIKit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using ObjCRuntime;
 using UIKit;
 
 namespace Microsoft.Maui.DeviceTests;

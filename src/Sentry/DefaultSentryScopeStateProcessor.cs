@@ -1,8 +1,6 @@
 #if !NET461
 using System;
 #endif
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Sentry;
 

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class DisposableExtensions
