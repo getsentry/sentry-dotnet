@@ -61,7 +61,6 @@
                   Mechanism: {}
                 }
               ],
-              SentryThreads: [],
               Level: error,
               TransactionName: name,
               Request: {},

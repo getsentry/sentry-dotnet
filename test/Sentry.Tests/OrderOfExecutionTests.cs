@@ -39,6 +39,7 @@ public class OrderOfExecutionTests
             yield return new object[] {alwaysDrop, sampleOut};
         }
     }
+
     static async Task RunTest(Action<IHub, List<string>> action, bool alwaysDrop, bool sampleOut)
     {
         var events = new List<string>();
@@ -46,15 +47,16 @@ public class OrderOfExecutionTests
         var options = new SentryOptions
         {
             TracesSampleRate = 1,
-            //SampleRate = sampleOut ? 0 : 1,
+            SampleRate = sampleOut ? 0 : 1,
             Transport = transport,
             Dsn = ValidDsn,
             ClientReportRecorder = new ClientReportRecorder(events)
         };
         if (alwaysDrop)
         {
-           options.SampleRate = float.Epsilon;
+            options.SampleRate = float.Epsilon;
         }
+
         options.BeforeSend += _ =>
         {
             events.Add("global BeforeSend");
@@ -95,6 +97,7 @@ public class OrderOfExecutionTests
                 })
             .IgnoreStandardSentryMembers()
             .IgnoreMembers("Stacktrace", "release")
+            .IgnoreMember<SentryEvent>(_ => _.SentryThreads)
             .UseParameters(alwaysDrop, sampleOut);
     }
 

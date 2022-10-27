@@ -51,7 +51,6 @@
               SentryExceptions: [],
               SentryThreads: [
                 {
-                  Name: second,
                   Crashed: false,
                   Current: true
                 }
