@@ -47,7 +47,7 @@ public class OrderOfExecutionTests
         var options = new SentryOptions
         {
             TracesSampleRate = 1,
-            SampleRate = sampleOut ? 0 : 1,
+            SampleRate = sampleOut ? float.Epsilon : 1,
             Transport = transport,
             Dsn = ValidDsn,
             ClientReportRecorder = new ClientReportRecorder(events)
@@ -96,7 +96,7 @@ public class OrderOfExecutionTests
                     transport.Envelopes
                 })
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("Stacktrace", "release")
+            .IgnoreMembers("Stacktrace", "release", "environment")
             .IgnoreMember<SentryEvent>(_ => _.SentryThreads)
             .UseParameters(alwaysDrop, sampleOut);
     }

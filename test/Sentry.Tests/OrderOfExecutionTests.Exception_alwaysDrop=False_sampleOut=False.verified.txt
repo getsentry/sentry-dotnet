@@ -119,7 +119,6 @@
           name: sentry.dotnet
         },
         trace: {
-          environment: production,
           public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
           sample_rate: 1,
           trace_id: Guid_3,
