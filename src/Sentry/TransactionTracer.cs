@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry
 {
     /// <summary>
     /// Transaction tracer.
     /// </summary>
-    public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource
+    public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
     {
         private readonly IHub _hub;
         private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
@@ -165,6 +167,11 @@ namespace Sentry
         /// <inheritdoc />
         public IReadOnlyCollection<ISpan> Spans => _spans;
 
+        private readonly ConcurrentDictionary<string, Measurement> _measurements = new();
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
+
         /// <inheritdoc />
         public bool IsFinished => EndTimestamp is not null;
 
@@ -223,6 +230,11 @@ namespace Sentry
         /// <inheritdoc />
         public void UnsetTag(string key) =>
             _tags.TryRemove(key, out _);
+
+        /// <inheritdoc />
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void SetMeasurement(string name, Measurement measurement) =>
+            _measurements[name] = measurement;
 
         internal ISpan StartChild(SpanId parentSpanId, string operation)
         {
