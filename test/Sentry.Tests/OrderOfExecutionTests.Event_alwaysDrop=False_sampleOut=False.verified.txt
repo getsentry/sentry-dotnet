@@ -46,13 +46,6 @@
             Source: {
               Platform: csharp,
               SentryExceptions: [],
-              SentryThreads: [
-                {
-                  Name: .NET Long Running Task,
-                  Crashed: false,
-                  Current: true
-                }
-              ],
               Level: error,
               TransactionName: name,
               Request: {},

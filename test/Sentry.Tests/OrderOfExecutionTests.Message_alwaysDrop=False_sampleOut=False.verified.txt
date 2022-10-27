@@ -49,12 +49,6 @@
               },
               Platform: csharp,
               SentryExceptions: [],
-              SentryThreads: [
-                {
-                  Crashed: false,
-                  Current: true
-                }
-              ],
               Level: info,
               TransactionName: name,
               Request: {},
