@@ -4,12 +4,15 @@ using Sentry.Infrastructure;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+
 #if NET461
 using Sentry.PlatformAbstractions;
 #endif
+
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internal.DiagnosticSource;
 #endif
+
 namespace Sentry
 {
     /// <summary>

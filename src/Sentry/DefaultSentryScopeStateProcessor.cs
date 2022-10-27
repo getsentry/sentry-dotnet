@@ -1,7 +1,3 @@
-#if !NET461
-using System;
-#endif
-
 namespace Sentry;
 
 /// <summary>

@@ -1,5 +1,4 @@
 #if NET461
-using System;
 using Sentry.Extensibility;
 using Sentry.PlatformAbstractions;
 
