@@ -1,47 +1,46 @@
-namespace Sentry.Protocol
+namespace Sentry.Protocol;
+
+/// <summary>
+/// Trace metadata stored in 'contexts.trace' on an event or transaction.
+/// </summary>
+public interface ITraceContext
 {
     /// <summary>
-    /// Trace metadata stored in 'contexts.trace' on an event or transaction.
+    /// Span ID.
     /// </summary>
-    public interface ITraceContext
-    {
-        /// <summary>
-        /// Span ID.
-        /// </summary>
-        SpanId SpanId { get; }
+    SpanId SpanId { get; }
 
-        /// <summary>
-        /// Parent ID.
-        /// </summary>
-        SpanId? ParentSpanId { get; }
+    /// <summary>
+    /// Parent ID.
+    /// </summary>
+    SpanId? ParentSpanId { get; }
 
-        /// <summary>
-        /// Trace ID.
-        /// </summary>
-        SentryId TraceId { get; }
+    /// <summary>
+    /// Trace ID.
+    /// </summary>
+    SentryId TraceId { get; }
 
-        /// <summary>
-        /// Operation.
-        /// </summary>
-        string Operation { get; }
+    /// <summary>
+    /// Operation.
+    /// </summary>
+    string Operation { get; }
 
-        /// <summary>
-        /// Description.
-        /// </summary>
-        string? Description { get; }
+    /// <summary>
+    /// Description.
+    /// </summary>
+    string? Description { get; }
 
-        /// <summary>
-        /// Status.
-        /// </summary>
-        SpanStatus? Status { get; }
+    /// <summary>
+    /// Status.
+    /// </summary>
+    SpanStatus? Status { get; }
 
-        // Note: this may need to be mutated internally,
-        // but the user should never be able to change it
-        // on their own.
+    // Note: this may need to be mutated internally,
+    // but the user should never be able to change it
+    // on their own.
 
-        /// <summary>
-        /// Whether the span or transaction is sampled in (i.e. eligible for sending to Sentry).
-        /// </summary>
-        bool? IsSampled { get; }
-    }
+    /// <summary>
+    /// Whether the span or transaction is sampled in (i.e. eligible for sending to Sentry).
+    /// </summary>
+    bool? IsSampled { get; }
 }

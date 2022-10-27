@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 
-namespace Sentry.Internal.ScopeStack
+namespace Sentry.Internal.ScopeStack;
+
+internal interface IScopeStackContainer
 {
-    internal interface IScopeStackContainer
-    {
-        KeyValuePair<Scope, ISentryClient>[]? Stack { get; set; }
-    }
+    KeyValuePair<Scope, ISentryClient>[]? Stack { get; set; }
 }

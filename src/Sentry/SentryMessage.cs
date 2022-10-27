@@ -4,73 +4,72 @@ using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry
+namespace Sentry;
+
+/// <summary>
+/// Sentry Message interface.
+/// </summary>
+/// <remarks>
+/// This interface enables support to structured logging.
+/// </remarks>
+/// <example>
+/// "sentry.interfaces.Message": {
+///   "message": "Message for event: {eventId}",
+///   "params": [10]
+/// }
+/// </example>
+/// <seealso href="https://develop.sentry.dev/sdk/event-payloads/message/"/>
+public sealed class SentryMessage : IJsonSerializable
 {
     /// <summary>
-    /// Sentry Message interface.
+    /// The raw message string (un-interpolated).
     /// </summary>
     /// <remarks>
-    /// This interface enables support to structured logging.
+    /// Must be no more than 1000 characters in length.
     /// </remarks>
-    /// <example>
-    /// "sentry.interfaces.Message": {
-    ///   "message": "Message for event: {eventId}",
-    ///   "params": [10]
-    /// }
-    /// </example>
-    /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/message/"/>
-    public sealed class SentryMessage : IJsonSerializable
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// The optional list of formatting parameters.
+    /// </summary>
+    public IEnumerable<object>? Params { get; set; }
+
+    /// <summary>
+    /// The formatted message.
+    /// </summary>
+    public string? Formatted { get; set; }
+
+    /// <summary>
+    /// Coerces <see cref="string"/> into <see cref="SentryMessage"/>.
+    /// </summary>
+    public static implicit operator SentryMessage(string? message) => new() { Message = message };
+
+    /// <inheritdoc />
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
-        /// <summary>
-        /// The raw message string (un-interpolated).
-        /// </summary>
-        /// <remarks>
-        /// Must be no more than 1000 characters in length.
-        /// </remarks>
-        public string? Message { get; set; }
+        writer.WriteStartObject();
 
-        /// <summary>
-        /// The optional list of formatting parameters.
-        /// </summary>
-        public IEnumerable<object>? Params { get; set; }
+        writer.WriteStringIfNotWhiteSpace("message", Message);
+        writer.WriteArrayIfNotEmpty("params", Params, logger);
+        writer.WriteStringIfNotWhiteSpace("formatted", Formatted);
 
-        /// <summary>
-        /// The formatted message.
-        /// </summary>
-        public string? Formatted { get; set; }
+        writer.WriteEndObject();
+    }
 
-        /// <summary>
-        /// Coerces <see cref="string"/> into <see cref="SentryMessage"/>.
-        /// </summary>
-        public static implicit operator SentryMessage(string? message) => new() { Message = message };
+    /// <summary>
+    /// Parses from JSON.
+    /// </summary>
+    public static SentryMessage FromJson(JsonElement json)
+    {
+        var message = json.GetPropertyOrNull("message")?.GetString();
+        var @params = json.GetPropertyOrNull("params")?.EnumerateArray().Select(j => j.GetDynamicOrNull()).Where(o => o != null).ToArray();
+        var formatted = json.GetPropertyOrNull("formatted")?.GetString();
 
-        /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+        return new SentryMessage
         {
-            writer.WriteStartObject();
-
-            writer.WriteStringIfNotWhiteSpace("message", Message);
-            writer.WriteArrayIfNotEmpty("params", Params, logger);
-            writer.WriteStringIfNotWhiteSpace("formatted", Formatted);
-
-            writer.WriteEndObject();
-        }
-
-        /// <summary>
-        /// Parses from JSON.
-        /// </summary>
-        public static SentryMessage FromJson(JsonElement json)
-        {
-            var message = json.GetPropertyOrNull("message")?.GetString();
-            var @params = json.GetPropertyOrNull("params")?.EnumerateArray().Select(j => j.GetDynamicOrNull()).Where(o => o != null).ToArray();
-            var formatted = json.GetPropertyOrNull("formatted")?.GetString();
-
-            return new SentryMessage
-            {
-                Message = message,
-                Params = @params!,
-                Formatted = formatted
-            };
-        }
+            Message = message,
+            Params = @params!,
+            Formatted = formatted
+        };
     }
 }

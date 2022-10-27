@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using Sentry.Internal.ScopeStack;
 
-namespace Sentry.Internal
+namespace Sentry.Internal;
+
+internal interface IInternalScopeManager : ISentryScopeManager, IDisposable
 {
-    internal interface IInternalScopeManager : ISentryScopeManager, IDisposable
-    {
-        KeyValuePair<Scope, ISentryClient> GetCurrent();
-        IScopeStackContainer ScopeStackContainer { get; }
-    }
+    KeyValuePair<Scope, ISentryClient> GetCurrent();
+    IScopeStackContainer ScopeStackContainer { get; }
 }

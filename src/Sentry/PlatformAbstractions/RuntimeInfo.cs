@@ -3,29 +3,29 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace Sentry.PlatformAbstractions
+namespace Sentry.PlatformAbstractions;
+
+// https://github.com/dotnet/corefx/issues/17452
+internal static class RuntimeInfo
 {
-    // https://github.com/dotnet/corefx/issues/17452
-    internal static class RuntimeInfo
+    private static readonly Regex RuntimeParseRegex = new(
+        @"^(?<name>(?:[A-Za-z.]\S*\s?)*)(?:\s|^|$)(?<version>\d\S*)?",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Gets the current runtime.
+    /// </summary>
+    /// <returns>A new instance for the current runtime</returns>
+    internal static Runtime GetRuntime()
     {
-        private static readonly Regex RuntimeParseRegex = new(
-            @"^(?<name>(?:[A-Za-z.]\S*\s?)*)(?:\s|^|$)(?<version>\d\S*)?",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        var runtime = GetFromRuntimeInformation();
+        runtime ??= GetFromMonoRuntime();
+        runtime ??= GetFromEnvironmentVariable();
+        return runtime.WithAdditionalProperties();
+    }
 
-        /// <summary>
-        /// Gets the current runtime.
-        /// </summary>
-        /// <returns>A new instance for the current runtime</returns>
-        internal static Runtime GetRuntime()
-        {
-            var runtime = GetFromRuntimeInformation();
-            runtime ??= GetFromMonoRuntime();
-            runtime ??= GetFromEnvironmentVariable();
-            return runtime.WithAdditionalProperties();
-        }
-
-        internal static Runtime WithAdditionalProperties(this Runtime runtime)
-        {
+    internal static Runtime WithAdditionalProperties(this Runtime runtime)
+    {
 #if NETFRAMEWORK
             GetNetFxInstallationAndVersion(runtime, out var inst, out var ver);
             var version = runtime.Version ?? ver;
@@ -36,29 +36,29 @@ namespace Sentry.PlatformAbstractions
             var identifier = runtime.Identifier ?? GetRuntimeIdentifier(runtime);
             return new Runtime(runtime.Name, version, runtime.Raw, identifier);
 #else
-            var version = runtime.Version ?? GetNetCoreVersion(runtime);
-            return new Runtime(runtime.Name, version, runtime.Raw);
+        var version = runtime.Version ?? GetNetCoreVersion(runtime);
+        return new Runtime(runtime.Name, version, runtime.Raw);
 #endif
-        }
+    }
 
-        internal static Runtime? Parse(string? rawRuntimeDescription, string? name = null)
+    internal static Runtime? Parse(string? rawRuntimeDescription, string? name = null)
+    {
+        if (rawRuntimeDescription == null)
         {
-            if (rawRuntimeDescription == null)
-            {
-                return name == null ? null : new Runtime(name);
-            }
-
-            var match = RuntimeParseRegex.Match(rawRuntimeDescription);
-            if (match.Success)
-            {
-                return new Runtime(
-                    name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
-                    match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
-                    raw: rawRuntimeDescription);
-            }
-
-            return new Runtime(name, raw: rawRuntimeDescription);
+            return name == null ? null : new Runtime(name);
         }
+
+        var match = RuntimeParseRegex.Match(rawRuntimeDescription);
+        if (match.Success)
+        {
+            return new Runtime(
+                name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
+                match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
+                raw: rawRuntimeDescription);
+        }
+
+        return new Runtime(name, raw: rawRuntimeDescription);
+    }
 
 #if NETFRAMEWORK
         internal static void GetNetFxInstallationAndVersion(
@@ -88,30 +88,30 @@ namespace Sentry.PlatformAbstractions
             }
         }
 #else
-        // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
-        private static string? GetNetCoreVersion(Runtime runtime)
+    // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
+    private static string? GetNetCoreVersion(Runtime runtime)
+    {
+        if (!runtime.IsNetCore())
         {
-            if (!runtime.IsNetCore())
-            {
-                return null;
-            }
+            return null;
+        }
 
-            // https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-308424100
-            var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
+        // https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-308424100
+        var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
 #if NETCOREAPP3_0_OR_GREATER
-            var assemblyPath = assembly.Location;
+        var assemblyPath = assembly.Location;
 #else
             var assemblyPath = assembly.CodeBase;
 #endif
-            var parts = assemblyPath.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
-            var netCoreAppIndex = Array.IndexOf(parts, "Microsoft.NETCore.App");
-            if (netCoreAppIndex > 0 && netCoreAppIndex < parts.Length - 2)
-            {
-                return parts[netCoreAppIndex + 1];
-            }
-
-            return null;
+        var parts = assemblyPath.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
+        var netCoreAppIndex = Array.IndexOf(parts, "Microsoft.NETCore.App");
+        if (netCoreAppIndex > 0 && netCoreAppIndex < parts.Length - 2)
+        {
+            return parts[netCoreAppIndex + 1];
         }
+
+        return null;
+    }
 #endif
 
 #if NET5_0_OR_GREATER
@@ -128,51 +128,50 @@ namespace Sentry.PlatformAbstractions
         }
 #endif
 
-        private static Runtime? GetFromRuntimeInformation()
+    private static Runtime? GetFromRuntimeInformation()
+    {
+        try
         {
-            try
-            {
-                // Preferred API: netstandard2.0
-                // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
-                // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs
-                // e.g: .NET Framework 4.7.2633.0, .NET Native, WebAssembly
-                // Note: this throws on some Unity IL2CPP versions
-                var frameworkDescription = RuntimeInformation.FrameworkDescription;
-                return Parse(frameworkDescription);
-            }
-            catch
-            {
-                return null;
-            }
+            // Preferred API: netstandard2.0
+            // https://github.com/dotnet/corefx/blob/master/src/System.Runtime.InteropServices.RuntimeInformation/src/System/Runtime/InteropServices/RuntimeInformation/RuntimeInformation.cs
+            // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs
+            // e.g: .NET Framework 4.7.2633.0, .NET Native, WebAssembly
+            // Note: this throws on some Unity IL2CPP versions
+            var frameworkDescription = RuntimeInformation.FrameworkDescription;
+            return Parse(frameworkDescription);
         }
-
-        private static Runtime? GetFromMonoRuntime()
-            => Type.GetType("Mono.Runtime", false)
-                ?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)
-                ?.Invoke(null, null) is string monoVersion
-                // The implementation of Mono to RuntimeInformation:
-                // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs#L40
-                // Examples:
-                // Mono 5.10.1.47 (2017-12/8eb8f7d5e74 Fri Apr 13 20:18:12 EDT 2018)
-                // Mono 5.10.1.47 (tarball Tue Apr 17 09:23:16 UTC 2018)
-                // Mono 5.10.0 (Visual Studio built mono)
-                ? Parse(monoVersion, "Mono")
-                : null;
-
-        // This should really only be used on .NET 1.0, 1.1, 2.0, 3.0, 3.5 and 4.0
-        private static Runtime GetFromEnvironmentVariable()
+        catch
         {
-            // Environment.Version: NET Framework 4, 4.5, 4.5.1, 4.5.2 = 4.0.30319.xxxxx
-            // .NET Framework 4.6, 4.6.1, 4.6.2, 4.7, 4.7.1 =  4.0.30319.42000
-            // Not recommended on NET45+ (which has RuntimeInformation)
-            var version = Environment.Version;
-
-            var friendlyVersion = version.Major switch
-            {
-                1 => "",
-                _ => version.ToString()
-            };
-            return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
+            return null;
         }
+    }
+
+    private static Runtime? GetFromMonoRuntime()
+        => Type.GetType("Mono.Runtime", false)
+            ?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)
+            ?.Invoke(null, null) is string monoVersion
+            // The implementation of Mono to RuntimeInformation:
+            // https://github.com/mono/mono/blob/90b49aa3aebb594e0409341f9dca63b74f9df52e/mcs/class/corlib/System.Runtime.InteropServices.RuntimeInformation/RuntimeInformation.cs#L40
+            // Examples:
+            // Mono 5.10.1.47 (2017-12/8eb8f7d5e74 Fri Apr 13 20:18:12 EDT 2018)
+            // Mono 5.10.1.47 (tarball Tue Apr 17 09:23:16 UTC 2018)
+            // Mono 5.10.0 (Visual Studio built mono)
+            ? Parse(monoVersion, "Mono")
+            : null;
+
+    // This should really only be used on .NET 1.0, 1.1, 2.0, 3.0, 3.5 and 4.0
+    private static Runtime GetFromEnvironmentVariable()
+    {
+        // Environment.Version: NET Framework 4, 4.5, 4.5.1, 4.5.2 = 4.0.30319.xxxxx
+        // .NET Framework 4.6, 4.6.1, 4.6.2, 4.7, 4.7.1 =  4.0.30319.42000
+        // Not recommended on NET45+ (which has RuntimeInformation)
+        var version = Environment.Version;
+
+        var friendlyVersion = version.Major switch
+        {
+            1 => "",
+            _ => version.ToString()
+        };
+        return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
     }
 }

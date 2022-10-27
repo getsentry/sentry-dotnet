@@ -1,50 +1,49 @@
 using System;
 
-namespace Sentry
+namespace Sentry;
+
+/// <summary>
+/// Session metadata.
+/// </summary>
+public interface ISession
 {
     /// <summary>
-    /// Session metadata.
+    /// Session auto-generated ID.
     /// </summary>
-    public interface ISession
-    {
-        /// <summary>
-        /// Session auto-generated ID.
-        /// </summary>
-        SentryId Id { get; }
+    SentryId Id { get; }
 
-        /// <summary>
-        /// Session distinct ID.
-        /// </summary>
-        string? DistinctId { get; }
+    /// <summary>
+    /// Session distinct ID.
+    /// </summary>
+    string? DistinctId { get; }
 
-        /// <summary>
-        /// Session start timestamp.
-        /// </summary>
-        DateTimeOffset StartTimestamp { get; }
+    /// <summary>
+    /// Session start timestamp.
+    /// </summary>
+    DateTimeOffset StartTimestamp { get; }
 
-        /// <summary>
-        /// Release.
-        /// </summary>
-        string Release { get; }
+    /// <summary>
+    /// Release.
+    /// </summary>
+    string Release { get; }
 
-        /// <summary>
-        /// Environment.
-        /// </summary>
-        string? Environment { get; }
+    /// <summary>
+    /// Environment.
+    /// </summary>
+    string? Environment { get; }
 
-        /// <summary>
-        /// IP address of the user.
-        /// </summary>
-        string? IpAddress { get; }
+    /// <summary>
+    /// IP address of the user.
+    /// </summary>
+    string? IpAddress { get; }
 
-        /// <summary>
-        /// User agent.
-        /// </summary>
-        string? UserAgent { get; }
+    /// <summary>
+    /// User agent.
+    /// </summary>
+    string? UserAgent { get; }
 
-        /// <summary>
-        /// Reported error count.
-        /// </summary>
-        int ErrorCount { get; }
-    }
+    /// <summary>
+    /// Reported error count.
+    /// </summary>
+    int ErrorCount { get; }
 }

@@ -1,17 +1,16 @@
-namespace Sentry.Internal
-{
-    internal abstract class RandomValuesFactory
-    {
-        public abstract int NextInt();
-        public abstract int NextInt(int minValue, int maxValue);
-        public abstract double NextDouble();
-        public abstract void NextBytes(byte[] bytes);
+namespace Sentry.Internal;
 
-        public bool NextBool(double rate) => rate switch
-        {
-            >= 1 => true,
-            <= 0 => false,
-            _ => NextDouble() < rate
-        };
-    }
+internal abstract class RandomValuesFactory
+{
+    public abstract int NextInt();
+    public abstract int NextInt(int minValue, int maxValue);
+    public abstract double NextDouble();
+    public abstract void NextBytes(byte[] bytes);
+
+    public bool NextBool(double rate) => rate switch
+    {
+        >= 1 => true,
+        <= 0 => false,
+        _ => NextDouble() < rate
+    };
 }

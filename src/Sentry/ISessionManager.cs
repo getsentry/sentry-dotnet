@@ -1,24 +1,23 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sentry
+namespace Sentry;
+
+internal interface ISessionManager
 {
-    internal interface ISessionManager
-    {
-        bool IsSessionActive { get; }
+    bool IsSessionActive { get; }
 
-        SessionUpdate? TryRecoverPersistedSession();
+    SessionUpdate? TryRecoverPersistedSession();
 
-        SessionUpdate? StartSession();
+    SessionUpdate? StartSession();
 
-        SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
+    SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
 
-        SessionUpdate? EndSession(SessionEndStatus status);
+    SessionUpdate? EndSession(SessionEndStatus status);
 
-        void PauseSession();
+    void PauseSession();
 
-        IReadOnlyList<SessionUpdate> ResumeSession();
+    IReadOnlyList<SessionUpdate> ResumeSession();
 
-        SessionUpdate? ReportError();
-    }
+    SessionUpdate? ReportError();
 }

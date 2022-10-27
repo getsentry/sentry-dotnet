@@ -1,31 +1,30 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sentry.Internal.Extensions
+namespace Sentry.Internal.Extensions;
+
+internal static class DisposableExtensions
 {
-    internal static class DisposableExtensions
+    public static void DisposeAll(this IEnumerable<IDisposable> disposables)
     {
-        public static void DisposeAll(this IEnumerable<IDisposable> disposables)
+        List<Exception>? exceptions = null;
+
+        foreach (var i in disposables)
         {
-            List<Exception>? exceptions = null;
-
-            foreach (var i in disposables)
+            try
             {
-                try
-                {
-                    i.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    exceptions ??= new List<Exception>();
-                    exceptions.Add(ex);
-                }
+                i.Dispose();
             }
-
-            if (exceptions?.Count > 0)
+            catch (Exception ex)
             {
-                throw new AggregateException(exceptions);
+                exceptions ??= new List<Exception>();
+                exceptions.Add(ex);
             }
+        }
+
+        if (exceptions?.Count > 0)
+        {
+            throw new AggregateException(exceptions);
         }
     }
 }

@@ -7,483 +7,482 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-namespace Sentry
+namespace Sentry;
+
+/// <summary>
+/// Scope data to be sent with the event.
+/// </summary>
+/// <remarks>
+/// Scope data is sent together with any event captured
+/// during the lifetime of the scope.
+/// </remarks>
+public class Scope : IEventLike, IHasDistribution
 {
+    internal SentryOptions Options { get; }
+
+    internal bool Locked { get; set; }
+
+    private readonly object _lastEventIdSync = new();
+    private SentryId _lastEventId;
+
+    internal SentryId LastEventId
+    {
+        get
+        {
+            lock (_lastEventIdSync)
+            {
+                return _lastEventId;
+            }
+        }
+        set
+        {
+            lock (_lastEventIdSync)
+            {
+                _lastEventId = value;
+            }
+        }
+    }
+
+    private readonly object _evaluationSync = new();
+    private volatile bool _hasEvaluated;
+
     /// <summary>
-    /// Scope data to be sent with the event.
+    /// Whether the <see cref="OnEvaluating"/> event has already fired.
+    /// </summary>
+    internal bool HasEvaluated => _hasEvaluated;
+
+    private readonly Lazy<ConcurrentBag<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
+        new(LazyThreadSafetyMode.PublicationOnly);
+
+    /// <summary>
+    /// A list of exception processors.
+    /// </summary>
+    internal ConcurrentBag<ISentryEventExceptionProcessor> ExceptionProcessors => _lazyExceptionProcessors.Value;
+
+    private readonly Lazy<ConcurrentBag<ISentryEventProcessor>> _lazyEventProcessors =
+        new(LazyThreadSafetyMode.PublicationOnly);
+
+    private readonly Lazy<ConcurrentBag<ISentryTransactionProcessor>> _lazyTransactionProcessors =
+        new(LazyThreadSafetyMode.PublicationOnly);
+
+    /// <summary>
+    /// A list of event processors.
+    /// </summary>
+    internal ConcurrentBag<ISentryEventProcessor> EventProcessors => _lazyEventProcessors.Value;
+
+    /// <summary>
+    /// A list of event processors.
+    /// </summary>
+    internal ConcurrentBag<ISentryTransactionProcessor> TransactionProcessors => _lazyTransactionProcessors.Value;
+
+    /// <summary>
+    /// An event that fires when the scope evaluates.
     /// </summary>
     /// <remarks>
-    /// Scope data is sent together with any event captured
-    /// during the lifetime of the scope.
+    /// This allows registering an event handler that is invoked in case
+    /// an event is about to be sent to Sentry. If an event is never sent,
+    /// this event is never fired and the resources spared.
+    /// It also allows registration at an early stage of the processing
+    /// but execution at a later time, when more data is available.
     /// </remarks>
-    public class Scope : IEventLike, IHasDistribution
+    /// <see cref="Evaluate"/>
+    internal event EventHandler? OnEvaluating;
+
+    /// <inheritdoc />
+    public SentryLevel? Level { get; set; }
+
+    private Request? _request;
+
+    /// <inheritdoc />
+    public Request Request
     {
-        internal SentryOptions Options { get; }
+        get => _request ??= new Request();
+        set => _request = value;
+    }
 
-        internal bool Locked { get; set; }
+    private readonly Contexts _contexts = new();
 
-        private readonly object _lastEventIdSync = new();
-        private SentryId _lastEventId;
+    /// <inheritdoc />
+    public Contexts Contexts
+    {
+        get => _contexts;
+        set => _contexts.ReplaceWith(value);
+    }
 
-        internal SentryId LastEventId
+    // Internal for testing.
+    internal Action<User?> UserChanged => user =>
+    {
+        if (Options.EnableScopeSync &&
+            Options.ScopeObserver is { } observer)
         {
-            get
-            {
-                lock (_lastEventIdSync)
-                {
-                    return _lastEventId;
-                }
-            }
-            set
-            {
-                lock (_lastEventIdSync)
-                {
-                    _lastEventId = value;
-                }
-            }
+            observer.SetUser(user);
         }
+    };
 
-        private readonly object _evaluationSync = new();
-        private volatile bool _hasEvaluated;
+    private User? _user;
 
-        /// <summary>
-        /// Whether the <see cref="OnEvaluating"/> event has already fired.
-        /// </summary>
-        internal bool HasEvaluated => _hasEvaluated;
-
-        private readonly Lazy<ConcurrentBag<ISentryEventExceptionProcessor>> _lazyExceptionProcessors =
-            new(LazyThreadSafetyMode.PublicationOnly);
-
-        /// <summary>
-        /// A list of exception processors.
-        /// </summary>
-        internal ConcurrentBag<ISentryEventExceptionProcessor> ExceptionProcessors => _lazyExceptionProcessors.Value;
-
-        private readonly Lazy<ConcurrentBag<ISentryEventProcessor>> _lazyEventProcessors =
-            new(LazyThreadSafetyMode.PublicationOnly);
-
-        private readonly Lazy<ConcurrentBag<ISentryTransactionProcessor>> _lazyTransactionProcessors =
-            new(LazyThreadSafetyMode.PublicationOnly);
-
-        /// <summary>
-        /// A list of event processors.
-        /// </summary>
-        internal ConcurrentBag<ISentryEventProcessor> EventProcessors => _lazyEventProcessors.Value;
-
-        /// <summary>
-        /// A list of event processors.
-        /// </summary>
-        internal ConcurrentBag<ISentryTransactionProcessor> TransactionProcessors => _lazyTransactionProcessors.Value;
-
-        /// <summary>
-        /// An event that fires when the scope evaluates.
-        /// </summary>
-        /// <remarks>
-        /// This allows registering an event handler that is invoked in case
-        /// an event is about to be sent to Sentry. If an event is never sent,
-        /// this event is never fired and the resources spared.
-        /// It also allows registration at an early stage of the processing
-        /// but execution at a later time, when more data is available.
-        /// </remarks>
-        /// <see cref="Evaluate"/>
-        internal event EventHandler? OnEvaluating;
-
-        /// <inheritdoc />
-        public SentryLevel? Level { get; set; }
-
-        private Request? _request;
-
-        /// <inheritdoc />
-        public Request Request
+    /// <inheritdoc />
+    public User User
+    {
+        get => _user ??= new User { PropertyChanged = UserChanged };
+        set
         {
-            get => _request ??= new Request();
-            set => _request = value;
-        }
-
-        private readonly Contexts _contexts = new();
-
-        /// <inheritdoc />
-        public Contexts Contexts
-        {
-            get => _contexts;
-            set => _contexts.ReplaceWith(value);
-        }
-
-        // Internal for testing.
-        internal Action<User?> UserChanged => user =>
-        {
-            if (Options.EnableScopeSync &&
-                Options.ScopeObserver is { } observer)
+            _user = value;
+            if (_user is not null)
             {
-                observer.SetUser(user);
+                _user.PropertyChanged = UserChanged;
             }
-        };
+            UserChanged.Invoke(_user);
+        }
+    }
 
-        private User? _user;
+    /// <inheritdoc />
+    public string? Platform { get; set; }
 
-        /// <inheritdoc />
-        public User User
+    /// <inheritdoc />
+    public string? Release { get; set; }
+
+    /// <inheritdoc />
+    public string? Distribution { get; set; }
+
+    /// <inheritdoc />
+    public string? Environment { get; set; }
+
+    // TransactionName is kept for legacy purposes because
+    // SentryEvent still makes use of it.
+    // It should be possible to set the transaction name
+    // without starting a fully fledged transaction.
+    // Consequently, Transaction.Name and TransactionName must
+    // be kept in sync as much as possible.
+
+    private string? _fallbackTransactionName;
+
+    /// <inheritdoc />
+    public string? TransactionName
+    {
+        get => Transaction?.Name ?? _fallbackTransactionName;
+        set
         {
-            get => _user ??= new User { PropertyChanged = UserChanged };
-            set
+            // Set the fallback regardless, so that the variable is always kept up to date
+            _fallbackTransactionName = value;
+
+            // If a transaction has been started, overwrite its name
+            if (Transaction is { } transaction)
             {
-                _user = value;
-                if (_user is not null)
-                {
-                    _user.PropertyChanged = UserChanged;
-                }
-                UserChanged.Invoke(_user);
+                // Null name is not allowed in a transaction, but
+                // allowed on `scope.TransactionName` because it's optional.
+                // As a workaround, we coerce null into empty string.
+                // Context: https://github.com/getsentry/develop/issues/246#issuecomment-762274438
+
+                transaction.Name = !string.IsNullOrWhiteSpace(value)
+                    ? value
+                    : string.Empty;
             }
         }
+    }
 
-        /// <inheritdoc />
-        public string? Platform { get; set; }
+    private ITransaction? _transaction;
 
-        /// <inheritdoc />
-        public string? Release { get; set; }
+    /// <summary>
+    /// Transaction.
+    /// </summary>
+    public ITransaction? Transaction
+    {
+        get => _transaction;
+        set => _transaction = value;
+    }
 
-        /// <inheritdoc />
-        public string? Distribution { get; set; }
+    internal SessionUpdate? SessionUpdate { get; set; }
 
-        /// <inheritdoc />
-        public string? Environment { get; set; }
+    /// <inheritdoc />
+    public SdkVersion Sdk { get; } = new();
 
-        // TransactionName is kept for legacy purposes because
-        // SentryEvent still makes use of it.
-        // It should be possible to set the transaction name
-        // without starting a fully fledged transaction.
-        // Consequently, Transaction.Name and TransactionName must
-        // be kept in sync as much as possible.
+    /// <inheritdoc />
+    public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
 
-        private string? _fallbackTransactionName;
+    private readonly ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
 
-        /// <inheritdoc />
-        public string? TransactionName
-        {
-            get => Transaction?.Name ?? _fallbackTransactionName;
-            set
-            {
-                // Set the fallback regardless, so that the variable is always kept up to date
-                _fallbackTransactionName = value;
+    /// <inheritdoc />
+    public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-                // If a transaction has been started, overwrite its name
-                if (Transaction is { } transaction)
-                {
-                    // Null name is not allowed in a transaction, but
-                    // allowed on `scope.TransactionName` because it's optional.
-                    // As a workaround, we coerce null into empty string.
-                    // Context: https://github.com/getsentry/develop/issues/246#issuecomment-762274438
+    private readonly ConcurrentDictionary<string, object?> _extra = new();
 
-                    transaction.Name = !string.IsNullOrWhiteSpace(value)
-                        ? value
-                        : string.Empty;
-                }
-            }
-        }
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, object?> Extra => _extra;
 
-        private ITransaction? _transaction;
+    private readonly ConcurrentDictionary<string, string> _tags = new();
 
-        /// <summary>
-        /// Transaction.
-        /// </summary>
-        public ITransaction? Transaction
-        {
-            get => _transaction;
-            set => _transaction = value;
-        }
-
-        internal SessionUpdate? SessionUpdate { get; set; }
-
-        /// <inheritdoc />
-        public SdkVersion Sdk { get; } = new();
-
-        /// <inheritdoc />
-        public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
-
-        private readonly ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
-
-        /// <inheritdoc />
-        public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
-
-        private readonly ConcurrentDictionary<string, object?> _extra = new();
-
-        /// <inheritdoc />
-        public IReadOnlyDictionary<string, object?> Extra => _extra;
-
-        private readonly ConcurrentDictionary<string, string> _tags = new();
-
-        /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> Tags => _tags;
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, string> Tags => _tags;
 
 #if NETSTANDARD2_0 || NET461
         private ConcurrentBag<Attachment> _attachments = new();
 #else
-        private readonly ConcurrentBag<Attachment> _attachments = new();
+    private readonly ConcurrentBag<Attachment> _attachments = new();
 
 #endif
 
-        /// <summary>
-        /// Attachments.
-        /// </summary>
-        public IReadOnlyCollection<Attachment> Attachments => _attachments;
+    /// <summary>
+    /// Attachments.
+    /// </summary>
+    public IReadOnlyCollection<Attachment> Attachments => _attachments;
 
-        /// <summary>
-        /// Creates a scope with the specified options.
-        /// </summary>
-        public Scope(SentryOptions? options)
-        {
-            Options = options ?? new SentryOptions();
-        }
+    /// <summary>
+    /// Creates a scope with the specified options.
+    /// </summary>
+    public Scope(SentryOptions? options)
+    {
+        Options = options ?? new SentryOptions();
+    }
 
-        // For testing. Should explicitly require SentryOptions.
-        internal Scope()
-            : this(new SentryOptions())
-        {
-        }
+    // For testing. Should explicitly require SentryOptions.
+    internal Scope()
+        : this(new SentryOptions())
+    {
+    }
 
-        /// <inheritdoc />
-        public void AddBreadcrumb(Breadcrumb breadcrumb)
+    /// <inheritdoc />
+    public void AddBreadcrumb(Breadcrumb breadcrumb)
+    {
+        if (Options.BeforeBreadcrumb is { } beforeBreadcrumb)
         {
-            if (Options.BeforeBreadcrumb is { } beforeBreadcrumb)
+            if (beforeBreadcrumb(breadcrumb) is { } processedBreadcrumb)
             {
-                if (beforeBreadcrumb(breadcrumb) is { } processedBreadcrumb)
-                {
-                    breadcrumb = processedBreadcrumb;
-                }
-                else
-                {
-                    // Callback returned null, which means the breadcrumb should be dropped
-                    return;
-                }
+                breadcrumb = processedBreadcrumb;
             }
-
-            if (Options.MaxBreadcrumbs <= 0)
+            else
             {
-                //Always drop the breadcrumb.
+                // Callback returned null, which means the breadcrumb should be dropped
                 return;
             }
-
-            if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
-            {
-                _breadcrumbs.TryDequeue(out _);
-            }
-
-            _breadcrumbs.Enqueue(breadcrumb);
-            if (Options.EnableScopeSync)
-            {
-                Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
-            }
         }
 
-        /// <inheritdoc />
-        public void SetExtra(string key, object? value)
+        if (Options.MaxBreadcrumbs <= 0)
         {
-            _extra[key] = value;
-            if (Options.EnableScopeSync)
-            {
-                Options.ScopeObserver?.SetExtra(key, value);
-            }
+            //Always drop the breadcrumb.
+            return;
         }
 
-        /// <inheritdoc />
-        public void SetTag(string key, string value)
+        if (Breadcrumbs.Count - Options.MaxBreadcrumbs + 1 > 0)
         {
-            _tags[key] = value;
-            if (Options.EnableScopeSync)
-            {
-                Options.ScopeObserver?.SetTag(key, value);
-            }
+            _breadcrumbs.TryDequeue(out _);
         }
 
-        /// <inheritdoc />
-        public void UnsetTag(string key)
+        _breadcrumbs.Enqueue(breadcrumb);
+        if (Options.EnableScopeSync)
         {
-            _tags.TryRemove(key, out _);
-            if (Options.EnableScopeSync)
-            {
-                Options.ScopeObserver?.UnsetTag(key);
-            }
+            Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
         }
+    }
 
-        /// <summary>
-        /// Adds an attachment.
-        /// </summary>
-        public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
-
-        /// <summary>
-        /// Clear all Attachments.
-        /// </summary>
-        public void ClearAttachments()
+    /// <inheritdoc />
+    public void SetExtra(string key, object? value)
+    {
+        _extra[key] = value;
+        if (Options.EnableScopeSync)
         {
+            Options.ScopeObserver?.SetExtra(key, value);
+        }
+    }
+
+    /// <inheritdoc />
+    public void SetTag(string key, string value)
+    {
+        _tags[key] = value;
+        if (Options.EnableScopeSync)
+        {
+            Options.ScopeObserver?.SetTag(key, value);
+        }
+    }
+
+    /// <inheritdoc />
+    public void UnsetTag(string key)
+    {
+        _tags.TryRemove(key, out _);
+        if (Options.EnableScopeSync)
+        {
+            Options.ScopeObserver?.UnsetTag(key);
+        }
+    }
+
+    /// <summary>
+    /// Adds an attachment.
+    /// </summary>
+    public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
+
+    /// <summary>
+    /// Clear all Attachments.
+    /// </summary>
+    public void ClearAttachments()
+    {
 #if NETSTANDARD2_0 || NET461
             Interlocked.Exchange(ref _attachments, new());
 #else
-            _attachments.Clear();
+        _attachments.Clear();
 #endif
-        }
+    }
 
-        /// <summary>
-        /// Applies the data from this scope to another event-like object.
-        /// </summary>
-        /// <param name="other">The scope to copy data to.</param>
-        /// <remarks>
-        /// Applies the data of 'from' into 'to'.
-        /// If data in 'from' is null, 'to' is unmodified.
-        /// Conflicting keys are not overriden.
-        /// This is a shallow copy.
-        /// </remarks>
-        public void Apply(IEventLike other)
+    /// <summary>
+    /// Applies the data from this scope to another event-like object.
+    /// </summary>
+    /// <param name="other">The scope to copy data to.</param>
+    /// <remarks>
+    /// Applies the data of 'from' into 'to'.
+    /// If data in 'from' is null, 'to' is unmodified.
+    /// Conflicting keys are not overriden.
+    /// This is a shallow copy.
+    /// </remarks>
+    public void Apply(IEventLike other)
+    {
+        // Not to throw on code that ignores nullability warnings.
+        if (other.IsNull())
         {
-            // Not to throw on code that ignores nullability warnings.
-            if (other.IsNull())
-            {
-                return;
-            }
-
-            // Fingerprint isn't combined. It's absolute.
-            // One set explicitly on target (i.e: event)
-            // takes precedence and is not overwritten
-            if (!other.Fingerprint.Any() && Fingerprint.Any())
-            {
-                other.Fingerprint = Fingerprint;
-            }
-
-            foreach (var breadcrumb in Breadcrumbs)
-            {
-                other.AddBreadcrumb(breadcrumb);
-            }
-
-            foreach (var (key, value) in Extra)
-            {
-                if (!other.Extra.ContainsKey(key))
-                {
-                    other.SetExtra(key, value);
-                }
-            }
-
-            foreach (var (key, value) in Tags)
-            {
-                if (!other.Tags.ContainsKey(key))
-                {
-                    other.SetTag(key, value);
-                }
-            }
-
-            Contexts.CopyTo(other.Contexts);
-            Request.CopyTo(other.Request);
-            User.CopyTo(other.User);
-
-            other.Platform ??= Platform;
-            other.Release ??= Release;
-            other.WithDistribution(_ => _.Distribution ??= Distribution);
-            other.Environment ??= Environment;
-            other.TransactionName ??= TransactionName;
-            other.Level ??= Level;
-
-            if (Sdk.Name is not null && Sdk.Version is not null)
-            {
-                other.Sdk.Name = Sdk.Name;
-                other.Sdk.Version = Sdk.Version;
-            }
-
-            foreach (var package in Sdk.InternalPackages)
-            {
-                other.Sdk.AddPackage(package);
-            }
+            return;
         }
 
-        /// <summary>
-        /// Applies data from one scope to another.
-        /// </summary>
-        public void Apply(Scope other)
+        // Fingerprint isn't combined. It's absolute.
+        // One set explicitly on target (i.e: event)
+        // takes precedence and is not overwritten
+        if (!other.Fingerprint.Any() && Fingerprint.Any())
         {
-            // Not to throw on code that ignores nullability warnings.
-            if (other.IsNull())
-            {
-                return;
-            }
-
-            Apply((IEventLike)other);
-
-            other.Transaction ??= Transaction;
-            other.SessionUpdate ??= SessionUpdate;
-
-            foreach (var attachment in Attachments)
-            {
-                other.AddAttachment(attachment);
-            }
+            other.Fingerprint = Fingerprint;
         }
 
-        /// <summary>
-        /// Applies the state object into the scope.
-        /// </summary>
-        /// <param name="state">The state object to apply.</param>
-        public void Apply(object state) => Options.SentryScopeStateProcessor.Apply(this, state);
-
-        /// <summary>
-        /// Clones the current <see cref="Scope"/>.
-        /// </summary>
-        public Scope Clone()
+        foreach (var breadcrumb in Breadcrumbs)
         {
-            var clone = new Scope(Options);
-            Apply(clone);
-
-            foreach (var processor in EventProcessors)
-            {
-                clone.EventProcessors.Add(processor);
-            }
-
-            foreach (var processor in TransactionProcessors)
-            {
-                clone.TransactionProcessors.Add(processor);
-            }
-
-            foreach (var processor in ExceptionProcessors)
-            {
-                clone.ExceptionProcessors.Add(processor);
-            }
-
-            return clone;
+            other.AddBreadcrumb(breadcrumb);
         }
 
-        internal void Evaluate()
+        foreach (var (key, value) in Extra)
+        {
+            if (!other.Extra.ContainsKey(key))
+            {
+                other.SetExtra(key, value);
+            }
+        }
+
+        foreach (var (key, value) in Tags)
+        {
+            if (!other.Tags.ContainsKey(key))
+            {
+                other.SetTag(key, value);
+            }
+        }
+
+        Contexts.CopyTo(other.Contexts);
+        Request.CopyTo(other.Request);
+        User.CopyTo(other.User);
+
+        other.Platform ??= Platform;
+        other.Release ??= Release;
+        other.WithDistribution(_ => _.Distribution ??= Distribution);
+        other.Environment ??= Environment;
+        other.TransactionName ??= TransactionName;
+        other.Level ??= Level;
+
+        if (Sdk.Name is not null && Sdk.Version is not null)
+        {
+            other.Sdk.Name = Sdk.Name;
+            other.Sdk.Version = Sdk.Version;
+        }
+
+        foreach (var package in Sdk.InternalPackages)
+        {
+            other.Sdk.AddPackage(package);
+        }
+    }
+
+    /// <summary>
+    /// Applies data from one scope to another.
+    /// </summary>
+    public void Apply(Scope other)
+    {
+        // Not to throw on code that ignores nullability warnings.
+        if (other.IsNull())
+        {
+            return;
+        }
+
+        Apply((IEventLike)other);
+
+        other.Transaction ??= Transaction;
+        other.SessionUpdate ??= SessionUpdate;
+
+        foreach (var attachment in Attachments)
+        {
+            other.AddAttachment(attachment);
+        }
+    }
+
+    /// <summary>
+    /// Applies the state object into the scope.
+    /// </summary>
+    /// <param name="state">The state object to apply.</param>
+    public void Apply(object state) => Options.SentryScopeStateProcessor.Apply(this, state);
+
+    /// <summary>
+    /// Clones the current <see cref="Scope"/>.
+    /// </summary>
+    public Scope Clone()
+    {
+        var clone = new Scope(Options);
+        Apply(clone);
+
+        foreach (var processor in EventProcessors)
+        {
+            clone.EventProcessors.Add(processor);
+        }
+
+        foreach (var processor in TransactionProcessors)
+        {
+            clone.TransactionProcessors.Add(processor);
+        }
+
+        foreach (var processor in ExceptionProcessors)
+        {
+            clone.ExceptionProcessors.Add(processor);
+        }
+
+        return clone;
+    }
+
+    internal void Evaluate()
+    {
+        if (_hasEvaluated)
+        {
+            return;
+        }
+
+        lock (_evaluationSync)
         {
             if (_hasEvaluated)
             {
                 return;
             }
 
-            lock (_evaluationSync)
+            try
             {
-                if (_hasEvaluated)
-                {
-                    return;
-                }
-
-                try
-                {
-                    OnEvaluating?.Invoke(this, EventArgs.Empty);
-                }
-                catch (Exception ex)
-                {
-                    Options.DiagnosticLogger?.LogError(
-                        "Failed invoking event handler.",
-                        ex);
-                }
-                finally
-                {
-                    _hasEvaluated = true;
-                }
+                OnEvaluating?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                Options.DiagnosticLogger?.LogError(
+                    "Failed invoking event handler.",
+                    ex);
+            }
+            finally
+            {
+                _hasEvaluated = true;
             }
         }
-
-        /// <summary>
-        /// Gets the currently ongoing (not finished) span or <c>null</c> if none available.
-        /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
-        /// </summary>
-        public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
-
-        internal void ResetTransaction(ITransaction? expectedCurrentTransaction) =>
-            Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
     }
+
+    /// <summary>
+    /// Gets the currently ongoing (not finished) span or <c>null</c> if none available.
+    /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
+    /// </summary>
+    public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
+
+    internal void ResetTransaction(ITransaction? expectedCurrentTransaction) =>
+        Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
 }

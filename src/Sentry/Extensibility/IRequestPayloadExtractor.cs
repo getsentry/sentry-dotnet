@@ -1,15 +1,14 @@
-namespace Sentry.Extensibility
+namespace Sentry.Extensibility;
+
+/// <summary>
+/// A request body extractor.
+/// </summary>
+public interface IRequestPayloadExtractor
 {
     /// <summary>
-    /// A request body extractor.
+    /// Extracts the payload of the provided <see cref="IHttpRequest"/>.
     /// </summary>
-    public interface IRequestPayloadExtractor
-    {
-        /// <summary>
-        /// Extracts the payload of the provided <see cref="IHttpRequest"/>.
-        /// </summary>
-        /// <param name="request">The HTTP Request object.</param>
-        /// <returns>The extracted payload.</returns>
-        object? ExtractPayload(IHttpRequest request);
-    }
+    /// <param name="request">The HTTP Request object.</param>
+    /// <returns>The extracted payload.</returns>
+    object? ExtractPayload(IHttpRequest request);
 }
