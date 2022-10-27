@@ -791,6 +791,7 @@ namespace Sentry
     }
     public static class SpanExtensions
     {
+        public static Sentry.ITransaction GetTransaction(this Sentry.ISpan span) { }
         public static Sentry.ISpan StartChild(this Sentry.ISpan span, string operation, string? description) { }
     }
     public readonly struct SpanId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SpanId>

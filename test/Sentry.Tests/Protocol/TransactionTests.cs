@@ -365,4 +365,33 @@ public class TransactionTests
         // Assert
         span.Status.Should().Be(SpanStatus.DataLoss);
     }
+
+    [Fact]
+    public void ISpan_GetTransaction_FromTransaction()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        ISpan transaction = new TransactionTracer(hub, "my name", "my op");
+
+        // Act
+        var result = transaction.GetTransaction();
+
+        // Assert
+        Assert.Same(transaction, result);
+    }
+
+    [Fact]
+    public void ISpan_GetTransaction_FromSpan()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "my name", "my op");
+        var span = transaction.StartChild("child op");
+
+        // Act
+        var result = span.GetTransaction();
+
+        // Assert
+        Assert.Same(transaction, result);
+    }
 }
