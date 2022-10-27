@@ -22,7 +22,7 @@ public class SentryTunnelMiddleware : IMiddleware
     /// <seealso href="https://docs.sentry.io/platforms/javascript/troubleshooting/#dealing-with-ad-blockers"/>
     public SentryTunnelMiddleware(string[] allowedHosts)
     {
-        _allowedHosts = new[] { "sentry.io" }.Concat(allowedHosts).ToArray();
+        _allowedHosts = allowedHosts;
     }
 
     /// <inheritdoc />
@@ -77,7 +77,10 @@ public class SentryTunnelMiddleware : IMiddleware
                 await response.WriteAsync("Invalid DSN JSON supplied").ConfigureAwait(false);
                 return;
             }
-            if (headerJson.TryGetValue("dsn", out var dsnString) && Uri.TryCreate(dsnString.ToString(), UriKind.Absolute, out var dsn) && _allowedHosts.Contains(dsn.Host))
+
+            if (headerJson.TryGetValue("dsn", out var dsnString) &&
+                Uri.TryCreate(dsnString.ToString(), UriKind.Absolute, out var dsn) &&
+                IsHostAllowed(dsn.Host))
             {
                 var projectId = dsn.AbsolutePath.Trim('/');
                 memoryStream.Position = 0;
@@ -110,4 +113,9 @@ public class SentryTunnelMiddleware : IMiddleware
             await response.WriteAsync("Received empty body").ConfigureAwait(false);
         }
     }
+
+    private bool IsHostAllowed(string host) =>
+        host.EndsWith(".sentry.io", StringComparison.OrdinalIgnoreCase) ||
+        host.Equals("sentry.io", StringComparison.OrdinalIgnoreCase) ||
+        _allowedHosts.Contains(host, StringComparer.OrdinalIgnoreCase);
 }
