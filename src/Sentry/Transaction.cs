@@ -1,7 +1,9 @@
+using System.ComponentModel;
 using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -9,7 +11,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution, IHasTransactionNameSource
+public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
 {
     /// <summary>
     /// Transaction's event ID.
@@ -181,6 +183,12 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
     /// </summary>
     public IReadOnlyCollection<Span> Spans => _spans;
 
+    // Not readonly because of deserialization
+    private Dictionary<string, Measurement> _measurements = new();
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
+
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
 
@@ -258,6 +266,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         {
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+            _measurements = transactionTracer.Measurements.ToDictionary();
         }
     }
 
@@ -276,6 +285,11 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
     /// <inheritdoc />
     public void UnsetTag(string key) =>
         _tags.Remove(key);
+
+    /// <inheritdoc />
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void SetMeasurement(string name, Measurement measurement) =>
+        _measurements[name] = measurement;
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(
@@ -314,6 +328,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
+        writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
 
         writer.WriteEndObject();
     }
@@ -325,8 +340,8 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
     {
         var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
         var name = json.GetProperty("transaction").GetStringOrThrow();
-        var nameSourceValue = json.GetPropertyOrNull("transaction_info")?.GetPropertyOrNull("source")?.GetString();
-        var nameSource = nameSourceValue?.ParseEnum<TransactionNameSource>() ?? TransactionNameSource.Custom;
+        var nameSource = json.GetPropertyOrNull("transaction_info")?.GetPropertyOrNull("source")?
+            .GetString()?.ParseEnum<TransactionNameSource>() ?? TransactionNameSource.Custom;
         var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
         var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
         var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
@@ -334,18 +349,22 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         var release = json.GetPropertyOrNull("release")?.GetString();
         var distribution = json.GetPropertyOrNull("dist")?.GetString();
         var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
-        var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
+        var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson) ?? new();
         var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
         var environment = json.GetPropertyOrNull("environment")?.GetString();
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
-        var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()!)
-            .ToArray();
-        var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson)
-            .Pipe(v => new List<Breadcrumb>(v));
-        var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull()
-            ?.ToDictionary();
-        var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()
-            ?.ToDictionary();
+        var fingerprint = json.GetPropertyOrNull("fingerprint")?
+            .EnumerateArray().Select(j => j.GetString()!).ToArray();
+        var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?
+            .EnumerateArray().Select(Breadcrumb.FromJson).ToList() ?? new();
+        var extra = json.GetPropertyOrNull("extra")?
+            .GetDictionaryOrNull() ?? new();
+        var tags = json.GetPropertyOrNull("tags")?
+            .GetStringDictionaryOrNull()?.WhereNotNullValue().ToDictionary() ?? new();
+        var measurements = json.GetPropertyOrNull("measurements")?
+            .GetDictionaryOrNull(Measurement.FromJson) ?? new();
+        var spans = json.GetPropertyOrNull("spans")?
+            .EnumerateArray().Select(Span.FromJson).ToArray() ?? Array.Empty<Span>();
 
         return new Transaction(name, nameSource)
         {
@@ -357,19 +376,16 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
             Release = release,
             Distribution = distribution,
             _request = request,
-            Contexts = contexts ?? new(),
+            Contexts = contexts,
             _user = user,
             Environment = environment,
             Sdk = sdk,
             _fingerprint = fingerprint,
-            _breadcrumbs = breadcrumbs ?? new(),
-            _extra = extra ?? new(),
-            _tags = (tags ?? new())!,
-            _spans = json
-                .GetPropertyOrNull("spans")?
-                .EnumerateArray()
-                .Select(Span.FromJson)
-                .ToArray() ?? Array.Empty<Span>()
+            _breadcrumbs = breadcrumbs,
+            _extra = extra,
+            _tags = tags,
+            _measurements = measurements,
+            _spans = spans
         };
     }
 }
