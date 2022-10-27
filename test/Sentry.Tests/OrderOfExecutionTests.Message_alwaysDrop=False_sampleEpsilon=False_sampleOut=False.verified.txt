@@ -11,11 +11,7 @@
   ],
   Envelopes: [
     {
-      Header: {
-        sdk: {
-          name: sentry.dotnet
-        }
-      },
+      Header: {},
       Items: [
         {
           Header: {
@@ -23,7 +19,6 @@
           },
           Payload: {
             Source: {
-              Release: release,
               IsInitial: true
             }
           }
@@ -32,10 +27,7 @@
     },
     {
       Header: {
-        event_id: Guid_1,
-        sdk: {
-          name: sentry.dotnet
-        }
+        event_id: Guid_1
       },
       Items: [
         {
@@ -47,35 +39,21 @@
               Message: {
                 Message: The message
               },
-              Platform: csharp,
               SentryExceptions: [],
-              SentryThreads: [
-                {
-                  Crashed: false,
-                  Current: true
-                }
-              ],
               Level: info,
               TransactionName: name,
-              Request: {},
               Contexts: {
                 trace: {
                   Operation: 
                 }
-              },
-              User: {},
-              Environment: production
+              }
             }
           }
         }
       ]
     },
     {
-      Header: {
-        sdk: {
-          name: sentry.dotnet
-        }
-      },
+      Header: {},
       Items: [
         {
           Header: {
@@ -83,7 +61,6 @@
           },
           Payload: {
             Source: {
-              Release: release,
               IsInitial: false,
               SequenceNumber: 1,
               EndStatus: Exited
@@ -95,12 +72,7 @@
     {
       Header: {
         event_id: Guid_2,
-        sdk: {
-          name: sentry.dotnet
-        },
         trace: {
-          environment: production,
-          public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
           sample_rate: 1,
           trace_id: Guid_3,
           transaction: name
@@ -114,23 +86,17 @@
           Payload: {
             Source: {
               Name: name,
-              Platform: csharp,
               Operation: operation,
-              Description: ,
               Status: Ok,
               IsSampled: true,
               SampleRate: 1.0,
-              Request: {},
               Contexts: {
                 trace: {
                   Operation: operation,
-                  Description: ,
                   Status: Ok,
                   IsSampled: true
                 }
               },
-              User: {},
-              Environment: production,
               IsFinished: true
             }
           }

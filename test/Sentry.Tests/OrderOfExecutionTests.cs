@@ -5,49 +5,65 @@ public class OrderOfExecutionTests
 {
     [Theory]
     [MemberData(nameof(GetData))]
-    public Task Event(bool alwaysDrop,bool  sampleOut) =>
+    public Task Event(bool alwaysDrop, bool sampleEpsilon, bool sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureEvent(new()),
-            alwaysDrop, sampleOut);
+            alwaysDrop, sampleEpsilon, sampleOut);
 
     [Theory]
     [MemberData(nameof(GetData))]
-    public Task Exception(bool alwaysDrop, bool sampleOut) =>
+    public Task Exception(bool alwaysDrop, bool sampleEpsilon, bool sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureException(new()),
-            alwaysDrop, sampleOut);
+            alwaysDrop, sampleEpsilon, sampleOut);
 
     [Theory]
     [MemberData(nameof(GetData))]
-    public Task Message(bool alwaysDrop, bool sampleOut) =>
+    public Task Message(bool alwaysDrop, bool sampleEpsilon, bool sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureMessage("The message"),
-            alwaysDrop, sampleOut);
+            alwaysDrop, sampleEpsilon, sampleOut);
 
     [Theory]
     [MemberData(nameof(GetData))]
-    public Task UserFeedback(bool alwaysDrop, bool sampleOut) =>
+    public Task UserFeedback(bool alwaysDrop, bool sampleEpsilon, bool sampleOut) =>
         RunTest(
             (hub, events) => hub.CaptureUserFeedback(new(SentryId.Create(), "Use Feedback", null, null)),
-            alwaysDrop, sampleOut);
+            alwaysDrop, sampleEpsilon, sampleOut);
 
     public static IEnumerable<object[]> GetData()
     {
         foreach (var alwaysDrop in new[] {true, false})
+        foreach (var sampleEpsilon in new[] {true, false})
         foreach (var sampleOut in new[] {true, false})
         {
-            yield return new object[] {alwaysDrop, sampleOut};
+            yield return new object[] {alwaysDrop, sampleEpsilon, sampleOut};
         }
     }
 
-    static async Task RunTest(Action<IHub, List<string>> action, bool alwaysDrop, bool sampleOut)
+    static async Task RunTest(Action<IHub, List<string>> action, bool alwaysDrop, bool sampleEpsilon, bool sampleOut)
     {
+        float? SampleRate()
+        {
+            if (sampleEpsilon)
+            {
+                return float.Epsilon;
+            }
+
+            if (sampleOut)
+            {
+                return null;
+            }
+
+            return 1;
+        }
+
         var events = new List<string>();
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
             TracesSampleRate = 1,
-            SampleRate = sampleOut ? float.Epsilon : 1,
+            SampleRate = SampleRate(),
             Transport = transport,
             Dsn = ValidDsn,
             ClientReportRecorder = new ClientReportRecorder(events)
@@ -96,9 +112,9 @@ public class OrderOfExecutionTests
                     transport.Envelopes
                 })
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("Stacktrace", "release", "environment")
+            .IgnoreMembers("Stacktrace", "public_key", "Description", "User", "Platform", "Request", "release", "Release", "sdk", "environment", "Environment")
             .IgnoreMember<SentryEvent>(_ => _.SentryThreads)
-            .UseParameters(alwaysDrop, sampleOut);
+            .UseParameters(alwaysDrop, sampleEpsilon, sampleOut);
     }
 
     class Capture :

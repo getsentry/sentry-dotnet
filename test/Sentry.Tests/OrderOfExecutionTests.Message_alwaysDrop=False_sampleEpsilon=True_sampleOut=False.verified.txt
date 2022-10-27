@@ -1,0 +1,78 @@
+﻿{
+  events: [
+    global TracesSampler,
+    SessionManager StartSession,
+    Discard ClientReport. sample_rate error,
+    SessionManager EndSession Exited,
+    global TransactionProcessor,
+    scoped TransactionProcessor
+  ],
+  Envelopes: [
+    {
+      Header: {},
+      Items: [
+        {
+          Header: {
+            type: session
+          },
+          Payload: {
+            Source: {
+              IsInitial: true
+            }
+          }
+        }
+      ]
+    },
+    {
+      Header: {},
+      Items: [
+        {
+          Header: {
+            type: session
+          },
+          Payload: {
+            Source: {
+              IsInitial: false,
+              SequenceNumber: 1,
+              EndStatus: Exited
+            }
+          }
+        }
+      ]
+    },
+    {
+      Header: {
+        event_id: Guid_1,
+        trace: {
+          sample_rate: 1,
+          trace_id: Guid_2,
+          transaction: name
+        }
+      },
+      Items: [
+        {
+          Header: {
+            type: transaction
+          },
+          Payload: {
+            Source: {
+              Name: name,
+              Operation: operation,
+              Status: Ok,
+              IsSampled: true,
+              SampleRate: 1.0,
+              Contexts: {
+                trace: {
+                  Operation: operation,
+                  Status: Ok,
+                  IsSampled: true
+                }
+              },
+              IsFinished: true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
