@@ -23,6 +23,7 @@
 - Fix DI issue by binding to MAUI using lifecycle events ([#2006](https://github.com/getsentry/sentry-dotnet/pull/2006))
 - Unhide `SentryEvent.Exception` ([#2011](https://github.com/getsentry/sentry-dotnet/pull/2011))
 - Bump `Google.Cloud.Functions.Hosting` to version 1.1.0 ([#2015](https://github.com/getsentry/sentry-dotnet/pull/2015))
+- Fix default host issue for the Sentry Tunnel middleware ([#2019](https://github.com/getsentry/sentry-dotnet/pull/2019))
 
 ## 3.22.0
 
