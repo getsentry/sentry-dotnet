@@ -1,10 +1,5 @@
 <Project>
 
-  <PropertyGroup>
-    <LangVersion>10</LangVersion>
-    <ImplicitUsings>true</ImplicitUsings>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Bindings.Android\Sentry.Bindings.Android.csproj" />
   </ItemGroup>

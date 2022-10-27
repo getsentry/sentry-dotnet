@@ -1,5 +1,4 @@
 using System.Security;
-using System.Threading.Tasks;
 using Sentry.Internal;
 using Sentry.Protocol;
 

@@ -1,17 +1,14 @@
-using System;
+namespace Sentry.Extensibility;
 
-namespace Sentry.Extensibility
+/// <summary>
+/// Factory to <see cref="SentryStackTrace" /> from an <see cref="Exception" />.
+/// </summary>
+public interface ISentryStackTraceFactory
 {
     /// <summary>
-    /// Factory to <see cref="SentryStackTrace" /> from an <see cref="Exception" />.
+    /// Creates a <see cref="SentryStackTrace" /> from the optional <see cref="Exception" />.
     /// </summary>
-    public interface ISentryStackTraceFactory
-    {
-        /// <summary>
-        /// Creates a <see cref="SentryStackTrace" /> from the optional <see cref="Exception" />.
-        /// </summary>
-        /// <param name="exception">The exception to create the stacktrace from.</param>
-        /// <returns>A Sentry stack trace.</returns>
-        SentryStackTrace? Create(Exception? exception = null);
-    }
+    /// <param name="exception">The exception to create the stacktrace from.</param>
+    /// <returns>A Sentry stack trace.</returns>
+    SentryStackTrace? Create(Exception? exception = null);
 }

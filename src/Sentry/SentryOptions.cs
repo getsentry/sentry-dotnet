@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json.Serialization;
@@ -800,7 +797,7 @@ namespace Sentry
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
                 new TaskUnobservedTaskExceptionIntegration(),
-#if NET461
+#if NETFRAMEWORK
                 new NetFxInstallationsIntegration(),
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION

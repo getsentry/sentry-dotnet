@@ -1,13 +1,12 @@
-namespace Sentry.Integrations
+namespace Sentry.Integrations;
+
+internal class AutoSessionTrackingIntegration : ISdkIntegration
 {
-    internal class AutoSessionTrackingIntegration : ISdkIntegration
+    public void Register(IHub hub, SentryOptions options)
     {
-        public void Register(IHub hub, SentryOptions options)
+        if (options.AutoSessionTracking)
         {
-            if (options.AutoSessionTracking)
-            {
-                hub.StartSession();
-            }
+            hub.StartSession();
         }
     }
 }

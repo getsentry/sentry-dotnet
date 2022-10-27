@@ -1,7 +1,6 @@
-namespace Sentry.Internal
+namespace Sentry.Internal;
+
+internal interface ICloneable<out T>
 {
-    internal interface ICloneable<out T>
-    {
-        T Clone();
-    }
+    T Clone();
 }

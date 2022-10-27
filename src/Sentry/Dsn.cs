@@ -1,133 +1,130 @@
-using System;
+namespace Sentry;
 
-namespace Sentry
+/// <summary>
+/// The Data Source Name of a given project in Sentry.
+/// </summary>
+/// <remarks>
+/// <see href="https://develop.sentry.dev/sdk/overview/#parsing-the-dsn"/>
+/// </remarks>
+internal sealed class Dsn
 {
     /// <summary>
-    /// The Data Source Name of a given project in Sentry.
+    /// Source DSN string.
     /// </summary>
-    /// <remarks>
-    /// <see href="https://develop.sentry.dev/sdk/overview/#parsing-the-dsn"/>
-    /// </remarks>
-    internal sealed class Dsn
+    public string Source { get; }
+
+    /// <summary>
+    /// The project ID which the authenticated user is bound to.
+    /// </summary>
+    public string ProjectId { get; }
+
+    /// <summary>
+    /// An optional path of which Sentry is hosted.
+    /// </summary>
+    public string? Path { get; }
+
+    /// <summary>
+    /// The optional secret key to authenticate the SDK.
+    /// </summary>
+    public string? SecretKey { get; }
+
+    /// <summary>
+    /// The required public key to authenticate the SDK.
+    /// </summary>
+    public string PublicKey { get; }
+
+    /// <summary>
+    /// Sentry API's base URI.
+    /// </summary>
+    private Uri ApiBaseUri { get; }
+
+    private Dsn(
+        string source,
+        string projectId,
+        string? path,
+        string? secretKey,
+        string publicKey,
+        Uri apiBaseUri)
     {
-        /// <summary>
-        /// Source DSN string.
-        /// </summary>
-        public string Source { get; }
+        Source = source;
+        ProjectId = projectId;
+        Path = path;
+        SecretKey = secretKey;
+        PublicKey = publicKey;
+        ApiBaseUri = apiBaseUri;
+    }
 
-        /// <summary>
-        /// The project ID which the authenticated user is bound to.
-        /// </summary>
-        public string ProjectId { get; }
+    public Uri GetStoreEndpointUri() => new(ApiBaseUri, "store/");
 
-        /// <summary>
-        /// An optional path of which Sentry is hosted.
-        /// </summary>
-        public string? Path { get; }
+    public Uri GetEnvelopeEndpointUri() => new(ApiBaseUri, "envelope/");
 
-        /// <summary>
-        /// The optional secret key to authenticate the SDK.
-        /// </summary>
-        public string? SecretKey { get; }
+    public override string ToString() => Source;
 
-        /// <summary>
-        /// The required public key to authenticate the SDK.
-        /// </summary>
-        public string PublicKey { get; }
+    public static bool IsDisabled(string? dsn) =>
+        Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Sentry API's base URI.
-        /// </summary>
-        private Uri ApiBaseUri { get; }
+    public static Dsn Parse(string dsn)
+    {
+        var uri = new Uri(dsn);
 
-        private Dsn(
-            string source,
-            string projectId,
-            string? path,
-            string? secretKey,
-            string publicKey,
-            Uri apiBaseUri)
+        // uri.UserInfo returns empty string instead of null when no user info data is provided
+        if (string.IsNullOrWhiteSpace(uri.UserInfo))
         {
-            Source = source;
-            ProjectId = projectId;
-            Path = path;
-            SecretKey = secretKey;
-            PublicKey = publicKey;
-            ApiBaseUri = apiBaseUri;
+            throw new ArgumentException("Invalid DSN: No public key provided.");
         }
 
-        public Uri GetStoreEndpointUri() => new(ApiBaseUri, "store/");
+        var keys = uri.UserInfo.Split(':');
 
-        public Uri GetEnvelopeEndpointUri() => new(ApiBaseUri, "envelope/");
-
-        public override string ToString() => Source;
-
-        public static bool IsDisabled(string? dsn) =>
-            Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
-
-        public static Dsn Parse(string dsn)
+        var publicKey = keys[0];
+        if (string.IsNullOrWhiteSpace(publicKey))
         {
-            var uri = new Uri(dsn);
-
-            // uri.UserInfo returns empty string instead of null when no user info data is provided
-            if (string.IsNullOrWhiteSpace(uri.UserInfo))
-            {
-                throw new ArgumentException("Invalid DSN: No public key provided.");
-            }
-
-            var keys = uri.UserInfo.Split(':');
-
-            var publicKey = keys[0];
-            if (string.IsNullOrWhiteSpace(publicKey))
-            {
-                throw new ArgumentException("Invalid DSN: No public key provided.");
-            }
-
-            var secretKey = keys.Length > 1
-                ? keys[1]
-                : null;
-
-            var path = uri.AbsolutePath.Substring(0, uri.AbsolutePath.LastIndexOf('/'));
-
-            var projectId = uri.AbsoluteUri.Substring(uri.AbsoluteUri.LastIndexOf('/') + 1);
-            if (string.IsNullOrWhiteSpace(projectId))
-            {
-                throw new ArgumentException("Invalid DSN: A Project Id is required.");
-            }
-
-            var apiBaseUri = new UriBuilder
-            {
-                Scheme = uri.Scheme,
-                Host = uri.DnsSafeHost,
-                Port = uri.Port,
-                Path = $"{path}/api/{projectId}/"
-            }.Uri;
-
-            return new Dsn(
-                dsn,
-                projectId,
-                path,
-                secretKey,
-                publicKey,
-                apiBaseUri);
+            throw new ArgumentException("Invalid DSN: No public key provided.");
         }
 
-        public static Dsn? TryParse(string? dsn)
-        {
-            if (string.IsNullOrWhiteSpace(dsn))
-            {
-                return null;
-            }
+        var secretKey = keys.Length > 1
+            ? keys[1]
+            : null;
 
-            try
-            {
-                return Parse(dsn);
-            }
-            catch
-            {
-                // Parse should not throw though!
-                return null;
-            }
+        var path = uri.AbsolutePath.Substring(0, uri.AbsolutePath.LastIndexOf('/'));
+
+        var projectId = uri.AbsoluteUri.Substring(uri.AbsoluteUri.LastIndexOf('/') + 1);
+        if (string.IsNullOrWhiteSpace(projectId))
+        {
+            throw new ArgumentException("Invalid DSN: A Project Id is required.");
+        }
+
+        var apiBaseUri = new UriBuilder
+        {
+            Scheme = uri.Scheme,
+            Host = uri.DnsSafeHost,
+            Port = uri.Port,
+            Path = $"{path}/api/{projectId}/"
+        }.Uri;
+
+        return new Dsn(
+            dsn,
+            projectId,
+            path,
+            secretKey,
+            publicKey,
+            apiBaseUri);
+    }
+
+    public static Dsn? TryParse(string? dsn)
+    {
+        if (string.IsNullOrWhiteSpace(dsn))
+        {
+            return null;
+        }
+
+        try
+        {
+            return Parse(dsn);
+        }
+        catch
+        {
+            // Parse should not throw though!
+            return null;
         }
     }
 }

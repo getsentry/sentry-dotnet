@@ -1,48 +1,44 @@
-using System.IO;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Sentry.Extensibility;
 
-namespace Sentry.Protocol.Envelopes
+namespace Sentry.Protocol.Envelopes;
+
+/// <summary>
+/// Represents an object serializable in JSON format.
+/// </summary>
+internal sealed class JsonSerializable : ISerializable
 {
     /// <summary>
-    /// Represents an object serializable in JSON format.
+    /// Source object.
     /// </summary>
-    internal sealed class JsonSerializable : ISerializable
+    public IJsonSerializable Source { get; }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="JsonSerializable"/>.
+    /// </summary>
+    public JsonSerializable(IJsonSerializable source) => Source = source;
+
+    /// <inheritdoc />
+    public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
     {
-        /// <summary>
-        /// Source object.
-        /// </summary>
-        public IJsonSerializable Source { get; }
+        var writer = new Utf8JsonWriter(stream);
 
-        /// <summary>
-        /// Initializes an instance of <see cref="JsonSerializable"/>.
-        /// </summary>
-        public JsonSerializable(IJsonSerializable source) => Source = source;
-
-        /// <inheritdoc />
-        public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
-        {
-            var writer = new Utf8JsonWriter(stream);
-
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
             using (writer)
 #else
-            await using (writer.ConfigureAwait(false))
+        await using (writer.ConfigureAwait(false))
 #endif
-            {
-                Source.WriteTo(writer, logger);
-                await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        /// <inheritdoc />
-        public void Serialize(Stream stream, IDiagnosticLogger? logger)
         {
-            using var writer = new Utf8JsonWriter(stream);
             Source.WriteTo(writer, logger);
-            writer.Flush();
+            await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    /// <inheritdoc />
+    public void Serialize(Stream stream, IDiagnosticLogger? logger)
+    {
+        using var writer = new Utf8JsonWriter(stream);
+        Source.WriteTo(writer, logger);
+        writer.Flush();
     }
 }
