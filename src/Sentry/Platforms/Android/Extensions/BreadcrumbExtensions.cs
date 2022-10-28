@@ -2,11 +2,11 @@ namespace Sentry.Android.Extensions;
 
 internal static class BreadcrumbExtensions
 {
-    public static Breadcrumb ToBreadcrumb(this Java.Breadcrumb breadcrumb)
+    public static Breadcrumb ToBreadcrumb(this JavaSdk.Breadcrumb breadcrumb)
     {
         var data = breadcrumb.Data
             .WorkaroundKeyIteratorBug()
-            .ToDictionary(x => x.Key, x => x.Value?.ToString() ?? "");
+            .ToDictionary(x => x.Key, x => x.Value.ToString());
 
         return new(breadcrumb.Timestamp.ToDateTimeOffset(),
             breadcrumb.Message,
@@ -16,9 +16,9 @@ internal static class BreadcrumbExtensions
             breadcrumb.Level?.ToBreadcrumbLevel() ?? default);
     }
 
-    public static Java.Breadcrumb ToJavaBreadcrumb(this Breadcrumb breadcrumb)
+    public static JavaSdk.Breadcrumb ToJavaBreadcrumb(this Breadcrumb breadcrumb)
     {
-        var javaBreadcrumb = new Java.Breadcrumb(breadcrumb.Timestamp.ToJavaDate())
+        var javaBreadcrumb = new JavaSdk.Breadcrumb(breadcrumb.Timestamp.ToJavaDate())
         {
             Message = breadcrumb.Message,
             Type = breadcrumb.Type,
@@ -31,8 +31,7 @@ internal static class BreadcrumbExtensions
             var javaData = javaBreadcrumb.Data;
             foreach (var item in data)
             {
-                var value = item.Value ?? "";
-                javaData.Add(item.Key, value!);
+                javaData.Add(item.Key, item.Value!);
             }
         }
 

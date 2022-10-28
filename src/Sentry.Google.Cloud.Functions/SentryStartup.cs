@@ -8,7 +8,6 @@ using Microsoft.Extensions.Options;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Reflection;
 
 namespace Google.Cloud.Functions.Framework;
@@ -73,6 +72,7 @@ public class SentryStartup : FunctionsStartup
     {
         base.ConfigureServices(context, services);
         services.AddTransient<IStartupFilter, SentryStartupFilter>();
+        services.AddTransient<SentryMiddleware>();
     }
 
     /// <summary>

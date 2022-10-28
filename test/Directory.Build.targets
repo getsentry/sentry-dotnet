@@ -2,24 +2,19 @@
   <Import Project="..\Directory.Build.targets" />
 
   <!-- platform-specific targets should not be marked as test projects -->
-  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' != ''">
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <!-- configure xunit -->
-  <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('windows')) AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))==''">
-    <Content Include="..\xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows')) AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))==''">
-    <Content Include="..\xunit.runner.windows.json">
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+    <Content Include="..\xunit.runner.windows.json" Condition="$([MSBuild]::IsOSPlatform('windows'))">
       <Link>xunit.runner.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))=='android'">
-    <AndroidAsset Include="..\xunit.runner.json" />
+    <Content Include="..\xunit.runner.json" Condition="!$([MSBuild]::IsOSPlatform('windows'))">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

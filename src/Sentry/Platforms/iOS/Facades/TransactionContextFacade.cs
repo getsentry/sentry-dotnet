@@ -4,9 +4,9 @@ namespace Sentry.iOS.Facades;
 
 internal class TransactionContextFacade : ITransactionContext
 {
-    private readonly SentryCocoa.SentryTransactionContext _context;
+    private readonly CocoaSdk.SentryTransactionContext _context;
 
-    internal TransactionContextFacade(SentryCocoa.SentryTransactionContext context)
+    internal TransactionContextFacade(CocoaSdk.SentryTransactionContext context)
     {
         _context = context;
     }
@@ -25,7 +25,7 @@ internal class TransactionContextFacade : ITransactionContext
 
     public string Operation => _context.Operation;
 
-    public string? Description => _context.Description;
+    public string Description => _context.Description;
 
     public SpanStatus? Status => _context.Status.ToSpanStatus();
 

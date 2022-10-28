@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -46,6 +45,9 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
 
         // Make sure custom factory was used instead of default one
         _ = factory.Received().CreateLogger(Arg.Any<string>());
+
+        // Invoke request to make sure Sentry is initialized
+        await HttpClient.GetAsync("/");
 
         Assert.True(SentrySdk.IsEnabled);
 

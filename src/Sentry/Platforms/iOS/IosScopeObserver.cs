@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Sentry.iOS.Extensions;
 using Sentry.Extensibility;
 

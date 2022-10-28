@@ -28,6 +28,9 @@ public class MiddlewareLoggerIntegration : IDisposable
         public ILogger SentryLogger { get; set; }
         public HttpContext HttpContext { get; set; } = Substitute.For<HttpContext>();
         public IFeatureCollection FeatureCollection { get; set; } = Substitute.For<IFeatureCollection>();
+        public IEnumerable<ISentryEventProcessor> EventProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventProcessor>>();
+        public IEnumerable<ISentryEventExceptionProcessor> EventExceptionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryEventExceptionProcessor>>();
+        public IEnumerable<ISentryTransactionProcessor> TransactionProcessors { get; set; } = Substitute.For<IEnumerable<ISentryTransactionProcessor>>();
         private readonly IDisposable _disposable;
 
         public Fixture()
@@ -53,11 +56,13 @@ public class MiddlewareLoggerIntegration : IDisposable
 
         public SentryMiddleware GetSut()
             => new(
-                RequestDelegate,
                 HubAccessor,
                 Microsoft.Extensions.Options.Options.Create(Options),
                 HostingEnvironment,
-                MiddlewareLogger);
+                MiddlewareLogger,
+                EventExceptionProcessors,
+                EventProcessors,
+                TransactionProcessors);
 
         public void Dispose() => _disposable.Dispose();
     }
@@ -75,7 +80,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         };
         var sut = _fixture.GetSut();
 
-        _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+        _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate));
 
         _ = _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
@@ -96,7 +101,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         };
         var sut = _fixture.GetSut();
 
-        _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+        _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate));
 
         _ = _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
@@ -111,7 +116,7 @@ public class MiddlewareLoggerIntegration : IDisposable
         _fixture.RequestDelegate = _ => throw new Exception();
         var sut = _fixture.GetSut();
 
-        _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext));
+        _ = await Assert.ThrowsAsync<Exception>(async () => await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate));
 
         _ = _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),

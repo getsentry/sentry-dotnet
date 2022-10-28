@@ -47,7 +47,10 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
     // Note: Log must be declared virtual so we can use it with NSubstitute spies.
     public virtual void Log(SentryLevel logLevel, string message, Exception exception = null, params object[] args)
     {
-        var formattedMessage = string.Format(message, args);
+        // Important: Only format the string if there are args passed.
+        // Otherwise, a pre-formatted string that contains braces can cause a FormatException.
+        var formattedMessage = args.Length == 0 ? message : string.Format(message, args);
+
         var entry = new LogEntry
         {
             Level = logLevel,
@@ -57,7 +60,7 @@ public class TestOutputDiagnosticLogger : IDiagnosticLogger
         };
         _entries.Enqueue(entry);
 
-        string msg = $@"[{logLevel} {_stopwatch.Elapsed:hh\:mm\:ss\.ff}]: {formattedMessage}".Trim();
+        var msg = $@"[{logLevel} {_stopwatch.Elapsed:hh\:mm\:ss\.ff}]: {formattedMessage}".Trim();
 
         if (exception != null)
         {

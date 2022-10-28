@@ -1,60 +1,57 @@
 using System.Collections;
-using System.Collections.Generic;
 
-namespace Sentry.Internal
+namespace Sentry.Internal;
+// Workaround for the fact that setting a list in config options appends instead of replaces.
+// See https://github.com/dotnet/runtime/issues/36569
+
+internal class AutoClearingList<T> : IList<T>
 {
-    // Workaround for the fact that setting a list in config options appends instead of replaces.
-    // See https://github.com/dotnet/runtime/issues/36569
+    private readonly IList<T> _list = new List<T>();
 
-    internal class AutoClearingList<T> : IList<T>
+    private bool _clearOnNextAdd;
+
+    public void Add(T item)
     {
-        private readonly IList<T> _list = new List<T>();
-
-        private bool _clearOnNextAdd;
-
-        public void Add(T item)
+        if (_clearOnNextAdd)
         {
-            if (_clearOnNextAdd)
-            {
-                Clear();
-                _clearOnNextAdd = false;
-            }
-
-            _list.Add(item);
+            Clear();
+            _clearOnNextAdd = false;
         }
 
-        public AutoClearingList<T> ClearOnNextAdd()
-        {
-            _clearOnNextAdd = true;
-            return this;
-        }
+        _list.Add(item);
+    }
 
-        public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+    public AutoClearingList<T> ClearOnNextAdd()
+    {
+        _clearOnNextAdd = true;
+        return this;
+    }
 
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_list).GetEnumerator();
+    public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
 
-        public void Clear() => _list.Clear();
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_list).GetEnumerator();
 
-        public bool Contains(T item) => _list.Contains(item);
+    public void Clear() => _list.Clear();
 
-        public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+    public bool Contains(T item) => _list.Contains(item);
 
-        public bool Remove(T item) => _list.Remove(item);
+    public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
 
-        public int Count => _list.Count;
+    public bool Remove(T item) => _list.Remove(item);
 
-        public bool IsReadOnly => _list.IsReadOnly;
+    public int Count => _list.Count;
 
-        public int IndexOf(T item) => _list.IndexOf(item);
+    public bool IsReadOnly => _list.IsReadOnly;
 
-        public void Insert(int index, T item) => _list.Insert(index, item);
+    public int IndexOf(T item) => _list.IndexOf(item);
 
-        public void RemoveAt(int index) => _list.RemoveAt(index);
+    public void Insert(int index, T item) => _list.Insert(index, item);
 
-        public T this[int index]
-        {
-            get => _list[index];
-            set => _list[index] = value;
-        }
+    public void RemoveAt(int index) => _list.RemoveAt(index);
+
+    public T this[int index]
+    {
+        get => _list[index];
+        set => _list[index] = value;
     }
 }

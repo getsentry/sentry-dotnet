@@ -1,35 +1,33 @@
-using System;
+namespace Sentry.PlatformAbstractions;
 
-namespace Sentry.PlatformAbstractions
+/// <summary>
+/// Details of the runtime
+/// </summary>
+public class Runtime : IEquatable<Runtime>
 {
     /// <summary>
-    /// Details of the runtime
+    /// Gets the current runtime
     /// </summary>
-    public class Runtime : IEquatable<Runtime>
-    {
-        /// <summary>
-        /// Gets the current runtime
-        /// </summary>
-        /// <value>
-        /// The current runtime.
-        /// </value>
-        public static Runtime Current { get; } = RuntimeInfo.GetRuntime();
+    /// <value>
+    /// The current runtime.
+    /// </value>
+    public static Runtime Current { get; } = RuntimeInfo.GetRuntime();
 
-        /// <summary>
-        /// The name of the runtime
-        /// </summary>
-        /// <example>
-        /// .NET Framework, .NET Native, Mono
-        /// </example>
-        public string? Name { get; }
+    /// <summary>
+    /// The name of the runtime
+    /// </summary>
+    /// <example>
+    /// .NET Framework, .NET Native, Mono
+    /// </example>
+    public string? Name { get; }
 
-        /// <summary>
-        /// The version of the runtime
-        /// </summary>
-        /// <example>
-        /// 4.7.2633.0
-        /// </example>
-        public string? Version { get; }
+    /// <summary>
+    /// The version of the runtime
+    /// </summary>
+    /// <example>
+    /// 4.7.2633.0
+    /// </example>
+    public string? Version { get; }
 
 #if NETFRAMEWORK
         /// <summary>
@@ -41,37 +39,37 @@ namespace Sentry.PlatformAbstractions
         public FrameworkInstallation? FrameworkInstallation { get; }
 #endif
 
-        /// <summary>
-        /// The raw value parsed to extract Name and Version
-        /// </summary>
-        /// <remarks>
-        /// This property will contain a value when the underlying API
-        /// returned Name and Version as a single string which required parsing.
-        /// </remarks>
-        public string? Raw { get; }
+    /// <summary>
+    /// The raw value parsed to extract Name and Version
+    /// </summary>
+    /// <remarks>
+    /// This property will contain a value when the underlying API
+    /// returned Name and Version as a single string which required parsing.
+    /// </remarks>
+    public string? Raw { get; }
 
-        /// <summary>
-        /// The .NET Runtime Identifier of the runtime
-        /// </summary>
-        /// <remarks>
-        /// This property will be populated for .NET 5 and newer, or <c>null</c> otherwise.
-        /// </remarks>
-        public string? Identifier
-        {
-            get => _identifier;
+    /// <summary>
+    /// The .NET Runtime Identifier of the runtime
+    /// </summary>
+    /// <remarks>
+    /// This property will be populated for .NET 5 and newer, or <c>null</c> otherwise.
+    /// </remarks>
+    public string? Identifier
+    {
+        get => _identifier;
 
-            [Obsolete("This setter is nonfunctional, and will be removed in a future version.")]
-            // ReSharper disable ValueParameterNotUsed
-            set { }
-            // ReSharper restore ValueParameterNotUsed
-        }
+        [Obsolete("This setter is nonfunctional, and will be removed in a future version.")]
+        // ReSharper disable ValueParameterNotUsed
+        set { }
+        // ReSharper restore ValueParameterNotUsed
+    }
 
-        // TODO: Convert to get-only auto-property in next major version
-        private readonly string? _identifier;
+    // TODO: Convert to get-only auto-property in next major version
+    private readonly string? _identifier;
 
-        /// <summary>
-        /// Creates a new Runtime instance
-        /// </summary>
+    /// <summary>
+    /// Creates a new Runtime instance
+    /// </summary>
 #if NETFRAMEWORK
         public Runtime(
             string? name = null,
@@ -86,109 +84,108 @@ namespace Sentry.PlatformAbstractions
             _identifier = null;
         }
 #else
-        public Runtime(
-            string? name = null,
-            string? version = null,
-            string? raw = null,
-            string? identifier = null)
-        {
-            Name = name;
-            Version = version;
-            Raw = raw;
-            _identifier = identifier;
-        }
+    public Runtime(
+        string? name = null,
+        string? version = null,
+        string? raw = null,
+        string? identifier = null)
+    {
+        Name = name;
+        Version = version;
+        Raw = raw;
+        _identifier = identifier;
+    }
 #endif
 
-        /// <summary>
-        /// The string representation of the Runtime
-        /// </summary>
-        public override string? ToString()
+    /// <summary>
+    /// The string representation of the Runtime
+    /// </summary>
+    public override string? ToString()
+    {
+        if (Name == null && Version == null)
         {
-            if (Name == null && Version == null)
-            {
-                return Raw;
-            }
-
-            if (Name != null && Version == null)
-            {
-                return Raw?.Contains(Name) == true
-                    ? Raw
-                    : $"{Name} {Raw}";
-            }
-
-            return $"{Name} {Version}";
+            return Raw;
         }
 
-        /// <summary>
-        /// Compare instances for equality.
-        /// </summary>
-        /// <param name="other">The instance to compare against.</param>
-        /// <returns>True if the instances are equal by reference or its state.</returns>
-        public bool Equals(Runtime? other)
+        if (Name != null && Version == null)
         {
-            if (other is null)
-            {
-                return false;
-            }
+            return Raw?.Contains(Name) == true
+                ? Raw
+                : $"{Name} {Raw}";
+        }
 
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
+        return $"{Name} {Version}";
+    }
 
-            return string.Equals(Name, other.Name)
-                   && string.Equals(Version, other.Version)
-                   && string.Equals(Raw, other.Raw)
+    /// <summary>
+    /// Compare instances for equality.
+    /// </summary>
+    /// <param name="other">The instance to compare against.</param>
+    /// <returns>True if the instances are equal by reference or its state.</returns>
+    public bool Equals(Runtime? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return string.Equals(Name, other.Name)
+               && string.Equals(Version, other.Version)
+               && string.Equals(Raw, other.Raw)
 #if NETFRAMEWORK
                    && Equals(FrameworkInstallation, other.FrameworkInstallation);
 #else
-                   && Equals(Identifier, other.Identifier);
+               && Equals(Identifier, other.Identifier);
 #endif
+    }
+
+    /// <summary>
+    /// Compare instances for equality.
+    /// </summary>
+    /// <param name="obj">The instance to compare against.</param>
+    /// <returns>True if the instances are equal by reference or its state.</returns>
+    public override bool Equals(object? obj)
+    {
+        if (obj is null)
+        {
+            return false;
         }
 
-        /// <summary>
-        /// Compare instances for equality.
-        /// </summary>
-        /// <param name="obj">The instance to compare against.</param>
-        /// <returns>True if the instances are equal by reference or its state.</returns>
-        public override bool Equals(object? obj)
+        if (ReferenceEquals(this, obj))
         {
-            if (obj is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-
-            return Equals((Runtime)obj);
+            return true;
         }
 
-        /// <summary>
-        /// Get the hashcode of this instance.
-        /// </summary>
-        /// <returns>The hashcode of the instance.</returns>
-        public override int GetHashCode()
+        if (obj.GetType() != GetType())
         {
-            unchecked
-            {
-                var hashCode = Name?.GetHashCode() ?? 0;
-                hashCode = (hashCode * 397) ^ (Version?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (Raw?.GetHashCode() ?? 0);
+            return false;
+        }
+
+        return Equals((Runtime)obj);
+    }
+
+    /// <summary>
+    /// Get the hashcode of this instance.
+    /// </summary>
+    /// <returns>The hashcode of the instance.</returns>
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = Name?.GetHashCode() ?? 0;
+            hashCode = (hashCode * 397) ^ (Version?.GetHashCode() ?? 0);
+            hashCode = (hashCode * 397) ^ (Raw?.GetHashCode() ?? 0);
 #if NETFRAMEWORK
                 hashCode = (hashCode * 397) ^ (FrameworkInstallation?.GetHashCode() ?? 0);
 #else
-                hashCode = (hashCode * 397) ^ (_identifier?.GetHashCode() ?? 0);
+            hashCode = (hashCode * 397) ^ (_identifier?.GetHashCode() ?? 0);
 #endif
-                return hashCode;
-            }
+            return hashCode;
         }
     }
 }

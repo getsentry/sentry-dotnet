@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using Sentry.Internal.Http;
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NETFRAMEWORK || NETSTANDARD2_0
 internal static partial class PolyfillExtensions
 {
     public static string[] Split(this string str, char c, StringSplitOptions options = StringSplitOptions.None) =>
@@ -65,9 +65,37 @@ namespace System.Collections.Generic
             source.Reverse().Skip(count).Reverse();
     }
 }
+
+namespace System
+{
+    internal static class HashCode
+    {
+        public static int Combine<T1, T2>(T1 value1, T2 value2)
+        {
+            unchecked
+            {
+                var hashCode = value1 != null ? value1.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ (value2 != null ? value2.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
+        public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3)
+        {
+            unchecked
+            {
+                var hashCode = value1 != null ? value1.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ (value2 != null ? value2.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (value3 != null ? value3.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+    }
+}
+
 #endif
 
-#if NET461
+#if NETFRAMEWORK
 namespace System.Linq
 {
     internal static class PolyfillExtensions

@@ -1,7 +1,3 @@
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Sentry.DiagnosticSource.IntegrationTests.EF;
-
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
 public static class TestDbBuilder
@@ -20,14 +16,17 @@ public static class TestDbBuilder
         var builder = new DbContextOptionsBuilder<TestDbContext>();
         builder.UseSqlServer(connection);
         builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        var dbContext = new TestDbContext(builder.Options);
-        return dbContext;
+        return new(builder.Options);
     }
 
     public static async Task AddEfData(SqlConnection connection)
     {
         using var dbContext = GetDbContext(connection);
-        dbContext.TestEntities.Add(new TestEntity { Property = "SHOULD NOT APPEAR IN PAYLOAD" });
+        dbContext.Add(
+            new TestEntity
+            {
+                Property = "SHOULD NOT APPEAR IN PAYLOAD"
+            });
         await dbContext.SaveChangesAsync();
     }
 

@@ -1,32 +1,29 @@
-using System.Collections.Generic;
+namespace Sentry;
 
-namespace Sentry
+/// <summary>
+/// Transaction.
+/// </summary>
+public interface ITransaction : ITransactionData, ISpan
 {
     /// <summary>
-    /// Transaction.
+    /// Transaction name.
     /// </summary>
-    public interface ITransaction : ITransactionData, ISpan
-    {
-        /// <summary>
-        /// Transaction name.
-        /// </summary>
-        // 'new' because it adds a setter
-        new string Name { get; set; }
+    // 'new' because it adds a setter
+    new string Name { get; set; }
 
-        /// <summary>
-        /// Whether the parent transaction of this transaction has been sampled.
-        /// </summary>
-        // 'new' because it adds a setter
-        new bool? IsParentSampled { get; set; }
+    /// <summary>
+    /// Whether the parent transaction of this transaction has been sampled.
+    /// </summary>
+    // 'new' because it adds a setter
+    new bool? IsParentSampled { get; set; }
 
-        /// <summary>
-        /// Flat list of spans within this transaction.
-        /// </summary>
-        IReadOnlyCollection<ISpan> Spans { get; }
+    /// <summary>
+    /// Flat list of spans within this transaction.
+    /// </summary>
+    IReadOnlyCollection<ISpan> Spans { get; }
 
-        /// <summary>
-        /// Gets the last active (not finished) span in this transaction.
-        /// </summary>
-        ISpan? GetLastActiveSpan();
-    }
+    /// <summary>
+    /// Gets the last active (not finished) span in this transaction.
+    /// </summary>
+    ISpan? GetLastActiveSpan();
 }

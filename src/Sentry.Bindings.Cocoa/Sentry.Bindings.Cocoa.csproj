@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <IsBindingProject>true</IsBindingProject>
+    <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+    <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
+  </PropertyGroup>
+
+  <!-- Use a separate readme, and don't add the changelog to the nuget. -->
+  <ItemGroup>
+    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+    <PackageReference Remove="SIL.ReleaseTasks" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <SentryCocoaSdkVersion>7.28.0</SentryCocoaSdkVersion>
+    <SentryCocoaSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Cocoa\$(SentryCocoaSdkVersion)\</SentryCocoaSdkDirectory>
+    <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
+
+    <!-- TODO: Replace with commented line once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
+    <SentryCocoaZipFile>$(MSBuildThisFileDirectory)..\..\lib\Sentry.xcframework.$(SentryCocoaSdkVersion).custombuild.zip</SentryCocoaZipFile>
+    <!-- <SentryCocoaZipFile>$(SentryCocoaSdkDirectory)Sentry.xcframework.zip</SentryCocoaZipFile> -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
+    <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
+  </ItemGroup>
+
+  <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+
+    <!-- TODO: Uncomment to download official version from GitHub once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
+    <!-- <DownloadFile
+      SourceUrl="https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaSdkVersion)/Sentry.xcframework.zip"
+      DestinationFolder="$(SentryCocoaSdkDirectory)"
+      Condition="!Exists('$(SentryCocoaZipFile)')"
+      Retries="3"
+    /> -->
+
+    <!-- Unzip with built-in command to properly restore symlinks -->
+    <MakeDir Directories="$(SentryCocoaSdkDirectory)" Condition="!Exists('$(SentryCocoaSdkDirectory)')"/>
+    <Exec
+      Command="unzip -q &quot;$(SentryCocoaZipFile)&quot; -d &quot;$(SentryCocoaSdkDirectory)&quot;"
+      Condition="Exists('$(SentryCocoaZipFile)') And !Exists('$(SentryCocoaFramework)')"
+    />
+  </Target>
+
+</Project>

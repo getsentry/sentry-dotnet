@@ -10,7 +10,7 @@ public static class VerifyExtensions
                 _.Converters.Add(new SpansConverter());
                 _.Converters.Add(new ContextsConverter());
             })
-            .IgnoreMember("version")
+            .IgnoreMembers("version", "elapsed")
             .IgnoreMembersWithType<SdkVersion>()
             .IgnoreMembersWithType<DateTimeOffset>()
             .IgnoreMembersWithType<SpanId>()
@@ -22,6 +22,8 @@ public static class VerifyExtensions
                 _ => _.Env,
                 _ => _.Url,
                 _ => _.Headers)
+            .IgnoreMembers<SessionUpdate>(
+                _ => _.Duration)
             .IgnoreMembers<Transaction>(
                 _ => _.Release)
             .IgnoreMembers<SentryException>(

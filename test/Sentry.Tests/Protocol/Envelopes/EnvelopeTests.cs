@@ -1,5 +1,10 @@
 using Sentry.Testing;
 
+#if DEBUG && !__MOBILE__
+using Sentry.PlatformAbstractions;
+using Runtime = Sentry.PlatformAbstractions.Runtime;
+#endif
+
 namespace Sentry.Tests.Protocol.Envelopes;
 
 public class EnvelopeTests
@@ -14,6 +19,70 @@ public class EnvelopeTests
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
         _fakeClock = new MockClock(DateTimeOffset.MaxValue);
+    }
+
+    [Fact]
+    public void TryGetEventId()
+    {
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var id = envelope.TryGetEventId(logger);
+
+        Assert.Equal("12c2d058d58442709aa2eca08bf20986", id.Value!.ToString());
+        Assert.Empty(logger.Entries);
+    }
+
+    [Fact]
+    public void TryGetEventId_none()
+    {
+        using var envelope = new Envelope(
+            new Dictionary<string, object>(),
+            Array.Empty<EnvelopeItem>());
+        var logger = new InMemoryDiagnosticLogger();
+
+        var id = envelope.TryGetEventId(logger);
+
+        Assert.Null(id);
+        Assert.Empty(logger.Entries);
+    }
+
+    [Theory]
+    [InlineData(null, false, "Header event_id is null")]
+    [InlineData(10, false, "Header event_id has incorrect type: System.Int32")]
+    [InlineData("not-guid", false, "Header event_id is not a GUID: not-guid")]
+    [InlineData("00000000-0000-0000-0000-000000000000", true, "Envelope contains an empty event_id header")]
+    public void TryGetEventId_Errors(object value, bool expectEmpty, string message)
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = value },
+            Array.Empty<EnvelopeItem>());
+
+        var logger = new InMemoryDiagnosticLogger();
+
+#if DEBUG && !__MOBILE__
+        if (!Runtime.Current.IsMono())
+        {
+            // Test for the exception thrown by Debug.Fail (doesn't throw on Mono)
+            var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
+            Assert.Contains(message, exception.Message);
+            return;
+        }
+#endif
+
+        var id = envelope.TryGetEventId(logger);
+        Assert.Equal(message, logger.Entries.Single().Message);
+        if (expectEmpty)
+        {
+            Assert.Equal(SentryId.Empty, id);
+        }
+        else
+        {
+            Assert.Null(id);
+        }
     }
 
     [Fact]

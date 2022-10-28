@@ -276,6 +276,61 @@ namespace Sentry
         string Name { get; }
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
+    public static class MeasurementExtensions
+    {
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, double value, Sentry.MeasurementUnit unit = default) { }
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, int value, Sentry.MeasurementUnit unit = default) { }
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, long value, Sentry.MeasurementUnit unit = default) { }
+        [System.CLSCompliant(false)]
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, ulong value, Sentry.MeasurementUnit unit = default) { }
+    }
+    public readonly struct MeasurementUnit : System.IEquatable<Sentry.MeasurementUnit>
+    {
+        public static Sentry.MeasurementUnit None;
+        public bool Equals(Sentry.MeasurementUnit other) { }
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
+        public override string ToString() { }
+        public static Sentry.MeasurementUnit Custom(string name) { }
+        public static Sentry.MeasurementUnit op_Implicit(Sentry.MeasurementUnit.Duration unit) { }
+        public static Sentry.MeasurementUnit op_Implicit(Sentry.MeasurementUnit.Fraction unit) { }
+        public static Sentry.MeasurementUnit op_Implicit(Sentry.MeasurementUnit.Information unit) { }
+        public static bool operator !=(Sentry.MeasurementUnit left, Sentry.MeasurementUnit right) { }
+        public static bool operator ==(Sentry.MeasurementUnit left, Sentry.MeasurementUnit right) { }
+        public enum Duration
+        {
+            Nanosecond = 0,
+            Microsecond = 1,
+            Millisecond = 2,
+            Second = 3,
+            Minute = 4,
+            Hour = 5,
+            Day = 6,
+            Week = 7,
+        }
+        public enum Fraction
+        {
+            Ratio = 0,
+            Percent = 1,
+        }
+        public enum Information
+        {
+            Bit = 0,
+            Byte = 1,
+            Kilobyte = 2,
+            Kibibyte = 3,
+            Megabyte = 4,
+            Mebibyte = 5,
+            Gigabyte = 6,
+            Gibibyte = 7,
+            Terabyte = 8,
+            Tebibyte = 9,
+            Petabyte = 10,
+            Pebibyte = 11,
+            Exabyte = 12,
+            Exbibyte = 13,
+        }
+    }
     public sealed class Package : Sentry.IJsonSerializable
     {
         public Package(string name, string version) { }
@@ -737,6 +792,7 @@ namespace Sentry
     }
     public static class SpanExtensions
     {
+        public static Sentry.ITransaction GetTransaction(this Sentry.ISpan span) { }
         public static Sentry.ISpan StartChild(this Sentry.ISpan span, string operation, string? description) { }
     }
     public readonly struct SpanId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SpanId>
@@ -841,6 +897,7 @@ namespace Sentry
         public bool? IsParentSampled { get; set; }
         public bool? IsSampled { get; }
         public Sentry.SentryLevel? Level { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Name { get; }
         public Sentry.TransactionNameSource NameSource { get; }
         public string Operation { get; }
@@ -860,6 +917,7 @@ namespace Sentry
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetExtra(string key, object? value) { }
+        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public void UnsetTag(string key) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
@@ -911,6 +969,7 @@ namespace Sentry
         public bool? IsParentSampled { get; set; }
         public bool? IsSampled { get; }
         public Sentry.SentryLevel? Level { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Name { get; set; }
         public Sentry.TransactionNameSource NameSource { get; set; }
         public string Operation { get; set; }
@@ -935,6 +994,7 @@ namespace Sentry
         public Sentry.ISpan? GetLastActiveSpan() { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetExtra(string key, object? value) { }
+        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public Sentry.ISpan StartChild(string operation) { }
         public void UnsetTag(string key) { }
@@ -1354,6 +1414,13 @@ namespace Sentry.Protocol
         Sentry.SpanId SpanId { get; }
         Sentry.SpanStatus? Status { get; }
         Sentry.SentryId TraceId { get; }
+    }
+    public sealed class Measurement : Sentry.IJsonSerializable
+    {
+        public Sentry.MeasurementUnit Unit { get; }
+        public object Value { get; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.Protocol.Measurement FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class Mechanism : Sentry.IJsonSerializable
     {

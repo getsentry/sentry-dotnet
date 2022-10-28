@@ -99,7 +99,10 @@ public static class SentryWebHostBuilderExtensions
 
         });
 
-        _ = builder.ConfigureServices(c => _ = c.AddTransient<IStartupFilter, SentryStartupFilter>());
+        _ = builder.ConfigureServices(c => _ =
+            c.AddTransient<IStartupFilter, SentryStartupFilter>()
+             .AddTransient<SentryMiddleware>()
+        );
 
         return builder;
     }
@@ -107,8 +110,12 @@ public static class SentryWebHostBuilderExtensions
     /// <summary>
     /// Adds and configures the Sentry tunneling middleware.
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="hostnames">The extra hostnames to be allowed for the tunneling. sentry.io is allowed by default; add your own Sentry domain if you use a self-hosted Sentry or Relay.</param>
+    /// <param name="services">The service collection</param>
+    /// <param name="hostnames">
+    /// The extra hostnames to be allowed for the tunneling.
+    /// Hosts ending in <c>.sentry.io</c> are always allowed, and do not need to be included in this list.
+    /// Add your own domain if you use a self-hosted Sentry or Relay.
+    /// </param>
     public static void AddSentryTunneling(this IServiceCollection services, params string[] hostnames) =>
         services.AddScoped(_ => new SentryTunnelMiddleware(hostnames));
 

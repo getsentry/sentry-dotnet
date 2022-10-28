@@ -1,13 +1,12 @@
-namespace Sentry
+namespace Sentry;
+
+/// <summary>
+/// Defines the logic for applying state onto a scope.
+/// </summary>
+public interface ISentryScopeStateProcessor
 {
     /// <summary>
-    /// Defines the logic for applying state onto a scope.
+    /// Applies state onto a scope.
     /// </summary>
-    public interface ISentryScopeStateProcessor
-    {
-        /// <summary>
-        /// Applies state onto a scope.
-        /// </summary>
-        void Apply(Scope scope, object state);
-    }
+    void Apply(Scope scope, object state);
 }

@@ -66,6 +66,10 @@ public class TransactionTests
         transaction.SetExtra("extra_key", "extra_value");
         transaction.Fingerprint = new[] { "fingerprint" };
         transaction.SetTag("tag_key", "tag_value");
+        transaction.SetMeasurement("measurement_1", 111);
+        transaction.SetMeasurement("measurement_2", 2.34, MeasurementUnit.Custom("things"));
+        transaction.SetMeasurement("measurement_3", 333, MeasurementUnit.Information.Terabyte);
+        transaction.SetMeasurement("measurement_4", 0, MeasurementUnit.None);
 
         var child1 = transaction.StartChild("child_op123", "child_desc123");
         child1.Status = SpanStatus.Unimplemented;
@@ -302,7 +306,7 @@ public class TransactionTests
     }
 
     [Fact]
-    public void Finish_NoStatus_DefaultsToUnknown()
+    public void Finish_NoStatus_DefaultsToOk()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -312,7 +316,7 @@ public class TransactionTests
         transaction.Finish();
 
         // Assert
-        transaction.Status.Should().Be(SpanStatus.UnknownError);
+        transaction.Status.Should().Be(SpanStatus.Ok);
     }
 
     [Fact]
@@ -330,5 +334,65 @@ public class TransactionTests
 
         // Assert
         transaction.Status.Should().Be(SpanStatus.DataLoss);
+    }
+
+    [Fact]
+    public void Finish_ChildSpan_NoStatus_DefaultsToOk()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "my name", "my op");
+        var span = transaction.StartChild("child op");
+
+        // Act
+        span.Finish();
+
+        // Assert
+        span.Status.Should().Be(SpanStatus.Ok);
+    }
+
+    [Fact]
+    public void Finish_ChildSpan_StatusSet_DoesNotOverride()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "my name", "my op");
+        var span = transaction.StartChild("child op");
+        span.Status = SpanStatus.DataLoss;
+
+        // Act
+        span.Finish();
+
+        // Assert
+        span.Status.Should().Be(SpanStatus.DataLoss);
+    }
+
+    [Fact]
+    public void ISpan_GetTransaction_FromTransaction()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        ISpan transaction = new TransactionTracer(hub, "my name", "my op");
+
+        // Act
+        var result = transaction.GetTransaction();
+
+        // Assert
+        Assert.Same(transaction, result);
+    }
+
+    [Fact]
+    public void ISpan_GetTransaction_FromSpan()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "my name", "my op");
+        var span = transaction.StartChild("child op");
+
+        // Act
+        var result = span.GetTransaction();
+
+        // Assert
+        Assert.Same(transaction, result);
     }
 }

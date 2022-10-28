@@ -25,7 +25,7 @@ internal static class OperatingSystemExtensions
         // operatingSystem.RawDescription is already set in Enricher.cs
     }
 
-    public static void ApplyFromSentryAndroidSdk(this OperatingSystem operatingSystem, Java.Protocol.OperatingSystem os)
+    public static void ApplyFromSentryAndroidSdk(this OperatingSystem operatingSystem, JavaSdk.Protocol.OperatingSystem os)
     {
         // We already have everything above, except the Rooted flag.
         // The Android SDK figures this out in RootChecker.java
