@@ -471,7 +471,7 @@ public class HubTests
             }
         });
 
-        await Verify(worker.Envelopes)
+        await Verifier.Verify(worker.Envelopes)
             .IgnoreStandardSentryMembers()
             .IgnoreMember("Stacktrace")
             .IgnoreMember<SentryThread>(_ => _.Name);

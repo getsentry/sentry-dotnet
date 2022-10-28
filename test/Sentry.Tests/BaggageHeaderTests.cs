@@ -157,7 +157,7 @@ public class BaggageHeaderTests
 
     private static SettingsTask VerifyHeader(BaggageHeader header)
     {
-        return Verify(header.Members)
+        return Verifier.Verify(header.Members)
             .DontScrubGuids()
             .AddExtraSettings(x => x.Converters.Add(new SentryIdConverter()));
     }
