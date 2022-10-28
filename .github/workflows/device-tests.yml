@@ -42,7 +42,7 @@ jobs:
     needs: [build]
     name: Run Android API-${{ matrix.api-level }} Test
     # MacOS is required for the emulator, per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
-    # We use macos-12 because macos-latest will soon point their anyway, per https://github.com/actions/runner-images/issues/6384
+    # We use macos-12 because macos-latest will soon point there anyway, per https://github.com/actions/runner-images/issues/6384
     runs-on: macos-12
     strategy:
       fail-fast: false
