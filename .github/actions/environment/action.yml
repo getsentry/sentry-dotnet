@@ -21,9 +21,6 @@ runs:
     - name: Install .NET 6 SDK
       uses: actions/setup-dotnet@v3
       if: runner.os == 'Windows'
-      env:
-        # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs
-        DOTNET_INSTALL_DIR: C:\Program Files\dotnet
       with:
         dotnet-version: 6.x.x
 
