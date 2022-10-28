@@ -8,13 +8,9 @@ runs:
       shell: bash
       run: echo "JAVA_HOME_11=$JAVA_HOME_11_X64" >> $GITHUB_ENV
 
-    - name: Setup Homebrew
-      if: runner.os != 'Windows'
-      uses: Homebrew/actions/setup-homebrew@b1bdd59d7f4eadb1ae600d5d79b8aeeb4eabe17a
-
     - name: Install Ninja
       shell: bash
-      run: ${{ runner.os == 'Windows' && 'choco' || 'brew' }} install ninja
+      run: ${{ runner.os == 'macOS' && 'brew install ninja' || runner.os == 'Windows' && 'choco install ninja' || 'sudo apt-get install ninja-build' }}
 
     - name: Build C Project
       if: runner.os == 'Linux' || runner.os == 'macOS'
