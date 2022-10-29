@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix concurrency bug in caching transport ([#2026](https://github.com/getsentry/sentry-dotnet/pull/2026))
+
 ## 3.23.0
 
 ### Features
