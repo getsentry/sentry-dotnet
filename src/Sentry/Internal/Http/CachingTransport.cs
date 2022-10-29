@@ -25,6 +25,9 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
     // Pre-released because the directory might already have files from previous sessions.
     private readonly Signal _workerSignal = new(true);
 
+    // Signal that ensures only one thread can process items from the cache at a time
+    private readonly Signal _processingSignal = new(true);
+
     // Lock to synchronize file system operations inside the cache directory.
     // It's required because there are multiple threads that may attempt to both read
     // and write from/to the cache directory.
@@ -254,18 +257,29 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
     private async Task ProcessCacheAsync(CancellationToken cancellation)
     {
-        // Signal that we can start waiting for _options.InitCacheFlushTimeout
-        _preInitCacheResetEvent?.Set();
-
-        // Process the cache
-        _options.LogDebug("Flushing cached envelopes.");
-        while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
+        try
         {
-            await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
-        }
+            // Make sure we're the only thread processing items
+            await _processingSignal.WaitAsync(cancellation).ConfigureAwait(false);
 
-        // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
-        _initCacheResetEvent?.Set();
+            // Signal that we can start waiting for _options.InitCacheFlushTimeout
+            _preInitCacheResetEvent?.Set();
+
+            // Process the cache
+            _options.LogDebug("Flushing cached envelopes.");
+            while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
+            {
+                await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
+            }
+
+            // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
+            _initCacheResetEvent?.Set();
+        }
+        finally
+        {
+            // Release the signal so the next pass or another thread can enter
+            _processingSignal.Release();
+        }
     }
 
     private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
