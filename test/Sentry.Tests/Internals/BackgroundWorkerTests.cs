@@ -488,6 +488,6 @@ public class BackgroundWorkerTests
 
         // Assert
         _fixture.Logger.Received(1)
-            .Log(SentryLevel.Debug, "External FlushAsync invocation: flushing cached envelopes.");
+            .Log(SentryLevel.Debug, "CachingTransport received request to flush the cache.");
     }
 }

@@ -137,7 +137,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
             try
             {
                 await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
-                _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
+                _options.LogDebug("CachingTransport worker signal triggered.");
                 await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (_workerCts.IsCancellationRequested)
@@ -258,6 +258,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
         _preInitCacheResetEvent?.Set();
 
         // Process the cache
+        _options.LogDebug("Flushing cached envelopes.");
         while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
         {
             await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
@@ -465,7 +466,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
     public Task FlushAsync(CancellationToken cancellationToken = default)
     {
-        _options.LogDebug("External FlushAsync invocation: flushing cached envelopes.");
+        _options.LogDebug("CachingTransport received request to flush the cache.");
         return ProcessCacheAsync(cancellationToken);
     }
 
