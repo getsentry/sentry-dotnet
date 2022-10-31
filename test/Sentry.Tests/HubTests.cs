@@ -1147,4 +1147,40 @@ public class HubTests
         Assert.False(child.IsFinished);
         Assert.Null(child.Status);
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
+    {
+        // Arrange
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
+        var transport = Substitute.For<ITransport>();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Transport = transport
+        };
+
+        if (cachingEnabled)
+        {
+            options.CacheDirectoryPath = cacheDirectory.Path;
+            options.FileSystem = fileSystem;
+        }
+
+        // Act
+        // Disposing the hub should flush the client and send the envelope.
+        // If caching is enabled, it should flush the cache as well.
+        // Either way, the envelope should be sent.
+        using (var hub = new Hub(options))
+        {
+            hub.CaptureEvent(new SentryEvent());
+        }
+
+        // Assert
+        await transport.Received(1)
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+    }
 }
