@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [27, 28, 29, 30, 31, 32, 33]
+        api-level: [27, 28, 29, 30, 31] # emulators for API 32 and 33 are flaky - skip for now
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
