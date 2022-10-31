@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.23.1
 
 ### Fixes
 
