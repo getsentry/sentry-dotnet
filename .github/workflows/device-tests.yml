@@ -65,7 +65,9 @@ jobs:
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
 
       - name: Install Intel HAXM
-        run: brew install --cask intel-haxm
+        run: |
+          brew install --cask intel-haxm
+          kextstat | grep intel
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@3fbe033aaae657f011f88f29be9e65ed26bd29ef # pin@v2
