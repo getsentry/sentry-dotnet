@@ -96,12 +96,14 @@ public static class SentryClientExtensions
         return client.FlushAsync(timeout);
     }
 
+    internal static SentryOptions? SentryOptionsForTestingOnly { get; set; }
+
     internal static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
         clientOrHub switch
         {
             SentryClient client => client.Options,
             Hub hub => hub.Options,
             HubAdapter => SentrySdk.CurrentOptions,
-            _ => null
+            _ => SentryOptionsForTestingOnly
         };
 }
