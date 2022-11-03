@@ -116,8 +116,10 @@ public static partial class SentrySdk
     }
 
     /// <summary>
-    /// Flushes events queued up.
+    /// Flushes the queue of captured events until the timeout is reached.
     /// </summary>
+    /// <param name="timeout">The amount of time allow for flushing.</param>
+    /// <returns>A task to await for the flush operation.</returns>
     [DebuggerStepThrough]
     public static Task FlushAsync(TimeSpan timeout) => CurrentHub.FlushAsync(timeout);
 
