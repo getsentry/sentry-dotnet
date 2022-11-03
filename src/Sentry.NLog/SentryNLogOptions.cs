@@ -18,11 +18,6 @@ public class SentryNLogOptions : SentryOptions
     }
 
     /// <summary>
-    /// How long to wait for the flush to finish. Defaults to 15 seconds (same as NLog default).
-    /// </summary>
-    public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(15);
-
-    /// <summary>
     /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.
     /// </summary>
     public LogLevel? MinimumEventLevel { get; set; } = LogLevel.Error;

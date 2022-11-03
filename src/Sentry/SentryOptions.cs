@@ -375,6 +375,11 @@ namespace Sentry
         public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
+        /// How long to wait for flush operations to finish. Defaults to 2 seconds.
+        /// </summary>
+        public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
+
+        /// <summary>
         /// Decompression methods accepted
         /// </summary>
         /// <remarks>
