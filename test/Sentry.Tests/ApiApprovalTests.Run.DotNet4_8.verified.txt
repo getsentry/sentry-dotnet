@@ -438,6 +438,9 @@ namespace Sentry
         public static Sentry.SentryId CaptureException(this Sentry.ISentryClient client, System.Exception ex) { }
         public static Sentry.SentryId CaptureMessage(this Sentry.ISentryClient client, string message, Sentry.SentryLevel level = 1) { }
         public static void CaptureUserFeedback(this Sentry.ISentryClient client, Sentry.SentryId eventId, string email, string comments, string? name = null) { }
+        public static void Flush(this Sentry.ISentryClient client) { }
+        public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
+        public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
     }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
     public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable
@@ -547,6 +550,7 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
         public string? Environment { get; set; }
+        public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
         public bool IsEnvironmentUser { get; set; }
@@ -634,6 +638,9 @@ namespace Sentry
         public static void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public static void EndSession(Sentry.SessionEndStatus status = 0) { }
+        public static void Flush() { }
+        public static void Flush(System.TimeSpan timeout) { }
+        public static System.Threading.Tasks.Task FlushAsync() { }
         public static System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
         public static Sentry.ISpan? GetSpan() { }
         public static Sentry.SentryTraceHeader? GetTraceHeader() { }
