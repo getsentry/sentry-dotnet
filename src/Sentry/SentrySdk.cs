@@ -116,6 +116,34 @@ public static partial class SentrySdk
     }
 
     /// <summary>
+    /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
+    /// is reached.
+    /// </summary>
+    /// <remarks>
+    /// Blocks synchronously. Prefer <see cref="FlushAsync()"/> in async code.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static void Flush() => CurrentHub.Flush();
+
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout is reached.
+    /// </summary>
+    /// <param name="timeout">The amount of time allow for flushing.</param>
+    /// <remarks>
+    /// Blocks synchronously. Prefer <see cref="FlushAsync(TimeSpan)"/> in async code.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static void Flush(TimeSpan timeout) => CurrentHub.Flush(timeout);
+
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
+    /// is reached.
+    /// </summary>
+    /// <returns>A task to await for the flush operation.</returns>
+    [DebuggerStepThrough]
+    public static Task FlushAsync() => CurrentHub.FlushAsync();
+
+    /// <summary>
     /// Flushes the queue of captured events until the timeout is reached.
     /// </summary>
     /// <param name="timeout">The amount of time allow for flushing.</param>

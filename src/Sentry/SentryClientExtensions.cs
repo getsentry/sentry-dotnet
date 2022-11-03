@@ -61,6 +61,41 @@ public static class SentryClientExtensions
         }
     }
 
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
+    /// is reached.
+    /// </summary>
+    /// <param name="client">The Sentry client.</param>
+    /// <remarks>
+    /// Blocks synchronously. Prefer <see cref="FlushAsync"/> in async code.
+    /// </remarks>
+    public static void Flush(this ISentryClient client) =>
+        client.FlushAsync().GetAwaiter().GetResult();
+
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout is reached.
+    /// </summary>
+    /// <param name="client">The Sentry client.</param>
+    /// <param name="timeout">The amount of time allow for flushing.</param>
+    /// <remarks>
+    /// Blocks synchronously. Prefer <see cref="ISentryClient.FlushAsync(TimeSpan)"/> in async code.
+    /// </remarks>
+    public static void Flush(this ISentryClient client, TimeSpan timeout) =>
+        client.FlushAsync(timeout).GetAwaiter().GetResult();
+
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
+    /// is reached.
+    /// </summary>
+    /// <param name="client">The Sentry client.</param>
+    /// <returns>A task to await for the flush operation.</returns>
+    public static Task FlushAsync(this ISentryClient client)
+    {
+        var options = client.GetSentryOptions() ?? new SentryOptions();
+        var timeout = options.FlushTimeout;
+        return client.FlushAsync(timeout);
+    }
+
     internal static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
         clientOrHub switch
         {
