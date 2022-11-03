@@ -7,6 +7,7 @@ namespace Sentry.NLog;
 [NLogConfigurationItem]
 public class SentryNLogOptions : SentryOptions
 {
+    /// <inheritdoc />
     public SentryNLogOptions()
     {
         // NLog's default flush timeout is 15 seconds, so we will do the same.
