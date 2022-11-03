@@ -376,7 +376,7 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+    public Task FlushAsync_NotInit_NoOp() => SentrySdk.FlushAsync();
 
     [Fact]
     public void PushScope_InstanceOf_DisabledClient()
@@ -672,7 +672,9 @@ public class SentrySdkTests : IDisposable
     {
         var clientExtensions = typeof(SentryClientExtensions).GetMembers(BindingFlags.Public | BindingFlags.Static)
             // Remove the extension argument: Method(this ISentryClient client, ...
-            .Select(m => m.ToString()!.Replace($"({typeof(ISentryClient).FullName}, ", "("));
+            .Select(m => m.ToString()!
+                .Replace($"({typeof(ISentryClient).FullName}", "(")
+                .Replace("(, ", "("));
         var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
         Assert.Empty(clientExtensions.Except(sentrySdk.Select(m => m.ToString())));
@@ -699,7 +701,7 @@ public class SentrySdkTests : IDisposable
     public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
     {
         var sut = SentrySdk.InitHub(new SentryOptions());
-        await sut.FlushAsync(TimeSpan.FromDays(1));
+        await sut.FlushAsync();
     }
 
     [Fact]
