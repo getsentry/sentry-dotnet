@@ -7,6 +7,12 @@ namespace Sentry.NLog;
 [NLogConfigurationItem]
 public class SentryNLogOptions : SentryOptions
 {
+    public SentryNLogOptions()
+    {
+        // NLog's default flush timeout is 15 seconds, so we will do the same.
+        FlushTimeout = TimeSpan.FromSeconds(15);
+    }
+
     /// <summary>
     /// How many seconds to wait after triggering <see cref="LogManager.Shutdown()"/> before just shutting down the
     /// Sentry sdk.

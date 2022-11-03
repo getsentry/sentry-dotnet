@@ -377,6 +377,9 @@ namespace Sentry
         /// <summary>
         /// How long to wait for flush operations to finish. Defaults to 2 seconds.
         /// </summary>
+        /// <remarks>
+        /// When using the <c>Sentry.NLog</c> integration, the default is increased to 15 seconds.
+        /// </remarks>
         public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
