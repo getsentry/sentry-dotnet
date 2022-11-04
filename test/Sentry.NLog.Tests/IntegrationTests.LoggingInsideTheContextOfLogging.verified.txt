@@ -26,8 +26,6 @@
               },
               Logger: Sentry.NLog.Tests.IntegrationTests,
               Platform: csharp,
-              SentryExceptions: [],
-              SentryThreads: [],
               Level: error,
               Request: {},
               Contexts: {},

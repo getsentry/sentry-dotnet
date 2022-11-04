@@ -30,7 +30,7 @@ public class TransactionProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
+        await Verifier.Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
@@ -86,7 +86,7 @@ public class TransactionProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
+        await Verifier.Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 

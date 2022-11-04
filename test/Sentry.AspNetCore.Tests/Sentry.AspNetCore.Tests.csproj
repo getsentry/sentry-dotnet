@@ -25,8 +25,8 @@
   <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.*" />
-    <PackageReference Include="Verify.AspNetCore" Version="1.*" />
-    <PackageReference Include="Verify.Http" Version="2.*" />
+    <PackageReference Include="Verify.AspNetCore" Version="2.*" />
+    <PackageReference Include="Verify.Http" Version="3.*" />
   </ItemGroup>
 
   <ItemGroup>

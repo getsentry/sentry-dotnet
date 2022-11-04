@@ -31,8 +31,8 @@
     <PackageReference Include="FluentAssertions" Version="6.*" />
     <PackageReference Include="xunit" Version="2.*" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.*" />
-    <PackageReference Include="Verify.Xunit" Version="17.*" />
-    <PackageReference Include="Verify.DiffPlex" Version="1.*" />
+    <PackageReference Include="Verify.Xunit" Version="18.*" />
+    <PackageReference Include="Verify.DiffPlex" Version="2.*" />
     <PackageReference Include="PublicApiGenerator" Version="10.*" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.*" />
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="17.*" />
