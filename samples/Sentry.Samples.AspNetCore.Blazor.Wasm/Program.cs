@@ -28,6 +28,6 @@ try
 catch (Exception e)
 {
     SentrySdk.CaptureException(e);
-    await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
+    await SentrySdk.FlushAsync();
     throw;
 }

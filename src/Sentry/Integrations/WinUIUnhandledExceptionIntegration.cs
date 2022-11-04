@@ -125,7 +125,7 @@ namespace Sentry.Integrations
             if (!handled)
             {
                 // We're crashing, so flush events to Sentry right away
-                _hub.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+                _hub.Flush(_options.ShutdownTimeout);
             }
         }
     }
