@@ -39,7 +39,6 @@
                 Mechanism: {}
               }
             ],
-            SentryThreads: [],
             Level: error,
             Request: {},
             Contexts: {},

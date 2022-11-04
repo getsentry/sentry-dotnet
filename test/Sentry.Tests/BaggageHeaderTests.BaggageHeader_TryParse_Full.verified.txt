@@ -1,54 +1,41 @@
 ﻿[
   {
-    Key: sentry-trace_id,
-    Value: 771a43a4192642f0b136d5159a501700
+    sentry-trace_id: 771a43a4192642f0b136d5159a501700
   },
   {
-    Key: sentry-public_key,
-    Value: 49d0f7386ad645858ae85020e393bef3
+    sentry-public_key: 49d0f7386ad645858ae85020e393bef3
   },
   {
-    Key: sentry-sample_rate,
-    Value: 0.01337
+    sentry-sample_rate: 0.01337
   },
   {
-    Key: sentry-release,
-    Value: foo@abc+123
+    sentry-release: foo@abc+123
   },
   {
-    Key: sentry-environment,
-    Value: production
+    sentry-environment: production
   },
   {
-    Key: sentry-user_segment,
-    Value: segment-a
+    sentry-user_segment: segment-a
   },
   {
-    Key: sentry-transaction,
-    Value: something, I think
+    sentry-transaction: something, I think
   },
   {
-    Key: sentry-other_value1,
-    Value: Amélie
+    sentry-other_value1: Amélie
   },
   {
-    Key: sentry-other_value2,
-    Value: Foo Bar Baz
+    sentry-other_value2: Foo Bar Baz
   },
   {
-    Key: other-vendor-value-1,
-    Value: foo
+    other-vendor-value-1: foo
   },
   {
-    Key: other-vendor-value-2,
-    Value: foo;bar;
+    other-vendor-value-2: foo;bar;
   },
   {
-    Key: dup-value,
-    Value: something
+    dup-value: something
   },
   {
-    Key: dup-value,
-    Value: something
+    dup-value: something
   }
 ]

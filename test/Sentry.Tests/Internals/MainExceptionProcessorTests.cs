@@ -158,7 +158,7 @@ public class MainExceptionProcessorTests
 
         var sentryException = sut.CreateSentryExceptions(aggregateException);
 
-        return Verify(sentryException);
+        return Verifier.Verify(sentryException);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class MainExceptionProcessorTests
 
         var sentryException = sut.CreateSentryExceptions(aggregateException);
 
-        return Verify(sentryException)
+        return Verifier.Verify(sentryException)
             .ScrubLines(x => x.Contains("One or more errors occurred"));
     }
 

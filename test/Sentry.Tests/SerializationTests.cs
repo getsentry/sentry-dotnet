@@ -20,7 +20,7 @@ public class SerializationTests
     public async Task Serialization(string name, object target)
     {
         var json = target.ToJsonString(_testOutputLogger);
-        await Verify(json).UseParameters(name);
+        await Verifier.Verify(json).UseParameters(name);
     }
 
     public static IEnumerable<object[]> GetData()

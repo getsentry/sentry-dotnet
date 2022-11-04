@@ -437,7 +437,7 @@ public class SentryClientTests
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(@event);
 
-        return Verify(@event.Breadcrumbs);
+        return Verifier.Verify(@event.Breadcrumbs);
     }
 
     [Fact]

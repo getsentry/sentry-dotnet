@@ -17,8 +17,6 @@
               Message: TheMessage
             },
             Platform: csharp,
-            SentryExceptions: [],
-            SentryThreads: [],
             Level: info,
             Request: {},
             Contexts: {
