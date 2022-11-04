@@ -76,7 +76,7 @@ public static class SentryClientExtensions
     /// Flushes the queue of captured events until the timeout is reached.
     /// </summary>
     /// <param name="client">The Sentry client.</param>
-    /// <param name="timeout">The amount of time allow for flushing.</param>
+    /// <param name="timeout">The amount of time allowed for flushing.</param>
     /// <remarks>
     /// Blocks synchronously. Prefer <see cref="ISentryClient.FlushAsync(TimeSpan)"/> in async code.
     /// </remarks>

@@ -47,7 +47,7 @@ public interface ISentryClient
     /// <summary>
     /// Flushes the queue of captured events until the timeout is reached.
     /// </summary>
-    /// <param name="timeout">The amount of time allow for flushing.</param>
+    /// <param name="timeout">The amount of time allowed for flushing.</param>
     /// <returns>A task to await for the flush operation.</returns>
     Task FlushAsync(TimeSpan timeout);
 }
