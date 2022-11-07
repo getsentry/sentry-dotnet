@@ -25,6 +25,7 @@ public class SentryEventTests
             Request = new Request { Method = "POST" },
             Contexts = new Contexts
             {
+                ["context_key"] = "context_value",
                 [".NET Framework"] = new Dictionary<string, string>
                 {
                     [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",

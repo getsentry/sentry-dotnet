@@ -111,8 +111,11 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
     }
 
     /// <inheritdoc />
-    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
-        writer.WriteDictionaryValue(this!, logger, includeNullValues: false);
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    {
+        var contexts = this.OrderBy(x => x.Key, StringComparer.Ordinal);
+        writer.WriteDictionaryValue(contexts!, logger, includeNullValues: false);
+    }
 
     /// <summary>
     /// Parses from JSON.
