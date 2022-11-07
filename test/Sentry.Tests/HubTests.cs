@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Net.Http;
+using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 
@@ -1148,40 +1149,43 @@ public class HubTests
         Assert.Null(child.Status);
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(false)]
     [InlineData(true)]
-    public Task FlushOnDispose_SendsEnvelope(bool cachingEnabled) =>
-        TestHelpers.RetryTestAsync(retryOnMobileOnly: true, maxAttempts: 3, async () =>
+    public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
+    {
+#if __MOBILE__
+        Skip.If(cachingEnabled && BuildServerDetector.Detected, "Test is flaky on mobile in CI.");
+#endif
+
+        // Arrange
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
+        var transport = Substitute.For<ITransport>();
+
+        var options = new SentryOptions
         {
-            // Arrange
-            var fileSystem = new FakeFileSystem();
-            using var cacheDirectory = new TempDirectory(fileSystem);
-            var transport = Substitute.For<ITransport>();
+            Dsn = ValidDsn,
+            Transport = transport
+        };
 
-            var options = new SentryOptions
-            {
-                Dsn = ValidDsn,
-                Transport = transport
-            };
+        if (cachingEnabled)
+        {
+            options.CacheDirectoryPath = cacheDirectory.Path;
+            options.FileSystem = fileSystem;
+        }
 
-            if (cachingEnabled)
-            {
-                options.CacheDirectoryPath = cacheDirectory.Path;
-                options.FileSystem = fileSystem;
-            }
+        // Act
+        // Disposing the hub should flush the client and send the envelope.
+        // If caching is enabled, it should flush the cache as well.
+        // Either way, the envelope should be sent.
+        using (var hub = new Hub(options))
+        {
+            hub.CaptureEvent(new SentryEvent());
+        }
 
-            // Act
-            // Disposing the hub should flush the client and send the envelope.
-            // If caching is enabled, it should flush the cache as well.
-            // Either way, the envelope should be sent.
-            using (var hub = new Hub(options))
-            {
-                hub.CaptureEvent(new SentryEvent());
-            }
-
-            // Assert
-            await transport.Received(1)
-                .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
-        });
+        // Assert
+        await transport.Received(1)
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+    }
 }
