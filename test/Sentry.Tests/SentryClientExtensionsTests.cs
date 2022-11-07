@@ -94,4 +94,44 @@ public class SentryClientExtensionsTests
 
         _sut.DidNotReceive().CaptureUserFeedback(Arg.Any<UserFeedback>());
     }
+
+    [Fact]
+    public async Task FlushAsync_NoTimeoutSpecified_UsesFlushTimeoutFromOptions()
+    {
+        var timeout = TimeSpan.FromSeconds(12345);
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
+        {
+            FlushTimeout = timeout
+        };
+
+        await _sut.FlushAsync();
+
+        await _sut.Received(1).FlushAsync(timeout);
+    }
+
+    [Fact]
+    public async Task Flush_NoTimeoutSpecified_UsesFlushTimeoutFromOptions()
+    {
+        var timeout = TimeSpan.FromSeconds(12345);
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
+        {
+            FlushTimeout = timeout
+        };
+
+        // ReSharper disable once MethodHasAsyncOverload
+        _sut.Flush();
+
+        await _sut.Received(1).FlushAsync(timeout);
+    }
+
+    [Fact]
+    public async Task Flush_WithTimeoutSpecified_UsesThatTimeout()
+    {
+        var timeout = TimeSpan.FromSeconds(12345);
+
+        // ReSharper disable once MethodHasAsyncOverload
+        _sut.Flush(timeout);
+
+        await _sut.Received(1).FlushAsync(timeout);
+    }
 }

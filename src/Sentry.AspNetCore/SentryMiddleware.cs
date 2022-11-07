@@ -90,7 +90,7 @@ internal class SentryMiddleware : IMiddleware
             if (_options.FlushOnCompletedRequest)
             {
                 // Serverless environments flush the queue at the end of each request
-                context.Response.OnCompleted(() => hub.FlushAsync(timeout: _options.FlushTimeout));
+                context.Response.OnCompleted(() => hub.FlushAsync(_options.FlushTimeout));
             }
 
             hub.ConfigureScope(scope =>
@@ -142,7 +142,7 @@ internal class SentryMiddleware : IMiddleware
 
             // Some environments disables the application after sending a request,
             // making the OnCompleted flush to not work.
-            Task FlushBeforeCompleted() => hub.FlushAsync(timeout: _options.FlushTimeout);
+            Task FlushBeforeCompleted() => hub.FlushAsync(_options.FlushTimeout);
 
             void CaptureException(Exception e, SentryId evtId, string mechanism)
             {

@@ -42,7 +42,6 @@ namespace Sentry.AspNetCore
         public SentryAspNetCoreOptions() { }
         public bool AdjustStandardEnvironmentNameCasing { get; set; }
         public bool FlushOnCompletedRequest { get; set; }
-        public System.TimeSpan FlushTimeout { get; set; }
         public bool IncludeActivityData { get; set; }
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
         public Sentry.AspNetCore.TransactionNameProvider? TransactionNameProvider { get; set; }

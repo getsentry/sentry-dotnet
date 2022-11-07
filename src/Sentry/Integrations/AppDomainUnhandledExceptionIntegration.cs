@@ -40,7 +40,7 @@ namespace Sentry.Integrations
 
             if (e.IsTerminating)
             {
-                _hub?.FlushAsync(_options!.ShutdownTimeout).GetAwaiter().GetResult();
+                _hub?.Flush(_options!.ShutdownTimeout);
             }
         }
     }

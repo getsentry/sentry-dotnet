@@ -45,9 +45,9 @@ public interface ISentryClient
     void CaptureSession(SessionUpdate sessionUpdate);
 
     /// <summary>
-    /// Flushes events queued up.
+    /// Flushes the queue of captured events until the timeout is reached.
     /// </summary>
-    /// <param name="timeout">How long to wait for flush to finish.</param>
+    /// <param name="timeout">The amount of time allowed for flushing.</param>
     /// <returns>A task to await for the flush operation.</returns>
     Task FlushAsync(TimeSpan timeout);
 }

@@ -428,7 +428,7 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        _ownedClient.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+        _ownedClient.Flush(_options.ShutdownTimeout);
         //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
     }
 

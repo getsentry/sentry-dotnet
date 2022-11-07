@@ -26,7 +26,7 @@ public class IntegrationTests
 
             hierarchy.Flush(1000);
 
-            await hub.FlushAsync(TimeSpan.FromSeconds(1000));
+            await hub.FlushAsync();
         }
 
         await Verify(transport.Envelopes)
@@ -68,7 +68,7 @@ public class IntegrationTests
 
             hierarchy.Flush(1000);
 
-            await hub.FlushAsync(TimeSpan.FromSeconds(1000));
+            await hub.FlushAsync();
         }
 
         var warningsAndAbove = diagnosticLogger.Entries

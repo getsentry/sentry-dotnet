@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Simplify API for flushing events ([#2030](https://github.com/getsentry/sentry-dotnet/pull/2030))
+
 ## 3.23.1
 
 ### Fixes

@@ -337,7 +337,7 @@ public class HubTests
             };
 
             hub.CaptureEvent(evt);
-            await hub.FlushAsync(options.ShutdownTimeout);
+            await hub.FlushAsync();
 
             // Synchronizing in the tests to go through the caching and http transports
 
@@ -471,7 +471,7 @@ public class HubTests
             }
         });
 
-        await Verify(worker.Envelopes)
+        await Verifier.Verify(worker.Envelopes)
             .IgnoreStandardSentryMembers()
             .IgnoreMember("Stacktrace")
             .IgnoreMember<SentryThread>(_ => _.Name);
@@ -855,7 +855,7 @@ public class HubTests
     }
 
     [Fact]
-    public void Dispose_CalledSecondTime_ClientDisposedOnce()
+    public void Dispose_CalledSecondTime_ClientFlushedOnce()
     {
         var client = Substitute.For<ISentryClient, IDisposable>();
         var options = new SentryOptions
@@ -869,7 +869,7 @@ public class HubTests
         hub.Dispose();
 
         // Assert
-        client.Received(1).FlushAsync(options.ShutdownTimeout);
+        client.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }
 
     [Fact]

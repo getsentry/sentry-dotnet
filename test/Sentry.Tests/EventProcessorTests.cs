@@ -23,10 +23,10 @@ public class EventProcessorTests
         using (SentrySdk.UseHub(hub))
         {
             hub.CaptureMessage("TheMessage");
-            await hub.FlushAsync(TimeSpan.FromSeconds(1));
+            await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
+        await Verifier.Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
@@ -43,10 +43,10 @@ public class EventProcessorTests
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureMessage("TheMessage");
-            await hub.FlushAsync(TimeSpan.FromSeconds(1));
+            await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
+        await Verifier.Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
@@ -69,10 +69,10 @@ public class EventProcessorTests
         using (SentrySdk.UseHub(hub))
         {
             hub.CaptureMessage("TheMessage");
-            await hub.FlushAsync(TimeSpan.FromSeconds(1));
+            await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
+        await Verifier.Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
