@@ -64,11 +64,6 @@ jobs:
       - name: Install XHarness
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
 
-      - name: Install Intel HAXM
-        run: |
-          sudo $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "extras;intel;Hardware_Accelerated_Execution_Manager"
-          kextstat | grep intel || true
-
       - name: Setup Gradle
         uses: gradle/gradle-build-action@3fbe033aaae657f011f88f29be9e65ed26bd29ef # pin@v2
 
