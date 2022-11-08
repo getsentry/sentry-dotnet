@@ -1,10 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-android</TargetFrameworks>
-    <!-- TODO: fix windows APPX1101 build failure -->
+
+    <!-- Currently we only are running device tests on Android -->
+    <TargetFramework>net6.0-android</TargetFramework>
+
+    <!-- TODO: Enable other platforms where we want to run device tests, and fix associated build failures. -->
+    <!-- <TargetFrameworks>net6.0-android</TargetFrameworks>-->
     <!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks> -->
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <!-- <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks> -->
+
     <OutputType>Exe</OutputType>
     <SingleProject>true</SingleProject>
     <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
