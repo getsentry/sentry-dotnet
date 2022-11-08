@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Net.Http;
+using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 
@@ -1148,11 +1149,15 @@ public class HubTests
         Assert.Null(child.Status);
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
     {
+#if __MOBILE__
+        Skip.If(cachingEnabled && BuildServerDetector.Detected, "Test is flaky on mobile in CI.");
+#endif
+
         // Arrange
         var fileSystem = new FakeFileSystem();
         using var cacheDirectory = new TempDirectory(fileSystem);
