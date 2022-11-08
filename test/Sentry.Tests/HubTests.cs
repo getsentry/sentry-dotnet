@@ -5,6 +5,7 @@ using Sentry.Testing;
 
 namespace Sentry.Tests;
 
+[UsesVerify]
 public class HubTests
 {
     private readonly ITestOutputHelper _output;
@@ -329,11 +330,14 @@ public class HubTests
             var evt = new SentryEvent
             {
                 Contexts = {[expectedContextKey] = new EvilContext()},
-                Message = new SentryMessage {Formatted = expectedMessage}
+                Message = new()
+                {
+                    Formatted = expectedMessage
+                }
             };
 
             hub.CaptureEvent(evt);
-            await hub.FlushAsync(options.ShutdownTimeout);
+            await hub.FlushAsync();
 
             // Synchronizing in the tests to go through the caching and http transports
 
@@ -405,9 +409,18 @@ public class HubTests
         hub.StartSession();
 
         // Act
-        hub.CaptureEvent(new SentryEvent
+        hub.CaptureEvent(new()
         {
-            SentryExceptions = new[] { new SentryException { Mechanism = new Mechanism { Handled = false } } }
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new()
+                    {
+                        Handled = false
+                    }
+                }
+            }
         });
 
         // Assert
@@ -421,6 +434,47 @@ public class HubTests
                     .Single()
                     .EndStatus == SessionEndStatus.Crashed
             ));
+    }
+
+    [Fact]
+    [Trait("Category", "Verify")]
+    public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
+    {
+        // Arrange
+        var worker = new FakeBackgroundWorker();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "release",
+            TracesSampleRate = 1.0
+        };
+        var client = new SentryClient(options, worker);
+        var hub = new Hub(options, client);
+
+        var transaction = hub.StartTransaction("my transaction", "my operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+        hub.StartSession();
+
+        // Act
+        hub.CaptureEvent(new()
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new()
+                    {
+                        Handled = false
+                    }
+                }
+            }
+        });
+
+        await Verifier.Verify(worker.Envelopes)
+            .IgnoreStandardSentryMembers()
+            .IgnoreMember("Stacktrace")
+            .IgnoreMember<SentryThread>(_ => _.Name);
     }
 
     [Fact]
@@ -801,7 +855,7 @@ public class HubTests
     }
 
     [Fact]
-    public void Dispose_CalledSecondTime_ClientDisposedOnce()
+    public void Dispose_CalledSecondTime_ClientFlushedOnce()
     {
         var client = Substitute.For<ISentryClient, IDisposable>();
         var options = new SentryOptions
@@ -815,7 +869,7 @@ public class HubTests
         hub.Dispose();
 
         // Assert
-        client.Received(1).FlushAsync(options.ShutdownTimeout);
+        client.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }
 
     [Fact]
@@ -1092,5 +1146,41 @@ public class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
         Assert.False(child.IsFinished);
         Assert.Null(child.Status);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
+    {
+        // Arrange
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
+        var transport = Substitute.For<ITransport>();
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Transport = transport
+        };
+
+        if (cachingEnabled)
+        {
+            options.CacheDirectoryPath = cacheDirectory.Path;
+            options.FileSystem = fileSystem;
+        }
+
+        // Act
+        // Disposing the hub should flush the client and send the envelope.
+        // If caching is enabled, it should flush the cache as well.
+        // Either way, the envelope should be sent.
+        using (var hub = new Hub(options))
+        {
+            hub.CaptureEvent(new SentryEvent());
+        }
+
+        // Assert
+        await transport.Received(1)
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
 }

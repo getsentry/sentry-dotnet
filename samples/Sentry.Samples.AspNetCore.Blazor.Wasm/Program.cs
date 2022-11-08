@@ -1,5 +1,4 @@
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Sentry.Samples.AspNetCore.Blazor.Wasm;
 
@@ -29,6 +28,6 @@ try
 catch (Exception e)
 {
     SentrySdk.CaptureException(e);
-    await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
+    await SentrySdk.FlushAsync();
     throw;
 }

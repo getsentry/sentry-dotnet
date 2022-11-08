@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Sentry.DiagnosticSource.IntegrationTests.EF;
 
 public class TestDbContext :
@@ -13,5 +11,7 @@ public class TestDbContext :
     }
 
     protected override void OnModelCreating(ModelBuilder model)
-        => model.Entity<TestEntity>();
+        => model.Entity<TestEntity>()
+            .HasIndex(u => u.Property)
+            .IsUnique();
 }

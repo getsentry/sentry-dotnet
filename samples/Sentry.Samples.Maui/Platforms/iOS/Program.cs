@@ -1,4 +1,3 @@
-using ObjCRuntime;
 using UIKit;
 
 namespace Sentry.Samples.Maui;

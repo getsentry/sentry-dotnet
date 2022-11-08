@@ -27,10 +27,10 @@ public class TransactionProcessorTests
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureMessage("TheMessage");
             transaction.Finish();
-            await hub.FlushAsync(TimeSpan.FromSeconds(1));
+            await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
+        await Verifier.Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
@@ -83,10 +83,10 @@ public class TransactionProcessorTests
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureMessage("TheMessage");
             transaction.Finish();
-            await hub.FlushAsync(TimeSpan.FromSeconds(1));
+            await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
+        await Verifier.Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 

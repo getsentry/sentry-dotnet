@@ -171,8 +171,8 @@ internal static class Program
                     Level = SentryLevel.Debug
                 });
             }
-            // Console output will show queue being flushed. Task completes then and timeout is never reached (you don't need to wait a day :)
-            await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+            // Console output will show queue being flushed.
+            await SentrySdk.FlushAsync();
 
             // -------------------------
 

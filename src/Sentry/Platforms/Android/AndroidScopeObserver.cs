@@ -22,7 +22,7 @@ internal sealed class AndroidScopeObserver : IScopeObserver
         try
         {
             var b = breadcrumb.ToJavaBreadcrumb();
-            Java.Sentry.AddBreadcrumb(b);
+            JavaSdk.Sentry.AddBreadcrumb(b);
         }
         finally
         {
@@ -42,14 +42,14 @@ internal sealed class AndroidScopeObserver : IScopeObserver
 
             if (value is string s)
             {
-                Java.Sentry.SetExtra(key, s);
+                JavaSdk.Sentry.SetExtra(key, s);
                 return;
             }
 
             try
             {
                 var json = JsonSerializer.Serialize(value);
-                Java.Sentry.SetExtra(key, json);
+                JavaSdk.Sentry.SetExtra(key, json);
             }
             catch (Exception ex)
             {
@@ -66,7 +66,7 @@ internal sealed class AndroidScopeObserver : IScopeObserver
     {
         try
         {
-            Java.Sentry.SetTag(key, value);
+            JavaSdk.Sentry.SetTag(key, value);
         }
         finally
         {
@@ -78,7 +78,7 @@ internal sealed class AndroidScopeObserver : IScopeObserver
     {
         try
         {
-            Java.Sentry.RemoveTag(key);
+            JavaSdk.Sentry.RemoveTag(key);
         }
         finally
         {
@@ -91,7 +91,7 @@ internal sealed class AndroidScopeObserver : IScopeObserver
         try
         {
             var u = user?.ToJavaUser();
-            Java.Sentry.SetUser(u);
+            JavaSdk.Sentry.SetUser(u);
         }
         finally
         {

@@ -1,4 +1,3 @@
-using System;
 using System.Security;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -41,7 +40,7 @@ namespace Sentry.Integrations
 
             if (e.IsTerminating)
             {
-                _hub?.FlushAsync(_options!.ShutdownTimeout).GetAwaiter().GetResult();
+                _hub?.Flush(_options!.ShutdownTimeout);
             }
         }
     }

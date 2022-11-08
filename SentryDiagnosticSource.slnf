@@ -1,0 +1,15 @@
+{
+  "solution": {
+    "path": "Sentry.sln",
+    "projects": [
+      "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
+      "src\\Sentry\\Sentry.csproj",
+      "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
+      "test\\Sentry.DiagnosticSource.Tests\\Sentry.DiagnosticSource.Tests.csproj",
+      "test\\Sentry.DiagnosticSource.IntegrationTests\\Sentry.DiagnosticSource.IntegrationTests.csproj",
+      "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
+      "test\\Sentry.Testing\\Sentry.Testing.csproj",
+      "test\\Sentry.Tests\\Sentry.Tests.csproj"
+    ]
+  }
+}

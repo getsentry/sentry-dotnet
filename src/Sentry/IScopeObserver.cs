@@ -1,33 +1,32 @@
-namespace Sentry
+namespace Sentry;
+
+/// <summary>
+/// Observer for the sync. of Scopes across SDKs.
+/// </summary>
+public interface IScopeObserver
 {
     /// <summary>
-    /// Observer for the sync. of Scopes across SDKs.
+    /// Adds a breadcrumb.
     /// </summary>
-    public interface IScopeObserver
-    {
-        /// <summary>
-        /// Adds a breadcrumb.
-        /// </summary>
-        void AddBreadcrumb(Breadcrumb breadcrumb);
+    void AddBreadcrumb(Breadcrumb breadcrumb);
 
-        /// <summary>
-        /// Sets an extra.
-        /// </summary>
-        void SetExtra(string key, object? value);
+    /// <summary>
+    /// Sets an extra.
+    /// </summary>
+    void SetExtra(string key, object? value);
 
-        /// <summary>
-        /// Sets a tag.
-        /// </summary>
-        void SetTag(string key, string value);
+    /// <summary>
+    /// Sets a tag.
+    /// </summary>
+    void SetTag(string key, string value);
 
-        /// <summary>
-        /// Removes a tag.
-        /// </summary>
-        void UnsetTag(string key);
+    /// <summary>
+    /// Removes a tag.
+    /// </summary>
+    void UnsetTag(string key);
 
-        /// <summary>
-        /// Sets the user information.
-        /// </summary>
-        void SetUser(User? user);
-    }
+    /// <summary>
+    /// Sets the user information.
+    /// </summary>
+    void SetUser(User? user);
 }

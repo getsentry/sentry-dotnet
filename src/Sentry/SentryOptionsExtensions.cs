@@ -1,20 +1,18 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
-#if NET461
+
+#if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
 #endif
+
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internal.DiagnosticSource;
 #endif
+
 namespace Sentry
 {
     /// <summary>
@@ -60,7 +58,7 @@ namespace Sentry
         public static void DisableTaskUnobservedTaskExceptionCapture(this SentryOptions options) =>
             options.RemoveIntegration<TaskUnobservedTaskExceptionIntegration>();
 
-#if NET461
+#if NETFRAMEWORK
         /// <summary>
         /// Disables the list addition of .Net Frameworks into events.
         /// </summary>

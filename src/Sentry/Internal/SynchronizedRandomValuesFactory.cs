@@ -1,9 +1,3 @@
-using System;
-
-#if !NET6_0_OR_GREATER
-using System.Threading;
-#endif
-
 namespace Sentry.Internal
 {
     internal class SynchronizedRandomValuesFactory : RandomValuesFactory

@@ -7,6 +7,13 @@ namespace Sentry.NLog;
 [NLogConfigurationItem]
 public class SentryNLogOptions : SentryOptions
 {
+    /// <inheritdoc />
+    public SentryNLogOptions()
+    {
+        // NLog's default flush timeout is 15 seconds, so we will do the same.
+        FlushTimeout = TimeSpan.FromSeconds(15);
+    }
+
     /// <summary>
     /// How many seconds to wait after triggering <see cref="LogManager.Shutdown()"/> before just shutting down the
     /// Sentry sdk.
@@ -16,11 +23,6 @@ public class SentryNLogOptions : SentryOptions
         get => (int)ShutdownTimeout.TotalSeconds;
         set => ShutdownTimeout = TimeSpan.FromSeconds(value);
     }
-
-    /// <summary>
-    /// How long to wait for the flush to finish. Defaults to 15 seconds (same as NLog default).
-    /// </summary>
-    public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(15);
 
     /// <summary>
     /// Minimum log level for events to trigger a send to Sentry. Defaults to <see cref="M:LogLevel.Error" />.

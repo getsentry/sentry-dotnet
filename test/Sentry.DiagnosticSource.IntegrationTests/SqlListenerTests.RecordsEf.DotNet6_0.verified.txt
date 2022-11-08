@@ -14,7 +14,6 @@
           Mechanism: {}
         }
       ],
-      SentryThreads: [],
       Level: error,
       TransactionName: my transaction,
       Request: {},

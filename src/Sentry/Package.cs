@@ -2,86 +2,85 @@ using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry
+namespace Sentry;
+
+/// <summary>
+/// Represents a package used to compose the SDK.
+/// </summary>
+public sealed class Package : IJsonSerializable
 {
     /// <summary>
-    /// Represents a package used to compose the SDK.
+    /// The name of the package.
     /// </summary>
-    public sealed class Package : IJsonSerializable
+    /// <example>
+    /// nuget:Sentry
+    /// nuget:Sentry.AspNetCore
+    /// </example>
+    public string Name { get; }
+
+    /// <summary>
+    /// The version of the package.
+    /// </summary>
+    /// <example>
+    /// 1.0.0-rc1
+    /// </example>
+    public string Version { get; }
+
+    /// <summary>
+    /// Creates a new instance of a <see cref="Package"/>.
+    /// </summary>
+    /// <param name="name">The package name.</param>
+    /// <param name="version">The package version.</param>
+    public Package(string name, string version)
     {
-        /// <summary>
-        /// The name of the package.
-        /// </summary>
-        /// <example>
-        /// nuget:Sentry
-        /// nuget:Sentry.AspNetCore
-        /// </example>
-        public string Name { get; }
+        Name = name;
+        Version = version;
+    }
 
-        /// <summary>
-        /// The version of the package.
-        /// </summary>
-        /// <example>
-        /// 1.0.0-rc1
-        /// </example>
-        public string Version { get; }
+    /// <inheritdoc />
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    {
+        writer.WriteStartObject();
 
-        /// <summary>
-        /// Creates a new instance of a <see cref="Package"/>.
-        /// </summary>
-        /// <param name="name">The package name.</param>
-        /// <param name="version">The package version.</param>
-        public Package(string name, string version)
+        writer.WriteStringIfNotWhiteSpace("name", Name);
+        writer.WriteStringIfNotWhiteSpace("version", Version);
+
+        writer.WriteEndObject();
+    }
+
+    /// <summary>
+    /// Parses from JSON.
+    /// </summary>
+    public static Package FromJson(JsonElement json)
+    {
+        var name = json.GetProperty("name").GetStringOrThrow();
+        var version = json.GetProperty("version").GetStringOrThrow();
+
+        return new Package(name, version);
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        unchecked
         {
-            Name = name;
-            Version = version;
+            return (Name.GetHashCode() * 397) ^ Version.GetHashCode();
+        }
+    }
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
         }
 
-        /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+        if (obj is Package package)
         {
-            writer.WriteStartObject();
-
-            writer.WriteStringIfNotWhiteSpace("name", Name);
-            writer.WriteStringIfNotWhiteSpace("version", Version);
-
-            writer.WriteEndObject();
+            return Name == package.Name && Version == package.Version;
         }
 
-        /// <summary>
-        /// Parses from JSON.
-        /// </summary>
-        public static Package FromJson(JsonElement json)
-        {
-            var name = json.GetProperty("name").GetStringOrThrow();
-            var version = json.GetProperty("version").GetStringOrThrow();
-
-            return new Package(name, version);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (Name.GetHashCode() * 397) ^ Version.GetHashCode();
-            }
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            if (obj is Package package)
-            {
-                return Name == package.Name && Version == package.Version;
-            }
-
-            return false;
-        }
+        return false;
     }
 }

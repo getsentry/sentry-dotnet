@@ -47,11 +47,6 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     internal bool FlushBeforeRequestCompleted { get; set; }
 
     /// <summary>
-    /// How long to wait for the flush to finish. Defaults to 2 seconds.
-    /// </summary>
-    public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
-
-    /// <summary>
     /// The strategy to define the name of a transaction based on the <see cref="HttpContext"/>.
     /// </summary>
     /// <remarks>

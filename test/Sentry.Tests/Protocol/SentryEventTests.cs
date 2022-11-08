@@ -1,5 +1,4 @@
 using Sentry.Testing;
-using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Protocol;
 

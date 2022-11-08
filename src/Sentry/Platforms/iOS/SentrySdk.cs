@@ -164,7 +164,7 @@ public static partial class SentrySdk
         SentryCocoaSdk.StartWithOptionsObject(cocoaOptions);
 
         // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
-        options.AddEventProcessor(new IosEventProcessor(cocoaOptions!));
+        options.AddEventProcessor(new IosEventProcessor(cocoaOptions));
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
         options.ScopeObserver = new IosScopeObserver(options);

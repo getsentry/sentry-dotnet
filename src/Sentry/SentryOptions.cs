@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json.Serialization;
@@ -376,6 +373,14 @@ namespace Sentry
         /// Even though default settings say 2 seconds, closing the SDK would block for 50ms.
         /// </example>
         public TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromSeconds(2);
+
+        /// <summary>
+        /// How long to wait for flush operations to finish. Defaults to 2 seconds.
+        /// </summary>
+        /// <remarks>
+        /// When using the <c>Sentry.NLog</c> integration, the default is increased to 15 seconds.
+        /// </remarks>
+        public TimeSpan FlushTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
         /// Decompression methods accepted
@@ -800,7 +805,7 @@ namespace Sentry
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
                 new TaskUnobservedTaskExceptionIntegration(),
-#if NET461
+#if NETFRAMEWORK
                 new NetFxInstallationsIntegration(),
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION

@@ -17,8 +17,6 @@
               Message: TheMessage
             },
             Platform: csharp,
-            SentryExceptions: [],
-            SentryThreads: [],
             Level: info,
             TransactionName: my transaction,
             Request: {},
@@ -48,7 +46,7 @@
         Payload: {
           Source: {
             DiscardedEvents: {
-              DiscardReasonWithCategory { Reason = DiscardReason { Value = event_processor }, Category = DataCategory { Value = transaction } }: 1
+              { Reason = "event_processor", Category = "transaction" }: 1
             }
           }
         }

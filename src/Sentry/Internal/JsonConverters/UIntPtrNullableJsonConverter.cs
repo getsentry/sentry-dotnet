@@ -1,31 +1,29 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Sentry.Internal.JsonConverters
-{
-    internal class UIntPtrNullableJsonConverter : JsonConverter<UIntPtr?>
-    {
-        public override UIntPtr? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType == JsonTokenType.Null)
-            {
-                return null;
-            }
+namespace Sentry.Internal.JsonConverters;
 
-            return new UIntPtr(reader.GetUInt64());
+internal class UIntPtrNullableJsonConverter : JsonConverter<UIntPtr?>
+{
+    public override UIntPtr? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Null)
+        {
+            return null;
         }
 
-        public override void Write(Utf8JsonWriter writer, UIntPtr? value, JsonSerializerOptions options)
+        return new UIntPtr(reader.GetUInt64());
+    }
+
+    public override void Write(Utf8JsonWriter writer, UIntPtr? value, JsonSerializerOptions options)
+    {
+        if (value == null)
         {
-            if (value == null)
-            {
-                writer.WriteNullValue();
-            }
-            else
-            {
-                writer.WriteNumberValue(value.Value.ToUInt64());
-            }
+            writer.WriteNullValue();
+        }
+        else
+        {
+            writer.WriteNumberValue(value.Value.ToUInt64());
         }
     }
 }

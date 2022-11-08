@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">10.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
@@ -16,7 +14,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <SentryCocoaSdkVersion>7.24.1</SentryCocoaSdkVersion>
+    <SentryCocoaSdkVersion>7.28.0</SentryCocoaSdkVersion>
     <SentryCocoaSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Cocoa\$(SentryCocoaSdkVersion)\</SentryCocoaSdkDirectory>
     <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
 
@@ -31,7 +29,7 @@
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
   </ItemGroup>
 
-  <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences">
+  <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
 
     <!-- TODO: Uncomment to download official version from GitHub once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
     <!-- <DownloadFile

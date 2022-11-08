@@ -1,42 +1,40 @@
-using System;
 using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry
+namespace Sentry;
+
+internal class PersistedSessionUpdate : IJsonSerializable
 {
-    internal class PersistedSessionUpdate : IJsonSerializable
+    public SessionUpdate Update { get; }
+
+    public DateTimeOffset? PauseTimestamp { get; }
+
+    public PersistedSessionUpdate(SessionUpdate update, DateTimeOffset? pauseTimestamp)
     {
-        public SessionUpdate Update { get; }
+        Update = update;
+        PauseTimestamp = pauseTimestamp;
+    }
 
-        public DateTimeOffset? PauseTimestamp { get; }
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    {
+        writer.WriteStartObject();
 
-        public PersistedSessionUpdate(SessionUpdate update, DateTimeOffset? pauseTimestamp)
+        writer.WriteSerializable("update", Update, logger);
+
+        if (PauseTimestamp is { } pauseTimestamp)
         {
-            Update = update;
-            PauseTimestamp = pauseTimestamp;
+            writer.WriteString("paused", pauseTimestamp);
         }
 
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
-        {
-            writer.WriteStartObject();
+        writer.WriteEndObject();
+    }
 
-            writer.WriteSerializable("update", Update, logger);
+    public static PersistedSessionUpdate FromJson(JsonElement json)
+    {
+        var update = SessionUpdate.FromJson(json.GetProperty("update"));
+        var pauseTimestamp = json.GetPropertyOrNull("paused")?.GetDateTimeOffset();
 
-            if (PauseTimestamp is { } pauseTimestamp)
-            {
-                writer.WriteString("paused", pauseTimestamp);
-            }
-
-            writer.WriteEndObject();
-        }
-
-        public static PersistedSessionUpdate FromJson(JsonElement json)
-        {
-            var update = SessionUpdate.FromJson(json.GetProperty("update"));
-            var pauseTimestamp = json.GetPropertyOrNull("paused")?.GetDateTimeOffset();
-
-            return new PersistedSessionUpdate(update, pauseTimestamp);
-        }
+        return new PersistedSessionUpdate(update, pauseTimestamp);
     }
 }

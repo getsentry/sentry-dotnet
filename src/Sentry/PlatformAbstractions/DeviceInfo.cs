@@ -1,7 +1,7 @@
-namespace Sentry.PlatformAbstractions
+namespace Sentry.PlatformAbstractions;
+
+internal static class DeviceInfo
 {
-    internal static class DeviceInfo
-    {
 #if ANDROID
         public const string PlatformName = "Android";
 #elif IOS
@@ -9,5 +9,4 @@ namespace Sentry.PlatformAbstractions
 #elif MACCATALYST
         public const string PlatformName = "Mac Catalyst";
 #endif
-    }
 }

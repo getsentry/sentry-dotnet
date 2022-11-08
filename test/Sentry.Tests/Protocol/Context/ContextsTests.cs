@@ -143,6 +143,20 @@ public class ContextsTests
     }
 
     [Fact]
+    public void SerializeObject_SortsContextKeys()
+    {
+        var sut = new Contexts
+        {
+            ["c"] = "3",
+            ["a"] = "1",
+            ["b"] = "2",
+        };
+
+        var actualString = sut.ToJsonString(_testOutputLogger);
+        Assert.Equal("{\"a\":\"1\",\"b\":\"2\",\"c\":\"3\"}", actualString);
+    }
+
+    [Fact]
     public void SerializeObject_Null_Should_Be_Ignored()
     {
         // Arrange

@@ -86,6 +86,6 @@ public class ContextCopyTests
     {
         var verifiable = dict.OrderBy(x => x.Key)
             .ToDictionary(x => x.Key, x => x.Value);
-        await Verify(verifiable);
+        await Verifier.Verify(verifiable);
     }
 }

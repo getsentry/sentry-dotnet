@@ -30,11 +30,11 @@ internal class IosEventProcessor : ISentryEventProcessor, IDisposable
         return @event;
     }
 
-    private static SentryCocoa.SentryEvent GetTempEvent()
+    private static CocoaSdk.SentryEvent GetTempEvent()
     {
         // This will populate an event with all of the information we need, without actually capturing that event.
-        var @event = new SentryCocoa.SentryEvent();
-        SentryCocoa.SentrySdk.ConfigureScope(scope =>
+        var @event = new CocoaSdk.SentryEvent();
+        SentryCocoaSdk.ConfigureScope(scope =>
         {
             scope.ApplyToEvent(@event, 0);
         });

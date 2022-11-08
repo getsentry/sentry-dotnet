@@ -37,5 +37,5 @@ public class DisabledHubTests
     public void Dispose_NoOp() => DisabledHub.Instance.Dispose();
 
     [Fact]
-    public async Task FlushAsync_NoOp() => await DisabledHub.Instance.FlushAsync(TimeSpan.FromDays(1));
+    public async Task FlushAsync_NoOp() => await DisabledHub.Instance.FlushAsync();
 }

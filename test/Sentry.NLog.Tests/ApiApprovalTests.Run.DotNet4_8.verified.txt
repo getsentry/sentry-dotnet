@@ -23,7 +23,6 @@ namespace Sentry.NLog
         public NLog.Layouts.Layout? DsnLayout { get; set; }
         [NLog.Config.NLogConfigurationIgnoreProperty]
         public NLog.Layouts.Layout? EnvironmentLayout { get; set; }
-        public System.TimeSpan FlushTimeout { get; set; }
         public bool IgnoreEventsWithNoException { get; set; }
         public bool IncludeEventDataOnBreadcrumbs { get; set; }
         public bool IncludeEventPropertiesAsTags { get; set; }

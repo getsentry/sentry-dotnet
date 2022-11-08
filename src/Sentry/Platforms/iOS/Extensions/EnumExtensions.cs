@@ -3,99 +3,99 @@ namespace Sentry.iOS.Extensions;
 internal static class EnumExtensions
 {
     // These align, so we can just cast
-    public static SentryLevel ToSentryLevel(this SentryCocoa.SentryLevel level) => (SentryLevel)level;
-    public static SentryCocoa.SentryLevel ToCocoaSentryLevel(this SentryLevel level) => (SentryCocoa.SentryLevel)level;
+    public static SentryLevel ToSentryLevel(this CocoaSdk.SentryLevel level) => (SentryLevel)level;
+    public static CocoaSdk.SentryLevel ToCocoaSentryLevel(this SentryLevel level) => (CocoaSdk.SentryLevel)level;
 
-    public static BreadcrumbLevel ToBreadcrumbLevel(this SentryCocoa.SentryLevel level) =>
+    public static BreadcrumbLevel ToBreadcrumbLevel(this CocoaSdk.SentryLevel level) =>
         level switch
         {
-            SentryCocoa.SentryLevel.Debug => BreadcrumbLevel.Debug,
-            SentryCocoa.SentryLevel.Info => BreadcrumbLevel.Info,
-            SentryCocoa.SentryLevel.Warning => BreadcrumbLevel.Warning,
-            SentryCocoa.SentryLevel.Error => BreadcrumbLevel.Error,
-            SentryCocoa.SentryLevel.Fatal => BreadcrumbLevel.Critical,
+            CocoaSdk.SentryLevel.Debug => BreadcrumbLevel.Debug,
+            CocoaSdk.SentryLevel.Info => BreadcrumbLevel.Info,
+            CocoaSdk.SentryLevel.Warning => BreadcrumbLevel.Warning,
+            CocoaSdk.SentryLevel.Error => BreadcrumbLevel.Error,
+            CocoaSdk.SentryLevel.Fatal => BreadcrumbLevel.Critical,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, null)
         };
 
-    public static SentryCocoa.SentryLevel ToCocoaSentryLevel(this BreadcrumbLevel level) =>
+    public static CocoaSdk.SentryLevel ToCocoaSentryLevel(this BreadcrumbLevel level) =>
         level switch
         {
-            BreadcrumbLevel.Debug => SentryCocoa.SentryLevel.Debug,
-            BreadcrumbLevel.Info => SentryCocoa.SentryLevel.Info,
-            BreadcrumbLevel.Warning => SentryCocoa.SentryLevel.Warning,
-            BreadcrumbLevel.Error => SentryCocoa.SentryLevel.Error,
-            BreadcrumbLevel.Critical => SentryCocoa.SentryLevel.Fatal,
+            BreadcrumbLevel.Debug => CocoaSdk.SentryLevel.Debug,
+            BreadcrumbLevel.Info => CocoaSdk.SentryLevel.Info,
+            BreadcrumbLevel.Warning => CocoaSdk.SentryLevel.Warning,
+            BreadcrumbLevel.Error => CocoaSdk.SentryLevel.Error,
+            BreadcrumbLevel.Critical => CocoaSdk.SentryLevel.Fatal,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, message: default)
         };
 
-    public static bool? ToNullableBoolean(this SentryCocoa.SentrySampleDecision decision) =>
+    public static bool? ToNullableBoolean(this CocoaSdk.SentrySampleDecision decision) =>
         decision switch
         {
-            SentryCocoa.SentrySampleDecision.Yes => true,
-            SentryCocoa.SentrySampleDecision.No => false,
-            SentryCocoa.SentrySampleDecision.Undecided => null,
+            CocoaSdk.SentrySampleDecision.Yes => true,
+            CocoaSdk.SentrySampleDecision.No => false,
+            CocoaSdk.SentrySampleDecision.Undecided => null,
             _ => throw new ArgumentOutOfRangeException(nameof(decision), decision, null)
         };
 
-    public static SentryCocoa.SentrySampleDecision ToCocoaSampleDecision(this bool? decision) =>
+    public static CocoaSdk.SentrySampleDecision ToCocoaSampleDecision(this bool? decision) =>
         decision switch
         {
-            true => SentryCocoa.SentrySampleDecision.Yes,
-            false => SentryCocoa.SentrySampleDecision.No,
-            null => SentryCocoa.SentrySampleDecision.Undecided
+            true => CocoaSdk.SentrySampleDecision.Yes,
+            false => CocoaSdk.SentrySampleDecision.No,
+            null => CocoaSdk.SentrySampleDecision.Undecided
         };
 
-    public static SpanStatus? ToSpanStatus(this SentryCocoa.SentrySpanStatus status) =>
+    public static SpanStatus? ToSpanStatus(this CocoaSdk.SentrySpanStatus status) =>
         status switch
         {
-            SentryCocoa.SentrySpanStatus.Undefined => null,
-            SentryCocoa.SentrySpanStatus.Ok => SpanStatus.Ok,
-            SentryCocoa.SentrySpanStatus.Cancelled => SpanStatus.Cancelled,
-            SentryCocoa.SentrySpanStatus.InternalError => SpanStatus.InternalError,
-            SentryCocoa.SentrySpanStatus.UnknownError => SpanStatus.UnknownError,
-            SentryCocoa.SentrySpanStatus.InvalidArgument => SpanStatus.InvalidArgument,
-            SentryCocoa.SentrySpanStatus.DeadlineExceeded => SpanStatus.DeadlineExceeded,
-            SentryCocoa.SentrySpanStatus.NotFound => SpanStatus.NotFound,
-            SentryCocoa.SentrySpanStatus.AlreadyExists => SpanStatus.AlreadyExists,
-            SentryCocoa.SentrySpanStatus.PermissionDenied => SpanStatus.PermissionDenied,
-            SentryCocoa.SentrySpanStatus.ResourceExhausted => SpanStatus.ResourceExhausted,
-            SentryCocoa.SentrySpanStatus.FailedPrecondition => SpanStatus.FailedPrecondition,
-            SentryCocoa.SentrySpanStatus.Aborted => SpanStatus.Aborted,
-            SentryCocoa.SentrySpanStatus.OutOfRange => SpanStatus.OutOfRange,
-            SentryCocoa.SentrySpanStatus.Unimplemented => SpanStatus.Unimplemented,
-            SentryCocoa.SentrySpanStatus.Unavailable => SpanStatus.Unavailable,
-            SentryCocoa.SentrySpanStatus.DataLoss => SpanStatus.DataLoss,
-            SentryCocoa.SentrySpanStatus.Unauthenticated => SpanStatus.Unauthenticated,
+            CocoaSdk.SentrySpanStatus.Undefined => null,
+            CocoaSdk.SentrySpanStatus.Ok => SpanStatus.Ok,
+            CocoaSdk.SentrySpanStatus.Cancelled => SpanStatus.Cancelled,
+            CocoaSdk.SentrySpanStatus.InternalError => SpanStatus.InternalError,
+            CocoaSdk.SentrySpanStatus.UnknownError => SpanStatus.UnknownError,
+            CocoaSdk.SentrySpanStatus.InvalidArgument => SpanStatus.InvalidArgument,
+            CocoaSdk.SentrySpanStatus.DeadlineExceeded => SpanStatus.DeadlineExceeded,
+            CocoaSdk.SentrySpanStatus.NotFound => SpanStatus.NotFound,
+            CocoaSdk.SentrySpanStatus.AlreadyExists => SpanStatus.AlreadyExists,
+            CocoaSdk.SentrySpanStatus.PermissionDenied => SpanStatus.PermissionDenied,
+            CocoaSdk.SentrySpanStatus.ResourceExhausted => SpanStatus.ResourceExhausted,
+            CocoaSdk.SentrySpanStatus.FailedPrecondition => SpanStatus.FailedPrecondition,
+            CocoaSdk.SentrySpanStatus.Aborted => SpanStatus.Aborted,
+            CocoaSdk.SentrySpanStatus.OutOfRange => SpanStatus.OutOfRange,
+            CocoaSdk.SentrySpanStatus.Unimplemented => SpanStatus.Unimplemented,
+            CocoaSdk.SentrySpanStatus.Unavailable => SpanStatus.Unavailable,
+            CocoaSdk.SentrySpanStatus.DataLoss => SpanStatus.DataLoss,
+            CocoaSdk.SentrySpanStatus.Unauthenticated => SpanStatus.Unauthenticated,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
 
-    public static SentryCocoa.SentrySpanStatus ToCocoaSpanStatus(this SpanStatus? status) =>
+    public static CocoaSdk.SentrySpanStatus ToCocoaSpanStatus(this SpanStatus? status) =>
         status switch
         {
-            null => SentryCocoa.SentrySpanStatus.Undefined,
-            SpanStatus.Ok => SentryCocoa.SentrySpanStatus.Ok,
-            SpanStatus.Cancelled => SentryCocoa.SentrySpanStatus.Cancelled,
-            SpanStatus.InternalError => SentryCocoa.SentrySpanStatus.InternalError,
-            SpanStatus.UnknownError => SentryCocoa.SentrySpanStatus.UnknownError,
-            SpanStatus.InvalidArgument => SentryCocoa.SentrySpanStatus.InvalidArgument,
-            SpanStatus.DeadlineExceeded => SentryCocoa.SentrySpanStatus.DeadlineExceeded,
-            SpanStatus.NotFound => SentryCocoa.SentrySpanStatus.NotFound,
-            SpanStatus.AlreadyExists => SentryCocoa.SentrySpanStatus.AlreadyExists,
-            SpanStatus.PermissionDenied => SentryCocoa.SentrySpanStatus.PermissionDenied,
-            SpanStatus.ResourceExhausted => SentryCocoa.SentrySpanStatus.ResourceExhausted,
-            SpanStatus.FailedPrecondition => SentryCocoa.SentrySpanStatus.FailedPrecondition,
-            SpanStatus.Aborted => SentryCocoa.SentrySpanStatus.Aborted,
-            SpanStatus.OutOfRange => SentryCocoa.SentrySpanStatus.OutOfRange,
-            SpanStatus.Unimplemented => SentryCocoa.SentrySpanStatus.Unimplemented,
-            SpanStatus.Unavailable => SentryCocoa.SentrySpanStatus.Unavailable,
-            SpanStatus.DataLoss => SentryCocoa.SentrySpanStatus.DataLoss,
-            SpanStatus.Unauthenticated => SentryCocoa.SentrySpanStatus.Unauthenticated,
+            null => CocoaSdk.SentrySpanStatus.Undefined,
+            SpanStatus.Ok => CocoaSdk.SentrySpanStatus.Ok,
+            SpanStatus.Cancelled => CocoaSdk.SentrySpanStatus.Cancelled,
+            SpanStatus.InternalError => CocoaSdk.SentrySpanStatus.InternalError,
+            SpanStatus.UnknownError => CocoaSdk.SentrySpanStatus.UnknownError,
+            SpanStatus.InvalidArgument => CocoaSdk.SentrySpanStatus.InvalidArgument,
+            SpanStatus.DeadlineExceeded => CocoaSdk.SentrySpanStatus.DeadlineExceeded,
+            SpanStatus.NotFound => CocoaSdk.SentrySpanStatus.NotFound,
+            SpanStatus.AlreadyExists => CocoaSdk.SentrySpanStatus.AlreadyExists,
+            SpanStatus.PermissionDenied => CocoaSdk.SentrySpanStatus.PermissionDenied,
+            SpanStatus.ResourceExhausted => CocoaSdk.SentrySpanStatus.ResourceExhausted,
+            SpanStatus.FailedPrecondition => CocoaSdk.SentrySpanStatus.FailedPrecondition,
+            SpanStatus.Aborted => CocoaSdk.SentrySpanStatus.Aborted,
+            SpanStatus.OutOfRange => CocoaSdk.SentrySpanStatus.OutOfRange,
+            SpanStatus.Unimplemented => CocoaSdk.SentrySpanStatus.Unimplemented,
+            SpanStatus.Unavailable => CocoaSdk.SentrySpanStatus.Unavailable,
+            SpanStatus.DataLoss => CocoaSdk.SentrySpanStatus.DataLoss,
+            SpanStatus.Unauthenticated => CocoaSdk.SentrySpanStatus.Unauthenticated,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, message: default)
         };
 
     // These align, so we can just cast
-    public static TransactionNameSource ToTransactionNameSource(this SentryCocoa.SentryTransactionNameSource source) =>
+    public static TransactionNameSource ToTransactionNameSource(this CocoaSdk.SentryTransactionNameSource source) =>
         (TransactionNameSource)source;
-    public static SentryCocoa.SentryTransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
-        (SentryCocoa.SentryTransactionNameSource)source;
+    public static CocoaSdk.SentryTransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
+        (CocoaSdk.SentryTransactionNameSource)source;
 }
