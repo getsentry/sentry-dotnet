@@ -276,6 +276,61 @@ namespace Sentry
         string Name { get; }
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
+    public static class MeasurementExtensions
+    {
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, double value, Sentry.MeasurementUnit unit = default) { }
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, int value, Sentry.MeasurementUnit unit = default) { }
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, long value, Sentry.MeasurementUnit unit = default) { }
+        [System.CLSCompliant(false)]
+        public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, ulong value, Sentry.MeasurementUnit unit = default) { }
+    }
+    public readonly struct MeasurementUnit : System.IEquatable<Sentry.MeasurementUnit>
+    {
+        public static Sentry.MeasurementUnit None;
+        public bool Equals(Sentry.MeasurementUnit other) { }
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
+        public override string ToString() { }
+        public static Sentry.MeasurementUnit Custom(string name) { }
+        public static Sentry.MeasurementUnit op_Implicit(Sentry.MeasurementUnit.Duration unit) { }
+        public static Sentry.MeasurementUnit op_Implicit(Sentry.MeasurementUnit.Fraction unit) { }
+        public static Sentry.MeasurementUnit op_Implicit(Sentry.MeasurementUnit.Information unit) { }
+        public static bool operator !=(Sentry.MeasurementUnit left, Sentry.MeasurementUnit right) { }
+        public static bool operator ==(Sentry.MeasurementUnit left, Sentry.MeasurementUnit right) { }
+        public enum Duration
+        {
+            Nanosecond = 0,
+            Microsecond = 1,
+            Millisecond = 2,
+            Second = 3,
+            Minute = 4,
+            Hour = 5,
+            Day = 6,
+            Week = 7,
+        }
+        public enum Fraction
+        {
+            Ratio = 0,
+            Percent = 1,
+        }
+        public enum Information
+        {
+            Bit = 0,
+            Byte = 1,
+            Kilobyte = 2,
+            Kibibyte = 3,
+            Megabyte = 4,
+            Mebibyte = 5,
+            Gigabyte = 6,
+            Gibibyte = 7,
+            Terabyte = 8,
+            Tebibyte = 9,
+            Petabyte = 10,
+            Pebibyte = 11,
+            Exabyte = 12,
+            Exbibyte = 13,
+        }
+    }
     public sealed class Package : Sentry.IJsonSerializable
     {
         public Package(string name, string version) { }
@@ -384,6 +439,9 @@ namespace Sentry
         public static Sentry.SentryId CaptureException(this Sentry.ISentryClient client, System.Exception ex) { }
         public static Sentry.SentryId CaptureMessage(this Sentry.ISentryClient client, string message, Sentry.SentryLevel level = 1) { }
         public static void CaptureUserFeedback(this Sentry.ISentryClient client, Sentry.SentryId eventId, string email, string comments, string? name = null) { }
+        public static void Flush(this Sentry.ISentryClient client) { }
+        public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
+        public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
     }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
     public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable
@@ -493,6 +551,7 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
         public string? Environment { get; set; }
+        public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
         public bool IsEnvironmentUser { get; set; }
@@ -517,6 +576,7 @@ namespace Sentry
         public string? ServerName { get; set; }
         public System.TimeSpan ShutdownTimeout { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
+        public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
         public double TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
@@ -579,6 +639,9 @@ namespace Sentry
         public static void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public static void EndSession(Sentry.SessionEndStatus status = 0) { }
+        public static void Flush() { }
+        public static void Flush(System.TimeSpan timeout) { }
+        public static System.Threading.Tasks.Task FlushAsync() { }
         public static System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
         public static Sentry.ISpan? GetSpan() { }
         public static Sentry.SentryTraceHeader? GetTraceHeader() { }
@@ -736,6 +799,7 @@ namespace Sentry
     }
     public static class SpanExtensions
     {
+        public static Sentry.ITransaction GetTransaction(this Sentry.ISpan span) { }
         public static Sentry.ISpan StartChild(this Sentry.ISpan span, string operation, string? description) { }
     }
     public readonly struct SpanId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SpanId>
@@ -815,6 +879,13 @@ namespace Sentry
         public StreamAttachmentContent(System.IO.Stream stream) { }
         public System.IO.Stream GetStream() { }
     }
+    [System.ComponentModel.TypeConverter(typeof(Sentry.TracePropagationTargetTypeConverter))]
+    public class TracePropagationTarget
+    {
+        public TracePropagationTarget(System.Text.RegularExpressions.Regex regex) { }
+        public TracePropagationTarget(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
+        public override string ToString() { }
+    }
     public class Transaction : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.IJsonSerializable, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public Transaction(Sentry.ITransaction tracer) { }
@@ -833,6 +904,7 @@ namespace Sentry
         public bool? IsParentSampled { get; set; }
         public bool? IsSampled { get; }
         public Sentry.SentryLevel? Level { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Name { get; }
         public Sentry.TransactionNameSource NameSource { get; }
         public string Operation { get; }
@@ -840,6 +912,7 @@ namespace Sentry
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
+        public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Span> Spans { get; }
@@ -851,6 +924,7 @@ namespace Sentry
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetExtra(string key, object? value) { }
+        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public void UnsetTag(string key) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
@@ -902,6 +976,7 @@ namespace Sentry
         public bool? IsParentSampled { get; set; }
         public bool? IsSampled { get; }
         public Sentry.SentryLevel? Level { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Name { get; set; }
         public Sentry.TransactionNameSource NameSource { get; set; }
         public string Operation { get; set; }
@@ -909,6 +984,7 @@ namespace Sentry
         public string? Platform { get; set; }
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
+        public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }
@@ -925,6 +1001,7 @@ namespace Sentry
         public Sentry.ISpan? GetLastActiveSpan() { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetExtra(string key, object? value) { }
+        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
         public Sentry.ISpan StartChild(string operation) { }
         public void UnsetTag(string key) { }
@@ -1344,6 +1421,13 @@ namespace Sentry.Protocol
         Sentry.SpanId SpanId { get; }
         Sentry.SpanStatus? Status { get; }
         Sentry.SentryId TraceId { get; }
+    }
+    public sealed class Measurement : Sentry.IJsonSerializable
+    {
+        public Sentry.MeasurementUnit Unit { get; }
+        public object Value { get; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.Protocol.Measurement FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class Mechanism : Sentry.IJsonSerializable
     {
