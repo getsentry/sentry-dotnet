@@ -30,10 +30,10 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net7.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.0-rc.1.22427.2" />
-    <PackageReference Include="Verify.AspNetCore" Version="1.5.0" />
-    <PackageReference Include="Verify.Http" Version="2.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.*" />
+    <PackageReference Include="Verify.AspNetCore" Version="2.*" />
+    <PackageReference Include="Verify.Http" Version="3.*" />
   </ItemGroup>
 
   <ItemGroup>
