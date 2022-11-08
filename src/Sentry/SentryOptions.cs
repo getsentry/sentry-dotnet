@@ -804,7 +804,7 @@ namespace Sentry
                 new AutoSessionTrackingIntegration(),
                 new AppDomainUnhandledExceptionIntegration(),
                 new AppDomainProcessExitIntegration(),
-                new TaskUnobservedTaskExceptionIntegration(),
+                new UnobservedTaskExceptionIntegration(),
 #if NETFRAMEWORK
                 new NetFxInstallationsIntegration(),
 #endif

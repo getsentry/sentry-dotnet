@@ -1,6 +1,6 @@
 namespace Sentry.Tests;
 
-public class TaskUnobservedTaskExceptionIntegrationTests
+public class UnobservedTaskExceptionIntegrationTests
 {
     private class Fixture
     {
@@ -9,7 +9,7 @@ public class TaskUnobservedTaskExceptionIntegrationTests
 
         public Fixture() => Hub.IsEnabled.Returns(true);
 
-        public TaskUnobservedTaskExceptionIntegration GetSut()
+        public UnobservedTaskExceptionIntegration GetSut()
             => new(AppDomain);
     }
 

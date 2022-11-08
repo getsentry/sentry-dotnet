@@ -8,12 +8,12 @@ using System.Runtime.ExceptionServices;
 
 namespace Sentry.Integrations
 {
-    internal class TaskUnobservedTaskExceptionIntegration : ISdkIntegration
+    internal class UnobservedTaskExceptionIntegration : ISdkIntegration
     {
         private readonly IAppDomain _appDomain;
         private IHub _hub = null!;
 
-        internal TaskUnobservedTaskExceptionIntegration(IAppDomain? appDomain = null)
+        internal UnobservedTaskExceptionIntegration(IAppDomain? appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
         public void Register(IHub hub, SentryOptions _)
