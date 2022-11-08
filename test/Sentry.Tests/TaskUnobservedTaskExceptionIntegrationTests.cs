@@ -57,17 +57,6 @@ public class TaskUnobservedTaskExceptionIntegrationTests
 #endif
 
     [Fact]
-    public void Handle_NoException_NoCaptureEvent()
-    {
-        var sut = _fixture.GetSut();
-        sut.Register(_fixture.Hub, SentryOptions);
-
-        sut.Handle(this, new UnobservedTaskExceptionEventArgs(null));
-
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
-    [Fact]
     public void Register_UnhandledException_Subscribes()
     {
         var sut = _fixture.GetSut();
