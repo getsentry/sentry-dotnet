@@ -11,6 +11,7 @@
 ### Fixes
 
 - Fix concurrency bug in caching transport ([#2026](https://github.com/getsentry/sentry-dotnet/pull/2026))
+- Update unobserved task exception integration ([#2034](https://github.com/getsentry/sentry-dotnet/pull/2034))
 
 ## 3.23.0
 
