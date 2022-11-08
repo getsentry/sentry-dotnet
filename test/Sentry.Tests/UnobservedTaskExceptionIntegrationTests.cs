@@ -1,3 +1,7 @@
+#if RELEASE
+using DiffEngine;
+#endif
+
 namespace Sentry.Tests;
 
 public class UnobservedTaskExceptionIntegrationTests
@@ -29,9 +33,13 @@ public class UnobservedTaskExceptionIntegrationTests
 
     // Only triggers in release mode.
 #if RELEASE
-    [Fact] // Integration test.
+    [SkippableFact]
     public void Handle_UnobservedTaskException_CaptureEvent()
     {
+#if __MOBILE__
+        Skip.If(BuildServerDetector.Detected, "Test is flaky on mobile in CI.");
+#endif
+
         _fixture.AppDomain = AppDomainAdapter.Instance;
         var captureCalledEvent = new ManualResetEvent(false);
         _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
