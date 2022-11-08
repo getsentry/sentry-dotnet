@@ -10,6 +10,8 @@ internal class AutoClearingList<T> : IList<T>
 
     private bool _clearOnNextAdd;
 
+    public bool WillClearOnNextAdd => _clearOnNextAdd;
+
     public void Add(T item)
     {
         if (_clearOnNextAdd)
@@ -45,7 +47,16 @@ internal class AutoClearingList<T> : IList<T>
 
     public int IndexOf(T item) => _list.IndexOf(item);
 
-    public void Insert(int index, T item) => _list.Insert(index, item);
+    public void Insert(int index, T item)
+    {
+        if (_clearOnNextAdd)
+        {
+            Clear();
+            _clearOnNextAdd = false;
+        }
+
+        _list.Insert(index, item);
+    }
 
     public void RemoveAt(int index) => _list.RemoveAt(index);
 

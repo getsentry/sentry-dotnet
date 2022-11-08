@@ -579,6 +579,11 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
+        private IList<TracePropagationTarget> _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
+        {
+            new(".*")
+        }.ClearOnNextAdd();
+
         /// <summary>
         /// A customizable list of <see cref="TracePropagationTarget"/> objects, each containing either a
         /// substring or regular expression pattern that can be used to control which outgoing HTTP requests
@@ -590,11 +595,18 @@ namespace Sentry
         /// <remarks>
         /// Adding an item to the default list will clear the <c>.*</c> value automatically.
         /// </remarks>
-        public IList<TracePropagationTarget> TracePropagationTargets { get; set; } =
-            new AutoClearingList<TracePropagationTarget>
-            {
-                new(".*")
-            }.ClearOnNextAdd();
+        public IList<TracePropagationTarget> TracePropagationTargets
+        {
+            // TODO: This is pretty ugly, but works. Find a better way.
+            // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
+            //       .NET 7 changed this to call the setter with an array that already starts with the old value.
+
+            get => _tracePropagationTargets;
+            set => _tracePropagationTargets =
+                _tracePropagationTargets is AutoClearingList<TracePropagationTarget> {WillClearOnNextAdd: true}
+                    ? value.Skip(_tracePropagationTargets.Count).ToList()
+                    : value;
+        }
 
         private StackTraceMode? _stackTraceMode;
 
