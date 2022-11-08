@@ -11,7 +11,7 @@ namespace Sentry.Integrations
     internal class TaskUnobservedTaskExceptionIntegration : ISdkIntegration
     {
         private readonly IAppDomain _appDomain;
-        private IHub? _hub;
+        private IHub _hub = null!;
 
         internal TaskUnobservedTaskExceptionIntegration(IAppDomain? appDomain = null)
             => _appDomain = appDomain ?? AppDomainAdapter.Instance;
@@ -22,19 +22,24 @@ namespace Sentry.Integrations
             _appDomain.UnobservedTaskException += Handle;
         }
 
-        // Internal for testability
 #if !NET6_0_OR_GREATER
         [HandleProcessCorruptedStateExceptions]
 #endif
         [SecurityCritical]
         internal void Handle(object? sender, UnobservedTaskExceptionEventArgs e)
         {
-            if (e.Exception is { } ex)
-            {
-                ex.Data[Mechanism.HandledKey] = false;
-                ex.Data[Mechanism.MechanismKey] = "UnobservedTaskException";
-                _ = _hub?.CaptureException(ex);
-            }
+            // The exception will never be null in any runtime.
+            // The annotation was corrected in .NET 5
+            // See: https://github.com/dotnet/runtime/issues/32454
+
+#if NET5_0_OR_GREATER
+            var ex = e.Exception;
+#else
+            var ex = e.Exception!;
+#endif
+            ex.Data[Mechanism.HandledKey] = false;
+            ex.Data[Mechanism.MechanismKey] = "UnobservedTaskException";
+            _hub.CaptureException(ex);
         }
     }
 }
