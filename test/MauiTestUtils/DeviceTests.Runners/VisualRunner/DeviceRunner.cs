@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls.Xaml;
+using Microsoft.Maui.Storage;
 using Xunit;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
