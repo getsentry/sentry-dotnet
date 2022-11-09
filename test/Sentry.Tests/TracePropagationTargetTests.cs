@@ -115,6 +115,24 @@ public class TracePropagationTargetTests
     }
 
     [Fact]
+    public void SentryOptions_TracePropagationTargets_SetRemovesDefault()
+    {
+        var options = new SentryOptions();
+        var targets = new []
+        {
+            new TracePropagationTarget(".*"),
+            new TracePropagationTarget("foo"),
+            new TracePropagationTarget("bar")
+        };
+
+        options.TracePropagationTargets = targets;
+
+        Assert.Equal(2, options.TracePropagationTargets.Count);
+        Assert.Equal("foo", options.TracePropagationTargets[0].ToString());
+        Assert.Equal("bar", options.TracePropagationTargets[1].ToString());
+    }
+
+    [Fact]
     public void SentryOptions_TracePropagationTargets_DefaultPropagatesAll()
     {
         var options = new SentryOptions();
