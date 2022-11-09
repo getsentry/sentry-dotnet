@@ -6,6 +6,10 @@
 
 - Simplify API for flushing events ([#2030](https://github.com/getsentry/sentry-dotnet/pull/2030))
 
+### Fixes
+
+- Fix trace propagation targets setter ([#2035](https://github.com/getsentry/sentry-dotnet/pull/2035))
+
 ## 3.23.1
 
 ### Fixes
