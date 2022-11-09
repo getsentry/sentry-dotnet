@@ -581,9 +581,7 @@ namespace Sentry
 
         // The default propagation list will match anything, but adding to the list should clear that.
         private IList<TracePropagationTarget> _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
-        {
-            new(".*")
-        }.ClearOnNextAdd();
+            (new[] {new TracePropagationTarget(".*")}, clearOnNextAdd: true);
 
         /// <summary>
         /// A customizable list of <see cref="TracePropagationTarget"/> objects, each containing either a
@@ -605,31 +603,24 @@ namespace Sentry
             get => _tracePropagationTargets;
             set
             {
-                if (value.Count == 1 && value[0].ToString() == ".*")
+                switch (value.Count)
                 {
-                    // There's only one item in the list, and it's the wildcard, so reset to the initial state.
-                    _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
-                    {
-                        new(".*")
-                    }.ClearOnNextAdd();
-                    return;
-                }
+                    case 1 when value[0].ToString() == ".*":
+                        // There's only one item in the list, and it's the wildcard, so reset to the initial state.
+                        _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>(value, clearOnNextAdd: true);
+                        break;
 
-                // Remove the default target during assignment, unless it's the only one.
-                var targets = new AutoClearingList<TracePropagationTarget>(value);
-                if (targets.Count > 1)
-                {
-                    for (var i = 0; i < targets.Count; i++)
-                    {
-                        if (targets[i].ToString() == ".*")
-                        {
-                            targets.RemoveAt(i);
-                            break;
-                        }
-                    }
-                }
+                    case > 1:
+                        // There's more than one item in the list.  Remove the wildcard.
+                        var targets = value.ToList();
+                        targets.RemoveAll(t => t.ToString() == ".*");
+                        _tracePropagationTargets = targets;
+                        break;
 
-                _tracePropagationTargets = targets;
+                    default:
+                        _tracePropagationTargets = value;
+                        break;
+                }
             }
         }
 

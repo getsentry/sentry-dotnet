@@ -10,14 +10,10 @@ internal class AutoClearingList<T> : IList<T>
 
     private bool _clearOnNextAdd;
 
-    public AutoClearingList()
+    public AutoClearingList(IEnumerable<T> initialItems, bool clearOnNextAdd)
     {
-        _list = new List<T>();
-    }
-
-    public AutoClearingList(IEnumerable<T> items)
-    {
-        _list = items.ToList();
+        _list = initialItems.ToList();
+        _clearOnNextAdd = clearOnNextAdd;
     }
 
     public void Add(T item)
@@ -29,12 +25,6 @@ internal class AutoClearingList<T> : IList<T>
         }
 
         _list.Add(item);
-    }
-
-    public AutoClearingList<T> ClearOnNextAdd()
-    {
-        _clearOnNextAdd = true;
-        return this;
     }
 
     public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
