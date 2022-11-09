@@ -1,7 +1,3 @@
-#if RELEASE
-using DiffEngine;
-#endif
-
 namespace Sentry.Tests;
 
 public class UnobservedTaskExceptionIntegrationTests
@@ -36,8 +32,8 @@ public class UnobservedTaskExceptionIntegrationTests
     [SkippableFact]
     public void Handle_UnobservedTaskException_CaptureEvent()
     {
-#if __MOBILE__
-        Skip.If(BuildServerDetector.Detected, "Test is flaky on mobile in CI.");
+#if __MOBILE__ && CI_BUILD
+        Skip.If(true, "Test is flaky on mobile in CI.");
 #endif
 
         _fixture.AppDomain = AppDomainAdapter.Instance;
