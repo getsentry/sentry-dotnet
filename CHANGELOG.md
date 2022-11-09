@@ -6,6 +6,10 @@
 
 - Simplify API for flushing events ([#2030](https://github.com/getsentry/sentry-dotnet/pull/2030))
 
+### Fixes
+
+- Update unobserved task exception integration ([#2034](https://github.com/getsentry/sentry-dotnet/pull/2034))
+
 ## 3.23.1
 
 ### Fixes
