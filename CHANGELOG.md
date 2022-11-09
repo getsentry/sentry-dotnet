@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- Update unobserved task exception integration ([#2034](https://github.com/getsentry/sentry-dotnet/pull/2034))
 - Fix trace propagation targets setter ([#2035](https://github.com/getsentry/sentry-dotnet/pull/2035))
 
 ## 3.23.1

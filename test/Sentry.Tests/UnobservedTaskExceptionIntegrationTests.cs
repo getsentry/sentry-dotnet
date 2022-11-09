@@ -4,7 +4,7 @@ using DiffEngine;
 
 namespace Sentry.Tests;
 
-public class TaskUnobservedTaskExceptionIntegrationTests
+public class UnobservedTaskExceptionIntegrationTests
 {
     private class Fixture
     {
@@ -13,7 +13,7 @@ public class TaskUnobservedTaskExceptionIntegrationTests
 
         public Fixture() => Hub.IsEnabled.Returns(true);
 
-        public TaskUnobservedTaskExceptionIntegration GetSut()
+        public UnobservedTaskExceptionIntegration GetSut()
             => new(AppDomain);
     }
 
@@ -63,17 +63,6 @@ public class TaskUnobservedTaskExceptionIntegrationTests
         } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));
     }
 #endif
-
-    [Fact]
-    public void Handle_NoException_NoCaptureEvent()
-    {
-        var sut = _fixture.GetSut();
-        sut.Register(_fixture.Hub, SentryOptions);
-
-        sut.Handle(this, new UnobservedTaskExceptionEventArgs(null));
-
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
-    }
 
     [Fact]
     public void Register_UnhandledException_Subscribes()
