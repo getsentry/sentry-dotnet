@@ -1,0 +1,54 @@
+﻿[
+  {
+    Source: {
+      Name: my transaction,
+      Platform: csharp,
+      Operation: my operation,
+      Description: ,
+      Status: Ok,
+      IsSampled: true,
+      SampleRate: 1.0,
+      Request: {},
+      Contexts: {
+        trace: {
+          Operation: my operation,
+          Description: ,
+          Status: Ok,
+          IsSampled: true
+        }
+      },
+      User: {},
+      Environment: production,
+      Spans: [
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Status: DeadlineExceeded,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Description:
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+OUTPUT INSERTED.[Id]
+VALUES (@p0);
+,
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2
+          }
+        }
+      ],
+      IsFinished: true
+    }
+  }
+]

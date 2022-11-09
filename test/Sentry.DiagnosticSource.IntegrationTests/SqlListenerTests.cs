@@ -117,7 +117,8 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
                 var efVersion = typeof(DbContext).Assembly.GetName().Version.ToString(3);
                 return line.Replace(efVersion, "");
             })
-            .IgnoreStandardSentryMembers();
+            .IgnoreStandardSentryMembers()
+            .UniqueForRuntimeAndVersion();
         Assert.DoesNotContain("An error occurred while saving the entity changes", result.Text);
     }
 

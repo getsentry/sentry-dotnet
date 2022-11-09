@@ -4,18 +4,21 @@
     <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
+  <!-- Test EF Core 7 on .NET 7 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.*" />
   </ItemGroup>
 
+  <!-- Test EF Core 6 on .NET 6 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.*" />
   </ItemGroup>
 
+  <!-- Test EF Core 5 on .NET Core 3.1 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.*" />
@@ -25,6 +28,7 @@
     <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
   </ItemGroup>
 
+  <!-- Test EF Core 3.1 on .NET Framework -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
