@@ -603,27 +603,24 @@ namespace Sentry
             get => _tracePropagationTargets;
             set
             {
-                if (value.Count == 1 && value[0].ToString() == ".*")
+                switch (value.Count)
                 {
-                    // There's only one item in the list, and it's the wildcard, so reset to the initial state.
-                    _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>(value, clearOnNextAdd: true);
-                    return;
-                }
+                    case 1 when value[0].ToString() == ".*":
+                        // There's only one item in the list, and it's the wildcard, so reset to the initial state.
+                        _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>(value, clearOnNextAdd: true);
+                        break;
 
-                if (value.Count > 1)
-                {
-                    // There's more than one item in the list.  Remove the wildcard.
-                    for (var i = 0; i < value.Count; i++)
-                    {
-                        if (value[i].ToString() == ".*")
-                        {
-                            value.RemoveAt(i);
-                            break;
-                        }
-                    }
-                }
+                    case > 1:
+                        // There's more than one item in the list.  Remove the wildcard.
+                        var targets = value.ToList();
+                        targets.RemoveAll(t => t.ToString() == ".*");
+                        _tracePropagationTargets = targets;
+                        break;
 
-                _tracePropagationTargets = value;
+                    default:
+                        _tracePropagationTargets = value;
+                        break;
+                }
             }
         }
 
