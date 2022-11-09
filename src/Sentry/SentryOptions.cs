@@ -579,6 +579,7 @@ namespace Sentry
         /// </remarks>
         public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
+        // The default propagation list will match anything, but adding to the list should clear that.
         private IList<TracePropagationTarget> _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
         {
             new(".*")
@@ -597,15 +598,39 @@ namespace Sentry
         /// </remarks>
         public IList<TracePropagationTarget> TracePropagationTargets
         {
-            // TODO: This is pretty ugly, but works. Find a better way.
             // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
             //       .NET 7 changed this to call the setter with an array that already starts with the old value.
+            //       We have to handle both cases.
 
             get => _tracePropagationTargets;
-            set => _tracePropagationTargets =
-                _tracePropagationTargets is AutoClearingList<TracePropagationTarget> {WillClearOnNextAdd: true}
-                    ? value.Skip(_tracePropagationTargets.Count).ToList()
-                    : value;
+            set
+            {
+                if (value.Count == 1 && value[0].ToString() == ".*")
+                {
+                    // There's only one item in the list, and it's the wildcard, so reset to the initial state.
+                    _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
+                    {
+                        new(".*")
+                    }.ClearOnNextAdd();
+                    return;
+                }
+
+                // Remove the default target during assignment, unless it's the only one.
+                var targets = new AutoClearingList<TracePropagationTarget>(value);
+                if (targets.Count > 1)
+                {
+                    for (var i = 0; i < targets.Count; i++)
+                    {
+                        if (targets[i].ToString() == ".*")
+                        {
+                            targets.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+
+                _tracePropagationTargets = targets;
+            }
         }
 
         private StackTraceMode? _stackTraceMode;

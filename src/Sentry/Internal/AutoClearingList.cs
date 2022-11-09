@@ -6,11 +6,19 @@ namespace Sentry.Internal;
 
 internal class AutoClearingList<T> : IList<T>
 {
-    private readonly IList<T> _list = new List<T>();
+    private readonly IList<T> _list;
 
     private bool _clearOnNextAdd;
 
-    public bool WillClearOnNextAdd => _clearOnNextAdd;
+    public AutoClearingList()
+    {
+        _list = new List<T>();
+    }
+
+    public AutoClearingList(IEnumerable<T> items)
+    {
+        _list = items.ToList();
+    }
 
     public void Add(T item)
     {
