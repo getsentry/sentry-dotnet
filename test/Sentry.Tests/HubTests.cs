@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Net.Http;
-using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 
@@ -1154,8 +1153,8 @@ public class HubTests
     [InlineData(true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
     {
-#if __MOBILE__
-        Skip.If(cachingEnabled && BuildServerDetector.Detected, "Test is flaky on mobile in CI.");
+#if __MOBILE__ && CI_BUILD
+        Skip.If(cachingEnabled, "Test is flaky on mobile in CI.");
 #endif
 
         // Arrange
