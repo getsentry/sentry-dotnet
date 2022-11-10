@@ -34,7 +34,7 @@ public class UnobservedTaskExceptionIntegrationTests
     {
 #if __MOBILE__ && CI_BUILD
         throw new Xunit.SkipException("Test is flaky on mobile in CI.");
-#endif
+#else
 
         _fixture.AppDomain = AppDomainAdapter.Instance;
         var captureCalledEvent = new ManualResetEvent(false);
@@ -57,6 +57,7 @@ public class UnobservedTaskExceptionIntegrationTests
             GC.Collect();
             GC.WaitForPendingFinalizers();
         } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));
+#endif
     }
 #endif
 
