@@ -33,7 +33,7 @@ public class UnobservedTaskExceptionIntegrationTests
     public void Handle_UnobservedTaskException_CaptureEvent()
     {
 #if __MOBILE__ && CI_BUILD
-        Skip.If(true, "Test is flaky on mobile in CI.");
+        throw new Xunit.SkipException("Test is flaky on mobile in CI.");
 #endif
 
         _fixture.AppDomain = AppDomainAdapter.Instance;
