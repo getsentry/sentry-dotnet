@@ -27,15 +27,14 @@ public class UnobservedTaskExceptionIntegrationTests
         _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
 
-    // Only triggers in release mode.
-#if RELEASE
     [SkippableFact]
     public void Handle_UnobservedTaskException_CaptureEvent()
     {
-#if __MOBILE__ && CI_BUILD
-        throw new Xunit.SkipException("Test is flaky on mobile in CI.");
+#if DEBUG
+        throw new SkipException("UnobservedTaskException does not fire in DEBUG configuration.");
+#elif __MOBILE__ && CI_BUILD
+        throw new SkipException("Test is flaky on mobile in CI.");
 #else
-
         _fixture.AppDomain = AppDomainAdapter.Instance;
         var captureCalledEvent = new ManualResetEvent(false);
         _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
@@ -59,7 +58,6 @@ public class UnobservedTaskExceptionIntegrationTests
         } while (!captureCalledEvent.WaitOne(TimeSpan.FromMilliseconds(100)));
 #endif
     }
-#endif
 
     [Fact]
     public void Register_UnhandledException_Subscribes()
