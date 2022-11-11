@@ -26,7 +26,7 @@ public class EnvelopeTests
 
         var id = envelope.TryGetEventId(logger);
 
-        Assert.Equal("12c2d058d58442709aa2eca08bf20986", id.Value!.ToString());
+        Assert.Equal("12c2d058d58442709aa2eca08bf20986", id?.ToString());
         Assert.Empty(logger.Entries);
     }
 
