@@ -66,9 +66,6 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             sentryOptions.Dsn = ValidDsn;
             sentryOptions.DiagnosticLogger = _logger;
             sentryOptions.Debug = true;
-
-            // sentryOptions.MinimumBreadcrumbLevel = LogLevel.Debug;
-            // sentryOptions.MinimumEventLevel = LogLevel.Error;
         }
 
         var options = new SentryLoggingOptions();
@@ -109,7 +106,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             }
             catch
             {
-                // Suppress the exception so we can test that we received the error through the listener.
+                // Suppress the exception so we can test that we received the error through logging.
             }
 
             transaction.Finish();
