@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore.Storage;
 using Sentry.Testing;
 
 namespace Sentry.DiagnosticSource.IntegrationTests;
@@ -35,13 +34,15 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 #else
         using var database = await _fixture.SqlInstance.Build();
 #endif
-        using var hub = new Hub(options);
-        var transaction = hub.StartTransaction("my transaction", "my operation");
-        hub.ConfigureScope(scope => scope.Transaction = transaction);
-        hub.CaptureException(new("my exception"));
-        await TestDbBuilder.AddDataAsync(database);
-        await TestDbBuilder.GetDataAsync(database);
-        transaction.Finish();
+        using (var hub = new Hub(options))
+        {
+            var transaction = hub.StartTransaction("my transaction", "my operation");
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+            hub.CaptureException(new("my exception"));
+            await TestDbBuilder.AddDataAsync(database);
+            await TestDbBuilder.GetDataAsync(database);
+            transaction.Finish();
+        }
 
         var result = await Verify(transport.Payloads)
             .IgnoreMember<IEventLike>(_ => _.Environment)
@@ -84,22 +85,23 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
         await using var dbContext = new TestDbContext(builder.Options);
-        dbContext.Add(
-            new TestEntity
-            {
-                Property = "Value"
-            });
+        dbContext.Add(new TestEntity
+        {
+            Property = "Value"
+        });
+
         await dbContext.SaveChangesAsync();
+
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
 
-            dbContext.Add(
-                new TestEntity
-                {
-                    Property = "Value"
-                });
+            dbContext.Add(new TestEntity
+            {
+                Property = "Value"
+            });
+
             try
             {
                 await dbContext.SaveChangesAsync();
@@ -107,6 +109,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             catch
             {
                 // Suppress the exception so we can test that we received the error through logging.
+                // Note, this uses the Sentry.Extensions.Logging integration.
             }
 
             transaction.Finish();
@@ -185,13 +188,15 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 #else
         using var database = await _fixture.SqlInstance.Build();
 #endif
-        using var hub = new Hub(options);
-        var transaction = hub.StartTransaction("my transaction", "my operation");
-        hub.ConfigureScope(scope => scope.Transaction = transaction);
-        hub.CaptureException(new("my exception"));
-        await TestDbBuilder.AddEfDataAsync(database);
-        await TestDbBuilder.GetEfDataAsync(database);
-        transaction.Finish();
+        using (var hub = new Hub(options))
+        {
+            var transaction = hub.StartTransaction("my transaction", "my operation");
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+            hub.CaptureException(new("my exception"));
+            await TestDbBuilder.AddEfDataAsync(database);
+            await TestDbBuilder.GetEfDataAsync(database);
+            transaction.Finish();
+        }
 
         var result = await Verify(transport.Payloads)
             .IgnoreMember<IEventLike>(_ => _.Environment)
