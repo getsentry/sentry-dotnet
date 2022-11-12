@@ -13,7 +13,7 @@ public sealed class LocalDbFixture : IDisposable
 
         SqlInstance = new(
             name: "SqlListenerTests" + Namer.RuntimeAndVersion,
-            buildTemplate: TestDbBuilder.CreateTable);
+            buildTemplate: TestDbBuilder.CreateTableAsync);
     }
 
     public void Dispose()

@@ -1,7 +1,6 @@
 namespace Sentry.DiagnosticSource.IntegrationTests.EF;
 
-public class TestDbContext :
-    DbContext
+public class TestDbContext : DbContext
 {
     public DbSet<TestEntity> TestEntities { get; set; } = null!;
 

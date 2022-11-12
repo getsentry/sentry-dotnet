@@ -22,8 +22,7 @@
           Operation: 
         }
       },
-      User: {},
-      Environment: production
+      User: {}
     }
   },
   {
@@ -45,7 +44,6 @@
         }
       },
       User: {},
-      Environment: production,
       Spans: [
         {
           IsFinished: true,
