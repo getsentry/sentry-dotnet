@@ -22,8 +22,7 @@
           Operation: 
         }
       },
-      User: {},
-      Environment: production
+      User: {}
     }
   },
   {
@@ -45,18 +44,7 @@
         }
       },
       User: {},
-      Environment: production,
       Spans: [
-        {
-          IsFinished: true,
-          Operation: db.query,
-          Status: DeadlineExceeded,
-          IsSampled: true,
-          Extra: {
-            db.connection_id: Guid_1,
-            db.operation_id: Guid_2
-          }
-        },
         {
           IsFinished: true,
           Operation: db.query,
@@ -68,16 +56,6 @@ values (@value);,
           Extra: {
             db.connection_id: Guid_1,
             db.operation_id: Guid_2
-          }
-        },
-        {
-          IsFinished: true,
-          Operation: db.query,
-          Status: DeadlineExceeded,
-          IsSampled: true,
-          Extra: {
-            db.connection_id: Guid_1,
-            db.operation_id: Guid_3
           }
         },
         {
