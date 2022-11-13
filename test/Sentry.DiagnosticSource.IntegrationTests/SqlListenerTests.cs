@@ -1,13 +1,17 @@
+using Sentry.Testing;
+
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
 [UsesVerify]
 public class SqlListenerTests : IClassFixture<LocalDbFixture>
 {
     private readonly LocalDbFixture _fixture;
+    private readonly TestOutputDiagnosticLogger _logger;
 
-    public SqlListenerTests(LocalDbFixture fixture)
+    public SqlListenerTests(LocalDbFixture fixture, ITestOutputHelper output)
     {
         _fixture = fixture;
+        _logger = new TestOutputDiagnosticLogger(output);
     }
 
 #if !NETFRAMEWORK
@@ -21,79 +25,91 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             TracesSampleRate = 1,
             Transport = transport,
             Dsn = ValidDsn,
-            DiagnosticLevel = SentryLevel.Debug
+            DiagnosticLogger = _logger,
+            Debug = true
         };
 
-        options.AddIntegration(new SentryDiagnosticListenerIntegration());
-
-        using (var database = await _fixture.SqlInstance.Build())
+#if NET6_0_OR_GREATER
+        await using var database = await _fixture.SqlInstance.Build();
+#else
+        using var database = await _fixture.SqlInstance.Build();
+#endif
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureException(new("my exception"));
-            await TestDbBuilder.AddData(database);
-            await TestDbBuilder.GetData(database);
+            await TestDbBuilder.AddDataAsync(database);
+            await TestDbBuilder.GetDataAsync(database);
             transaction.Finish();
         }
 
         var result = await Verify(transport.Payloads)
+            .IgnoreMember<IEventLike>(_ => _.Environment)
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
-
 #endif
 
 #if NET6_0_OR_GREATER
     [SkippableFact]
     public async Task Logging()
     {
+        _logger.LogDebug(RelationalEventId.CommandError.Name!);
+
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
 
-        void ApplyOptions(SentryOptions sentryOptions)
+        void ApplyOptions(SentryLoggingOptions sentryOptions)
         {
             sentryOptions.TracesSampleRate = 1;
             sentryOptions.Transport = transport;
             sentryOptions.Dsn = ValidDsn;
-            sentryOptions.DiagnosticLevel = SentryLevel.Debug;
+            sentryOptions.DiagnosticLogger = _logger;
+            sentryOptions.Debug = true;
         }
 
-        var options = new SentryOptions();
+        var options = new SentryLoggingOptions();
         ApplyOptions(options);
-
-        options.AddIntegration(new SentryDiagnosticListenerIntegration());
 
         var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
 
+#if NET6_0_OR_GREATER
         await using var database = await _fixture.SqlInstance.Build();
+#else
+        using var database = await _fixture.SqlInstance.Build();
+#endif
         var builder = new DbContextOptionsBuilder<TestDbContext>();
         builder.UseSqlServer(database);
         builder.UseLoggerFactory(loggerFactory);
         builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
         await using var dbContext = new TestDbContext(builder.Options);
-        dbContext.Add(
-            new TestEntity
-            {
-                Property = "Value"
-            });
+        dbContext.Add(new TestEntity
+        {
+            Property = "Value"
+        });
+
         await dbContext.SaveChangesAsync();
+
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
 
-            dbContext.Add(
-                new TestEntity
-                {
-                    Property = "Value"
-                });
+            dbContext.Add(new TestEntity
+            {
+                Property = "Value"
+            });
+
             try
             {
                 await dbContext.SaveChangesAsync();
             }
             catch
             {
+                // Suppress the exception so we can test that we received the error through logging.
+                // Note, this uses the Sentry.Extensions.Logging integration.
             }
 
             transaction.Finish();
@@ -102,6 +118,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         var result = await Verify(transport.Payloads)
             .ScrubInlineGuids()
             .IgnoreMember<SentryEvent>(_ => _.SentryThreads)
+            .IgnoreMember<IEventLike>(_ => _.Environment)
             .ScrubLinesWithReplace(line =>
             {
                 if (line.StartsWith("Executed DbCommand ("))
@@ -114,12 +131,13 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
                     return "Failed executing DbCommand";
                 }
 
-                var efVersion = typeof(DbContext).Assembly.GetName().Version.ToString(3);
+                var efVersion = typeof(DbContext).Assembly.GetName().Version!.ToString(3);
                 return line.Replace(efVersion, "");
             })
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain("An error occurred while saving the entity changes", result.Text);
     }
+#endif
 
     [Fact]
     public void ShouldIgnoreAllErrorAndExceptionIds()
@@ -146,8 +164,6 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         }
     }
 
-#endif
-
     [SkippableFact]
     public async Task RecordsEf()
     {
@@ -158,23 +174,31 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             TracesSampleRate = 1,
             Transport = transport,
             Dsn = ValidDsn,
-            DiagnosticLevel = SentryLevel.Debug
+            DiagnosticLogger = _logger,
+            Debug = true
         };
 
-        options.AddIntegration(new SentryDiagnosticListenerIntegration());
+#if NETFRAMEWORK
+        options.AddDiagnosticSourceIntegration();
+#endif
 
-        using (var database = await _fixture.SqlInstance.Build())
+#if NET6_0_OR_GREATER
+        await using var database = await _fixture.SqlInstance.Build();
+#else
+        using var database = await _fixture.SqlInstance.Build();
+#endif
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureException(new("my exception"));
-            await TestDbBuilder.AddEfData(database);
-            await TestDbBuilder.GetEfData(database);
+            await TestDbBuilder.AddEfDataAsync(database);
+            await TestDbBuilder.GetEfDataAsync(database);
             transaction.Finish();
         }
 
         var result = await Verify(transport.Payloads)
+            .IgnoreMember<IEventLike>(_ => _.Environment)
             .IgnoreStandardSentryMembers()
             .UniqueForRuntimeAndVersion();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
