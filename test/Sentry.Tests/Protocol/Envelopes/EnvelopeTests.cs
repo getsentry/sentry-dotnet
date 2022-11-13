@@ -1,10 +1,5 @@
 using Sentry.Testing;
 
-#if DEBUG && !__MOBILE__
-using Sentry.PlatformAbstractions;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
-#endif
-
 namespace Sentry.Tests.Protocol.Envelopes;
 
 public class EnvelopeTests
@@ -31,7 +26,7 @@ public class EnvelopeTests
 
         var id = envelope.TryGetEventId(logger);
 
-        Assert.Equal("12c2d058d58442709aa2eca08bf20986", id.Value!.ToString());
+        Assert.Equal("12c2d058d58442709aa2eca08bf20986", id?.ToString());
         Assert.Empty(logger.Entries);
     }
 
@@ -62,16 +57,6 @@ public class EnvelopeTests
             Array.Empty<EnvelopeItem>());
 
         var logger = new InMemoryDiagnosticLogger();
-
-#if DEBUG && !__MOBILE__
-        if (!Runtime.Current.IsMono())
-        {
-            // Test for the exception thrown by Debug.Fail (doesn't throw on Mono)
-            var exception = Assert.ThrowsAny<Exception>(() => envelope.TryGetEventId(logger));
-            Assert.Contains(message, exception.Message);
-            return;
-        }
-#endif
 
         var id = envelope.TryGetEventId(logger);
         Assert.Equal(message, logger.Entries.Single().Message);
