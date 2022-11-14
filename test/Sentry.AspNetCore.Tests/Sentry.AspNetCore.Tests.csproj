@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +26,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.*" />
     <PackageReference Include="Verify.AspNetCore" Version="2.*" />
-    <PackageReference Include="Verify.Http" Version="3.*" />
+    <PackageReference Include="Verify.Http" Version="4.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net7.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.*" />
+    <PackageReference Include="Verify.AspNetCore" Version="3.*" />
+    <PackageReference Include="Verify.Http" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>

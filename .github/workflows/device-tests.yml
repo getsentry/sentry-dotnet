@@ -61,6 +61,11 @@ jobs:
           name: device-test-android
           path: bin
 
+      - name: Install .NET 7 SDK (for XHarness)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.x.x
+
       - name: Install XHarness
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
 

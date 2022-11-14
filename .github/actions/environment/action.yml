@@ -24,6 +24,11 @@ runs:
       with:
         dotnet-version: 6.x.x
 
+    - name: Install .NET 7 SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.x.x
+
     - name: Dependency Caching
       uses: actions/cache@v3
       # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
