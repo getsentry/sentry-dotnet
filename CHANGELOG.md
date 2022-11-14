@@ -11,6 +11,7 @@
 - Update unobserved task exception integration ([#2034](https://github.com/getsentry/sentry-dotnet/pull/2034))
 - Fix trace propagation targets setter ([#2035](https://github.com/getsentry/sentry-dotnet/pull/2035))
 - Fix DiagnosticSource integration disabled incorrectly with TracesSampler ([#2039](https://github.com/getsentry/sentry-dotnet/pull/2039))
+- Update transitive dependencies to resolve security warnings ([#2045](https://github.com/getsentry/sentry-dotnet/pull/2045))
 
 ## 3.23.1
 
