@@ -19,6 +19,9 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.1.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.0" />
+
+    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.22" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
