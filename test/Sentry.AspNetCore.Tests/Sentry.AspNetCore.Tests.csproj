@@ -26,14 +26,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.*" />
     <PackageReference Include="Verify.AspNetCore" Version="2.*" />
-    <PackageReference Include="Verify.Http" Version="3.*" />
+    <PackageReference Include="Verify.Http" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net7.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.*" />
-    <PackageReference Include="Verify.AspNetCore" Version="2.*" />
-    <PackageReference Include="Verify.Http" Version="3.*" />
+    <PackageReference Include="Verify.AspNetCore" Version="3.*" />
+    <PackageReference Include="Verify.Http" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>
