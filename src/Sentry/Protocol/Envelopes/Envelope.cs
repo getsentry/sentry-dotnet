@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
@@ -55,15 +54,6 @@ public sealed class Envelope : ISerializable, IDisposable
     /// </summary>
     internal SentryId? TryGetEventId(IDiagnosticLogger? logger)
     {
-        void Error(string message)
-        {
-// On mobile platforms, Debug.Fail will crash the app
-#if !__MOBILE__
-                Debug.Fail(message);
-#endif
-            logger?.LogError(message);
-        }
-
         if (_eventId != null)
         {
             // use the cached value
@@ -77,25 +67,25 @@ public sealed class Envelope : ISerializable, IDisposable
 
         if (value == null)
         {
-            Error("Header event_id is null");
+            logger?.LogError("Header event_id is null");
             return null;
         }
 
         if (value is not string valueString)
         {
-            Error($"Header event_id has incorrect type: {value.GetType()}");
+            logger?.LogError($"Header event_id has incorrect type: {value.GetType()}");
             return null;
         }
 
         if (!Guid.TryParse(valueString, out var guid))
         {
-            Error($"Header event_id is not a GUID: {value}");
+            logger?.LogError($"Header event_id is not a GUID: {value}");
             return null;
         }
 
         if (guid == Guid.Empty)
         {
-            Error("Envelope contains an empty event_id header");
+            logger?.LogError("Envelope contains an empty event_id header");
             _eventId = SentryId.Empty;
             return _eventId;
         }
