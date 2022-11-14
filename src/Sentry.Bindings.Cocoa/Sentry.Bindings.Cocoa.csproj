@@ -29,6 +29,10 @@
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
+  </ItemGroup>
+
   <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
 
     <!-- TODO: Uncomment to download official version from GitHub once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
