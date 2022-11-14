@@ -9,7 +9,6 @@
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
     <ImplicitUsings>true</ImplicitUsings>
-    <NoWarn>NU1603</NoWarn>
   </PropertyGroup>
 
   <!--
