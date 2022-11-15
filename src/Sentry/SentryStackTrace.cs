@@ -11,7 +11,7 @@ namespace Sentry;
 /// Frames should be sorted from oldest to newest.
 /// </remarks>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
-public sealed class SentryStackTrace : IJsonSerializable
+public class SentryStackTrace : IJsonSerializable
 {
     internal IList<SentryStackFrame>? InternalFrames { get; private set; }
 
@@ -26,6 +26,9 @@ public sealed class SentryStackTrace : IJsonSerializable
         get => InternalFrames ??= new List<SentryStackFrame>();
         set => InternalFrames = value;
     }
+
+    // This class is sealed externally, but can be extended internally.
+    internal SentryStackTrace() { }
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)

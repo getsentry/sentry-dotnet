@@ -27,7 +27,6 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
 
         sentryEvent.SentryExceptions = sentryExceptions;
-        sentryEvent.DebugImages = SentryStackTraceFactoryAccessor().DebugImages();
     }
 
     // SentryException.Extra is not supported by Sentry yet.

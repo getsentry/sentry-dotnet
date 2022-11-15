@@ -102,26 +102,25 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
                 @event.SentryThreads = @event.SentryThreads?.Any() == true
                     ? new List<SentryThread>(@event.SentryThreads) { thread }
                     : new[] { thread }.AsEnumerable();
+
+                if (stackTrace is SentryDebugStackTrace debugStackTrace)
+                {
+                    debugStackTrace.MergeDebugImagesInto(@event);
+                }
             }
         }
 
-        // Add all the Debug Images that were referenced from stack traces
-        // to the Event
-        // XXX: Ideally the StackTraceFactory would write these directly when
-        // creating the StackTrace, but that interface does not work that way.
-        // As we need our indices to work, we add these images to the *beginning*,
-        // shifting any existing image to the end.
-        // This should work for example with the Unity il2cpp processor.
-        // However if any other processor is adding (or rather, referencing)
-        // indexed images, things *will* break. Whatever code is creating/adding
-        // stack traces needs to modify the list of debug images at the same
-        // time!
-        var debugImages = SentryStackTraceFactoryAccessor().DebugImages() ?? new List<DebugImage>();
-        if (@event.DebugImages != null && !debugImages.SequenceEqual(@event.DebugImages))
+        // Add all the Debug Images that were referenced from stack traces to the Event.
+        if (@event.SentryExceptions is { } sentryExceptions)
         {
-            debugImages.AddRange(@event.DebugImages);
+            foreach (var sentryException in sentryExceptions)
+            {
+                if (sentryException.Stacktrace is SentryDebugStackTrace debugStackTrace)
+                {
+                    debugStackTrace.MergeDebugImagesInto(@event);
+                }
+            }
         }
-        @event.DebugImages = debugImages;
 
         if (_options.ReportAssembliesMode != ReportAssembliesMode.None)
         {

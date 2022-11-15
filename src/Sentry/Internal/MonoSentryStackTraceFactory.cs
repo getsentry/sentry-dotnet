@@ -5,6 +5,7 @@ namespace Sentry.Internal;
 /// <summary>
 /// Mono factory to <see cref="SentryStackTrace" /> from an <see cref="Exception" />.
 /// </summary>
+/// TODO remove - this seems unused
 internal class MonoSentryStackTraceFactory : SentryStackTraceFactory
 {
     private readonly SentryOptions _options;
