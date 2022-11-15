@@ -49,13 +49,11 @@
           IsFinished: true,
           Operation: db.query,
           Description:
+SET IMPLICIT_TRANSACTIONS OFF;
 SET NOCOUNT ON;
 INSERT INTO [TestEntities] ([Property])
+OUTPUT INSERTED.[Id]
 VALUES (@p0);
-SELECT [Id]
-FROM [TestEntities]
-WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
-
 ,
           Status: Ok,
           IsSampled: true,
