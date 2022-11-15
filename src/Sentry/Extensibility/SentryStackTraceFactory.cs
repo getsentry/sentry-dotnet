@@ -53,14 +53,13 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
     /// <returns>A Sentry stack trace.</returns>
     public virtual SentryStackTrace? Create(Exception? exception = null)
     {
-        var isCurrentStackTrace = exception == null && _options.AttachStacktrace;
-
-        if (exception == null && !isCurrentStackTrace)
+        if (exception == null && !_options.AttachStacktrace)
         {
             _options.LogDebug("No Exception and AttachStacktrace is off. No stack trace will be collected.");
             return null;
         }
 
+        var isCurrentStackTrace = exception == null && _options.AttachStacktrace;
         _options.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
         return Create(CreateStackTrace(exception), isCurrentStackTrace);
