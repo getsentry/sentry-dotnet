@@ -29,7 +29,7 @@ jobs:
 
       # We only need to restore to check for vulnerable packages
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+        run: dotnet restore --nologo
 
       # The dotnet list package command doesn't change its exit code on detection, so tee to a file and scan it
       # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
