@@ -13,8 +13,8 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
 {
     private readonly SentryOptions _options;
 
-    private Dictionary<Guid, Int32> _debugImageIndexByModule = new Dictionary<Guid, Int32>();
-    private List<DebugImage> _debugImages = new List<DebugImage>();
+    private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
+    private readonly List<DebugImage> _debugImages = new();
 
     /*
      *  NOTE: While we could improve these regexes, doing so might break exception grouping on the backend.
@@ -129,7 +129,6 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
         var firstFrame = true;
         foreach (var stackFrame in frames)
         {
-
 #if !NET5_0_OR_GREATER
             if (stackFrame is null)
             {
@@ -198,10 +197,10 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
 
             AttributeReader.TryGetProjectDirectory(method.Module.Assembly, out projectPath);
 
-            var moduleIdx = GetModuleIndex(method.Module);
+            var moduleIdx = AddDebugImage(method.Module);
             if (moduleIdx != null)
             {
-                frame.AddressMode = String.Format("rel:{0}", moduleIdx);
+                frame.AddressMode = string.Format("rel:{0}", moduleIdx);
             }
 
             var token = method.MetadataToken;
@@ -212,19 +211,16 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
             if (tokenType == 0x06000000)
             {
                 var recordId = token & 0x00ffffff;
-                frame.FunctionId = String.Format("0x{0:x}", recordId);
+                frame.FunctionId = string.Format("0x{0:x}", recordId);
             }
         }
 
         frame.ConfigureAppFrame(_options);
 
         var frameFileName = stackFrame.GetFileName();
-        if (projectPath != null && frameFileName != null)
+        if (projectPath != null && frameFileName?.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase) is true)
         {
-            if (frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
-            {
-                frameFileName = frameFileName.Substring(projectPath.Length);
-            }
+            frameFileName = frameFileName[projectPath.Length..];
         }
 
         frame.FileName = frameFileName;
@@ -233,7 +229,7 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
         var ilOffset = stackFrame.GetILOffset();
         if (ilOffset != StackFrame.OFFSET_UNKNOWN)
         {
-            frame.InstructionAddress = String.Format("0x{0:x}", ilOffset);
+            frame.InstructionAddress = string.Format("0x{0:x}", ilOffset);
         }
 
         var lineNo = stackFrame.GetFileLineNumber();
@@ -266,13 +262,11 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
         return frame;
     }
 
-
-    private Int32? GetModuleIndex(Module module)
+    private int? AddDebugImage(Module module)
     {
         var id = module.ModuleVersionId;
-        Int32 idx = 0;
 
-        if (_debugImageIndexByModule.TryGetValue(id, out idx))
+        if (_debugImageIndexByModule.TryGetValue(id, out var idx))
         {
             return idx;
         }
@@ -286,19 +280,18 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
         using var stream = File.OpenRead(codeFile);
         var peReader = new PEReader(stream);
 
-
         var headers = peReader.PEHeaders;
         var peHeader = headers.PEHeader;
 
-        String? codeId = null;
+        string? codeId = null;
         if (peHeader != null)
         {
-            codeId = String.Format("{0:X8}{1:x}", headers.CoffHeader.TimeDateStamp, peHeader.SizeOfImage);
+            codeId = string.Format("{0:X8}{1:x}", headers.CoffHeader.TimeDateStamp, peHeader.SizeOfImage);
         }
 
-        String? debugId = null;
-        String? debugFile = null;
-        String? debugChecksum = null;
+        string? debugId = null;
+        string? debugFile = null;
+        string? debugChecksum = null;
 
         var debugDirs = peReader.ReadDebugDirectory();
         foreach (var entry in debugDirs)
@@ -307,7 +300,7 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
             {
                 var checksum = peReader.ReadPdbChecksumDebugDirectoryData(entry);
                 var checksumHex = string.Concat(checksum.Checksum.Select(b => b.ToString("x2")));
-                debugChecksum = String.Format("{0}:{1:x}", checksum.AlgorithmName, checksumHex);
+                debugChecksum = string.Format("{0}:{1:x}", checksum.AlgorithmName, checksumHex);
             }
             if (!entry.IsPortableCodeView)
             {
@@ -319,10 +312,9 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
             // should be used to match the PE/COFF image with the associated PDB (instead of Guid and Age).
             // Matching PDB ID is stored in the #Pdb stream of the .pdb file.
             // See https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
-            debugId = String.Format("{0}-{1:x}", codeView.Guid, entry.Stamp);
+            debugId = string.Format("{0}-{1:x}", codeView.Guid, entry.Stamp);
             debugFile = codeView.Path;
         }
-
 
         // well, we are out of luck :-(
         if (debugId == null)
