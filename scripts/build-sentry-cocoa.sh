@@ -25,7 +25,7 @@ then
     # Keep track of the submodule's SHA so we only build when we need to
     SHA=$(git rev-parse HEAD)
     SHAFILE=Carthage/Build/.built-from-sha
-    SHAFROMFILE=$(<$SHAFILE)
+    [ -f $SHAFILE ] && SHAFROMFILE=$(<$SHAFILE)
     VERSION="$(git describe --tags) ($(git rev-parse --short HEAD))"
 
     if [ "$SHA" == "$SHAFROMFILE" ]; then
