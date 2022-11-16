@@ -110,16 +110,14 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
             firstFrame = false;
 
-            yield return CreateFrame(stackFrame, isCurrentStackTrace);
+            yield return CreateFrame(stackFrame);
         }
     }
-
-    private SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
 
     /// <summary>
     /// Create a <see cref="SentryStackFrame"/> from a <see cref="StackFrame"/>.
     /// </summary>
-    private SentryStackFrame CreateFrame(StackFrame stackFrame, bool isCurrentStackTrace) => InternalCreateFrame(stackFrame, true);
+    private SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
 
     /// <summary>
     /// Default the implementation of CreateFrame.
@@ -129,7 +127,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
         const string unknownRequiredField = "(unknown)";
         string? projectPath = null;
         var frame = new SentryStackFrame();
-        if (GetMethod(stackFrame) is { } method)
+        if (stackFrame.GetMethod() is { } method)
         {
             frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
             frame.Package = method.DeclaringType?.Assembly.FullName;
@@ -164,17 +162,17 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
             if (moduleIdx != null)
             {
                 frame.AddressMode = string.Format("rel:{0}", moduleIdx);
-            }
 
-            var token = method.MetadataToken;
-            // The top byte is the token type, the lower three bytes are the record id.
-            // See: https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/ms404456(v=vs.100)#metadata-token-structure
-            var tokenType = token & 0xff000000;
-            // See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/cortokentype-enumeration
-            if (tokenType == 0x06000000)
-            {
-                var recordId = token & 0x00ffffff;
-                frame.FunctionId = string.Format("0x{0:x}", recordId);
+                var token = method.MetadataToken;
+                // The top byte is the token type, the lower three bytes are the record id.
+                // See: https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/ms404456(v=vs.100)#metadata-token-structure
+                var tokenType = token & 0xff000000;
+                // See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/cortokentype-enumeration
+                if (tokenType == 0x06000000) // CorTokenType.mdtMethodDef
+                {
+                    var recordId = token & 0x00ffffff;
+                    frame.FunctionId = string.Format("0x{0:x}", recordId);
+                }
             }
         }
 
@@ -224,13 +222,6 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
         return frame;
     }
-
-    /// <summary>
-    /// Get a <see cref="MethodBase"/> from <see cref="StackFrame"/>.
-    /// </summary>
-    /// <param name="stackFrame">The <see cref="StackFrame"/></param>.
-    private MethodBase? GetMethod(StackFrame stackFrame)
-        => stackFrame.GetMethod();
 
     /// <summary>
     /// Clean up function and module names produced from `async` state machine calls.
