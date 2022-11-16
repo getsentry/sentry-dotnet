@@ -4,3 +4,7 @@
 [submodule "modules/sentry-cocoa"]
 	path = modules/sentry-cocoa
 	url = https://github.com/getsentry/sentry-cocoa.git
+[submodule "modules/Carthage"]
+	path = modules/Carthage
+	url = https://github.com/Carthage/Carthage
+	branch = xcframework-catalyst
