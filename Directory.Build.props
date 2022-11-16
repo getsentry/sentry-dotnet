@@ -9,6 +9,7 @@
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
     <ImplicitUsings>true</ImplicitUsings>
+    <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
   </PropertyGroup>
 
   <!--
