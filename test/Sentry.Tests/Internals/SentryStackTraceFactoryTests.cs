@@ -10,6 +10,7 @@ public partial class SentryStackTraceFactoryTests
     {
         public SentryOptions SentryOptions { get; set; } = new();
         public SentryStackTraceFactory GetSut() => new(SentryOptions);
+        public SentryDebugStackTrace GetSutDST() => new(SentryOptions);
     }
 
     private readonly Fixture _fixture = new();
@@ -41,7 +42,7 @@ public partial class SentryStackTraceFactoryTests
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
             p.Function?.StartsWith(
-                nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                nameof(SentryDebugStackTrace.CreateFrame) + '(',
                 StringComparison.Ordinal
             ) == true);
     }
@@ -105,7 +106,7 @@ public partial class SentryStackTraceFactoryTests
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
             p.Function?.StartsWith(
-                nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                nameof(SentryDebugStackTrace.CreateFrame) + '(',
                 StringComparison.Ordinal
             ) == true);
     }
@@ -196,11 +197,44 @@ public partial class SentryStackTraceFactoryTests
         frame.Function.Should().Be(method);
     }
 
+    [SkippableTheory]
+    [InlineData(StackTraceMode.Original)]
+    [InlineData(StackTraceMode.Enhanced)]
+    [Trait("Category", "Verify")]
+    public Task MethodGeneric(StackTraceMode mode)
+    {
+        // TODO: Mono gives different results.  Investigate why.
+        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "Not supported on Mono");
+
+        _fixture.SentryOptions.StackTraceMode = mode;
+
+        // Arrange
+        var i = 5;
+        var exception = Record.Exception(() => GenericMethodThatThrows(i));
+
+        _fixture.SentryOptions.AttachStacktrace = true;
+        var factory = _fixture.GetSut();
+
+        // Act
+        var stackTrace = factory.Create(exception);
+
+        // Assert;
+        var frame = stackTrace!.Frames.Single(x => x.Function!.Contains("GenericMethodThatThrows"));
+        return Verifier.Verify(frame)
+            .IgnoreMembers<SentryStackFrame>(
+                x => x.Package,
+                x => x.LineNumber,
+                x => x.ColumnNumber,
+                x => x.InstructionAddress,
+                x => x.FunctionId).AddScrubber(x => x.Replace(@"\", @"/"))
+            .UseParameters(mode);
+    }
+
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
     {
         var frame = new StackFrame();
-        var sut = _fixture.GetSut();
+        var sut = _fixture.GetSutDST();
 
         var actual = sut.CreateFrame(frame);
 
@@ -211,7 +245,7 @@ public partial class SentryStackTraceFactoryTests
     public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
     {
         _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
-        var sut = _fixture.GetSut();
+        var sut = _fixture.GetSutDST();
         var frame = new StackFrame();
 
         var actual = sut.CreateFrame(frame);
@@ -224,7 +258,7 @@ public partial class SentryStackTraceFactoryTests
     {
         _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
         _fixture.SentryOptions.AddInAppInclude(ThisNamespace);
-        var sut = _fixture.GetSut();
+        var sut = _fixture.GetSutDST();
         var frame = new StackFrame();
 
         var actual = sut.CreateFrame(frame);
@@ -241,7 +275,7 @@ public partial class SentryStackTraceFactoryTests
             Function = null
         };
 
-        SentryStackTraceFactory.DemangleAnonymousFunction(stackFrame);
+        SentryDebugStackTrace.DemangleAnonymousFunction(stackFrame);
         Assert.Null(stackFrame.Function);
     }
 
@@ -253,7 +287,7 @@ public partial class SentryStackTraceFactoryTests
             Module = null
         };
 
-        SentryStackTraceFactory.DemangleAnonymousFunction(stackFrame);
+        SentryDebugStackTrace.DemangleAnonymousFunction(stackFrame);
         Assert.Null(stackFrame.Module);
     }
 

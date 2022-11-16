@@ -35,7 +35,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
     private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    private SentryDebugStackTrace(SentryOptions options) => _options = options;
+    internal SentryDebugStackTrace(SentryOptions options) => _options = options;
 
     internal static SentryDebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace)
     {
@@ -168,7 +168,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
     /// <summary>
     /// Create a <see cref="SentryStackFrame"/> from a <see cref="StackFrame"/>.
     /// </summary>
-    private SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
+    internal SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
 
     /// <summary>
     /// Default the implementation of CreateFrame.
@@ -312,7 +312,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
     /// <summary>
     /// Clean up function names for anonymous lambda calls.
     /// </summary>
-    private static void DemangleAnonymousFunction(SentryStackFrame frame)
+    internal static void DemangleAnonymousFunction(SentryStackFrame frame)
     {
         if (frame.Function == null)
         {
