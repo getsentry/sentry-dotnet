@@ -18,6 +18,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
     // Debug images referenced by frames in this StackTrace
     private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
     private readonly List<DebugImage> _debugImages = new();
+    private bool _debugImagesMerged = false;
 
     /*
      *  NOTE: While we could improve these regexes, doing so might break exception grouping on the backend.
@@ -53,13 +54,63 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
     internal void MergeDebugImagesInto(SentryEvent @event)
     {
-        if (_debugImages.Count > 0)
+        // This operation may only be run once because it is destructive to the object state;
+        // Frame indexes may be changed as well as _debugImageIndexByModule becoming invalid.
+        if (_debugImagesMerged)
         {
-            // TODO we can deduplicate here if the same debug image is already in the event.
-            // If it is found, update all frames referencing it instead of adding again.
-            // At the moment, we just add all images
-            @event.DebugImages ??= new();
+            throw new InvalidOperationException("Cannot call MergeDebugImagesInto multiple times");
+        }
+        _debugImagesMerged = true;
+
+        if (_debugImages.Count == 0)
+        {
+            return;
+        }
+
+        @event.DebugImages ??= new();
+
+        if (@event.DebugImages.Count == 0)
+        {
+            // Default case when there's just a single stacktrace (i.e. no inner exceptions).
             @event.DebugImages.AddRange(_debugImages);
+            return;
+        }
+
+        // Otherwise, we must merge new images into an existing list, which means their relative indexes change.
+        // Therefore, we must also update indices specified in frame.AddressMode for each affected frame.
+        // We could just append _debugImages to @event.DebugImages and shift all indexes but merging is simple too.
+        var originalCount = @event.DebugImages.Count;
+        Dictionary<string, string> relocations = new();
+        for (var i = 0; i < _debugImages.Count; i++)
+        {
+            // First check if the image is already present on the event. Simple lookup should be faster than
+            // constructing a map first, assuming there are normally just a few debug images affected.
+            var found = false;
+            for (var j = 0; j < originalCount; j++)
+            {
+                if (_debugImages[i].ModuleVersionId == @event.DebugImages[j].ModuleVersionId)
+                {
+                    if (i != j)
+                    {
+                        relocations.Add(SentryDebugStackTrace.GetRelativeAddressMode(i), SentryDebugStackTrace.GetRelativeAddressMode(j));
+                    }
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                relocations.Add(SentryDebugStackTrace.GetRelativeAddressMode(i), SentryDebugStackTrace.GetRelativeAddressMode(@event.DebugImages.Count));
+                @event.DebugImages.Add(_debugImages[i]);
+            }
+        }
+
+        foreach (var frame in Frames)
+        {
+            if (frame.AddressMode is not null && relocations.TryGetValue(frame.AddressMode, out var newAddressMode))
+            {
+                frame.AddressMode = newAddressMode;
+            }
         }
     }
 
@@ -161,7 +212,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
             var moduleIdx = AddDebugImage(method.Module);
             if (moduleIdx != null)
             {
-                frame.AddressMode = string.Format("rel:{0}", moduleIdx);
+                frame.AddressMode = SentryDebugStackTrace.GetRelativeAddressMode((int)moduleIdx);
 
                 var token = method.MetadataToken;
                 // The top byte is the token type, the lower three bytes are the record id.
@@ -222,6 +273,8 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
         return frame;
     }
+
+    private static string GetRelativeAddressMode(int moduleIndex) => string.Format("rel:{0}", moduleIndex);
 
     /// <summary>
     /// Clean up function and module names produced from `async` state machine calls.
@@ -372,6 +425,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
             DebugId = debugId,
             DebugChecksum = debugChecksum,
             DebugFile = debugFile,
+            ModuleVersionId = id,
         });
         _debugImageIndexByModule.Add(id, idx);
 

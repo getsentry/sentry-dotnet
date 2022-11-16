@@ -52,6 +52,8 @@ public sealed class DebugImage : IJsonSerializable
     /// </summary>
     public string? CodeFile { get; set; }
 
+    internal Guid? ModuleVersionId { get; set; }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
