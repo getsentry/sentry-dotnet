@@ -54,11 +54,8 @@ public static class SentryMauiAppBuilderExtensions
 
         services.AddLogging();
         services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
-        services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
-        services.AddSingleton<Disposer>();
         services.AddSingleton<MauiEventsBinder>();
-
         services.AddSentry<SentryMauiOptions>();
 
         builder.RegisterMauiEventsBinder();

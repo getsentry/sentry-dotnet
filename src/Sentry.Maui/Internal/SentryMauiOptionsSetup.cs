@@ -16,8 +16,8 @@ internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<Sentry
         // NOTE: Anything set here will overwrite options set by the user.
         //       For option defaults that can be changed, use the constructor in SentryMauiOptions instead.
 
-        // We'll initialize the SDK in SentryMauiInitializer
-        options.InitializeSdk = false;
+        // Always initialize the SDK (via Sentry.Extensions.Logging)
+        options.InitializeSdk = true;
 
         // Global Mode makes sense for client apps
         options.IsGlobalModeEnabled = true;
