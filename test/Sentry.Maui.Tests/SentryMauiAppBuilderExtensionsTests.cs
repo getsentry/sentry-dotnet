@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Sentry.Testing;
 using MauiConstants = Sentry.Maui.Internal.Constants;
 
 namespace Sentry.Maui.Tests;
@@ -202,5 +203,49 @@ public class SentryMauiAppBuilderExtensionsTests
         // Assert
         // Note, the hub is disabled when disposed.  We ensure it's first enabled in the previous test.
         Assert.False(hub.IsEnabled);
+    }
+
+    [Fact]
+    public void UseSentry_CacheDirectory_Default()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.UseSentry();
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+#if PLATFORM_NEUTRAL
+        const string expected = null;
+#else
+        var expected = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
+#endif
+        Assert.Equal(expected, options.CacheDirectoryPath);
+    }
+
+    [Fact]
+    public void UseSentry_CacheDirectory_EnableCaching()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        var fileSystem = new FakeFileSystem();
+        using var cacheDirectory = new TempDirectory(fileSystem);
+        var cachePath = cacheDirectory.Path;
+
+        // Act
+        builder.UseSentry(options =>
+        {
+            options.FileSystem = fileSystem;
+            options.CacheDirectoryPath = cachePath;
+        });
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        Assert.Equal(cachePath, options.CacheDirectoryPath);
     }
 }
