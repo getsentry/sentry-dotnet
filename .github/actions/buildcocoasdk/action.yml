@@ -24,7 +24,7 @@ runs:
 
     - name: Fetch version tags for Sentry Cocoa SDK
       shell: bash
-      run: git fetch --tags > /dev/null
+      run: git fetch --tags --quiet
       working-directory: modules/sentry-cocoa
 
     - name: Get Sentry Cocoa SHA
