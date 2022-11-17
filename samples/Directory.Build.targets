@@ -14,4 +14,11 @@
     </ItemGroup>
   </Target>
 
+  <!--
+    This is only needed because we use project references in this solution.
+    In a real app, it will come through the nuget package automatically.
+  -->
+  <Import Project="$(SolutionDir)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
+          Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+
 </Project>
