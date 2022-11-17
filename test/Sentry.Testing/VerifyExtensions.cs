@@ -1,4 +1,10 @@
 #if !__MOBILE__
+
+using System.Text.Json;
+using System.Text.RegularExpressions;
+
+namespace Sentry.Testing;
+
 public static class VerifyExtensions
 {
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
@@ -10,6 +16,8 @@ public static class VerifyExtensions
             {
                 _.Converters.Add(new SpansConverter());
                 _.Converters.Add(new ContextsConverter());
+                _.Converters.Add(new DebugImageConverter());
+                _.Converters.Add(new StackFrameConverter());
             })
             .IgnoreMembers("version", "elapsed")
             .IgnoreMembersWithType<SdkVersion>()
@@ -40,7 +48,7 @@ public static class VerifyExtensions
             .IgnoreStackTrace();
     }
 
-    class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
+    private class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
     {
         public override void Write(VerifyJsonWriter writer, IReadOnlyCollection<Span> spans)
         {
@@ -59,7 +67,7 @@ public static class VerifyExtensions
         }
     }
 
-    class ContextsConverter : WriteOnlyJsonConverter<Contexts>
+    private class ContextsConverter : WriteOnlyJsonConverter<Contexts>
     {
         public override void Write(VerifyJsonWriter writer, Contexts contexts)
         {
@@ -77,6 +85,83 @@ public static class VerifyExtensions
                 .OrderBy(x => x.Key)
                 .ToDictionary();
             writer.Serialize(items);
+        }
+    }
+
+    private class DebugImageConverter : WriteOnlyJsonConverter<DebugImage>
+    {
+        public override void Write(VerifyJsonWriter writer, DebugImage obj)
+        {
+            obj.DebugId = ScrubAlphaNum(obj.DebugId);
+            obj.DebugChecksum = ScrubAlphaNum(obj.DebugChecksum);
+            obj.DebugFile = ScrubPath(obj.DebugFile);
+            obj.CodeFile = ScrubPath(obj.CodeFile);
+            obj.CodeId = ScrubAlphaNum(obj.CodeId);
+            writer.WriteJson(obj);
+        }
+    }
+
+    private class StackFrameConverter : WriteOnlyJsonConverter<SentryStackFrame>
+    {
+        public override void Write(VerifyJsonWriter writer, SentryStackFrame obj)
+        {
+            obj.FileName = ScrubPath(obj.FileName);
+            obj.FunctionId = ScrubAlphaNum(obj.FunctionId);
+            obj.InstructionAddress = ScrubAlphaNum(obj.InstructionAddress);
+            obj.Package = obj.Package.Replace(new Regex("=[^,]+"), "=SCRUBBED");
+            writer.WriteJson(obj);
+        }
+    }
+
+    // Extension so we can use `nullableString?.Replace()`.
+    private static string Replace(this string str, Regex regex, string replacement) => regex.Replace(str, replacement);
+
+    private static string ScrubAlphaNum(string str) => str?.Replace(new Regex("[a-zA-Z0-9]"), "_");
+
+    private static string ScrubPath(string str) => str?.Replace(new Regex(@"^.*[/\\]"), ".../");
+
+    private static void WriteJson(this VerifyJsonWriter verifyWriter, IJsonSerializable @object)
+    {
+        using var stream = new MemoryStream();
+        using var jsonWriter = new Utf8JsonWriter(stream, new() { Indented = true });
+        @object.WriteTo(jsonWriter, null);
+        jsonWriter.Flush();
+        var str = Encoding.UTF8.GetString(stream.ToArray());
+
+        // Note: this is not perfect because we don't respect indentation. of the surrounding objects.
+        // Unfortunately, there doesn't seem to be the way to get current serialization depth.
+        // There's `Indentation` and `IndentChar` but those are only relevant in combination with the current depth
+        // should be available as `Top`, which is protected internal...
+        // verifyWriter.WriteValue(str);
+
+        // Therefore, we have the following best-effort approach of splitting lines and writing individually
+        // which makes the JsonWriter add proper indentation.
+        var lines = str.Replace("\r", "").Split('\n');
+        var depth = 0;
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i].Trim();
+
+            // Note: we can't use WriteStartObject/EndObject because folloowing WriteRawValueWithScrubbers() fails with:
+            //   Argon.JsonWriterException : Token Undefined in state ObjectStart would result in an invalid JSON object. Path '[0].Items[0].Payload.Source.objs[0]'.
+            switch (line)
+            {
+                case "{":
+                case "[":
+                    verifyWriter.WriteRawValue(line);
+                    depth++;
+                    break;
+                case "}":
+                case "]":
+                    verifyWriter.WriteRawValue(line);
+                    depth--;
+                    break;
+                default:
+                    var indent = new string(verifyWriter.IndentChar, verifyWriter.Indentation * depth);
+                    // FYI: this always adds comma on the previous line before adding the given value. Can't help it.
+                    verifyWriter.WriteRawValueWithScrubbers(indent + line.TrimEnd(','));
+                    break;
+            }
         }
     }
 }
