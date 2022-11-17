@@ -13,7 +13,7 @@ runs:
       id: cache-carthage
       uses: actions/cache@v3
       with:
-        path: modules/Carthage/.build/carthage
+        path: modules/Carthage/.build/debug/carthage
         key: carthage-${{ env.CARTHAGE_SHA }}
 
     - name: Build Carthage
@@ -24,7 +24,7 @@ runs:
 
     - name: Fetch version tags for Sentry Cocoa SDK
       shell: bash
-      run: git fetch --tags
+      run: git fetch --tags > /dev/null
       working-directory: modules/sentry-cocoa
 
     - name: Get Sentry Cocoa SHA
