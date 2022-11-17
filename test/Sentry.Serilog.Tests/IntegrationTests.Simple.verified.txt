@@ -1,4 +1,4 @@
-[
+﻿[
   {
     Header: {
       event_id: Guid_1,
@@ -160,9 +160,16 @@
                 Value: Exception message,
                 Stacktrace: {
                   Frames: [
-                    {
-                      Function: Task IntegrationTests.Simple(),
-                      InApp: true
+                    {,
+                      "filename": ".../IntegrationTests.cs",
+                      "function": "Task IntegrationTests.Simple()",
+                      "lineno": 43,
+                      "colno": 17,
+                      "in_app": true,
+                      "package": "Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED",
+                      "instruction_addr": "____",
+                      "addr_mode": "rel:0",
+                      "function_id": "____",
                     }
                   ]
                 },
@@ -170,6 +177,16 @@
                 Data: {
                   details: Do work always throws.
                 }
+              }
+            ],
+            DebugImages: [
+              {,
+                "type": "pe_dotnet",
+                "debug_id": "________-____-____-____-____________-________",
+                "debug_checksum": "______:________________________________________________________________",
+                "debug_file": ".../Sentry.Serilog.Tests.pdb",
+                "code_id": "_____________",
+                "code_file": ".../Sentry.Serilog.Tests.dll",
               }
             ],
             Level: fatal,

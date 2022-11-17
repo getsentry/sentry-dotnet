@@ -300,7 +300,7 @@ public partial class HubTests
             var expectedContextKey = Guid.NewGuid().ToString();
             var evt = new SentryEvent
             {
-                Contexts = {[expectedContextKey] = new EvilContext()},
+                Contexts = { [expectedContextKey] = new EvilContext() },
                 Message = new()
                 {
                     Formatted = expectedMessage

@@ -214,15 +214,24 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
             {
                 frame.AddressMode = SentryDebugStackTrace.GetRelativeAddressMode((int)moduleIdx);
 
-                var token = method.MetadataToken;
-                // The top byte is the token type, the lower three bytes are the record id.
-                // See: https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/ms404456(v=vs.100)#metadata-token-structure
-                var tokenType = token & 0xff000000;
-                // See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/cortokentype-enumeration
-                if (tokenType == 0x06000000) // CorTokenType.mdtMethodDef
+                try
                 {
-                    var recordId = token & 0x00ffffff;
-                    frame.FunctionId = string.Format("0x{0:x}", recordId);
+                    var token = method.MetadataToken;
+                    // The top byte is the token type, the lower three bytes are the record id.
+                    // See: https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/ms404456(v=vs.100)#metadata-token-structure
+                    var tokenType = token & 0xff000000;
+                    // See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/cortokentype-enumeration
+                    if (tokenType == 0x06000000) // CorTokenType.mdtMethodDef
+                    {
+                        var recordId = token & 0x00ffffff;
+                        frame.FunctionId = string.Format("0x{0:x}", recordId);
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // method.MetadataToken may throw
+                    // see https://learn.microsoft.com/en-us/dotnet/api/system.reflection.memberinfo.metadatatoken?view=net-6.0
+                    _options.LogDebug("Could not get MetadataToken for stack frame {0} from {1}", frame.Function, method.Module.Name);
                 }
             }
         }
