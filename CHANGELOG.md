@@ -5,6 +5,7 @@
 ### Features
 
 - Simplify API for flushing events ([#2030](https://github.com/getsentry/sentry-dotnet/pull/2030))
+- Update bundled Cocoa SDK to version 7.31.1 ([#2053](https://github.com/getsentry/sentry-dotnet/pull/2053))
 
 ### Fixes
 

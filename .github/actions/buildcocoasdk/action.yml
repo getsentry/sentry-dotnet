@@ -1,0 +1,45 @@
+name: Build Native Dependencies
+runs:
+  using: composite
+
+  steps:
+
+    - name: Get Carthage SHA
+      shell: bash
+      run: echo "CARTHAGE_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      working-directory: modules/Carthage
+
+    - name: Cache Carthage
+      id: cache-carthage
+      uses: actions/cache@v3
+      with:
+        path: modules/Carthage/.build/debug/carthage
+        key: carthage-${{ env.CARTHAGE_SHA }}
+
+    - name: Build Carthage
+      if: ${{ steps.cache-carthage.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: make all
+      working-directory: modules/Carthage
+
+    - name: Fetch version tags for Sentry Cocoa SDK
+      shell: bash
+      run: git fetch --tags --quiet
+      working-directory: modules/sentry-cocoa
+
+    - name: Get Sentry Cocoa SHA
+      shell: bash
+      run: echo "SENTRY_COCOA_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      working-directory: modules/sentry-cocoa
+
+    - name: Cache Sentry Cocoa SDK
+      id: cache-sentry-cocoa
+      uses: actions/cache@v3
+      with:
+        path: modules/sentry-cocoa/Carthage/Build
+        key: sentry-cocoa-${{ env.SENTRY_COCOA_SHA }}
+
+    - name: Build Sentry Cocoa SDK
+      if: ${{ steps.cache-sentry-cocoa.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: scripts/build-sentry-cocoa.sh
