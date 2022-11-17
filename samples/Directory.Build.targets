@@ -1,0 +1,17 @@
+<Project>
+
+  <Import Project="..\Directory.Build.targets" />
+
+  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems"
+          BeforeTargets="_ComputePublishLocation"
+          Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'">
+    <ItemGroup>
+      <ResolvedFileToPublish
+        Update="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+        PublishFolderType="None" />
+    </ItemGroup>
+  </Target>
+
+</Project>

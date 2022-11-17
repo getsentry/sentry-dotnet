@@ -18,17 +18,4 @@
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
 
-  <!--
-    Workaround for https://github.com/dotnet/maui/issues/7272 (also happens for iOS without MAUI)
-    This should not be needed in a real application.
-  -->
-  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
-    <ItemGroup>
-      <ResolvedFileToPublish
-        Update="@(ResolvedFileToPublish)"
-        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
-        PublishFolderType="None" />
-    </ItemGroup>
-  </Target>
-
 </Project>
