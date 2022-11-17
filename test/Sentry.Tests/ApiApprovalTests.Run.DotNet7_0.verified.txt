@@ -81,6 +81,7 @@ namespace Sentry
         public DebugImage() { }
         public string? CodeFile { get; set; }
         public string? CodeId { get; set; }
+        public string? DebugChecksum { get; set; }
         public string? DebugFile { get; set; }
         public string? DebugId { get; set; }
         public string? ImageAddress { get; set; }
@@ -676,6 +677,7 @@ namespace Sentry
         public string? FileName { get; set; }
         public System.Collections.Generic.IList<int> FramesOmitted { get; }
         public string? Function { get; set; }
+        public string? FunctionId { get; set; }
         public long ImageAddress { get; set; }
         public bool? InApp { get; set; }
         public string? InstructionAddress { get; set; }
@@ -692,9 +694,8 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackFrame FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryStackTrace : Sentry.IJsonSerializable
+    public class SentryStackTrace : Sentry.IJsonSerializable
     {
-        public SentryStackTrace() { }
         public System.Collections.Generic.IList<Sentry.SentryStackFrame> Frames { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
@@ -1206,10 +1207,6 @@ namespace Sentry.Extensibility
     {
         public SentryStackTraceFactory(Sentry.SentryOptions options) { }
         public virtual Sentry.SentryStackTrace? Create(System.Exception? exception = null) { }
-        protected virtual Sentry.SentryStackFrame CreateFrame(System.Diagnostics.StackFrame stackFrame, bool isCurrentStackTrace) { }
-        protected virtual System.Diagnostics.StackTrace CreateStackTrace(System.Exception? exception) { }
-        protected virtual System.Reflection.MethodBase? GetMethod(System.Diagnostics.StackFrame stackFrame) { }
-        protected Sentry.SentryStackFrame InternalCreateFrame(System.Diagnostics.StackFrame stackFrame, bool demangle) { }
     }
 }
 namespace Sentry.Http
