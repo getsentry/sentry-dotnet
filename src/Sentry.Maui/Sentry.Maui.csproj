@@ -32,12 +32,6 @@
     -->
     <UseMaui>true</UseMaui>
 
-    <!--
-      MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749
-      If MAUI assemblies are signed in the future, remove this to sign our library - which will be a breaking change.
-     -->
-    <SignAssembly>false</SignAssembly>
-
   </PropertyGroup>
 
   <ItemGroup>

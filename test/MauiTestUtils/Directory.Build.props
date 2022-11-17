@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <LangVersion>10</LangVersion>
-    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->
