@@ -14,6 +14,7 @@
 - Fix DiagnosticSource integration disabled incorrectly with TracesSampler ([#2039](https://github.com/getsentry/sentry-dotnet/pull/2039))
 - Update transitive dependencies to resolve security warnings ([#2045](https://github.com/getsentry/sentry-dotnet/pull/2045))
 - Fix issue with Hot Restart for iOS ([#2047](https://github.com/getsentry/sentry-dotnet/pull/2047))
+- Fix `CacheDirectoryPath` option on MAUI ([#2055](https://github.com/getsentry/sentry-dotnet/pull/2055))
 
 ## 3.23.1
 
