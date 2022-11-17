@@ -64,24 +64,6 @@ internal enum SentryError : long
     EventNotSent = 107
 }
 
-// internal static class CFunctions
-// {
-//     // extern NSError * _Nullable NSErrorFromSentryError (SentryError error, NSString * _Nonnull description) __attribute__((visibility("default")));
-//     [DllImport ("__Internal")]
-//     [Verify (PlatformInvoke)]
-//     [return: NullAllowed]
-//     static extern NSError NSErrorFromSentryError (SentryError error, NSString description);
-
-//     // extern NSString * _Nonnull nameForSentrySampleDecision (SentrySampleDecision decision);
-//     [DllImport ("__Internal")]
-//     [Verify (PlatformInvoke)]
-//     static extern NSString nameForSentrySampleDecision (SentrySampleDecision decision);
-
-//     // extern NSString * _Nonnull nameForSentrySpanStatus (SentrySpanStatus status);
-//     [DllImport ("__Internal")]
-//     [Verify (PlatformInvoke)]
-//     static extern NSString nameForSentrySpanStatus (SentrySpanStatus status);
-// }
 
 [Native]
 internal enum SentrySampleDecision : ulong
