@@ -62,14 +62,4 @@
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
   </ItemGroup>
 
-  <!-- Workaround for https://github.com/dotnet/maui/issues/7272 -->
-  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
-    <ItemGroup>
-      <ResolvedFileToPublish
-        Update="@(ResolvedFileToPublish)"
-        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
-        PublishFolderType="None" />
-    </ItemGroup>
-  </Target>
-
 </Project>
