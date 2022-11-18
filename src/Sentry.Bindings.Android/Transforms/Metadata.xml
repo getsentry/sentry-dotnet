@@ -61,6 +61,7 @@
   <remove-node path="/api/package[@name='io.sentry']/class[@name='EnvelopeSender']" />
   <remove-node path="/api/package[@name='io.sentry']/class[@name='OutboxSender']" />
   <remove-node path="/api/package[@name='io.sentry.cache']/class[@name='EnvelopeCache']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core.cache']/class[@name='AndroidEnvelopeCache']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.gestures']" />
 
@@ -71,5 +72,6 @@
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='ExceptionMechanismException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='InvalidSentryTraceHeaderException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryEnvelopeException']" />
+  <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryHttpClientException']" />
   <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='MalformedJsonException']" />
 </metadata>
