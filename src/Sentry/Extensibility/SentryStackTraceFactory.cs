@@ -36,6 +36,7 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
 
         var stackTrace = exception is null ? new StackTrace(true) : new StackTrace(exception, true);
         var result = SentryDebugStackTrace.Create(_options, stackTrace, isCurrentStackTrace);
+        _options.LogDebug("Created SentryDebugStackTrace with {0} frames.", result.Frames.Count);
         return result.Frames.Count != 0 ? result : null;
     }
 }

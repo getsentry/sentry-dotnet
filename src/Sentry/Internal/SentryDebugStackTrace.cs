@@ -16,8 +16,9 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
     private readonly SentryOptions _options;
 
     // Debug images referenced by frames in this StackTrace
-    private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
     private readonly List<DebugImage> _debugImages = new();
+    private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
+    private const int DebugImageMissing = -1;
     private bool _debugImagesMerged = false;
 
     /*
@@ -62,6 +63,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
         }
         _debugImagesMerged = true;
 
+        _options.LogDebug("Merging {0} debug images from stacktrace.", _debugImages.Count);
         if (_debugImages.Count == 0)
         {
             return;
@@ -156,6 +158,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
                 && stackFrame.GetMethod() is { } method
                 && method.DeclaringType?.AssemblyQualifiedName?.StartsWith("Sentry") == true)
             {
+                _options.LogDebug("Skipping initial stack frame '{0}'", method.Name);
                 continue;
             }
 
@@ -209,10 +212,9 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
             AttributeReader.TryGetProjectDirectory(method.Module.Assembly, out projectPath);
 
-            var moduleIdx = AddDebugImage(method.Module);
-            if (moduleIdx != null)
+            if (AddDebugImage(method.Module) is int moduleIdx && moduleIdx != DebugImageMissing)
             {
-                frame.AddressMode = SentryDebugStackTrace.GetRelativeAddressMode((int)moduleIdx);
+                frame.AddressMode = SentryDebugStackTrace.GetRelativeAddressMode(moduleIdx);
 
                 try
                 {
@@ -238,13 +240,14 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
         frame.ConfigureAppFrame(_options);
 
-        var frameFileName = stackFrame.GetFileName();
-        if (projectPath != null && frameFileName?.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase) is true)
+        if (stackFrame.GetFileName() is { } frameFileName)
         {
-            frameFileName = frameFileName.Substring(projectPath.Length);
+            if (projectPath != null && frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
+            {
+                frameFileName = frameFileName.Substring(projectPath.Length);
+            }
+            frame.FileName = frameFileName;
         }
-
-        frame.FileName = frameFileName;
 
         // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
         var ilOffset = stackFrame.GetILOffset();
@@ -374,21 +377,21 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
         {
             return idx;
         }
-        idx = _debugImages.Count;
 
         var codeFile = module.FullyQualifiedName;
         if (!File.Exists(codeFile))
         {
+            _options.LogDebug("Skipping DebugImage for module '{0}' because CodeFile wasn't found: '{1}'",
+                    module.Name, codeFile);
+            _debugImageIndexByModule.Add(id, DebugImageMissing); // don't try to resolve again
             return null;
         }
         using var stream = File.OpenRead(codeFile);
         var peReader = new PEReader(stream);
 
-        var headers = peReader.PEHeaders;
-        var peHeader = headers.PEHeader;
-
         string? codeId = null;
-        if (peHeader != null)
+        var headers = peReader.PEHeaders;
+        if (headers.PEHeader is { } peHeader)
         {
             codeId = string.Format("{0:X8}{1:x}", headers.CoffHeader.TimeDateStamp, peHeader.SizeOfImage);
         }
@@ -423,9 +426,12 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
         // well, we are out of luck :-(
         if (debugId == null)
         {
+            _options.LogDebug("Skipping DebugImage for module '{0}' because DebugId couldn't be determined", module.Name);
+            _debugImageIndexByModule.Add(id, DebugImageMissing); // don't try to resolve again
             return null;
         }
 
+        idx = _debugImages.Count;
         _debugImages.Add(new DebugImage
         {
             Type = "pe_dotnet",
