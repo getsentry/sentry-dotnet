@@ -369,6 +369,52 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
         }
     }
 
+#if ANDROID
+    private IAndroidAssemblyReader? _assemblyReader;
+    private bool _assemblyReaderInitialized = false;
+
+    private void InitializeAssemblyReader()
+    {
+        if (_assemblyReaderInitialized)
+        {
+            return;
+        }
+        _assemblyReaderInitialized = true;
+
+        var apkPath = Environment.CommandLine;
+        if (!File.Exists(apkPath))
+        {
+            _options.LogWarning("Cannot create AssemblyReader: cannot read APK path from Environment.CommandLine={0}", apkPath);
+            return;
+        }
+        try
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            var supportedAbis = AndroidBuild.SupportedAbis ?? new List<string> { AndroidBuild.CpuAbi ?? "" };
+#pragma warning restore CS0618 // Type or member is obsolete
+            _assemblyReader = AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _options.DiagnosticLogger);
+        }
+        catch (Exception e)
+        {
+            _options.LogWarning("Cannot create AssemblyReader: {e}", e.Message);
+        }
+    }
+#endif
+
+    private PEReader? TryReadAssembly(string assemblyName)
+    {
+#if ANDROID
+        InitializeAssemblyReader();
+        return _assemblyReader?.TryReadAssembly(assemblyName);
+#else
+        if (File.Exists(assemblyName))
+        {
+            return new(File.OpenRead(assemblyName));
+        }
+        return null;
+#endif
+    }
+
     private int? AddDebugImage(Module module)
     {
         var id = module.ModuleVersionId;
@@ -378,16 +424,15 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
             return idx;
         }
 
-        var codeFile = module.FullyQualifiedName;
-        if (!File.Exists(codeFile))
+        var assemblyName = module.FullyQualifiedName;
+        using var peReader = TryReadAssembly(assemblyName);
+        if (peReader is null)
         {
-            _options.LogDebug("Skipping DebugImage for module '{0}' because CodeFile wasn't found: '{1}'",
-                    module.Name, codeFile);
+            _options.LogDebug("Skipping DebugImage for module '{0}' because assembly wasn't found: '{1}'",
+                    module.Name, assemblyName);
             _debugImageIndexByModule.Add(id, DebugImageMissing); // don't try to resolve again
             return null;
         }
-        using var stream = File.OpenRead(codeFile);
-        var peReader = new PEReader(stream);
 
         string? codeId = null;
         var headers = peReader.PEHeaders;
@@ -436,7 +481,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
         {
             Type = "pe_dotnet",
             CodeId = codeId,
-            CodeFile = codeFile,
+            CodeFile = assemblyName,
             DebugId = debugId,
             DebugChecksum = debugChecksum,
             DebugFile = debugFile,
