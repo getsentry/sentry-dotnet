@@ -11,9 +11,9 @@ $receivedFiles | ForEach-Object {
     $nameWithoutRuntime = ($_.BaseName.Split(".") | Select-Object -SkipLast 2) -join "."
     $ext = ".verified.txt"
 
-    $targetFile = (Test-Path "$($_.Directory)/$nameWithRuntime$ext") `
-        ? "$($_.Directory)/$nameWithRuntime$ext" `
-        : "$($_.Directory)/$nameWithoutRuntime$ext"
+    $targetFile = (Test-Path "$($_.Directory)/$nameWithoutRuntime$ext") `
+        ? "$($_.Directory)/$nameWithoutRuntime$ext" `
+        : "$($_.Directory)/$nameWithRuntime$ext"
 
     Write-Host "Updating $($targetFile.Replace((Get-Item .).FullName, ''))"
     if (-not ($DryRun))
