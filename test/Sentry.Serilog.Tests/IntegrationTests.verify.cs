@@ -52,6 +52,7 @@ public class IntegrationTests
         Log.CloseAndFlush();
 
         return Verify(transport.Envelopes)
+            .UniqueForRuntimeAndVersion()
             .IgnoreStandardSentryMembers();
     }
 
