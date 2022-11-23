@@ -1,6 +1,4 @@
 #define TRACE
-using System.Diagnostics;
-
 namespace Sentry.Infrastructure;
 
 /// <summary>

@@ -1,8 +1,6 @@
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using PublicApiGenerator;
 
-namespace Sentry.Tests;
+namespace Sentry.Testing;
 
 public static class ApiExtensions
 {

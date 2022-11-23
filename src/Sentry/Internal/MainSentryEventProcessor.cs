@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Runtime.CompilerServices;
 using Sentry.Extensibility;
 using Sentry.Reflection;
 

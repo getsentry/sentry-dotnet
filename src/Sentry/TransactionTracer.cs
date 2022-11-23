@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using System.ComponentModel;
 using Sentry.Internal;
 using Sentry.Protocol;
 

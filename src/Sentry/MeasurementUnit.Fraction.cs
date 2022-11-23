@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace Sentry
 {
     public readonly partial struct MeasurementUnit

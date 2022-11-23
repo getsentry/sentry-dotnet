@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Http;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol.Envelopes;

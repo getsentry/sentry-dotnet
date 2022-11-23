@@ -1,4 +1,4 @@
-using Sentry.Testing;
+using Trace = Sentry.Protocol.Trace;
 
 namespace Sentry.Tests.Protocol.Context;
 

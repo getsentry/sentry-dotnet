@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Sentry.Internal;
 
 namespace Sentry;

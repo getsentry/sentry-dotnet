@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 namespace Sentry.Android.Extensions;
 
 internal static class UserExtensions

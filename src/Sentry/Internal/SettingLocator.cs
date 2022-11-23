@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Reflection;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;

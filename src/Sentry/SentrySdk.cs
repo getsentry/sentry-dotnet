@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;

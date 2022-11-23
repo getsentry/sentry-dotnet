@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Http;
 using Sentry.Infrastructure;
 
 namespace Sentry.Internal.Http;

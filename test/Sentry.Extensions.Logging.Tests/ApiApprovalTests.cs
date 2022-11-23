@@ -1,5 +1,3 @@
-using Sentry.Tests;
-
 namespace Sentry.Extensions.Logging.Tests;
 
 [UsesVerify]

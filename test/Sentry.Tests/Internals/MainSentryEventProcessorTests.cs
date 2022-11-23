@@ -1,6 +1,3 @@
-using System.Globalization;
-using Sentry.Testing;
-
 namespace Sentry.Tests.Internals;
 
 public class MainSentryEventProcessorTests

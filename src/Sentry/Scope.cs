@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;

@@ -1,5 +1,4 @@
-using System.Net.Http;
-using System.Reflection;
+
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;

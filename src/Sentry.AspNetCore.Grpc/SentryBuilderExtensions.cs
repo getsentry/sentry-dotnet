@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Sentry.Extensibility;
 using Sentry.Reflection;

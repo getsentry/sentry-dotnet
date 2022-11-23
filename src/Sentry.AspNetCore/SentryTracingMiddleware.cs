@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using System.Net.Http;
-using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;

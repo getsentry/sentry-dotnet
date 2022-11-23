@@ -1,5 +1,3 @@
-using System.IO.Compression;
-using System.Net;
 #if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
 using Xunit.Sdk;

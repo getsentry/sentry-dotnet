@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using System.Reflection;
-using Sentry.Testing;
 using Sentry.Tests.Helpers.Reflection;
 
 namespace Sentry.Tests.Internals;

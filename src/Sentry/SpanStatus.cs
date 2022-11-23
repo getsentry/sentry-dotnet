@@ -1,6 +1,3 @@
-using System.Net;
-using System.Security.Authentication;
-
 namespace Sentry;
 
 /// <summary>

@@ -1,6 +1,4 @@
 #if NET5_0_OR_GREATER
-using System.Reflection;
-using System.Runtime.InteropServices;
 using Sentry.Extensibility;
 
 namespace Sentry.Integrations

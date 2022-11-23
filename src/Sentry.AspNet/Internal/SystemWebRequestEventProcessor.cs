@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using System.Web;
 using Sentry.Extensibility;
 using Sentry.Reflection;
 

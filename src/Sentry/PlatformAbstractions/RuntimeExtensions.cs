@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace Sentry.PlatformAbstractions;
 
 /// <summary>

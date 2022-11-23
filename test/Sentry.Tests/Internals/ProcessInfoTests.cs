@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-
 namespace Sentry.Tests.Internals;
 
 public class ProcessInfoTests

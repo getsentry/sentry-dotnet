@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;

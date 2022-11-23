@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Sentry.Internal.DiagnosticSource;
 

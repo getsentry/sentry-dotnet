@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
-using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests.Utils;
 

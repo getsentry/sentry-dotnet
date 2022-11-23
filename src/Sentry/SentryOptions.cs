@@ -1,8 +1,3 @@
-using System.ComponentModel;
-using System.IO.Compression;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json.Serialization;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Integrations;

@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class MiscExtensions

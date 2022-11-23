@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Sentry.PlatformAbstractions;
 
 // ReSharper disable once CheckNamespace

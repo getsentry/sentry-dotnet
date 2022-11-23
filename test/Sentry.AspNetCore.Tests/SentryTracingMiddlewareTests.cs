@@ -1,6 +1,4 @@
 #if NETCOREAPP3_1_OR_GREATER
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +7,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore.Tests.Utils.Extensions;
-using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 

@@ -1,10 +1,9 @@
-using System.Collections.Concurrent;
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
+using Trace = Sentry.Protocol.Trace;
 
 namespace Sentry;
 

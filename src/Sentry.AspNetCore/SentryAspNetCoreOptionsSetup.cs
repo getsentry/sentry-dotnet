@@ -3,10 +3,8 @@ using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 
 #if NETSTANDARD2_0
-using Microsoft.AspNetCore.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 #else
-using Microsoft.Extensions.Hosting;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 #endif
 

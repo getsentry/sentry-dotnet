@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
 [UsesVerify]

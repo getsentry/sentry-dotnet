@@ -1,7 +1,3 @@
-using System.IO.Compression;
-using System.Net;
-using System.Net.Http;
-
 namespace Sentry.Internal.Http;
 
 /// <summary>
