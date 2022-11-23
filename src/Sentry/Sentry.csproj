@@ -68,4 +68,8 @@
     <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- TODO we only need LZ4 decompression only for Android -->
+    <PackageReference Include="K4os.Compression.LZ4" Version="1.*" />
+  </ItemGroup>
 </Project>
