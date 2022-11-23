@@ -37,7 +37,7 @@ jobs:
       - name: Run Tests
         run: >
           xharness apple test \
-            --app=test/Sentry.Maui.Device.TestApp/bin/Debug/net7.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app \
+            --app=test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app \
             --target=ios-simulator-64 \
             --output-directory=./test_output
 
