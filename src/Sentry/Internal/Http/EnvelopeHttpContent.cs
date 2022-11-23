@@ -2,55 +2,54 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol.Envelopes;
 
-namespace Sentry.Internal.Http
+namespace Sentry.Internal.Http;
+
+internal class EnvelopeHttpContent : HttpContent
 {
-    internal class EnvelopeHttpContent : HttpContent
+    private readonly Envelope _envelope;
+    private readonly IDiagnosticLogger? _logger;
+    private readonly ISystemClock _clock;
+
+    public EnvelopeHttpContent(Envelope envelope, IDiagnosticLogger? logger, ISystemClock clock)
     {
-        private readonly Envelope _envelope;
-        private readonly IDiagnosticLogger? _logger;
-        private readonly ISystemClock _clock;
+        _envelope = envelope;
+        _logger = logger;
+        _clock = clock;
+    }
 
-        public EnvelopeHttpContent(Envelope envelope, IDiagnosticLogger? logger, ISystemClock clock)
+    protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+    {
+        try
         {
-            _envelope = envelope;
-            _logger = logger;
-            _clock = clock;
+            await _envelope.SerializeAsync(stream, _logger, _clock).ConfigureAwait(false);
         }
-
-        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+        catch (Exception e)
         {
-            try
-            {
-                await _envelope.SerializeAsync(stream, _logger, _clock).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                _logger?.LogError("Failed to serialize Envelope into the network stream", e);
-                throw;
-            }
+            _logger?.LogError("Failed to serialize Envelope into the network stream", e);
+            throw;
         }
+    }
 
 #if NET5_0_OR_GREATER
         protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
 #else
-        internal void SerializeToStream(Stream stream)
+    internal void SerializeToStream(Stream stream)
 #endif
+    {
+        try
         {
-            try
-            {
-                _envelope.Serialize(stream, _logger, _clock);
-            }
-            catch (Exception e)
-            {
-                _logger?.LogError("Failed to serialize Envelope into the network stream", e);
-                throw;
-            }
+            _envelope.Serialize(stream, _logger, _clock);
         }
+        catch (Exception e)
+        {
+            _logger?.LogError("Failed to serialize Envelope into the network stream", e);
+            throw;
+        }
+    }
 
-        protected override bool TryComputeLength(out long length)
-        {
-            length = default;
-            return false;
-        }
+    protected override bool TryComputeLength(out long length)
+    {
+        length = default;
+        return false;
     }
 }

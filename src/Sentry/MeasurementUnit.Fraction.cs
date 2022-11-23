@@ -1,29 +1,28 @@
-namespace Sentry
+namespace Sentry;
+
+public readonly partial struct MeasurementUnit
 {
-    public readonly partial struct MeasurementUnit
+    /// <summary>
+    /// A fraction unit
+    /// </summary>
+    /// <seealso href="https://getsentry.github.io/relay/relay_metrics/enum.FractionUnit.html"/>
+    public enum Fraction
     {
         /// <summary>
-        /// A fraction unit
+        /// Floating point fraction of 1.
+        /// A ratio of 1.0 equals 100%.
         /// </summary>
-        /// <seealso href="https://getsentry.github.io/relay/relay_metrics/enum.FractionUnit.html"/>
-        public enum Fraction
-        {
-            /// <summary>
-            /// Floating point fraction of 1.
-            /// A ratio of 1.0 equals 100%.
-            /// </summary>
-            Ratio,
-
-            /// <summary>
-            /// Ratio expressed as a fraction of 100.
-            /// 100% equals a ratio of 1.0.
-            /// </summary>
-            Percent
-        }
+        Ratio,
 
         /// <summary>
-        /// Implicitly casts a <see cref="MeasurementUnit.Fraction"/> to a <see cref="MeasurementUnit"/>.
+        /// Ratio expressed as a fraction of 100.
+        /// 100% equals a ratio of 1.0.
         /// </summary>
-        public static implicit operator MeasurementUnit(Fraction unit) => new(unit);
+        Percent
     }
+
+    /// <summary>
+    /// Implicitly casts a <see cref="MeasurementUnit.Fraction"/> to a <see cref="MeasurementUnit"/>.
+    /// </summary>
+    public static implicit operator MeasurementUnit(Fraction unit) => new(unit);
 }
