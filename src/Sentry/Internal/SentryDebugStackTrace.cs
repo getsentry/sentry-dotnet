@@ -396,7 +396,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
         }
         catch (Exception e)
         {
-            _options.LogWarning("Cannot create AssemblyReader: {e}", e.Message);
+            _options.LogWarning("Cannot create AssemblyReader: {0}", e.Message);
         }
     }
 #endif

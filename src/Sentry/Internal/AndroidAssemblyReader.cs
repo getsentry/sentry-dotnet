@@ -17,9 +17,7 @@ internal sealed class AndroidAssemblyReaderFactory
     public static IAndroidAssemblyReader Open(string apkPath, IList<string> supportedAbis, IDiagnosticLogger? logger)
     {
         logger?.LogDebug("Opening APK: {0}", apkPath);
-        // Note: We open in Update mode so that the streams returned by ZipArchiveEntry.Open() support seeking.
-        // We don't actually do any updates though.
-        var zipArchive = ZipFile.Open(apkPath, ZipArchiveMode.Update);
+        var zipArchive = ZipFile.Open(apkPath, ZipArchiveMode.Read);
 
         if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
         {
@@ -39,7 +37,6 @@ internal class AndroidAssemblyReader : IDisposable
     protected readonly IDiagnosticLogger? _logger;
     protected readonly ZipArchive _zipArchive;
     protected readonly IList<string> _supportedAbis;
-    private static readonly ArrayPool<byte> bytePool = ArrayPool<byte>.Shared;
 
     public AndroidAssemblyReader(ZipArchive zip, IList<string> supportedAbis, IDiagnosticLogger? logger)
     {
@@ -53,11 +50,11 @@ internal class AndroidAssemblyReader : IDisposable
         _zipArchive.Dispose();
     }
 
-    protected PEReader CreatePEReader(string assemblyName, Stream assemblyDataStream)
+    protected PEReader CreatePEReader(string assemblyName, MemoryStream inputStream)
     {
-        var decompressedStream = TryDecompressLZ4(assemblyName, assemblyDataStream);
+        var decompressedStream = TryDecompressLZ4(assemblyName, inputStream);
         // Use the decompressed stream, or if null, i.e. it wasn't compressed, use the original.
-        return new(decompressedStream ?? assemblyDataStream);
+        return new(decompressedStream ?? inputStream);
     }
 
     /// <summary>
@@ -69,9 +66,10 @@ internal class AndroidAssemblyReader : IDisposable
     ///    [rest: lz4 compressed payload]
     /// </summary>
     /// <seealso href="https://github.com/xamarin/xamarin-android/blob/c92702619f5fabcff0ed88e09160baf9edd70f41/tools/decompress-assemblies/main.cs#L26" />
-    private Stream? TryDecompressLZ4(string assemblyName, Stream inputStream)
+    private Stream? TryDecompressLZ4(string assemblyName, MemoryStream inputStream)
     {
         const uint CompressedDataMagic = 0x5A4C4158; // 'XALZ', little-endian
+        const int payloadOffset = 12;
         var reader = new BinaryReader(inputStream);
         if (reader.ReadUInt32() != CompressedDataMagic)
         {
@@ -81,38 +79,23 @@ internal class AndroidAssemblyReader : IDisposable
         }
         reader.ReadUInt32(); // ignore descriptor index, we don't need it
         var decompressedLength = reader.ReadInt32();
+        Debug.Assert(inputStream.Position == payloadOffset);
+        var inputLength = (int)(inputStream.Length - payloadOffset);
 
         _logger?.LogDebug("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
 
-        // copy the compressed data
-        Debug.Assert(inputStream.Position == 12);
-        var inputLength = (int)(inputStream.Length - 12);
-        var sourceBytes = bytePool.Rent(inputLength);
-        try
+        var outputStream = new MemoryStream(decompressedLength);
+
+        // We're writing to the underlying array manually, so we need to set the length.
+        outputStream.SetLength(decompressedLength);
+        var outputBuffer = outputStream.GetBuffer();
+
+        var decoded = LZ4Codec.Decode(inputStream.GetBuffer(), payloadOffset, inputLength, outputBuffer, 0, decompressedLength);
+        if (decoded != decompressedLength)
         {
-            reader.Read(sourceBytes, 0, inputLength);
-
-            // We can release the reader & the input stream now.
-            reader.Dispose();
-            inputStream.Dispose();
-
-            var outputStream = new MemoryStream(decompressedLength);
-
-            // we're writing to the underlying array manually
-            outputStream.SetLength(decompressedLength);
-            var outputBuffer = outputStream.GetBuffer();
-
-            var decoded = LZ4Codec.Decode(sourceBytes, 0, inputLength, outputBuffer, 0, decompressedLength);
-            if (decoded != decompressedLength)
-            {
-                throw new Exception($"Failed to decompress LZ4 data of assembly {assemblyName} - decoded {decoded} instead of expected {decompressedLength} bytes");
-            }
-            return outputStream;
+            throw new Exception($"Failed to decompress LZ4 data of assembly {assemblyName} - decoded {decoded} instead of expected {decompressedLength} bytes");
         }
-        finally
-        {
-            bytePool.Return(sourceBytes);
-        }
+        return outputStream;
     }
 }
 
@@ -145,7 +128,15 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
         }
 
         _logger?.LogDebug("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
-        return CreatePEReader(name, zipEntry.Open());
+
+        // We need a seekable stream for the PEReader (or even to check whether the DLL is compressed), so make a copy.
+        var memStream = new MemoryStream((int)zipEntry.Length);
+        using (var zipStream = zipEntry.Open())
+        {
+            zipStream.CopyTo(memStream);
+            memStream.Position = 0;
+        }
+        return CreatePEReader(name, memStream);
     }
 
     private ZipArchiveEntry? FindAssembly(string name)
