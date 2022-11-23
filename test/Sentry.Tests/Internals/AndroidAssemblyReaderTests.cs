@@ -14,14 +14,14 @@ public class AndroidAssemblyReaderTests
         _logger = new(output);
     }
 
-    private IAndroidAssemblyReader GetSut(bool isAssemblyStore, List<string> supportedAbis)
+    private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool compressed, List<string> supportedAbis)
     {
         var apkPath = Path.Combine(
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
             "../../../Internals/",
-            $"android-AssemblyStore={isAssemblyStore}.apk");
+            $"android-Store={isAssemblyStore}-Compressed={compressed}.apk");
 
-        _output.WriteLine($"APK for isAssemblyStore={isAssemblyStore}: {apkPath}");
+        _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
 
         return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _logger);
@@ -32,7 +32,7 @@ public class AndroidAssemblyReaderTests
     [InlineData(true)]
     public void CreatesCorrectReader(bool isAssemblyStore)
     {
-        using var sut = GetSut(isAssemblyStore, new());
+        using var sut = GetSut(isAssemblyStore, compressed: true, supportedAbis: new());
         if (isAssemblyStore)
         {
             Assert.IsType<AndroidAssemblyStoreReader>(sut);
@@ -48,27 +48,32 @@ public class AndroidAssemblyReaderTests
     [InlineData(true)]
     public void ReturnsNullIfAssemblyDoesntExist(bool isAssemblyStore)
     {
-        using var sut = GetSut(isAssemblyStore, new() { "x86_64" });
+        using var sut = GetSut(isAssemblyStore, compressed: true, supportedAbis: new() { "x86_64" });
         Assert.Null(sut.TryReadAssembly("NonExistent.dll"));
     }
 
     [Theory]
-    [InlineData(false)]
-    // [InlineData(true)]
-    public void ReadsCommonAssembly(bool isAssemblyStore)
+    // [InlineData(false, true, "Mono.Android.dll")]
+    [InlineData(false, false, "Mono.Android.dll")]
+    // [InlineData(false, true, "System.Threading.dll")]
+    // [InlineData(false, false, "System.Threading.dll")]
+    // [InlineData(true, true, "Mono.Android.dll")]
+    // [InlineData(true, false, "Mono.Android.dll")]
+    // [InlineData(true, true, "System.Threading.dll")]
+    // [InlineData(true, false, "System.Threading.dll")]
+    public void ReadsAssembly(bool isAssemblyStore, bool compressed, string assemblyName)
     {
-        using var sut = GetSut(isAssemblyStore, new() { "x86_64" });
-        var peReader = sut.TryReadAssembly("Mono.Android.dll");
-        Assert.NotNull(peReader);
-    }
+        using var sut = GetSut(isAssemblyStore, compressed, supportedAbis: new() { "x86_64" });
 
-    [Theory]
-    [InlineData(false)]
-    // [InlineData(true)]
-    public void ReadsArchitectureSpecificAssembly(bool isAssemblyStore)
-    {
-        using var sut = GetSut(isAssemblyStore, new() { "x86_64" });
-        var peReader = sut.TryReadAssembly("System.Threading.dll");
+        var peReader = sut.TryReadAssembly(assemblyName);
         Assert.NotNull(peReader);
+        Assert.True(peReader.HasMetadata);
+
+        var headers = peReader.PEHeaders;
+        Assert.True(headers.IsDll);
+        headers.MetadataSize.Should().BeGreaterThan(0);
+        headers.PEHeader.SizeOfImage.Should().BeGreaterThan(0);
+        var debugDirs = peReader.ReadDebugDirectory();
+        debugDirs.Length.Should().BeGreaterThan(0);
     }
 }

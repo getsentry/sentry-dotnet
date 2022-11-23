@@ -78,9 +78,18 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
 
         _logger?.LogDebug("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
 
+        using var zipStream = zipEntry.Open();
+
+        // The DLL may be LZ4 compressed in addition to the APK being zipped.
+        // See https://github.com/xamarin/xamarin-android/pull/4686
+        // The format is:
+        //    [ 4 byte magic header ] (XALZ)
+        //    [ 4 byte header index ]
+        //    [ 4 byte uncompressed payload length ]
+        //    [rest: lz4 compressed payload]
+
         // Unfortunately, we can't just return `new PEReader(zipEntry.Open())` because it requires a seekable stream.
         // Therefore, we are making an in-memory copy of the DLL.
-        using var zipStream = zipEntry.Open();
         var memStream = new MemoryStream((int)zipEntry.Length);
         zipStream.CopyTo(memStream);
         memStream.Position = 0;
@@ -95,10 +104,13 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
         {
             foreach (var abi in _supportedAbis)
             {
-                zipEntry = _zipArchive.GetEntry($"assemblies/{abi}/{name}");
-                if (zipEntry is not null)
+                if (abi.Length > 0)
                 {
-                    break;
+                    zipEntry = _zipArchive.GetEntry($"assemblies/{abi}/{name}");
+                    if (zipEntry is not null)
+                    {
+                        break;
+                    }
                 }
             }
         }
