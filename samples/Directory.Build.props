@@ -6,10 +6,4 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Using Include="Sentry" />
-    <Using Include="Sentry.Extensibility" />
-    <Using Include="System.Diagnostics" />
-  </ItemGroup>
-
 </Project>

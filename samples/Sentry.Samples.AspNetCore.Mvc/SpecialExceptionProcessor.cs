@@ -1,3 +1,6 @@
+using Sentry;
+using Sentry.Extensibility;
+
 namespace Samples.AspNetCore.Mvc;
 
 public class SpecialExceptionProcessor : SentryEventExceptionProcessor<SpecialException>
