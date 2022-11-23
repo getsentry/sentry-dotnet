@@ -1,0 +1,51 @@
+name: iOS Device Tests
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-12
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@b173b6ec0100793626c2d9e6b90435061f4fc3e5 # Tag: 0.11.0
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
+
+      - name: Build iOS Test App
+        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net7.0-ios --no-restore --nologo
+
+      - name: Install XHarness
+        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
+
+      - name: Run Tests
+        run: >
+          xharness apple test \
+            --app=test/Sentry.Maui.Device.TestApp/bin/Debug/net7.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app \
+            --target=ios-simulator-64 \
+            --output-directory=./test_output
+
+      - name: Create Test Report
+        if: success() || failure()
+        run: scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
+        shell: pwsh
+
+      - name: Upload results
+        if: success() || failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: device-test-ios-results
+          path: test_output
