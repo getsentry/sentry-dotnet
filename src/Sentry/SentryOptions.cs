@@ -793,6 +793,12 @@ namespace Sentry
         internal SettingLocator SettingLocator { get; set; }
 
         /// <summary>
+        /// Controls whether the bundled SDKs will be initialized (when applicable).
+        /// Defaults to <c>true</c>.  Used only for testing.
+        /// </summary>
+        internal bool InitBundledSdks { get; set; } = true;
+
+        /// <summary>
         /// Creates a new instance of <see cref="SentryOptions"/>
         /// </summary>
         public SentryOptions()

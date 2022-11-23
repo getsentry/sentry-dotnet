@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using Sentry.Tests;
 
 namespace Sentry.Extensions.Logging.Tests;
@@ -6,9 +7,9 @@ namespace Sentry.Extensions.Logging.Tests;
 public class ApiApprovalTests
 {
     [Fact]
-    [Trait("Category", "Verify")]
     public Task Run()
     {
         return typeof(SentryLogger).Assembly.CheckApproval();
     }
 }
+#endif

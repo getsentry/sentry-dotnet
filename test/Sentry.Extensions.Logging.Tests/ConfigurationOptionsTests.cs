@@ -29,7 +29,12 @@ public class ConfigurationOptionsTests
         {
             var configuration = Builder.Build();
             var services = new ServiceCollection();
-            _ = services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry());
+            _ = services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry(o =>
+            {
+                o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+                o.InitBundledSdks = false;
+                o.AutoSessionTracking = false;
+            }));
             return services.BuildServiceProvider();
         }
     }
@@ -62,7 +67,7 @@ public class ConfigurationOptionsTests
 
         Assert.Equal(150, sentryLoggingOptions.MaxBreadcrumbs);
         Assert.Equal("e386dfd", sentryLoggingOptions.Release);
-        Assert.Equal("https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537", sentryLoggingOptions.Dsn);
+        Assert.Equal(ValidDsn, sentryLoggingOptions.Dsn);
     }
 
     [Fact]

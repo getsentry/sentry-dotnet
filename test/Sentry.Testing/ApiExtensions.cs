@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using PublicApiGenerator;
@@ -10,7 +11,7 @@ public static class ApiExtensions
     {
         var generatorOptions = new ApiGeneratorOptions { WhitelistedNamespacePrefixes = new[] { "Sentry" } };
         var apiText = assembly.GeneratePublicApi(generatorOptions);
-        return Verifier.Verify(apiText, null, filePath)
+        return Verify(apiText, null, filePath)
             .AutoVerify(includeBuildServer: false)
             .UniqueForTargetFrameworkAndVersion()
             .ScrubEmptyLines()
@@ -23,3 +24,4 @@ public static class ApiExtensions
                 l.StartsWith("[assembly: System.Reflection.AssemblyMetadata("));
     }
 }
+#endif

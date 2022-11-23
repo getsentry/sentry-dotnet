@@ -6,8 +6,7 @@ using Sentry.Testing;
 
 namespace Sentry.Tests;
 
-[UsesVerify]
-public class SentryClientTests
+public partial class SentryClientTests
 {
     private class Fixture
     {
@@ -426,21 +425,6 @@ public class SentryClientTests
     }
 
     [Fact]
-    [Trait("Category", "Verify")]
-    public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
-    {
-        var error = new Exception("Exception message!");
-        _fixture.SentryOptions.BeforeSend = _ => throw error;
-
-        var @event = new SentryEvent();
-
-        var sut = _fixture.GetSut();
-        _ = sut.CaptureEvent(@event);
-
-        return Verifier.Verify(@event.Breadcrumbs);
-    }
-
-    [Fact]
     public void CaptureEvent_Release_SetFromOptions()
     {
         const string expectedRelease = "release number";
@@ -521,10 +505,7 @@ public class SentryClientTests
     public void Dispose_should_only_flush()
     {
         // Arrange
-        var client = new SentryClient(new SentryOptions
-        {
-            Dsn = ValidDsn,
-        });
+        var client = _fixture.GetSut();
 
         // Act
         client.Dispose();
@@ -752,6 +733,7 @@ public class SentryClientTests
     public void Ctor_NullBackgroundWorker_ConcreteBackgroundWorker()
     {
         _fixture.SentryOptions.Dsn = ValidDsn;
+        _fixture.SentryOptions.Transport = Substitute.For<ITransport>();
 
         using var sut = new SentryClient(_fixture.SentryOptions);
         _ = Assert.IsType<BackgroundWorker>(sut.Worker);

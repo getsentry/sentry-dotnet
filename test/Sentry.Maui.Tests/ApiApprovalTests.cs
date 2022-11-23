@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using Sentry.Tests;
 
 namespace Sentry.Maui.Tests;
@@ -6,9 +7,9 @@ namespace Sentry.Maui.Tests;
 public class ApiApprovalTests
 {
     [Fact]
-    [Trait("Category", "Verify")]
     public Task Run()
     {
         return typeof(SentryMauiOptions).Assembly.CheckApproval();
     }
 }
+#endif

@@ -1,4 +1,3 @@
-using NSubstitute.ExceptionExtensions;
 using Sentry.Maui.Internal;
 using Sentry.Testing;
 

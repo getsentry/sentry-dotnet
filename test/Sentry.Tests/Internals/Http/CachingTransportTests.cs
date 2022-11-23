@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 

@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
 using Sentry.Testing;
 

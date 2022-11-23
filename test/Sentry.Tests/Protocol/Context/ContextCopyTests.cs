@@ -1,7 +1,7 @@
+#if !__MOBILE__
 namespace Sentry.Tests.Protocol.Context;
 
 [UsesVerify]
-[Trait("Category", "Verify")]
 public class ContextCopyTests
 {
     [Fact]
@@ -86,6 +86,7 @@ public class ContextCopyTests
     {
         var verifiable = dict.OrderBy(x => x.Key)
             .ToDictionary(x => x.Key, x => x.Value);
-        await Verifier.Verify(verifiable);
+        await Verify(verifiable);
     }
 }
+#endif

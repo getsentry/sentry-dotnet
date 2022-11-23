@@ -1,4 +1,4 @@
-#if NETCOREAPP3_1_OR_GREATER
+#if !__MOBILE__ && NETCOREAPP3_1_OR_GREATER
 
 using Sentry.Testing;
 
@@ -15,7 +15,6 @@ public class MemoryInfoTests
     }
 
     [Fact]
-    [Trait("Category", "Verify")]
     public Task WriteTo()
     {
 #if NET5_0_OR_GREATER
@@ -28,5 +27,4 @@ public class MemoryInfoTests
         return VerifyJson(json).UniqueForTargetFrameworkAndVersion();
     }
 }
-
 #endif

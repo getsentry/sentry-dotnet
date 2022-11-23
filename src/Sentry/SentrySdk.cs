@@ -54,10 +54,15 @@ public static partial class SentrySdk
         }
 
         // Initialize bundled platform SDKs here
-#if ANDROID
+#if __MOBILE__
+        if (options.InitBundledSdks)
+        {
+#if __IOS__
+            InitSentryCocoaSdk(options);
+#elif ANDROID
             InitSentryAndroidSdk(options);
-#elif __IOS__
-        InitSentryCocoaSdk(options);
+#endif
+        }
 #endif
         return new Hub(options);
     }

@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Sentry.Testing;
@@ -16,11 +17,10 @@ public class SerializationTests
 
     [Theory]
     [MemberData(nameof(GetData))]
-    [Trait("Category", "Verify")]
     public async Task Serialization(string name, object target)
     {
         var json = target.ToJsonString(_testOutputLogger);
-        await Verifier.Verify(json).UseParameters(name);
+        await Verify(json).UseParameters(name);
     }
 
     public static IEnumerable<object[]> GetData()
@@ -61,3 +61,4 @@ public class SerializationTests
             => writer.WriteStringValue(value.Value);
     }
 }
+#endif

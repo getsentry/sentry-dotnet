@@ -1,3 +1,4 @@
+#if !__MOBILE__
 public static class VerifyExtensions
 {
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
@@ -79,3 +80,4 @@ public static class VerifyExtensions
         }
     }
 }
+#endif

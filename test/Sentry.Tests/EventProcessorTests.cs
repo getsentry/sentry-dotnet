@@ -1,9 +1,9 @@
+#if !__MOBILE__
 using Sentry.Testing;
 
 namespace Sentry.Tests;
 
 [UsesVerify]
-[Trait("Category", "Verify")]
 public class EventProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;
@@ -26,7 +26,7 @@ public class EventProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verifier.Verify(transport.Envelopes)
+        await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
@@ -46,7 +46,7 @@ public class EventProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verifier.Verify(transport.Envelopes)
+        await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
@@ -72,7 +72,7 @@ public class EventProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verifier.Verify(transport.Envelopes)
+        await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers();
     }
 
@@ -92,3 +92,4 @@ public class EventProcessorTests
             AttachStacktrace = false
         };
 }
+#endif

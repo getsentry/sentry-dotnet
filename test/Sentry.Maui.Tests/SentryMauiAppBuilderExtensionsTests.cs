@@ -1,10 +1,11 @@
 using Microsoft.Extensions.Options;
+using Sentry.Internal.Http;
 using Sentry.Testing;
 using MauiConstants = Sentry.Maui.Internal.Constants;
 
 namespace Sentry.Maui.Tests;
 
-public class SentryMauiAppBuilderExtensionsTests
+public partial class SentryMauiAppBuilderExtensionsTests
 {
     private class Fixture
     {
@@ -17,12 +18,10 @@ public class SentryMauiAppBuilderExtensionsTests
 
             builder.Services.Configure<SentryMauiOptions>(options =>
             {
-                // Don't use a real transport for any of these tests
                 options.Transport = Substitute.For<ITransport>();
-
-                // Disable auto session tracking so the Android/iOS SDK doesn't start a session
-                // when these tests are run as device tests.
+                options.Dsn = ValidDsn;
                 options.AutoSessionTracking = false;
+                options.InitBundledSdks = false;
             });
 
             Builder = builder;
@@ -46,10 +45,11 @@ public class SentryMauiAppBuilderExtensionsTests
 
         using var app = builder.Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+        var hub = app.Services.GetRequiredService<IHub>();
 
         // Assert
         Assert.Same(builder, chainedBuilder);
-        Assert.True(SentrySdk.IsEnabled);
+        Assert.True(hub.IsEnabled);
         Assert.Equal(ValidDsn, options.Dsn);
         Assert.False(options.Debug);
     }
@@ -65,10 +65,11 @@ public class SentryMauiAppBuilderExtensionsTests
 
         using var app = builder.Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+        var hub = app.Services.GetRequiredService<IHub>();
 
         // Assert
         Assert.Same(builder, chainedBuilder);
-        Assert.True(SentrySdk.IsEnabled);
+        Assert.True(hub.IsEnabled);
         Assert.Equal(ValidDsn, options.Dsn);
         Assert.False(options.Debug);
     }
@@ -87,10 +88,11 @@ public class SentryMauiAppBuilderExtensionsTests
 
         using var app = builder.Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+        var hub = app.Services.GetRequiredService<IHub>();
 
         // Assert
         Assert.Same(builder, chainedBuilder);
-        Assert.True(SentrySdk.IsEnabled);
+        Assert.True(hub.IsEnabled);
         Assert.Equal(ValidDsn, options.Dsn);
         Assert.False(options.Debug);
     }
@@ -113,10 +115,11 @@ public class SentryMauiAppBuilderExtensionsTests
 
         using var app = builder.Build();
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+        var hub = app.Services.GetRequiredService<IHub>();
 
         // Assert
         Assert.Same(builder, chainedBuilder);
-        Assert.True(SentrySdk.IsEnabled);
+        Assert.True(hub.IsEnabled);
         Assert.Equal(ValidDsn, options.Dsn);
         Assert.Equal("test", options.Release);
     }
@@ -171,8 +174,7 @@ public class SentryMauiAppBuilderExtensionsTests
     public void UseSentry_EnablesHub()
     {
         // Arrange
-        var builder = _fixture.Builder
-            .UseSentry(ValidDsn);
+        var builder = _fixture.Builder.UseSentry(ValidDsn);
 
         // Act
         using var app = builder.Build();
@@ -190,8 +192,7 @@ public class SentryMauiAppBuilderExtensionsTests
         //       that implement IDisposable.
 
         // Arrange
-        var builder = _fixture.Builder
-            .UseSentry(ValidDsn);
+        var builder = _fixture.Builder.UseSentry(ValidDsn);
 
         // Act
         IHub hub;
@@ -206,7 +207,7 @@ public class SentryMauiAppBuilderExtensionsTests
     }
 
     [Fact]
-    public void UseSentry_CacheDirectory_Default()
+    public void UseSentry_WithCaching_Default()
     {
         // Arrange
         var builder = _fixture.Builder;
@@ -219,15 +220,17 @@ public class SentryMauiAppBuilderExtensionsTests
 
         // Assert
 #if PLATFORM_NEUTRAL
-        const string expected = null;
+        Assert.Null(options.CacheDirectoryPath);
+        Assert.IsNotType<CachingTransport>(options.Transport);
 #else
-        var expected = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
+        var expectedPath = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
+        Assert.Equal(expectedPath, options.CacheDirectoryPath);
+        Assert.IsType<CachingTransport>(options.Transport);
 #endif
-        Assert.Equal(expected, options.CacheDirectoryPath);
     }
 
     [Fact]
-    public void UseSentry_CacheDirectory_EnableCaching()
+    public void UseSentry_WithCaching_CanChangeCacheDirectoryPath()
     {
         // Arrange
         var builder = _fixture.Builder;
