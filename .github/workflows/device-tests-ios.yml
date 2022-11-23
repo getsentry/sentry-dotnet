@@ -43,7 +43,7 @@ jobs:
 
       - name: Create Test Report
         if: success() || failure()
-        run: scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
+        run: scripts/parse-xunit2-xml.ps1 @(gci ./test_output/*.xml)[0].FullName | Out-File $env:GITHUB_STEP_SUMMARY
         shell: pwsh
 
       - name: Upload results
