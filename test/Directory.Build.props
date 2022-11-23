@@ -25,23 +25,24 @@
     <Using Include="FluentAssertions" />
     <Using Include="NSubstitute" />
     <Using Include="NSubstitute.Core" />
+    <Using Include="NSubstitute.ExceptionExtensions" />
     <Using Include="NSubstitute.ReturnsExtensions" />
     <Using Include="Sentry.DsnSamples" Static="True" />
     <PackageReference Include="NSubstitute" Version="4.*" />
     <PackageReference Include="FluentAssertions" Version="6.*" />
     <PackageReference Include="xunit" Version="2.*" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.*" />
-    <PackageReference Include="Verify.Xunit" Version="19.*" />
-    <PackageReference Include="Verify.DiffPlex" Version="2.*" />
-    <PackageReference Include="PublicApiGenerator" Version="10.*" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.*" />
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="17.*" />
   </ItemGroup>
 
   <!-- only non-platform-specific projects should include these packages -->
   <ItemGroup Condition="'$(TargetPlatformIdentifier)'==''">
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.*" PrivateAssets="All" />
+    <PackageReference Include="Verify.Xunit" Version="19.*" />
+    <PackageReference Include="Verify.DiffPlex" Version="2.*" />
+    <PackageReference Include="PublicApiGenerator" Version="10.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" PrivateAssets="All" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.*" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->

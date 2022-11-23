@@ -34,6 +34,25 @@
     <Compile Remove="**\Tizen\**\*.cs" />
   </ItemGroup>
 
+  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems"
+    BeforeTargets="_ComputePublishLocation"
+    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
+    <ItemGroup>
+    <ResolvedFileToPublish
+      Update="@(ResolvedFileToPublish)"
+      Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+      PublishFolderType="None" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+  This is needed because we use project references in this solution.
+  In an app that uses our nuget packages, it will come through the nuget package automatically.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
+      Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+
   <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
   <ItemGroup>
     <Using Remove="System.Net.Http" />
