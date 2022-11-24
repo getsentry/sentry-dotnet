@@ -1,3 +1,4 @@
+#if NET6_0_OR_GREATER
 using System.Reflection;
 using Sentry.Testing;
 
@@ -77,3 +78,4 @@ public class AndroidAssemblyReaderTests
         debugDirs.Length.Should().BeGreaterThan(0);
     }
 }
+#endif

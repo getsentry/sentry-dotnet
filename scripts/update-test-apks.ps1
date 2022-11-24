@@ -1,13 +1,22 @@
+param([switch] $IfNotExist)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$apkPrefix = 'test/Sentry.Tests/Internals/android'
+$repoRoot = "$PSScriptRoot/.."
+$apkPrefix = "$repoRoot/test/Sentry.Tests/Internals/android"
 
 function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompression)
 {
-    $sampleDir = 'samples/Sentry.Samples.Android'
+    $sampleDir = "$repoRoot/samples/Sentry.Samples.Android"
     $framework = 'net6.0-android'
     $outputApk = "$apkPrefix-Store=$UseAssemblyStore-Compressed=$UseAssemblyCompression.apk"
+
+    if ($IfNotExist -and (Test-Path $outputApk))
+    {
+        Write-Host "$outputApk already exists, skipping build"
+        return
+    }
 
     Push-Location -Verbose $sampleDir
     try
@@ -32,7 +41,10 @@ function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompres
     Move-Item -Verbose "$sampleDir/bin/Release/$framework/io.sentry.dotnet.samples.android-Signed.apk" $outputApk
 }
 
-Remove-Item -Verbose "$apkPrefix-*.apk"
+if (!$IfNotExist)
+{
+    Remove-Item -Verbose "$apkPrefix-*.apk"
+}
 BuildAndroidSample $true $true
 BuildAndroidSample $true $false
 BuildAndroidSample $false $true

@@ -1,3 +1,6 @@
+// TODO this is actually only needed for Android but we want to test on local devices. Is there another way to do this?
+#if NET6_0_OR_GREATER
+
 using System.IO.Compression;
 using System.Reflection.PortableExecutable;
 using Sentry.Extensibility;
@@ -704,3 +707,4 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         public MemoryStream? GetAssemblyConfig() => Store.GetAssemblyConfigSlice(this);
     }
 }
+#endif
