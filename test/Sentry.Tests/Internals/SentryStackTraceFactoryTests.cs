@@ -197,40 +197,6 @@ public partial class SentryStackTraceFactoryTests
         frame.Function.Should().Be(method);
     }
 
-    [SkippableTheory]
-    [InlineData(StackTraceMode.Original)]
-    [InlineData(StackTraceMode.Enhanced)]
-    [Trait("Category", "Verify")]
-    public Task MethodGeneric(StackTraceMode mode)
-    {
-        // TODO: Mono gives different results.  Investigate why.
-        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "Not supported on Mono");
-
-        _fixture.SentryOptions.StackTraceMode = mode;
-
-        // Arrange
-        var i = 5;
-        var exception = Record.Exception(() => GenericMethodThatThrows(i));
-
-        _fixture.SentryOptions.AttachStacktrace = true;
-        var factory = _fixture.GetSut();
-
-        // Act
-        var stackTrace = factory.Create(exception);
-
-        // Assert;
-        var frame = stackTrace!.Frames.Single(x => x.Function!.Contains("GenericMethodThatThrows"));
-        return Verifier.Verify(frame)
-            .IgnoreMembers<SentryStackFrame>(
-                x => x.Package,
-                x => x.LineNumber,
-                x => x.ColumnNumber,
-                x => x.InstructionAddress,
-                x => x.FunctionId)
-            .AddScrubber(x => x.Replace(@"\", @"/"))
-            .UseParameters(mode);
-    }
-
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
     {

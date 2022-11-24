@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Sentry.Internal.Extensions;
+using Sentry.Internal;
 
 namespace Sentry.Extensibility;
 

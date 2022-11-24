@@ -161,7 +161,7 @@
                 Stacktrace: {
                   Frames: [
                     {,
-                      "filename": ".../IntegrationTests.cs",
+                      "filename": ".../IntegrationTests.verify.cs",
                       "function": "Task IntegrationTests.Simple()",
                       "lineno": 43,
                       "colno": 17,
