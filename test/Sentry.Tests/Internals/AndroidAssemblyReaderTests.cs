@@ -57,10 +57,10 @@ public class AndroidAssemblyReaderTests
     [InlineData(false, false, "Mono.Android.dll")]
     [InlineData(false, true, "System.Threading.dll")]
     [InlineData(false, false, "System.Threading.dll")]
-    // [InlineData(true, true, "Mono.Android.dll")]
-    // [InlineData(true, false, "Mono.Android.dll")]
-    // [InlineData(true, true, "System.Threading.dll")]
-    // [InlineData(true, false, "System.Threading.dll")]
+    [InlineData(true, true, "Mono.Android.dll")]
+    [InlineData(true, false, "Mono.Android.dll")]
+    [InlineData(true, true, "System.Threading.dll")]
+    [InlineData(true, false, "System.Threading.dll")]
     public void ReadsAssembly(bool isAssemblyStore, bool isCompressed, string assemblyName)
     {
         using var sut = GetSut(isAssemblyStore, isCompressed, supportedAbis: new() { "x86_64" });
