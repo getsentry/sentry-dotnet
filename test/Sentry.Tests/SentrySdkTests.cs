@@ -34,7 +34,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         var id = SentrySdk.CaptureMessage("test");
@@ -50,7 +50,7 @@ public class SentrySdkTests : IDisposable
             o.TracesSampleRate = 1.0;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         var id = SentrySdk.CaptureMessage("test");
@@ -73,7 +73,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         Assert.True(SentrySdk.IsEnabled);
@@ -89,7 +89,7 @@ public class SentrySdkTests : IDisposable
 #pragma warning restore CS0618
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         Assert.True(SentrySdk.IsEnabled);
@@ -103,7 +103,7 @@ public class SentrySdkTests : IDisposable
             o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         Assert.True(SentrySdk.IsEnabled);
@@ -149,7 +149,7 @@ public class SentrySdkTests : IDisposable
         {
             DiagnosticLogger = _logger,
             Debug = true,
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         using (SentrySdk.Init(options))
@@ -168,7 +168,7 @@ public class SentrySdkTests : IDisposable
             Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff:ed0a8589a0bb4d4793ac4c70375f3d65@fake-sentry.io:65535/2147483647",
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         using (SentrySdk.Init(options))
@@ -184,7 +184,7 @@ public class SentrySdkTests : IDisposable
         {
             DiagnosticLogger = _logger,
             Debug = false,
-            InitBundledSdks = false,
+            InitNativeSdks = false,
         };
 
         using (SentrySdk.Init(options))
@@ -201,7 +201,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
         SentrySdk.AddBreadcrumb("test", "category");
         var called = false;
@@ -218,7 +218,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
         SentrySdk.ConfigureScope(p =>
         {
@@ -264,7 +264,7 @@ public class SentrySdkTests : IDisposable
                 CacheDirectoryPath = cachePath,
                 FileSystem = fileSystem,
                 AutoSessionTracking = false,
-                InitBundledSdks = false,
+                InitNativeSdks = false,
             },
             startWorker: false);
         await using (initialTransport)
@@ -319,7 +319,7 @@ public class SentrySdkTests : IDisposable
                 o.InitCacheFlushTimeout = initFlushTimeout;
                 o.Transport = transport;
                 o.AutoSessionTracking = false;
-                o.InitBundledSdks = false;
+                o.InitNativeSdks = false;
                 options = o;
             });
 
@@ -362,7 +362,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
         disposable.Dispose();
         disposable.Dispose();
@@ -377,14 +377,14 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
         var second = SentrySdk.Init(o =>
         {
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
         SentrySdk.AddBreadcrumb("test", "category");
         first.Dispose();
@@ -456,7 +456,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         await ModifyScope();
@@ -492,7 +492,7 @@ public class SentrySdkTests : IDisposable
             IsGlobalModeEnabled = false,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         using var _ = SentrySdk.Init(options);
@@ -521,7 +521,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.BackgroundWorker = worker;
             o.AutoSessionTracking = false;
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
         SentrySdk.CaptureEvent(new SentryEvent(), s => s.AddBreadcrumb(expected));
 
@@ -545,7 +545,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         var callbackCounter = 0;
@@ -567,7 +567,7 @@ public class SentrySdkTests : IDisposable
             Debug = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         using var _ = SentrySdk.Init(options);
@@ -588,7 +588,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         var scopeCallbackWasInvoked = false;
@@ -605,7 +605,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         var scopeCallbackWasInvoked = false;
@@ -622,7 +622,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.AutoSessionTracking = false;
             o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         var scopeCallbackWasInvoked = false;
@@ -664,7 +664,7 @@ public class SentrySdkTests : IDisposable
             o.Dsn = ValidDsn;
             o.BackgroundWorker = worker;
             o.AutoSessionTracking = false;
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         });
 
         const string expected = "test";
@@ -746,7 +746,7 @@ public class SentrySdkTests : IDisposable
             IsGlobalModeEnabled = false,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         // Act
@@ -767,7 +767,7 @@ public class SentrySdkTests : IDisposable
             IsGlobalModeEnabled = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         // Act
@@ -790,7 +790,7 @@ public class SentrySdkTests : IDisposable
             Debug = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         SentrySdk.InitHub(options);
@@ -819,7 +819,7 @@ public class SentrySdkTests : IDisposable
             Debug = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         SentrySdk.InitHub(options);
@@ -849,7 +849,7 @@ public class SentrySdkTests : IDisposable
             Debug = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 
         SentrySdk.InitHub(options);

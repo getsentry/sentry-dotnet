@@ -20,7 +20,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
                 options.Transport = Substitute.For<ITransport>();
                 options.Dsn = ValidDsn;
                 options.AutoSessionTracking = false;
-                options.InitBundledSdks = false;
+                options.InitNativeSdks = false;
             });
 
             Builder = builder;

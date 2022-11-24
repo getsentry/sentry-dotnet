@@ -51,9 +51,9 @@ public static partial class SentrySdk
             options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
         }
 
-        // Initialize bundled platform SDKs here
+        // Initialize native platform SDKs here
 #if __MOBILE__
-        if (options.InitBundledSdks)
+        if (options.InitNativeSdks)
         {
 #if __IOS__
             InitSentryCocoaSdk(options);

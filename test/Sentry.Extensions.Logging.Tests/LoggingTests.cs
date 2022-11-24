@@ -24,7 +24,7 @@ public class LoggingTests
             o.MinimumEventLevel = logLevel;
             o.MinimumBreadcrumbLevel = LogLevel.None;
             o.BackgroundWorker = worker;
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         }));
         using var serviceProvider = serviceCollection.BuildServiceProvider();
         using var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
@@ -65,7 +65,7 @@ public class LoggingTests
             o.MinimumBreadcrumbLevel = logLevel;
             o.MinimumEventLevel = LogLevel.None;
             o.BackgroundWorker = worker;
-            o.InitBundledSdks = false;
+            o.InitNativeSdks = false;
         }));
         using var serviceProvider = serviceCollection.BuildServiceProvider();
         using var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();

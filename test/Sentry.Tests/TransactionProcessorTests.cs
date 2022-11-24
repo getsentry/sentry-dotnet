@@ -63,6 +63,6 @@ public partial class TransactionProcessorTests
             DiagnosticLogger = _logger,
             AttachStacktrace = false,
             Release = "Sentry.Tests@1.0.0",
-            InitBundledSdks = false
+            InitNativeSdks = false
         };
 }

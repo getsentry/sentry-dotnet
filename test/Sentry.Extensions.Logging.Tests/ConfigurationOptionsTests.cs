@@ -32,7 +32,7 @@ public class ConfigurationOptionsTests
             _ = services.AddLogging(builder => builder.AddConfiguration(configuration).AddSentry(o =>
             {
                 o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-                o.InitBundledSdks = false;
+                o.InitNativeSdks = false;
                 o.AutoSessionTracking = false;
             }));
             return services.BuildServiceProvider();

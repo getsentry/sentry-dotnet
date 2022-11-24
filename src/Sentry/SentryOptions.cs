@@ -788,10 +788,11 @@ public class SentryOptions
     internal SettingLocator SettingLocator { get; set; }
 
     /// <summary>
-    /// Controls whether the bundled SDKs will be initialized (when applicable).
-    /// Defaults to <c>true</c>.  Used only for testing.
+    /// Controls whether the native SDKs (Android, Cocoa, etc.) will be initialized (when applicable).
+    /// Should be set <c>false</c> (disabled) only when testing, and then only if the test initializes the managed SDK.
+    /// Defaults to <c>true</c> (enabled).
     /// </summary>
-    internal bool InitBundledSdks { get; set; } = true;
+    internal bool InitNativeSdks { get; set; } = true;
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryOptions"/>
