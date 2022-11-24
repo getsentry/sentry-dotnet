@@ -8,7 +8,10 @@ public static class ApiExtensions
 {
     public static Task CheckApproval(this Assembly assembly, [CallerFilePath] string filePath = "")
     {
-        var generatorOptions = new ApiGeneratorOptions { WhitelistedNamespacePrefixes = new[] { "Sentry" } };
+        var generatorOptions = new ApiGeneratorOptions
+        {
+            WhitelistedNamespacePrefixes = new[] { "Sentry", "Microsoft" }
+        };
         var apiText = assembly.GeneratePublicApi(generatorOptions);
         return Verifier.Verify(apiText, null, filePath)
             .AutoVerify(includeBuildServer: false)
