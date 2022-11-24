@@ -12,11 +12,10 @@ public class SerializationTests
 
     [Theory]
     [MemberData(nameof(GetData))]
-    [Trait("Category", "Verify")]
     public async Task Serialization(string name, object target)
     {
         var json = target.ToJsonString(_testOutputLogger);
-        await Verifier.Verify(json).UseParameters(name);
+        await Verify(json).UseParameters(name);
     }
 
     public static IEnumerable<object[]> GetData()

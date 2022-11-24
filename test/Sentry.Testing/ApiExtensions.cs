@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using PublicApiGenerator;
 
 namespace Sentry.Testing;
@@ -11,7 +12,7 @@ public static class ApiExtensions
             WhitelistedNamespacePrefixes = new[] { "Sentry", "Microsoft" }
         };
         var apiText = assembly.GeneratePublicApi(generatorOptions);
-        return Verifier.Verify(apiText, null, filePath)
+        return Verify(apiText, null, filePath)
             .AutoVerify(includeBuildServer: false)
             .UniqueForTargetFrameworkAndVersion()
             .ScrubEmptyLines()
@@ -24,3 +25,4 @@ public static class ApiExtensions
                 l.StartsWith("[assembly: System.Reflection.AssemblyMetadata("));
     }
 }
+#endif

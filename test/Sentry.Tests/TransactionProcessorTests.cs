@@ -1,44 +1,12 @@
 namespace Sentry.Tests;
 
-[UsesVerify]
-[Trait("Category", "Verify")]
-public class TransactionProcessorTests
+public partial class TransactionProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;
 
     public TransactionProcessorTests(ITestOutputHelper output)
     {
         _logger = new TestOutputDiagnosticLogger(output);
-    }
-
-    [Fact]
-    public async Task Simple()
-    {
-        var transport = new RecordingTransport();
-        var options = Options(transport);
-
-        options.AddTransactionProcessor(new TheProcessor());
-        var hub = SentrySdk.InitHub(options);
-        using (SentrySdk.UseHub(hub))
-        {
-            var transaction = hub.StartTransaction("my transaction", "my operation");
-            hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureMessage("TheMessage");
-            transaction.Finish();
-            await hub.FlushAsync();
-        }
-
-        await Verifier.Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
-    }
-
-    public class TheProcessor : ISentryTransactionProcessor
-    {
-        public Transaction Process(Transaction transaction)
-        {
-            transaction.Contexts["key"] = "value";
-            return transaction;
-        }
     }
 
     [Fact]
@@ -52,8 +20,20 @@ public class TransactionProcessorTests
         {
             IsSampled = false
         };
-        new Hub(options).CaptureTransaction(transaction);
+
+        using var hub = new Hub(options);
+        hub.CaptureTransaction(transaction);
+
         Assert.False(processor.Called);
+    }
+
+    public class TheProcessor : ISentryTransactionProcessor
+    {
+        public Transaction Process(Transaction transaction)
+        {
+            transaction.Contexts["key"] = "value";
+            return transaction;
+        }
     }
 
     public class TrackingProcessor : ISentryTransactionProcessor
@@ -65,27 +45,6 @@ public class TransactionProcessorTests
             Called = true;
             return transaction;
         }
-    }
-
-    [Fact]
-    public async Task Discard()
-    {
-        var transport = new RecordingTransport();
-        var options = Options(transport);
-
-        options.AddTransactionProcessor(new DiscardProcessor());
-        var hub = SentrySdk.InitHub(options);
-        using (SentrySdk.UseHub(hub))
-        {
-            var transaction = hub.StartTransaction("my transaction", "my operation");
-            hub.ConfigureScope(scope => scope.Transaction = transaction);
-            hub.CaptureMessage("TheMessage");
-            transaction.Finish();
-            await hub.FlushAsync();
-        }
-
-        await Verifier.Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
     }
 
     public class DiscardProcessor : ISentryTransactionProcessor
@@ -103,6 +62,7 @@ public class TransactionProcessorTests
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             AttachStacktrace = false,
-            Release = "Sentry.Tests@1.0.0"
+            Release = "Sentry.Tests@1.0.0",
+            InitNativeSdks = false
         };
 }

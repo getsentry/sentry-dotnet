@@ -2,10 +2,37 @@ using Sentry.Internal.Http;
 
 namespace Sentry.Tests;
 
-[UsesVerify]
-public class HubTests
+public partial class HubTests
 {
     private readonly ITestOutputHelper _output;
+
+    private class Fixture
+    {
+        public SentryOptions Options { get; }
+
+        public ISentryClient Client { get; }
+
+        public ISessionManager SessionManager { get; set; }
+
+        public IInternalScopeManager ScopeManager { get; set; }
+
+        public ISystemClock Clock { get; set; }
+
+        public Fixture()
+        {
+            Options = new SentryOptions
+            {
+                Dsn = ValidDsn,
+                AutoSessionTracking = false
+            };
+
+            Client = Substitute.For<ISentryClient>();
+        }
+
+        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager);
+    }
+
+    private readonly Fixture _fixture = new();
 
     public HubTests(ITestOutputHelper output)
     {
@@ -16,14 +43,8 @@ public class HubTests
     public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
     {
         // Arrange
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            BackgroundWorker = new FakeBackgroundWorker(),
-            IsGlobalModeEnabled = false
-        };
-
-        var hub = new Hub(options);
+        _fixture.Options.IsGlobalModeEnabled = false;
+        var hub = _fixture.GetSut();
 
         // Act & assert
         using (hub.PushScope())
@@ -39,11 +60,7 @@ public class HubTests
     public void PushAndLockScope_DoesNotAffectOuterScope()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            BackgroundWorker = new FakeBackgroundWorker()
-        });
+        var hub = _fixture.GetSut();
 
         // Act & assert
         hub.ConfigureScope(s => Assert.False(s.Locked));
@@ -59,14 +76,7 @@ public class HubTests
     public void CaptureMessage_FailedQueue_LastEventIdSetToEmpty()
     {
         // Arrange
-        var worker = Substitute.For<IBackgroundWorker>();
-        worker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(false);
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            BackgroundWorker = worker
-        });
+        var hub = _fixture.GetSut();
 
         // Act
         var actualId = hub.CaptureMessage("test");
@@ -101,14 +111,8 @@ public class HubTests
     public void CaptureException_FinishedSpanBoundToSameExceptionExists_EventIsLinkedToSpan()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 1
-        }, client);
-
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
         var exception = new Exception("error");
 
         var transaction = hub.StartTransaction("foo", "bar");
@@ -118,7 +122,7 @@ public class HubTests
         hub.CaptureException(exception);
 
         // Assert
-        client.Received(1).CaptureEvent(
+        _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
@@ -129,25 +133,18 @@ public class HubTests
     public void CaptureException_ActiveSpanExistsOnScope_EventIsLinkedToSpan()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 1
-        }, client);
-
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
         var exception = new Exception("error");
 
         var transaction = hub.StartTransaction("foo", "bar");
-
         hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
         hub.CaptureException(exception);
 
         // Assert
-        client.Received(1).CaptureEvent(
+        _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
@@ -158,25 +155,18 @@ public class HubTests
     public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 0
-        }, client);
-
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
         var exception = new Exception("error");
 
         var transaction = hub.StartTransaction("foo", "bar");
-
         hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
         hub.CaptureException(exception);
 
         // Assert
-        client.Received(1).CaptureEvent(
+        _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
@@ -187,19 +177,14 @@ public class HubTests
     public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 1
-        }, client);
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
 
         // Act
         hub.CaptureException(new Exception("error"));
 
         // Assert
-        client.Received(1).CaptureEvent(
+        _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
@@ -210,14 +195,8 @@ public class HubTests
     public void CaptureEvent_SessionActive_NoExceptionDoesNotReportError()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Release = "release"
-        }, client);
-
+        _fixture.Options.Release = "release";
+        var hub = _fixture.GetSut();
         hub.StartSession();
 
         // Act
@@ -225,24 +204,19 @@ public class HubTests
         hub.EndSession();
 
         // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 0));
+        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 0));
     }
 
     [Fact]
     public void CaptureEvent_ExceptionWithOpenSpan_SpanLinkedToEventContext()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
 
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 1
-        }, client);
         var scope = new Scope();
         var evt = new SentryEvent(new Exception());
         scope.Transaction = hub.StartTransaction("transaction", "operation");
-
         var child = scope.Transaction.StartChild("child", "child");
 
         // Act
@@ -371,13 +345,8 @@ public class HubTests
     public void CaptureEvent_SessionActive_ExceptionReportsError()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Release = "release"
-        }, client);
+        _fixture.Options.Release = "release";
+        var hub = _fixture.GetSut();
 
         hub.StartSession();
 
@@ -386,7 +355,7 @@ public class HubTests
         hub.EndSession();
 
         // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 1));
+        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 1));
     }
 
     [Fact]
@@ -434,47 +403,6 @@ public class HubTests
     }
 
     [Fact]
-    [Trait("Category", "Verify")]
-    public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
-    {
-        // Arrange
-        var worker = new FakeBackgroundWorker();
-
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Release = "release",
-            TracesSampleRate = 1.0
-        };
-        var client = new SentryClient(options, worker);
-        var hub = new Hub(options, client);
-
-        var transaction = hub.StartTransaction("my transaction", "my operation");
-        hub.ConfigureScope(scope => scope.Transaction = transaction);
-        hub.StartSession();
-
-        // Act
-        hub.CaptureEvent(new()
-        {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Mechanism = new()
-                    {
-                        Handled = false
-                    }
-                }
-            }
-        });
-
-        await Verifier.Verify(worker.Envelopes)
-            .IgnoreStandardSentryMembers()
-            .IgnoreMember("Stacktrace")
-            .IgnoreMember<SentryThread>(_ => _.Name);
-    }
-
-    [Fact]
     public void AppDomainUnhandledExceptionIntegration_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
     {
         // Arrange
@@ -514,10 +442,7 @@ public class HubTests
     public void StartTransaction_NameOpDescription_Works()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn
-        });
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction("name", "operation", "description");
@@ -532,11 +457,8 @@ public class HubTests
     public void StartTransaction_FromTraceHeader_CopiesContext()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 1
-        });
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
 
         var traceHeader = new SentryTraceHeader(
             SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
@@ -556,11 +478,8 @@ public class HubTests
     public void StartTransaction_FromTraceHeader_SampledInheritedFromParentRegardlessOfSampleRate()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 0
-        });
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
 
         var traceHeader = new SentryTraceHeader(
             SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
@@ -578,12 +497,9 @@ public class HubTests
     public void StartTransaction_FromTraceHeader_CustomSamplerCanSampleOutTransaction()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampler = _ => 0,
-            TracesSampleRate = 1
-        });
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.TracesSampler = _ => 0.0;
+        var hub = _fixture.GetSut();
 
         var traceHeader = new SentryTraceHeader(
             SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
@@ -601,11 +517,8 @@ public class HubTests
     public void StartTransaction_StaticSampling_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 1
-        });
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction("name", "operation");
@@ -618,11 +531,8 @@ public class HubTests
     public void StartTransaction_StaticSampling_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 0
-        });
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction("name", "operation");
@@ -681,11 +591,8 @@ public class HubTests
     public void StartTransaction_TracesSampler_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
-        });
+        _fixture.Options.TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction("foo", "op");
@@ -698,11 +605,8 @@ public class HubTests
     public void StartTransaction_TracesSampler_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0
-        });
+        _fixture.Options.TracesSampler = ctx => ctx.TransactionContext.Name == "foo" ? 1 : 0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction("bar", "op");
@@ -715,11 +619,9 @@ public class HubTests
     public void StartTransaction_TracesSampler_WithCustomContext_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
-        });
+        _fixture.Options.TracesSampler = ctx =>
+            ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction(
@@ -734,11 +636,9 @@ public class HubTests
     public void StartTransaction_TracesSampler_WithCustomContext_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampler = ctx => ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0
-        });
+        _fixture.Options.TracesSampler = ctx =>
+            ctx.CustomSamplingContext.GetValueOrDefault("xxx") as string == "zzz" ? 1 : 0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction(
@@ -753,12 +653,9 @@ public class HubTests
     public void StartTransaction_TracesSampler_FallbackToStatic_SampledIn()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampler = _ => null,
-            TracesSampleRate = 1
-        });
+        _fixture.Options.TracesSampler = _ => null;
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction("foo", "bar");
@@ -771,12 +668,9 @@ public class HubTests
     public void StartTransaction_TracesSampler_FallbackToStatic_SampledOut()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampler = _ => null,
-            TracesSampleRate = 0
-        });
+        _fixture.Options.TracesSampler = _ => null;
+        _fixture.Options.TracesSampleRate = 0.0;
+        var hub = _fixture.GetSut();
 
         // Act
         var transaction = hub.StartTransaction("foo", "bar");
@@ -789,11 +683,7 @@ public class HubTests
     public void GetTraceHeader_ReturnsHeaderForActiveSpan()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn
-        });
-
+        var hub = _fixture.GetSut();
         var transaction = hub.StartTransaction("foo", "bar");
 
         // Act
@@ -815,13 +705,7 @@ public class HubTests
     public void CaptureTransaction_AfterTransactionFinishes_ResetsTransactionOnScope()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn
-        }, client);
-
+        var hub = _fixture.GetSut();
         var transaction = hub.StartTransaction("foo", "bar");
 
         hub.WithScope(scope => scope.Transaction = transaction);
@@ -837,11 +721,7 @@ public class HubTests
     public void Dispose_IsEnabled_SetToFalse()
     {
         // Arrange
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn
-        });
-
+        var hub = _fixture.GetSut();
         hub.IsEnabled.Should().BeTrue();
 
         // Act
@@ -854,38 +734,28 @@ public class HubTests
     [Fact]
     public void Dispose_CalledSecondTime_ClientFlushedOnce()
     {
-        var client = Substitute.For<ISentryClient, IDisposable>();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn
-        };
-        var hub = new Hub(options, client);
+        var hub = _fixture.GetSut();
 
         // Act
         hub.Dispose();
         hub.Dispose();
 
         // Assert
-        client.Received(1).FlushAsync(Arg.Any<TimeSpan>());
+        _fixture.Client.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }
 
     [Fact]
     public void StartSession_CapturesUpdate()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Release = "release"
-        }, client);
+        _fixture.Options.Release = "release";
+        var hub = _fixture.GetSut();
 
         // Act
         hub.StartSession();
 
         // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
     }
 
     [Fact]
@@ -895,36 +765,28 @@ public class HubTests
         var sessionUpdate = new GlobalSessionManagerTests().TryRecoverPersistedSessionWithExceptionOnLastRun();
         var newSession = new SessionUpdate(Substitute.For<ISession>(), false, default, 0, null);
 
-        var client = Substitute.For<ISentryClient>();
         var sessionManager = Substitute.For<ISessionManager>();
         sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
         sessionManager.StartSession().Returns(newSession);
 
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Release = "release"
-        }, client, sessionManager);
+        _fixture.SessionManager = sessionManager;
+        _fixture.Options.Release = "release";
+        var hub = _fixture.GetSut();
 
         // Act
         hub.StartSession();
 
         // Assert
-        client.Received().CaptureSession(Arg.Is(sessionUpdate));
-        client.Received().CaptureSession(Arg.Is(newSession));
+        _fixture.Client.Received().CaptureSession(Arg.Is(sessionUpdate));
+        _fixture.Client.Received().CaptureSession(Arg.Is(newSession));
     }
 
     [Fact]
     public void EndSession_CapturesUpdate()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Release = "release"
-        }, client);
+        _fixture.Options.Release = "release";
+        var hub = _fixture.GetSut();
 
         hub.StartSession();
 
@@ -932,74 +794,57 @@ public class HubTests
         hub.EndSession();
 
         // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
+        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => !s.IsInitial));
     }
 
     [Fact]
     public void Ctor_AutoSessionTrackingEnabled_StartsSession()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
+        _fixture.Options.AutoSessionTracking = true;
+        _fixture.Options.Release = "release";
 
         // Act
-        _ = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            AutoSessionTracking = true,
-            Release = "release"
-        }, client);
+        _ = _fixture.GetSut();
 
         // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
     }
 
     [Fact]
     public void Ctor_GlobalModeTrue_DoesNotPushScope()
     {
         // Arrange
-        var scopeManager = Substitute.For<IInternalScopeManager>();
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        _fixture.Options.IsGlobalModeEnabled = true;
 
         // Act
-        _ = new Hub(new SentryOptions
-        {
-            IsGlobalModeEnabled = true,
-            Dsn = ValidDsn,
-        }, scopeManager: scopeManager);
+        _ = _fixture.GetSut();
 
         // Assert
-        scopeManager.DidNotReceiveWithAnyArgs().PushScope();
+        _fixture.ScopeManager.DidNotReceiveWithAnyArgs().PushScope();
     }
 
     [Fact]
     public void Ctor_GlobalModeFalse_DoesPushScope()
     {
         // Arrange
-        var scopeManager = Substitute.For<IInternalScopeManager>();
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        _fixture.Options.IsGlobalModeEnabled = false;
 
         // Act
-        var options = new SentryOptions
-        {
-            IsGlobalModeEnabled = false,
-            Dsn = ValidDsn,
-        };
-
-        _ = new Hub(options, scopeManager: scopeManager);
+        _ = _fixture.GetSut();
 
         // Assert
-        scopeManager.Received(1).PushScope();
+        _fixture.ScopeManager.Received(1).PushScope();
     }
 
     [Fact]
     public void ResumeSession_WithinAutoTrackingInterval_ContinuesSameSession()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999)
-        }, client);
+        _fixture.Options.AutoSessionTrackingInterval = TimeSpan.FromSeconds(9999);
+        var hub = _fixture.GetSut();
 
         hub.StartSession();
         hub.PauseSession();
@@ -1008,104 +853,82 @@ public class HubTests
         hub.ResumeSession();
 
         // Assert
-        client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+        _fixture.Client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
     }
 
     [Fact]
     public void ResumeSession_BeyondAutoTrackingInterval_EndsPreviousSessionAndStartsANewOne()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-        var clock = Substitute.For<ISystemClock>();
+        _fixture.Options.AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10);
+        _fixture.Options.Release = "release";
+        _fixture.Clock = Substitute.For<ISystemClock>();
+        _fixture.SessionManager = new GlobalSessionManager(_fixture.Options, _fixture.Clock);
 
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10),
-            Release = "release"
-        };
+        var hub = _fixture.GetSut();
+        var now = DateTimeOffset.Now;
 
-        var hub = new Hub(
-            options,
-            client,
-            clock: clock,
-            sessionManager: new GlobalSessionManager(options, clock));
-
-        clock.GetUtcNow().Returns(DateTimeOffset.Now);
+        _fixture.Clock.GetUtcNow().Returns(now);
 
         hub.StartSession();
         hub.PauseSession();
 
-        clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+        _fixture.Clock.GetUtcNow().Returns(now.AddDays(1));
 
         // Act
         hub.ResumeSession();
 
         // Assert
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
-        client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
+        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus == SessionEndStatus.Exited));
+        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.IsInitial));
     }
 
     [Fact]
     public void ResumeSession_NoActiveSession_DoesNothing()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-        var clock = Substitute.For<ISystemClock>();
+        _fixture.Options.AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10);
+        _fixture.Clock = Substitute.For<ISystemClock>();
+        _fixture.SessionManager = new GlobalSessionManager(_fixture.Options, _fixture.Clock);
 
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
-        };
+        var hub = _fixture.GetSut();
+        var now = DateTimeOffset.Now;
 
-        var hub = new Hub(
-            options,
-            clock: clock,
-            sessionManager: new GlobalSessionManager(options, clock));
-
-        clock.GetUtcNow().Returns(DateTimeOffset.Now);
+        _fixture.Clock.GetUtcNow().Returns(now);
 
         hub.PauseSession();
 
-        clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+        _fixture.Clock.GetUtcNow().Returns(now.AddDays(1));
 
         // Act
         hub.ResumeSession();
 
         // Assert
-        client.DidNotReceive().CaptureSession(Arg.Any<SessionUpdate>());
+        _fixture.Client.DidNotReceive().CaptureSession(Arg.Any<SessionUpdate>());
     }
 
     [Fact]
     public void ResumeSession_NoPausedSession_DoesNothing()
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
-        var clock = Substitute.For<ISystemClock>();
+        _fixture.Options.AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10);
+        _fixture.Clock = Substitute.For<ISystemClock>();
+        _fixture.SessionManager = new GlobalSessionManager(_fixture.Options, _fixture.Clock);
 
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(10)
-        };
+        var hub = _fixture.GetSut();
+        var now = DateTimeOffset.Now;
 
-        var hub = new Hub(
-            options,
-            clock: clock,
-            sessionManager: new GlobalSessionManager(options, clock));
-
-        clock.GetUtcNow().Returns(DateTimeOffset.Now);
+        _fixture.Clock.GetUtcNow().Returns(now);
 
         hub.StartSession();
 
-        clock.GetUtcNow().Returns(DateTimeOffset.Now + TimeSpan.FromDays(1));
+        _fixture.Clock.GetUtcNow().Returns(now.AddDays(1));
 
         // Act
         hub.ResumeSession();
 
         // Assert
-        client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
+        _fixture.Client.DidNotReceive().CaptureSession(Arg.Is<SessionUpdate>(s => s.EndStatus != null));
     }
 
     [Theory]
@@ -1117,13 +940,9 @@ public class HubTests
     public void CaptureEvent_MessageOnlyEvent_SpanLinkedToEventContext(SentryLevel level)
     {
         // Arrange
-        var client = Substitute.For<ISentryClient>();
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
 
-        var hub = new Hub(new SentryOptions
-        {
-            Dsn = ValidDsn,
-            TracesSampleRate = 1
-        }, client);
         var scope = new Scope();
         var evt = new SentryEvent
         {
@@ -1145,15 +964,11 @@ public class HubTests
         Assert.Null(child.Status);
     }
 
-    [SkippableTheory]
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
     {
-#if __MOBILE__ && CI_BUILD
-        Skip.If(cachingEnabled, "Test is flaky on mobile in CI.");
-#endif
-
         // Arrange
         var fileSystem = new FakeFileSystem();
         using var cacheDirectory = new TempDirectory(fileSystem);
@@ -1162,6 +977,8 @@ public class HubTests
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
+            AutoSessionTracking = false,
+            IsGlobalModeEnabled = true,
             Transport = transport
         };
 

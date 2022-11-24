@@ -1,4 +1,3 @@
-using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
 
 namespace Sentry.Tests.Internals.Http;

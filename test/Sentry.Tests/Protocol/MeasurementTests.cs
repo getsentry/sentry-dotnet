@@ -1,7 +1,6 @@
 namespace Sentry.Tests.Protocol;
 
-[UsesVerify]
-public class MeasurementTests
+public partial class MeasurementTests
 {
     private static readonly MeasurementUnit EmptyUnit = new();
 
@@ -185,8 +184,8 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(int.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
+            t.Measurements["foo"].Value.As<int>() == int.MaxValue &&
+            t.Measurements["foo"].Unit == EmptyUnit));
     }
 
     [Fact]
@@ -209,8 +208,8 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(long.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
+            t.Measurements["foo"].Value.As<long>() == long.MaxValue &&
+            t.Measurements["foo"].Unit == EmptyUnit));
     }
 
     [Fact]
@@ -233,8 +232,8 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(ulong.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
+            t.Measurements["foo"].Value.As<ulong>() == ulong.MaxValue &&
+            t.Measurements["foo"].Unit == EmptyUnit));
     }
 
     [Fact]
@@ -257,8 +256,8 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(double.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(EmptyUnit)));
+            Math.Abs(t.Measurements["foo"].Value.As<double>() - double.MaxValue) < double.Epsilon &&
+            t.Measurements["foo"].Unit == EmptyUnit));
     }
 
     [Fact]
@@ -281,8 +280,8 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(int.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.Duration.Nanosecond)));
+            t.Measurements["foo"].Value.As<int>() == int.MaxValue &&
+            t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond));
     }
 
     [Fact]
@@ -305,8 +304,8 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(long.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.Duration.Nanosecond)));
+            t.Measurements["foo"].Value.As<long>() == long.MaxValue &&
+            t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond));
     }
 
     [Fact]
@@ -329,8 +328,8 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(ulong.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.Duration.Nanosecond)));
+            t.Measurements["foo"].Value.As<ulong>() == ulong.MaxValue &&
+            t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond));
     }
 
     [Fact]
@@ -353,30 +352,7 @@ public class MeasurementTests
         // Assert
         client.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
             t.Measurements.Count == 1 &&
-            t.Measurements["foo"].Value.Equals(double.MaxValue) &&
-            t.Measurements["foo"].Unit.Equals(MeasurementUnit.Duration.Nanosecond)));
-    }
-
-    [Fact]
-    [Trait("Category", "Verify")]
-    public Task Transaction_Serializes_Measurements()
-    {
-        var transaction = new Transaction("name", "operation");
-        transaction.Contexts.Trace.SpanId = SpanId.Empty;
-
-        transaction.SetMeasurement("_", 0, MeasurementUnit.None);
-        transaction.SetMeasurement("a", int.MaxValue);
-        transaction.SetMeasurement("b", int.MaxValue, MeasurementUnit.Duration.Second);
-        transaction.SetMeasurement("c", long.MaxValue);
-        transaction.SetMeasurement("d", long.MaxValue, MeasurementUnit.Information.Kilobyte);
-        transaction.SetMeasurement("e", ulong.MaxValue);
-        transaction.SetMeasurement("f", ulong.MaxValue, MeasurementUnit.Information.Exbibyte);
-        transaction.SetMeasurement("g", double.MaxValue);
-        transaction.SetMeasurement("h", double.MaxValue, MeasurementUnit.Custom("foo"));
-        transaction.SetMeasurement("i", 0.5, MeasurementUnit.Fraction.Ratio);
-        transaction.SetMeasurement("j", 88.25, MeasurementUnit.Fraction.Percent);
-
-        var json = transaction.ToJsonString();
-        return VerifyJson(json);
+            Math.Abs(t.Measurements["foo"].Value.As<double>() - double.MaxValue) < double.Epsilon &&
+            t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond));
     }
 }

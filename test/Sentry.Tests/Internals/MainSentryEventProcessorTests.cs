@@ -272,14 +272,18 @@ public class MainSentryEventProcessorTests
     }
 
     [Theory]
-    [InlineData(null, Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-    [InlineData("", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-    [InlineData(" ", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+    [InlineData(null, null)] // Missing: will get default value.
+    [InlineData("", null)] // Missing: will get default value.
+    [InlineData(" ", null)] // Missing: will get default value.
     [InlineData("a", "a")] // Provided: nothing will change.
     [InlineData("production", "production")] // Provided: nothing will change. (value has a lower case 'p', different to default value)
     [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
     public void Process_EnvironmentOnOptions_SetToEvent(string environment, string expectedEnvironment)
     {
+        expectedEnvironment ??= Debugger.IsAttached
+            ? Sentry.Internal.Constants.DebugEnvironmentSetting
+            : Sentry.Internal.Constants.ProductionEnvironmentSetting;
+
         _fixture.SentryOptions.Environment = environment;
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
@@ -290,14 +294,18 @@ public class MainSentryEventProcessorTests
     }
 
     [Theory]
-    [InlineData(null, Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-    [InlineData("", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
-    [InlineData(" ", Sentry.Internal.Constants.ProductionEnvironmentSetting)] // Missing: will get default value.
+    [InlineData(null, null)] // Missing: will get default value.
+    [InlineData("", null)] // Missing: will get default value.
+    [InlineData(" ", null)] // Missing: will get default value.
     [InlineData("a", "a")] // Provided: nothing will change.
     [InlineData("Production", "Production")] // Provided: nothing will change. (value has a upper case 'p', different to default value)
     [InlineData("aBcDe F !@#$ gHi", "aBcDe F !@#$ gHi")] // Provided: nothing will change. (Case check)
     public void Process_NoEnvironmentOnOptions_SameAsEnvironmentVariable(string environment, string expectedEnvironment)
     {
+        expectedEnvironment ??= Debugger.IsAttached
+            ? Sentry.Internal.Constants.DebugEnvironmentSetting
+            : Sentry.Internal.Constants.ProductionEnvironmentSetting;
+
         _fixture.SentryOptions.Environment = null;
         _fixture.SentryOptions.FakeSettings()
             .EnvironmentVariables[Sentry.Internal.Constants.EnvironmentEnvironmentVariable] = environment;

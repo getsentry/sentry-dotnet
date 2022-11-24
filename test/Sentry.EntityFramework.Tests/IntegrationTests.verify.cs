@@ -1,5 +1,4 @@
 #if NETFRAMEWORK
-
 namespace Sentry.EntityFramework.Tests;
 
 [UsesVerify]

@@ -1,7 +1,6 @@
 namespace Sentry.Tests.Internals;
 
-[UsesVerify]
-public class MainExceptionProcessorTests
+public partial class MainExceptionProcessorTests
 {
     private class Fixture
     {
@@ -147,32 +146,6 @@ public class MainExceptionProcessorTests
         var actual = sut.CreateSentryExceptions(ex);
 
         Assert.Empty(actual.Single().Data);
-    }
-
-    [Fact]
-    [Trait("Category", "Verify")]
-    public Task CreateSentryException_Aggregate()
-    {
-        var sut = _fixture.GetSut();
-        var aggregateException = BuildAggregateException();
-
-        var sentryException = sut.CreateSentryExceptions(aggregateException);
-
-        return Verifier.Verify(sentryException);
-    }
-
-    [Fact]
-    [Trait("Category", "Verify")]
-    public Task CreateSentryException_Aggregate_Keep()
-    {
-        _fixture.SentryOptions.KeepAggregateException = true;
-        var sut = _fixture.GetSut();
-        var aggregateException = BuildAggregateException();
-
-        var sentryException = sut.CreateSentryExceptions(aggregateException);
-
-        return Verifier.Verify(sentryException)
-            .ScrubLines(x => x.Contains("One or more errors occurred"));
     }
 
     [Fact]

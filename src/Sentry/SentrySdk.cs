@@ -51,11 +51,16 @@ public static partial class SentrySdk
             options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
         }
 
-        // Initialize bundled platform SDKs here
-#if ANDROID
+        // Initialize native platform SDKs here
+#if __MOBILE__
+        if (options.InitNativeSdks)
+        {
+#if __IOS__
+            InitSentryCocoaSdk(options);
+#elif ANDROID
             InitSentryAndroidSdk(options);
-#elif __IOS__
-        InitSentryCocoaSdk(options);
+#endif
+        }
 #endif
         return new Hub(options);
     }
