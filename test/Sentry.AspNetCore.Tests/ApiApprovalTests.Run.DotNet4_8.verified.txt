@@ -1,14 +1,30 @@
 ﻿namespace Microsoft.AspNetCore.Builder
 {
-    public static class SentryTracingMiddlewareExtensions { }
+    public static class SentryTracingMiddlewareExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseSentryTracing(this Microsoft.AspNetCore.Builder.IApplicationBuilder builder) { }
+    }
 }
 namespace Microsoft.AspNetCore.Hosting
 {
-    public static class SentryWebHostBuilderExtensions { }
+    public static class SentryWebHostBuilderExtensions
+    {
+        public static void AddSentryTunneling(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, params string[] hostnames) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Sentry.AspNetCore.ISentryBuilder>? configureSentry) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Sentry.AspNetCore.SentryAspNetCoreOptions>? configureOptions) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Microsoft.AspNetCore.Hosting.WebHostBuilderContext, Sentry.AspNetCore.ISentryBuilder>? configureSentry) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Microsoft.AspNetCore.Hosting.WebHostBuilderContext, Sentry.AspNetCore.SentryAspNetCoreOptions>? configureOptions) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, string dsn) { }
+        public static void UseSentryTunneling(this Microsoft.AspNetCore.Builder.IApplicationBuilder builder, string path = "/tunnel") { }
+    }
 }
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceCollectionExtensions { }
+    public static class ServiceCollectionExtensions
+    {
+        public static Sentry.AspNetCore.ISentryBuilder AddSentry(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+    }
 }
 namespace Sentry.AspNetCore
 {

@@ -1,7 +1,15 @@
 ﻿namespace Microsoft.Extensions.Logging
 {
-    public static class LoggingBuilderExtensions { }
-    public static class SentryLoggerFactoryExtensions { }
+    public static class LoggingBuilderExtensions
+    {
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder) { }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration) { }
+        public static Microsoft.Extensions.Logging.ILoggingBuilder AddSentry(this Microsoft.Extensions.Logging.ILoggingBuilder builder, string dsn) { }
+    }
+    public static class SentryLoggerFactoryExtensions
+    {
+        public static Microsoft.Extensions.Logging.ILoggerFactory AddSentry(this Microsoft.Extensions.Logging.ILoggerFactory factory, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration = null) { }
+    }
 }
 namespace Sentry.Extensions.Logging
 {
