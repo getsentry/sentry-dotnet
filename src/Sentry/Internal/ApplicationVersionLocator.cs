@@ -1,4 +1,3 @@
-using System.Reflection;
 using Sentry.Reflection;
 
 namespace Sentry.Internal;

@@ -29,8 +29,6 @@
     <Using Include="System.Runtime.InteropServices" />
     <Using Include="Effort.Provider" />
     <Using Include="Sentry.EntityFramework.ErrorProcessors" />
-    <Using Include="Sentry.Testing" />
-    <Using Include="Sentry.Tests" />
   </ItemGroup>
 
 </Project>

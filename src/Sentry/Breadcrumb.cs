@@ -1,7 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 

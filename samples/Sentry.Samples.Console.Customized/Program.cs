@@ -1,6 +1,7 @@
-using System.Net.Http;
 using System.Reflection;
 using System.Xml.Xsl;
+using Sentry;
+using Sentry.Extensibility;
 
 // One of the ways to set your DSN is via an attribute:
 // It could be set via AssemblyInfo.cs and patched via CI.

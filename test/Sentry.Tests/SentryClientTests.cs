@@ -1,6 +1,5 @@
-using System.Net.Http;
 using Sentry.Internal.Http;
-using Sentry.Testing;
+using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 #pragma warning disable CS0618
 

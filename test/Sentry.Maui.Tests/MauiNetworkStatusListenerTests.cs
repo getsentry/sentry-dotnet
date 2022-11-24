@@ -1,5 +1,4 @@
 using Sentry.Maui.Internal;
-using Sentry.Testing;
 
 namespace Sentry.Maui.Tests;
 

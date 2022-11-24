@@ -1,3 +1,5 @@
+using Sentry.AspNetCore.Tests;
+
 namespace Sentry.Serilog.Tests;
 
 public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture

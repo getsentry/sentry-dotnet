@@ -1,15 +1,16 @@
 #if !__MOBILE__
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using PublicApiGenerator;
 
-namespace Sentry.Tests;
+namespace Sentry.Testing;
 
 public static class ApiExtensions
 {
     public static Task CheckApproval(this Assembly assembly, [CallerFilePath] string filePath = "")
     {
-        var generatorOptions = new ApiGeneratorOptions { WhitelistedNamespacePrefixes = new[] { "Sentry" } };
+        var generatorOptions = new ApiGeneratorOptions
+        {
+            WhitelistedNamespacePrefixes = new[] { "Sentry", "Microsoft" }
+        };
         var apiText = assembly.GeneratePublicApi(generatorOptions);
         return Verify(apiText, null, filePath)
             .AutoVerify(includeBuildServer: false)

@@ -1,7 +1,3 @@
-using System.Reflection;
-using System.Text.Json;
-using Sentry.Testing;
-
 namespace Sentry.Tests.Internals;
 
 public class JsonTests

@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Reference Include="System.Web" />
+    <Using Include="System.Web" />
   </ItemGroup>
 
   <ItemGroup>

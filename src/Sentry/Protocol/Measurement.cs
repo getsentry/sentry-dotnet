@@ -1,88 +1,86 @@
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.Protocol
+namespace Sentry.Protocol;
+
+/// <summary>
+/// A measurement, containing a numeric value and a unit.
+/// </summary>
+public sealed class Measurement : IJsonSerializable
 {
     /// <summary>
-    /// A measurement, containing a numeric value and a unit.
+    /// The numeric value of the measurement.
     /// </summary>
-    public sealed class Measurement : IJsonSerializable
+    public object Value { get; }
+
+    /// <summary>
+    /// The unit of measurement.
+    /// </summary>
+    public MeasurementUnit Unit { get; }
+
+    private Measurement(object value, MeasurementUnit unit)
     {
-        /// <summary>
-        /// The numeric value of the measurement.
-        /// </summary>
-        public object Value { get; }
+        Value = value;
+        Unit = unit;
+    }
 
-        /// <summary>
-        /// The unit of measurement.
-        /// </summary>
-        public MeasurementUnit Unit { get; }
+    internal Measurement(int value, MeasurementUnit unit = default)
+    {
+        Value = value;
+        Unit = unit;
+    }
 
-        private Measurement(object value, MeasurementUnit unit)
+    internal Measurement(long value, MeasurementUnit unit = default)
+    {
+        Value = value;
+        Unit = unit;
+    }
+
+    internal Measurement(ulong value, MeasurementUnit unit = default)
+    {
+        Value = value;
+        Unit = unit;
+    }
+
+    internal Measurement(double value, MeasurementUnit unit = default)
+    {
+        Value = value;
+        Unit = unit;
+    }
+
+    /// <inheritdoc />
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    {
+        writer.WriteStartObject();
+
+        switch (Value)
         {
-            Value = value;
-            Unit = unit;
+            case int number:
+                writer.WriteNumber("value", number);
+                break;
+            case long number:
+                writer.WriteNumber("value", number);
+                break;
+            case ulong number:
+                writer.WriteNumber("value", number);
+                break;
+            case double number:
+                writer.WriteNumber("value", number);
+                break;
         }
 
-        internal Measurement(int value, MeasurementUnit unit = default)
-        {
-            Value = value;
-            Unit = unit;
-        }
+        writer.WriteStringIfNotWhiteSpace("unit", Unit.ToString());
 
-        internal Measurement(long value, MeasurementUnit unit = default)
-        {
-            Value = value;
-            Unit = unit;
-        }
+        writer.WriteEndObject();
+    }
 
-        internal Measurement(ulong value, MeasurementUnit unit = default)
-        {
-            Value = value;
-            Unit = unit;
-        }
-
-        internal Measurement(double value, MeasurementUnit unit = default)
-        {
-            Value = value;
-            Unit = unit;
-        }
-
-        /// <inheritdoc />
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
-        {
-            writer.WriteStartObject();
-
-            switch (Value)
-            {
-                case int number:
-                    writer.WriteNumber("value", number);
-                    break;
-                case long number:
-                    writer.WriteNumber("value", number);
-                    break;
-                case ulong number:
-                    writer.WriteNumber("value", number);
-                    break;
-                case double number:
-                    writer.WriteNumber("value", number);
-                    break;
-            }
-
-            writer.WriteStringIfNotWhiteSpace("unit", Unit.ToString());
-
-            writer.WriteEndObject();
-        }
-
-        /// <summary>
-        /// Parses from JSON.
-        /// </summary>
-        public static Measurement FromJson(JsonElement json)
-        {
-            var value = json.GetProperty("value").GetDynamicOrNull()!;
-            var unit = json.GetPropertyOrNull("unit")?.GetString();
-            return new Measurement(value, MeasurementUnit.Parse(unit));
-        }
+    /// <summary>
+    /// Parses from JSON.
+    /// </summary>
+    public static Measurement FromJson(JsonElement json)
+    {
+        var value = json.GetProperty("value").GetDynamicOrNull()!;
+        var unit = json.GetPropertyOrNull("unit")?.GetString();
+        return new Measurement(value, MeasurementUnit.Parse(unit));
     }
 }

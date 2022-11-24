@@ -1,5 +1,4 @@
 using System.Data;
-using System.Net.Http;
 
 namespace Samples.AspNetCore.Mvc;
 

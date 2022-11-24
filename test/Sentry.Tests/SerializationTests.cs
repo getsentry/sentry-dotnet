@@ -1,8 +1,4 @@
 #if !__MOBILE__
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Sentry.Testing;
-
 namespace Sentry.Tests;
 
 [UsesVerify]

@@ -1,9 +1,5 @@
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using Sentry.Http;
 using Sentry.Internal.Http;
-using Sentry.Testing;
 using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Internals.Http;

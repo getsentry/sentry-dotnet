@@ -1,6 +1,3 @@
-using System.Net.Http;
-using System.Text.Json;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class HttpClientExtensions

@@ -1,4 +1,3 @@
-using System.Web;
 using Sentry.AspNet.Internal;
 
 namespace Sentry.AspNet.Tests.Internal;

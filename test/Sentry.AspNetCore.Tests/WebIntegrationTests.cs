@@ -1,12 +1,9 @@
 #if NET6_0_OR_GREATER
-
-using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Sentry.Testing;
 
 namespace Sentry.AspNetCore.Tests;
 

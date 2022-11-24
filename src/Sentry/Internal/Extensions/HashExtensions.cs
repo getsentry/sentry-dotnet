@@ -1,6 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class HashExtensions

@@ -1,16 +1,5 @@
-// ReSharper disable CheckNamespace
-// ReSharper disable RedundantUsingDirective
-
 // Polyfills to bridge the missing APIs in older versions of the framework/standard.
 // In some cases, these just proxy calls to existing methods but also provide a signature that matches .netstd2.1
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 #if !NET5_0_OR_GREATER
 using Sentry.Internal.Http;
@@ -96,6 +85,15 @@ namespace System
 #endif
 
 #if NETFRAMEWORK
+namespace System.Net.Http.Headers
+{
+    // This class just helps resolve the namespace for the global using.
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal static class Shim
+    {
+    }
+}
+
 namespace System.Linq
 {
     internal static class PolyfillExtensions

@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;

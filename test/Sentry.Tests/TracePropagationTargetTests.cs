@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace Sentry.Tests;
 
 public class TracePropagationTargetTests

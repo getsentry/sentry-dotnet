@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Web;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 

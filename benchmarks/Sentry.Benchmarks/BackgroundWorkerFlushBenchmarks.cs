@@ -1,7 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
+using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Benchmarks;
 

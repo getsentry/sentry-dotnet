@@ -1,6 +1,3 @@
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class CollectionsExtensions

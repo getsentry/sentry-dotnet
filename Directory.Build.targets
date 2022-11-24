@@ -53,9 +53,4 @@
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
       Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
 
-  <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
-  <ItemGroup>
-    <Using Remove="System.Net.Http" />
-    <Using Remove="System.Net.Http.Json" />
-  </ItemGroup>
 </Project>

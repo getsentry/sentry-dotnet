@@ -1,5 +1,3 @@
-using Sentry.Tests;
-
 namespace Sentry.AspNetCore.Grpc.Tests;
 
 [UsesVerify]

@@ -1,6 +1,4 @@
 #if !__MOBILE__
-using System.Collections.Concurrent;
-
 namespace Sentry.Tests.Internals;
 
 [UsesVerify]

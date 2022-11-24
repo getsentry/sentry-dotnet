@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Sentry.Internal;
 // Workaround for the fact that setting a list in config options appends instead of replaces.
 // See https://github.com/dotnet/runtime/issues/36569
