@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Maui.Tests;
 
 [UsesVerify]
@@ -10,4 +9,3 @@ public class ApiApprovalTests
         return typeof(SentryMauiOptions).Assembly.CheckApproval();
     }
 }
-#endif

@@ -1,4 +1,3 @@
-#if !__MOBILE__
 using Sentry.PlatformAbstractions;
 
 // ReSharper disable once CheckNamespace
@@ -39,4 +38,3 @@ public partial class SentryStackTraceFactoryTests
             .UseParameters(mode);
     }
 }
-#endif

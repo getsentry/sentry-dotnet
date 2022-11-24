@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -57,4 +56,3 @@ public class SerializationTests
             => writer.WriteStringValue(value.Value);
     }
 }
-#endif

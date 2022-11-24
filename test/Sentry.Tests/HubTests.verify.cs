@@ -1,4 +1,3 @@
-#if !__MOBILE__
 using Sentry.Testing;
 
 namespace Sentry.Tests;
@@ -46,4 +45,3 @@ public partial class HubTests
             .IgnoreMember<SentryThread>(_ => _.Name);
     }
 }
-#endif

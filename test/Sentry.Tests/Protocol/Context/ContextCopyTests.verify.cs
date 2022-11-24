@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests.Protocol.Context;
 
 [UsesVerify]
@@ -89,4 +88,3 @@ public class ContextCopyTests
         await Verify(verifiable);
     }
 }
-#endif

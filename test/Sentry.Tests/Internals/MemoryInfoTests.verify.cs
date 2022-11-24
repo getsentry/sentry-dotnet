@@ -1,5 +1,4 @@
-#if !__MOBILE__ && NETCOREAPP3_1_OR_GREATER
-
+#if NETCOREAPP3_1_OR_GREATER
 using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;

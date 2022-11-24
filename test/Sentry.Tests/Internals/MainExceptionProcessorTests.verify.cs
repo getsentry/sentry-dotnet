@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests.Internals;
 
 [UsesVerify]
@@ -28,4 +27,3 @@ public partial class MainExceptionProcessorTests
             .ScrubLines(x => x.Contains("One or more errors occurred"));
     }
 }
-#endif

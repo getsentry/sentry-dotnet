@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests.Protocol;
 
 [UsesVerify]
@@ -26,4 +25,3 @@ public partial class MeasurementTests
         return VerifyJson(json);
     }
 }
-#endif

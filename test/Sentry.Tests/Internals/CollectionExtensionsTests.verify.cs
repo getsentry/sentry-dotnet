@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests.Internals;
 
 [UsesVerify]
@@ -16,4 +15,3 @@ public class CollectionExtensionsTests
     {
     }
 }
-#endif

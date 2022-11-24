@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -90,4 +89,3 @@ public class EventProcessorTests
             AttachStacktrace = false
         };
 }
-#endif

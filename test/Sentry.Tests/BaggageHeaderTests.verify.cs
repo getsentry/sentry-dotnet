@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -74,4 +73,3 @@ public partial class BaggageHeaderTests
         }
     }
 }
-#endif

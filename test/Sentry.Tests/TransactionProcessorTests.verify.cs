@@ -1,5 +1,3 @@
-#if !__MOBILE__
-
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -47,4 +45,3 @@ public partial class TransactionProcessorTests
             .IgnoreStandardSentryMembers();
     }
 }
-#endif

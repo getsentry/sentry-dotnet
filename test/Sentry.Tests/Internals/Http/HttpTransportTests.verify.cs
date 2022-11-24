@@ -1,4 +1,3 @@
-#if !__MOBILE__
 using Sentry.Http;
 
 namespace Sentry.Tests.Internals.Http;
@@ -50,4 +49,3 @@ public partial class HttpTransportTests
             .IgnoreMembers("timestamp");
     }
 }
-#endif

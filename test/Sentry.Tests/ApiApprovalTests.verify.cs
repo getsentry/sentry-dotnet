@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -10,4 +9,3 @@ public class ApiApprovalTests
         return typeof(SentrySdk).Assembly.CheckApproval();
     }
 }
-#endif

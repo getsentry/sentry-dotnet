@@ -1,4 +1,3 @@
-#if !__MOBILE__
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -18,4 +17,3 @@ public partial class SentryClientTests
         return Verify(@event.Breadcrumbs);
     }
 }
-#endif
