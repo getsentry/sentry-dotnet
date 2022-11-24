@@ -1,4 +1,3 @@
-using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
