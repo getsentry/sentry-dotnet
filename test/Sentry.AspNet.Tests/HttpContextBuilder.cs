@@ -1,5 +1,3 @@
-using System.Web;
-
 namespace Sentry.AspNet.Tests;
 
 public static class HttpContextBuilder

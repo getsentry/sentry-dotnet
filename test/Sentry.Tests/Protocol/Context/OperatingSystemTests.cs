@@ -1,4 +1,3 @@
-using Sentry.Testing;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
 namespace Sentry.Tests.Protocol.Context;

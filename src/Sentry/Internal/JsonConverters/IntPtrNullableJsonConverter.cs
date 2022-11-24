@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-
-namespace Sentry.Internal.JsonConverters;
+﻿namespace Sentry.Internal.JsonConverters;
 
 internal class IntPtrNullableJsonConverter : JsonConverter<IntPtr?>
 {

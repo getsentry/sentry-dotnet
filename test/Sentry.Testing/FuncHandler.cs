@@ -1,5 +1,3 @@
-using System.Net.Http;
-
 namespace Sentry.Testing;
 
 public class FuncHandler : HttpMessageHandler

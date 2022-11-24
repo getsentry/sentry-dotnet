@@ -1,4 +1,3 @@
-using System.Net.Http;
 using Sentry.Http;
 
 namespace Sentry.AspNetCore.Tests;

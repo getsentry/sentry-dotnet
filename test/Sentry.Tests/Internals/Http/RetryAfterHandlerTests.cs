@@ -1,9 +1,4 @@
-using System.Globalization;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Sentry.Internal.Http;
-using Sentry.Testing;
 using static System.Threading.CancellationToken;
 
 namespace Sentry.Tests.Internals.Http;

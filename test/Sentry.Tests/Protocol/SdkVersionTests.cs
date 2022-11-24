@@ -1,6 +1,3 @@
-using System.Text.RegularExpressions;
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol;
 
 public class SdkVersionTests

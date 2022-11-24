@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using Sentry.Testing;
 using MauiConstants = Sentry.Maui.Internal.Constants;
 
 namespace Sentry.Maui.Tests;

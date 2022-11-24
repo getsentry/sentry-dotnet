@@ -1,4 +1,3 @@
-using System.Net.Http;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Infrastructure;

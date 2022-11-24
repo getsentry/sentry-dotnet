@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Internals;
 
 public class ClientReportRecorderTests

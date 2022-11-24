@@ -1,5 +1,4 @@
 using Sentry.Internal.DiagnosticSource;
-using Sentry.Testing;
 using static Sentry.Internal.DiagnosticSource.SentrySqlListener;
 
 namespace Sentry.DiagnosticSource.Tests;

@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;

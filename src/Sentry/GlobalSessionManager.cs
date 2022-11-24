@@ -1,4 +1,3 @@
-using System.Net.NetworkInformation;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;

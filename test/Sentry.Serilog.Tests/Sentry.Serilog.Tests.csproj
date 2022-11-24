@@ -17,9 +17,6 @@
     <Using Include="System.Text.Json" />
     <Using Include="Microsoft.AspNetCore.Builder" />
     <Using Include="Microsoft.AspNetCore.Hosting" />
-    <Using Include="Sentry.AspNetCore.Tests" />
-    <Using Include="Sentry.Testing" />
-    <Using Include="Sentry.Tests" />
     <Using Include="Serilog" />
     <Using Include="Serilog.Events" />
     <Using Include="Serilog.Context" />

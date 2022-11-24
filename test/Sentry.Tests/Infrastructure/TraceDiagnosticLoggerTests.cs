@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Trace = System.Diagnostics.Trace;
 
 namespace Sentry.Tests.Infrastructure;

@@ -1,5 +1,3 @@
-using System.Runtime.Serialization;
-
 namespace Sentry.Protocol;
 
 /// <summary>

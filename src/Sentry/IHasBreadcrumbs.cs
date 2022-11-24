@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;

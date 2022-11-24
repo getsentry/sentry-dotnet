@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 using Runtime = Sentry.Protocol.Runtime;

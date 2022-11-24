@@ -1,7 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Text.RegularExpressions;
-
 namespace Sentry.Internal;
 
 // https://github.com/mono/mono/blob/d336d6be307dfea8b7a07268270c6d885db9d399/mcs/tools/mono-symbolicate/StackFrameData.cs

@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Web;
 using Sentry.AspNet.Internal;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;

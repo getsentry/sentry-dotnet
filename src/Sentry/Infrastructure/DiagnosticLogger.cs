@@ -1,4 +1,3 @@
-using System.Text;
 using Sentry.Extensibility;
 
 namespace Sentry.Infrastructure;

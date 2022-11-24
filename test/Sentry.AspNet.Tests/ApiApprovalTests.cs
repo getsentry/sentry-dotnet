@@ -1,5 +1,3 @@
-using Sentry.Tests;
-
 namespace Sentry.AspNet.Tests;
 
 [UsesVerify]

@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Microsoft.Extensions.Options;

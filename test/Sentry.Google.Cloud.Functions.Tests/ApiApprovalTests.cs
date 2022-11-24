@@ -1,5 +1,4 @@
 using Google.Cloud.Functions.Framework;
-using Sentry.Tests;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 

@@ -1,9 +1,6 @@
-using System.Diagnostics;
-using System.Reflection;
 using DiffEngine;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
-using Sentry.Testing;
 using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests;

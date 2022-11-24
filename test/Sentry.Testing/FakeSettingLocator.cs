@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using System.Reflection;
-
 namespace Sentry.Testing;
 
 internal class FakeSettingLocator : SettingLocator

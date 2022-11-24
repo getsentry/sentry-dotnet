@@ -1,7 +1,3 @@
-using System.Diagnostics;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Extensibility;

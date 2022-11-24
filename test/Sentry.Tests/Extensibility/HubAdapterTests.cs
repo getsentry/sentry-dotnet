@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace Sentry.Tests.Extensibility;
 
 [Collection(nameof(SentrySdkCollection))]

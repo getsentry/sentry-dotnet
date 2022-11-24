@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests.PlatformAbstractions;

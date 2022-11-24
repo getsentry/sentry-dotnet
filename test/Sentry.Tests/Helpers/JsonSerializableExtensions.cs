@@ -1,6 +1,3 @@
-using System.Buffers;
-using System.Text.Json;
-
 internal static class JsonSerializableExtensions
 {
     public static string ToJsonString(this IJsonSerializable serializable, IDiagnosticLogger logger = null) =>

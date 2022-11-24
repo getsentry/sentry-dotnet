@@ -2,24 +2,24 @@
 using Sentry.Extensibility;
 using Sentry.PlatformAbstractions;
 
-namespace Sentry.Integrations
+namespace Sentry.Integrations;
+
+internal class NetFxInstallationsIntegration : ISdkIntegration
 {
-    internal class NetFxInstallationsIntegration : ISdkIntegration
+    public void Register(IHub hub, SentryOptions options)
     {
-        public void Register(IHub hub, SentryOptions options)
+        try
         {
-            try
+            if (!Runtime.Current.IsMono())
             {
-                if (!Runtime.Current.IsMono())
-                {
-                    options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
-                }
+                options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
             }
-            catch (Exception ex)
-            {
-                options.LogError("Failed to register NetFxInstallations.", ex);
-            }
+        }
+        catch (Exception ex)
+        {
+            options.LogError("Failed to register NetFxInstallations.", ex);
         }
     }
 }
+
 #endif

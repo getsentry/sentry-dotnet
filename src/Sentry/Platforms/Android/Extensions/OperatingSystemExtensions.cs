@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
 namespace Sentry.Android.Extensions;

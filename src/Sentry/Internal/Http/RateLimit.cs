@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Sentry.Internal.Http;
 
 internal class RateLimit
