@@ -1,8 +1,3 @@
-using System.Diagnostics;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using Sentry.Internal.Extensions;
 using Sentry.Internal;
 
 namespace Sentry.Extensibility;
@@ -36,8 +31,8 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
         _options.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
         var stackTrace = exception is null ? new StackTrace(true) : new StackTrace(exception, true);
-        var result = SentryDebugStackTrace.Create(_options, stackTrace, isCurrentStackTrace);
-        _options.LogDebug("Created SentryDebugStackTrace with {0} frames.", result.Frames.Count);
+        var result = DebugStackTrace.Create(_options, stackTrace, isCurrentStackTrace);
+        _options.LogDebug($"Created {typeof(DebugStackTrace).Name} with {0} frames.", result.Frames.Count);
         return result.Frames.Count != 0 ? result : null;
     }
 }

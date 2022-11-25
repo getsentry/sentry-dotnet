@@ -103,7 +103,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
                     ? new List<SentryThread>(@event.SentryThreads) { thread }
                     : new[] { thread }.AsEnumerable();
 
-                if (stackTrace is SentryDebugStackTrace debugStackTrace)
+                if (stackTrace is DebugStackTrace debugStackTrace)
                 {
                     debugStackTrace.MergeDebugImagesInto(@event);
                 }
@@ -115,7 +115,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         {
             foreach (var sentryException in sentryExceptions)
             {
-                if (sentryException.Stacktrace is SentryDebugStackTrace debugStackTrace)
+                if (sentryException.Stacktrace is DebugStackTrace debugStackTrace)
                 {
                     debugStackTrace.MergeDebugImagesInto(@event);
                 }

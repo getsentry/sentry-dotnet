@@ -11,12 +11,12 @@ namespace Sentry.Internal;
 /// <summary>
 /// Sentry Stacktrace with debug images.
 /// </summary>
-internal sealed class SentryDebugStackTrace : SentryStackTrace
+internal class DebugStackTrace : SentryStackTrace
 {
     private readonly SentryOptions _options;
 
     // Debug images referenced by frames in this StackTrace
-    private readonly List<DebugImage> _debugImages = new();
+    protected readonly List<DebugImage> _debugImages = new();
     private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
     private const int DebugImageMissing = -1;
     private bool _debugImagesMerged = false;
@@ -36,11 +36,11 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
     private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    internal SentryDebugStackTrace(SentryOptions options) => _options = options;
+    internal DebugStackTrace(SentryOptions options) => _options = options;
 
-    internal static SentryDebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace)
+    internal static DebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace)
     {
-        var result = new SentryDebugStackTrace(options);
+        var result = new DebugStackTrace(options);
 
         var frames = result.CreateFrames(stackTrace, isCurrentStackTrace)
             .Reverse(); // Sentry expects the frames to be sent in reversed order
@@ -94,7 +94,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
                 {
                     if (i != j)
                     {
-                        relocations.Add(SentryDebugStackTrace.GetRelativeAddressMode(i), SentryDebugStackTrace.GetRelativeAddressMode(j));
+                        relocations.Add(DebugStackTrace.GetRelativeAddressMode(i), DebugStackTrace.GetRelativeAddressMode(j));
                     }
                     found = true;
                 }
@@ -102,7 +102,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
             if (!found)
             {
-                relocations.Add(SentryDebugStackTrace.GetRelativeAddressMode(i), SentryDebugStackTrace.GetRelativeAddressMode(@event.DebugImages.Count));
+                relocations.Add(DebugStackTrace.GetRelativeAddressMode(i), DebugStackTrace.GetRelativeAddressMode(@event.DebugImages.Count));
                 @event.DebugImages.Add(_debugImages[i]);
             }
         }
@@ -214,7 +214,7 @@ internal sealed class SentryDebugStackTrace : SentryStackTrace
 
             if (AddDebugImage(method.Module) is int moduleIdx && moduleIdx != DebugImageMissing)
             {
-                frame.AddressMode = SentryDebugStackTrace.GetRelativeAddressMode(moduleIdx);
+                frame.AddressMode = DebugStackTrace.GetRelativeAddressMode(moduleIdx);
 
                 try
                 {

@@ -10,7 +10,7 @@ public partial class SentryStackTraceFactoryTests
     {
         public SentryOptions SentryOptions { get; set; } = new();
         public SentryStackTraceFactory GetSut() => new(SentryOptions);
-        public SentryDebugStackTrace GetSutDST() => new(SentryOptions);
+        public DebugStackTrace GetSutDST() => new(SentryOptions);
     }
 
     private readonly Fixture _fixture = new();
@@ -42,7 +42,7 @@ public partial class SentryStackTraceFactoryTests
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
             p.Function?.StartsWith(
-                nameof(SentryDebugStackTrace.CreateFrame) + '(',
+                nameof(DebugStackTrace.CreateFrame) + '(',
                 StringComparison.Ordinal
             ) == true);
     }
@@ -106,7 +106,7 @@ public partial class SentryStackTraceFactoryTests
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
             p.Function?.StartsWith(
-                nameof(SentryDebugStackTrace.CreateFrame) + '(',
+                nameof(DebugStackTrace.CreateFrame) + '(',
                 StringComparison.Ordinal
             ) == true);
     }
@@ -195,67 +195,6 @@ public partial class SentryStackTraceFactoryTests
         // Assert
         var frame = stackTrace!.Frames.Last();
         frame.Function.Should().Be(method);
-    }
-
-    [Fact]
-    public void CreateSentryStackFrame_AppNamespace_InAppFrame()
-    {
-        var frame = new StackFrame();
-        var sut = _fixture.GetSutDST();
-
-        var actual = sut.CreateFrame(frame);
-
-        Assert.True(actual.InApp);
-    }
-
-    [Fact]
-    public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
-    {
-        _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
-        var sut = _fixture.GetSutDST();
-        var frame = new StackFrame();
-
-        var actual = sut.CreateFrame(frame);
-
-        Assert.False(actual.InApp);
-    }
-
-    [Fact]
-    public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
-    {
-        _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
-        _fixture.SentryOptions.AddInAppInclude(ThisNamespace);
-        var sut = _fixture.GetSutDST();
-        var frame = new StackFrame();
-
-        var actual = sut.CreateFrame(frame);
-
-        Assert.True(actual.InApp);
-    }
-
-    // https://github.com/getsentry/sentry-dotnet/issues/64
-    [Fact]
-    public void DemangleAnonymousFunction_NullFunction_ContinuesNull()
-    {
-        var stackFrame = new SentryStackFrame
-        {
-            Function = null
-        };
-
-        SentryDebugStackTrace.DemangleAnonymousFunction(stackFrame);
-        Assert.Null(stackFrame.Function);
-    }
-
-    [Fact]
-    public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
-    {
-        var stackFrame = new SentryStackFrame
-        {
-            Module = null
-        };
-
-        SentryDebugStackTrace.DemangleAnonymousFunction(stackFrame);
-        Assert.Null(stackFrame.Module);
     }
 
     // ReSharper disable UnusedParameter.Local
