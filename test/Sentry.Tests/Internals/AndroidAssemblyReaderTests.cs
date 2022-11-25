@@ -1,4 +1,4 @@
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER && !__IOS__
 using System.Reflection;
 using Sentry.Testing;
 
@@ -15,25 +15,36 @@ public class AndroidAssemblyReaderTests
         _logger = new(output);
     }
 
-    private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool compressed, List<string> supportedAbis)
+    private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
     {
+#if ANDROID
+        // On Android, this tests the current app APK.
+        var apkPath = Environment.CommandLine;
+        // AndroidBuild not available here - We can't use the usual code
+        // var supportedAbis = AndroidBuild.SupportedAbis ?? new List<string> { AndroidBuild.CpuAbi ?? "" };
+        var supportedAbis = new List<string> { "x86_64" };
+#else
         var apkPath = Path.Combine(
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
             "../../../Internals/",
-            $"android-Store={isAssemblyStore}-Compressed={compressed}.apk");
-
+            $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk");
+        var supportedAbis = new List<string> { "x86_64" };
+#endif
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
 
         return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _logger);
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(false)]
     [InlineData(true)]
     public void CreatesCorrectReader(bool isAssemblyStore)
     {
-        using var sut = GetSut(isAssemblyStore, compressed: true, supportedAbis: new());
+#if ANDROID
+        Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
+#endif
+        using var sut = GetSut(isAssemblyStore, isCompressed: true);
         if (isAssemblyStore)
         {
             Assert.IsType<AndroidAssemblyStoreReader>(sut);
@@ -44,16 +55,16 @@ public class AndroidAssemblyReaderTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(false)]
     [InlineData(true)]
     public void ReturnsNullIfAssemblyDoesntExist(bool isAssemblyStore)
     {
-        using var sut = GetSut(isAssemblyStore, compressed: true, supportedAbis: new() { "x86_64" });
+        using var sut = GetSut(isAssemblyStore, isCompressed: true);
         Assert.Null(sut.TryReadAssembly("NonExistent.dll"));
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(false, true, "Mono.Android.dll")]
     [InlineData(false, false, "Mono.Android.dll")]
     [InlineData(false, true, "System.Threading.dll")]
@@ -64,7 +75,12 @@ public class AndroidAssemblyReaderTests
     [InlineData(true, false, "System.Threading.dll")]
     public void ReadsAssembly(bool isAssemblyStore, bool isCompressed, string assemblyName)
     {
-        using var sut = GetSut(isAssemblyStore, isCompressed, supportedAbis: new() { "x86_64" });
+#if ANDROID
+        // No need to run all combinations - we only test the current APK which is (likely) compressed assembly store.
+        Skip.If(!isAssemblyStore);
+        Skip.If(!isCompressed);
+#endif
+        using var sut = GetSut(isAssemblyStore, isCompressed);
 
         var peReader = sut.TryReadAssembly(assemblyName);
         Assert.NotNull(peReader);
