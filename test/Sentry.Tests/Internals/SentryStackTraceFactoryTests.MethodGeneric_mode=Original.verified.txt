@@ -3,7 +3,5 @@
   Function: GenericMethodThatThrows,
   Module: Other.Tests.Internals.SentryStackTraceFactoryTests,
   InApp: true,
-  InstructionAddress: 0x5,
-  AddressMode: rel:0,
-  FunctionId: 0x32
+  AddressMode: rel:0
 }

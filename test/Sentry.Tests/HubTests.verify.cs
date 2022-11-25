@@ -40,8 +40,14 @@ public partial class HubTests
         });
 
         await Verify(worker.Envelopes)
+            .UniqueForRuntimeAndVersion()
             .IgnoreStandardSentryMembers()
             .IgnoreMember("Stacktrace")
-            .IgnoreMember<SentryThread>(_ => _.Name);
+            .IgnoreMember<SentryThread>(_ => _.Name)
+            .IgnoreInstance<DebugImage>(_ =>
+                _.DebugFile.Contains("Xunit.SkippableFact") ||
+                _.DebugFile.Contains("xunit.runner") ||
+                _.DebugFile.Contains("Microsoft.TestPlatform")
+            );
     }
 }

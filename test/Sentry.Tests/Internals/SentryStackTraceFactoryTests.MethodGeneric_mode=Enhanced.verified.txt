@@ -2,7 +2,5 @@
   FileName: Internals/SentryStackTraceFactoryTests.cs,
   Function: void SentryStackTraceFactoryTests.GenericMethodThatThrows<T>(T value),
   InApp: true,
-  InstructionAddress: 0x5,
-  AddressMode: rel:0,
-  FunctionId: 0x32
+  AddressMode: rel:0
 }
