@@ -658,7 +658,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         private void ReadGlobalIndex(BinaryReader reader, List<AssemblyStoreHashEntry> index32, List<AssemblyStoreHashEntry> index64)
         {
             ReadIndex(true, index32);
-            ReadIndex(true, index64);
+            ReadIndex(false, index64);
 
             void ReadIndex(bool is32Bit, List<AssemblyStoreHashEntry> index)
             {
