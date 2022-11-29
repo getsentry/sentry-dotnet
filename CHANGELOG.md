@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix missing stack trace on UnobservedTaskException ([#2067](https://github.com/getsentry/sentry-dotnet/pull/2067))
+
 ## 3.24.0
 
 ### Features
