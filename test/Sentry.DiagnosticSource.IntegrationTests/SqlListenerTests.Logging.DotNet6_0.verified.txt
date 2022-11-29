@@ -25,20 +25,6 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
             eventId: Microsoft.EntityFrameworkCore.Infrastructure.ContextInitialized
           },
           Category: Microsoft.EntityFrameworkCore.Infrastructure
-        },
-        {
-          Message:
-Executed DbCommand
-SET NOCOUNT ON;
-INSERT INTO [TestEntities] ([Property])
-VALUES (@p0);
-SELECT [Id]
-FROM [TestEntities]
-WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
-          Data: {
-            eventId: Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted
-          },
-          Category: Microsoft.EntityFrameworkCore.Database.Command
         }
       ],
       Tags: {
@@ -80,6 +66,19 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
       Spans: [
         {
           IsFinished: true,
+          Operation: db.connection,
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            bytes_received: 677,
+            bytes_sent : 510,
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2,
+            rows_sent: 0
+          }
+        },
+        {
+          IsFinished: true,
           Operation: db.query,
           Description:
 SET NOCOUNT ON;
@@ -94,7 +93,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.operation_id: Guid_2
+            db.operation_id: Guid_3
           }
         }
       ],
