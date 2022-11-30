@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix warning caused by db connection span closed prematurely ([#2068](https://github.com/getsentry/sentry-dotnet/pull/2068))
+
 ## 3.24.0
 
 ### Features
