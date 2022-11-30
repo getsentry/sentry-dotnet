@@ -58,8 +58,6 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
     [SkippableFact]
     public async Task Logging()
     {
-        _logger.LogDebug(RelationalEventId.CommandError.Name!);
-
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
 
