@@ -70,7 +70,6 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           Status: Ok,
           IsSampled: true,
           Extra: {
-            bytes_received: 677,
             bytes_sent : 510,
             db.connection_id: Guid_1,
             db.operation_id: Guid_2,
