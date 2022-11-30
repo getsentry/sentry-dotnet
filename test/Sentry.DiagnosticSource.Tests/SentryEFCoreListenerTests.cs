@@ -28,10 +28,13 @@ public class SentryEFCoreListenerTests
     private class Fixture
     {
         internal TransactionTracer Tracer { get; }
+
         public SentryOptions Options { get; }
+
         public IReadOnlyCollection<ISpan> Spans => Tracer?.Spans;
-        public IHub Hub { get; set; }
-        private Scope _scope { get; }
+
+        public IHub Hub { get; }
+
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
@@ -39,7 +42,8 @@ public class SentryEFCoreListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope
+
+            var scope = new Scope
             {
                 Transaction = Tracer
             };
@@ -53,14 +57,16 @@ public class SentryEFCoreListenerTests
                 Debug = true,
                 DiagnosticLogger = logger
             };
+
             Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
             Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
             {
                 Spans.LastOrDefault(s => !s.IsFinished)?.Finish(SpanStatus.InternalError);
                 return SentryId.Empty;
             });
+
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
         }
     }
 
@@ -93,7 +99,8 @@ public class SentryEFCoreListenerTests
         interceptor.OnNext(new(key, value));
 
         // Assert
-        var child = _fixture.Spans.First(s => GetValidator(key)(s));
+        var child = _fixture.Spans.FirstOrDefault(s => GetValidator(key)(s));
+        Assert.NotNull(child);
     }
 
     [Theory]
@@ -104,6 +111,7 @@ public class SentryEFCoreListenerTests
         // Arrange
         var hub = _fixture.Hub;
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+
         if (key == EFCommandExecuting)
         {
             interceptor.DisableQuerySpan();
@@ -155,12 +163,9 @@ public class SentryEFCoreListenerTests
 
         // Assert
         hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
-        _fixture.Options.DiagnosticLogger.DidNotReceive().Log(
-            Arg.Any<SentryLevel>(),
-            Arg.Any<string>(),
-            Arg.Any<Exception>(),
-            Arg.Any<object[]>());
+        _fixture.Options.DiagnosticLogger.DidNotReceiveWithAnyArgs()?.Log(default, default!);
     }
+
     [Theory]
     [InlineData(EFQueryStartCompiling)]
     [InlineData(EFQueryCompiling)]
@@ -204,25 +209,27 @@ public class SentryEFCoreListenerTests
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
         var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
         var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
+
         // Validate if all spans were finished.
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.All(_fixture.Spans, span =>
         {
             Assert.True(span.IsFinished);
-            if (span.Operation == "db.connection")
-            {
-                Assert.Null(span.Description);
-            }
-            else
-            {
-                Assert.Equal(expectedSql, span.Description);
-            }
             Assert.Equal(SpanStatus.Ok, span.Status);
         });
+
+        // Assert span descriptions
+        Assert.Null(connectionSpan.Description);
+        Assert.Equal(expectedSql, compilerSpan.Description);
+        Assert.Equal(expectedSql, commandSpan.Description);
+
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
         Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
-        _fixture.Options.DiagnosticLogger.Received(0).Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"), null, Arg.Any<object[]>());
+        _fixture.Options.DiagnosticLogger.DidNotReceive()?
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
+                null, Arg.Any<object[]>());
     }
 
     [Fact]
@@ -248,12 +255,10 @@ public class SentryEFCoreListenerTests
         var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandFailed)(s));
 
         // Validate if all spans were finished.
-        Assert.All(new[] { compilerSpan, connectionSpan },
-            span =>
-            {
-                Assert.True(span.IsFinished);
-                Assert.Equal(SpanStatus.Ok, span.Status);
-            });
+        Assert.True(compilerSpan.IsFinished);
+        Assert.True(connectionSpan.IsFinished);
+        Assert.Equal(SpanStatus.Ok, compilerSpan.Status);
+        Assert.Equal(SpanStatus.Ok, connectionSpan.Status);
 
         // Assert the failed command.
         Assert.True(commandSpan.IsFinished);
@@ -327,7 +332,9 @@ public class SentryEFCoreListenerTests
         interceptor.OnNext(new(operation, "ef Junk\r\nSELECT * FROM ..."));
 
         // Assert
-        _fixture.Options.DiagnosticLogger.Received(1).Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"), null, Arg.Any<object[]>());
+        _fixture.Options.DiagnosticLogger.Received(1)?
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
+                null, Arg.Any<object[]>());
     }
 
     [Fact]

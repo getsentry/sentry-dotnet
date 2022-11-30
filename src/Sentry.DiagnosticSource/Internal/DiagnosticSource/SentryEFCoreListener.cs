@@ -66,7 +66,7 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
     {
         _hub.ConfigureScope(scope =>
         {
-            if (scope.Transaction?.IsSampled != true)
+            if (scope.Transaction is not {IsSampled: true} transaction)
             {
                 return;
             }
