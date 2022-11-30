@@ -23,9 +23,6 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
     internal const string SqlMicrosoftWriteConnectionCloseAfterCommand = "Microsoft.Data.SqlClient.WriteConnectionCloseAfter";
     internal const string SqlDataWriteConnectionCloseAfterCommand = "System.Data.SqlClient.WriteConnectionCloseAfter";
 
-    internal const string SqlMicrosoftWriteTransactionCommitAfter = "Microsoft.Data.SqlClient.WriteTransactionCommitAfter";
-    internal const string SqlDataWriteTransactionCommitAfter = "System.Data.SqlClient.WriteTransactionCommitAfter";
-
     internal const string SqlDataBeforeExecuteCommand = "System.Data.SqlClient.WriteCommandBefore";
     internal const string SqlMicrosoftBeforeExecuteCommand = "Microsoft.Data.SqlClient.WriteCommandBefore";
 
@@ -110,17 +107,15 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                 return;
             }
 
-            var operationId = kvp.Value?.GetGuidProperty("OperationId");
-
             switch (type)
             {
                 case SentrySqlSpanType.Execution:
-                {
+
+                    var operationId = kvp.Value?.GetGuidProperty("OperationId");
                     if (TryGetQuerySpan(scope, operationId) is not { } querySpan)
                     {
                         _options.LogWarning(
-                            "Trying to get a span of type {0} with operation id {1}, but it was not found.",
-                            type,
+                            "Trying to get an execution span with operation id {0}, but it was not found.",
                             operationId);
                         return;
                     }
@@ -137,35 +132,24 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                     }
 
                     break;
-                }
+
                 case SentrySqlSpanType.Connection:
-                    switch (kvp.Key)
+
+                    var connectionId = kvp.Value?.GetGuidProperty("ConnectionId");
+                    if (TryGetConnectionSpan(scope, connectionId) is not { } connectionSpan)
                     {
-                        case SqlMicrosoftWriteConnectionCloseAfterCommand or
-                            SqlDataWriteConnectionCloseAfterCommand when
-                            kvp.Value?.GetGuidProperty("ConnectionId") is { } id &&
-                            TryGetConnectionSpan(scope, id) is { } connectionSpan:
-                            span = connectionSpan;
-                            break;
-
-                        case SqlMicrosoftWriteTransactionCommitAfter or
-                            SqlDataWriteTransactionCommitAfter when
-                            kvp.Value?.GetProperty("Connection")?
-                                .GetGuidProperty("ClientConnectionId") is { } commitId &&
-                            TryGetConnectionSpan(scope, commitId) is { } commitSpan:
-                            span = commitSpan;
-                            break;
-
-                        default:
-                            _options.LogWarning(
-                                "Trying to get a span of type {0} with operation id {1}, but it was not found.",
-                                type, operationId);
-                            break;
+                        _options.LogWarning(
+                            "Trying to get a connection span with connection id {0}, but it was not found.",
+                            connectionId);
+                        return;
                     }
+
+                    span = connectionSpan;
 
                     break;
             }
         });
+
         return span;
     }
 
@@ -214,7 +198,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         {
             switch (kvp.Key)
             {
-                // Query.
+                // Query
                 case SqlMicrosoftBeforeExecuteCommand or SqlDataBeforeExecuteCommand:
                     AddSpan(SentrySqlSpanType.Execution, "db.query", kvp.Value);
                     return;
@@ -228,7 +212,8 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                     errorSpan.Description = kvp.Value?.GetProperty("Command")?.GetStringProperty("CommandText");
                     errorSpan.Finish(SpanStatus.InternalError);
                     return;
-                // Connection.
+
+                // Connection
                 case SqlMicrosoftWriteConnectionOpenBeforeCommand or SqlDataWriteConnectionOpenBeforeCommand:
                     AddSpan(SentrySqlSpanType.Connection, "db.connection", kvp.Value);
                     return;
@@ -240,12 +225,6 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                     TrySetConnectionStatistics(closeSpan, kvp.Value);
                     closeSpan.Finish(SpanStatus.Ok);
                     return;
-                case SqlMicrosoftWriteTransactionCommitAfter or SqlDataWriteTransactionCommitAfter
-                    when GetSpan(SentrySqlSpanType.Connection, kvp) is { } commitSpan:
-                    // If some query makes changes to the Database data, CloseAfterCommand event will not be invoked,
-                    // instead, TransactionCommitAfter is invoked.
-                    commitSpan.Finish(SpanStatus.Ok);
-                    break;
             }
         }
         catch (Exception ex)
