@@ -76,4 +76,20 @@ public static class SpanExtensions
             SpanTracer tracer => tracer.Transaction,
             _ => throw new ArgumentOutOfRangeException(nameof(span), span, null)
         };
+
+    /// <summary>
+    /// Gets the parent span for database operations. This is the last active non-database span, which might be the
+    /// transaction root, or it might be some other child span of the transaction (such as a web request).
+    /// </summary>
+    /// <remarks>
+    /// Used by EF, EF Core, and SQLClient integrations.
+    /// </remarks>
+    internal static ISpan GetDbParentSpan(this ISpan span)
+    {
+        var transaction = span.GetTransaction();
+        return transaction.Spans
+                   .OrderByDescending(x => x.StartTimestamp)
+                   .FirstOrDefault(s => !s.IsFinished && !s.Operation.StartsWith("db."))
+               ?? transaction;
+    }
 }

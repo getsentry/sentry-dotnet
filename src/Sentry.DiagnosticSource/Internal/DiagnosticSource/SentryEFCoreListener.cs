@@ -52,16 +52,6 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 
     internal void DisableQuerySpan() => _logQueryEnabled = false;
 
-    private static ISpan? GetParent(SentryEFSpanType type, Scope scope)
-    {
-        if (type == SentryEFSpanType.QueryExecution)
-        {
-            return scope.GetSpan();
-        }
-
-        return scope.Transaction;
-    }
-
     private void AddSpan(SentryEFSpanType type, string operation, string? description)
     {
         _hub.ConfigureScope(scope =>
@@ -71,13 +61,14 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
                 return;
             }
 
-            if (GetParent(type, scope)?.StartChild(operation, description) is not { } startedChild)
-            {
-                return;
-            }
+            var parent = type == SentryEFSpanType.QueryExecution
+                ? transaction.GetLastActiveSpan() ?? transaction.GetDbParentSpan()
+                : transaction.GetDbParentSpan();
+
+            var child = parent.StartChild(operation, description);
 
             var asyncLocalSpan = GetSpanBucket(type);
-            asyncLocalSpan.Value = new WeakReference<ISpan>(startedChild);
+            asyncLocalSpan.Value = new WeakReference<ISpan>(child);
         });
     }
 
