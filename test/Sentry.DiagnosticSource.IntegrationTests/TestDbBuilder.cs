@@ -17,11 +17,16 @@ public static class TestDbBuilder
         await command.ExecuteNonQueryAsync();
     }
 
-    private static TestDbContext GetDbContext(SqlConnection connection)
+    public static TestDbContext GetDbContext(SqlConnection connection, ILoggerFactory loggerFactory = null)
     {
         var builder = new DbContextOptionsBuilder<TestDbContext>();
         builder.UseSqlServer(connection);
         builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        if (loggerFactory != null)
+        {
+            builder.UseLoggerFactory(loggerFactory);
+        }
+
         return new TestDbContext(builder.Options);
     }
 

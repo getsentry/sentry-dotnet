@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix missing stack trace on UnobservedTaskException ([#2067](https://github.com/getsentry/sentry-dotnet/pull/2067))
+- Fix warning caused by db connection span closed prematurely ([#2068](https://github.com/getsentry/sentry-dotnet/pull/2068))
 
 ## 3.24.0
 

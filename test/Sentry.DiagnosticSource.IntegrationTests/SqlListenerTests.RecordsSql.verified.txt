@@ -47,6 +47,19 @@
       Spans: [
         {
           IsFinished: true,
+          Operation: db.connection,
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            bytes_received: 167,
+            bytes_sent : 542,
+            db.connection_id: Guid_1,
+            db.operation_id: Guid_2,
+            rows_sent: 1
+          }
+        },
+        {
+          IsFinished: true,
           Operation: db.query,
           Description:
 insert into MyTable (Value)
@@ -55,7 +68,7 @@ values (@value);,
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.operation_id: Guid_2
+            db.operation_id: Guid_3
           }
         },
         {
@@ -66,7 +79,7 @@ values (@value);,
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.operation_id: Guid_3
+            db.operation_id: Guid_4
           }
         }
       ],

@@ -37,8 +37,13 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureException(new("my exception"));
-            await TestDbBuilder.AddDataAsync(database);
-            await TestDbBuilder.GetDataAsync(database);
+
+            await using (var connection = await database.OpenNewConnection())
+            {
+                await TestDbBuilder.AddDataAsync(connection);
+                await TestDbBuilder.GetDataAsync(connection);
+            }
+
             transaction.Finish();
         }
 
@@ -53,8 +58,6 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
     [SkippableFact]
     public async Task Logging()
     {
-        _logger.LogDebug(RelationalEventId.CommandError.Name!);
-
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
 
@@ -70,44 +73,41 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         var options = new SentryLoggingOptions();
         ApplyOptions(options);
 
-        var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
-
-#if NET6_0_OR_GREATER
         await using var database = await _fixture.SqlInstance.Build();
-#else
-        using var database = await _fixture.SqlInstance.Build();
-#endif
-        var builder = new DbContextOptionsBuilder<TestDbContext>();
-        builder.UseSqlServer(database);
-        builder.UseLoggerFactory(loggerFactory);
-        builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 
-        await using var dbContext = new TestDbContext(builder.Options);
-        dbContext.Add(new TestEntity
+        await using (var dbContext = TestDbBuilder.GetDbContext(database.Connection))
         {
-            Property = "Value"
-        });
-
-        await dbContext.SaveChangesAsync();
-
-        using (var hub = new Hub(options))
-        {
-            var transaction = hub.StartTransaction("my transaction", "my operation");
-            hub.ConfigureScope(scope => scope.Transaction = transaction);
-
             dbContext.Add(new TestEntity
             {
                 Property = "Value"
             });
 
-            try
+            await dbContext.SaveChangesAsync();
+        }
+
+        var loggerFactory = LoggerFactory.Create(_ => _.AddSentry(ApplyOptions));
+        using (var hub = new Hub(options))
+        {
+            var transaction = hub.StartTransaction("my transaction", "my operation");
+            hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+            await using (var connection = await database.OpenNewConnection())
+            await using (var dbContext = TestDbBuilder.GetDbContext(connection, loggerFactory))
             {
-                await dbContext.SaveChangesAsync();
-            }
-            catch
-            {
-                // Suppress the exception so we can test that we received the error through logging.
-                // Note, this uses the Sentry.Extensions.Logging integration.
+                dbContext.Add(new TestEntity
+                {
+                    Property = "Value"
+                });
+
+                try
+                {
+                    await dbContext.SaveChangesAsync();
+                }
+                catch
+                {
+                    // Suppress the exception so we can test that we received the error through logging.
+                    // Note, this uses the Sentry.Extensions.Logging integration.
+                }
             }
 
             transaction.Finish();
@@ -117,6 +117,11 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             .ScrubInlineGuids()
             .IgnoreMember<SentryEvent>(_ => _.SentryThreads)
             .IgnoreMember<IEventLike>(_ => _.Environment)
+
+            // Really not sure why, but bytes received for this test varies randomly when run in CI
+            // TODO: remove this and investigate
+            .IgnoreMember("bytes_received")
+
             .ScrubLinesWithReplace(line =>
             {
                 if (line.StartsWith("Executed DbCommand ("))
@@ -191,8 +196,17 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
             var transaction = hub.StartTransaction("my transaction", "my operation");
             hub.ConfigureScope(scope => scope.Transaction = transaction);
             hub.CaptureException(new("my exception"));
-            await TestDbBuilder.AddEfDataAsync(database);
-            await TestDbBuilder.GetEfDataAsync(database);
+
+#if NETCOREAPP
+            await using (var connection = await database.OpenNewConnection())
+#else
+            using (var connection = await database.OpenNewConnection())
+#endif
+            {
+                await TestDbBuilder.AddEfDataAsync(connection);
+                await TestDbBuilder.GetEfDataAsync(connection);
+            }
+
             transaction.Finish();
         }
 
