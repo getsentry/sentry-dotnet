@@ -233,6 +233,52 @@ public class SentryEFCoreListenerTests
     }
 
     [Fact]
+    public void OnNext_HappyPathInsideChildSpan_IsValid()
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+        var expectedSql = "SELECT * FROM ...";
+        var efSql = "ef Junk\r\nSELECT * FROM ...";
+
+        // Act
+        var childSpan = _fixture.Tracer.StartChild("Child Span");
+        interceptor.OnNext(new(EFQueryCompiling, efSql));
+        interceptor.OnNext(new(EFQueryCompiled, efSql));
+        interceptor.OnNext(new(EFConnectionOpening, null));
+        interceptor.OnNext(new(EFCommandExecuting, efSql));
+        interceptor.OnNext(new(EFCommandExecuted, efSql));
+        interceptor.OnNext(new(EFConnectionClosed, efSql));
+        childSpan.Finish();
+
+        // Assert
+        var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
+        var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
+        var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
+
+        // Validate if all spans were finished.
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        Assert.All(_fixture.Spans, span =>
+        {
+            Assert.True(span.IsFinished);
+            Assert.Equal(SpanStatus.Ok, span.Status);
+        });
+
+        // Assert span descriptions
+        Assert.Null(connectionSpan.Description);
+        Assert.Equal(expectedSql, compilerSpan.Description);
+        Assert.Equal(expectedSql, commandSpan.Description);
+
+        // Check connections between spans.
+        Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
+        Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
+        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        _fixture.Options.DiagnosticLogger.DidNotReceive()?
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
+                null, Arg.Any<object[]>());
+    }
+
+    [Fact]
     public void OnNext_HappyPathWithError_TransactionWithErroredCommand()
     {
         // Arrange

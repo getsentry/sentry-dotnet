@@ -232,6 +232,86 @@ public class SentrySqlListenerTests
 
     [Theory]
     [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand,
+        SqlMicrosoftWriteConnectionCloseAfterCommand, SqlMicrosoftBeforeExecuteCommand,
+        SqlMicrosoftAfterExecuteCommand)]
+    [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand,
+        SqlDataWriteConnectionCloseAfterCommand, SqlDataBeforeExecuteCommand, SqlDataAfterExecuteCommand)]
+    public void OnNext_HappyPathsInsideChildSpan_IsValid(string connectionOpenKey, string connectionUpdateKey,
+        string connectionCloseKey, string queryStartKey, string queryEndKey)
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        var interceptor = new SentrySqlListener(hub, new SentryOptions());
+        var query = "SELECT * FROM ...";
+        var connectionId = Guid.NewGuid();
+        var connectionOperationId = Guid.NewGuid();
+        var connectionOperationIdClosed = Guid.NewGuid();
+        var queryOperationId = Guid.NewGuid();
+
+        // Act
+        var childSpan = _fixture.Tracer.StartChild("Child Span");
+        interceptor.OnNext(
+            new(connectionOpenKey,
+                new
+                {
+                    OperationId = connectionOperationId
+                }));
+        interceptor.OnNext(
+            new(connectionUpdateKey,
+                new
+                {
+                    OperationId = connectionOperationId,
+                    ConnectionId = connectionId
+                }));
+        interceptor.OnNext(
+            new(queryStartKey,
+                new
+                {
+                    OperationId = queryOperationId,
+                    ConnectionId = connectionId
+                }));
+        interceptor.OnNext(
+            new(queryEndKey,
+                new
+                {
+                    OperationId = queryOperationId,
+                    ConnectionId = connectionId,
+                    Command = new
+                    {
+                        CommandText = query
+                    }
+                }));
+        interceptor.OnNext(
+            new(connectionCloseKey,
+                new
+                {
+                    OperationId = connectionOperationIdClosed,
+                    ConnectionId = connectionId
+                }));
+        childSpan.Finish();
+
+        // Assert
+        _fixture.Spans.Should().HaveCount(3);
+        var connectionSpan = _fixture.Spans.First(s => GetValidator(connectionOpenKey)(s));
+        var commandSpan = _fixture.Spans.First(s => GetValidator(queryStartKey)(s));
+
+        // Validate if all spans were finished.
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        Assert.All(_fixture.Spans, span =>
+        {
+            Assert.True(span.IsFinished);
+            Assert.Equal(SpanStatus.Ok, span.Status);
+        });
+
+        // Check connections between spans.
+        Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
+        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+
+        Assert.Equal(query, commandSpan.Description);
+    }
+
+    [Theory]
+    [InlineData(SqlMicrosoftWriteConnectionOpenBeforeCommand, SqlMicrosoftWriteConnectionOpenAfterCommand,
         SqlMicrosoftWriteConnectionCloseAfterCommand)]
     [InlineData(SqlDataWriteConnectionOpenBeforeCommand, SqlDataWriteConnectionOpenAfterCommand,
         SqlDataWriteConnectionCloseAfterCommand)]
