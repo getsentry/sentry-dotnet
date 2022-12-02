@@ -30,7 +30,7 @@ internal class UnobservedTaskExceptionIntegration : ISdkIntegration
 #if NET5_0_OR_GREATER
         var ex = e.Exception;
 #else
-            var ex = e.Exception!;
+        var ex = e.Exception!;
 #endif
         ex.Data[Mechanism.HandledKey] = false;
         ex.Data[Mechanism.MechanismKey] = "UnobservedTaskException";

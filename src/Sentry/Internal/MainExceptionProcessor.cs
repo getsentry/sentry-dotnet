@@ -90,9 +90,12 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
             // Exceptions are sent from oldest to newest, so the details belong on the LAST exception.
             var last = exceptions.Last();
-            last.Stacktrace = original.Stacktrace;
             last.Mechanism = original.Mechanism;
             original.Data.TryCopyTo(last.Data);
+
+            // In some cases the stack trace is already positioned on the inner exception.
+            // Only copy it over when it is missing.
+            last.Stacktrace ??= original.Stacktrace;
         }
 
         return exceptions;
