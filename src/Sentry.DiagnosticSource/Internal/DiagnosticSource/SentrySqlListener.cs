@@ -78,12 +78,12 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
             switch (type)
             {
-                case SentrySqlSpanType.Connection when transaction.StartChild(operation) is { } connectionSpan:
+                case SentrySqlSpanType.Connection when transaction.GetDbParentSpan().StartChild(operation) is { } connectionSpan:
                     SetOperationId(connectionSpan, operationId);
                     break;
 
                 case SentrySqlSpanType.Execution when value?.GetGuidProperty("ConnectionId") is { } connectionId:
-                    var parent = TryGetConnectionSpan(scope, connectionId) ?? transaction;
+                    var parent = TryGetConnectionSpan(scope, connectionId) ?? transaction.GetDbParentSpan();
                     var span = TryStartChild(parent, operation, null);
                     if (span != null)
                     {
