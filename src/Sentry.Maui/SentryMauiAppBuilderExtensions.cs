@@ -100,9 +100,16 @@ public static class SentryMauiAppBuilderExtensions
         });
     }
 
-    private static void BindMauiEvents(this IPlatformApplication application)
+    private static void BindMauiEvents(this IPlatformApplication platformApplication)
     {
-        var binder = application.Services.GetRequiredService<IMauiEventsBinder>();
-        binder.BindMauiEvents();
+        // Bind to the MAUI application events in a real application control,
+        // because the required events are not present on the interfaces.
+        if (platformApplication.Application is not Application application)
+        {
+            return;
+        }
+
+        var binder = platformApplication.Services.GetRequiredService<IMauiEventsBinder>();
+        binder.BindApplicationEvents(application);
     }
 }

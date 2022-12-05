@@ -5,7 +5,6 @@ namespace Sentry.Maui.Internal;
 
 internal class MauiEventsBinder : IMauiEventsBinder
 {
-    private readonly IApplication _application;
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
 
@@ -34,25 +33,13 @@ internal class MauiEventsBinder : IMauiEventsBinder
         typeof(Button),
     };
 
-    public MauiEventsBinder(IApplication application, IHub hub, IOptions<SentryMauiOptions> options)
+    public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options)
     {
-        _application = application;
         _hub = hub;
         _options = options.Value;
     }
 
-    public void BindMauiEvents()
-    {
-        // Bind to the MAUI application events in a real application (not when testing)
-        if (_application is not Application application)
-        {
-            return;
-        }
-
-        BindApplicationEvents(application);
-    }
-
-    private void BindApplicationEvents(Application application)
+    public void BindApplicationEvents(Application application)
     {
         // Attach element events to all descendents as they are added to the application.
         application.DescendantAdded += (_, e) =>
