@@ -48,6 +48,11 @@ Additionally, our [.NET API refererence docs](https://getsentry.github.io/sentry
 
 Looking for more samples? Check out [this repository](https://github.com/getsentry/examples).
 
+### Talks
+
+* On.NET [Error monitoring with Sentry for .NET MAUI](https://www.youtube.com/watch?v=8YmEC4iKD2I)
+* .NET Conf [focus on MAUI](https://www.youtube.com/watch?v=RW3hiukVXZQ&list=PLdo4fOcmZ0oWePZU3W162NJ9vcXqgpMVc) 
+
 ## Compatibility
 
 The packages target **.NET Standard 2.0** and **.NET Framework 4.6.1**.
