@@ -11,14 +11,14 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
-    private const string NavigationType = "navigation";
-    private const string SystemType = "system";
-    private const string UserType = "user";
-    private const string HandlersCategory = "ui.handlers";
-    private const string LifecycleCategory =  "ui.lifecycle";
-    private const string NavigationCategory = "navigation";
-    private const string RenderingCategory = "ui.rendering";
-    private const string UserActionCategory = "ui.useraction";
+    internal const string NavigationType = "navigation";
+    internal const string SystemType = "system";
+    internal const string UserType = "user";
+    internal const string HandlersCategory = "ui.handlers";
+    internal const string LifecycleCategory =  "ui.lifecycle";
+    internal const string NavigationCategory = "navigation";
+    internal const string RenderingCategory = "ui.rendering";
+    internal const string UserActionCategory = "ui.useraction";
 
     // This list should contain all types that we have explicitly added handlers for their events.
     // Any elements that are not in this list will have their events discovered by reflection.
@@ -219,31 +219,31 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // Element handler events
         // https://docs.microsoft.com/dotnet/maui/user-interface/handlers/customize#handler-lifecycle
         element.HandlerChanging += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.HandlerChanging), SystemType, HandlersCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanging), SystemType, HandlersCategory,
                 data =>
                 {
                     data.Add(nameof(e.OldHandler), e.OldHandler?.ToString() ?? "");
                     data.Add(nameof(e.NewHandler), e.NewHandler?.ToString() ?? "");
                 });
         element.HandlerChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.HandlerChanged), SystemType, HandlersCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanged), SystemType, HandlersCategory);
 
         // Rendering events
         element.ChildAdded += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ChildAdded), SystemType, RenderingCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ChildAdded), SystemType, RenderingCategory,
                 data => data.AddElementInfo(_options, e.Element, nameof(e.Element)));
         element.ChildRemoved += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ChildRemoved), SystemType, RenderingCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ChildRemoved), SystemType, RenderingCategory,
                 data => data.AddElementInfo(_options, e.Element, nameof(e.Element)));
         element.ParentChanging += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ParentChanging), SystemType, RenderingCategory,
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ParentChanging), SystemType, RenderingCategory,
                 data =>
                 {
                     data.AddElementInfo(_options, e.OldParent, nameof(e.OldParent));
                     data.AddElementInfo(_options, e.NewParent, nameof(e.NewParent));
                 });
         element.ParentChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ParentChanged), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ParentChanged), SystemType, RenderingCategory);
 
         // These lead to lots of duplicate information, so probably best not to include them.
         // element.DescendantAdded
@@ -268,25 +268,25 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private void BindVisualElementEvents(VisualElement element)
     {
-        element.Focused += (sender, e) =>
+        element.Focused += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Focused), SystemType, RenderingCategory);
 
-        element.Unfocused += (sender, e) =>
+        element.Unfocused += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unfocused), SystemType, RenderingCategory);
 
-        element.Loaded += (sender, e) =>
+        element.Loaded += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Loaded), SystemType, RenderingCategory);
 
-        element.Unloaded += (sender, e) =>
+        element.Unloaded += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unloaded), SystemType, RenderingCategory);
 
-        element.ChildrenReordered += (sender, e) =>
+        element.ChildrenReordered += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.ChildrenReordered), SystemType, RenderingCategory);
 
-        element.MeasureInvalidated += (sender, e) =>
+        element.MeasureInvalidated += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.MeasureInvalidated), SystemType, RenderingCategory);
 
-        element.SizeChanged += (sender, e) =>
+        element.SizeChanged += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.SizeChanged), SystemType, RenderingCategory);
     }
 
