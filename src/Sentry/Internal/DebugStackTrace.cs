@@ -372,6 +372,7 @@ internal class DebugStackTrace : SentryStackTrace
 #if ANDROID
     private IAndroidAssemblyReader? _assemblyReader;
     private bool _assemblyReaderInitialized = false;
+    private object _assemblyReaderLock = new();
 
     private void InitializeAssemblyReader()
     {
@@ -379,24 +380,37 @@ internal class DebugStackTrace : SentryStackTrace
         {
             return;
         }
-        _assemblyReaderInitialized = true;
+        lock (_assemblyReaderLock)
+        {
+            // check again after acquiring the lock
+            if (_assemblyReaderInitialized)
+            {
+                return;
+            }
 
-        var apkPath = Environment.CommandLine;
-        if (!File.Exists(apkPath))
-        {
-            _options.LogWarning("Cannot create AssemblyReader: cannot read APK path from Environment.CommandLine={0}", apkPath);
-            return;
-        }
-        try
-        {
+            var apkPath = Environment.CommandLine;
+            try
+            {
+                if (!File.Exists(apkPath))
+                {
+                    _options.DiagnosticLogger?.LogWarning("Cannot create AssemblyReader: cannot read APK path from Environment.CommandLine={0}", apkPath);
+                }
+                else
+                {
 #pragma warning disable CS0618 // Type or member is obsolete
-            var supportedAbis = AndroidBuild.SupportedAbis ?? new List<string> { AndroidBuild.CpuAbi ?? "" };
+                    var supportedAbis = AndroidBuild.SupportedAbis ?? new List<string> { AndroidBuild.CpuAbi ?? "" };
 #pragma warning restore CS0618 // Type or member is obsolete
-            _assemblyReader = AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _options.DiagnosticLogger);
-        }
-        catch (Exception e)
-        {
-            _options.LogWarning("Cannot create AssemblyReader: {0}", e.Message);
+                    _assemblyReader = AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _options.DiagnosticLogger);
+                }
+            }
+            catch (Exception e)
+            {
+                _options.DiagnosticLogger?.LogError("Cannot create AssemblyReader: {0}", e);
+            }
+            finally
+            {
+                _assemblyReaderInitialized = true;
+            }
         }
     }
 #endif
