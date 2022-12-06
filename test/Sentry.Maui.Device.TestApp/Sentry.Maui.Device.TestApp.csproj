@@ -3,7 +3,6 @@
   <PropertyGroup>
 
     <TargetFrameworks>net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
 
     <!-- Use arm runtime on arm Macs  -->
