@@ -427,42 +427,6 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 }
             }
         }
-        // public readonly Dictionary<string, AssemblyStoreManifestEntry?> EntriesByName = new();
-
-        // public AssemblyStoreManifestReader(Stream manifest)
-        // {
-        //     using (var sr = new StreamReader(manifest, Encoding.UTF8, detectEncodingFromByteOrderMarks: false))
-        //     {
-        //         ReadManifest(sr);
-        //     }
-        // }
-
-        // void ReadManifest(StreamReader reader)
-        // {
-        //     // First line is ignored, it contains headers
-        //     reader.ReadLine();
-
-        //     // Each subsequent line consists of fields separated with any number of spaces (for the pleasure of a human being reading the manifest)
-        //     while (!reader.EndOfStream)
-        //     {
-        //         string[]? fields = reader.ReadLine()?.Split(' ', stringSplitOptions.RemoveEmptyEntries);
-        //         if (fields == null)
-        //         {
-        //             continue;
-        //         }
-
-        //         var entry = new AssemblyStoreManifestEntry(fields);
-        //         if (EntriesByName.ContainsKey(entry.Name))
-        //         {
-        //             // Duplicate entries - not sure it's possible, but let's be safe.
-        //             EntriesByName[entry.Name] = null;
-        //         }
-        //         else
-        //         {
-        //             EntriesByName.Add(entry.Name, entry);
-        //         }
-        //     }
-        // }
     }
 
     // Adapted from https://github.com/xamarin/xamarin-android/blob/c92702619f5fabcff0ed88e09160baf9edd70f41/tools/assembly-store-reader/AssemblyStoreManifestEntry.cs

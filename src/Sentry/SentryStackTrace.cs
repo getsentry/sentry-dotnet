@@ -27,9 +27,6 @@ public class SentryStackTrace : IJsonSerializable
         set => InternalFrames = value;
     }
 
-    // This class is sealed externally, but can be extended internally.
-    internal SentryStackTrace() { }
-
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {

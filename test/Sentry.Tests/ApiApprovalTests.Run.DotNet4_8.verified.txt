@@ -695,6 +695,7 @@ namespace Sentry
     }
     public class SentryStackTrace : Sentry.IJsonSerializable
     {
+        public SentryStackTrace() { }
         public System.Collections.Generic.IList<Sentry.SentryStackFrame> Frames { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }

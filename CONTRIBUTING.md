@@ -1,9 +1,9 @@
 # Contributing
 
-We love receiving PRs from the community with features and fixed. 
+We love receiving PRs from the community with features and fixed.
 For big feature it's advised to raise an issue to discuss it first.
 
-## TLDR:
+## TLDR
 
 * Install the .NET SDKs
 * To quickly get up and running, you can just run `dotnet build`
@@ -68,7 +68,7 @@ Note that the MSBuild version should always be `17.0` but will change paths base
 We'd love for users to update the SDK everytime and as soon as we make a new release. But in reality most users rarely update the SDK.
 To help users see value in updating the SDK, we maintain a changelog file with entries split between two headings:
 
-1. `### Features` 
+1. `### Features`
 2. `### Fixes`
 
 We add the heading in the first PR that's adding either a feature or fixes in the current release.
@@ -86,3 +86,15 @@ Below that, you'll add the heading 3 mentioned above. For example, if you're add
 ```
 
 There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
+
+## Verify tests
+
+Some tests use [Verify](https://github.com/VerifyTests/Verify) to check returned objects against snapshots that are part of the repo.
+In case you're making code changes that produce many (intended) changes in those snapshots, you can use [accept-verifier-changes.ps1](./scripts/accept-verifier-changes.ps1) like this:
+
+```shell-script
+dotnet test
+pwsh ./scripts/accept-verifier-changes.ps1
+```
+
+You may need to run this multiple times because `dotnet test` stops after a certain number of failures.

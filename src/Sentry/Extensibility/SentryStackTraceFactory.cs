@@ -32,7 +32,7 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
 
         var stackTrace = exception is null ? new StackTrace(true) : new StackTrace(exception, true);
         var result = DebugStackTrace.Create(_options, stackTrace, isCurrentStackTrace);
-        _options.LogDebug($"Created {typeof(DebugStackTrace).Name} with {0} frames.", result.Frames.Count);
+        _options.LogDebug("Created {0} with {1} frames.", typeof(DebugStackTrace).Name, result.Frames.Count);
         return result.Frames.Count != 0 ? result : null;
     }
 }

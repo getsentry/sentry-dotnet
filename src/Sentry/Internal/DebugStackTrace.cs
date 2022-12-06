@@ -485,7 +485,7 @@ internal class DebugStackTrace : SentryStackTrace
         // well, we are out of luck :-(
         if (debugId == null)
         {
-            _options.LogDebug("Skipping DebugImage for module '{0}' because DebugId couldn't be determined", module.Name);
+            _options.LogWarning("Skipping DebugImage for module '{0}' because DebugId couldn't be determined", module.Name);
             _debugImageIndexByModule.Add(id, DebugImageMissing); // don't try to resolve again
             return null;
         }

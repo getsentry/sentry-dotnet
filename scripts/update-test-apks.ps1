@@ -9,7 +9,6 @@ $apkPrefix = "$repoRoot/test/Sentry.Tests/Internals/android"
 function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompression)
 {
     $sampleDir = "$repoRoot/samples/Sentry.Samples.Android"
-    $framework = 'net6.0-android'
     $outputApk = "$apkPrefix-Store=$UseAssemblyStore-Compressed=$UseAssemblyCompression.apk"
 
     if ($IfNotExist -and (Test-Path $outputApk))
@@ -24,7 +23,7 @@ function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompres
         # Need to do a clean build otherwise some DLLs would end up being compressed even if it's disabled on this run.
         git clean -ffxd . | Out-Host
 
-        dotnet build --configuration Release --framework $framework `
+        dotnet build --configuration Release `
             --property:AndroidUseAssemblyStore=$UseAssemblyStore `
             --property:AndroidEnableAssemblyCompression=$UseAssemblyCompression `
         | Out-Host
@@ -38,7 +37,7 @@ function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompres
         Pop-Location
     }
 
-    Move-Item -Verbose "$sampleDir/bin/Release/$framework/io.sentry.dotnet.samples.android-Signed.apk" $outputApk
+    Move-Item -Verbose "$sampleDir/bin/Release/*/io.sentry.dotnet.samples.android-Signed.apk" $outputApk
 }
 
 if (!$IfNotExist)
