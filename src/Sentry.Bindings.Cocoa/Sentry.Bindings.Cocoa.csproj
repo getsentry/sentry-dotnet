@@ -4,7 +4,7 @@
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
-    <SentryCocoaSdkDirectory>$(SolutionDir)\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
+    <SentryCocoaSdkDirectory>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
     <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
   </PropertyGroup>
 
