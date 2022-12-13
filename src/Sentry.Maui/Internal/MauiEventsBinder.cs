@@ -201,7 +201,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.PopCanceled), NavigationType, NavigationCategory);
     }
 
-    private void BindElementEvents(Element element)
+    public void BindElementEvents(Element element)
     {
         // Element handler events
         // https://docs.microsoft.com/dotnet/maui/user-interface/handlers/customize#handler-lifecycle

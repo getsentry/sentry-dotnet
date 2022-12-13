@@ -33,6 +33,5 @@ public class MockApplication : Application
 
     public void InvokeOnChildAdded(Element child) => OnChildAdded(child);
 
-    public void InvokeOnChildRemoved(Element child, int oldLogicalIndex) =>
-        OnChildRemoved(child, oldLogicalIndex);
+    public void InvokeOnChildRemoved(Element child, int oldLogicalIndex) => OnChildRemoved(child, oldLogicalIndex);
 }
