@@ -107,7 +107,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 data => data.Add(nameof(e.RequestedTheme), e.RequestedTheme.ToString()));
     }
 
-    private void BindReflectedEvents(Element element)
+    public void BindReflectedEvents(Element element)
     {
         // This reflects over the element's events, and attaches to any that
         // are *NOT* declared by types in the ExplicitlyHandledTypes list.
@@ -141,7 +141,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private void BindWindowEvents(Window window)
+    public void BindWindowEvents(Window window)
     {
         // Lifecycle Events
         // https://docs.microsoft.com/dotnet/maui/fundamentals/windows
@@ -270,7 +270,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // element.PropertyChanged
     }
 
-    private void BindVisualElementEvents(VisualElement element)
+    public void BindVisualElementEvents(VisualElement element)
     {
         element.Focused += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Focused), SystemType, RenderingCategory);
@@ -294,7 +294,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.SizeChanged), SystemType, RenderingCategory);
     }
 
-    private void BindShellEvents(Shell shell)
+    public void BindShellEvents(Shell shell)
     {
         // Navigation events
         // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/navigation
@@ -319,7 +319,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         BindPageEvents(shell);
     }
 
-    private void BindPageEvents(Page page)
+    public void BindPageEvents(Page page)
     {
         // Lifecycle events
         // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/lifecycle
@@ -343,7 +343,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.LayoutChanged), SystemType, RenderingCategory);
     }
 
-    private void BindButtonEvents(Button button)
+    public void BindButtonEvents(Button button)
     {
         button.Clicked += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Clicked), UserType, UserActionCategory);
