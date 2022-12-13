@@ -209,11 +209,16 @@ internal class MauiEventsBinder : IMauiEventsBinder
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanging), SystemType, HandlersCategory,
                 data =>
                 {
-                    data.Add(nameof(e.OldHandler), e.OldHandler?.ToString() ?? "");
-                    data.Add(nameof(e.NewHandler), e.NewHandler?.ToString() ?? "");
+                    data.Add(nameof(e.OldHandler), e.OldHandler?.ToStringOrTypeName() ?? "");
+                    data.Add(nameof(e.NewHandler), e.NewHandler?.ToStringOrTypeName() ?? "");
                 });
         element.HandlerChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanged), SystemType, HandlersCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanged), SystemType, HandlersCategory,
+                data =>
+                {
+                    var e = sender as Element;
+                    data.Add(nameof(e.Handler), e?.Handler?.ToStringOrTypeName() ?? "");
+                });
 
         // Rendering events
         element.ChildAdded += (sender, e) =>
@@ -230,7 +235,12 @@ internal class MauiEventsBinder : IMauiEventsBinder
                     data.AddElementInfo(_options, e.NewParent, nameof(e.NewParent));
                 });
         element.ParentChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ParentChanged), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ParentChanged), SystemType, RenderingCategory,
+                data =>
+                {
+                    var e = sender as Element;
+                    data.AddElementInfo(_options, e?.Parent, nameof(e.Parent));
+                });
 
         // These lead to lots of duplicate information, so probably best not to include them.
         // element.DescendantAdded
@@ -239,13 +249,20 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // BindableObject events
         element.BindingContextChanged += (sender, _) =>
         {
-            var bo = (BindableObject)sender!;
-            if (bo.BindingContext != null)
+            if (sender is not BindableObject {BindingContext: { } bindingContext})
             {
-                // Don't add breadcrumbs when this is null
-                _hub.AddBreadcrumbForEvent(_options, element, nameof(bo.BindingContextChanged), SystemType, RenderingCategory,
-                    data => data.Add(nameof(bo.BindingContext), bo.BindingContext.GetType().Name));
+                // Don't add breadcrumbs when BindingContext is null
+                return;
             }
+
+            _hub.AddBreadcrumbForEvent(
+                _options,
+                element,
+                nameof(BindableObject.BindingContextChanged),
+                SystemType,
+                RenderingCategory,
+                data =>
+                    data.Add(nameof(BindableObject.BindingContext), bindingContext.ToStringOrTypeName()));
         };
 
         // NotifyPropertyChanged events are too noisy to be useful
