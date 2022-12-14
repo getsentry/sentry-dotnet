@@ -21,11 +21,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     // This list should contain all types that we have explicitly added handlers for their events.
     // Any elements that are not in this list will have their events discovered by reflection.
-    private static readonly HashSet<Type> ExplicitlyHandledTypes = new()
+    internal static readonly HashSet<Type> ExplicitlyHandledTypes = new()
     {
+        typeof(BindableObject),
         typeof(Element),
         typeof(VisualElement),
-        typeof(BindableObject),
         typeof(Application),
         typeof(Window),
         typeof(Shell),
@@ -81,24 +81,24 @@ internal class MauiEventsBinder : IMauiEventsBinder
         BindElementEvents(application);
 
         // Navigation events
-        application.ModalPopping += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopping), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        application.ModalPopped += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        application.ModalPushing += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        application.ModalPushed += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         application.PageAppearing += (sender, page) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageAppearing), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, page, nameof(Page)));
         application.PageDisappearing += (sender, page) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, page, nameof(Page)));
+        application.ModalPushing += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        application.ModalPushed += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        application.ModalPopping += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopping), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        application.ModalPopped += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
 
         // Theme changed event
         // https://docs.microsoft.com/dotnet/maui/user-interface/system-theme-changes#react-to-theme-changes
@@ -107,14 +107,21 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 data => data.Add(nameof(e.RequestedTheme), e.RequestedTheme.ToString()));
     }
 
-    public void BindReflectedEvents(Element element)
+    public void BindReflectedEvents(BindableObject bindableObject, bool includeExplicitlyHandledTypes = false)
     {
-        // This reflects over the element's events, and attaches to any that
-        // are *NOT* declared by types in the ExplicitlyHandledTypes list.
+        // This reflects over the object's events.
+        // By default, it attaches only to events that are *NOT* declared by types in the ExplicitlyHandledTypes list.
+        // We will only include such events when testing.
 
-        var elementType = element.GetType();
-        var events = elementType.GetEvents(BindingFlags.Instance | BindingFlags.Public);
-        foreach (var eventInfo in events.Where(e => !ExplicitlyHandledTypes.Contains(e.DeclaringType!)))
+        var type = bindableObject.GetType();
+
+        IEnumerable<EventInfo> events = type.GetEvents(BindingFlags.Instance | BindingFlags.Public);
+        if (!includeExplicitlyHandledTypes)
+        {
+            events = events.Where(e => !ExplicitlyHandledTypes.Contains(e.DeclaringType!));
+        }
+
+        foreach (var eventInfo in events)
         {
             var browsable = eventInfo.GetCustomAttribute<EditorBrowsableAttribute>();
             if (browsable != null && browsable.State != EditorBrowsableState.Always)
@@ -131,12 +138,12 @@ internal class MauiEventsBinder : IMauiEventsBinder
             try
             {
                 var typedHandler = Delegate.CreateDelegate(eventInfo.EventHandlerType!, handler.Target, handler.Method);
-                eventInfo.AddEventHandler(element, typedHandler);
+                eventInfo.AddEventHandler(bindableObject, typedHandler);
             }
             catch (Exception ex)
             {
                 // Don't throw if we can't bind the event handler
-                _options.DiagnosticLogger?.LogError("Couldn't bind to {0}.{1}", ex, elementType.Name, eventInfo.Name);
+                _options.DiagnosticLogger?.LogError("Couldn't bind to {0}.{1}", ex, type.Name, eventInfo.Name);
             }
         }
     }
@@ -185,17 +192,17 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 });
 
         // Navigation events
-        window.ModalPopping += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopping), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        window.ModalPopped += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopped), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.ModalPushing += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPushing), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.ModalPushed += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPushed), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        window.ModalPopping += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopping), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
+        window.ModalPopped += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopped), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.PopCanceled += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.PopCanceled), NavigationType, NavigationCategory);

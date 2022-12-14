@@ -4,12 +4,13 @@ public class MockElement : Element
 {
     public MockElement(string name = null)
     {
+        // The x:Name attribute set in XAML is assigned to the StyleId property
         StyleId = name;
     }
 
-    public void InvokeOnChildAdded(Element child) =>
-        OnChildAdded(child);
+    public event EventHandler CustomEvent;
 
-    public void InvokeOnChildRemoved(Element child, int oldLogicalIndex) =>
-        OnChildRemoved(child, oldLogicalIndex);
+    protected virtual void OnCustomEvent() => CustomEvent?.Invoke(this, EventArgs.Empty);
+
+    public void RaiseCustomEvent() => OnCustomEvent();
 }

@@ -30,8 +30,4 @@ public class MockApplication : Application
             return application;
         }
     }
-
-    public void InvokeOnChildAdded(Element child) => OnChildAdded(child);
-
-    public void InvokeOnChildRemoved(Element child, int oldLogicalIndex) => OnChildRemoved(child, oldLogicalIndex);
 }

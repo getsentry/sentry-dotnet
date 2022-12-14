@@ -4,7 +4,7 @@ internal interface IMauiEventsBinder
 {
     void BindApplicationEvents(Application application);
 
-    void BindReflectedEvents(Element element);
+    void BindReflectedEvents(BindableObject bindableObject, bool includeExplicitlyHandledTypes = false);
 
     void BindWindowEvents(Window window);
 
