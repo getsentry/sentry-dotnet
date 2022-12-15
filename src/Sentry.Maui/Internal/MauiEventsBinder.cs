@@ -331,18 +331,20 @@ internal class MauiEventsBinder : IMauiEventsBinder
         // Lifecycle events
         // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/lifecycle
         page.Appearing += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.Appearing), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.Appearing), SystemType, LifecycleCategory);
         page.Disappearing += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.Disappearing), SystemType, RenderingCategory);
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.Disappearing), SystemType, LifecycleCategory);
 
         // Navigation events
         // https://github.com/dotnet/docs-maui/issues/583
         page.NavigatingFrom += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatingFrom), NavigationType, NavigationCategory);
-        page.NavigatedFrom += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedFrom), NavigationType, NavigationCategory);
-        page.NavigatedTo += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory);
+        page.NavigatedFrom += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedFrom), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.GetDestinationPage(), "DestinationPage"));
+        page.NavigatedTo += (sender, e) =>
+            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory,
+                data => data.AddElementInfo(_options, e.GetPreviousPage(), "PreviousPage"));
 
         // Layout changed event
         // https://docs.microsoft.com/dotnet/api/xamarin.forms.ilayout.layoutchanged
