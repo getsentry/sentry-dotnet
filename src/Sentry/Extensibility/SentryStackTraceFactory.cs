@@ -5,7 +5,7 @@ namespace Sentry.Extensibility;
 /// <summary>
 /// Default factory to <see cref="SentryStackTrace" /> from an <see cref="Exception" />.
 /// </summary>
-public class SentryStackTraceFactory : ISentryStackTraceFactory
+public sealed class SentryStackTraceFactory : ISentryStackTraceFactory
 {
     private readonly SentryOptions _options;
 
@@ -19,7 +19,7 @@ public class SentryStackTraceFactory : ISentryStackTraceFactory
     /// </summary>
     /// <param name="exception">The exception to create the stacktrace from.</param>
     /// <returns>A Sentry stack trace.</returns>
-    public virtual SentryStackTrace? Create(Exception? exception = null)
+    public SentryStackTrace? Create(Exception? exception = null)
     {
         if (exception == null && !_options.AttachStacktrace)
         {

@@ -1203,10 +1203,10 @@ namespace Sentry.Extensibility
         public void Process(System.Exception? exception, Sentry.SentryEvent sentryEvent) { }
         protected abstract void ProcessException(TException exception, Sentry.SentryEvent sentryEvent);
     }
-    public class SentryStackTraceFactory : Sentry.Extensibility.ISentryStackTraceFactory
+    public sealed class SentryStackTraceFactory : Sentry.Extensibility.ISentryStackTraceFactory
     {
         public SentryStackTraceFactory(Sentry.SentryOptions options) { }
-        public virtual Sentry.SentryStackTrace? Create(System.Exception? exception = null) { }
+        public Sentry.SentryStackTrace? Create(System.Exception? exception = null) { }
     }
 }
 namespace Sentry.Http
