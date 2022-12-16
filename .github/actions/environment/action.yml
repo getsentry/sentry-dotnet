@@ -16,6 +16,13 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
+    - name: Set XCode Version
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        sudo xcode-select -s "/Applications/Xcode_14.1.app"
+        echo "MD_APPLE_SDK_ROOT=/Applications/Xcode_14.1.app" >> $GITHUB_ENV
+
     # Note, the following is needed on the windows-2019 image only.
     # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
     - name: Install .NET 6 SDK
