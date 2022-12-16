@@ -4,7 +4,7 @@
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
-    <SentryCocoaSdkDirectory>$(SolutionDir)\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
+    <SentryCocoaSdkDirectory>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
     <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
   </PropertyGroup>
 
@@ -16,7 +16,7 @@
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
 
     <!-- Use a separate readme file in the nuget. -->
-    <None Remove="$(SolutionDir)README.md" />
+    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
 
     <!-- Don't add the changelog to the nuget. -->
@@ -31,7 +31,7 @@
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerBuildSentryCocoaSDK">
-    <Exec Command="$(SolutionDir)scripts/build-sentry-cocoa.sh" />
+    <Exec Command="$(MSBuildThisFileDirectory)../../scripts/build-sentry-cocoa.sh" />
   </Target>
 
 </Project>
