@@ -11,14 +11,14 @@ public partial class MauiEventsBinderTests
     public void Button_CommonEvents_AddsBreadcrumb(string eventName)
     {
         // Arrange
-        var element = new Button
+        var button = new Button
         {
             StyleId = "button"
         };
-        _fixture.Binder.BindButtonEvents(element);
+        _fixture.Binder.BindButtonEvents(button);
 
         // Act
-        element.RaiseEvent(eventName, EventArgs.Empty);
+        button.RaiseEvent(eventName, EventArgs.Empty);
 
         // Assert
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
