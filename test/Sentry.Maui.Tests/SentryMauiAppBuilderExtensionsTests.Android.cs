@@ -1,40 +1,44 @@
 using Microsoft.Maui.LifecycleEvents;
 using Sentry.Maui.Internal;
+using Sentry.Maui.Tests.Mocks;
 
 namespace Sentry.Maui.Tests;
 
 public partial class SentryMauiAppBuilderExtensionsTests
 {
     [Fact]
-    public void UseSentry_BindsToLifecycleEvents_Android()
+    public void UseSentry_BindsToApplicationStartupEvent_Android()
     {
         // Arrange
         var binder = Substitute.For<IMauiEventsBinder>();
 
         var builder = _fixture.Builder;
         builder.Services.AddSingleton(binder);
-
-        // Act
         builder.UseSentry(ValidDsn);
         using var app = builder.Build();
-        var application = new FakeAndroidApplication(app.Services);
 
+        var application = MockApplication.Create();
+        var androidApplication = new MockAndroidApplication(application, app.Services);
+
+        // Act
         var lifecycleEventService = app.Services.GetRequiredService<ILifecycleEventService>();
         lifecycleEventService.InvokeEvents<AndroidLifecycle.OnApplicationCreating>
-            (nameof(AndroidLifecycle.OnApplicationCreating), del => del.Invoke(application));
+            (nameof(AndroidLifecycle.OnApplicationCreating), del => del.Invoke(androidApplication));
 
         // Assert
-        binder.Received(1).BindMauiEvents();
+        binder.Received(1).BindApplicationEvents(application);
     }
 
-    private class FakeAndroidApplication : global::Android.App.Application, IPlatformApplication
+    private class MockAndroidApplication : global::Android.App.Application, IPlatformApplication
     {
-        public FakeAndroidApplication(IServiceProvider services)
+        public MockAndroidApplication(IApplication application, IServiceProvider services)
         {
+            Application = application;
             Services = services;
         }
 
+        public IApplication Application { get; }
+
         public IServiceProvider Services { get; }
-        public IApplication Application => null;
     }
 }
