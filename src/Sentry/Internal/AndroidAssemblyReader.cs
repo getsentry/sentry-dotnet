@@ -12,7 +12,7 @@ internal interface IAndroidAssemblyReader : IDisposable
     PEReader? TryReadAssembly(string name);
 }
 
-internal sealed class AndroidAssemblyReaderFactory
+internal static class AndroidAssemblyReaderFactory
 {
     public static IAndroidAssemblyReader Open(string apkPath, IList<string> supportedAbis, IDiagnosticLogger? logger)
     {
@@ -24,37 +24,36 @@ internal sealed class AndroidAssemblyReaderFactory
             logger?.LogDebug("APK uses AssemblyStore");
             return new AndroidAssemblyStoreReader(zipArchive, supportedAbis, logger);
         }
-        else
-        {
-            logger?.LogDebug("APK doesn't use AssemblyStore");
-            return new AndroidAssemblyDirectoryReader(zipArchive, supportedAbis, logger);
-        }
+
+        logger?.LogDebug("APK doesn't use AssemblyStore");
+        return new AndroidAssemblyDirectoryReader(zipArchive, supportedAbis, logger);
     }
 }
 
-internal class AndroidAssemblyReader : IDisposable
+internal abstract class AndroidAssemblyReader : IDisposable
 {
-    protected readonly IDiagnosticLogger? _logger;
-    protected readonly ZipArchive _zipArchive;
-    protected readonly IList<string> _supportedAbis;
+    protected IDiagnosticLogger? Logger { get; }
+    protected ZipArchive ZipArchive { get; }
+    protected IList<string> SupportedAbis { get; }
 
-    public AndroidAssemblyReader(ZipArchive zip, IList<string> supportedAbis, IDiagnosticLogger? logger)
+    protected AndroidAssemblyReader(ZipArchive zip, IList<string> supportedAbis, IDiagnosticLogger? logger)
     {
-        _zipArchive = zip;
-        _logger = logger;
-        _supportedAbis = supportedAbis;
+        ZipArchive = zip;
+        Logger = logger;
+        SupportedAbis = supportedAbis;
     }
 
     public void Dispose()
     {
-        _zipArchive.Dispose();
+        ZipArchive.Dispose();
     }
 
     protected PEReader CreatePEReader(string assemblyName, MemoryStream inputStream)
     {
         var decompressedStream = TryDecompressLZ4(assemblyName, inputStream);
+
         // Use the decompressed stream, or if null, i.e. it wasn't compressed, use the original.
-        return new(decompressedStream ?? inputStream);
+        return new PEReader(decompressedStream ?? inputStream);
     }
 
     /// <summary>
@@ -68,10 +67,10 @@ internal class AndroidAssemblyReader : IDisposable
     /// <seealso href="https://github.com/xamarin/xamarin-android/blob/c92702619f5fabcff0ed88e09160baf9edd70f41/tools/decompress-assemblies/main.cs#L26" />
     private Stream? TryDecompressLZ4(string assemblyName, MemoryStream inputStream)
     {
-        const uint CompressedDataMagic = 0x5A4C4158; // 'XALZ', little-endian
+        const uint compressedDataMagic = 0x5A4C4158; // 'XALZ', little-endian
         const int payloadOffset = 12;
         var reader = new BinaryReader(inputStream);
-        if (reader.ReadUInt32() != CompressedDataMagic)
+        if (reader.ReadUInt32() != compressedDataMagic)
         {
             // Restore the input stream to the beginning if we're not decompressing.
             inputStream.Position = 0;
@@ -82,7 +81,7 @@ internal class AndroidAssemblyReader : IDisposable
         Debug.Assert(inputStream.Position == payloadOffset);
         var inputLength = (int)(inputStream.Length - payloadOffset);
 
-        _logger?.LogDebug("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
+        Logger?.LogDebug("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
 
         var outputStream = new MemoryStream(decompressedLength);
 
@@ -90,8 +89,8 @@ internal class AndroidAssemblyReader : IDisposable
         outputStream.SetLength(decompressedLength);
         var outputBuffer = outputStream.GetBuffer();
 
-        var inputBuffer = inputStream is MemorySlice ? (inputStream as MemorySlice)!.FullBuffer : inputStream.GetBuffer();
-        var offset = inputStream is MemorySlice ? (inputStream as MemorySlice)!.Offset + payloadOffset : payloadOffset;
+        var inputBuffer = inputStream is MemorySlice slice ? slice.FullBuffer : inputStream.GetBuffer();
+        var offset = inputStream is MemorySlice memorySlice ? memorySlice.Offset + payloadOffset : payloadOffset;
         var decoded = LZ4Codec.Decode(inputBuffer, offset, inputLength, outputBuffer, 0, decompressedLength);
         if (decoded != decompressedLength)
         {
@@ -126,11 +125,11 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
         var zipEntry = FindAssembly(name);
         if (zipEntry is null)
         {
-            _logger?.LogDebug("Couldn't find assembly {0} in the APK", name);
+            Logger?.LogDebug("Couldn't find assembly {0} in the APK", name);
             return null;
         }
 
-        _logger?.LogDebug("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
+        Logger?.LogDebug("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
 
         // We need a seekable stream for the PEReader (or even to check whether the DLL is compressed), so make a copy.
         var memStream = new MemoryStream((int)zipEntry.Length);
@@ -144,15 +143,15 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
 
     private ZipArchiveEntry? FindAssembly(string name)
     {
-        var zipEntry = _zipArchive.GetEntry($"assemblies/{name}");
+        var zipEntry = ZipArchive.GetEntry($"assemblies/{name}");
 
         if (zipEntry is null)
         {
-            foreach (var abi in _supportedAbis)
+            foreach (var abi in SupportedAbis)
             {
                 if (abi.Length > 0)
                 {
-                    zipEntry = _zipArchive.GetEntry($"assemblies/{abi}/{name}");
+                    zipEntry = ZipArchive.GetEntry($"assemblies/{abi}/{name}");
                     if (zipEntry is not null)
                     {
                         break;
@@ -181,16 +180,16 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         var assembly = TryFindAssembly(name);
         if (assembly is null)
         {
-            _logger?.LogDebug("Couldn't find assembly {0} in the APK AssemblyStore", name);
+            Logger?.LogDebug("Couldn't find assembly {0} in the APK AssemblyStore", name);
             return null;
         }
 
-        _logger?.LogDebug("Resolved assembly {0} in the APK {1} AssemblyStore", name, assembly.Store.Arch);
+        Logger?.LogDebug("Resolved assembly {0} in the APK {1} AssemblyStore", name, assembly.Store.Arch);
 
         var stream = assembly.GetImage();
         if (stream is null)
         {
-            _logger?.LogDebug("Couldn't access assembly {0} image stream", name);
+            Logger?.LogDebug("Couldn't access assembly {0} image stream", name);
             return null;
         }
 
@@ -223,11 +222,20 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         private AssemblyStoreReader? _indexStore;
         private readonly AssemblyStoreManifestReader _manifest;
         private readonly IDiagnosticLogger? _logger;
-        public IDictionary<string, AssemblyStoreAssembly> AssembliesByName { get; } = new SortedDictionary<string, AssemblyStoreAssembly>(StringComparer.OrdinalIgnoreCase);
-        public IDictionary<uint, AssemblyStoreAssembly> AssembliesByHash32 { get; } = new Dictionary<uint, AssemblyStoreAssembly>();
-        public IDictionary<ulong, AssemblyStoreAssembly> AssembliesByHash64 { get; } = new Dictionary<ulong, AssemblyStoreAssembly>();
+
+        public IDictionary<string, AssemblyStoreAssembly> AssembliesByName { get; } =
+            new SortedDictionary<string, AssemblyStoreAssembly>(StringComparer.OrdinalIgnoreCase);
+
+        public IDictionary<uint, AssemblyStoreAssembly> AssembliesByHash32 { get; } =
+            new Dictionary<uint, AssemblyStoreAssembly>();
+
+        public IDictionary<ulong, AssemblyStoreAssembly> AssembliesByHash64 { get; } =
+            new Dictionary<ulong, AssemblyStoreAssembly>();
+
         public List<AssemblyStoreAssembly> Assemblies { get; } = new();
-        public IDictionary<uint, List<AssemblyStoreReader>> Stores { get; } = new SortedDictionary<uint, List<AssemblyStoreReader>>();
+
+        public IDictionary<uint, List<AssemblyStoreReader>> Stores { get; } =
+            new SortedDictionary<uint, List<AssemblyStoreReader>>();
 
         public AssemblyStoreExplorer(ZipArchive zip, IList<string> supportedAbis, IDiagnosticLogger? logger)
         {
@@ -242,6 +250,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                     TryAddStore(zip, abi);
                 }
             }
+
             zip.Dispose();
             ProcessStores();
         }
@@ -274,23 +283,27 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 assembly.Hash64 = he.Hash;
                 if (assembly.RuntimeIndex != he.MappingIndex)
                 {
-                    _logger?.LogDebug($"assembly with hashes 0x{assembly.Hash32} and 0x{assembly.Hash64} has a different 32-bit runtime index ({assembly.RuntimeIndex}) than the 64-bit runtime index({he.MappingIndex})");
+                    _logger?.LogDebug(
+                        $"assembly with hashes 0x{assembly.Hash32} and 0x{assembly.Hash64} has a different 32-bit runtime index ({assembly.RuntimeIndex}) than the 64-bit runtime index({he.MappingIndex})");
                 }
 
                 if (_manifest.EntriesByHash64.TryGetValue(assembly.Hash64, out var me))
                 {
                     if (string.IsNullOrEmpty(assembly.Name))
                     {
-                        _logger?.LogDebug($"32-bit hash 0x{assembly.Hash32:x} did not match any assembly name in the manifest");
+                        _logger?.LogDebug(
+                            $"32-bit hash 0x{assembly.Hash32:x} did not match any assembly name in the manifest");
                         assembly.Name = me.Name;
                         if (string.IsNullOrEmpty(assembly.Name))
                         {
-                            _logger?.LogDebug($"64-bit hash 0x{assembly.Hash64:x} did not match any assembly name in the manifest");
+                            _logger?.LogDebug(
+                                $"64-bit hash 0x{assembly.Hash64:x} did not match any assembly name in the manifest");
                         }
                     }
                     else if (!string.Equals(assembly.Name, me.Name, StringComparison.Ordinal))
                     {
-                        _logger?.LogDebug($"32-bit hash 0x{assembly.Hash32:x} maps to assembly name '{assembly.Name}', however 64-bit hash 0x{assembly.Hash64:x} for the same entry matches assembly name '{me.Name}'");
+                        _logger?.LogDebug(
+                            $"32-bit hash 0x{assembly.Hash32:x} maps to assembly name '{assembly.Name}', however 64-bit hash 0x{assembly.Hash64:x} for the same entry matches assembly name '{me.Name}'");
                     }
                 }
 
@@ -314,12 +327,14 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                     var other = list[i];
                     if (!template.HasIdenticalContent(other))
                     {
-                        throw new Exception($"Store ID {template.StoreId} for architecture {other.Arch} is not identical to other stores with the same ID");
+                        throw new Exception(
+                            $"Store ID {template.StoreId} for architecture {other.Arch} is not identical to other stores with the same ID");
                     }
                 }
             }
 
-            void ProcessIndex(List<AssemblyStoreHashEntry> index, string bitness, Action<AssemblyStoreHashEntry, AssemblyStoreAssembly> assemblyHandler)
+            void ProcessIndex(List<AssemblyStoreHashEntry> index, string bitness,
+                Action<AssemblyStoreHashEntry, AssemblyStoreAssembly> assemblyHandler)
             {
                 foreach (var he in index)
                 {
@@ -333,7 +348,8 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                     {
                         if (he.LocalStoreIndex >= (uint)store.Assemblies.Count)
                         {
-                            _logger?.LogDebug($"{bitness}-bit index entry with hash 0x{he.Hash:x} has invalid store {store.StoreId} index {he.LocalStoreIndex} (maximum allowed is {store.Assemblies.Count})");
+                            _logger?.LogDebug(
+                                $"{bitness}-bit index entry with hash 0x{he.Hash:x} has invalid store {store.StoreId} index {he.LocalStoreIndex} (maximum allowed is {store.Assemblies.Count})");
                             continue;
                         }
 
@@ -360,6 +376,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                     zipStream.CopyTo(memStream);
                     memStream.Position = 0;
                 }
+
                 AddStore(new AssemblyStoreReader(memStream, abi));
             }
         }
@@ -376,6 +393,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 storeList = new List<AssemblyStoreReader>();
                 Stores.Add(reader.StoreId, storeList);
             }
+
             storeList.Add(reader);
 
             Assemblies.AddRange(reader.Assemblies);
@@ -545,30 +563,17 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             }
         }
 
-        internal MemoryStream GetAssemblyImageSlice(AssemblyStoreAssembly assembly)
-        {
-            return GetDataSlice(assembly.DataOffset, assembly.DataSize);
-        }
+        internal MemoryStream? GetAssemblyImageSlice(AssemblyStoreAssembly assembly) =>
+            GetDataSlice(assembly.DataOffset, assembly.DataSize);
 
-        internal MemoryStream? GetAssemblyDebugDataSlice(AssemblyStoreAssembly assembly)
-        {
-            if (assembly.DebugDataOffset == 0 || assembly.DebugDataSize == 0)
-            {
-                return null;
-            }
-            return GetDataSlice(assembly.DebugDataOffset, assembly.DebugDataSize);
-        }
+        internal MemoryStream? GetAssemblyDebugDataSlice(AssemblyStoreAssembly assembly) =>
+            assembly.DebugDataOffset == 0 ? null : GetDataSlice(assembly.DebugDataOffset, assembly.DebugDataSize);
 
-        internal MemoryStream? GetAssemblyConfigSlice(AssemblyStoreAssembly assembly)
-        {
-            if (assembly.ConfigDataOffset == 0 || assembly.ConfigDataSize == 0)
-            {
-                return null;
-            }
-            return GetDataSlice(assembly.ConfigDataOffset, assembly.ConfigDataSize);
-        }
+        internal MemoryStream? GetAssemblyConfigSlice(AssemblyStoreAssembly assembly) =>
+            assembly.ConfigDataOffset == 0 ? null : GetDataSlice(assembly.ConfigDataOffset, assembly.ConfigDataSize);
 
-        private MemoryStream GetDataSlice(uint offset, uint size) => new MemorySlice(_storeData, (int)offset, (int)size);
+        private MemoryStream? GetDataSlice(uint offset, uint size) =>
+            size == 0 ? null : new MemorySlice(_storeData, (int)offset, (int)size);
 
         public bool HasIdenticalContent(AssemblyStoreReader other)
         {
@@ -597,7 +602,8 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
 
             if (Version > ASSEMBLY_STORE_FORMAT_VERSION)
             {
-                throw new InvalidOperationException($"Store format version {Version} is higher than the one understood by this reader, {ASSEMBLY_STORE_FORMAT_VERSION}");
+                throw new InvalidOperationException(
+                    $"Store format version {Version} is higher than the one understood by this reader, {ASSEMBLY_STORE_FORMAT_VERSION}");
             }
 
             LocalEntryCount = reader.ReadUInt32();
@@ -613,7 +619,8 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             }
         }
 
-        private void ReadGlobalIndex(BinaryReader reader, List<AssemblyStoreHashEntry> index32, List<AssemblyStoreHashEntry> index64)
+        private void ReadGlobalIndex(BinaryReader reader, List<AssemblyStoreHashEntry> index32,
+            List<AssemblyStoreHashEntry> index64)
         {
             ReadIndex(true, index32);
             ReadIndex(false, index64);
