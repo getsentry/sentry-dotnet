@@ -1,8 +1,5 @@
 #if !__MOBILE__
 
-using System.Text.Json;
-using System.Text.RegularExpressions;
-
 namespace Sentry.Testing;
 
 public static class VerifyExtensions

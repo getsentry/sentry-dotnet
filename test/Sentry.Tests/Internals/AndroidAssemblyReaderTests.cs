@@ -1,33 +1,29 @@
 #if NET6_0_OR_GREATER && !__IOS__
-using System.Reflection;
-using Sentry.Testing;
-
 namespace Sentry.Tests.Internals;
 
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly TestOutputDiagnosticLogger _logger;
+    private readonly IDiagnosticLogger _logger;
 
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
         _output = output;
-        _logger = new(output);
+        _logger = new TestOutputDiagnosticLogger(output);
     }
 
     private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
     {
 #if ANDROID
-        // On Android, this tests the current app APK.
+        // On Android, this gets the current app APK.
         var apkPath = Environment.CommandLine;
-        // AndroidBuild not available here - We can't use the usual code
-        // var supportedAbis = AndroidBuild.SupportedAbis ?? new List<string> { AndroidBuild.CpuAbi ?? "" };
-        var supportedAbis = new List<string> { "x86_64" };
+        var supportedAbis = Android.AndroidHelpers.GetSupportedAbis();
 #else
         var apkPath = Path.Combine(
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-            "../../../Internals/",
+            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+            "..", "..", "..", "Internals",
             $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk");
+
         var supportedAbis = new List<string> { "x86_64" };
 #endif
         _output.WriteLine($"Checking if APK exists: {apkPath}");
@@ -89,6 +85,7 @@ public class AndroidAssemblyReaderTests
         var headers = peReader.PEHeaders;
         Assert.True(headers.IsDll);
         headers.MetadataSize.Should().BeGreaterThan(0);
+        Assert.NotNull(headers.PEHeader);
         headers.PEHeader.SizeOfImage.Should().BeGreaterThan(0);
         var debugDirs = peReader.ReadDebugDirectory();
         debugDirs.Length.Should().BeGreaterThan(0);

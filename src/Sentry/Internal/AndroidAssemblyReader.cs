@@ -1,13 +1,9 @@
 // TODO this is actually only needed for Android but we want to test on local devices. Is there another way to do this?
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER && !__IOS__
 
-using System.IO.Compression;
 using System.Reflection.PortableExecutable;
 using Sentry.Extensibility;
 using K4os.Compression.LZ4;
-using System.Diagnostics;
-using System.Globalization;
-using System.Text;
 
 namespace Sentry.Internal;
 
@@ -77,7 +73,7 @@ internal class AndroidAssemblyReader : IDisposable
         var reader = new BinaryReader(inputStream);
         if (reader.ReadUInt32() != CompressedDataMagic)
         {
-            // Restore the input stream to the begininng if we're not decompressing.
+            // Restore the input stream to the beginning if we're not decompressing.
             inputStream.Position = 0;
             return null;
         }
@@ -230,7 +226,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         public IDictionary<string, AssemblyStoreAssembly> AssembliesByName { get; } = new SortedDictionary<string, AssemblyStoreAssembly>(StringComparer.OrdinalIgnoreCase);
         public IDictionary<uint, AssemblyStoreAssembly> AssembliesByHash32 { get; } = new Dictionary<uint, AssemblyStoreAssembly>();
         public IDictionary<ulong, AssemblyStoreAssembly> AssembliesByHash64 { get; } = new Dictionary<ulong, AssemblyStoreAssembly>();
-        public List<AssemblyStoreAssembly> Assemblies { get; } = new List<AssemblyStoreAssembly>();
+        public List<AssemblyStoreAssembly> Assemblies { get; } = new();
         public IDictionary<uint, List<AssemblyStoreReader>> Stores { get; } = new SortedDictionary<uint, List<AssemblyStoreReader>>();
 
         public AssemblyStoreExplorer(ZipArchive zip, IList<string> supportedAbis, IDiagnosticLogger? logger)
@@ -257,12 +253,12 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 return;
             }
 
-            ProcessIndex(_indexStore.GlobalIndex32, "32", (AssemblyStoreHashEntry he, AssemblyStoreAssembly assembly) =>
+            ProcessIndex(_indexStore.GlobalIndex32, "32", (he, assembly) =>
             {
                 assembly.Hash32 = (uint)he.Hash;
                 assembly.RuntimeIndex = he.MappingIndex;
 
-                if (_manifest != null && _manifest.EntriesByHash32.TryGetValue(assembly.Hash32, out var me) && me != null)
+                if (_manifest.EntriesByHash32.TryGetValue(assembly.Hash32, out var me))
                 {
                     assembly.Name = me.Name;
                 }
@@ -273,7 +269,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 }
             });
 
-            ProcessIndex(_indexStore.GlobalIndex64, "64", (AssemblyStoreHashEntry he, AssemblyStoreAssembly assembly) =>
+            ProcessIndex(_indexStore.GlobalIndex64, "64", (he, assembly) =>
             {
                 assembly.Hash64 = he.Hash;
                 if (assembly.RuntimeIndex != he.MappingIndex)
@@ -281,7 +277,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                     _logger?.LogDebug($"assembly with hashes 0x{assembly.Hash32} and 0x{assembly.Hash64} has a different 32-bit runtime index ({assembly.RuntimeIndex}) than the 64-bit runtime index({he.MappingIndex})");
                 }
 
-                if (_manifest != null && _manifest.EntriesByHash64.TryGetValue(assembly.Hash64, out var me) && me != null)
+                if (_manifest.EntriesByHash64.TryGetValue(assembly.Hash64, out var me))
                 {
                     if (string.IsNullOrEmpty(assembly.Name))
                     {
@@ -306,42 +302,42 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
 
             foreach (var kvp in Stores)
             {
-                List<AssemblyStoreReader> list = kvp.Value;
+                var list = kvp.Value;
                 if (list.Count < 2)
                 {
                     continue;
                 }
 
-                AssemblyStoreReader template = list[0];
-                for (int i = 1; i < list.Count; i++)
+                var template = list[0];
+                for (var i = 1; i < list.Count; i++)
                 {
-                    AssemblyStoreReader other = list[i];
+                    var other = list[i];
                     if (!template.HasIdenticalContent(other))
                     {
-                        throw new Exception($"Store ID {template.StoreID} for architecture {other.Arch} is not identical to other stores with the same ID");
+                        throw new Exception($"Store ID {template.StoreId} for architecture {other.Arch} is not identical to other stores with the same ID");
                     }
                 }
             }
 
             void ProcessIndex(List<AssemblyStoreHashEntry> index, string bitness, Action<AssemblyStoreHashEntry, AssemblyStoreAssembly> assemblyHandler)
             {
-                foreach (AssemblyStoreHashEntry he in index)
+                foreach (var he in index)
                 {
-                    if (!Stores.TryGetValue(he.StoreID, out List<AssemblyStoreReader>? storeList) || storeList == null)
+                    if (!Stores.TryGetValue(he.StoreId, out var storeList))
                     {
-                        _logger?.LogDebug($"store with id {he.StoreID} not part of the set");
+                        _logger?.LogDebug($"store with id {he.StoreId} not part of the set");
                         continue;
                     }
 
-                    foreach (AssemblyStoreReader store in storeList)
+                    foreach (var store in storeList)
                     {
                         if (he.LocalStoreIndex >= (uint)store.Assemblies.Count)
                         {
-                            _logger?.LogDebug($"{bitness}-bit index entry with hash 0x{he.Hash:x} has invalid store {store.StoreID} index {he.LocalStoreIndex} (maximum allowed is {store.Assemblies.Count})");
+                            _logger?.LogDebug($"{bitness}-bit index entry with hash 0x{he.Hash:x} has invalid store {store.StoreId} index {he.LocalStoreIndex} (maximum allowed is {store.Assemblies.Count})");
                             continue;
                         }
 
-                        AssemblyStoreAssembly assembly = store.Assemblies[(int)he.LocalStoreIndex];
+                        var assembly = store.Assemblies[(int)he.LocalStoreIndex];
                         assemblyHandler(he, assembly);
 
                         if (!AssembliesByName.ContainsKey(assembly.Name))
@@ -375,10 +371,10 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 _indexStore = reader;
             }
 
-            if (!Stores.TryGetValue(reader.StoreID, out var storeList))
+            if (!Stores.TryGetValue(reader.StoreId, out var storeList))
             {
                 storeList = new List<AssemblyStoreReader>();
-                Stores.Add(reader.StoreID, storeList);
+                Stores.Add(reader.StoreId, storeList);
             }
             storeList.Add(reader);
 
@@ -390,9 +386,9 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
     // With the original code licensed under MIT License (https://github.com/xamarin/xamarin-android/blob/2bd13c4a00ae78db34663a4b9c7a4c5bfb20c344/LICENSE).
     private class AssemblyStoreManifestReader
     {
-        public List<AssemblyStoreManifestEntry> Entries { get; } = new List<AssemblyStoreManifestEntry>();
-        public Dictionary<uint, AssemblyStoreManifestEntry> EntriesByHash32 { get; } = new Dictionary<uint, AssemblyStoreManifestEntry>();
-        public Dictionary<ulong, AssemblyStoreManifestEntry> EntriesByHash64 { get; } = new Dictionary<ulong, AssemblyStoreManifestEntry>();
+        public List<AssemblyStoreManifestEntry> Entries { get; } = new();
+        public Dictionary<uint, AssemblyStoreManifestEntry> EntriesByHash32 { get; } = new();
+        public Dictionary<ulong, AssemblyStoreManifestEntry> EntriesByHash64 { get; } = new();
 
         public AssemblyStoreManifestReader(Stream manifest)
         {
@@ -408,7 +404,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             // Each subsequent line consists of fields separated with any number of spaces (for the pleasure of a human being reading the manifest)
             while (!reader.EndOfStream)
             {
-                string[]? fields = reader.ReadLine()?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var fields = reader.ReadLine()?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (fields == null)
                 {
                     continue;
@@ -438,13 +434,13 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         private const int NumberOfFields = 5;
         private const int Hash32FieldIndex = 0;
         private const int Hash64FieldIndex = 1;
-        private const int StoreIDFieldIndex = 2;
+        private const int StoreIdFieldIndex = 2;
         private const int StoreIndexFieldIndex = 3;
         private const int NameFieldIndex = 4;
 
         public uint Hash32 { get; }
         public ulong Hash64 { get; }
-        public uint StoreID { get; }
+        public uint StoreId { get; }
         public uint IndexInStore { get; }
         public string Name { get; }
 
@@ -457,14 +453,14 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
 
             Hash32 = GetUInt32(fields[Hash32FieldIndex]);
             Hash64 = GetUInt64(fields[Hash64FieldIndex]);
-            StoreID = GetUInt32(fields[StoreIDFieldIndex]);
+            StoreId = GetUInt32(fields[StoreIdFieldIndex]);
             IndexInStore = GetUInt32(fields[StoreIndexFieldIndex]);
             Name = fields[NameFieldIndex].Trim();
         }
 
         private static uint GetUInt32(string value)
         {
-            if (uint.TryParse(PrepHexValue(value), NumberStyles.HexNumber, null, out uint hash))
+            if (uint.TryParse(PrepHexValue(value), NumberStyles.HexNumber, null, out var hash))
             {
                 return hash;
             }
@@ -474,7 +470,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
 
         private static ulong GetUInt64(string value)
         {
-            if (ulong.TryParse(PrepHexValue(value), NumberStyles.HexNumber, null, out ulong hash))
+            if (ulong.TryParse(PrepHexValue(value), NumberStyles.HexNumber, null, out var hash))
             {
                 return hash;
             }
@@ -498,20 +494,18 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
     private class AssemblyStoreHashEntry
     {
         public bool Is32Bit { get; }
-
         public ulong Hash { get; }
         public uint MappingIndex { get; }
         public uint LocalStoreIndex { get; }
-        public uint StoreID { get; }
+        public uint StoreId { get; }
 
         internal AssemblyStoreHashEntry(BinaryReader reader, bool is32Bit)
         {
             Is32Bit = is32Bit;
-
             Hash = reader.ReadUInt64();
             MappingIndex = reader.ReadUInt32();
             LocalStoreIndex = reader.ReadUInt32();
-            StoreID = reader.ReadUInt32();
+            StoreId = reader.ReadUInt32();
         }
     }
 
@@ -528,13 +522,13 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         public uint Version { get; private set; }
         public uint LocalEntryCount { get; private set; }
         public uint GlobalEntryCount { get; private set; }
-        public uint StoreID { get; private set; }
+        public uint StoreId { get; private set; }
         public List<AssemblyStoreAssembly> Assemblies { get; }
-        public List<AssemblyStoreHashEntry> GlobalIndex32 { get; } = new List<AssemblyStoreHashEntry>();
-        public List<AssemblyStoreHashEntry> GlobalIndex64 { get; } = new List<AssemblyStoreHashEntry>();
+        public List<AssemblyStoreHashEntry> GlobalIndex32 { get; } = new();
+        public List<AssemblyStoreHashEntry> GlobalIndex64 { get; } = new();
         public string Arch { get; }
 
-        public bool HasGlobalIndex => StoreID == 0;
+        public bool HasGlobalIndex => StoreId == 0;
 
         public AssemblyStoreReader(MemoryStream store, string? arch = null)
         {
@@ -551,7 +545,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             }
         }
 
-        internal MemoryStream? GetAssemblyImageSlice(AssemblyStoreAssembly assembly)
+        internal MemoryStream GetAssemblyImageSlice(AssemblyStoreAssembly assembly)
         {
             return GetDataSlice(assembly.DataOffset, assembly.DataSize);
         }
@@ -582,7 +576,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 other.Version == Version &&
                 other.LocalEntryCount == LocalEntryCount &&
                 other.GlobalEntryCount == GlobalEntryCount &&
-                other.StoreID == StoreID &&
+                other.StoreId == StoreId &&
                 other.Assemblies.Count == Assemblies.Count &&
                 other.GlobalIndex32.Count == GlobalIndex32.Count &&
                 other.GlobalIndex64.Count == GlobalIndex64.Count;
@@ -608,7 +602,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
 
             LocalEntryCount = reader.ReadUInt32();
             GlobalEntryCount = reader.ReadUInt32();
-            StoreID = reader.ReadUInt32();
+            StoreId = reader.ReadUInt32();
         }
 
         private void ReadLocalEntries(BinaryReader reader, List<AssemblyStoreAssembly> assemblies)

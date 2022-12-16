@@ -160,10 +160,10 @@ public partial class DebugStackTraceTests
 
         public void Inject(int identifier)
         {
-            _debugImages.Add(new DebugImage
+            DebugImages.Add(new DebugImage
             {
                 CodeFile = $"{identifier}.dll",
-                ModuleVersionId = new Guid("00000000-0000-0000-0000-" + identifier.ToString("D12"))
+                ModuleVersionId = new Guid($"00000000-0000-0000-0000-{identifier:D12}")
             });
         }
     }

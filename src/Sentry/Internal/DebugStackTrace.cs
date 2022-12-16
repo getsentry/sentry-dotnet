@@ -1,8 +1,4 @@
-using System.Reflection;
 using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 
@@ -16,10 +12,9 @@ internal class DebugStackTrace : SentryStackTrace
     private readonly SentryOptions _options;
 
     // Debug images referenced by frames in this StackTrace
-    protected readonly List<DebugImage> _debugImages = new();
     private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
     private const int DebugImageMissing = -1;
-    private bool _debugImagesMerged = false;
+    private bool _debugImagesMerged;
 
     /*
      *  NOTE: While we could improve these regexes, doing so might break exception grouping on the backend.
@@ -37,6 +32,8 @@ internal class DebugStackTrace : SentryStackTrace
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     internal DebugStackTrace(SentryOptions options) => _options = options;
+
+    protected List<DebugImage> DebugImages { get; } = new();
 
     internal static DebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace)
     {
@@ -63,8 +60,8 @@ internal class DebugStackTrace : SentryStackTrace
         }
         _debugImagesMerged = true;
 
-        _options.LogDebug("Merging {0} debug images from stacktrace.", _debugImages.Count);
-        if (_debugImages.Count == 0)
+        _options.LogDebug("Merging {0} debug images from stacktrace.", DebugImages.Count);
+        if (DebugImages.Count == 0)
         {
             return;
         }
@@ -74,7 +71,7 @@ internal class DebugStackTrace : SentryStackTrace
         if (@event.DebugImages.Count == 0)
         {
             // Default case when there's just a single stacktrace (i.e. no inner exceptions).
-            @event.DebugImages.AddRange(_debugImages);
+            @event.DebugImages.AddRange(DebugImages);
             return;
         }
 
@@ -83,14 +80,14 @@ internal class DebugStackTrace : SentryStackTrace
         // We could just append _debugImages to @event.DebugImages and shift all indexes but merging is simple too.
         var originalCount = @event.DebugImages.Count;
         Dictionary<string, string> relocations = new();
-        for (var i = 0; i < _debugImages.Count; i++)
+        for (var i = 0; i < DebugImages.Count; i++)
         {
             // First check if the image is already present on the event. Simple lookup should be faster than
             // constructing a map first, assuming there are normally just a few debug images affected.
             var found = false;
             for (var j = 0; j < originalCount; j++)
             {
-                if (_debugImages[i].ModuleVersionId == @event.DebugImages[j].ModuleVersionId)
+                if (DebugImages[i].ModuleVersionId == @event.DebugImages[j].ModuleVersionId)
                 {
                     if (i != j)
                     {
@@ -103,7 +100,7 @@ internal class DebugStackTrace : SentryStackTrace
             if (!found)
             {
                 relocations.Add(DebugStackTrace.GetRelativeAddressMode(i), DebugStackTrace.GetRelativeAddressMode(@event.DebugImages.Count));
-                @event.DebugImages.Add(_debugImages[i]);
+                @event.DebugImages.Add(DebugImages[i]);
             }
         }
 
@@ -212,7 +209,7 @@ internal class DebugStackTrace : SentryStackTrace
 
             AttributeReader.TryGetProjectDirectory(method.Module.Assembly, out projectPath);
 
-            if (AddDebugImage(method.Module) is int moduleIdx && moduleIdx != DebugImageMissing)
+            if (AddDebugImage(method.Module) is { } moduleIdx && moduleIdx != DebugImageMissing)
             {
                 frame.AddressMode = DebugStackTrace.GetRelativeAddressMode(moduleIdx);
 
@@ -226,7 +223,7 @@ internal class DebugStackTrace : SentryStackTrace
                     if (tokenType == 0x06000000) // CorTokenType.mdtMethodDef
                     {
                         var recordId = token & 0x00ffffff;
-                        frame.FunctionId = string.Format("0x{0:x}", recordId);
+                        frame.FunctionId = $"0x{recordId:x}";
                     }
                 }
                 catch (InvalidOperationException)
@@ -253,7 +250,7 @@ internal class DebugStackTrace : SentryStackTrace
         var ilOffset = stackFrame.GetILOffset();
         if (ilOffset != StackFrame.OFFSET_UNKNOWN)
         {
-            frame.InstructionAddress = string.Format("0x{0:x}", ilOffset);
+            frame.InstructionAddress = $"0x{ilOffset:x}";
         }
 
         var lineNo = stackFrame.GetFileLineNumber();
@@ -286,7 +283,7 @@ internal class DebugStackTrace : SentryStackTrace
         return frame;
     }
 
-    private static string GetRelativeAddressMode(int moduleIndex) => string.Format("rel:{0}", moduleIndex);
+    private static string GetRelativeAddressMode(int moduleIndex) => $"rel:{moduleIndex}";
 
     /// <summary>
     /// Clean up function and module names produced from `async` state machine calls.
@@ -314,7 +311,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   RemotePrinterService in UpdateNotification at line 457:13
 
         var match = RegexAsyncFunctionName.Match(frame.Module);
-        if (match.Success && match.Groups.Count == 3)
+        if (match is {Success: true, Groups.Count: 3})
         {
             frame.Module = match.Groups[1].Value;
             frame.Function = match.Groups[2].Value;
@@ -339,7 +336,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   BeginInvokeAsynchronousActionMethod { <lambda> }
 
         var match = RegexAnonymousFunction.Match(frame.Function);
-        if (match.Success && match.Groups.Count == 2)
+        if (match is {Success: true, Groups.Count: 2})
         {
             frame.Function = match.Groups[1].Value + " { <lambda> }";
         }
@@ -363,7 +360,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   System.Threading.Tasks.Task`1 in InnerInvoke`
         //   or System.Collections.Generic.List`1 in get_Item
         var match = RegexAsyncReturn.Match(frame.Module);
-        if (match.Success && match.Groups.Count == 2)
+        if (match is {Success: true, Groups.Count: 2})
         {
             frame.Module = match.Groups[1].Value;
         }
@@ -452,7 +449,7 @@ internal class DebugStackTrace : SentryStackTrace
         var headers = peReader.PEHeaders;
         if (headers.PEHeader is { } peHeader)
         {
-            codeId = string.Format("{0:X8}{1:x}", headers.CoffHeader.TimeDateStamp, peHeader.SizeOfImage);
+            codeId = $"{headers.CoffHeader.TimeDateStamp:X8}{peHeader.SizeOfImage:x}";
         }
 
         string? debugId = null;
@@ -465,8 +462,8 @@ internal class DebugStackTrace : SentryStackTrace
             if (entry.Type == DebugDirectoryEntryType.PdbChecksum)
             {
                 var checksum = peReader.ReadPdbChecksumDebugDirectoryData(entry);
-                var checksumHex = string.Concat(checksum.Checksum.Select(b => b.ToString("x2")));
-                debugChecksum = string.Format("{0}:{1:x}", checksum.AlgorithmName, checksumHex);
+                var checksumHex = checksum.Checksum.AsSpan().ToHexString();
+                debugChecksum = $"{checksum.AlgorithmName}:{checksumHex}";
             }
             if (!entry.IsPortableCodeView)
             {
@@ -478,7 +475,7 @@ internal class DebugStackTrace : SentryStackTrace
             // should be used to match the PE/COFF image with the associated PDB (instead of Guid and Age).
             // Matching PDB ID is stored in the #Pdb stream of the .pdb file.
             // See https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
-            debugId = string.Format("{0}-{1:x}", codeView.Guid, entry.Stamp);
+            debugId = $"{codeView.Guid}-{entry.Stamp:x}";
             debugFile = codeView.Path;
         }
 
@@ -490,8 +487,8 @@ internal class DebugStackTrace : SentryStackTrace
             return null;
         }
 
-        idx = _debugImages.Count;
-        _debugImages.Add(new DebugImage
+        idx = DebugImages.Count;
+        DebugImages.Add(new DebugImage
         {
             Type = "pe_dotnet",
             CodeId = codeId,
