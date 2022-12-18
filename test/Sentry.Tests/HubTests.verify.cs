@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests;
 
 [UsesVerify]
@@ -45,9 +43,11 @@ public partial class HubTests
             .IgnoreMember("Stacktrace")
             .IgnoreMember<SentryThread>(_ => _.Name)
             .IgnoreInstance<DebugImage>(_ =>
-                _.DebugFile.Contains("Xunit.SkippableFact") ||
-                _.DebugFile.Contains("xunit.runner") ||
-                _.DebugFile.Contains("Microsoft.TestPlatform")
+                _.DebugFile != null && (
+                    _.DebugFile.Contains("Xunit.SkippableFact") ||
+                    _.DebugFile.Contains("xunit.runner") ||
+                    _.DebugFile.Contains("Microsoft.TestPlatform")
+                )
             );
     }
 }

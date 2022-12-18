@@ -1,6 +1,8 @@
+// ReSharper disable once CheckNamespace
+// Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
 
-public partial class DebugStackTraceTests
+public class DebugStackTraceTests
 {
     private class Fixture
     {
@@ -102,25 +104,16 @@ public partial class DebugStackTraceTests
         sut1.Frames.Add(new SentryStackFrame() { Function = "1", AddressMode = "rel:0" });
         sut1.Frames.Add(new SentryStackFrame() { Function = "2", AddressMode = "rel:1" });
         sut1.Frames.Add(new SentryStackFrame() { Function = "3", AddressMode = "rel:0" });
-        var checkSut1IsUnchanged = () =>
-        {
-            Assert.Equal(3, sut1.Frames.Count);
-            Assert.Equal("1", sut1.Frames[0].Function);
-            Assert.Equal("rel:0", sut1.Frames[0].AddressMode);
-            Assert.Equal("2", sut1.Frames[1].Function);
-            Assert.Equal("rel:1", sut1.Frames[1].AddressMode);
-            Assert.Equal("3", sut1.Frames[2].Function);
-            Assert.Equal("rel:0", sut1.Frames[2].AddressMode);
-        };
 
         var e = new SentryEvent();
         sut1.MergeDebugImagesInto(e);
+        Assert.NotNull(e.DebugImages);
         Assert.Equal(2, e.DebugImages.Count);
         Assert.Equal("1111.dll", e.DebugImages[0].CodeFile);
         Assert.Equal("2222.dll", e.DebugImages[1].CodeFile);
 
         // Stack trace isn't changed - there were no DebugImage relocations yet.
-        checkSut1IsUnchanged();
+        CheckStackTraceIsUnchanged(sut1);
 
         var sut2 = _fixture.GetSut();
         sut2.Inject(3333);
@@ -140,7 +133,7 @@ public partial class DebugStackTraceTests
         Assert.Equal("4444.dll", e.DebugImages[3].CodeFile);
 
         // First stack trace must remain unchanged.
-        checkSut1IsUnchanged();
+        CheckStackTraceIsUnchanged(sut1);
 
         // Stack trace is updated to reflect new positions
         Assert.Equal(4, sut2.Frames.Count);
@@ -152,6 +145,17 @@ public partial class DebugStackTraceTests
         Assert.Equal("rel:2", sut2.Frames[2].AddressMode);
         Assert.Equal("4", sut2.Frames[3].Function);
         Assert.Equal("rel:3", sut2.Frames[3].AddressMode);
+
+        void CheckStackTraceIsUnchanged(SentryStackTrace stackTrace)
+        {
+            Assert.Equal(3, stackTrace.Frames.Count);
+            Assert.Equal("1", stackTrace.Frames[0].Function);
+            Assert.Equal("rel:0", stackTrace.Frames[0].AddressMode);
+            Assert.Equal("2", stackTrace.Frames[1].Function);
+            Assert.Equal("rel:1", stackTrace.Frames[1].AddressMode);
+            Assert.Equal("3", stackTrace.Frames[2].Function);
+            Assert.Equal("rel:0", stackTrace.Frames[2].AddressMode);
+        }
     }
 
     private class InjectableDebugStackTrace : DebugStackTrace

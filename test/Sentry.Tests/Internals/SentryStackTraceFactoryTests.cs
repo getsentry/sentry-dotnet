@@ -8,13 +8,11 @@ public partial class SentryStackTraceFactoryTests
 {
     private class Fixture
     {
-        public SentryOptions SentryOptions { get; set; } = new();
+        public SentryOptions SentryOptions { get; } = new();
         public SentryStackTraceFactory GetSut() => new(SentryOptions);
-        public DebugStackTrace GetSutDST() => new(SentryOptions);
     }
 
     private readonly Fixture _fixture = new();
-    private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace;
 
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionFalse_NullResult()

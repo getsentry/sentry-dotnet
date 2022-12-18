@@ -139,7 +139,7 @@ public static class VerifyExtensions
         {
             var line = lines[i].Trim();
 
-            // Note: we can't use WriteStartObject/EndObject because folloowing WriteRawValueWithScrubbers() fails with:
+            // Note: we can't use WriteStartObject/EndObject because following WriteRawValueWithScrubbers() fails with:
             //   Argon.JsonWriterException : Token Undefined in state ObjectStart would result in an invalid JSON object. Path '[0].Items[0].Payload.Source.objs[0]'.
             switch (line)
             {
