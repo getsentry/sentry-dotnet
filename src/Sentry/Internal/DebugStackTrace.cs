@@ -2,6 +2,10 @@ using System.Reflection.PortableExecutable;
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 
+#if ANDROID
+using Sentry.Android.AssemblyReader;
+#endif
+
 namespace Sentry.Internal;
 
 /// <summary>

@@ -16,7 +16,4 @@
 
   <Import Project="..\..\src\Sentry\buildTransitive\Sentry.props" />
 
-  <Target Name="BuildTestAPKs" BeforeTargets="VSTest">
-    <Exec Command="pwsh &quot;$(MSBuildThisFileDirectory)/../../scripts/update-test-apks.ps1&quot; -IfNotExist" />
-  </Target>
 </Project>

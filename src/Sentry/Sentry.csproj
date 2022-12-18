@@ -68,8 +68,4 @@
     <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net6.0'))">
-    <!-- TODO we only need LZ4 decompression only for Android, but we want to run all tests during development on net6.0/net7.0 directly on dev machine -->
-    <PackageReference Include="K4os.Compression.LZ4" Version="1.*" />
-  </ItemGroup>
 </Project>

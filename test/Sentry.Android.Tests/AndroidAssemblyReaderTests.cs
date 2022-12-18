@@ -1,5 +1,6 @@
-#if NET6_0_OR_GREATER && !__IOS__
-namespace Sentry.Tests.Internals;
+using Sentry.Android.AssemblyReader;
+
+namespace Sentry.Android.Tests;
 
 public class AndroidAssemblyReaderTests
 {
@@ -17,11 +18,11 @@ public class AndroidAssemblyReaderTests
 #if ANDROID
         // On Android, this gets the current app APK.
         var apkPath = Environment.CommandLine;
-        var supportedAbis = Android.AndroidHelpers.GetSupportedAbis();
+        var supportedAbis = Sentry.Android.AndroidHelpers.GetSupportedAbis();
 #else
         var apkPath = Path.Combine(
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
-            "..", "..", "..", "Internals",
+            "..", "..", "..", "TestAPKs",
             $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk");
 
         var supportedAbis = new List<string> { "x86_64" };
@@ -91,4 +92,3 @@ public class AndroidAssemblyReaderTests
         debugDirs.Length.Should().BeGreaterThan(0);
     }
 }
-#endif
