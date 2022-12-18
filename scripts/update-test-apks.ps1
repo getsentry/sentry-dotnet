@@ -4,9 +4,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = "$PSScriptRoot/.."
-$apkDir = Resolve-Path "$repoRoot/test/Sentry.Android.Tests/TestAPKs"
+$apkDir = "$repoRoot/test/Sentry.Android.Tests/TestAPKs"
 
 New-Item -ItemType Directory -Force -Path $apkDir | Out-Null
+$apkDir = Resolve-Path $apkDir
 
 function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompression)
 {
