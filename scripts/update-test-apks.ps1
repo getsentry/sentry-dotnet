@@ -11,7 +11,7 @@ $apkDir = Resolve-Path $apkDir
 
 function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompression)
 {
-    $sampleDir = "$repoRoot/samples/Sentry.Samples.Android"
+    $testAppDir = "$repoRoot/test/AndroidTestApp"
     $outputApk = "$apkDir/android-Store=$UseAssemblyStore-Compressed=$UseAssemblyCompression.apk"
 
     if ($IfNotExist -and (Test-Path $outputApk))
@@ -20,7 +20,7 @@ function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompres
         return
     }
 
-    Push-Location -Verbose $sampleDir
+    Push-Location -Verbose $testAppDir
     try
     {
         # Need to do a clean build otherwise some DLLs would end up being compressed even if it's disabled on this run.
@@ -38,7 +38,7 @@ function BuildAndroidSample([bool] $UseAssemblyStore, [bool] $UseAssemblyCompres
         Pop-Location
     }
 
-    Move-Item "$sampleDir/bin/Release/*/io.sentry.dotnet.samples.android-Signed.apk" $outputApk
+    Move-Item "$testAppDir/bin/Release/*/*-signed.apk" $outputApk
 }
 
 if (!$IfNotExist)
