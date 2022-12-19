@@ -3,6 +3,7 @@ using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 
 #if ANDROID
+using Sentry.Android;
 using Sentry.Android.AssemblyReader;
 #endif
 
@@ -35,7 +36,17 @@ internal class DebugStackTrace : SentryStackTrace
     private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    internal DebugStackTrace(SentryOptions options) => _options = options;
+#if ANDROID
+    private readonly Lazy<IAndroidAssemblyReader?> _assemblyReader;
+#endif
+
+    internal DebugStackTrace(SentryOptions options)
+    {
+        _options = options;
+#if ANDROID
+        _assemblyReader = new Lazy<IAndroidAssemblyReader?>(() => GetAndroidAssemblyReader(options));
+#endif
+    }
 
     protected List<DebugImage> DebugImages { get; } = new();
 
@@ -371,62 +382,36 @@ internal class DebugStackTrace : SentryStackTrace
     }
 
 #if ANDROID
-    private IAndroidAssemblyReader? _assemblyReader;
-    private bool _assemblyReaderInitialized = false;
-    private object _assemblyReaderLock = new();
-
-    private void InitializeAssemblyReader()
+    private static IAndroidAssemblyReader? GetAndroidAssemblyReader(SentryOptions options)
     {
-        if (_assemblyReaderInitialized)
+        var apkPath = Environment.CommandLine;
+        try
         {
-            return;
-        }
-        lock (_assemblyReaderLock)
-        {
-            // check again after acquiring the lock
-            if (_assemblyReaderInitialized)
+            if (File.Exists(apkPath))
             {
-                return;
+                var supportedAbis = AndroidHelpers.GetSupportedAbis();
+                return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, options.DiagnosticLogger);
             }
 
-            var apkPath = Environment.CommandLine;
-            try
-            {
-                if (!File.Exists(apkPath))
-                {
-                    _options.DiagnosticLogger?.LogWarning("Cannot create AssemblyReader: cannot read APK path from Environment.CommandLine={0}", apkPath);
-                }
-                else
-                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    var supportedAbis = AndroidBuild.SupportedAbis ?? new List<string> { AndroidBuild.CpuAbi ?? "" };
-#pragma warning restore CS0618 // Type or member is obsolete
-                    _assemblyReader = AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _options.DiagnosticLogger);
-                }
-            }
-            catch (Exception e)
-            {
-                _options.DiagnosticLogger?.LogError("Cannot create AssemblyReader: {0}", e);
-            }
-            finally
-            {
-                _assemblyReaderInitialized = true;
-            }
+            options.LogWarning(
+                "Cannot create AssemblyReader: cannot read APK path from Environment.CommandLine={0}",
+                apkPath);
         }
+        catch (Exception e)
+        {
+            options.LogError("Cannot create AssemblyReader: {0}", e);
+        }
+
+        return null;
     }
 #endif
 
     private PEReader? TryReadAssembly(string assemblyName)
     {
 #if ANDROID
-        InitializeAssemblyReader();
-        return _assemblyReader?.TryReadAssembly(assemblyName);
+        return _assemblyReader.Value?.TryReadAssembly(assemblyName);
 #else
-        if (File.Exists(assemblyName))
-        {
-            return new(File.OpenRead(assemblyName));
-        }
-        return null;
+        return File.Exists(assemblyName) ? new PEReader(File.OpenRead(assemblyName)) : null;
 #endif
     }
 
