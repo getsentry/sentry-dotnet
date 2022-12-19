@@ -1,4 +1,7 @@
-﻿[UsesVerify]
+﻿namespace Sentry.Serilog.Tests;
+
+[UsesVerify]
+[Collection(nameof(SentrySdkCollection))]
 public class IntegrationTests
 {
     [Fact]

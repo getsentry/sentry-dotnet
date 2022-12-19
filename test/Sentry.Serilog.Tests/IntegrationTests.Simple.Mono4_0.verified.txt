@@ -162,7 +162,7 @@
                   Frames: [
                     {,
                       "function": "Task IntegrationTests.Simple()",
-                      "in_app": true,
+                      "in_app": false,
                       "package": "Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED",
                       "instruction_addr": "____",
                       "addr_mode": "rel:0",
