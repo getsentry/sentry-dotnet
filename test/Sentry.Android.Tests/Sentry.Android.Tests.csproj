@@ -11,7 +11,7 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <!-- 
+  <!--
     On Android, the assembly reader files are compiled in to Sentry.
     We can include them here to also allow testing on regular platforms.
    -->
@@ -20,7 +20,7 @@
     <PackageReference Include="K4os.Compression.LZ4" Version="1.2.16" />
   </ItemGroup>
 
-  <Target Name="_BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild">
+  <Target Name="_BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
