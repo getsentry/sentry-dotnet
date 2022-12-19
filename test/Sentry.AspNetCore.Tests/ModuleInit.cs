@@ -3,12 +3,7 @@ namespace Sentry.AspNetCore.Tests;
 
 public static class ModuleInit
 {
-    private static volatile bool Initialized;
-
     [ModuleInitializer]
-    public static void Init()
-    {
-        VerifyHttp.Enable();
-    }
+    public static void Init() => VerifyHttp.Enable();
 }
 #endif
