@@ -1,5 +1,5 @@
 #if NET6_0_OR_GREATER
-namespace Sentry.AspNetCore.Tests;
+namespace Sentry.Google.Cloud.Functions.Tests;
 
 public static class ModuleInit
 {

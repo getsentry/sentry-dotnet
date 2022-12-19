@@ -1,5 +1,5 @@
 #if NET6_0_OR_GREATER
-namespace Sentry.AspNetCore.Tests;
+namespace Sentry.AspNetCore.Grpc.Tests;
 
 public static class ModuleInit
 {
