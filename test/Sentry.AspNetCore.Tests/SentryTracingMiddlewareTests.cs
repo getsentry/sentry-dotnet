@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sentry.AspNetCore.Tests.Utils.Extensions;
+using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.AspNetCore.Tests;
 

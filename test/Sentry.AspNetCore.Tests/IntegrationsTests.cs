@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.AspNetCore.Tests;
 

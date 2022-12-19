@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
-using Sentry.AspNetCore.Tests.Utils.Extensions;
 
-namespace Sentry.AspNetCore.Tests.Utils;
+namespace Sentry.AspNetCore.TestUtils;
 
 internal static class FakeSentryServer
 {

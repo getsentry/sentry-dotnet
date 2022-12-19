@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Sentry.AspNetCore.Tests;
+namespace Sentry.AspNetCore.TestUtils;
 
 public class LastExceptionFilter : IStartupFilter
 {

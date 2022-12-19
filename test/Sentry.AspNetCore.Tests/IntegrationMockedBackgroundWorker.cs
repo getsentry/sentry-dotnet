@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore;
 using Sentry.AspNetCore.Tests;
+using Sentry.AspNetCore.TestUtils;
 using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace - To test Logger emitting events:

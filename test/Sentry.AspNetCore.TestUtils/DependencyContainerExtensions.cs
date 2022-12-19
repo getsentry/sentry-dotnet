@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sentry.AspNetCore.Tests.Utils.Extensions;
+namespace Sentry.AspNetCore.TestUtils;
 
-internal static class DependencyContainerExtensions
+public static class DependencyContainerExtensions
 {
     public static void EnableValidation(this ServiceProviderOptions options, bool enable = true)
     {

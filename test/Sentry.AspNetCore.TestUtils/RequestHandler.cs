@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Sentry.AspNetCore.Tests;
+namespace Sentry.AspNetCore.TestUtils;
 
 public class RequestHandler
 {
