@@ -1,4 +1,4 @@
-using Sentry.AspNetCore.Tests;
+using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.Serilog.Tests;
 

@@ -11,6 +11,11 @@
     <Compile Remove="**\*.verify.cs" />
   </ItemGroup>
 
+  <!-- common module init for all test projects -->
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+    <Compile Include="$(MSBuildThisFileDirectory)CommonModuleInit.cs" />
+  </ItemGroup>
+
   <!-- configure xunit -->
   <ItemGroup Condition="'$(IsTestProject)' == 'true'">
     <Content Include="..\xunit.runner.windows.json" Condition="$([MSBuild]::IsOSPlatform('windows'))">

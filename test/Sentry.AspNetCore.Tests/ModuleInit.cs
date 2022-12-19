@@ -8,11 +8,7 @@ public static class ModuleInit
     [ModuleInitializer]
     public static void Init()
     {
-        if (!Initialized)
-        {
-            Initialized = true;
-            VerifyHttp.Enable();
-        }
+        VerifyHttp.Enable();
     }
 }
 #endif

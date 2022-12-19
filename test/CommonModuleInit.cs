@@ -1,5 +1,5 @@
 #if !__MOBILE__
-public static class ModuleInit
+public static class CommonModuleInit
 {
     [ModuleInitializer]
     public static void Init() =>

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
-using Sentry.AspNetCore.Tests.Utils;
 
-namespace Sentry.AspNetCore.Tests;
+namespace Sentry.AspNetCore.TestUtils;
 
 // Allows integration tests the include the background worker and mock only the HTTP bits
 public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
