@@ -32,6 +32,11 @@ public sealed class DebugImage : IJsonSerializable
     public string? DebugId { get; set; }
 
     /// <summary>
+    /// Checksum of the companion debug file.
+    /// </summary>
+    public string? DebugChecksum { get; set; }
+
+    /// <summary>
     /// Path and name of the debug companion file.
     /// </summary>
     public string? DebugFile { get; set; }
@@ -47,6 +52,8 @@ public sealed class DebugImage : IJsonSerializable
     /// </summary>
     public string? CodeFile { get; set; }
 
+    internal Guid? ModuleVersionId { get; set; }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
@@ -56,6 +63,7 @@ public sealed class DebugImage : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress);
         writer.WriteNumberIfNotNull("image_size", ImageSize);
         writer.WriteStringIfNotWhiteSpace("debug_id", DebugId);
+        writer.WriteStringIfNotWhiteSpace("debug_checksum", DebugChecksum);
         writer.WriteStringIfNotWhiteSpace("debug_file", DebugFile);
         writer.WriteStringIfNotWhiteSpace("code_id", CodeId);
         writer.WriteStringIfNotWhiteSpace("code_file", CodeFile);
@@ -72,6 +80,7 @@ public sealed class DebugImage : IJsonSerializable
         var imageAddress = json.GetPropertyOrNull("image_addr")?.GetString();
         var imageSize = json.GetPropertyOrNull("image_size")?.GetInt64();
         var debugId = json.GetPropertyOrNull("debug_id")?.GetString();
+        var debugChecksum = json.GetPropertyOrNull("debug_checksum")?.GetString();
         var debugFile = json.GetPropertyOrNull("debug_file")?.GetString();
         var codeId = json.GetPropertyOrNull("code_id")?.GetString();
         var codeFile = json.GetPropertyOrNull("code_file")?.GetString();
@@ -82,6 +91,7 @@ public sealed class DebugImage : IJsonSerializable
             ImageAddress = imageAddress,
             ImageSize = imageSize,
             DebugId = debugId,
+            DebugChecksum = debugChecksum,
             DebugFile = debugFile,
             CodeId = codeId,
             CodeFile = codeFile,

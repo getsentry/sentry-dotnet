@@ -2,6 +2,7 @@
   "solution": {
     "path": "Sentry.sln",
     "projects": [
+      "test\\Sentry.Android.Tests\\Sentry.Android.Tests.csproj",
       "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",

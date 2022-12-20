@@ -1,4 +1,7 @@
-﻿[UsesVerify]
+﻿namespace Sentry.Serilog.Tests;
+
+[UsesVerify]
+[Collection(nameof(SentrySdkCollection))]
 public class IntegrationTests
 {
     [Fact]
@@ -52,6 +55,7 @@ public class IntegrationTests
         Log.CloseAndFlush();
 
         return Verify(transport.Envelopes)
+            .UniqueForRuntimeAndVersion()
             .IgnoreStandardSentryMembers();
     }
 

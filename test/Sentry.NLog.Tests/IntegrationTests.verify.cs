@@ -55,6 +55,7 @@ public class IntegrationTests
         LogManager.Flush();
 
         return Verify(transport.Envelopes)
+            .UniqueForRuntimeAndVersion()
             .IgnoreStandardSentryMembers();
     }
 

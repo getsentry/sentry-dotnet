@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add support for Portable PDB format ([#2050](https://github.com/getsentry/sentry-dotnet/pull/2050))
+
 ## 3.24.1
 
 ### Fixes

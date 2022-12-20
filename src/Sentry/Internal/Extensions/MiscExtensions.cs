@@ -9,8 +9,27 @@ internal static class MiscExtensions
             ? value
             : null;
 
-    public static string ToHexString(this long l) =>
-        "0x" + l.ToString("x", CultureInfo.InvariantCulture);
+    public static string ToHexString(this long l) => "0x" + l.ToString("x", CultureInfo.InvariantCulture);
+
+    public static string ToHexString(this byte[] bytes) => new ReadOnlySpan<byte>(bytes).ToHexString();
+
+    public static string ToHexString(this Span<byte> bytes) => ((ReadOnlySpan<byte>)bytes).ToHexString();
+
+    public static string ToHexString(this ReadOnlySpan<byte> bytes)
+    {
+#if NET5_0_OR_GREATER
+        return Convert.ToHexString(bytes).ToLowerInvariant();
+#else
+        var buffer = new StringBuilder(bytes.Length * 2);
+
+        foreach (var t in bytes)
+        {
+            buffer.Append(t.ToString("x2", CultureInfo.InvariantCulture));
+        }
+
+        return buffer.ToString();
+#endif
+    }
 
     private static readonly TimeSpan MaxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
 

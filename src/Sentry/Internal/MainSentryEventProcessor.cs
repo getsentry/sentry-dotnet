@@ -85,7 +85,8 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
 
         if (@event.Exception == null)
         {
-            var stackTrace = SentryStackTraceFactoryAccessor().Create(@event.Exception);
+            // if there's no exception, get the current stack trace
+            var stackTrace = SentryStackTraceFactoryAccessor().Create();
             if (stackTrace != null)
             {
                 var currentThread = Thread.CurrentThread;
@@ -101,6 +102,23 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
                 @event.SentryThreads = @event.SentryThreads?.Any() == true
                     ? new List<SentryThread>(@event.SentryThreads) { thread }
                     : new[] { thread }.AsEnumerable();
+
+                if (stackTrace is DebugStackTrace debugStackTrace)
+                {
+                    debugStackTrace.MergeDebugImagesInto(@event);
+                }
+            }
+        }
+
+        // Add all the Debug Images that were referenced from stack traces to the Event.
+        if (@event.SentryExceptions is { } sentryExceptions)
+        {
+            foreach (var sentryException in sentryExceptions)
+            {
+                if (sentryException.Stacktrace is DebugStackTrace debugStackTrace)
+                {
+                    debugStackTrace.MergeDebugImagesInto(@event);
+                }
             }
         }
 

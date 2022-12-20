@@ -34,24 +34,4 @@ public class SentryOptionsTests
         var sut = new SentryOptions();
         Assert.True(sut.AttachStacktrace);
     }
-
-#if NETFRAMEWORK
-    [SkippableFact(typeof(IsTypeException))]
-    public void StackTraceFactory_RunningOnMono_HasMonoStackTraceFactory()
-    {
-        Skip.If(!RuntimeInfo.GetRuntime().IsMono());
-
-        var sut = new SentryOptions();
-        Assert.IsType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
-    }
-
-    [SkippableFact(typeof(IsNotTypeException))]
-    public void StackTraceFactory_NotRunningOnMono_NotMonoStackTraceFactory()
-    {
-        Skip.If(RuntimeInfo.GetRuntime().IsMono());
-
-        var sut = new SentryOptions();
-        Assert.IsNotType<MonoSentryStackTraceFactory>(sut.SentryStackTraceFactory);
-    }
-#endif
 }

@@ -34,7 +34,9 @@ public partial class SentryStackTraceFactoryTests
                 x => x.Package,
                 x => x.LineNumber,
                 x => x.ColumnNumber,
-                x => x.InstructionOffset).AddScrubber(x => x.Replace(@"\", @"/"))
+                x => x.InstructionAddress,
+                x => x.FunctionId)
+            .AddScrubber(x => x.Replace(@"\", @"/"))
             .UseParameters(mode);
     }
 }

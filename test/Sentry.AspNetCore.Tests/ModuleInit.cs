@@ -4,9 +4,6 @@ namespace Sentry.AspNetCore.Tests;
 public static class ModuleInit
 {
     [ModuleInitializer]
-    public static void Init()
-    {
-        VerifyHttp.Enable();
-    }
+    public static void Init() => VerifyHttp.Enable();
 }
 #endif

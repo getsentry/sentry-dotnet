@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net6.0;net7.0-android</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+  <!--
+    On Android, the assembly reader files are compiled in to Sentry.
+    We can include them here to also allow testing on regular platforms.
+   -->
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'android'">
+    <Compile Include="..\..\src\Sentry\Platforms\Android\AssemblyReader\*.cs" LinkBase="AssemblyReader" />
+    <PackageReference Include="K4os.Compression.LZ4" Version="1.2.16" />
+  </ItemGroup>
+
+  <Target Name="_BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=once" />
+  </Target>
+  <Target Name="_InnerBuildTestAPKs">
+    <Exec Command="pwsh &quot;$(MSBuildThisFileDirectory)/../../scripts/update-test-apks.ps1&quot; -IfNotExist" />
+  </Target>
+
+</Project>
