@@ -54,6 +54,12 @@
   <attr path="/api/package[@name='io.sentry.android.core']/class[@name='DefaultAndroidEventProcessor']" name="visibility">internal</attr>
 
   <!--
+    This API uses FrameMetrics, which requires Android >= 24.0.  We currently target Android >= 21.0 which is the minimum supported by MAUI.
+    TODO: If we need this, figure out how to multi-target or late bind.
+  -->
+  <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
+
+  <!--
     The remaining APIS are removed to prevent various errors/warnings.
     TODO: Find other workarounds for each one, rather than removing the APIs.
   -->
