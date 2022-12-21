@@ -6,6 +6,7 @@
 
 - Add support for Portable PDB format ([#2050](https://github.com/getsentry/sentry-dotnet/pull/2050))
 - Update bundled Android SDK to version 6.10.0([#2095](https://github.com/getsentry/sentry-dotnet/pull/2095))
+- Update bundled Cocoa SDK to version 7.31.4 ([#2096](https://github.com/getsentry/sentry-dotnet/pull/2096))
 
 ## 3.24.1
 

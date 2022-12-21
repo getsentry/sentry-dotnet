@@ -22,46 +22,44 @@ interface Constants
     NSString SentryErrorDomain { get; }
 }
 
-// Xamarin bug: Delegate types don't honor the [Internal] attribute.
-// Workaround by using Func<T> or Action<T> instead.
-// See: https://github.com/xamarin/xamarin-macios/issues/15299
-// Leaving code commented here so we can more easily go back when the issue is fixed.
+// typedef void (^SentryRequestFinished)(NSError * _Nullable);
+[Internal]
+delegate void SentryRequestFinished ([NullAllowed] NSError error);
 
-// // typedef void (^SentryRequestFinished)(NSError * _Nullable);
-// [Internal]
-// delegate void SentryRequestFinished ([NullAllowed] NSError arg0);
+// typedef void (^SentryRequestOperationFinished)(NSHTTPURLResponse * _Nullable, NSError * _Nullable);
+[Internal]
+delegate void SentryRequestOperationFinished ([NullAllowed] NSHttpUrlResponse response, [NullAllowed] NSError error);
 
-// // typedef void (^SentryRequestOperationFinished)(NSHTTPURLResponse * _Nullable, NSError * _Nullable);
-// [Internal]
-// delegate void SentryRequestOperationFinished ([NullAllowed] NSHttpUrlResponse arg0, [NullAllowed] NSError arg1);
+// typedef SentryBreadcrumb * _Nullable (^SentryBeforeBreadcrumbCallback)(SentryBreadcrumb * _Nonnull);
+[Internal]
+[return: NullAllowed]
+delegate SentryBreadcrumb SentryBeforeBreadcrumbCallback (SentryBreadcrumb breadcrumb);
 
-// // typedef SentryBreadcrumb * _Nullable (^SentryBeforeBreadcrumbCallback)(SentryBreadcrumb * _Nonnull);
-// [Internal]
-// delegate SentryBreadcrumb SentryBeforeBreadcrumbCallback (SentryBreadcrumb arg0);
+// typedef SentryEvent * _Nullable (^SentryBeforeSendEventCallback)(SentryEvent * _Nonnull);
+[Internal]
+[return: NullAllowed]
+delegate SentryEvent SentryBeforeSendEventCallback (SentryEvent @event);
 
-// // typedef SentryEvent * _Nullable (^SentryBeforeSendEventCallback)(SentryEvent * _Nonnull);
-// [Internal]
-// delegate SentryEvent SentryBeforeSendEventCallback (SentryEvent arg0);
+// typedef void (^SentryOnCrashedLastRunCallback)(SentryEvent * _Nonnull);
+[Internal]
+delegate void SentryOnCrashedLastRunCallback (SentryEvent @event);
 
-// // typedef void (^SentryOnCrashedLastRunCallback)(SentryEvent * _Nonnull);
-// [Internal]
-// delegate void SentryOnCrashedLastRunCallback (SentryEvent arg0);
+// typedef BOOL (^SentryShouldQueueEvent)(NSHTTPURLResponse * _Nullable, NSError * _Nullable);
+[Internal]
+delegate bool SentryShouldQueueEvent ([NullAllowed] NSHttpUrlResponse response, [NullAllowed] NSError error);
 
-// // typedef BOOL (^SentryShouldQueueEvent)(NSHTTPURLResponse * _Nullable, NSError * _Nullable);
-// [Internal]
-// delegate bool SentryShouldQueueEvent ([NullAllowed] NSHttpUrlResponse arg0, [NullAllowed] NSError arg1);
-
-// // typedef NSNumber * _Nullable (^SentryTracesSamplerCallback)(SentrySamplingContext * _Nonnull);
-// [Internal]
-// delegate NSNumber SentryTracesSamplerCallback (SentrySamplingContext arg0);
+// typedef NSNumber * _Nullable (^SentryTracesSamplerCallback)(SentrySamplingContext * _Nonnull);
+[Internal]
+[return: NullAllowed]
+delegate NSNumber SentryTracesSamplerCallback (SentrySamplingContext samplingContext);
 
 // typedef void (^SentrySpanCallback)(id<SentrySpan> _Nullable);
-// [Internal]
-// delegate void SentrySpanCallback ([NullAllowed] SentrySpan arg0);
+[Internal]
+delegate void SentrySpanCallback ([NullAllowed] SentrySpan span);
 
-// // typedef void (^SentryOnAppStartMeasurementAvailable)(SentryAppStartMeasurement * _Nullable);
-// [Internal]
-// delegate void SentryOnAppStartMeasurementAvailable ([NullAllowed] SentryAppStartMeasurement arg0);
+// typedef void (^SentryOnAppStartMeasurementAvailable)(SentryAppStartMeasurement * _Nullable);
+[Internal]
+delegate void SentryOnAppStartMeasurementAvailable ([NullAllowed] SentryAppStartMeasurement appStartMeasurement);
 
 // @interface PrivateSentrySDKOnly : NSObject
 [BaseType (typeof(NSObject), Name="PrivateSentrySDKOnly")]
@@ -112,7 +110,7 @@ interface PrivateSentrySdkOnly
     // @property (copy, nonatomic, class) SentryOnAppStartMeasurementAvailable _Nullable onAppStartMeasurementAvailable;
     [Static]
     [NullAllowed, Export ("onAppStartMeasurementAvailable", ArgumentSemantic.Copy)]
-    Action<SentryAppStartMeasurement?> OnAppStartMeasurementAvailable { get; set; }
+    SentryOnAppStartMeasurementAvailable OnAppStartMeasurementAvailable { get; set; }
 
     // @property (readonly, nonatomic, class) SentryAppStartMeasurement * _Nullable appStartMeasurement;
     [Static]
@@ -148,6 +146,11 @@ interface PrivateSentrySdkOnly
     [Static]
     [Export ("currentScreenFrames", ArgumentSemantic.Assign)]
     SentryScreenFrames CurrentScreenFrames { get; }
+
+    // +(NSArray<NSData *> * _Nonnull)captureScreenshots;
+    [Static]
+    [Export ("captureScreenshots")]
+    NSData[] CaptureScreenshots();
 }
 
 // @interface SentryAppStartMeasurement : NSObject
@@ -881,15 +884,15 @@ interface SentryOptions
 
     // @property (copy, nonatomic) SentryBeforeSendEventCallback _Nullable beforeSend;
     [NullAllowed, Export ("beforeSend", ArgumentSemantic.Copy)]
-    Func<SentryEvent?, SentryEvent> BeforeSend { get; set; }
+    SentryBeforeSendEventCallback BeforeSend { get; set; }
 
     // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
     [NullAllowed, Export ("beforeBreadcrumb", ArgumentSemantic.Copy)]
-    Func<SentryBreadcrumb, SentryBreadcrumb?> BeforeBreadcrumb { get; set; }
+    SentryBeforeBreadcrumbCallback BeforeBreadcrumb { get; set; }
 
     // @property (copy, nonatomic) SentryOnCrashedLastRunCallback _Nullable onCrashedLastRun;
     [NullAllowed, Export ("onCrashedLastRun", ArgumentSemantic.Copy)]
-    Action<SentryEvent> OnCrashedLastRun { get; set; }
+    SentryOnCrashedLastRunCallback OnCrashedLastRun { get; set; }
 
     // @property (copy, nonatomic) NSArray<NSString *> * _Nullable integrations;
     [NullAllowed, Export ("integrations", ArgumentSemantic.Copy)]
@@ -978,7 +981,7 @@ interface SentryOptions
 
     // @property (nonatomic) SentryTracesSamplerCallback _Nullable tracesSampler;
     [NullAllowed, Export ("tracesSampler", ArgumentSemantic.Assign)]
-    Func<SentrySamplingContext, NSNumber?> TracesSampler { get; set; }
+    SentryTracesSamplerCallback TracesSampler { get; set; }
 
     // @property (readonly, assign, nonatomic) BOOL isTracingEnabled;
     [Export ("isTracingEnabled")]
@@ -1022,7 +1025,7 @@ interface SentryOptions
 
     // @property (nonatomic) SentryTracesSamplerCallback _Nullable profilesSampler;
     [NullAllowed, Export ("profilesSampler", ArgumentSemantic.Assign)]
-    Func<SentrySamplingContext, NSNumber?> ProfilesSampler { get; set; }
+    SentryTracesSamplerCallback ProfilesSampler { get; set; }
 
     // @property (readonly, assign, nonatomic) BOOL isProfilingEnabled;
     [Export ("isProfilingEnabled")]
@@ -1981,7 +1984,7 @@ interface SentryScope : SentrySerializable
 
     // -(void)useSpan:(SentrySpanCallback _Nonnull)callback;
     [Export ("useSpan:")]
-    void UseSpan (Action<SentrySpan?> callback);
+    void UseSpan (SentrySpanCallback callback);
 }
 
 // @interface SentryScreenFrames : NSObject
