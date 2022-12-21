@@ -26,6 +26,17 @@
     <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
   </ItemGroup>
 
+  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
+  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <GeneratedSupportDelegatesFile>$(MSBuildThisFileDirectory)$(GeneratedSourcesDir)SupportDelegates.g.cs</GeneratedSupportDelegatesFile>
+    </PropertyGroup>
+    <WriteLinesToFile
+      File="$(GeneratedSupportDelegatesFile)"
+      Lines="$([System.IO.File]::ReadAllText($(GeneratedSupportDelegatesFile)).Replace('public delegate','internal delegate'))"
+      Overwrite="true" />
+  </Target>
+
   <!-- Build the Sentry Cocoa SDK -->
   <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
