@@ -5,6 +5,7 @@
 ### Features
 
 - Add support for Portable PDB format ([#2050](https://github.com/getsentry/sentry-dotnet/pull/2050))
+- Update bundled Cocoa SDK to version 7.31.4 ([#2096](https://github.com/getsentry/sentry-dotnet/pull/2096))
 
 ## 3.24.1
 
