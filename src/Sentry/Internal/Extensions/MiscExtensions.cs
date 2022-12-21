@@ -9,22 +9,27 @@ internal static class MiscExtensions
             ? value
             : null;
 
-    public static string ToHexString(this long l) => "0x" + l.ToString("x", CultureInfo.InvariantCulture);
+    public static string ToHexString(this long l, bool upperCase = false) =>
+        "0x" + l.ToString("x", CultureInfo.InvariantCulture);
 
-    public static string ToHexString(this byte[] bytes) => new ReadOnlySpan<byte>(bytes).ToHexString();
+    public static string ToHexString(this byte[] bytes, bool upperCase = false) =>
+        new ReadOnlySpan<byte>(bytes).ToHexString(upperCase);
 
-    public static string ToHexString(this Span<byte> bytes) => ((ReadOnlySpan<byte>)bytes).ToHexString();
+    public static string ToHexString(this Span<byte> bytes, bool upperCase = false) =>
+        ((ReadOnlySpan<byte>)bytes).ToHexString(upperCase);
 
-    public static string ToHexString(this ReadOnlySpan<byte> bytes)
+    public static string ToHexString(this ReadOnlySpan<byte> bytes, bool upperCase = false)
     {
 #if NET5_0_OR_GREATER
-        return Convert.ToHexString(bytes).ToLowerInvariant();
+        var s = Convert.ToHexString(bytes);
+        return upperCase ? s : s.ToLowerInvariant();
 #else
         var buffer = new StringBuilder(bytes.Length * 2);
+        var format = upperCase ? "X2" : "x2";
 
         foreach (var t in bytes)
         {
-            buffer.Append(t.ToString("x2", CultureInfo.InvariantCulture));
+            buffer.Append(t.ToString(format, CultureInfo.InvariantCulture));
         }
 
         return buffer.ToString();
