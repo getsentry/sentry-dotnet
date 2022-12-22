@@ -8,6 +8,10 @@
 - Update bundled Android SDK to version 6.10.0([#2095](https://github.com/getsentry/sentry-dotnet/pull/2095))
 - Update bundled Cocoa SDK to version 7.31.4 ([#2096](https://github.com/getsentry/sentry-dotnet/pull/2096))
 
+### Fixes
+
+- Fix db warnings caused by transaction sampled out ([#2097](https://github.com/getsentry/sentry-dotnet/pull/2097))
+
 ## 3.24.1
 
 ### Fixes

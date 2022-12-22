@@ -198,4 +198,17 @@ public static class HubExtensions
         => hub is Hub fullHub
             ? fullHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext)
             : hub.StartTransaction(context, customSamplingContext);
+
+    internal static ITransaction? GetTransaction(this IHub hub)
+    {
+        ITransaction? transaction = null;
+        hub.ConfigureScope(scope => transaction = scope.Transaction);
+        return transaction;
+    }
+
+    internal static ITransaction? GetTransactionIfSampled(this IHub hub)
+    {
+        var transaction = hub.GetTransaction();
+        return transaction?.IsSampled == true ? transaction : null;
+    }
 }
