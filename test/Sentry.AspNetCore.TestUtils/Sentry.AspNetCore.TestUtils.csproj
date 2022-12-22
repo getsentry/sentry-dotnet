@@ -10,13 +10,28 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework) == 'net48'">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.*" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.*" />
+  <!--
+    ASP.NET Core on .NET Framework is supported by Microsoft indefinitely on version 2.1 only.
+    Indeed, version 2.1 has newer nuget packages than version 2.2 (which is out of support).
+    Thus, we will test on 2.1.*, not 2.*.
+    See https://dotnet.microsoft.com/platform/support/policy/aspnet
+    And https://github.com/dotnet/aspnetcore/issues/3753#issuecomment-438046364
 
-    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
-    <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.*" />
+    Also, JetBrains Rider (via Checkmarx) may report the following security vulnerabilities:
+      CVE-2019-0815
+      CVE-2020-1045
+      CVE-2020-1597
+    These are safe to ignore for our tests.  A real project would resolve them by installing
+    an updated version of the ASP.NET Core runtime on their hosting server.
+    See https://github.com/dotnet/aspnetcore/issues/15423
+  -->
+  <ItemGroup Condition="$(TargetFramework) == 'net48'">
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.*" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.1.*" />
+
+    <!-- This is needed because the version that is brought in transitively also has a vulnerability warning -->
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.1.*" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
