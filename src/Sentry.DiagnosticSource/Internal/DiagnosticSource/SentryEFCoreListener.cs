@@ -54,44 +54,37 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 
     private void AddSpan(SentryEFSpanType type, string operation, string? description)
     {
-        _hub.ConfigureScope(scope =>
+        var transaction = _hub.GetTransactionIfSampled();
+        if (transaction == null)
         {
-            if (scope.Transaction is not {IsSampled: true} transaction)
-            {
-                return;
-            }
+            return;
+        }
 
-            var parent = type == SentryEFSpanType.QueryExecution
-                ? transaction.GetLastActiveSpan() ?? transaction.GetDbParentSpan()
-                : transaction.GetDbParentSpan();
+        var parent = type == SentryEFSpanType.QueryExecution
+            ? transaction.GetLastActiveSpan() ?? transaction.GetDbParentSpan()
+            : transaction.GetDbParentSpan();
 
-            var child = parent.StartChild(operation, description);
+        var child = parent.StartChild(operation, description);
 
-            var asyncLocalSpan = GetSpanBucket(type);
-            asyncLocalSpan.Value = new WeakReference<ISpan>(child);
-        });
+        var asyncLocalSpan = GetSpanBucket(type);
+        asyncLocalSpan.Value = new WeakReference<ISpan>(child);
     }
 
     private ISpan? TakeSpan(SentryEFSpanType type)
     {
-        ISpan? span = null;
-        _hub.ConfigureScope(scope =>
+        var transaction = _hub.GetTransactionIfSampled();
+        if (transaction == null)
         {
-            if (scope.Transaction?.IsSampled != true)
-            {
-                return;
-            }
+            return null;
+        }
 
-            if (GetSpanBucket(type).Value is { } reference &&
-                reference.TryGetTarget(out var startedSpan))
-            {
-                span = startedSpan;
-                return;
-            }
+        if (GetSpanBucket(type).Value is { } reference && reference.TryGetTarget(out var startedSpan))
+        {
+            return startedSpan;
+        }
 
-            _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
-        });
-        return span;
+        _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
+        return null;
     }
 
     private AsyncLocal<WeakReference<ISpan>> GetSpanBucket(SentryEFSpanType type)
@@ -166,6 +159,5 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 #else
         return str?.Substring(str.IndexOf('\n') + 1);
 #endif
-
     }
 }
