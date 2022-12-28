@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Logging info instead of warning when skipping debug images ([#2067](https://github.com/getsentry/sentry-dotnet/pull/2067))
+- Logging info instead of warning when skipping debug images ([#2101](https://github.com/getsentry/sentry-dotnet/pull/2101))
 
 ## 3.25.0
 
