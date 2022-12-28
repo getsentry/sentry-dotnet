@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Logging info instead of warning when skipping debug images ([#2067](https://github.com/getsentry/sentry-dotnet/pull/2067))
+
 ## 3.25.0
 
 ### Features
