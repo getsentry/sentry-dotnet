@@ -33,7 +33,7 @@ public class HubAdapterTests : IDisposable
     {
         var expected = new Exception();
         _ = HubAdapter.Instance.CaptureException(expected);
-        _ = Hub.Received(1).CaptureException(expected);
+        _ = Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(s => s.Exception == expected));
     }
 
     [Fact]

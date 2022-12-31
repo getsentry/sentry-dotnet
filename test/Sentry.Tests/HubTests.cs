@@ -965,6 +965,87 @@ public partial class HubTests
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureEvent_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var evt = new SentryEvent();
+
+        // Act
+        hub.CaptureEvent(evt);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureUserFeedback_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var feedback = new UserFeedback(SentryId.Create(), "foo", "bar", "baz");
+
+        // Act
+        hub.CaptureUserFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureUserFeedback(Arg.Any<UserFeedback>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureSession_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        // Act
+        hub.StartSession();
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureSession(Arg.Any<SessionUpdate>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureTransaction_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        // Act
+        var t = hub.StartTransaction("test", "test");
+        t.Finish();
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureTransaction(Arg.Any<Transaction>());
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
