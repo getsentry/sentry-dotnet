@@ -3,7 +3,7 @@ using Sentry.Infrastructure;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IDisposable
+internal class Hub : IHubEx, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -300,13 +300,11 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
-    {
-        if (!IsEnabled)
-        {
-            return SentryId.Empty;
-        }
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
+        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, scope) : SentryId.Empty;
 
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Scope? scope)
+    {
         try
         {
             var currentScope = ScopeManager.GetCurrent();

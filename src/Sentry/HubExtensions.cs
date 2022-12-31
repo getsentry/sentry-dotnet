@@ -155,6 +155,12 @@ public static class HubExtensions
         public void Dispose() => _scope.Dispose();
     }
 
+    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex) =>
+        hub.CaptureEventInternal(new SentryEvent(ex));
+
+    internal static SentryId CaptureEventInternal(this IHub hub, SentryEvent evt) =>
+        hub is IHubEx hubEx ? hubEx.CaptureEventInternal(evt) : hub.CaptureEvent(evt);
+
     /// <summary>
     /// Captures the exception with a configurable scope callback.
     /// </summary>

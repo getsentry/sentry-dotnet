@@ -34,6 +34,8 @@ internal class UnobservedTaskExceptionIntegration : ISdkIntegration
 #endif
         ex.Data[Mechanism.HandledKey] = false;
         ex.Data[Mechanism.MechanismKey] = "UnobservedTaskException";
-        _hub.CaptureException(ex);
+
+        // Call the internal implementation, so that we still capture even if the hub has been disabled.
+        _hub.CaptureExceptionInternal(ex);
     }
 }
