@@ -281,6 +281,11 @@ internal class Hub : IHub, IDisposable
 
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
     {
+        if (!IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
         try
         {
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
@@ -297,6 +302,11 @@ internal class Hub : IHub, IDisposable
 
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
     {
+        if (!IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
         try
         {
             var currentScope = ScopeManager.GetCurrent();
@@ -347,6 +357,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             _ownedClient.CaptureUserFeedback(userFeedback);
@@ -359,6 +374,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureTransaction(Transaction transaction)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             // Apply scope data
@@ -395,6 +415,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             _ownedClient.CaptureSession(sessionUpdate);

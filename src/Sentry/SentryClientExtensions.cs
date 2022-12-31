@@ -15,12 +15,8 @@ public static class SentryClientExtensions
     /// <param name="client">The Sentry client.</param>
     /// <param name="ex">The exception.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this ISentryClient client, Exception ex)
-    {
-        return !client.IsEnabled
-            ? new SentryId()
-            : client.CaptureEvent(new SentryEvent(ex));
-    }
+    public static SentryId CaptureException(this ISentryClient client, Exception ex) =>
+        client.CaptureEvent(new SentryEvent(ex));
 
     /// <summary>
     /// Captures a message.
@@ -29,19 +25,21 @@ public static class SentryClientExtensions
     /// <param name="message">The message to send.</param>
     /// <param name="level">The message level.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureMessage(
-        this ISentryClient client,
-        string message,
+    public static SentryId CaptureMessage(this ISentryClient client, string message,
         SentryLevel level = SentryLevel.Info)
     {
-        return !client.IsEnabled || string.IsNullOrWhiteSpace(message)
-            ? new SentryId()
-            : client.CaptureEvent(
-                new SentryEvent
-                {
-                    Message = message,
-                    Level = level
-                });
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return new SentryId();
+        }
+
+        var sentryEvent = new SentryEvent
+        {
+            Message = message,
+            Level = level
+        };
+
+        return client.CaptureEvent(sentryEvent);
     }
 
     /// <summary>
@@ -52,13 +50,9 @@ public static class SentryClientExtensions
     /// <param name="email">The user email.</param>
     /// <param name="comments">The user comments.</param>
     /// <param name="name">The optional username.</param>
-    public static void CaptureUserFeedback(this ISentryClient client, SentryId eventId, string email, string comments, string? name = null)
-    {
-        if (client.IsEnabled)
-        {
-            client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
-        }
-    }
+    public static void CaptureUserFeedback(this ISentryClient client, SentryId eventId, string email, string comments,
+        string? name = null) =>
+        client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>

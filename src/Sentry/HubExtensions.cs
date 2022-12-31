@@ -162,10 +162,8 @@ public static class HubExtensions
     /// <param name="ex">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope)
-        => !hub.IsEnabled
-            ? new SentryId()
-            : hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope) =>
+        hub.CaptureEvent(new SentryEvent(ex), configureScope);
 
     /// <summary>
     /// Captures a message with a configurable scope callback.
@@ -175,20 +173,22 @@ public static class HubExtensions
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <param name="level">The message level.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureMessage(
-        this IHub hub,
-        string message,
-        Action<Scope> configureScope,
+    public static SentryId CaptureMessage(this IHub hub, string message, Action<Scope> configureScope,
         SentryLevel level = SentryLevel.Info)
-        => !hub.IsEnabled || string.IsNullOrWhiteSpace(message)
-            ? new SentryId()
-            : hub.CaptureEvent(
-                new SentryEvent
-                {
-                    Message = message,
-                    Level = level
-                },
-                configureScope);
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return new SentryId();
+        }
+
+        var sentryEvent = new SentryEvent
+        {
+            Message = message,
+            Level = level
+        };
+
+        return hub.CaptureEvent(sentryEvent, configureScope);
+    }
 
     internal static ITransaction StartTransaction(
         this IHub hub,
