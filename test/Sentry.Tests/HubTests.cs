@@ -1012,6 +1012,7 @@ public partial class HubTests
     public void CaptureSession_HubEnabled(bool enabled)
     {
         // Arrange
+        _fixture.Options.Release = "release";
         var hub = _fixture.GetSut();
         if (!enabled)
         {
