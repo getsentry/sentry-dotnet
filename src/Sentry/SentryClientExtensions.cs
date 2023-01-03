@@ -16,7 +16,7 @@ public static class SentryClientExtensions
     /// <param name="ex">The exception.</param>
     /// <returns>The Id of the event</returns>
     public static SentryId CaptureException(this ISentryClient client, Exception ex) =>
-        client.CaptureEvent(new SentryEvent(ex));
+        client.IsEnabled ? client.CaptureEventInternal(new SentryEvent(ex)) : SentryId.Empty;
 
     /// <summary>
     /// Captures a message.
@@ -28,18 +28,16 @@ public static class SentryClientExtensions
     public static SentryId CaptureMessage(this ISentryClient client, string message,
         SentryLevel level = SentryLevel.Info)
     {
-        if (string.IsNullOrWhiteSpace(message))
+        if (client.IsEnabled && !string.IsNullOrWhiteSpace(message))
         {
-            return new SentryId();
+            return client.CaptureEventInternal(new SentryEvent
+            {
+                Message = message,
+                Level = level
+            });
         }
 
-        var sentryEvent = new SentryEvent
-        {
-            Message = message,
-            Level = level
-        };
-
-        return client.CaptureEvent(sentryEvent);
+        return SentryId.Empty;
     }
 
     /// <summary>
@@ -51,8 +49,22 @@ public static class SentryClientExtensions
     /// <param name="comments">The user comments.</param>
     /// <param name="name">The optional username.</param>
     public static void CaptureUserFeedback(this ISentryClient client, SentryId eventId, string email, string comments,
-        string? name = null) =>
+        string? name = null)
+    {
+        if (!client.IsEnabled)
+        {
+            return;
+        }
+
         client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
+    }
+
+    private static SentryId CaptureEventInternal(this ISentryClient client, SentryEvent sentryEvent) =>
+        client switch
+        {
+            IHubEx hub => hub.CaptureEventInternal(sentryEvent),
+            _ => client.CaptureEvent(sentryEvent)
+        };
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>

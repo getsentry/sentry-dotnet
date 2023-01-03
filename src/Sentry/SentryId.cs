@@ -12,7 +12,7 @@ public readonly struct SentryId : IEquatable<SentryId>, IJsonSerializable
     /// <summary>
     /// An empty sentry id.
     /// </summary>
-    public static readonly SentryId Empty = Guid.Empty;
+    public static readonly SentryId Empty = default;
 
     /// <summary>
     /// Creates a new instance of a Sentry Id.
