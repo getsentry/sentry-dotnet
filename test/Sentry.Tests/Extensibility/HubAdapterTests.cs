@@ -3,20 +3,20 @@ namespace Sentry.Tests.Extensibility;
 [Collection(nameof(SentrySdkCollection))]
 public class HubAdapterTests : IDisposable
 {
-    public IHub Hub { get; set; }
+    private IHub Hub { get; }
 
     public HubAdapterTests()
     {
         Hub = Substitute.For<IHub>();
-        _ = SentrySdk.UseHub(Hub);
+        SentrySdk.UseHub(Hub);
     }
 
     [Fact]
     public void CaptureEvent_MockInvoked()
     {
         var expected = new SentryEvent();
-        _ = HubAdapter.Instance.CaptureEvent(expected);
-        _ = Hub.Received(1).CaptureEvent(expected);
+        HubAdapter.Instance.CaptureEvent(expected);
+        Hub.Received(1).CaptureEvent(expected);
     }
 
     [Fact]
@@ -24,16 +24,17 @@ public class HubAdapterTests : IDisposable
     {
         var expectedEvent = new SentryEvent();
         var expectedScope = new Scope();
-        _ = HubAdapter.Instance.CaptureEvent(expectedEvent, expectedScope);
-        _ = Hub.Received(1).CaptureEvent(expectedEvent, expectedScope);
+        HubAdapter.Instance.CaptureEvent(expectedEvent, expectedScope);
+        Hub.Received(1).CaptureEvent(expectedEvent, expectedScope);
     }
 
     [Fact]
     public void CaptureException_MockInvoked()
     {
         var expected = new Exception();
-        _ = HubAdapter.Instance.CaptureException(expected);
-        _ = Hub.Received(1).CaptureException(expected);
+        Hub.IsEnabled.Returns(true);
+        HubAdapter.Instance.CaptureException(expected);
+        Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(s => s.Exception == expected));
     }
 
     [Fact]
@@ -65,15 +66,14 @@ public class HubAdapterTests : IDisposable
     {
         static Task Expected(Scope _) => Task.CompletedTask;
 
-        _ = HubAdapter.Instance.ConfigureScopeAsync(Expected);
-        _ = Hub.Received(1).ConfigureScopeAsync(Expected);
+        HubAdapter.Instance.ConfigureScopeAsync(Expected);
+        Hub.Received(1).ConfigureScopeAsync(Expected);
     }
 
     [Fact]
     public void ConfigureScope_MockInvoked()
     {
-        void Expected(Scope _)
-        { }
+        void Expected(Scope _) { }
         HubAdapter.Instance.ConfigureScope(Expected);
         Hub.Received(1).ConfigureScope(Expected);
     }
@@ -82,8 +82,7 @@ public class HubAdapterTests : IDisposable
     [Fact]
     public void WithScope_MockInvoked()
     {
-        void Expected(Scope _)
-        { }
+        void Expected(Scope _) { }
         HubAdapter.Instance.WithScope(Expected);
         Hub.Received(1).WithScope(Expected);
     }
@@ -91,16 +90,16 @@ public class HubAdapterTests : IDisposable
     [Fact]
     public void PushScope_MockInvoked()
     {
-        _ = HubAdapter.Instance.PushScope();
-        _ = Hub.Received(1).PushScope();
+        HubAdapter.Instance.PushScope();
+        Hub.Received(1).PushScope();
     }
 
     [Fact]
     public void PushScope_State_MockInvoked()
     {
         var expected = new object();
-        _ = HubAdapter.Instance.PushScope(expected);
-        _ = Hub.Received(1).PushScope(expected);
+        HubAdapter.Instance.PushScope(expected);
+        Hub.Received(1).PushScope(expected);
     }
 
     [Fact]
@@ -121,7 +120,7 @@ public class HubAdapterTests : IDisposable
     public void AddBreadcrumb_WithClock_BreadcrumbInstanceCreated()
     {
         var clock = Substitute.For<ISystemClock>();
-        _ = clock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
+        clock.GetUtcNow().Returns(DateTimeOffset.MaxValue);
 
         TestAddBreadcrumbExtension((message, category, type, data, level)
             => HubAdapter.Instance.AddBreadcrumb(
@@ -132,7 +131,7 @@ public class HubAdapterTests : IDisposable
                 data,
                 level));
 
-        _ = clock.Received(1).GetUtcNow();
+        clock.Received(1).GetUtcNow();
     }
 
     private void TestAddBreadcrumbExtension(
@@ -164,7 +163,7 @@ public class HubAdapterTests : IDisposable
         Assert.Equal(type, crumb.Type);
         Assert.Equal(category, crumb.Category);
         Assert.Equal(level, crumb.Level);
-        Assert.Equal(data.Count, crumb.Data.Count);
+        Assert.Equal(data.Count, crumb.Data?.Count);
         Assert.Equal(data.ToImmutableDictionary(), crumb.Data);
     }
 

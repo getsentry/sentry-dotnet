@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -26,11 +27,15 @@ internal class AppDomainUnhandledExceptionIntegration : ISdkIntegration
     [SecurityCritical]
     internal void Handle(object sender, UnhandledExceptionEventArgs e)
     {
+        _options?.LogDebug("AppDomain Unhandled Exception");
+
         if (e.ExceptionObject is Exception ex)
         {
             ex.Data[Mechanism.HandledKey] = false;
             ex.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
-            _ = _hub?.CaptureException(ex);
+
+            // Call the internal implementation, so that we still capture even if the hub has been disabled.
+            _hub?.CaptureExceptionInternal(ex);
         }
 
         if (e.IsTerminating)

@@ -5,6 +5,7 @@
 ### Fixes
 
 - Logging info instead of warning when skipping debug images ([#2101](https://github.com/getsentry/sentry-dotnet/pull/2101))
+- Fix unhandled exception not captured when hub disabled ([#2103](https://github.com/getsentry/sentry-dotnet/pull/2103))
 
 ## 3.25.0
 

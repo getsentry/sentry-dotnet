@@ -3,7 +3,7 @@ using Sentry.Infrastructure;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IDisposable
+internal class Hub : IHubEx, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -281,6 +281,11 @@ internal class Hub : IHub, IDisposable
 
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
     {
+        if (!IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
         try
         {
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
@@ -295,7 +300,10 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
+        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, scope) : SentryId.Empty;
+
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Scope? scope)
     {
         try
         {
@@ -347,6 +355,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             _ownedClient.CaptureUserFeedback(userFeedback);
@@ -359,6 +372,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureTransaction(Transaction transaction)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             // Apply scope data
@@ -395,6 +413,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             _ownedClient.CaptureSession(sessionUpdate);
