@@ -45,14 +45,21 @@
       <SentryCLIDirectory Condition="'$(PkgSentry)' != ''">$(PkgSentry)\tools\</SentryCLIDirectory>
     </PropertyGroup>
 
-    <!-- We bundle Sentry CLI for these architectures (in Sentry.csproj) -->
+    <!--
+      Choose the correct Sentry CLI executable depending on OS platform and architecture.
+      For Windows on Arm64, we'll use the X64 build for now (which should run via emulation).
+      Switch to a Windows Arm64 build when available. See https://github.com/getsentry/sentry-cli/issues/1426
+    -->
     <PropertyGroup Condition="'$(SentryCLI)' == '' And '$(SentryCLIDirectory)' != ''">
       <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)osx-arm64\sentry-cli</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)osx-x64\sentry-cli</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)linux-arm64\sentry-cli</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)linux-x64\sentry-cli</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(SentryCLIDirectory)windows-x64\sentry-cli.exe</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Darwin-arm64</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Darwin-x86_64</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Linux-aarch64</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86'">$(SentryCLIDirectory)sentry-cli-Linux-i686</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Linux-x86_64</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86'">$(SentryCLIDirectory)sentry-cli-Windows-i686</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64</SentryCLI>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(SENTRY_AUTH_TOKEN)' != '' And '$(SENTRY_ORG)' != '' And '$(SENTRY_PROJECT)' != '' And '$(SentryCLI)' != '' And Exists('$(SentryCLI)')">
