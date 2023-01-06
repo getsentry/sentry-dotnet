@@ -32,4 +32,27 @@
               ItemName="FileWrites" />
     </WriteCodeFragment>
   </Target>
+
+  <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" Condition="'$(PkgSentry)' != '' Or '$(SentryCLIDirectory)' != ''">
+    <PropertyGroup>
+      <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
+      <SentryCLIDirectory Condition="'$(PkgSentry)' != ''">$(PkgSentry)\tools\</SentryCLIDirectory>
+
+      <!-- We bundle Sentry CLI for these architectures (in Sentry.csproj) -->
+      <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)osx-arm64\sentry-cli</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)osx-x64\sentry-cli</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)linux-arm64\sentry-cli</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)linux-x64\sentry-cli</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(SentryCLIDirectory)windows-x64\sentry-cli.exe</SentryCLI>
+    </PropertyGroup>
+
+    <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
+
+    <Exec
+      Condition="'$(SENTRY_AUTH_TOKEN)' != '' And '$(SENTRY_ORG)' != '' And '$(SENTRY_PROJECT)' != '' And '$(SentryCLI)' != '' And Exists('$(SentryCLI)')"
+      Command="'$(SentryCLI)' upload-dif '$(IntermediateOutputPath)'" />
+
+  </Target>
+
 </Project>

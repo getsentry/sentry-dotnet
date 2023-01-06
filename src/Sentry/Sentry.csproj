@@ -67,4 +67,25 @@
     <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
   </ItemGroup>
 
+  <!-- Download and bundle Sentry CLI with the nuget package. -->
+  <Target Name="DownloadSentryCLI" BeforeTargets="CollectPackageReferences" Condition="'$(SentryCLIDirectory)' != ''">
+    <ItemGroup>
+      <SentryCLIDownload Include="sentry-cli-Darwin-arm64" DestinationFolder="osx-arm64\" DestinationFileName="sentry-cli" />
+      <SentryCLIDownload Include="sentry-cli-Darwin-x86_64" DestinationFolder="osx-x64\" DestinationFileName="sentry-cli" />
+      <SentryCLIDownload Include="sentry-cli-Linux-aarch64" DestinationFolder="linux-arm64\" DestinationFileName="sentry-cli" />
+      <SentryCLIDownload Include="sentry-cli-Linux-x86_64" DestinationFolder="linux-x64\" DestinationFileName="sentry-cli" />
+      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" DestinationFolder="windows-x64\" DestinationFileName="sentry-cli.exe" />
+    </ItemGroup>
+    <DownloadFile
+      SourceUrl="https://github.com/getsentry/sentry-cli/releases/download/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)"
+      DestinationFolder="$(SentryCLIDirectory)%(SentryCLIDownload.DestinationFolder)"
+      DestinationFileName="%(SentryCLIDownload.DestinationFileName)"
+      Condition="!Exists('$(SentryCLIDirectory)%(SentryCLIDownload.DestinationFolder)%(SentryCLIDownload.DestinationFileName)')"
+      Retries="3" />
+    <Exec Command="chmod +x $(SentryCLIDirectory)*/*" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+  </Target>
+  <ItemGroup Condition="'$(SentryCLIDirectory)' != ''">
+    <None Include="$(SentryCLIDirectory)**" Pack="true" PackagePath="tools\" />
+  </ItemGroup>
+
 </Project>
