@@ -33,12 +33,7 @@
     </WriteCodeFragment>
   </Target>
 
-  <PropertyGroup>
-    <!-- By default, symbols will be uploaded for Release builds only.  SentryUploadSymbols can be set to override. -->
-    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release'">true</SentryUploadSymbols>
-    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' != 'Release'">false</SentryUploadSymbols>
-  </PropertyGroup>
-  <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" Condition="'$(SentryUploadSymbols)' == 'true' And ('$(PkgSentry)' != '' Or '$(SentryCLIDirectory)' != '')">
+  <Target Name="_PrepareSentryCLI" AfterTargets="AfterBuild" Condition="'$(PkgSentry)' != '' Or '$(SentryCLIDirectory)' != ''">
 
     <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
     <PropertyGroup Condition="'$(SentryCLIDirectory)' == ''">
@@ -62,16 +57,22 @@
       <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64</SentryCLI>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(SENTRY_AUTH_TOKEN)' != '' And '$(SENTRY_ORG)' != '' And '$(SENTRY_PROJECT)' != '' And '$(SentryCLI)' != '' And Exists('$(SentryCLI)')">
-      <_InvokeSentryCLI>true</_InvokeSentryCLI>
+    <PropertyGroup Condition="'$(SENTRY_AUTH_TOKEN)' == '' Or '$(SENTRY_ORG)' == '' Or '$(SENTRY_PROJECT)' == '' Or '$(SentryCLI)' == '' Or !Exists('$(SentryCLI)')">
+      <SentryCLI />
     </PropertyGroup>
+  </Target>
 
-    <Message Condition="'$(_InvokeSentryCLI)' == 'true'" Importance="High"
-      Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-
-    <Exec Condition="'$(_InvokeSentryCLI)' == 'true'"
-      Command="'$(SentryCLI)' upload-dif '$(IntermediateOutputPath)'" />
-
+  <!--
+    Upload symbols (and any other debug information files) to Sentry after the build.
+    By default, this will be uploaded for Release builds only.  The SentryUploadSymbols property can be set in the app to deviate from the default.
+  -->
+  <PropertyGroup>
+    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release'">true</SentryUploadSymbols>
+    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' != 'Release'">false</SentryUploadSymbols>
+  </PropertyGroup>
+  <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="_PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
+    <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
+    <Exec Command="'$(SentryCLI)' upload-dif '$(IntermediateOutputPath)'" />
   </Target>
 
 </Project>
