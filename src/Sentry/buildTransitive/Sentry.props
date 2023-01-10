@@ -35,7 +35,7 @@
 
   <PropertyGroup>
     <!-- Defaults for Sentry CLI are set here.  Any of these properties can be set in the application to override the defaults. -->
-    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release'">true</SentryUploadSymbols>
+    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release' And '$(DebugType)' != 'embedded'">true</SentryUploadSymbols>
     <!-- Additional properties can go here.  For example, SentryCreateNewRelease, etc. -->
 
     <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
