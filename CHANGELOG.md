@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Use Sentry CLI after build to upload symbols ([#2107](https://github.com/getsentry/sentry-dotnet/pull/2107))
+
 ### Fixes
 
 - Logging info instead of warning when skipping debug images ([#2101](https://github.com/getsentry/sentry-dotnet/pull/2101))
