@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup>
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
@@ -19,89 +20,11 @@
       <!-- Ensure not part of Compile, as a workaround for https://github.com/dotnet/sdk/issues/114 -->
       <Compile Remove="$(SentryAttributesFilePath)" />
     </ItemGroup>
-    <WriteCodeFragment AssemblyAttributes="@(SentryAttributes)"
-                       Language="$(Language)"
-                       OutputFile="$(SentryAttributesFilePath)">
-      <Output Condition="$(Language) != 'F#'"
-              TaskParameter="OutputFile"
-              ItemName="Compile" />
-      <Output Condition="$(Language) == 'F#'"
-              TaskParameter="OutputFile"
-              ItemName="CompileBefore" />
-      <Output TaskParameter="OutputFile"
-              ItemName="FileWrites" />
+    <WriteCodeFragment AssemblyAttributes="@(SentryAttributes)" Language="$(Language)" OutputFile="$(SentryAttributesFilePath)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" Condition="$(Language) != 'F#'" />
+      <Output TaskParameter="OutputFile" ItemName="CompileBefore" Condition="$(Language) == 'F#'" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
     </WriteCodeFragment>
-  </Target>
-
-  <PropertyGroup>
-    <!-- Defaults for Sentry CLI are set here.  Any of these properties can be set in the application to override the defaults. -->
-    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release' And '$(DebugType)' != 'embedded'">true</SentryUploadSymbols>
-    <!-- Additional properties can go here.  For example, SentryCreateNewRelease, etc. -->
-
-    <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
-    <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true')">true</UseSentryCLI>
-
-    <!--
-      The Sentry configuration can be set manually in MSBuild properties if desired.
-      Otherwise the default configuration will be used, as reported by "sentry-cli info".
-      The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
-    -->
-    <SentryCLIOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIOptions) --api-key $(SentryApiKey)</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIOptions) --auth-token $(SentryAuthToken)</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIOptions) --url $(SentryUrl)</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org '$(SentryOrg)'</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project '$(SentryProject)'</SentryCLIOptions>
-  </PropertyGroup>
-
-  <Target Name="_PrepareSentryCLI" AfterTargets="DispatchToInnerBuilds;AfterBuild" Condition="'$(UseSentryCLI)' == 'true'">
-    <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
-    <PropertyGroup Condition="'$(SentryCLIDirectory)' == ''">
-      <SentryCLIDirectory Condition="'$(PkgSentry)' != ''">$(PkgSentry)\tools\</SentryCLIDirectory>
-    </PropertyGroup>
-
-    <!--
-      Choose the correct Sentry CLI executable depending on OS platform and architecture.
-      For Windows on Arm64, we'll use the X64 build for now (which should run via emulation).
-      Switch to a Windows Arm64 build when available. See https://github.com/getsentry/sentry-cli/issues/1426
-    -->
-    <PropertyGroup Condition="'$(SentryCLI)' == '' And '$(SentryCLIDirectory)' != ''">
-      <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Darwin-arm64</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Darwin-x86_64</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Linux-aarch64</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86'">$(SentryCLIDirectory)sentry-cli-Linux-i686</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Linux-x86_64</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86'">$(SentryCLIDirectory)sentry-cli-Windows-i686</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64</SentryCLI>
-      <SentryCLI Condition="!Exists('$(SentryCLI)')"/>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <_SentryCLIInfoOptions Condition="'$(SentryOrg)' != '' And '$(SentryProject)' != ''">--no-defaults</_SentryCLIInfoOptions>
-    </PropertyGroup>
-    <Exec Command="'$(SentryCLI)' info $(_SentryCLIInfoOptions)" Condition="'$(SentryCLI)' != ''" IgnoreExitCode="true" ConsoleToMsBuild="true" StandardOutputImportance="Low">
-      <Output TaskParameter="ExitCode" PropertyName="SentryCLIExitCode" />
-      <Output TaskParameter="ConsoleOutput" PropertyName="SentryCLIOutput" />
-    </Exec>
-
-    <PropertyGroup Condition="'$(SentryCLIExitCode)' != '0'">
-      <_SentryCLIRequestFailed Condition="$(SentryCLIOutput.Contains('API request failed'))">true</_SentryCLIRequestFailed>
-    </PropertyGroup>
-    <Warning Condition="'$(_SentryCLIRequestFailed)' != ''"
-      Text="Sentry API request failed.  Either the authentication info is invalid, or the Sentry server could not be reached." />
-
-    <Message Importance="High" Condition="'$(SentryCLIExitCode)' != '0' And '$(_SentryCLIRequestFailed)' == ''"
-      Text="The Sentry CLI is not fully configured with authentication, organization, and project." />
-    <PropertyGroup Condition="'$(SentryCLIExitCode)' != '0'">
-      <SentryCLI />
-    </PropertyGroup>
-  </Target>
-
-  <!-- Upload symbols (and any other debug information files) to Sentry after the build. -->
-  <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="_PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
-    <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-    <Exec Command="'$(SentryCLI)' upload-dif $(SentryCLIOptions) '$(IntermediateOutputPath)'" />
   </Target>
 
 </Project>

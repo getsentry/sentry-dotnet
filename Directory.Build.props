@@ -62,4 +62,10 @@
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 
+  <!--
+    This is needed because we use project references in this solution.
+    In an app that uses our nuget package, it will come through the nuget package automatically.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry\buildTransitive\Sentry.props" />
+
 </Project>
