@@ -7,10 +7,14 @@
     <!-- This property controls whether symbols will be uploaded to Sentry. -->
     <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release' And '$(DebugType)' != 'embedded'">true</SentryUploadSymbols>
 
+    <!-- These properties control creation of release information in Sentry. -->
+    <SentryRelease Condition="'$(SentryRelease)' == ''">$(SENTRY_RELEASE)</SentryRelease>
+    <SentryCreateRelease Condition="'$(SentryCreateRelease)' == '' And '$(Configuration)' == 'Release' And ('$(OutputType)' == 'Exe' Or '$(AndroidApplication)' == 'true') And '$(IsTestProject)' != 'true'">true</SentryCreateRelease>
+
     <!-- Additional properties can go here. -->
 
     <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
-    <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true')">true</UseSentryCLI>
+    <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true' Or '$(SentryCreateRelease)' == 'true')">true</UseSentryCLI>
 
     <!--
       The Sentry configuration can be set manually in MSBuild properties if desired.
@@ -69,10 +73,98 @@
     </PropertyGroup>
   </Target>
 
+  <UsingTask TaskName="SentryGetReleaseFromInformationalVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <AssemblyPath Required="true" />
+      <Release Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System"/>
+      <Using Namespace="System.Reflection"/>
+      <Code Type="Fragment" Language="cs">
+  <![CDATA[
+  try
+  {
+    var path = Path.GetFullPath(AssemblyPath);
+    var assembly = Assembly.LoadFile(path);
+
+    var assemblyName = assembly.GetName();
+    var name = assemblyName.Name;
+    var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+    if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
+    {
+      Release = $"{name}@{version}";
+    }
+  }
+  catch
+  {
+  }
+  ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <UsingTask TaskName="SentryGetReleaseFromAppManifest" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+    Condition="$(TargetFramework.Contains('ios')) Or $(TargetFramework.Contains('maccatalyst'))">
+    <ParameterGroup>
+      <AppManifestPath Required="true" />
+      <Release Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="$(_XamarinTaskAssembly)" />
+      <Using Namespace="Xamarin.MacDev"/>
+      <Code Type="Fragment" Language="cs">
+  <![CDATA[
+  try
+  {
+    var plist = PDictionary.FromFile(AppManifestPath);
+
+    var packageName = plist.GetCFBundleIdentifier();
+    var packageVersion = plist.GetCFBundleShortVersionString();
+    var buildVersion = plist.GetCFBundleVersion();
+
+    Release = $"{packageName}@{packageVersion}+{buildVersion}";
+  }
+  catch
+  {
+  }
+  ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="_GetSentryRelease" AfterTargets="DispatchToInnerBuilds;AfterBuild" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true'">
+    <PropertyGroup Condition="'$(SentryRelease)' == '' And $(TargetFramework.Contains('android'))">
+      <SentryRelease>$(ApplicationId)@$(ApplicationDisplayVersion)+$(ApplicationVersion)</SentryRelease>
+    </PropertyGroup>
+
+    <SentryGetReleaseFromAppManifest AppManifestPath="$(_TemporaryAppManifest)"
+      Condition="'$(SentryRelease)' == '' And ($(TargetFramework.Contains('ios')) Or $(TargetFramework.Contains('maccatalyst')))">
+      <Output TaskParameter="Release" PropertyName="SentryRelease" />
+    </SentryGetReleaseFromAppManifest>
+
+    <SentryGetReleaseFromInformationalVersion Condition="'$(SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+      <Output TaskParameter="Release" PropertyName="SentryRelease" />
+    </SentryGetReleaseFromInformationalVersion>
+
+    <GetAssemblyIdentity Condition="'$(SentryRelease)' == '' And '$(TargetName)' != ''" AssemblyFiles="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+      <Output TaskParameter="Assemblies" ItemName="MainAssemblyIdentity" />
+    </GetAssemblyIdentity>
+    <PropertyGroup Condition="'$(SentryRelease)' == '' And '@(MainAssemblyIdentity)' != ''">
+      <SentryRelease>%(MainAssemblyIdentity.Name)@%(Version)</SentryRelease>
+    </PropertyGroup>
+  </Target>
+
   <!-- Upload symbols (and any other debug information files) to Sentry after the build. -->
   <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="_PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
     <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
     <Exec Command="'$(SentryCLI)' upload-dif $(SentryCLIOptions) '$(IntermediateOutputPath)'" />
+  </Target>
+
+  <!-- Create release info in Sentry after a the build. -->
+  <Target Name="CreateReleaseInSentry" AfterTargets="AfterBuild" DependsOnTargets="_PrepareSentryCLI;_GetSentryRelease"
+    Condition="'$(SentryCreateRelease)' == 'true' And '$(SentryCLI)' != '' And '$(SentryRelease)' != ''">
+    <Exec Command="'$(SentryCLI)' releases new $(SentryCLIOptions) '$(SentryRelease)'" />
   </Target>
 
 </Project>
