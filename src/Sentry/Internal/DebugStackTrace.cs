@@ -474,7 +474,7 @@ internal class DebugStackTrace : SentryStackTrace
             // should be used to match the PE/COFF image with the associated PDB (instead of Guid and Age).
             // Matching PDB ID is stored in the #Pdb stream of the .pdb file.
             // See https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
-            debugId = $"{codeView.Guid}-{entry.Stamp:x}";
+            debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
             debugFile = codeView.Path;
         }
 
