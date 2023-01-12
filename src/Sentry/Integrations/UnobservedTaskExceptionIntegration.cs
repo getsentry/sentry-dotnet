@@ -5,6 +5,8 @@ namespace Sentry.Integrations;
 
 internal class UnobservedTaskExceptionIntegration : ISdkIntegration
 {
+    internal const string MechanismKey = "UnobservedTaskException";
+
     private readonly IAppDomain _appDomain;
     private IHub _hub = null!;
 
@@ -33,7 +35,7 @@ internal class UnobservedTaskExceptionIntegration : ISdkIntegration
         var ex = e.Exception!;
 #endif
         ex.Data[Mechanism.HandledKey] = false;
-        ex.Data[Mechanism.MechanismKey] = "UnobservedTaskException";
+        ex.Data[Mechanism.MechanismKey] = MechanismKey;
 
         // Call the internal implementation, so that we still capture even if the hub has been disabled.
         _hub.CaptureExceptionInternal(ex);

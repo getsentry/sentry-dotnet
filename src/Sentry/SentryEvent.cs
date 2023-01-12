@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
@@ -170,11 +171,21 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
 
     internal bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
 
-    internal bool HasUnhandledException() =>
-        (SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
-        // Before event is processed by the client and SentryExceptions created.
-        // See: AppDomainUnhandledExceptionIntegration
-        || Exception?.Data[Mechanism.HandledKey] is false;
+    internal bool HasTerminalException()
+    {
+        // The exception is considered terminal if it is marked unhandled,
+        // UNLESS it comes from the UnobservedTaskExceptionIntegration
+
+        if (Exception?.Data[Mechanism.HandledKey] is false)
+        {
+            return Exception.Data[Mechanism.MechanismKey] as string != UnobservedTaskExceptionIntegration.MechanismKey;
+        }
+
+        return SentryExceptions?.Any(e =>
+            e.Mechanism is {Handled: false} mechanism &&
+            mechanism.Type != UnobservedTaskExceptionIntegration.MechanismKey
+        ) ?? false;
+    }
 
     /// <summary>
     /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
