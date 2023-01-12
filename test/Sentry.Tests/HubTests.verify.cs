@@ -46,6 +46,7 @@ public partial class HubTests
                 _.DebugFile != null && (
                     _.DebugFile.Contains("Xunit.SkippableFact") ||
                     _.DebugFile.Contains("xunit.runner") ||
+                    _.DebugFile.Contains("JetBrains.ReSharper.TestRunner") ||
                     _.DebugFile.Contains("Microsoft.TestPlatform")
                 )
             );
