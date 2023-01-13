@@ -163,15 +163,25 @@ public partial class SentryStackTraceFactoryTests
             exception = e;
         }
 
-        var expected = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
-        var path = sut.Create(exception)?.Frames[0].FileName;
+        var stackTrace = sut.Create(exception);
+
+        Assert.NotNull(stackTrace);
+
+        var frame = stackTrace.Frames[0];
 
 #if __MOBILE__
         // We don't get file paths on mobile unless we've got a debugger attached.
-        Skip.If(string.IsNullOrEmpty(path));
+        Skip.If(string.IsNullOrEmpty(frame.FileName));
 #endif
-        Assert.Equal(expected, path);
+
+        var path = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
+        Assert.Equal(path, frame.FileName);
+
+        var fullPath = GetThisFilePath();
+        Assert.Equal(fullPath, frame.AbsolutePath);
     }
+
+    private static string GetThisFilePath([CallerFilePath] string path = null) => path;
 
     [Theory]
     [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
