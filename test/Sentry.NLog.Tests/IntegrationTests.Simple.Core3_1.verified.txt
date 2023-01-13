@@ -30,17 +30,23 @@
                 Value: Exception message,
                 Stacktrace: {
                   Frames: [
-                    {,
-                      "filename": "IntegrationTests.verify.cs",
-                      "function": "Task IntegrationTests.Simple()",
-                      "lineno": 47,
-                      "colno": 17,
-                      "abs_path": "{ProjectDirectory}IntegrationTests.verify.cs",
-                      "in_app": false,
-                      "package": "Sentry.NLog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED",
-                      "instruction_addr": "____",
-                      "addr_mode": "rel:0",
-                      "function_id": "____",
+                    {
+                      FileName: IntegrationTests.verify.cs,
+                      Function: Task IntegrationTests.Simple(),
+                      Module: null,
+                      LineNumber: 47,
+                      ColumnNumber: 17,
+                      AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
+                      ContextLine: null,
+                      InApp: false,
+                      Package: Sentry.NLog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,
+                      Platform: null,
+                      ImageAddress: 0,
+                      SymbolAddress: null,
+                      InstructionAddress: ____,
+                      InstructionOffset: null,
+                      AddressMode: rel:0,
+                      FunctionId: ____
                     }
                   ]
                 },
@@ -48,13 +54,15 @@
               }
             ],
             DebugImages: [
-              {,
-                "type": "pe_dotnet",
-                "debug_id": "________-____-____-____-____________-________",
-                "debug_checksum": "______:________________________________________________________________",
-                "debug_file": ".../Sentry.NLog.Tests.pdb",
-                "code_id": "_____________",
-                "code_file": ".../Sentry.NLog.Tests.dll",
+              {
+                Type: pe_dotnet,
+                ImageAddress: null,
+                ImageSize: null,
+                DebugId: ________-____-____-____-____________-________,
+                DebugChecksum: ______:________________________________________________________________,
+                DebugFile: .../Sentry.NLog.Tests.pdb,
+                CodeId: _____________,
+                CodeFile: .../Sentry.NLog.Tests.dll
               }
             ],
             Level: error,
