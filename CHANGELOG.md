@@ -12,6 +12,7 @@
 - Fix unhandled exception not captured when hub disabled ([#2103](https://github.com/getsentry/sentry-dotnet/pull/2103))
 - Fix Android support for Portable PDB format when app uses split APKs ([#2108](https://github.com/getsentry/sentry-dotnet/pull/2108))
 - Set absolute path when stripping project path on stack frame ([#2117](https://github.com/getsentry/sentry-dotnet/pull/2117))
+- Fix session ending as crashed for unobserved task exceptions ([#2112](https://github.com/getsentry/sentry-dotnet/pull/2112))
 
 ## 3.25.0
 

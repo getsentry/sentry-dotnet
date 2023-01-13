@@ -318,8 +318,8 @@ internal class Hub : IHubEx, IDisposable
                 evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
             }
 
-            var hasUnhandledException = evt.HasUnhandledException();
-            if (hasUnhandledException)
+            var hasTerminalException = evt.HasTerminalException();
+            if (hasTerminalException)
             {
                 // Event contains a terminal exception -> end session as crashed
                 _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
@@ -336,7 +336,7 @@ internal class Hub : IHubEx, IDisposable
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (hasUnhandledException)
+            if (hasTerminalException)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
