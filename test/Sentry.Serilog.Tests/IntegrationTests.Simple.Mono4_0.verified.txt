@@ -160,13 +160,23 @@
                 Value: Exception message,
                 Stacktrace: {
                   Frames: [
-                    {,
-                      "function": "Task IntegrationTests.Simple()",
-                      "in_app": false,
-                      "package": "Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED",
-                      "instruction_addr": "____",
-                      "addr_mode": "rel:0",
-                      "function_id": "____",
+                    {
+                      FileName: ,
+                      Function: Task IntegrationTests.Simple(),
+                      Module: null,
+                      LineNumber: null,
+                      ColumnNumber: null,
+                      AbsolutePath: null,
+                      ContextLine: null,
+                      InApp: false,
+                      Package: Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,
+                      Platform: null,
+                      ImageAddress: 0,
+                      SymbolAddress: null,
+                      InstructionAddress: ____,
+                      InstructionOffset: null,
+                      AddressMode: rel:0,
+                      FunctionId: ____
                     }
                   ]
                 },
@@ -177,13 +187,15 @@
               }
             ],
             DebugImages: [
-              {,
-                "type": "pe_dotnet",
-                "debug_id": "________-____-____-____-____________-________",
-                "debug_checksum": "______:________________________________________________________________",
-                "debug_file": ".../Sentry.Serilog.Tests.pdb",
-                "code_id": "_____________",
-                "code_file": ".../Sentry.Serilog.Tests.dll",
+              {
+                Type: pe_dotnet,
+                ImageAddress: null,
+                ImageSize: null,
+                DebugId: ________-____-____-____-____________-________,
+                DebugChecksum: ______:________________________________________________________________,
+                DebugFile: .../Sentry.Serilog.Tests.pdb,
+                CodeId: _____________,
+                CodeFile: .../Sentry.Serilog.Tests.dll
               }
             ],
             Level: fatal,

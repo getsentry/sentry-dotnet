@@ -10,7 +10,7 @@ runs:
 
     - name: Install Ninja
       shell: bash
-      run: ${{ runner.os == 'macOS' && 'brew install ninja' || runner.os == 'Windows' && 'choco install ninja' || 'sudo apt-get install ninja-build' }}
+      run: ${{ runner.os == 'macOS' && 'brew install ninja' || runner.os == 'Windows' && 'choco install ninja' || 'sudo apt-get update && sudo apt-get install ninja-build' }}
 
     - name: Build C Project
       if: runner.os == 'Linux' || runner.os == 'macOS'
