@@ -1,4 +1,5 @@
 #if !__MOBILE__
+using Argon;
 
 namespace Sentry.Testing;
 
@@ -36,12 +37,6 @@ public static class VerifyExtensions
                 _ => _.Module,
                 _ => _.ThreadId)
             .IgnoreMembers<SentryThread>(_ => _.Id)
-            .IgnoreMembers<SentryStackFrame>(
-                _ => _.FileName,
-                _ => _.LineNumber,
-                _ => _.ColumnNumber,
-                _ => _.InstructionOffset,
-                _ => _.Package)
             .IgnoreStackTrace();
     }
 
@@ -87,6 +82,9 @@ public static class VerifyExtensions
 
     private class DebugImageConverter : WriteOnlyJsonConverter<DebugImage>
     {
+        private static readonly Regex PathRegex = new(@"^.*[/\\]", RegexOptions.Compiled);
+        private static string ScrubPath(string str) => str?.Replace(PathRegex, ".../");
+
         public override void Write(VerifyJsonWriter writer, DebugImage obj)
         {
             obj.DebugId = ScrubAlphaNum(obj.DebugId);
@@ -94,72 +92,27 @@ public static class VerifyExtensions
             obj.DebugFile = ScrubPath(obj.DebugFile);
             obj.CodeFile = ScrubPath(obj.CodeFile);
             obj.CodeId = ScrubAlphaNum(obj.CodeId);
-            writer.WriteJson(obj);
+            writer.Serialize(JToken.FromObject(obj));
         }
     }
 
     private class StackFrameConverter : WriteOnlyJsonConverter<SentryStackFrame>
     {
+        private static readonly Regex PackageRegex = new("=[^,]+", RegexOptions.Compiled);
+
         public override void Write(VerifyJsonWriter writer, SentryStackFrame obj)
         {
-            obj.FileName = ScrubPath(obj.FileName);
             obj.FunctionId = ScrubAlphaNum(obj.FunctionId);
             obj.InstructionAddress = ScrubAlphaNum(obj.InstructionAddress);
-            obj.Package = obj.Package.Replace(new Regex("=[^,]+"), "=SCRUBBED");
-            writer.WriteJson(obj);
+            obj.Package = obj.Package.Replace(PackageRegex, "=SCRUBBED");
+            writer.Serialize(JToken.FromObject(obj));
         }
     }
 
-    // Extension so we can use `nullableString?.Replace()`.
+    private static readonly Regex AlphaNumRegex = new("[a-zA-Z0-9]", RegexOptions.Compiled);
+
     private static string Replace(this string str, Regex regex, string replacement) => regex.Replace(str, replacement);
 
-    private static string ScrubAlphaNum(string str) => str?.Replace(new Regex("[a-zA-Z0-9]"), "_");
-
-    private static string ScrubPath(string str) => str?.Replace(new Regex(@"^.*[/\\]"), ".../");
-
-    private static void WriteJson(this VerifyJsonWriter verifyWriter, IJsonSerializable @object)
-    {
-        using var stream = new MemoryStream();
-        using var jsonWriter = new Utf8JsonWriter(stream, new() { Indented = true });
-        @object.WriteTo(jsonWriter, null);
-        jsonWriter.Flush();
-        var str = Encoding.UTF8.GetString(stream.ToArray());
-
-        // Note: this is not perfect because we don't respect indentation. of the surrounding objects.
-        // Unfortunately, there doesn't seem to be the way to get current serialization depth.
-        // There's `Indentation` and `IndentChar` but those are only relevant in combination with the current depth
-        // should be available as `Top`, which is protected internal...
-        // verifyWriter.WriteValue(str);
-
-        // Therefore, we have the following best-effort approach of splitting lines and writing individually
-        // which makes the JsonWriter add proper indentation.
-        var lines = str.Replace("\r", "").Split('\n');
-        var depth = 0;
-        for (var i = 0; i < lines.Length; i++)
-        {
-            var line = lines[i].Trim();
-
-            // Note: we can't use WriteStartObject/EndObject because following WriteRawValueWithScrubbers() fails with:
-            //   Argon.JsonWriterException : Token Undefined in state ObjectStart would result in an invalid JSON object. Path '[0].Items[0].Payload.Source.objs[0]'.
-            switch (line)
-            {
-                case "{":
-                case "[":
-                    verifyWriter.WriteRawValue(line);
-                    depth++;
-                    break;
-                case "}":
-                case "]":
-                    verifyWriter.WriteRawValue(line);
-                    depth--;
-                    break;
-                default:
-                    var indent = new string(verifyWriter.IndentChar, verifyWriter.Indentation * depth);
-                    // FYI: this always adds comma on the previous line before adding the given value. Can't help it.
-                    verifyWriter.WriteRawValueWithScrubbers(indent + line.TrimEnd(','));
-                    break;
-            }
-        }
-    }
+    private static string ScrubAlphaNum(string str) => str?.Replace(AlphaNumRegex, "_");
 }
 #endif
