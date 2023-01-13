@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.26.0
 
 ### Features
 
