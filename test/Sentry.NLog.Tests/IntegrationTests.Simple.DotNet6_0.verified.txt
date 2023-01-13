@@ -35,6 +35,7 @@
                       "function": "Task IntegrationTests.Simple()",
                       "lineno": 47,
                       "colno": 17,
+                      "abs_path": "{ProjectDirectory}IntegrationTests.verify.cs",
                       "in_app": false,
                       "package": "Sentry.NLog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED",
                       "instruction_addr": "____",

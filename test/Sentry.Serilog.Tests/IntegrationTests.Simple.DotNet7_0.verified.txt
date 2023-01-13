@@ -165,6 +165,7 @@
                       "function": "Task IntegrationTests.Simple()",
                       "lineno": 46,
                       "colno": 17,
+                      "abs_path": "{ProjectDirectory}IntegrationTests.verify.cs",
                       "in_app": false,
                       "package": "Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED",
                       "instruction_addr": "____",
