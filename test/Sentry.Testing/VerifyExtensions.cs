@@ -102,14 +102,6 @@ public static class VerifyExtensions
 
         public override void Write(VerifyJsonWriter writer, SentryStackFrame obj)
         {
-#if NET7_0_OR_GREATER
-            // Workaround because the ProjectDir on Windows in .NET 7 has the drive letter in lower case.
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && obj.AbsolutePath is { } path)
-            {
-                obj.AbsolutePath = path[0].ToString().ToLowerInvariant() + path[1..];
-            }
-#endif
-
             obj.FunctionId = ScrubAlphaNum(obj.FunctionId);
             obj.InstructionAddress = ScrubAlphaNum(obj.InstructionAddress);
             obj.Package = obj.Package.Replace(PackageRegex, "=SCRUBBED");
