@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix issue with Sentry CLI msbuild properties ([#2119](https://github.com/getsentry/sentry-dotnet/pull/2119))
+
 ## 3.26.0
 
 ### Features
