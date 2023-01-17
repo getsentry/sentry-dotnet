@@ -33,30 +33,31 @@
     </WriteCodeFragment>
   </Target>
 
-  <PropertyGroup>
-    <!-- Defaults for Sentry CLI are set here.  Any of these properties can be set in the application to override the defaults. -->
-    <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release' And '$(DebugType)' != 'embedded'">true</SentryUploadSymbols>
-    <!-- Additional properties can go here.  For example, SentryCreateNewRelease, etc. -->
+  <Target Name="CheckSentryCLI" AfterTargets="DispatchToInnerBuilds;AfterBuild">
+    <PropertyGroup>
+      <!-- This property controls whether symbols are to be sent to Sentry. -->
+      <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release' And '$(DebugType)' != 'embedded'">true</SentryUploadSymbols>
 
-    <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
-    <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true')">true</UseSentryCLI>
+      <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
+      <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true')">true</UseSentryCLI>
+    </PropertyGroup>
+  </Target>
 
-    <!--
-      The Sentry configuration can be set manually in MSBuild properties if desired.
-      Otherwise the default configuration will be used, as reported by "sentry-cli info".
-      The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
-    -->
-    <SentryCLIOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIOptions) --api-key $(SentryApiKey)</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIOptions) --auth-token $(SentryAuthToken)</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIOptions) --url $(SentryUrl)</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org '$(SentryOrg)'</SentryCLIOptions>
-    <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project '$(SentryProject)'</SentryCLIOptions>
-  </PropertyGroup>
+  <Target Name="PrepareSentryCLI" AfterTargets="CheckSentryCLI" Condition="'$(UseSentryCLI)' == 'true'">
+    <PropertyGroup>
+      <!--
+        The Sentry configuration can be set manually in MSBuild properties if desired.
+        Otherwise the default configuration will be used, as reported by "sentry-cli info".
+        The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
+      -->
+      <SentryCLIOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIOptions) --api-key $(SentryApiKey)</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIOptions) --auth-token $(SentryAuthToken)</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIOptions) --url $(SentryUrl)</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org '$(SentryOrg)'</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project '$(SentryProject)'</SentryCLIOptions>
 
-  <Target Name="_PrepareSentryCLI" AfterTargets="DispatchToInnerBuilds;AfterBuild" Condition="'$(UseSentryCLI)' == 'true'">
-    <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
-    <PropertyGroup Condition="'$(SentryCLIDirectory)' == ''">
-      <SentryCLIDirectory Condition="'$(PkgSentry)' != ''">$(PkgSentry)\tools\</SentryCLIDirectory>
+      <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
+      <SentryCLIDirectory Condition="'$(SentryCLIDirectory)' == '' And '$(PkgSentry)' != ''">$(PkgSentry)\tools\</SentryCLIDirectory>
     </PropertyGroup>
 
     <!--
@@ -99,7 +100,7 @@
   </Target>
 
   <!-- Upload symbols (and any other debug information files) to Sentry after the build. -->
-  <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="_PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
+  <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
     <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
     <Exec Command="'$(SentryCLI)' upload-dif $(SentryCLIOptions) '$(IntermediateOutputPath)'" />
   </Target>
