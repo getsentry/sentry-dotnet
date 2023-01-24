@@ -48,8 +48,8 @@
       <SentryCLIOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIOptions) --api-key $(SentryApiKey)</SentryCLIOptions>
       <SentryCLIOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIOptions) --auth-token $(SentryAuthToken)</SentryCLIOptions>
       <SentryCLIOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIOptions) --url $(SentryUrl)</SentryCLIOptions>
-      <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org &quot;$(SentryOrg)</SentryCLIOptions>
-      <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project &quot;$(SentryProject)&quot;</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org $(SentryOrg)</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project $(SentryProject)</SentryCLIOptions>
 
       <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
       <SentryCLIDirectory Condition="'$(SentryCLIDirectory)' == '' And '$(PkgSentry)' != ''">$(PkgSentry)\tools\</SentryCLIDirectory>
@@ -97,7 +97,7 @@
   <!-- Upload symbols (and any other debug information files) to Sentry after the build. -->
   <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
     <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-    <Exec Command="&quot;$(SentryCLI)&quot; upload-dif $(SentryCLIOptions) &quot;$(IntermediateOutputPath)&quot;" />
+    <Exec Command="&quot;$(SentryCLI)&quot; upload-dif $(SentryCLIOptions) $(IntermediateOutputPath)" />
   </Target>
 
 </Project>
