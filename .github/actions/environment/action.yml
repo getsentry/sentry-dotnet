@@ -16,13 +16,6 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
-    - name: Set XCode Version
-      if: runner.os == 'macOS'
-      shell: bash
-      run: |
-        sudo xcode-select -s "/Applications/Xcode_14.1.app"
-        echo "MD_APPLE_SDK_ROOT=/Applications/Xcode_14.1.app" >> $GITHUB_ENV
-
     # Android SDK is pre-installed, but this makes sure it is current and on the path.
     - name: Setup Android Environment
       uses: android-actions/setup-android@7c5672355aaa8fde5f97a91aa9a99616d1ace6bc # pin @v2
