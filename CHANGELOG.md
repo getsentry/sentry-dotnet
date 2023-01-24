@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Fix Sentry CLI integration on Windows ([#2123](https://github.com/getsentry/sentry-dotnet/pull/2123))
+- Fix Sentry CLI integration on Windows ([#2123](https://github.com/getsentry/sentry-dotnet/pull/2123)) ([#2124](https://github.com/getsentry/sentry-dotnet/pull/2124))
 
 ## 3.26.1
 
