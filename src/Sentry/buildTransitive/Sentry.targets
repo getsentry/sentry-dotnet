@@ -48,8 +48,8 @@
       <SentryCLIOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIOptions) --api-key $(SentryApiKey)</SentryCLIOptions>
       <SentryCLIOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIOptions) --auth-token $(SentryAuthToken)</SentryCLIOptions>
       <SentryCLIOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIOptions) --url $(SentryUrl)</SentryCLIOptions>
-      <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org '$(SentryOrg)'</SentryCLIOptions>
-      <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project '$(SentryProject)'</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org &quot;$(SentryOrg)</SentryCLIOptions>
+      <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project &quot;$(SentryProject)&quot;</SentryCLIOptions>
 
       <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
       <SentryCLIDirectory Condition="'$(SentryCLIDirectory)' == '' And '$(PkgSentry)' != ''">$(PkgSentry)\tools\</SentryCLIDirectory>
@@ -67,16 +67,16 @@
       <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Linux-aarch64</SentryCLI>
       <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86'">$(SentryCLIDirectory)sentry-cli-Linux-i686</SentryCLI>
       <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Linux-x86_64</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86'">$(SentryCLIDirectory)sentry-cli-Windows-i686</SentryCLI>
-      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'Arm64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64.exe</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86'">$(SentryCLIDirectory)sentry-cli-Windows-i686.exe</SentryCLI>
+      <SentryCLI Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X64'">$(SentryCLIDirectory)sentry-cli-Windows-x86_64.exe</SentryCLI>
       <SentryCLI Condition="!Exists('$(SentryCLI)')"/>
     </PropertyGroup>
 
     <PropertyGroup>
       <_SentryCLIInfoOptions Condition="'$(SentryOrg)' != '' And '$(SentryProject)' != ''">--no-defaults</_SentryCLIInfoOptions>
     </PropertyGroup>
-    <Exec Command="'$(SentryCLI)' info $(_SentryCLIInfoOptions)" Condition="'$(SentryCLI)' != ''" IgnoreExitCode="true" ConsoleToMsBuild="true" StandardOutputImportance="Low">
+    <Exec Command="&quot;$(SentryCLI)&quot; info $(_SentryCLIInfoOptions)" Condition="'$(SentryCLI)' != ''" IgnoreExitCode="true" ConsoleToMsBuild="true" StandardOutputImportance="Low">
       <Output TaskParameter="ExitCode" PropertyName="SentryCLIExitCode" />
       <Output TaskParameter="ConsoleOutput" PropertyName="SentryCLIOutput" />
     </Exec>
@@ -97,7 +97,7 @@
   <!-- Upload symbols (and any other debug information files) to Sentry after the build. -->
   <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
     <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-    <Exec Command="'$(SentryCLI)' upload-dif $(SentryCLIOptions) '$(IntermediateOutputPath)'" />
+    <Exec Command="&quot;$(SentryCLI)&quot; upload-dif $(SentryCLIOptions) &quot;$(IntermediateOutputPath)&quot;" />
   </Target>
 
 </Project>
