@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Bindings.Android\Sentry.Bindings.Android.csproj" />
-    <PackageReference Include="K4os.Compression.LZ4" Version="1.2.16" />
+    <ProjectReference Include="..\Sentry.Android.AssemblyReader\Sentry.Android.AssemblyReader.csproj" />
   </ItemGroup>
 
   <ItemGroup>

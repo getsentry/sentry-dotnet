@@ -12,6 +12,10 @@ using static Sentry.Constants;
 using Sentry.Internal.DiagnosticSource;
 #endif
 
+#if ANDROID
+using Sentry.Android.AssemblyReader;
+#endif
+
 namespace Sentry;
 
 /// <summary>
@@ -785,6 +789,15 @@ public class SentryOptions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public INetworkStatusListener? NetworkStatusListener { get; set; }
 
+    /// <summary>
+    /// Allows integrations to provide a custom assembly reader.
+    /// </summary>
+#if !__MOBILE__
+    [CLSCompliant(false)]
+#endif
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public Func<string, PEReader?>? AssemblyReader { get; set; }
+
     internal SettingLocator SettingLocator { get; set; }
 
     /// <summary>
@@ -852,6 +865,10 @@ public class SentryOptions
 
 #if ANDROID
         Android = new AndroidOptions(this);
+
+        _androidAssemblyReader = new Lazy<IAndroidAssemblyReader?>(() => GetAndroidAssemblyReader(this));
+        AssemblyReader = name => _androidAssemblyReader.Value?.TryReadAssembly(name);
+
 #elif __IOS__
         iOS = new IosOptions(this);
 #endif

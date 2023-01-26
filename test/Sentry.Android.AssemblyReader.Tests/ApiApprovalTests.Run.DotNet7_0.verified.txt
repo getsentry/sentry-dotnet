@@ -1,0 +1,15 @@
+﻿namespace Sentry.Android.AssemblyReader
+{
+    public static class AndroidAssemblyReaderFactory
+    {
+        public static Sentry.Android.AssemblyReader.IAndroidAssemblyReader Open(string apkPath, System.Collections.Generic.IList<string> supportedAbis, Sentry.Android.AssemblyReader.IAndroidAssemblyReaderLogger? logger = null) { }
+    }
+    public interface IAndroidAssemblyReader : System.IDisposable
+    {
+        System.Reflection.PortableExecutable.PEReader? TryReadAssembly(string name);
+    }
+    public interface IAndroidAssemblyReaderLogger
+    {
+        void Log(string message, params object?[] args);
+    }
+}

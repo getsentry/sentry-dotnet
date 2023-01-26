@@ -1,11 +1,6 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 
-#if ANDROID
-using Sentry.Android;
-using Sentry.Android.AssemblyReader;
-#endif
-
 namespace Sentry.Internal;
 
 /// <summary>
@@ -35,16 +30,9 @@ internal class DebugStackTrace : SentryStackTrace
     private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-#if ANDROID
-    private readonly Lazy<IAndroidAssemblyReader?> _assemblyReader;
-#endif
-
     internal DebugStackTrace(SentryOptions options)
     {
         _options = options;
-#if ANDROID
-        _assemblyReader = new Lazy<IAndroidAssemblyReader?>(() => GetAndroidAssemblyReader(options));
-#endif
     }
 
     protected List<DebugImage> DebugImages { get; } = new();
@@ -381,48 +369,14 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
-#if ANDROID
-    private static IAndroidAssemblyReader? GetAndroidAssemblyReader(SentryOptions options)
-    {
-        // NOTE: Environment.CommandLine contains the APK that the app was launched from.
-        // In a release build, that may be a "split" APK rather than the base.
-        // .NET Assemblies are placed into the base APK, so we shouldn't use Environment.CommandLine.
-        // Instead, we can get the base APK from the info in the Android app context.
-
-        var apkPath = Application.Context.ApplicationInfo!.SourceDir;
-
-        // Also, we are assuming that .NET assemblies are never placed into one of the split APKs.
-        // If that turns out to be incorrect, we can use the SplitSourceDirs property to get the split APK info,
-        // but then we'll have to rework our assembly reader to support searching multiple APKs.
-
-        try
-        {
-            if (File.Exists(apkPath))
-            {
-                var supportedAbis = AndroidHelpers.GetSupportedAbis();
-                return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, options.DiagnosticLogger);
-            }
-
-            options.LogWarning(
-                "Cannot create AssemblyReader: cannot read APK path from Environment.CommandLine={0}",
-                apkPath);
-        }
-        catch (Exception e)
-        {
-            options.LogError("Cannot create AssemblyReader: {0}", e);
-        }
-
-        return null;
-    }
-#endif
-
     private PEReader? TryReadAssembly(string assemblyName)
     {
-#if ANDROID
-        return _assemblyReader.Value?.TryReadAssembly(assemblyName);
-#else
+        if (_options.AssemblyReader is { } reader)
+        {
+            return reader.Invoke(assemblyName);
+        }
+
         return File.Exists(assemblyName) ? new PEReader(File.OpenRead(assemblyName)) : null;
-#endif
     }
 
     private int? AddDebugImage(Module module)

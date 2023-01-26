@@ -531,6 +531,8 @@ namespace Sentry
     public class SentryOptions
     {
         public SentryOptions() { }
+        [System.CLSCompliant(false)]
+        public System.Func<string, System.Reflection.PortableExecutable.PEReader?>? AssemblyReader { get; set; }
         public bool AttachStacktrace { get; set; }
         public bool AutoSessionTracking { get; set; }
         public System.TimeSpan AutoSessionTrackingInterval { get; set; }

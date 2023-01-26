@@ -1,8 +1,15 @@
 // ReSharper disable once CheckNamespace
+
+using Sentry.Android;
+using Sentry.Android.AssemblyReader;
+using Sentry.Extensibility;
+
 namespace Sentry;
 
 public partial class SentryOptions
 {
+    private readonly Lazy<IAndroidAssemblyReader?> _androidAssemblyReader = null!;
+
     /// <summary>
     /// Exposes additional options for the Android platform.
     /// </summary>
@@ -272,5 +279,50 @@ public partial class SentryOptions
         /// be stripped away during the round-tripping between the two SDKs.  Use with caution.
         /// </remarks>
         public bool EnableAndroidSdkBeforeSend { get; set; } = false;
+    }
+
+    private static IAndroidAssemblyReader? GetAndroidAssemblyReader(SentryOptions options)
+    {
+        // NOTE: Environment.CommandLine contains the APK that the app was launched from.
+        // In a release build, that may be a "split" APK rather than the base.
+        // .NET Assemblies are placed into the base APK, so we shouldn't use Environment.CommandLine.
+        // Instead, we can get the base APK from the info in the Android app context.
+
+        var apkPath = Application.Context.ApplicationInfo!.SourceDir;
+
+        // Also, we are assuming that .NET assemblies are never placed into one of the split APKs.
+        // If that turns out to be incorrect, we can use the SplitSourceDirs property to get the split APK info,
+        // but then we'll have to rework our assembly reader to support searching multiple APKs.
+
+        try
+        {
+            if (File.Exists(apkPath))
+            {
+                var supportedAbis = AndroidHelpers.GetSupportedAbis();
+                var logger = options.DiagnosticLogger == null
+                    ? null
+                    : new AndroidAssemblyReaderLogger(options.DiagnosticLogger);
+                return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, logger);
+            }
+
+            options.LogWarning(
+                "Cannot create AssemblyReader: cannot read APK path from Environment.CommandLine={0}",
+                apkPath);
+        }
+        catch (Exception e)
+        {
+            options.LogError("Cannot create AssemblyReader: {0}", e);
+        }
+
+        return null;
+    }
+
+    private class AndroidAssemblyReaderLogger : IAndroidAssemblyReaderLogger
+    {
+        private readonly IDiagnosticLogger _logger;
+
+        public AndroidAssemblyReaderLogger(IDiagnosticLogger logger) => _logger = logger;
+
+        public void Log(string message, params object?[] args) => _logger.LogDebug(message, args);
     }
 }

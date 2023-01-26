@@ -1,16 +1,14 @@
-using Sentry.Android.AssemblyReader;
-
-namespace Sentry.Android.Tests;
+namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly IDiagnosticLogger _logger;
+    private readonly IAndroidAssemblyReaderLogger _logger;
 
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
         _output = output;
-        _logger = new TestOutputDiagnosticLogger(output);
+        _logger = new TestOutputLogger(output);
     }
 
     private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
@@ -44,11 +42,11 @@ public class AndroidAssemblyReaderTests
         using var sut = GetSut(isAssemblyStore, isCompressed: true);
         if (isAssemblyStore)
         {
-            Assert.IsType<AndroidAssemblyStoreReader>(sut);
+            Assert.IsType<AssemblyReader.AndroidAssemblyStoreReader>(sut);
         }
         else
         {
-            Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
+            Assert.IsType<AssemblyReader.AndroidAssemblyDirectoryReader>(sut);
         }
     }
 
