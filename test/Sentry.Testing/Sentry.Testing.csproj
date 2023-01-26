@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-
-    <Using Include="System.Collections.Concurrent" />
   </ItemGroup>
 
 </Project>

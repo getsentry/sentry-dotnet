@@ -6,8 +6,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="System.Globalization" />
-    <Using Include="System.Text.Json" />
     <Using Include="Android.Runtime" />
     <Using Include="Android.Content.Context" Alias="AndroidContext" />
     <Using Include="Android.OS.Build" Alias="AndroidBuild" />

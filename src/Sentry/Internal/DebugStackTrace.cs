@@ -1,4 +1,3 @@
-using System.Reflection.PortableExecutable;
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 
