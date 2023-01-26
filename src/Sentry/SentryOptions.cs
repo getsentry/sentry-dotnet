@@ -792,6 +792,9 @@ public class SentryOptions
     /// <summary>
     /// Allows integrations to provide a custom assembly reader.
     /// </summary>
+    /// <remarks>
+    /// This is for Sentry use only, and can change without a major version bump.
+    /// </remarks>
 #if !__MOBILE__
     [CLSCompliant(false)]
 #endif
