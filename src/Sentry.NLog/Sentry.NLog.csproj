@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.5.11" />
-    
+
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
 
     <Using Include="NLog" />
@@ -20,7 +20,6 @@
     <Using Include="Sentry.Extensibility" />
     <Using Include="Sentry.Infrastructure" />
     <Using Include="Sentry.Reflection" />
-    <Using Include="System.ComponentModel" />
   </ItemGroup>
 
 </Project>

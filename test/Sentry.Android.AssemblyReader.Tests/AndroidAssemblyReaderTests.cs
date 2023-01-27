@@ -1,36 +1,33 @@
-using Sentry.Android.AssemblyReader;
-
-namespace Sentry.Android.Tests;
+namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly IDiagnosticLogger _logger;
 
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
         _output = output;
-        _logger = new TestOutputDiagnosticLogger(output);
     }
 
     private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
     {
 #if ANDROID
-        // On Android, this gets the current app APK.
-        var apkPath = Environment.CommandLine;
-        var supportedAbis = Sentry.Android.AndroidHelpers.GetSupportedAbis();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        return AndroidHelpers.GetAndroidAssemblyReader(logger)!;
 #else
-        var apkPath = Path.Combine(
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
-            "..", "..", "..", "TestAPKs",
-            $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk");
+        var apkPath =
+            Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+                "..", "..", "..", "TestAPKs",
+                $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
 
-        var supportedAbis = new List<string> { "x86_64" };
-#endif
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
 
-        return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _logger);
+        string[] supportedAbis = {"x86_64"};
+        return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
+            logger: (message, args) => _output.WriteLine(message, args));
+#endif
     }
 
     [SkippableTheory]
@@ -44,11 +41,11 @@ public class AndroidAssemblyReaderTests
         using var sut = GetSut(isAssemblyStore, isCompressed: true);
         if (isAssemblyStore)
         {
-            Assert.IsType<AndroidAssemblyStoreReader>(sut);
+            Assert.IsType<AssemblyReader.AndroidAssemblyStoreReader>(sut);
         }
         else
         {
-            Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
+            Assert.IsType<AssemblyReader.AndroidAssemblyDirectoryReader>(sut);
         }
     }
 

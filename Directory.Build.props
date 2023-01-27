@@ -54,6 +54,10 @@
   <!-- Import the root global usings, except for samples. -->
   <ItemGroup Condition="!$(MSBuildProjectName.Contains('Samples'))">
     <Compile Include="$(MSBuildThisFileDirectory)GlobalUsings.cs" />
+
+    <!-- Add these here instead, so we can remove them for projects that don't have STJ available. -->
+    <Using Include="System.Text.Json" />
+    <Using Include="System.Text.Json.Serialization" />
   </ItemGroup>
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->

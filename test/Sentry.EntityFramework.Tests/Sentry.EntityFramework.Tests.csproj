@@ -20,13 +20,11 @@
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
 
-    <Using Include="System.Collections.Concurrent" />
     <Using Include="System.ComponentModel.DataAnnotations" />
     <Using Include="System.Data.Common" />
     <Using Include="System.Data.Entity" />
     <Using Include="System.Data.Entity.Infrastructure.Interception" />
     <Using Include="System.Data.Entity.Validation" />
-    <Using Include="System.Runtime.InteropServices" />
     <Using Include="Effort.Provider" />
     <Using Include="Sentry.EntityFramework.ErrorProcessors" />
   </ItemGroup>

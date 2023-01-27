@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
 
-    <Using Include="System.ComponentModel" />
     <Using Include="System.Data" />
     <Using Include="System.Data.Common" />
     <Using Include="System.Data.Entity.Infrastructure.Interception" />

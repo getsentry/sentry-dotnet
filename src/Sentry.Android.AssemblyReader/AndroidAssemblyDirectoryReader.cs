@@ -1,12 +1,9 @@
-using System.Reflection.PortableExecutable;
-using Sentry.Extensibility;
-
 namespace Sentry.Android.AssemblyReader;
 
 // The "Old" app type - where each DLL is placed in the 'assemblies' directory as an individual file.
 internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IAndroidAssemblyReader
 {
-    public AndroidAssemblyDirectoryReader(ZipArchive zip, IList<string> supportedAbis, IDiagnosticLogger? logger)
+    public AndroidAssemblyDirectoryReader(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
         : base(zip, supportedAbis, logger) { }
 
     public PEReader? TryReadAssembly(string name)
@@ -14,11 +11,11 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
         var zipEntry = FindAssembly(name);
         if (zipEntry is null)
         {
-            Logger?.LogDebug("Couldn't find assembly {0} in the APK", name);
+            Logger?.Invoke("Couldn't find assembly {0} in the APK", name);
             return null;
         }
 
-        Logger?.LogDebug("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
+        Logger?.Invoke("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
 
         // We need a seekable stream for the PEReader (or even to check whether the DLL is compressed), so make a copy.
         var memStream = new MemoryStream((int)zipEntry.Length);
