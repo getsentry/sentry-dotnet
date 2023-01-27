@@ -2,11 +2,11 @@ namespace Sentry.Android.AssemblyReader;
 
 internal abstract class AndroidAssemblyReader : IDisposable
 {
-    protected IAndroidAssemblyReaderLogger? Logger { get; }
+    protected DebugLogger? Logger { get; }
     protected ZipArchive ZipArchive { get; }
     protected IList<string> SupportedAbis { get; }
 
-    protected AndroidAssemblyReader(ZipArchive zip, IList<string> supportedAbis, IAndroidAssemblyReaderLogger? logger)
+    protected AndroidAssemblyReader(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
     {
         ZipArchive = zip;
         Logger = logger;
@@ -51,7 +51,7 @@ internal abstract class AndroidAssemblyReader : IDisposable
         Debug.Assert(inputStream.Position == payloadOffset);
         var inputLength = (int)(inputStream.Length - payloadOffset);
 
-        Logger?.Log("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
+        Logger?.Invoke("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
 
         var outputStream = new MemoryStream(decompressedLength);
 

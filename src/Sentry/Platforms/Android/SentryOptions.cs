@@ -299,10 +299,9 @@ public partial class SentryOptions
             if (File.Exists(apkPath))
             {
                 var supportedAbis = AndroidHelpers.GetSupportedAbis();
-                var logger = options.DiagnosticLogger == null
-                    ? null
-                    : new AndroidAssemblyReaderLogger(options.DiagnosticLogger);
-                return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, logger);
+
+                return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
+                    logger: (message, args) => options.DiagnosticLogger?.Log(SentryLevel.Debug, message, args: args));
             }
 
             options.LogWarning(
@@ -315,15 +314,5 @@ public partial class SentryOptions
         }
 
         return null;
-    }
-
-    private class AndroidAssemblyReaderLogger : IAndroidAssemblyReaderLogger
-    {
-        private readonly IDiagnosticLogger _logger;
-
-        public AndroidAssemblyReaderLogger(IDiagnosticLogger logger) => _logger = logger;
-
-        public void Log(string message, params object?[] args) =>
-            _logger.Log(SentryLevel.Debug, message, null, args);
     }
 }

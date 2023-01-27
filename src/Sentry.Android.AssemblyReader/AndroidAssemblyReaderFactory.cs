@@ -10,20 +10,20 @@ public static class AndroidAssemblyReaderFactory
     /// </summary>
     /// <param name="apkPath">The path to the APK</param>
     /// <param name="supportedAbis">The supported ABIs</param>
-    /// <param name="logger">An optional logger</param>
+    /// <param name="logger">An optional logger for debugging</param>
     /// <returns>The reader</returns>
-    public static IAndroidAssemblyReader Open(string apkPath, IList<string> supportedAbis, IAndroidAssemblyReaderLogger? logger = null)
+    public static IAndroidAssemblyReader Open(string apkPath, IList<string> supportedAbis, DebugLogger? logger = null)
     {
-        logger?.Log("Opening APK: {0}", apkPath);
+        logger?.Invoke("Opening APK: {0}", apkPath);
         var zipArchive = ZipFile.Open(apkPath, ZipArchiveMode.Read);
 
         if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
         {
-            logger?.Log("APK uses AssemblyStore");
+            logger?.Invoke("APK uses AssemblyStore");
             return new AndroidAssemblyStoreReader(zipArchive, supportedAbis, logger);
         }
 
-        logger?.Log("APK doesn't use AssemblyStore");
+        logger?.Invoke("APK doesn't use AssemblyStore");
         return new AndroidAssemblyDirectoryReader(zipArchive, supportedAbis, logger);
     }
 }

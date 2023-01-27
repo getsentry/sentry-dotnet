@@ -5,7 +5,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
 {
     private readonly AssemblyStoreExplorer _explorer;
 
-    public AndroidAssemblyStoreReader(ZipArchive zip, IList<string> supportedAbis, IAndroidAssemblyReaderLogger? logger)
+    public AndroidAssemblyStoreReader(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
         : base(zip, supportedAbis, logger)
     {
         _explorer = new(zip, supportedAbis, logger);
@@ -16,16 +16,16 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         var assembly = TryFindAssembly(name);
         if (assembly is null)
         {
-            Logger?.Log("Couldn't find assembly {0} in the APK AssemblyStore", name);
+            Logger?.Invoke("Couldn't find assembly {0} in the APK AssemblyStore", name);
             return null;
         }
 
-        Logger?.Log("Resolved assembly {0} in the APK {1} AssemblyStore", name, assembly.Store.Arch);
+        Logger?.Invoke("Resolved assembly {0} in the APK {1} AssemblyStore", name, assembly.Store.Arch);
 
         var stream = assembly.GetImage();
         if (stream is null)
         {
-            Logger?.Log("Couldn't access assembly {0} image stream", name);
+            Logger?.Invoke("Couldn't access assembly {0} image stream", name);
             return null;
         }
 
@@ -57,7 +57,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
     {
         private AssemblyStoreReader? _indexStore;
         private readonly AssemblyStoreManifestReader _manifest;
-        private readonly IAndroidAssemblyReaderLogger? _logger;
+        private readonly DebugLogger? _logger;
 
         public IDictionary<string, AssemblyStoreAssembly> AssembliesByName { get; } =
             new SortedDictionary<string, AssemblyStoreAssembly>(StringComparer.OrdinalIgnoreCase);
@@ -73,7 +73,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         public IDictionary<uint, List<AssemblyStoreReader>> Stores { get; } =
             new SortedDictionary<uint, List<AssemblyStoreReader>>();
 
-        public AssemblyStoreExplorer(ZipArchive zip, IList<string> supportedAbis, IAndroidAssemblyReaderLogger? logger)
+        public AssemblyStoreExplorer(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
         {
             _logger = logger;
             _manifest = new AssemblyStoreManifestReader(zip.GetEntry("assemblies/assemblies.manifest")!.Open());
@@ -119,7 +119,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 assembly.Hash64 = he.Hash;
                 if (assembly.RuntimeIndex != he.MappingIndex)
                 {
-                    _logger?.Log(
+                    _logger?.Invoke(
                         $"assembly with hashes 0x{assembly.Hash32} and 0x{assembly.Hash64} has a different 32-bit runtime index ({assembly.RuntimeIndex}) than the 64-bit runtime index({he.MappingIndex})");
                 }
 
@@ -127,18 +127,18 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 {
                     if (string.IsNullOrEmpty(assembly.Name))
                     {
-                        _logger?.Log(
+                        _logger?.Invoke(
                             $"32-bit hash 0x{assembly.Hash32:x} did not match any assembly name in the manifest");
                         assembly.Name = me.Name;
                         if (string.IsNullOrEmpty(assembly.Name))
                         {
-                            _logger?.Log(
+                            _logger?.Invoke(
                                 $"64-bit hash 0x{assembly.Hash64:x} did not match any assembly name in the manifest");
                         }
                     }
                     else if (!string.Equals(assembly.Name, me.Name, StringComparison.Ordinal))
                     {
-                        _logger?.Log(
+                        _logger?.Invoke(
                             $"32-bit hash 0x{assembly.Hash32:x} maps to assembly name '{assembly.Name}', however 64-bit hash 0x{assembly.Hash64:x} for the same entry matches assembly name '{me.Name}'");
                     }
                 }
@@ -176,7 +176,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                 {
                     if (!Stores.TryGetValue(he.StoreId, out var storeList))
                     {
-                        _logger?.Log($"store with id {he.StoreId} not part of the set");
+                        _logger?.Invoke($"store with id {he.StoreId} not part of the set");
                         continue;
                     }
 
@@ -184,7 +184,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
                     {
                         if (he.LocalStoreIndex >= (uint)store.Assemblies.Count)
                         {
-                            _logger?.Log(
+                            _logger?.Invoke(
                                 $"{bitness}-bit index entry with hash 0x{he.Hash:x} has invalid store {store.StoreId} index {he.LocalStoreIndex} (maximum allowed is {store.Assemblies.Count})");
                             continue;
                         }

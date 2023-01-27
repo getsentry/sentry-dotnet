@@ -3,12 +3,10 @@ namespace Sentry.Android.AssemblyReader.Tests;
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly IAndroidAssemblyReaderLogger _logger;
 
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
         _output = output;
-        _logger = new TestOutputLogger(output);
     }
 
     private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
@@ -16,7 +14,7 @@ public class AndroidAssemblyReaderTests
 #if ANDROID
         // On Android, this gets the current app APK.
         var apkPath = Environment.CommandLine;
-        var supportedAbis = Sentry.Android.AndroidHelpers.GetSupportedAbis();
+        var supportedAbis = AndroidHelpers.GetSupportedAbis();
 #else
         var apkPath = Path.Combine(
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
@@ -28,7 +26,8 @@ public class AndroidAssemblyReaderTests
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
 
-        return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis, _logger);
+        return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
+            logger: (message, args) => _output.WriteLine(message, args));
     }
 
     [SkippableTheory]
