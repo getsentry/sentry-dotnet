@@ -323,6 +323,7 @@ public partial class SentryOptions
 
         public AndroidAssemblyReaderLogger(IDiagnosticLogger logger) => _logger = logger;
 
-        public void Log(string message, params object?[] args) => _logger.LogDebug(message, args);
+        public void Log(string message, params object?[] args) =>
+            _logger.Log(SentryLevel.Debug, message, null, args);
     }
 }
