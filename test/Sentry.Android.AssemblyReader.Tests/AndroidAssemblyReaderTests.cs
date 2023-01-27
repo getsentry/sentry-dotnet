@@ -12,22 +12,22 @@ public class AndroidAssemblyReaderTests
     private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
     {
 #if ANDROID
-        // On Android, this gets the current app APK.
-        var apkPath = Environment.CommandLine;
-        var supportedAbis = AndroidHelpers.GetSupportedAbis();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        return AndroidHelpers.GetAndroidAssemblyReader(logger)!;
 #else
-        var apkPath = Path.Combine(
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
-            "..", "..", "..", "TestAPKs",
-            $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk");
+        var apkPath =
+            Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+                "..", "..", "..", "TestAPKs",
+                $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
 
-        var supportedAbis = new List<string> { "x86_64" };
-#endif
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
 
+        string[] supportedAbis = {"x86_64"};
         return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
             logger: (message, args) => _output.WriteLine(message, args));
+#endif
     }
 
     [SkippableTheory]

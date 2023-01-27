@@ -13,6 +13,7 @@ using Sentry.Internal.DiagnosticSource;
 #endif
 
 #if ANDROID
+using Sentry.Android;
 using Sentry.Android.AssemblyReader;
 #endif
 
@@ -869,8 +870,8 @@ public class SentryOptions
 #if ANDROID
         Android = new AndroidOptions(this);
 
-        _androidAssemblyReader = new Lazy<IAndroidAssemblyReader?>(() => GetAndroidAssemblyReader(this));
-        AssemblyReader = name => _androidAssemblyReader.Value?.TryReadAssembly(name);
+        var reader = new Lazy<IAndroidAssemblyReader?>(() => AndroidHelpers.GetAndroidAssemblyReader(DiagnosticLogger));
+        AssemblyReader = name => reader.Value?.TryReadAssembly(name);
 
 #elif __IOS__
         iOS = new IosOptions(this);
