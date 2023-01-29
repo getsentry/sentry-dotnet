@@ -117,7 +117,7 @@ public class Scope : IEventLike, IHasDistribution
     private User? _user;
 
     /// <inheritdoc />
-    public User User
+    public User? User
     {
         get => _user ??= new User { PropertyChanged = UserChanged };
         set
