@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Mark `Sentry.Scope.User` as nullable, as per its implementation and the documentation
+- Mark `Sentry.Scope.User` as nullable, as per its implementation and the documentation ([#2133](https://github.com/getsentry/sentry-dotnet/pull/2133))
 
 ### Features
 
