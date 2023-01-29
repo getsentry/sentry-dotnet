@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Mark `Sentry.Scope.User` as nullable, as per its implementation and the documentation
+
 ### Features
 
 - Publish `Sentry.Android.AssemblyReader` as a separate nuget package (for reuse by `Sentry.Xamarin`) ([#2127](https://github.com/getsentry/sentry-dotnet/pull/2127))
