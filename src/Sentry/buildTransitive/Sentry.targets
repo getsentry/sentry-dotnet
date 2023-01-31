@@ -31,7 +31,7 @@
   <Target Name="CheckSentryCLI" AfterTargets="DispatchToInnerBuilds;AfterBuild">
     <PropertyGroup>
       <!-- This property controls whether symbols are to be sent to Sentry. -->
-      <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release' And '$(DebugType)' != 'embedded'">true</SentryUploadSymbols>
+      <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release'">true</SentryUploadSymbols>
 
       <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
       <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true')">true</UseSentryCLI>
@@ -94,10 +94,20 @@
     </PropertyGroup>
   </Target>
 
-  <!-- Upload symbols (and any other debug information files) to Sentry after the build. -->
+  <!-- Upload debug information files to Sentry after the build. -->
   <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
-    <Message Importance="High" Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-    <Exec Command="&quot;$(SentryCLI)&quot; upload-dif $(SentryCLIOptions) $(IntermediateOutputPath)" />
+
+    <Message Importance="High" Condition="'$(SentryUploadSources)' != 'true'"
+      Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
+
+    <Message Importance="High" Condition="'$(SentryUploadSources)' == 'true'"
+      Text="Preparing to upload debug symbols and sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
+
+    <PropertyGroup Condition="'$(SentryUploadSources)' == 'true'">
+      <_SentryUploadOptions>--include-sources</_SentryUploadOptions>
+    </PropertyGroup>
+
+    <Exec Command="&quot;$(SentryCLI)&quot; upload-dif $(_SentryUploadOptions) $(SentryCLIOptions) $(IntermediateOutputPath)" />
   </Target>
 
 </Project>

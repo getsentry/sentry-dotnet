@@ -16,6 +16,7 @@
     <!-- Configure Sentry CLI -->
     <SentryOrg>sentry-sdks</SentryOrg>
     <SentryProject>sentry-dotnet</SentryProject>
+    <SentryUploadSources>true</SentryUploadSources>
 
   </PropertyGroup>
 
