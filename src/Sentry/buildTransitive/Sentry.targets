@@ -97,9 +97,14 @@
   <!-- Upload debug information files to Sentry after the build. -->
   <Target Name="UploadSymbolsToSentry" AfterTargets="Build;Publish" DependsOnTargets="PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
 
+    <Warning Condition="'$(SentryUploadSources)' == 'true' And '$(EmbedAllSources)' == 'true'"
+      Text="Both SentryUploadSources and EmbedAllSources are enabled.  Disabling SentryUploadSources." />
+    <PropertyGroup Condition="'$(SentryUploadSources)' == 'true' And '$(EmbedAllSources)' == 'true'">
+      <SentryUploadSources>false</SentryUploadSources>
+    </PropertyGroup>
+
     <Message Importance="High" Condition="'$(SentryUploadSources)' != 'true'"
       Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-
     <Message Importance="High" Condition="'$(SentryUploadSources)' == 'true'"
       Text="Preparing to upload debug symbols and sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
 
