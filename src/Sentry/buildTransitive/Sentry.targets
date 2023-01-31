@@ -115,7 +115,18 @@
       <_SentryCLICommand Condition="'$(SentryUploadSources)' == 'true'">$(_SentryCLICommand) --include-sources</_SentryCLICommand>
       <_SentryCLICommand>$(_SentryCLICommand) $(IntermediateOutputPath)</_SentryCLICommand>
     </PropertyGroup>
-    <Exec Command="$(_SentryCLICommand)" />
+    <Exec Command="$(_SentryCLICommand)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+    </Exec>
+
+    <Warning Condition="'$(_SentryCLIExitCode)' != '0' And '$(SentryUploadSources)' != 'true'"
+      Text="Sentry CLI could not upload debug files." />
+    <Warning Condition="'$(_SentryCLIExitCode)' != '0' And '$(SentryUploadSources)' == 'true'"
+      Text="Sentry CLI could not upload debug files with sources.  Will retry without sources." />
+
+    <MSBuild Condition="'$(_SentryCLIExitCode)' != '0' And '$(SentryUploadSources)' == 'true'"
+      Projects="$(MSBuildProjectFile)" Targets="UploadSymbolsToSentry"
+      Properties="SentryUploadSymbols=true;SentryUploadSources=false;SentryCLI=$(SentryCLI);SentryCLIOptions=$(SentryCLIOptions)" />
 
   </Target>
 
