@@ -5,6 +5,7 @@
 ### Features
 
 - Publish `Sentry.Android.AssemblyReader` as a separate nuget package (for reuse by `Sentry.Xamarin`) ([#2127](https://github.com/getsentry/sentry-dotnet/pull/2127))
+- Improvements for Sentry CLI integration ([#2145](https://github.com/getsentry/sentry-dotnet/pull/2145))
 
 ## 3.26.2
 
