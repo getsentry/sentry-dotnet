@@ -28,7 +28,7 @@
     </WriteCodeFragment>
   </Target>
 
-  <Target Name="CheckSentryCLI" AfterTargets="DispatchToInnerBuilds;AfterBuild">
+  <Target Name="CheckSentryCLI" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
     <PropertyGroup>
       <!-- This property controls whether symbols are to be sent to Sentry. -->
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release'">true</SentryUploadSymbols>
@@ -95,7 +95,7 @@
   </Target>
 
   <!-- Upload debug information files to Sentry after the build. -->
-  <Target Name="UploadSymbolsToSentry" AfterTargets="AfterBuild" DependsOnTargets="PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
+  <Target Name="UploadSymbolsToSentry" AfterTargets="Build;Publish" DependsOnTargets="PrepareSentryCLI" Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
 
     <Message Importance="High" Condition="'$(SentryUploadSources)' != 'true'"
       Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
