@@ -177,6 +177,7 @@ public sealed class SentryStackFrame : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("symbol_addr", SymbolAddress?.ToHexString());
         writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
         writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
+        writer.WriteStringIfNotWhiteSpace("instruction_addr_adjustment", InstructionAddressAdjustment);
         writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
         writer.WriteStringIfNotWhiteSpace("function_id", FunctionId);
 
