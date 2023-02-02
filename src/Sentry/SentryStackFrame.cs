@@ -131,14 +131,6 @@ public sealed class SentryStackFrame : IJsonSerializable
     public long? InstructionOffset { get; set; }
 
     /// <summary>
-    /// The instruction address adjustment.
-    /// </summary>
-    /// <remarks>
-    /// Tells the symbolicator if adjustment for the frame is needed.
-    /// </remarks>
-    public string? InstructionAddressAdjustment { get; set; }
-
-    /// <summary>
     /// Optionally changes the addressing mode. The default value is the same as
     /// `"abs"` which means absolute referencing. This can also be set to
     /// `"rel:DEBUG_ID"` or `"rel:IMAGE_INDEX"` to make addresses relative to an
@@ -177,7 +169,6 @@ public sealed class SentryStackFrame : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("symbol_addr", SymbolAddress?.ToHexString());
         writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
         writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
-        writer.WriteStringIfNotWhiteSpace("instruction_addr_adjustment", InstructionAddressAdjustment);
         writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
         writer.WriteStringIfNotWhiteSpace("function_id", FunctionId);
 

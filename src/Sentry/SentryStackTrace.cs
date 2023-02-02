@@ -27,12 +27,21 @@ public class SentryStackTrace : IJsonSerializable
         set => InternalFrames = value;
     }
 
+    /// <summary>
+    /// The instruction address adjustment.
+    /// </summary>
+    /// <remarks>
+    /// Tells the symbolicator if adjustment for the frame is needed.
+    /// </remarks>
+    public string? InstructionAddressAdjustment { get; set; }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
 
         writer.WriteArrayIfNotEmpty("frames", InternalFrames, logger);
+        writer.WriteStringIfNotWhiteSpace("instruction_addr_adjustment", InstructionAddressAdjustment);
 
         writer.WriteEndObject();
     }
