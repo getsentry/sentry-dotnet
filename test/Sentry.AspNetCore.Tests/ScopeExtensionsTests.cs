@@ -7,20 +7,27 @@ namespace Sentry.AspNetCore.Tests;
 
 public partial class ScopeExtensionsTests
 {
+    private readonly IDiagnosticLogger _logger;
     private readonly Scope _sut = new(new SentryOptions());
     private readonly HttpContext _httpContext = Substitute.For<HttpContext>();
     private readonly HttpRequest _httpRequest = Substitute.For<HttpRequest>();
     private readonly IServiceProvider _provider = Substitute.For<IServiceProvider>();
 
-    public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; } = new()
-    {
-        MaxRequestBodySize = RequestSize.Always
-    };
+    public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; }
 
-    public ScopeExtensionsTests()
+    public ScopeExtensionsTests(ITestOutputHelper output)
     {
         _httpContext.RequestServices.Returns(_provider);
         _httpContext.Request.Returns(_httpRequest);
+
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
+
+        SentryAspNetCoreOptions = new()
+        {
+            MaxRequestBodySize = RequestSize.Always,
+            Debug = true,
+            DiagnosticLogger = _logger
+        };
     }
 
     private class Fixture
@@ -302,15 +309,39 @@ public partial class ScopeExtensionsTests
     [MemberData(nameof(InvalidRequestBodies))]
     public void Populate_PayloadExtractors_DoesNotConsiderInvalidResponse(object expected)
     {
-        var first = Substitute.For<IRequestPayloadExtractor>();
-        first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
+        var extractor = Substitute.For<IRequestPayloadExtractor>();
+        if (expected is Exception exception)
+        {
+            extractor.ExtractPayload(Arg.Any<IHttpRequest>()).Throws(exception);
+        }
+        else
+        {
+            extractor.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
+        }
+
+#if NET5_0_OR_GREATER
+        if (expected is BadHttpRequestException)
+        {
+            _httpContext.RequestAborted = new CancellationToken(canceled: true);
+        }
+#endif
+
         _httpContext.RequestServices
             .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
-            .Returns(new[] { first });
+            .Returns(new[] { extractor });
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+        extractor.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+
+        if (_httpContext.RequestAborted.IsCancellationRequested)
+        {
+            _logger.Received().Log(SentryLevel.Debug, "Failed to extract body because the request was aborted.");
+        }
+        else if (expected is Exception ex)
+        {
+            _logger.Received().Log(SentryLevel.Error, "Failed to extract body.", ex);
+        }
 
         Assert.Null(_sut.Request.Data);
     }
@@ -319,6 +350,10 @@ public partial class ScopeExtensionsTests
     {
         yield return new object[] { "" };
         yield return new object[] { null };
+        yield return new object[] {new Exception()};
+#if NET5_0_OR_GREATER
+        yield return new object[] { new BadHttpRequestException("Unexpected end of request content.") };
+#endif
     }
 
     [Theory]
