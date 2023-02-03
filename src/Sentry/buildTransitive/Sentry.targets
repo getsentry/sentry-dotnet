@@ -113,8 +113,7 @@
       <_SentryCLICommand>&quot;$(SentryCLI)&quot; upload-dif</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryCLIOptions.Trim())' != ''">$(_SentryCLICommand) $(SentryCLIOptions.Trim())</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryUploadSources)' == 'true'">$(_SentryCLICommand) --include-sources</_SentryCLICommand>
-      <_SentryCLICommand>$(_SentryCLICommand) $(OutputPath)</_SentryCLICommand>
-      <_SentryCLICommand Condition="'$(SentryIncludeIntermediateOutputPath)' == 'true'">$(_SentryCLICommand) $(IntermediateOutputPath)</_SentryCLICommand>
+      <_SentryCLICommand>$(_SentryCLICommand) $(IntermediateOutputPath)</_SentryCLICommand>
     </PropertyGroup>
     <Exec Command="$(_SentryCLICommand)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
