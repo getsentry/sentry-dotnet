@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Fix Sentry CLI MSBuild for Xamarin and NetFX ([#2154](https://github.com/getsentry/sentry-dotnet/pull/2154))
 - Log aborted HTTP requests as debug instead of error ([#2155](https://github.com/getsentry/sentry-dotnet/pull/2155))
 
 ## 3.27.0
