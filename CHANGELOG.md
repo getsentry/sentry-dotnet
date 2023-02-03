@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix Sentry CLI MSBuild for Xamarin and NetFX ([#2153](https://github.com/getsentry/sentry-dotnet/pull/2153))
+
 ## 3.27.0
 
 ### Features
