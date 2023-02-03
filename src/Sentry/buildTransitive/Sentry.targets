@@ -28,7 +28,7 @@
     </WriteCodeFragment>
   </Target>
 
-  <Target Name="CheckSentryCLI" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+  <Target Name="CheckSentryCLI" AfterTargets="Build" Condition="'$(InnerTargets)' == ''">
     <PropertyGroup>
       <!-- This property controls whether symbols are to be sent to Sentry. -->
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release'">true</SentryUploadSymbols>
