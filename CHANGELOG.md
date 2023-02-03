@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Log aborted HTTP requests as debug instead of error ([#2155](https://github.com/getsentry/sentry-dotnet/pull/2155))
+
 ## 3.27.0
 
 ### Features
