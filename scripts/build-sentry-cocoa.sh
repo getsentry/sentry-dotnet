@@ -51,7 +51,9 @@ then
         echo ""
     fi
 
-    cd ..
+    # Remove anything we don't want to bundle in the nuget package.
+    cd Carthage
+    find . \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 fi
 
 popd > /dev/null
