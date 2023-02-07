@@ -11,10 +11,6 @@
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
 
-    <Using Include="System.Collections" />
-    <Using Include="System.IO.Compression" />
-    <Using Include="System.Net" />
-    <Using Include="System.Text.Json" />
     <Using Include="Microsoft.AspNetCore.Builder" />
     <Using Include="Microsoft.AspNetCore.Hosting" />
     <Using Include="Serilog" />

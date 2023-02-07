@@ -15,9 +15,8 @@ public static class MauiProgram
                     typeof(Sentry.Tests.SentrySdkTests).Assembly,
                     typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
                     typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
-
 #if ANDROID
-                    typeof(Sentry.Android.Tests.AndroidAssemblyReaderTests).Assembly,
+                    typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
 #endif
                 }
             })

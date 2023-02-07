@@ -39,6 +39,7 @@ jobs:
           xharness apple test \
             --app=test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app \
             --target=ios-simulator-64 \
+            --launch-timeout=00:10:00 \
             --output-directory=./test_output
 
       - name: Create Test Report

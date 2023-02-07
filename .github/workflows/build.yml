@@ -44,6 +44,8 @@ jobs:
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Test
         run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"

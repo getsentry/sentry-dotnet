@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.27.1
+
+### Fixes
+
+- Fix Sentry CLI MSBuild for Xamarin and NetFX ([#2154](https://github.com/getsentry/sentry-dotnet/pull/2154))
+- Log aborted HTTP requests as debug instead of error ([#2155](https://github.com/getsentry/sentry-dotnet/pull/2155))
+
+## 3.27.0
+
+### Features
+
+- Publish `Sentry.Android.AssemblyReader` as a separate nuget package (for reuse by `Sentry.Xamarin`) ([#2127](https://github.com/getsentry/sentry-dotnet/pull/2127))
+- Improvements for Sentry CLI integration ([#2145](https://github.com/getsentry/sentry-dotnet/pull/2145))
+- Update bundled Android SDK to version 6.13.0 ([#2147](https://github.com/getsentry/sentry-dotnet/pull/2147))
+
 ## 3.26.2
 
 ### Fixes

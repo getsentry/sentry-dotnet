@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.26.2</Version>
+    <Version>3.27.1</Version>
     <LangVersion>10</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
@@ -12,6 +12,11 @@
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+
+    <!-- Configure Sentry CLI -->
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
+    <SentryUploadSources>true</SentryUploadSources>
 
   </PropertyGroup>
 
@@ -54,11 +59,15 @@
   <!-- Import the root global usings, except for samples. -->
   <ItemGroup Condition="!$(MSBuildProjectName.Contains('Samples'))">
     <Compile Include="$(MSBuildThisFileDirectory)GlobalUsings.cs" />
+
+    <!-- Add these here instead, so we can remove them for projects that don't have STJ available. -->
+    <Using Include="System.Text.Json" />
+    <Using Include="System.Text.Json.Serialization" />
   </ItemGroup>
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.11.0</SentryCLIVersion>
+    <SentryCLIVersion>2.12.0</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 
