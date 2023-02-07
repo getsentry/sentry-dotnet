@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Workaround VS Pair to Mac issue, and Update bundled Cocoa SDK to version 7.31.5 ([#2164](https://github.com/getsentry/sentry-dotnet/pull/2164))
+- Workaround Visual Studio "Pair to Mac" issue (on Windows), and Update bundled Cocoa SDK to version 7.31.5 ([#2164](https://github.com/getsentry/sentry-dotnet/pull/2164))
 
 ## 3.27.1
 
