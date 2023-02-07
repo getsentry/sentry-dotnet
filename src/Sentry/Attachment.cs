@@ -32,6 +32,10 @@ public enum AttachmentType
     /// During event ingestion, the last logs are extracted into event breadcrumbs.
     /// </summary>
     UnrealLogs,
+
+    /// <summary>
+    /// A json attachment containing the View Hierarchy
+    /// </summary>
     ViewHierarchy
 }
 
