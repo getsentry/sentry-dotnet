@@ -305,7 +305,7 @@ public partial class MauiEventsBinderTests
                 EventArgs.Empty),
 
             nameof(Application) => (
-                Substitute.For<Application>(),
+                MockApplication.Create(),
                 nameof(Application.ModalPushed),
                 new ModalPushedEventArgs(Substitute.For<Page>())),
 
