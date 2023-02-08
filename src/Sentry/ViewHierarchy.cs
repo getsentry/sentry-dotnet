@@ -40,7 +40,7 @@ namespace Sentry
         public float? Height { get; set; }
         public bool? Visible { get; set; }
         public List<ViewHierarchyNode>? Children { get; set; }
-        // public Dictionary<string, object>? Unknown { get; set; }
+        public List<string>? Extras { get; set; }
 
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
@@ -62,6 +62,16 @@ namespace Sentry
                 foreach (var child in children)
                 {
                     child.WriteTo(writer, logger);
+                }
+                writer.WriteEndArray();
+            }
+
+            if (Extras is { } extras)
+            {
+                writer.WriteStartArray("extras");
+                foreach (var extra in extras)
+                {
+                    writer.WriteStringValue(extra);
                 }
                 writer.WriteEndArray();
             }
