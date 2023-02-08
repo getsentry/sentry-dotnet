@@ -1,5 +1,29 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Added `instruction_addr_adjustment` attribute to SentryStackTrace ([#2151](https://github.com/getsentry/sentry-dotnet/pull/2151))
+
+### Fixes
+
+- Workaround Visual Studio "Pair to Mac" issue (on Windows), and Update bundled Cocoa SDK to version 7.31.5 ([#2164](https://github.com/getsentry/sentry-dotnet/pull/2164))
+- Sentry SDK assemblies no longer have PDBs embedded. Debug symbols are uploaded to `nuget.org` as `snupkg` packages  ([#2166](https://github.com/getsentry/sentry-dotnet/pull/2166))
+
+### Dependencies
+
+- Bump Java SDK from v6.13.0 to v6.13.1 ([#2168](https://github.com/getsentry/sentry-dotnet/pull/2168))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6131)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.13.0...6.13.1)
+
+## 3.27.1
+
+### Fixes
+
+- Fix Sentry CLI MSBuild for Xamarin and NetFX ([#2154](https://github.com/getsentry/sentry-dotnet/pull/2154))
+- Log aborted HTTP requests as debug instead of error ([#2155](https://github.com/getsentry/sentry-dotnet/pull/2155))
+
 ## 3.27.0
 
 ### Features

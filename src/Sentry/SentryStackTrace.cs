@@ -4,6 +4,35 @@ using Sentry.Internal.Extensions;
 namespace Sentry;
 
 /// <summary>
+/// Instruction Address Adjustments
+/// </summary>
+public enum InstructionAddressAdjustment
+{
+    /// <summary>
+    /// Symbolicator will use the `"all_but_first"` strategy **unless** the event has a crashing `signal`
+    /// attribute and the Stack Trace has a `registers` map, and the instruction pointer register (`rip` / `pc`)
+    /// does not match the first frame. In that case, `"all"` frames will be adjusted.
+    /// </summary>
+    Auto,
+
+    /// <summary>
+    /// All frames of the stack trace will be adjusted, subtracting one instruction with (or `1`) from the
+    /// incoming `instruction_addr` before symbolication.
+    /// </summary>
+    All,
+
+    /// <summary>
+    /// All frames but the first (in callee to caller / child to parent direction) should be adjusted.
+    /// </summary>
+    AllButFirst,
+
+    /// <summary>
+    /// No adjustment will be applied whatsoever.
+    /// </summary>
+    None
+}
+
+/// <summary>
 /// Sentry Stacktrace interface.
 /// </summary>
 /// <remarks>
@@ -27,12 +56,34 @@ public class SentryStackTrace : IJsonSerializable
         set => InternalFrames = value;
     }
 
+    /// <summary>
+    /// The optional instruction address adjustment.
+    /// </summary>
+    /// <remarks>
+    /// Tells the symbolicator if and what adjustment for is needed.
+    /// </remarks>
+    public InstructionAddressAdjustment? AddressAdjustment { get; set; }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
 
         writer.WriteArrayIfNotEmpty("frames", InternalFrames, logger);
+
+        if (AddressAdjustment is { } instructionAddressAdjustment)
+        {
+            var adjustmentType = instructionAddressAdjustment switch
+            {
+                InstructionAddressAdjustment.Auto => "auto",
+                InstructionAddressAdjustment.All => "all",
+                InstructionAddressAdjustment.AllButFirst => "all_but_first",
+                InstructionAddressAdjustment.None => "none",
+                _ => "auto"
+            };
+
+            writer.WriteString("instruction_addr_adjustment", adjustmentType);
+        }
 
         writer.WriteEndObject();
     }
@@ -48,9 +99,15 @@ public class SentryStackTrace : IJsonSerializable
             .Select(SentryStackFrame.FromJson)
             .ToArray();
 
+        var instructionAddressAdjustment = json
+            .GetPropertyOrNull("instruction_addr_adjustment")
+            ?.ToString()
+            ?.ParseEnum<InstructionAddressAdjustment>();
+
         return new SentryStackTrace
         {
-            InternalFrames = frames
+            InternalFrames = frames,
+            AddressAdjustment = instructionAddressAdjustment
         };
     }
 }
