@@ -36,7 +36,7 @@ runs:
       id: cache-sentry-cocoa
       uses: actions/cache@v3
       with:
-        path: modules/sentry-cocoa/Carthage/Build
+        path: modules/sentry-cocoa/Carthage
         key: sentry-cocoa-${{ env.SENTRY_COCOA_SHA }}
 
     - name: Build Sentry Cocoa SDK

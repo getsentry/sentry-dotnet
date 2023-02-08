@@ -72,3 +72,4 @@ jobs:
           if-no-files-found: error
           path: |
             ${{ github.workspace }}/src/**/Release/*.nupkg
+            ${{ github.workspace }}/src/**/Release/*.snupkg
