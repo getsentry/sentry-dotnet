@@ -23,15 +23,18 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
-    <!-- Prop required by Microsoft.SourceLink.GitHub -->
-    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <!--
+      SourceLink configuration
+      See https://github.com/dotnet/sourcelink/blob/main/README.md
+      And https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props
+    -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <Nullable>annotations</Nullable>
-
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
