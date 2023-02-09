@@ -6,6 +6,7 @@
 
 - Fix MAUI missing breadcrumbs for lifecycle and UI events ([#2170](https://github.com/getsentry/sentry-dotnet/pull/2170))
 - Fix hybrid sdk names ([#2171](https://github.com/getsentry/sentry-dotnet/pull/2171))
+- Fix ASP.NET sdk name ([#2172](https://github.com/getsentry/sentry-dotnet/pull/2172))
 
 ## 3.28.0
 
