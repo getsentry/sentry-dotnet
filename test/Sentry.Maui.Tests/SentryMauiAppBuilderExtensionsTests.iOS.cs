@@ -11,14 +11,15 @@ public partial class SentryMauiAppBuilderExtensionsTests
     public void UseSentry_BindsToApplicationStartupEvent_iOS()
     {
         // Arrange
+        var application = MockApplication.Create();
         var binder = Substitute.For<IMauiEventsBinder>();
 
         var builder = _fixture.Builder;
+        builder.Services.AddSingleton<IApplication>(application);
         builder.Services.AddSingleton(binder);
         builder.UseSentry(ValidDsn);
         using var app = builder.Build();
 
-        var application = MockApplication.Create();
         var iosApplication = new MockIosApplication(application, app.Services);
 
         // A bit of hackery here, because we can't mock UIKit.UIApplication.

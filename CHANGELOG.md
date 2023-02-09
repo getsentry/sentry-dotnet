@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix MAUI missing breadcrumbs for lifecycle and UI events ([#2170](https://github.com/getsentry/sentry-dotnet/pull/2170))
+
 ## 3.28.0
 
 ### Features
