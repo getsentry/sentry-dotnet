@@ -1,4 +1,4 @@
-minVersion: 1.1.0
+minVersion: 1.1.1
 changelogPolicy: auto
 targets:
   - name: nuget
