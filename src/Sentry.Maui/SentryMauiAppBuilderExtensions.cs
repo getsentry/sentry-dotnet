@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
+using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
@@ -111,6 +112,8 @@ public static class SentryMauiAppBuilderExtensions
         // are not present on IApplication and related interfaces.
         if (app is not Application application)
         {
+            var options = services.GetService<IOptions<SentryMauiOptions>>()?.Value;
+            options?.LogWarning("Could not bind to MAUI events!");
             return;
         }
 
