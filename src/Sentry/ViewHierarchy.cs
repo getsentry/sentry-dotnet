@@ -5,8 +5,8 @@ namespace Sentry
 {
     public class ViewHierarchy : IJsonSerializable
     {
-        public string? RenderingSystem { get; set; }
-        public List<ViewHierarchyNode>? Children { get; set; }
+        public string RenderingSystem { get; set; } = string.Empty;
+        public List<IJsonSerializable>? Children { get; set; }
 
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
@@ -30,31 +30,16 @@ namespace Sentry
 
     public class ViewHierarchyNode : IJsonSerializable
     {
-        public string? Type { get; set; }
-        public string? Identifier { get; set; }
-        public string? Tag { get; set; }
-        public float? X { get; set; }
-        public float? Y { get; set; }
-        public float? Z { get; set; }
-        public float? Width { get; set; }
-        public float? Height { get; set; }
-        public bool? Visible { get; set; }
-        public List<ViewHierarchyNode>? Children { get; set; }
-        public List<string>? Extras { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Identifier { get; set; } = string.Empty;
+        public List<IJsonSerializable>? Children { get; set; }
 
-        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+        public virtual void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
             writer.WriteStringIfNotWhiteSpace("type", Type);
             writer.WriteStringIfNotWhiteSpace("identifier", Identifier);
-            writer.WriteStringIfNotWhiteSpace("tag", Tag);
-            writer.WriteNumberIfNotNull("x", X);
-            writer.WriteNumberIfNotNull("y", Y);
-            writer.WriteNumberIfNotNull("z", Z);
-            writer.WriteNumberIfNotNull("width", Width);
-            writer.WriteNumberIfNotNull("height", Height);
-            writer.WriteBooleanIfNotNull("visible", Visible);
 
             if (Children is { } children)
             {
@@ -62,16 +47,6 @@ namespace Sentry
                 foreach (var child in children)
                 {
                     child.WriteTo(writer, logger);
-                }
-                writer.WriteEndArray();
-            }
-
-            if (Extras is { } extras)
-            {
-                writer.WriteStartArray("extras");
-                foreach (var extra in extras)
-                {
-                    writer.WriteStringValue(extra);
                 }
                 writer.WriteEndArray();
             }
