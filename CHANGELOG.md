@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix assembly not found on Android in Debug configuration ([#2175](https://github.com/getsentry/sentry-dotnet/pull/2175))
+- Update samples ([#2183](https://github.com/getsentry/sentry-dotnet/pull/2183))
 
 ## 3.28.1
 
