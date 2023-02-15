@@ -3,55 +3,52 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry
 {
-    public class ViewHierarchy : IJsonSerializable
+    /// <summary>
+    /// Sentry View Hierarchy.
+    /// </summary>
+    public sealed class ViewHierarchy : IJsonSerializable
     {
+        /// <summary>
+        /// The rendering system this view hierarchy is capturing.
+        /// </summary>
         public string RenderingSystem { get; set; } = string.Empty;
-        public List<IJsonSerializable>? Children { get; set; }
 
+        /// <summary>
+        /// The elements or windows within the view hierarchy.
+        /// </summary>
+        public List<IViewHierarchyNode> Windows { get; set; } = new();
+
+        /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
         {
             writer.WriteStartObject();
 
             writer.WriteStringIfNotWhiteSpace("rendering_system", RenderingSystem);
 
-            if (Children is {} children)
+            writer.WriteStartArray("windows");
+            foreach (var window in Windows)
             {
-                writer.WriteStartArray("windows");
-                foreach (var child in children)
-                {
-                    child.WriteTo(writer, logger);
-                }
-                writer.WriteEndArray();
+                window.WriteTo(writer, logger);
             }
+            writer.WriteEndArray();
 
             writer.WriteEndObject();
         }
     }
 
-    public class ViewHierarchyNode : IJsonSerializable
+    /// <summary>
+    /// Sentry View Hierarchy Node Interface
+    /// </summary>
+    public interface IViewHierarchyNode : IJsonSerializable
     {
-        public string Type { get; set; } = string.Empty;
-        public string Identifier { get; set; } = string.Empty;
-        public List<IJsonSerializable>? Children { get; set; }
+        /// <summary>
+        /// The type of the element represented by this node.
+        /// </summary>
+        public string Type { get; set; }
 
-        public virtual void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
-        {
-            writer.WriteStartObject();
-
-            writer.WriteStringIfNotWhiteSpace("type", Type);
-            writer.WriteStringIfNotWhiteSpace("identifier", Identifier);
-
-            if (Children is { } children)
-            {
-                writer.WriteStartArray("children");
-                foreach (var child in children)
-                {
-                    child.WriteTo(writer, logger);
-                }
-                writer.WriteEndArray();
-            }
-
-            writer.WriteEndObject();
-        }
+        /// <summary>
+        /// The child nodes
+        /// </summary>
+        public List<IViewHierarchyNode>? Children { get; set; }
     }
 }
