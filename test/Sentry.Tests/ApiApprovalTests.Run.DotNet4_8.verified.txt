@@ -17,6 +17,7 @@ namespace Sentry
         AppleCrashReport = 2,
         UnrealContext = 3,
         UnrealLogs = 4,
+        ViewHierarchy = 5,
     }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
     public sealed class Breadcrumb : Sentry.IJsonSerializable
@@ -276,6 +277,11 @@ namespace Sentry
         string Name { get; }
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
+    public interface IViewHierarchyNode : Sentry.IJsonSerializable
+    {
+        System.Collections.Generic.List<Sentry.IViewHierarchyNode>? Children { get; set; }
+        string Type { get; set; }
+    }
     public enum InstructionAddressAdjustment
     {
         Auto = 0,
@@ -1042,6 +1048,13 @@ namespace Sentry
         public string? Name { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.UserFeedback FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class ViewHierarchy : Sentry.IJsonSerializable
+    {
+        public ViewHierarchy() { }
+        public string RenderingSystem { get; set; }
+        public System.Collections.Generic.List<Sentry.IViewHierarchyNode> Windows { get; set; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
 }
 namespace Sentry.Extensibility
