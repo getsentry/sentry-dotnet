@@ -2,8 +2,11 @@ using Sentry;
 
 using var _ = SentrySdk.Init(o =>
 {
-    // The DSN is required.
-    o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+    // The DSN is required, but for these samples, we recommend using the SENTRY_DSN environment variable.
+    // If you prefer, paste your DSN in the code instead (uncomment the below line).
+    // To learn more about DSN, see the https://docs.sentry.io/product/sentry-basics/dsn-explainer/ article.
+    //
+    // o.Dsn = "";
 
     // When debug is enabled, the Sentry client will emit detailed debugging information to the console.
     o.Debug = true;
