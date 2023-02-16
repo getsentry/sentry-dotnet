@@ -1,5 +1,8 @@
 <Project>
 
+  <!-- TODO: see if we can remove this import.  Ideally, Samples should not inherit the parent props or targets. -->
+  <Import Project="..\Directory.Build.targets" />
+
   <ItemGroup>
     <!-- Needed to build old-style NetFx csproj on non-Windows machines. -->
     <PackageReference

@@ -1,5 +1,6 @@
 <Project>
 
+  <!-- TODO: see if we can remove this import.  Ideally, Samples should not inherit the parent props or targets. -->
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
