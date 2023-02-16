@@ -11,12 +11,17 @@ namespace Sentry
         /// <summary>
         /// The rendering system this view hierarchy is capturing.
         /// </summary>
-        public string RenderingSystem { get; set; } = string.Empty;
+        public string RenderingSystem { get; set; }
 
         /// <summary>
         /// The elements or windows within the view hierarchy.
         /// </summary>
-        public List<IViewHierarchyNode> Windows { get; set; } = new();
+        public List<ViewHierarchyNode> Windows { get; } = new();
+
+        public ViewHierarchy(string renderingSystem)
+        {
+            RenderingSystem = renderingSystem;
+        }
 
         /// <inheritdoc />
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
@@ -39,8 +44,10 @@ namespace Sentry
     /// <summary>
     /// Sentry View Hierarchy Node Interface
     /// </summary>
-    public interface IViewHierarchyNode : IJsonSerializable
+    public abstract class ViewHierarchyNode : IJsonSerializable
     {
+        private List<ViewHierarchyNode>? _children;
+
         /// <summary>
         /// The type of the element represented by this node.
         /// </summary>
@@ -49,6 +56,39 @@ namespace Sentry
         /// <summary>
         /// The child nodes
         /// </summary>
-        public List<IViewHierarchyNode>? Children { get; set; }
+        public List<ViewHierarchyNode> Children
+        {
+            get => _children ??= new List<ViewHierarchyNode>();
+            set => _children = value;
+        }
+
+        protected ViewHierarchyNode(string type)
+        {
+            Type = type;
+        }
+
+        /// <inheritdoc />
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+        {
+            writer.WriteStartObject();
+
+            writer.WriteString("type", Type);
+
+            WriteAdditionalProperties(writer, logger);
+
+            if (Children is { } children)
+            {
+                writer.WriteStartArray("children");
+                foreach (var child in children)
+                {
+                    child.WriteTo(writer, logger);
+                }
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndObject();
+        }
+
+        protected abstract void WriteAdditionalProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger);
     }
 }
