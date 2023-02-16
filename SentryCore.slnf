@@ -2,7 +2,8 @@
   "solution": {
     "path": "Sentry.sln",
     "projects": [
-      "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
+      "samples\\Sentry.Samples.Console.Basic.net48\\Sentry.Samples.Console.Basic.net48.csproj",
+      "samples\\Sentry.Samples.Console.Basic.net60\\Sentry.Samples.Console.Basic.net60.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",

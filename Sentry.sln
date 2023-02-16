@@ -38,7 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7745
 		samples\Directory.Build.props = samples\Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.Basic", "samples\Sentry.Samples.Console.Basic\Sentry.Samples.Console.Basic.csproj", "{65F5A969-B386-48F5-8B7E-6C90D6C720BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.Basic.net60", "samples\Sentry.Samples.Console.Basic.net60\Sentry.Samples.Console.Basic.net60.csproj", "{65F5A969-B386-48F5-8B7E-6C90D6C720BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.ME.Logging", "samples\Sentry.Samples.ME.Logging\Sentry.Samples.ME.Logging.csproj", "{DE536383-4A18-4057-A7F0-639BDEF6E1BB}"
 EndProject
@@ -171,6 +171,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.TestUtils", "test\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj", "{C96CB65D-3D2D-404E-85C0-69A3FC03B48F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Android.AssemblyReader", "src\Sentry.Android.AssemblyReader\Sentry.Android.AssemblyReader.csproj", "{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Basic.net48", "samples\Sentry.Samples.Console.Basic.net48\Sentry.Samples.Console.Basic.net48.csproj", "{149A7507-0A48-4013-B477-37FA2B489C5D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -415,6 +417,10 @@ Global
 		{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{149A7507-0A48-4013-B477-37FA2B489C5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{149A7507-0A48-4013-B477-37FA2B489C5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{149A7507-0A48-4013-B477-37FA2B489C5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{149A7507-0A48-4013-B477-37FA2B489C5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -481,6 +487,7 @@ Global
 		{5E12E053-22AF-4184-8581-3FCFD225617D} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{C96CB65D-3D2D-404E-85C0-69A3FC03B48F} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{149A7507-0A48-4013-B477-37FA2B489C5D} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
