@@ -1,0 +1,10 @@
+<Project>
+
+  <ItemGroup>
+    <!-- Needed to build old-style NetFx csproj on non-Windows machines. -->
+    <PackageReference
+      Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.*" PrivateAssets="All"
+      Condition="'$(TargetFrameworkVersion)' == 'v4.8' And !$([MSBuild]::IsOSPlatform('Windows'))" />
+  </ItemGroup>
+
+</Project>
