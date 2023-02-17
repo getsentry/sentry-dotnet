@@ -18,6 +18,10 @@ namespace Sentry
         /// </summary>
         public List<ViewHierarchyNode> Windows { get; } = new();
 
+        /// <summary>
+        /// Initialies an instance of <see cref="ViewHierarchy"/>
+        /// </summary>
+        /// <param name="renderingSystem">The rendering system</param>
         public ViewHierarchy(string renderingSystem)
         {
             RenderingSystem = renderingSystem;
@@ -42,7 +46,7 @@ namespace Sentry
     }
 
     /// <summary>
-    /// Sentry View Hierarchy Node Interface
+    /// Sentry View Hierarchy Node
     /// </summary>
     public abstract class ViewHierarchyNode : IJsonSerializable
     {
@@ -62,6 +66,10 @@ namespace Sentry
             set => _children = value;
         }
 
+        /// <summary>
+        /// Initializes an instance of <see cref="ViewHierarchyNode"/>
+        /// </summary>
+        /// <param name="type">The type of node</param>
         protected ViewHierarchyNode(string type)
         {
             Type = type;
@@ -89,6 +97,9 @@ namespace Sentry
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Gets automatically called and writes additional properties during <see cref="WriteTo"/>
+        /// </summary>
         protected abstract void WriteAdditionalProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger);
     }
 }

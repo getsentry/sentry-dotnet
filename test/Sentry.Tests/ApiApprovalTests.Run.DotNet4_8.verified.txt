@@ -277,11 +277,6 @@ namespace Sentry
         string Name { get; }
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
-    public interface IViewHierarchyNode : Sentry.IJsonSerializable
-    {
-        System.Collections.Generic.List<Sentry.IViewHierarchyNode>? Children { get; set; }
-        string Type { get; set; }
-    }
     public enum InstructionAddressAdjustment
     {
         Auto = 0,
@@ -1051,9 +1046,21 @@ namespace Sentry
     }
     public sealed class ViewHierarchy : Sentry.IJsonSerializable
     {
-        public ViewHierarchy() { }
+        public ViewHierarchy(string renderingSystem) { }
         public string RenderingSystem { get; set; }
-        public System.Collections.Generic.List<Sentry.IViewHierarchyNode> Windows { get; set; }
+        public System.Collections.Generic.List<Sentry.ViewHierarchyNode> Windows { get; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+    }
+    public class ViewHierarchyAttachment : Sentry.Attachment
+    {
+        public ViewHierarchyAttachment(Sentry.IAttachmentContent content) { }
+    }
+    public abstract class ViewHierarchyNode : Sentry.IJsonSerializable
+    {
+        protected ViewHierarchyNode(string type) { }
+        public System.Collections.Generic.List<Sentry.ViewHierarchyNode> Children { get; set; }
+        public string Type { get; set; }
+        protected abstract void WriteAdditionalProperties(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
 }
