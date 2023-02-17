@@ -4,6 +4,7 @@
 
 ### Features
 
+- Added basic functionality to support `View Hierarchy` ([#2163](https://github.com/getsentry/sentry-dotnet/pull/2163))
 - Added `instruction_addr_adjustment` attribute to SentryStackTrace ([#2151](https://github.com/getsentry/sentry-dotnet/pull/2151))
 
 ### Fixes
