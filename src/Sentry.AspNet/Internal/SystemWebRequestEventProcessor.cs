@@ -95,19 +95,10 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
             @event.Request.Data = body;
         }
 
-        if (@event.Sdk.Version is null && @event.Sdk.Name is null)
-        {
-            @event.Sdk.Name = "sentry.dotnet.aspnet";
-            @event.Sdk.Version = SdkVersion.Version;
-        }
-
-        if (SdkVersion.Version != null)
-        {
-            @event.Sdk.AddPackage(
-                $"nuget:{SdkVersion.Name}",
-                SdkVersion.Version);
-        }
-
+        // Always set the SDK info
+        @event.Sdk.Name = "sentry.dotnet.aspnet";
+        @event.Sdk.Version = SdkVersion.Version;
+        @event.Sdk.AddPackage($"nuget:{SdkVersion.Name}", SdkVersion.Version);
         return @event;
     }
 }

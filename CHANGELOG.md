@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix assembly not found on Android in Debug configuration ([#2175](https://github.com/getsentry/sentry-dotnet/pull/2175))
+
+### Dependencies
+
+- Bump Java SDK from v6.13.1 to v6.14.0 ([#2185](https://github.com/getsentry/sentry-dotnet/pull/2185))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6140)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.13.1...6.14.0)
+
+## 3.28.1
+
+### Fixes
+
+- Fix MAUI missing breadcrumbs for lifecycle and UI events ([#2170](https://github.com/getsentry/sentry-dotnet/pull/2170))
+- Fix hybrid sdk names ([#2171](https://github.com/getsentry/sentry-dotnet/pull/2171))
+- Fix ASP.NET sdk name ([#2172](https://github.com/getsentry/sentry-dotnet/pull/2172))
+
+## 3.28.0
+
 ### Features
 
 - Added basic functionality to support `View Hierarchy` ([#2163](https://github.com/getsentry/sentry-dotnet/pull/2163))

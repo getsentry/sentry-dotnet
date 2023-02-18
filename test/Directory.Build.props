@@ -9,6 +9,17 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
+  <!--
+    Workaround for Verify issue with scrubbing when running in Rider on Windows.
+    Ensures that the volume label is upper cased ("C:" instead of "c:"), which is read
+    from ProjectDir and SolutionDir properties during compilation and written to the
+    assembly metadata attributes.
+  -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <ProjectDir Condition="'$(ProjectDir)' != ''">$(ProjectDir.Substring(0, 1).ToUpper())$(ProjectDir.Substring(1))</ProjectDir>
+    <SolutionDir Condition="'$(SolutionDir)' != ''">$(SolutionDir.Substring(0, 1).ToUpper())$(SolutionDir.Substring(1))</SolutionDir>
+  </PropertyGroup>
+
   <ItemGroup>
     <Using Include="Sentry" />
     <Using Include="Sentry.DsnSamples" Static="True" />
