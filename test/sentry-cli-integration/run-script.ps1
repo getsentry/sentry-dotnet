@@ -1,0 +1,1 @@
+dotnet build samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true

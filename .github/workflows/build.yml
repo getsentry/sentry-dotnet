@@ -44,18 +44,25 @@ jobs:
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Test
         run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+
+      - name: Test symbol upload
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@efc3213bec78777d3d89618f5ec1a4cdda7d7b53
+        with:
+          script: test/sentry-cli-integration/run-script.ps1
+          # script-output-expected: test/sentry-cli-integration/script-output.expected
+          server-output-expected: test/sentry-cli-integration/server-output.expected
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Upload Verify Results
         if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: verify-test-results
-          path: "**/*.received.*"
+          path: '**/*.received.*'
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
       # We use macOS for that so we we get all the iOS/macCatalyst targets in the packages
