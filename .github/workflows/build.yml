@@ -58,7 +58,7 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
-      - name: Upload Verify Results
+      - name: Upload symbol-upload test outputs
         if: failure()
         uses: actions/upload-artifact@v3
         with:
