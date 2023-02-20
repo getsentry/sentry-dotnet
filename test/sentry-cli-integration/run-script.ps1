@@ -2,10 +2,10 @@ param(
     [Parameter(Mandatory = $true)][string] $ServerUri
 )
 
-$sample = 'Sentry.Samples.Console.Basic'
+$sample = 'Sentry.Samples.Maui'
 $rootDir = "$(Get-Item $PSScriptRoot/../../)"
 
-dotnet build "samples/$sample/$sample.csproj" -c Release --framework net6.0 --no-restore --nologo `
+dotnet build "samples/$sample/$sample.csproj" -c Release --no-restore --nologo `
     /p:CopyLocalLockFileAssemblies=true `
     /p:SentryOrg=org `
     /p:SentryProject=project `
