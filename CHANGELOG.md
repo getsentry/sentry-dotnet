@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added basic functionality to support `View Hierarchy` ([#2163](https://github.com/getsentry/sentry-dotnet/pull/2163))
+
 ### Fixes
 
 - Fix assembly not found on Android in Debug configuration ([#2175](https://github.com/getsentry/sentry-dotnet/pull/2175))
@@ -24,7 +28,6 @@
 
 ### Features
 
-- Added basic functionality to support `View Hierarchy` ([#2163](https://github.com/getsentry/sentry-dotnet/pull/2163))
 - Added `instruction_addr_adjustment` attribute to SentryStackTrace ([#2151](https://github.com/getsentry/sentry-dotnet/pull/2151))
 
 ### Fixes
