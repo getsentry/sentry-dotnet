@@ -1,0 +1,16 @@
+HTTP server listening on <ServerUri>
+To stop the server, execute a GET request to <ServerUri>/STOP
+GET /api/0/ HTTP/1.1
+GET /api/0/organizations/org/chunk-upload/ HTTP/1.1
+POST /api/0/projects/org/project/files/difs/assemble/ HTTP/1.1
+     Sentry.pdb
+POST /api/0/projects/org/project/reprocessing/ HTTP/1.1
+GET /api/0/ HTTP/1.1
+GET /api/0/organizations/org/chunk-upload/ HTTP/1.1
+POST /api/0/projects/org/project/files/difs/assemble/ HTTP/1.1
+     apphost.exe
+     Sentry.Samples.Console.Basic.pdb
+     Sentry.Samples.Console.Basic.pdb
+POST /api/0/projects/org/project/reprocessing/ HTTP/1.1
+GET /STOP HTTP/1.1
+HTTP server stopping!

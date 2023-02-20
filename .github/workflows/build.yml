@@ -50,13 +50,20 @@ jobs:
       #   run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
       - name: Test symbol upload
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@6b3f6cbd95c473c1d9c1fc695680c6e83f00c8da
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@c6e8771b48cadcd1b439abd511c1d6654ad5a9ab
         with:
           script: test/sentry-cli-integration/run-script.ps1
           # script-output-expected: test/sentry-cli-integration/script-output.expected
           server-output-expected: test/sentry-cli-integration/server-output.expected
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Upload Verify Results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: symbol-upload-test-results
+          path: test/sentry-cli-integration/*-output.txt
 
       - name: Upload Verify Results
         if: failure()

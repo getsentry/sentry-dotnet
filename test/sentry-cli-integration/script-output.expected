@@ -1,0 +1,18 @@
+  Sentry -> src/Sentry/bin/Release/net6.0/Sentry.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry (Release/net6.0)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
+  Sentry.Samples.Console.Basic -> samples/Sentry.Samples.Console.Basic/bin/Release/net6.0/Sentry.Samples.Console.Basic.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Samples.Console.Basic (Release/net6.0)
+  > Found 2 debug information files
+  > Resolved source code for 1 debug information file
+  > Prepared debug information files for upload
+  > Nothing to upload, all files are on the server
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed [value removed]
