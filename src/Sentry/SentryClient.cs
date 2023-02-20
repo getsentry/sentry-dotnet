@@ -121,20 +121,67 @@ public class SentryClient : ISentryClient, IDisposable
                                 "to properly finalize the transaction and send it to Sentry.");
         }
 
-
         // Sampling decision MUST have been made at this point
-        Debug.Assert(transaction.IsSampled != null,
+        Debug.Assert(transaction.IsSampled is null,
             "Attempt to capture transaction without sampling decision.");
 
-
-        if (transaction.IsSampled != true)
+        if (transaction.IsSampled is false)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
             _options.LogDebug("Transaction dropped by sampling.");
             return;
         }
 
+        var processedTransaction = BeforeSendTransaction(transaction);
+        if (processedTransaction is null) // Rejected transaction
+        {
+            // TODO: should the dropped transaction be recorded?
+            //_options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSendTransaction, DataCategory.Error);
+            _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
+            return;
+        }
+
         CaptureEnvelope(Envelope.FromTransaction(transaction));
+    }
+
+    private Transaction? BeforeSendTransaction(Transaction transaction)
+    {
+        if (_options.BeforeSendTransaction is null)
+        {
+            return transaction;
+        }
+
+        _options.LogDebug("Calling the BeforeSendTransaction callback");
+
+        try
+        {
+            return _options.BeforeSendTransaction?.Invoke(transaction);
+        }
+        catch (Exception e)
+        {
+            // Attempt to demystify exceptions before adding them as breadcrumbs.
+            e.Demystify();
+
+            _options.LogError("The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.", e);
+
+            var data = new Dictionary<string, string>
+            {
+                {"message", e.Message}
+            };
+
+            if (e.StackTrace is not null)
+            {
+                data.Add("stackTrace", e.StackTrace);
+            }
+
+            transaction.AddBreadcrumb(
+                message: "BeforeSendTransaction callback failed.",
+                category: "SentryClient",
+                data: data,
+                level: BreadcrumbLevel.Error);
+        }
+
+        return transaction;
     }
 
     /// <inheritdoc />
