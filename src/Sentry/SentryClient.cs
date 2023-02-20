@@ -122,7 +122,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         // Sampling decision MUST have been made at this point
-        Debug.Assert(transaction.IsSampled is null,
+        Debug.Assert(transaction.IsSampled is not null,
             "Attempt to capture transaction without sampling decision.");
 
         if (transaction.IsSampled is false)
