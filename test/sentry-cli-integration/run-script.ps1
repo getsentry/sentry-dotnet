@@ -18,7 +18,9 @@ dotnet build "samples/$sample/$sample.csproj" -c Release --framework net6.0 --no
     }
     else
     {
-        "$_".Replace($rootDir, '').Replace('\', '/')
+        "$_". `
+            Replace($rootDir, '').  `
+            Replace('\', '/')
     }
 }
 
