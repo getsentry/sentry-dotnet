@@ -1,13 +1,499 @@
+  Sentry.Android.AssemblyReader -> src/Sentry.Android.AssemblyReader/bin/Release/net6.0/Sentry.Android.AssemblyReader.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Android.AssemblyReader (Release/net6.0)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
   Sentry -> src/Sentry/bin/Release/net6.0/Sentry.dll
   Preparing to upload debug symbols and sources to Sentry for Sentry (Release/net6.0)
   > Found 1 debug information file (1 with embedded sources)
   > Resolved source code for 0 debug information files
   > Prepared debug information file for upload
   > Nothing to upload, all files are on the server
-  Sentry.Samples.Console.Basic -> samples/Sentry.Samples.Console.Basic/bin/Release/net6.0/Sentry.Samples.Console.Basic.dll
-  Preparing to upload debug symbols and sources to Sentry for Sentry.Samples.Console.Basic (Release/net6.0)
-  > Found 2 debug information files
-  > Resolved source code for 1 debug information file
+  Sentry.Bindings.Android -> src/Sentry.Bindings.Android/bin/Release/net6.0-android/Sentry.Bindings.Android.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Bindings.Android (Release/net6.0-android)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
+  Sentry -> src/Sentry/bin/Release/net6.0-android/Sentry.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry (Release/net6.0-android)
+  > Found 13 debug information files (1 with embedded sources)
+  > Resolved source code for 4 debug information files
+  > Prepared debug information files for upload
+  > Nothing to upload, all files are on the server
+  Sentry.Extensions.Logging -> src/Sentry.Extensions.Logging/bin/Release/net6.0/Sentry.Extensions.Logging.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Extensions.Logging (Release/net6.0)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
+  Sentry.Maui -> src/Sentry.Maui/bin/Release/net6.0-android/Sentry.Maui.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Maui (Release/net6.0-android)
+  > Found 13 debug information files (1 with embedded sources)
+  > Resolved source code for 4 debug information files
+  > Prepared debug information files for upload
+  > Nothing to upload, all files are on the server
+  Sentry.Samples.Maui -> samples/Sentry.Samples.Maui/bin/Release/net6.0-android/Sentry.Samples.Maui.dll
+  Sentry.Android.AssemblyReader -> src/Sentry.Android.AssemblyReader/bin/Release/net6.0/Sentry.Android.AssemblyReader.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Android.AssemblyReader (Release/net6.0)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
+  Sentry.Bindings.Android -> src/Sentry.Bindings.Android/bin/Release/net6.0-android/Sentry.Bindings.Android.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Bindings.Android (Release/net6.0-android)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
+  Sentry -> src/Sentry/bin/Release/net6.0/Sentry.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry (Release/net6.0)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
+  Sentry.Extensions.Logging -> src/Sentry.Extensions.Logging/bin/Release/net6.0/Sentry.Extensions.Logging.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Extensions.Logging (Release/net6.0)
+  > Found 1 debug information file (1 with embedded sources)
+  > Resolved source code for 0 debug information files
+  > Prepared debug information file for upload
+  > Nothing to upload, all files are on the server
+  Sentry -> src/Sentry/bin/Release/net6.0-android/Sentry.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry (Release/net6.0-android)
+  > Found 13 debug information files (1 with embedded sources)
+  > Resolved source code for 4 debug information files
+  > Prepared debug information files for upload
+  > Nothing to upload, all files are on the server
+  Sentry.Maui -> src/Sentry.Maui/bin/Release/net6.0-android/Sentry.Maui.dll
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Maui (Release/net6.0-android)
+  > Found 13 debug information files (1 with embedded sources)
+  > Resolved source code for 4 debug information files
+  > Prepared debug information files for upload
+  > Nothing to upload, all files are on the server
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  Optimizing assemblies for size. This process might take a while.
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  Optimizing assemblies for size. This process might take a while.
+  [2/103] K4os.Compression.LZ4.dll -> K4os.Compression.LZ4.dll.so
+  [1/103] System.Console.dll -> System.Console.dll.so
+  [3/103] Microsoft.Extensions.Configuration.dll -> Microsoft.Extensions.Configuration.dll.so
+  [4/103] System.Diagnostics.DiagnosticSource.dll -> System.Diagnostics.DiagnosticSource.dll.so
+  [5/103] System.Diagnostics.StackTrace.dll -> System.Diagnostics.StackTrace.dll.so
+  [6/103] Microsoft.Extensions.Configuration.Abstractions.dll -> Microsoft.Extensions.Configuration.Abstractions.dll.so
+  [7/103] System.Diagnostics.TraceSource.dll -> System.Diagnostics.TraceSource.dll.so
+  [8/103] Microsoft.Extensions.Configuration.Binder.dll -> Microsoft.Extensions.Configuration.Binder.dll.so
+  [1/103] K4os.Compression.LZ4.dll -> K4os.Compression.LZ4.dll.so
+  [9/103] System.IO.Compression.ZipFile.dll -> System.IO.Compression.ZipFile.dll.so
+  [10/103] Microsoft.Extensions.DependencyInjection.dll -> Microsoft.Extensions.DependencyInjection.dll.so
+  [2/103] Microsoft.Extensions.Configuration.dll -> Microsoft.Extensions.Configuration.dll.so
+  [11/103] System.IO.Compression.dll -> System.IO.Compression.dll.so
+  [12/103] Microsoft.Extensions.DependencyInjection.Abstractions.dll -> Microsoft.Extensions.DependencyInjection.Abstractions.dll.so
+  [13/103] System.IO.FileSystem.DriveInfo.dll -> System.IO.FileSystem.DriveInfo.dll.so
+  [3/103] Microsoft.Extensions.Configuration.Abstractions.dll -> Microsoft.Extensions.Configuration.Abstractions.dll.so
+  [14/103] Microsoft.Extensions.Http.dll -> Microsoft.Extensions.Http.dll.so
+  [15/103] System.IO.MemoryMappedFiles.dll -> System.IO.MemoryMappedFiles.dll.so
+  [4/103] Microsoft.Extensions.Configuration.Binder.dll -> Microsoft.Extensions.Configuration.Binder.dll.so
+  [16/103] Microsoft.Extensions.Logging.dll -> Microsoft.Extensions.Logging.dll.so
+  [17/103] Microsoft.Extensions.Logging.Abstractions.dll -> Microsoft.Extensions.Logging.Abstractions.dll.so
+  [5/103] Microsoft.Extensions.DependencyInjection.dll -> Microsoft.Extensions.DependencyInjection.dll.so
+  [18/103] Microsoft.Extensions.Logging.Configuration.dll -> Microsoft.Extensions.Logging.Configuration.dll.so
+  [19/103] System.Linq.Expressions.dll -> System.Linq.Expressions.dll.so
+  [20/103] Microsoft.Extensions.Options.dll -> Microsoft.Extensions.Options.dll.so
+  [6/103] Microsoft.Extensions.DependencyInjection.Abstractions.dll -> Microsoft.Extensions.DependencyInjection.Abstractions.dll.so
+  [21/103] Microsoft.Extensions.Options.ConfigurationExtensions.dll -> Microsoft.Extensions.Options.ConfigurationExtensions.dll.so
+  [7/103] Microsoft.Extensions.Http.dll -> Microsoft.Extensions.Http.dll.so
+  [22/103] Microsoft.Extensions.Primitives.dll -> Microsoft.Extensions.Primitives.dll.so
+  [23/103] System.Linq.dll -> System.Linq.dll.so
+  [24/103] System.Memory.dll -> System.Memory.dll.so
+  [8/103] Microsoft.Extensions.Logging.dll -> Microsoft.Extensions.Logging.dll.so
+  [25/103] Microsoft.Maui.Graphics.dll -> Microsoft.Maui.Graphics.dll.so
+  [26/103] Xamarin.AndroidX.Activity.dll -> Xamarin.AndroidX.Activity.dll.so
+  [9/103] Microsoft.Extensions.Logging.Abstractions.dll -> Microsoft.Extensions.Logging.Abstractions.dll.so
+  [27/103] System.Net.Http.dll -> System.Net.Http.dll.so
+  [28/103] Xamarin.AndroidX.AppCompat.dll -> Xamarin.AndroidX.AppCompat.dll.so
+  [10/103] Microsoft.Extensions.Logging.Configuration.dll -> Microsoft.Extensions.Logging.Configuration.dll.so
+  [29/103] System.Net.NetworkInformation.dll -> System.Net.NetworkInformation.dll.so
+  [30/103] Xamarin.AndroidX.AppCompat.AppCompatResources.dll -> Xamarin.AndroidX.AppCompat.AppCompatResources.dll.so
+  [31/103] System.Net.Primitives.dll -> System.Net.Primitives.dll.so
+  [11/103] Microsoft.Extensions.Options.dll -> Microsoft.Extensions.Options.dll.so
+  [32/103] System.Net.Requests.dll -> System.Net.Requests.dll.so
+  [33/103] Xamarin.AndroidX.CardView.dll -> Xamarin.AndroidX.CardView.dll.so
+  [34/103] System.Net.Security.dll -> System.Net.Security.dll.so
+  [12/103] Microsoft.Extensions.Options.ConfigurationExtensions.dll -> Microsoft.Extensions.Options.ConfigurationExtensions.dll.so
+  [35/103] Xamarin.AndroidX.Collection.dll -> Xamarin.AndroidX.Collection.dll.so
+  [36/103] System.Net.WebProxy.dll -> System.Net.WebProxy.dll.so
+  [37/103] System.Numerics.Vectors.dll -> System.Numerics.Vectors.dll.so
+  [38/103] Xamarin.AndroidX.CoordinatorLayout.dll -> Xamarin.AndroidX.CoordinatorLayout.dll.so
+  [13/103] Microsoft.Extensions.Primitives.dll -> Microsoft.Extensions.Primitives.dll.so
+  [39/103] System.ObjectModel.dll -> System.ObjectModel.dll.so
+  [40/103] Xamarin.AndroidX.Core.dll -> Xamarin.AndroidX.Core.dll.so
+  [14/103] Microsoft.Maui.Graphics.dll -> Microsoft.Maui.Graphics.dll.so
+  [41/103] Xamarin.AndroidX.CursorAdapter.dll -> Xamarin.AndroidX.CursorAdapter.dll.so
+  [42/103] Xamarin.AndroidX.CustomView.dll -> Xamarin.AndroidX.CustomView.dll.so
+  [43/103] Xamarin.AndroidX.DrawerLayout.dll -> Xamarin.AndroidX.DrawerLayout.dll.so
+  [44/103] System.Private.Uri.dll -> System.Private.Uri.dll.so
+  [15/103] Xamarin.AndroidX.Activity.dll -> Xamarin.AndroidX.Activity.dll.so
+  [45/103] Xamarin.AndroidX.Fragment.dll -> Xamarin.AndroidX.Fragment.dll.so
+  [46/103] System.Private.Xml.dll -> System.Private.Xml.dll.so
+  [47/103] Xamarin.AndroidX.Lifecycle.Common.dll -> Xamarin.AndroidX.Lifecycle.Common.dll.so
+  [16/103] Xamarin.AndroidX.AppCompat.dll -> Xamarin.AndroidX.AppCompat.dll.so
+  [48/103] System.Reflection.Metadata.dll -> System.Reflection.Metadata.dll.so
+  [49/103] Xamarin.AndroidX.Lifecycle.LiveData.Core.dll -> Xamarin.AndroidX.Lifecycle.LiveData.Core.dll.so
+  [17/103] Xamarin.AndroidX.AppCompat.AppCompatResources.dll -> Xamarin.AndroidX.AppCompat.AppCompatResources.dll.so
+  [50/103] System.Reflection.Primitives.dll -> System.Reflection.Primitives.dll.so
+  [51/103] Xamarin.AndroidX.Lifecycle.ViewModel.dll -> Xamarin.AndroidX.Lifecycle.ViewModel.dll.so
+  [52/103] System.Runtime.CompilerServices.Unsafe.dll -> System.Runtime.CompilerServices.Unsafe.dll.so
+  [18/103] Xamarin.AndroidX.CardView.dll -> Xamarin.AndroidX.CardView.dll.so
+  [53/103] System.Runtime.InteropServices.RuntimeInformation.dll -> System.Runtime.InteropServices.RuntimeInformation.dll.so
+  [54/103] Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll -> Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll.so
+  [55/103] System.Runtime.InteropServices.dll -> System.Runtime.InteropServices.dll.so
+  [56/103] System.Runtime.Serialization.Primitives.dll -> System.Runtime.Serialization.Primitives.dll.so
+  [19/103] Xamarin.AndroidX.Collection.dll -> Xamarin.AndroidX.Collection.dll.so
+  [57/103] Xamarin.AndroidX.Loader.dll -> Xamarin.AndroidX.Loader.dll.so
+  [58/103] System.Runtime.dll -> System.Runtime.dll.so
+  [20/103] Xamarin.AndroidX.CoordinatorLayout.dll -> Xamarin.AndroidX.CoordinatorLayout.dll.so
+  [59/103] Xamarin.AndroidX.Navigation.Common.dll -> Xamarin.AndroidX.Navigation.Common.dll.so
+  [60/103] System.Security.Cryptography.Algorithms.dll -> System.Security.Cryptography.Algorithms.dll.so
+  [61/103] Xamarin.AndroidX.Navigation.Fragment.dll -> Xamarin.AndroidX.Navigation.Fragment.dll.so
+  [62/103] System.Security.Cryptography.Primitives.dll -> System.Security.Cryptography.Primitives.dll.so
+  [21/103] Xamarin.AndroidX.Core.dll -> Xamarin.AndroidX.Core.dll.so
+  [63/103] Xamarin.AndroidX.Navigation.Runtime.dll -> Xamarin.AndroidX.Navigation.Runtime.dll.so
+  [22/103] Xamarin.AndroidX.CursorAdapter.dll -> Xamarin.AndroidX.CursorAdapter.dll.so
+  [64/103] System.Text.Encodings.Web.dll -> System.Text.Encodings.Web.dll.so
+  [23/103] Xamarin.AndroidX.CustomView.dll -> Xamarin.AndroidX.CustomView.dll.so
+  [65/103] Xamarin.AndroidX.Navigation.UI.dll -> Xamarin.AndroidX.Navigation.UI.dll.so
+  [24/103] Xamarin.AndroidX.DrawerLayout.dll -> Xamarin.AndroidX.DrawerLayout.dll.so
+  [66/103] Xamarin.AndroidX.RecyclerView.dll -> Xamarin.AndroidX.RecyclerView.dll.so
+  [25/103] Xamarin.AndroidX.Fragment.dll -> Xamarin.AndroidX.Fragment.dll.so
+  [26/103] Xamarin.AndroidX.Lifecycle.Common.dll -> Xamarin.AndroidX.Lifecycle.Common.dll.so
+  [67/103] Xamarin.AndroidX.SavedState.dll -> Xamarin.AndroidX.SavedState.dll.so
+  [27/103] Xamarin.AndroidX.Lifecycle.LiveData.Core.dll -> Xamarin.AndroidX.Lifecycle.LiveData.Core.dll.so
+  [68/103] Xamarin.AndroidX.SwipeRefreshLayout.dll -> Xamarin.AndroidX.SwipeRefreshLayout.dll.so
+  [28/103] Xamarin.AndroidX.Lifecycle.ViewModel.dll -> Xamarin.AndroidX.Lifecycle.ViewModel.dll.so
+  [69/103] System.Text.Json.dll -> System.Text.Json.dll.so
+  [70/103] Xamarin.AndroidX.ViewPager.dll -> Xamarin.AndroidX.ViewPager.dll.so
+  [29/103] Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll -> Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll.so
+  [71/103] Xamarin.AndroidX.ViewPager2.dll -> Xamarin.AndroidX.ViewPager2.dll.so
+  [72/103] System.Text.RegularExpressions.dll -> System.Text.RegularExpressions.dll.so
+  [30/103] Xamarin.AndroidX.Loader.dll -> Xamarin.AndroidX.Loader.dll.so
+  [73/103] Xamarin.Google.Android.Material.dll -> Xamarin.Google.Android.Material.dll.so
+  [74/103] System.Threading.Thread.dll -> System.Threading.Thread.dll.so
+  [31/103] Xamarin.AndroidX.Navigation.Common.dll -> Xamarin.AndroidX.Navigation.Common.dll.so
+  [75/103] Xamarin.Kotlin.StdLib.dll -> Xamarin.Kotlin.StdLib.dll.so
+  [76/103] System.Threading.ThreadPool.dll -> System.Threading.ThreadPool.dll.so
+  [77/103] Xamarin.KotlinX.Coroutines.Core.Jvm.dll -> Xamarin.KotlinX.Coroutines.Core.Jvm.dll.so
+  [78/103] System.Threading.dll -> System.Threading.dll.so
+  [32/103] Xamarin.AndroidX.Navigation.Fragment.dll -> Xamarin.AndroidX.Navigation.Fragment.dll.so
+  [79/103] Microsoft.Win32.Primitives.dll -> Microsoft.Win32.Primitives.dll.so
+  [80/103] System.Xml.ReaderWriter.dll -> System.Xml.ReaderWriter.dll.so
+  [33/103] Xamarin.AndroidX.Navigation.Runtime.dll -> Xamarin.AndroidX.Navigation.Runtime.dll.so
+  [81/103] System.dll -> System.dll.so
+  [82/103] System.Collections.Concurrent.dll -> System.Collections.Concurrent.dll.so
+  [34/103] Xamarin.AndroidX.Navigation.UI.dll -> Xamarin.AndroidX.Navigation.UI.dll.so
+  [35/103] Xamarin.AndroidX.RecyclerView.dll -> Xamarin.AndroidX.RecyclerView.dll.so
+  [36/103] Xamarin.AndroidX.SavedState.dll -> Xamarin.AndroidX.SavedState.dll.so
+  [83/103] System.Collections.Immutable.dll -> System.Collections.Immutable.dll.so
+  [37/103] Xamarin.AndroidX.SwipeRefreshLayout.dll -> Xamarin.AndroidX.SwipeRefreshLayout.dll.so
+  [84/103] Java.Interop.dll -> Java.Interop.dll.so
+  [85/103] System.Collections.NonGeneric.dll -> System.Collections.NonGeneric.dll.so
+  [38/103] Xamarin.AndroidX.ViewPager.dll -> Xamarin.AndroidX.ViewPager.dll.so
+  [86/103] System.Collections.Specialized.dll -> System.Collections.Specialized.dll.so
+  [39/103] Xamarin.AndroidX.ViewPager2.dll -> Xamarin.AndroidX.ViewPager2.dll.so
+  [87/103] System.Collections.dll -> System.Collections.dll.so
+  [88/103] System.ComponentModel.Primitives.dll -> System.ComponentModel.Primitives.dll.so
+  [40/103] Xamarin.Google.Android.Material.dll -> Xamarin.Google.Android.Material.dll.so
+  [89/103] System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll.so
+  [41/103] Xamarin.Kotlin.StdLib.dll -> Xamarin.Kotlin.StdLib.dll.so
+  [42/103] Xamarin.KotlinX.Coroutines.Core.Jvm.dll -> Xamarin.KotlinX.Coroutines.Core.Jvm.dll.so
+  [90/103] System.ComponentModel.dll -> System.ComponentModel.dll.so
+  [91/103] Mono.Android.dll -> Mono.Android.dll.so
+  [43/103] Microsoft.Win32.Primitives.dll -> Microsoft.Win32.Primitives.dll.so
+  [92/103] Sentry.dll -> Sentry.dll.so
+  [44/103] System.Collections.Concurrent.dll -> System.Collections.Concurrent.dll.so
+  [45/103] System.Collections.Immutable.dll -> System.Collections.Immutable.dll.so
+  [93/103] Sentry.Extensions.Logging.dll -> Sentry.Extensions.Logging.dll.so
+  [46/103] System.Collections.NonGeneric.dll -> System.Collections.NonGeneric.dll.so
+  [94/103] Sentry.Maui.dll -> Sentry.Maui.dll.so
+  [47/103] System.Collections.Specialized.dll -> System.Collections.Specialized.dll.so
+  [95/103] Microsoft.Maui.dll -> Microsoft.Maui.dll.so
+  [48/103] System.Collections.dll -> System.Collections.dll.so
+  [96/103] Microsoft.Maui.Controls.Compatibility.dll -> Microsoft.Maui.Controls.Compatibility.dll.so
+  [49/103] System.ComponentModel.Primitives.dll -> System.ComponentModel.Primitives.dll.so
+  [97/103] Sentry.Samples.Maui.dll -> Sentry.Samples.Maui.dll.so
+  [50/103] System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll.so
+  [51/103] System.ComponentModel.dll -> System.ComponentModel.dll.so
+  [98/103] Microsoft.Maui.Controls.Xaml.dll -> Microsoft.Maui.Controls.Xaml.dll.so
+  [52/103] System.Console.dll -> System.Console.dll.so
+  [53/103] System.Diagnostics.DiagnosticSource.dll -> System.Diagnostics.DiagnosticSource.dll.so
+  [54/103] System.Diagnostics.StackTrace.dll -> System.Diagnostics.StackTrace.dll.so
+  [55/103] System.Diagnostics.TraceSource.dll -> System.Diagnostics.TraceSource.dll.so
+  [56/103] System.IO.Compression.ZipFile.dll -> System.IO.Compression.ZipFile.dll.so
+  [57/103] System.IO.Compression.dll -> System.IO.Compression.dll.so
+  [58/103] System.IO.FileSystem.DriveInfo.dll -> System.IO.FileSystem.DriveInfo.dll.so
+  [59/103] System.IO.MemoryMappedFiles.dll -> System.IO.MemoryMappedFiles.dll.so
+  [60/103] System.Linq.Expressions.dll -> System.Linq.Expressions.dll.so
+  [61/103] System.Linq.dll -> System.Linq.dll.so
+  [62/103] System.Memory.dll -> System.Memory.dll.so
+  [99/103] Microsoft.Maui.Controls.dll -> Microsoft.Maui.Controls.dll.so
+  [100/103] Microsoft.Maui.Essentials.dll -> Microsoft.Maui.Essentials.dll.so
+  [63/103] System.Net.Http.dll -> System.Net.Http.dll.so
+  [101/103] System.Private.CoreLib.dll -> System.Private.CoreLib.dll.so
+  [102/103] Sentry.Android.AssemblyReader.dll -> Sentry.Android.AssemblyReader.dll.so
+  [64/103] System.Net.NetworkInformation.dll -> System.Net.NetworkInformation.dll.so
+  [103/103] Sentry.Bindings.Android.dll -> Sentry.Bindings.Android.dll.so
+  [65/103] System.Net.Primitives.dll -> System.Net.Primitives.dll.so
+  [66/103] System.Net.Requests.dll -> System.Net.Requests.dll.so
+  [67/103] System.Net.Security.dll -> System.Net.Security.dll.so
+  [68/103] System.Net.WebProxy.dll -> System.Net.WebProxy.dll.so
+  [69/103] System.Numerics.Vectors.dll -> System.Numerics.Vectors.dll.so
+  [70/103] System.ObjectModel.dll -> System.ObjectModel.dll.so
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  Optimizing assemblies for size. This process might take a while.
+  [71/103] System.Private.Uri.dll -> System.Private.Uri.dll.so
+  [72/103] System.Private.Xml.dll -> System.Private.Xml.dll.so
+  [73/103] System.Reflection.Metadata.dll -> System.Reflection.Metadata.dll.so
+  [74/103] System.Reflection.Primitives.dll -> System.Reflection.Primitives.dll.so
+  [75/103] System.Runtime.CompilerServices.Unsafe.dll -> System.Runtime.CompilerServices.Unsafe.dll.so
+  [76/103] System.Runtime.InteropServices.RuntimeInformation.dll -> System.Runtime.InteropServices.RuntimeInformation.dll.so
+  [77/103] System.Runtime.InteropServices.dll -> System.Runtime.InteropServices.dll.so
+  [78/103] System.Runtime.Serialization.Primitives.dll -> System.Runtime.Serialization.Primitives.dll.so
+  [79/103] System.Runtime.dll -> System.Runtime.dll.so
+  [80/103] System.Security.Cryptography.Algorithms.dll -> System.Security.Cryptography.Algorithms.dll.so
+  [81/103] System.Security.Cryptography.Primitives.dll -> System.Security.Cryptography.Primitives.dll.so
+  [82/103] System.Text.Encodings.Web.dll -> System.Text.Encodings.Web.dll.so
+  [83/103] System.Text.Json.dll -> System.Text.Json.dll.so
+  [84/103] System.Text.RegularExpressions.dll -> System.Text.RegularExpressions.dll.so
+  [85/103] System.Threading.Thread.dll -> System.Threading.Thread.dll.so
+  [86/103] System.Threading.ThreadPool.dll -> System.Threading.ThreadPool.dll.so
+  [87/103] System.Threading.dll -> System.Threading.dll.so
+  [88/103] System.Xml.ReaderWriter.dll -> System.Xml.ReaderWriter.dll.so
+  [89/103] System.dll -> System.dll.so
+  [90/103] Java.Interop.dll -> Java.Interop.dll.so
+  [91/103] Mono.Android.dll -> Mono.Android.dll.so
+  [92/103] Microsoft.Maui.dll -> Microsoft.Maui.dll.so
+  [93/103] Microsoft.Maui.Controls.Compatibility.dll -> Microsoft.Maui.Controls.Compatibility.dll.so
+  [94/103] Microsoft.Maui.Controls.Xaml.dll -> Microsoft.Maui.Controls.Xaml.dll.so
+  [95/103] Microsoft.Maui.Controls.dll -> Microsoft.Maui.Controls.dll.so
+  [96/103] Microsoft.Maui.Essentials.dll -> Microsoft.Maui.Essentials.dll.so
+  [97/103] Sentry.Android.AssemblyReader.dll -> Sentry.Android.AssemblyReader.dll.so
+  [98/103] Sentry.Bindings.Android.dll -> Sentry.Bindings.Android.dll.so
+  [99/103] Sentry.dll -> Sentry.dll.so
+  [100/103] Sentry.Extensions.Logging.dll -> Sentry.Extensions.Logging.dll.so
+  [101/103] Sentry.Maui.dll -> Sentry.Maui.dll.so
+  [102/103] Sentry.Samples.Maui.dll -> Sentry.Samples.Maui.dll.so
+  [103/103] System.Private.CoreLib.dll -> System.Private.CoreLib.dll.so
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  Optimizing assemblies for size. This process might take a while.
+  [1/103] System.Console.dll -> System.Console.dll.so
+  [2/103] K4os.Compression.LZ4.dll -> K4os.Compression.LZ4.dll.so
+  [3/103] System.Diagnostics.DiagnosticSource.dll -> System.Diagnostics.DiagnosticSource.dll.so
+  [4/103] Microsoft.Extensions.Configuration.dll -> Microsoft.Extensions.Configuration.dll.so
+  [5/103] System.Diagnostics.StackTrace.dll -> System.Diagnostics.StackTrace.dll.so
+  [6/103] Microsoft.Extensions.Configuration.Abstractions.dll -> Microsoft.Extensions.Configuration.Abstractions.dll.so
+  [7/103] System.Diagnostics.TraceSource.dll -> System.Diagnostics.TraceSource.dll.so
+  [8/103] Microsoft.Extensions.Configuration.Binder.dll -> Microsoft.Extensions.Configuration.Binder.dll.so
+  [9/103] System.IO.Compression.ZipFile.dll -> System.IO.Compression.ZipFile.dll.so
+  [10/103] System.IO.Compression.dll -> System.IO.Compression.dll.so
+  [11/103] System.IO.FileSystem.DriveInfo.dll -> System.IO.FileSystem.DriveInfo.dll.so
+  [12/103] Microsoft.Extensions.DependencyInjection.dll -> Microsoft.Extensions.DependencyInjection.dll.so
+  [13/103] Microsoft.Extensions.DependencyInjection.Abstractions.dll -> Microsoft.Extensions.DependencyInjection.Abstractions.dll.so
+  [14/103] System.IO.MemoryMappedFiles.dll -> System.IO.MemoryMappedFiles.dll.so
+  [15/103] Microsoft.Extensions.Http.dll -> Microsoft.Extensions.Http.dll.so
+  [16/103] Microsoft.Extensions.Logging.dll -> Microsoft.Extensions.Logging.dll.so
+  [17/103] Microsoft.Extensions.Logging.Abstractions.dll -> Microsoft.Extensions.Logging.Abstractions.dll.so
+  [18/103] System.Linq.Expressions.dll -> System.Linq.Expressions.dll.so
+  [19/103] Microsoft.Extensions.Logging.Configuration.dll -> Microsoft.Extensions.Logging.Configuration.dll.so
+  [20/103] Microsoft.Extensions.Options.dll -> Microsoft.Extensions.Options.dll.so
+  [21/103] Microsoft.Extensions.Options.ConfigurationExtensions.dll -> Microsoft.Extensions.Options.ConfigurationExtensions.dll.so
+  [22/103] System.Linq.dll -> System.Linq.dll.so
+  [23/103] Microsoft.Extensions.Primitives.dll -> Microsoft.Extensions.Primitives.dll.so
+  [24/103] System.Memory.dll -> System.Memory.dll.so
+  [25/103] System.Net.Http.dll -> System.Net.Http.dll.so
+  [26/103] System.Net.NetworkInformation.dll -> System.Net.NetworkInformation.dll.so
+  [27/103] Microsoft.Maui.Graphics.dll -> Microsoft.Maui.Graphics.dll.so
+  [28/103] System.Net.Primitives.dll -> System.Net.Primitives.dll.so
+  [29/103] System.Net.Requests.dll -> System.Net.Requests.dll.so
+  [30/103] System.Net.Security.dll -> System.Net.Security.dll.so
+  [31/103] Xamarin.AndroidX.Activity.dll -> Xamarin.AndroidX.Activity.dll.so
+  [32/103] System.Net.WebProxy.dll -> System.Net.WebProxy.dll.so
+  [33/103] System.Numerics.Vectors.dll -> System.Numerics.Vectors.dll.so
+  [34/103] Xamarin.AndroidX.AppCompat.dll -> Xamarin.AndroidX.AppCompat.dll.so
+  [35/103] System.ObjectModel.dll -> System.ObjectModel.dll.so
+  [36/103] Xamarin.AndroidX.AppCompat.AppCompatResources.dll -> Xamarin.AndroidX.AppCompat.AppCompatResources.dll.so
+  [37/103] Xamarin.AndroidX.CardView.dll -> Xamarin.AndroidX.CardView.dll.so
+  [38/103] System.Private.Uri.dll -> System.Private.Uri.dll.so
+  [39/103] Xamarin.AndroidX.Collection.dll -> Xamarin.AndroidX.Collection.dll.so
+  [40/103] System.Private.Xml.dll -> System.Private.Xml.dll.so
+  [41/103] Xamarin.AndroidX.CoordinatorLayout.dll -> Xamarin.AndroidX.CoordinatorLayout.dll.so
+  [42/103] System.Reflection.Metadata.dll -> System.Reflection.Metadata.dll.so
+  [43/103] System.Reflection.Primitives.dll -> System.Reflection.Primitives.dll.so
+  [44/103] Xamarin.AndroidX.Core.dll -> Xamarin.AndroidX.Core.dll.so
+  [45/103] System.Runtime.CompilerServices.Unsafe.dll -> System.Runtime.CompilerServices.Unsafe.dll.so
+  [46/103] Xamarin.AndroidX.CursorAdapter.dll -> Xamarin.AndroidX.CursorAdapter.dll.so
+  [47/103] System.Runtime.InteropServices.RuntimeInformation.dll -> System.Runtime.InteropServices.RuntimeInformation.dll.so
+  [48/103] Xamarin.AndroidX.CustomView.dll -> Xamarin.AndroidX.CustomView.dll.so
+  [49/103] System.Runtime.InteropServices.dll -> System.Runtime.InteropServices.dll.so
+  [50/103] Xamarin.AndroidX.DrawerLayout.dll -> Xamarin.AndroidX.DrawerLayout.dll.so
+  [51/103] System.Runtime.Serialization.Primitives.dll -> System.Runtime.Serialization.Primitives.dll.so
+  [52/103] System.Runtime.dll -> System.Runtime.dll.so
+  [53/103] System.Security.Cryptography.Algorithms.dll -> System.Security.Cryptography.Algorithms.dll.so
+  [54/103] Xamarin.AndroidX.Fragment.dll -> Xamarin.AndroidX.Fragment.dll.so
+  [55/103] Xamarin.AndroidX.Lifecycle.Common.dll -> Xamarin.AndroidX.Lifecycle.Common.dll.so
+  [56/103] System.Security.Cryptography.Primitives.dll -> System.Security.Cryptography.Primitives.dll.so
+  [57/103] Xamarin.AndroidX.Lifecycle.LiveData.Core.dll -> Xamarin.AndroidX.Lifecycle.LiveData.Core.dll.so
+  [58/103] Xamarin.AndroidX.Lifecycle.ViewModel.dll -> Xamarin.AndroidX.Lifecycle.ViewModel.dll.so
+  [59/103] System.Text.Encodings.Web.dll -> System.Text.Encodings.Web.dll.so
+  [60/103] Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll -> Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll.so
+  [61/103] Xamarin.AndroidX.Loader.dll -> Xamarin.AndroidX.Loader.dll.so
+  [62/103] Xamarin.AndroidX.Navigation.Common.dll -> Xamarin.AndroidX.Navigation.Common.dll.so
+  [63/103] Xamarin.AndroidX.Navigation.Fragment.dll -> Xamarin.AndroidX.Navigation.Fragment.dll.so
+  [64/103] Xamarin.AndroidX.Navigation.Runtime.dll -> Xamarin.AndroidX.Navigation.Runtime.dll.so
+  [65/103] Xamarin.AndroidX.Navigation.UI.dll -> Xamarin.AndroidX.Navigation.UI.dll.so
+  [66/103] Xamarin.AndroidX.RecyclerView.dll -> Xamarin.AndroidX.RecyclerView.dll.so
+  [67/103] Xamarin.AndroidX.SavedState.dll -> Xamarin.AndroidX.SavedState.dll.so
+  [68/103] System.Text.Json.dll -> System.Text.Json.dll.so
+  [69/103] Xamarin.AndroidX.SwipeRefreshLayout.dll -> Xamarin.AndroidX.SwipeRefreshLayout.dll.so
+  [70/103] Xamarin.AndroidX.ViewPager.dll -> Xamarin.AndroidX.ViewPager.dll.so
+  [71/103] System.Text.RegularExpressions.dll -> System.Text.RegularExpressions.dll.so
+  [72/103] Xamarin.AndroidX.ViewPager2.dll -> Xamarin.AndroidX.ViewPager2.dll.so
+  [73/103] System.Threading.Thread.dll -> System.Threading.Thread.dll.so
+  [74/103] System.Threading.ThreadPool.dll -> System.Threading.ThreadPool.dll.so
+  [75/103] Xamarin.Google.Android.Material.dll -> Xamarin.Google.Android.Material.dll.so
+  [76/103] System.Threading.dll -> System.Threading.dll.so
+  [77/103] Xamarin.Kotlin.StdLib.dll -> Xamarin.Kotlin.StdLib.dll.so
+  [78/103] System.Xml.ReaderWriter.dll -> System.Xml.ReaderWriter.dll.so
+  [79/103] Xamarin.KotlinX.Coroutines.Core.Jvm.dll -> Xamarin.KotlinX.Coroutines.Core.Jvm.dll.so
+  [80/103] System.dll -> System.dll.so
+  [81/103] Microsoft.Win32.Primitives.dll -> Microsoft.Win32.Primitives.dll.so
+  [82/103] System.Collections.Concurrent.dll -> System.Collections.Concurrent.dll.so
+  [83/103] System.Collections.Immutable.dll -> System.Collections.Immutable.dll.so
+  [84/103] System.Collections.NonGeneric.dll -> System.Collections.NonGeneric.dll.so
+  [85/103] Java.Interop.dll -> Java.Interop.dll.so
+  [86/103] System.Collections.Specialized.dll -> System.Collections.Specialized.dll.so
+  [87/103] System.Collections.dll -> System.Collections.dll.so
+  [88/103] System.ComponentModel.Primitives.dll -> System.ComponentModel.Primitives.dll.so
+  [89/103] System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll.so
+  [90/103] System.ComponentModel.dll -> System.ComponentModel.dll.so
+  [91/103] Mono.Android.dll -> Mono.Android.dll.so
+  [92/103] Sentry.dll -> Sentry.dll.so
+  [93/103] Sentry.Extensions.Logging.dll -> Sentry.Extensions.Logging.dll.so
+  [94/103] Sentry.Maui.dll -> Sentry.Maui.dll.so
+  [95/103] Microsoft.Maui.dll -> Microsoft.Maui.dll.so
+  [96/103] Microsoft.Maui.Controls.Compatibility.dll -> Microsoft.Maui.Controls.Compatibility.dll.so
+  [97/103] Microsoft.Maui.Controls.Xaml.dll -> Microsoft.Maui.Controls.Xaml.dll.so
+  [98/103] Sentry.Samples.Maui.dll -> Sentry.Samples.Maui.dll.so
+  [1/103] K4os.Compression.LZ4.dll -> K4os.Compression.LZ4.dll.so
+  [2/103] Microsoft.Extensions.Configuration.dll -> Microsoft.Extensions.Configuration.dll.so
+  [3/103] Microsoft.Extensions.Configuration.Abstractions.dll -> Microsoft.Extensions.Configuration.Abstractions.dll.so
+  [4/103] Microsoft.Extensions.Configuration.Binder.dll -> Microsoft.Extensions.Configuration.Binder.dll.so
+  [5/103] Microsoft.Extensions.DependencyInjection.dll -> Microsoft.Extensions.DependencyInjection.dll.so
+  [6/103] Microsoft.Extensions.DependencyInjection.Abstractions.dll -> Microsoft.Extensions.DependencyInjection.Abstractions.dll.so
+  [7/103] Microsoft.Extensions.Http.dll -> Microsoft.Extensions.Http.dll.so
+  [8/103] Microsoft.Extensions.Logging.dll -> Microsoft.Extensions.Logging.dll.so
+  [9/103] Microsoft.Extensions.Logging.Abstractions.dll -> Microsoft.Extensions.Logging.Abstractions.dll.so
+  [10/103] Microsoft.Extensions.Logging.Configuration.dll -> Microsoft.Extensions.Logging.Configuration.dll.so
+  [11/103] Microsoft.Extensions.Options.dll -> Microsoft.Extensions.Options.dll.so
+  [12/103] Microsoft.Extensions.Options.ConfigurationExtensions.dll -> Microsoft.Extensions.Options.ConfigurationExtensions.dll.so
+  [13/103] Microsoft.Extensions.Primitives.dll -> Microsoft.Extensions.Primitives.dll.so
+  [99/103] Microsoft.Maui.Controls.dll -> Microsoft.Maui.Controls.dll.so
+  [14/103] Microsoft.Maui.Graphics.dll -> Microsoft.Maui.Graphics.dll.so
+  [100/103] System.Private.CoreLib.dll -> System.Private.CoreLib.dll.so
+  [15/103] Xamarin.AndroidX.Activity.dll -> Xamarin.AndroidX.Activity.dll.so
+  [101/103] Microsoft.Maui.Essentials.dll -> Microsoft.Maui.Essentials.dll.so
+  [102/103] Sentry.Android.AssemblyReader.dll -> Sentry.Android.AssemblyReader.dll.so
+  [16/103] Xamarin.AndroidX.AppCompat.dll -> Xamarin.AndroidX.AppCompat.dll.so
+  [103/103] Sentry.Bindings.Android.dll -> Sentry.Bindings.Android.dll.so
+  [17/103] Xamarin.AndroidX.AppCompat.AppCompatResources.dll -> Xamarin.AndroidX.AppCompat.AppCompatResources.dll.so
+  [18/103] Xamarin.AndroidX.CardView.dll -> Xamarin.AndroidX.CardView.dll.so
+  [19/103] Xamarin.AndroidX.Collection.dll -> Xamarin.AndroidX.Collection.dll.so
+  [20/103] Xamarin.AndroidX.CoordinatorLayout.dll -> Xamarin.AndroidX.CoordinatorLayout.dll.so
+  [21/103] Xamarin.AndroidX.Core.dll -> Xamarin.AndroidX.Core.dll.so
+  [22/103] Xamarin.AndroidX.CursorAdapter.dll -> Xamarin.AndroidX.CursorAdapter.dll.so
+  [23/103] Xamarin.AndroidX.CustomView.dll -> Xamarin.AndroidX.CustomView.dll.so
+  [24/103] Xamarin.AndroidX.DrawerLayout.dll -> Xamarin.AndroidX.DrawerLayout.dll.so
+  [25/103] Xamarin.AndroidX.Fragment.dll -> Xamarin.AndroidX.Fragment.dll.so
+  [26/103] Xamarin.AndroidX.Lifecycle.Common.dll -> Xamarin.AndroidX.Lifecycle.Common.dll.so
+  [27/103] Xamarin.AndroidX.Lifecycle.LiveData.Core.dll -> Xamarin.AndroidX.Lifecycle.LiveData.Core.dll.so
+  [28/103] Xamarin.AndroidX.Lifecycle.ViewModel.dll -> Xamarin.AndroidX.Lifecycle.ViewModel.dll.so
+  [29/103] Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll -> Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll.so
+  [30/103] Xamarin.AndroidX.Loader.dll -> Xamarin.AndroidX.Loader.dll.so
+  [31/103] Xamarin.AndroidX.Navigation.Common.dll -> Xamarin.AndroidX.Navigation.Common.dll.so
+  [32/103] Xamarin.AndroidX.Navigation.Fragment.dll -> Xamarin.AndroidX.Navigation.Fragment.dll.so
+  [33/103] Xamarin.AndroidX.Navigation.Runtime.dll -> Xamarin.AndroidX.Navigation.Runtime.dll.so
+  [34/103] Xamarin.AndroidX.Navigation.UI.dll -> Xamarin.AndroidX.Navigation.UI.dll.so
+  [35/103] Xamarin.AndroidX.RecyclerView.dll -> Xamarin.AndroidX.RecyclerView.dll.so
+  [36/103] Xamarin.AndroidX.SavedState.dll -> Xamarin.AndroidX.SavedState.dll.so
+  [37/103] Xamarin.AndroidX.SwipeRefreshLayout.dll -> Xamarin.AndroidX.SwipeRefreshLayout.dll.so
+  [38/103] Xamarin.AndroidX.ViewPager.dll -> Xamarin.AndroidX.ViewPager.dll.so
+  [39/103] Xamarin.AndroidX.ViewPager2.dll -> Xamarin.AndroidX.ViewPager2.dll.so
+  [40/103] Xamarin.Google.Android.Material.dll -> Xamarin.Google.Android.Material.dll.so
+  [41/103] Xamarin.Kotlin.StdLib.dll -> Xamarin.Kotlin.StdLib.dll.so
+  [42/103] Xamarin.KotlinX.Coroutines.Core.Jvm.dll -> Xamarin.KotlinX.Coroutines.Core.Jvm.dll.so
+  [43/103] Microsoft.Win32.Primitives.dll -> Microsoft.Win32.Primitives.dll.so
+  [44/103] System.Collections.Concurrent.dll -> System.Collections.Concurrent.dll.so
+  [45/103] System.Collections.Immutable.dll -> System.Collections.Immutable.dll.so
+  [46/103] System.Collections.NonGeneric.dll -> System.Collections.NonGeneric.dll.so
+  [47/103] System.Collections.Specialized.dll -> System.Collections.Specialized.dll.so
+  [48/103] System.Collections.dll -> System.Collections.dll.so
+  [49/103] System.ComponentModel.Primitives.dll -> System.ComponentModel.Primitives.dll.so
+  [50/103] System.ComponentModel.TypeConverter.dll -> System.ComponentModel.TypeConverter.dll.so
+  [51/103] System.ComponentModel.dll -> System.ComponentModel.dll.so
+  [52/103] System.Console.dll -> System.Console.dll.so
+  [53/103] System.Diagnostics.DiagnosticSource.dll -> System.Diagnostics.DiagnosticSource.dll.so
+  [54/103] System.Diagnostics.StackTrace.dll -> System.Diagnostics.StackTrace.dll.so
+  [55/103] System.Diagnostics.TraceSource.dll -> System.Diagnostics.TraceSource.dll.so
+  [56/103] System.IO.Compression.ZipFile.dll -> System.IO.Compression.ZipFile.dll.so
+  [57/103] System.IO.Compression.dll -> System.IO.Compression.dll.so
+  [58/103] System.IO.FileSystem.DriveInfo.dll -> System.IO.FileSystem.DriveInfo.dll.so
+  [59/103] System.IO.MemoryMappedFiles.dll -> System.IO.MemoryMappedFiles.dll.so
+  [60/103] System.Linq.Expressions.dll -> System.Linq.Expressions.dll.so
+  [61/103] System.Linq.dll -> System.Linq.dll.so
+  [62/103] System.Memory.dll -> System.Memory.dll.so
+  [63/103] System.Net.Http.dll -> System.Net.Http.dll.so
+  [64/103] System.Net.NetworkInformation.dll -> System.Net.NetworkInformation.dll.so
+  [65/103] System.Net.Primitives.dll -> System.Net.Primitives.dll.so
+  [66/103] System.Net.Requests.dll -> System.Net.Requests.dll.so
+  [67/103] System.Net.Security.dll -> System.Net.Security.dll.so
+  [68/103] System.Net.WebProxy.dll -> System.Net.WebProxy.dll.so
+  [69/103] System.Numerics.Vectors.dll -> System.Numerics.Vectors.dll.so
+  [70/103] System.ObjectModel.dll -> System.ObjectModel.dll.so
+  [71/103] System.Private.Uri.dll -> System.Private.Uri.dll.so
+  [72/103] System.Private.Xml.dll -> System.Private.Xml.dll.so
+  [73/103] System.Reflection.Metadata.dll -> System.Reflection.Metadata.dll.so
+  [74/103] System.Reflection.Primitives.dll -> System.Reflection.Primitives.dll.so
+  [75/103] System.Runtime.CompilerServices.Unsafe.dll -> System.Runtime.CompilerServices.Unsafe.dll.so
+  [76/103] System.Runtime.InteropServices.RuntimeInformation.dll -> System.Runtime.InteropServices.RuntimeInformation.dll.so
+  [77/103] System.Runtime.InteropServices.dll -> System.Runtime.InteropServices.dll.so
+  [78/103] System.Runtime.Serialization.Primitives.dll -> System.Runtime.Serialization.Primitives.dll.so
+  [79/103] System.Runtime.dll -> System.Runtime.dll.so
+  [80/103] System.Security.Cryptography.Algorithms.dll -> System.Security.Cryptography.Algorithms.dll.so
+  [81/103] System.Security.Cryptography.Primitives.dll -> System.Security.Cryptography.Primitives.dll.so
+  [82/103] System.Text.Encodings.Web.dll -> System.Text.Encodings.Web.dll.so
+  [83/103] System.Text.Json.dll -> System.Text.Json.dll.so
+  [84/103] System.Text.RegularExpressions.dll -> System.Text.RegularExpressions.dll.so
+  [85/103] System.Threading.Thread.dll -> System.Threading.Thread.dll.so
+  [86/103] System.Threading.ThreadPool.dll -> System.Threading.ThreadPool.dll.so
+  [87/103] System.Threading.dll -> System.Threading.dll.so
+  [88/103] System.Xml.ReaderWriter.dll -> System.Xml.ReaderWriter.dll.so
+  [89/103] System.dll -> System.dll.so
+  [90/103] Java.Interop.dll -> Java.Interop.dll.so
+  [91/103] Mono.Android.dll -> Mono.Android.dll.so
+  [92/103] Microsoft.Maui.dll -> Microsoft.Maui.dll.so
+  [93/103] Microsoft.Maui.Controls.Compatibility.dll -> Microsoft.Maui.Controls.Compatibility.dll.so
+  [94/103] Microsoft.Maui.Controls.Xaml.dll -> Microsoft.Maui.Controls.Xaml.dll.so
+  [95/103] Microsoft.Maui.Controls.dll -> Microsoft.Maui.Controls.dll.so
+  [96/103] Microsoft.Maui.Essentials.dll -> Microsoft.Maui.Essentials.dll.so
+  [97/103] Sentry.Android.AssemblyReader.dll -> Sentry.Android.AssemblyReader.dll.so
+  [98/103] Sentry.Bindings.Android.dll -> Sentry.Bindings.Android.dll.so
+  [99/103] Sentry.dll -> Sentry.dll.so
+  [100/103] Sentry.Extensions.Logging.dll -> Sentry.Extensions.Logging.dll.so
+  [101/103] Sentry.Maui.dll -> Sentry.Maui.dll.so
+  [102/103] Sentry.Samples.Maui.dll -> Sentry.Samples.Maui.dll.so
+  [103/103] System.Private.CoreLib.dll -> System.Private.CoreLib.dll.so
+  Preparing to upload debug symbols and sources to Sentry for Sentry.Samples.Maui (Release/net6.0-android)
+  > Found 877 debug information files
+  > Resolved source code for 9 debug information files
   > Prepared debug information files for upload
   > Nothing to upload, all files are on the server
 
