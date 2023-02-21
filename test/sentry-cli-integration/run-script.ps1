@@ -16,6 +16,10 @@ dotnet build "samples/$sample/$sample.csproj" -c Release --no-restore --nologo `
     {
         "Time Elapsed [value removed]"
     }
+    elseif ($_ -match "\[[0-9/]+\]")
+    {
+        # Skip lines like `[102/103] Sentry.Samples.Maui.dll -> Sentry.Samples.Maui.dll.so`
+    }
     else
     {
         "$_". `
