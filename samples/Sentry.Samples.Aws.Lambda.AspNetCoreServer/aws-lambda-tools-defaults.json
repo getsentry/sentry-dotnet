@@ -4,7 +4,7 @@
   "profile": "",
   "region": "",
   "configuration": "Release",
-  "framework": "netcoreapp3.1",
+  "framework": "net6.0",
   "s3-prefix": "aws-aspnet/",
   "template": "serverless.template",
   "template-parameters": "ShouldCreateBucket=true;BucketName="

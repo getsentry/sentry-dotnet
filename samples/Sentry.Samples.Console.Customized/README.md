@@ -4,8 +4,8 @@ Get your `DSN` at [sentry.io](sentry.io).
 
 ### Running with .NET Core:
 
-dotnet run -c Release -f netcoreapp2.1
+dotnet run -c Release -f net6.0
 
 ### Running with .NET Framework or Mono
 
-dotnet run -c Release -f net472
+dotnet run -c Release -f net8
