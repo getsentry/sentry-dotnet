@@ -51,9 +51,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.*" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.*" PrivateAssets="All" />
-    <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
+    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="4.2.0" PrivateAssets="All" />
+    <PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Import the root global usings, except for samples. -->
