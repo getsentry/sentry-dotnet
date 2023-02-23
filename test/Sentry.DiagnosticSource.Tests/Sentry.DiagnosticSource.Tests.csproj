@@ -25,7 +25,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[5.0.17,6)" />
 
     <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
-    <PackageReference Include="System.Text.Encodings.Web" Version="[6.0.0,7)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="[5.0.1,6)" />
   </ItemGroup>
 
   <!-- Test EF Core 3.1 on .NET Framework -->
@@ -34,6 +34,9 @@
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[3.1.32,4)" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[3.1.31,4)" />
+
+    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>
