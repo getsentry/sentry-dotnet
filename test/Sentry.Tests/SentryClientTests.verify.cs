@@ -23,11 +23,14 @@ public partial class SentryClientTests
         var error = new Exception("Exception message!");
         _fixture.SentryOptions.BeforeSendTransaction = _ => throw error;
 
-        var @event = new SentryEvent();
+        var transaction = new Transaction("name", "operation")
+        {
+            IsSampled = true
+        };
 
         var sut = _fixture.GetSut();
-        _ = sut.CaptureEvent(@event);
+        sut.CaptureTransaction(transaction);
 
-        return Verify(@event.Breadcrumbs);
+        return Verify(transaction.Breadcrumbs);
     }
 }
