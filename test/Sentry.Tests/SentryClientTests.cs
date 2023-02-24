@@ -722,7 +722,7 @@ public partial class SentryClientTests
     [Fact(Skip = "TBD")]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
     {
-        _fixture.SentryOptions.BeforeSend = _ => null;
+        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction( new Transaction("test name", "test operation")
@@ -732,7 +732,7 @@ public partial class SentryClientTests
         });
 
         _fixture.ClientReportRecorder.Received(1)
-            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
+            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
     }
 
     [Fact]
