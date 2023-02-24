@@ -135,8 +135,7 @@ public class SentryClient : ISentryClient, IDisposable
         var processedTransaction = BeforeSendTransaction(transaction);
         if (processedTransaction is null) // Rejected transaction
         {
-            // TODO: should the dropped transaction be recorded?
-            //_options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSendTransaction, DataCategory.Error);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
             _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
             return;
         }
