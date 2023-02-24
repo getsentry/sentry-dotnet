@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Allow `SentryUploadSources` to work even when not uploading symbols ([#2197](https://github.com/getsentry/sentry-dotnet/pull/2197))
+
 ### Fixes
 
 - Fix assembly not found on Android in Debug configuration ([#2175](https://github.com/getsentry/sentry-dotnet/pull/2175))
