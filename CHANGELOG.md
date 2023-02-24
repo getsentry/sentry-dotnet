@@ -5,6 +5,7 @@
 ### Features
 
 - Allow `SentryUploadSources` to work even when not uploading symbols ([#2197](https://github.com/getsentry/sentry-dotnet/pull/2197))
+- Add support for `BeforeSendTransaction` ([#2188](https://github.com/getsentry/sentry-dotnet/pull/2188))
 
 ### Fixes
 
