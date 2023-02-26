@@ -32,7 +32,10 @@
 // Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
 // See https://docs.sentry.io/platforms/android/configuration/manual-init/
 // This attribute automatically adds the metadata to the final AndroidManifest.xml
-[assembly: Android.App.MetaData("io.sentry.auto-init", Value = "false")]
+[assembly: MetaData("io.sentry.auto-init", Value = "false")]
+
+// Set the hybrid SDK name
+[assembly: MetaData("io.sentry.sdk.name", Value = "sentry.java.android.dotnet")]
 
 #endif
 

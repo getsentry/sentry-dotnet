@@ -276,6 +276,13 @@ namespace Sentry
         string Name { get; }
     }
     public interface ITransactionData : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
+    public enum InstructionAddressAdjustment
+    {
+        Auto = 0,
+        All = 1,
+        AllButFirst = 2,
+        None = 3,
+    }
     public static class MeasurementExtensions
     {
         public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, double value, Sentry.MeasurementUnit unit = default) { }
@@ -698,6 +705,7 @@ namespace Sentry
     public class SentryStackTrace : Sentry.IJsonSerializable
     {
         public SentryStackTrace() { }
+        public Sentry.InstructionAddressAdjustment? AddressAdjustment { get; set; }
         public System.Collections.Generic.IList<Sentry.SentryStackFrame> Frames { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }

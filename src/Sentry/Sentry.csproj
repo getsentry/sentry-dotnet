@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
@@ -75,13 +75,13 @@
       Update with each new version.
     -->
     <ItemGroup>
-      <SentryCLIDownload Include="sentry-cli-Darwin-arm64" FileHash="fbefb40a8e5ce29f82e0f7195e84f569dbeaaae07cdc1f983f5f3418fd9a376d" />
-      <SentryCLIDownload Include="sentry-cli-Darwin-x86_64" FileHash="d55ee5636d12bd193a4f526ab426e6af6273bec5bc2dc22e81dc8357d6e039eb" />
-      <SentryCLIDownload Include="sentry-cli-Linux-aarch64" FileHash="c62c5c1259307611e78af4f24a4c30162cff8adb0f021d363b307c42cded5c70" />
-      <SentryCLIDownload Include="sentry-cli-Linux-i686" FileHash="25c5e7e6d978d1e66bc26c9e4282633135a318ed0ac36cb73b4fa58f59fcb089" />
-      <SentryCLIDownload Include="sentry-cli-Linux-x86_64" FileHash="bc8f5f223fa688b3ad963c60a729f02aa8f5b17525de66fb3abf86800977ff6e" />
-      <SentryCLIDownload Include="sentry-cli-Windows-i686.exe" FileHash="2bb96fc94ea749e24cd607f48750b121572a3fb4b3f9499f63a996f83c56ef2b" />
-      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" FileHash="7b70536177419dcd2fdb2c823422290abfe25180ffa3beae000fb3c9b1473c1f"/>
+      <SentryCLIDownload Include="sentry-cli-Darwin-arm64" FileHash="5c3234a27ffde95ef3abe344b8ec48d0233d582029816c6b37a74581a189d431" />
+      <SentryCLIDownload Include="sentry-cli-Darwin-x86_64" FileHash="2f597027d36035beca9b4cad79e65370bf0dd4d6aa20842c907a8cae4c8d528a" />
+      <SentryCLIDownload Include="sentry-cli-Linux-aarch64" FileHash="01b39b3dd502d532846b741e612a1796ce727b79bb69cbab45b23126507717f8" />
+      <SentryCLIDownload Include="sentry-cli-Linux-i686" FileHash="05e52e80408ad1e513cdc2e6732486331bfdc122951478a91f44c6652b282cf7" />
+      <SentryCLIDownload Include="sentry-cli-Linux-x86_64" FileHash="217bcb4e5fd74b189be5a834ba835828eb6f7d97d3f676ef2da26f4de3df1729" />
+      <SentryCLIDownload Include="sentry-cli-Windows-i686.exe" FileHash="5d0a4c3c6a49ca7cd65b685aff0d56a2e79a29e841380ca493c6bc3656ebd8cb" />
+      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" FileHash="753d0f2cb65bfb5ab95d74d034c2d58451d5dcae1136e16b3e1aa0683ee1af95"/>
     </ItemGroup>
 
     <!-- Download the files -->

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
+using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
@@ -102,14 +103,22 @@ public static class SentryMauiAppBuilderExtensions
 
     private static void BindMauiEvents(this IPlatformApplication platformApplication)
     {
-        // Bind to the MAUI application events in a real application control,
-        // because the required events are not present on the interfaces.
-        if (platformApplication.Application is not Application application)
+        // We need to resolve the application manually, because it's not necessarily
+        // set on platformApplication.Application at this point in the lifecycle.
+        var services = platformApplication.Services;
+        var app = services.GetService<IApplication>();
+
+        // Use a real Application control, because the required events needed for binding
+        // are not present on IApplication and related interfaces.
+        if (app is not Application application)
         {
+            var options = services.GetService<IOptions<SentryMauiOptions>>()?.Value;
+            options?.LogWarning("Could not bind to MAUI events!");
             return;
         }
 
-        var binder = platformApplication.Services.GetRequiredService<IMauiEventsBinder>();
+        // Bind the events
+        var binder = services.GetRequiredService<IMauiEventsBinder>();
         binder.BindApplicationEvents(application);
     }
 }

@@ -8,6 +8,13 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
 
     public PEReader? TryReadAssembly(string name)
     {
+        if (File.Exists(name))
+        {
+            // The assembly is already extracted to the file system.  Just read it.
+            var stream = File.OpenRead(name);
+            return new PEReader(stream);
+        }
+
         var zipEntry = FindAssembly(name);
         if (zipEntry is null)
         {

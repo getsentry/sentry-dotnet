@@ -5,7 +5,7 @@
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
     <SentryCocoaSdkDirectory>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
-    <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
+    <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
-  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile">
+  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <PropertyGroup>
       <GeneratedSupportDelegatesFile>$(MSBuildThisFileDirectory)$(GeneratedSourcesDir)SupportDelegates.g.cs</GeneratedSupportDelegatesFile>
     </PropertyGroup>

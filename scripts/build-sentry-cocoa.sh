@@ -24,7 +24,7 @@ then
 
     # Keep track of the submodule's SHA so we only build when we need to
     SHA=$(git rev-parse HEAD)
-    SHAFILE=Carthage/Build/.built-from-sha
+    SHAFILE=Carthage/.built-from-sha
     [ -f $SHAFILE ] && SHAFROMFILE=$(<$SHAFILE)
     VERSION="$(git describe --tags) ($(git rev-parse --short HEAD))"
 
@@ -33,12 +33,27 @@ then
     else
         echo "---------- Building Sentry Cocoa SDK $VERSION ---------- "
         rm -rf Carthage
-        ../$CARTHAGE build --use-xcframeworks --no-skip-current --platform ios,macCatalyst
+
+        # Note - We keep the build output in separate directories so that .NET
+        # bundles iOS with net6.0-ios and Mac Catalyst with net6.0-maccatalyst.
+        # The lack of symlinks in the ios builds, means we should also be able
+        # to use the package on Windows with "Pair to Mac".
+
+        # Build for iOS.  We'll get both ios and ios-simulator from this.
+        ../$CARTHAGE build --use-xcframeworks --no-skip-current --platform ios
+        mv Carthage/Build Carthage/Build-ios
+
+        # Separately, build for Mac Catalyst in its own directory.
+        ../$CARTHAGE build --use-xcframeworks --no-skip-current --platform macCatalyst
+        mv Carthage/Build Carthage/Build-maccatalyst
+
         echo $SHA > $SHAFILE
         echo ""
     fi
 
-    cd ..
+    # Remove anything we don't want to bundle in the nuget package.
+    cd Carthage
+    find . \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 fi
 
 popd > /dev/null
