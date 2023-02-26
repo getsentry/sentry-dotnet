@@ -2,9 +2,9 @@ param([string] $File)
 
 Set-StrictMode -Version Latest
 
-if (!Test-Path($File))
+if ([string]::IsNullOrEmpty($File) -or !(Test-Path($File)))
 {
-    Write-Warning "$File was not found."
+    Write-Warning "Test output file was not found."
 
     # Return success exit code so that GitHub Actions highlights the failure in the test run, rather than in this script.
     return
