@@ -2,6 +2,14 @@ param([string] $File)
 
 Set-StrictMode -Version Latest
 
+if ([string]::IsNullOrEmpty($File) -or !(Test-Path($File)))
+{
+    Write-Warning "Test output file was not found."
+
+    # Return success exit code so that GitHub Actions highlights the failure in the test run, rather than in this script.
+    return
+}
+
 [xml]$xml = Get-Content $File
 
 function ElementText([System.Xml.XmlElement] $element)
