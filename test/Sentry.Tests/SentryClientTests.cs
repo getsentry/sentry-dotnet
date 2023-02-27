@@ -719,7 +719,7 @@ public partial class SentryClientTests
         Assert.Same(transaction, received);
     }
 
-    [Fact(Skip = "TBD")]
+    [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
     {
         _fixture.SentryOptions.BeforeSendTransaction = _ => null;
