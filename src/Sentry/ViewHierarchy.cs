@@ -19,7 +19,7 @@ namespace Sentry
         public List<ViewHierarchyNode> Windows { get; } = new();
 
         /// <summary>
-        /// Initialies an instance of <see cref="ViewHierarchy"/>
+        /// Initializes an instance of <see cref="ViewHierarchy"/>
         /// </summary>
         /// <param name="renderingSystem">The rendering system</param>
         public ViewHierarchy(string renderingSystem)

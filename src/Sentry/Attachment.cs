@@ -34,7 +34,7 @@ public enum AttachmentType
     UnrealLogs,
 
     /// <summary>
-    /// A json attachment containing the View Hierarchy
+    /// A JSON attachment containing the View Hierarchy
     /// </summary>
     ViewHierarchy
 }
