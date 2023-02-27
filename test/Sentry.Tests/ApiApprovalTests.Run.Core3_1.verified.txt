@@ -547,6 +547,7 @@ namespace Sentry
         public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
         public System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?>? BeforeBreadcrumb { get; set; }
         public System.Func<Sentry.SentryEvent, Sentry.SentryEvent?>? BeforeSend { get; set; }
+        public System.Func<Sentry.Transaction, Sentry.Transaction?>? BeforeSendTransaction { get; set; }
         public string? CacheDirectoryPath { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }

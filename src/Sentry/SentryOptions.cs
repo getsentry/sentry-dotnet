@@ -315,6 +315,16 @@ public class SentryOptions
     public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
 
     /// <summary>
+    /// A callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <remarks>
+    /// The return of this transaction will be sent to Sentry. This allows the application
+    /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
+    /// should not be sent at all, return null from the callback.
+    /// </remarks>
+    public Func<Transaction, Transaction?>? BeforeSendTransaction { get; set; }
+
+    /// <summary>
     /// A callback invoked when a breadcrumb is about to be stored.
     /// </summary>
     /// <remarks>

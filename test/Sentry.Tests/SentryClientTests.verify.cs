@@ -16,4 +16,21 @@ public partial class SentryClientTests
 
         return Verify(@event.Breadcrumbs);
     }
+
+    [Fact]
+    public Task CaptureTransaction_BeforeSendTransactionThrows_ErrorToEventBreadcrumb()
+    {
+        var error = new Exception("Exception message!");
+        _fixture.SentryOptions.BeforeSendTransaction = _ => throw error;
+
+        var transaction = new Transaction("name", "operation")
+        {
+            IsSampled = true
+        };
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction(transaction);
+
+        return Verify(transaction.Breadcrumbs);
+    }
 }
