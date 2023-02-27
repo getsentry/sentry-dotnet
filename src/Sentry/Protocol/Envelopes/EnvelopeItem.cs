@@ -230,6 +230,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             AttachmentType.AppleCrashReport => "event.applecrashreport",
             AttachmentType.UnrealContext => "unreal.context",
             AttachmentType.UnrealLogs => "unreal.logs",
+            AttachmentType.ViewHierarchy => "event.view_hierarchy",
             _ => "event.attachment"
         };
 
