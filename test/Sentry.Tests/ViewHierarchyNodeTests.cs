@@ -2,7 +2,7 @@ namespace Sentry.Tests;
 
 public class ViewHierarchyNodeTests
 {
-    private class TestViewHierarchyNode : ViewHierarchyNode
+    internal class TestViewHierarchyNode : ViewHierarchyNode
     {
         public TestViewHierarchyNode(string type) : base(type) { }
         public bool WriteAdditionalPropertiesGotCalled { get; private set; }
