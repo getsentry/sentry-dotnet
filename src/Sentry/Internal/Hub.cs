@@ -123,26 +123,38 @@ internal class Hub : IHubEx, IDisposable
     {
         var transaction = new TransactionTracer(this, context);
 
-        // Tracing sampler callback runs regardless of whether a decision
-        // has already been made, as it can be used to override it.
-        if (_options.TracesSampler is { } tracesSampler)
+        // If tracing is explicitly disabled, we will always sample out.
+        // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
+        // that may have been already set (i.e.: from a sentry-trace header).
+        if (_options.EnableTracing is false)
         {
-            var samplingContext = new TransactionSamplingContext(
-                context,
-                customSamplingContext);
-
-            if (tracesSampler(samplingContext) is { } sampleRate)
+            transaction.IsSampled = false;
+            transaction.SampleRate = 0.0;
+        }
+        else
+        {
+            // Except when tracing is disabled, TracesSampler runs regardless of whether a decision
+            // has already been made, as it can be used to override it.
+            if (_options.TracesSampler is { } tracesSampler)
             {
+                var samplingContext = new TransactionSamplingContext(
+                    context,
+                    customSamplingContext);
+
+                if (tracesSampler(samplingContext) is { } sampleRate)
+                {
+                    transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                    transaction.SampleRate = sampleRate;
+                }
+            }
+
+            // Random sampling runs only if the sampling decision hasn't been made already.
+            if (transaction.IsSampled == null)
+            {
+                var sampleRate = _options.TracesSampleRate;
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
-        }
-
-        // Random sampling runs only if the sampling decision hasn't been made already.
-        if (transaction.IsSampled == null)
-        {
-            transaction.IsSampled = _randomValuesFactory.NextBool(_options.TracesSampleRate);
-            transaction.SampleRate = _options.TracesSampleRate;
         }
 
         // Use the provided DSC, or create one based on this transaction.

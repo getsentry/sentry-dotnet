@@ -548,14 +548,51 @@ public class SentryOptions
     /// </remarks>
     public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
-    private double _tracesSampleRate;
+    /// <summary>
+    /// Indicates whether tracing is enabled, via any combination of
+    /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
+    /// </summary>
+    internal bool IsTracingEnabled => EnableTracing ?? (_tracesSampleRate > 0.0 || TracesSampler is not null);
+
+    /// <summary>
+    /// Simplified option for enabling or disabling tracing.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>true</c></term>
+    ///     <description>
+    ///       Tracing is enabled. <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> will be used if set,
+    ///       or 100% sample rate will be used otherwise.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>false</c></term>
+    ///     <description>
+    ///       Tracing is disabled, regardless of <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/>.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       Tracing is enabled only if <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> are set.
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// </summary>
+    public bool? EnableTracing { get; set; }
+
+    private double? _tracesSampleRate;
 
     /// <summary>
     /// Indicates the percentage of the tracing data that is collected.
-    /// Setting this to <c>0</c> discards all trace data.
+    /// Setting this to <c>0.0</c> discards all trace data.
     /// Setting this to <c>1.0</c> collects all trace data.
     /// Values outside of this range are invalid.
-    /// Default value is <c>0</c>, which means tracing is disabled.
+    /// The default value is either <c>0.0</c> or <c>1.0</c>, depending on the <see cref="EnableTracing"/> property.
     /// </summary>
     /// <remarks>
     /// Random sampling rate is only applied to transactions that don't already
@@ -564,13 +601,13 @@ public class SentryOptions
     /// </remarks>
     public double TracesSampleRate
     {
-        get => _tracesSampleRate;
+        get => _tracesSampleRate ?? (EnableTracing is true ? 1.0 : 0.0);
         set
         {
-            if (value is < 0 or > 1)
+            if (value is < 0.0 or > 1.0)
             {
                 throw new InvalidOperationException(
-                    $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1.");
+                    $"The value {value} is not a valid tracing sample rate. Use values between 0.0 and 1.0.");
             }
 
             _tracesSampleRate = value;

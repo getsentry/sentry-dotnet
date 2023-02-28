@@ -19,6 +19,7 @@ public class Startup
         }
 
         app.UseRouting();
+        app.UseSentryTracing();
 
         app.UseEndpoints(endpoints =>
         {

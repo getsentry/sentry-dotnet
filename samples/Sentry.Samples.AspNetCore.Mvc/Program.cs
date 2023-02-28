@@ -29,7 +29,7 @@ public static class Program
 
                 options.MaxBreadcrumbs = 200;
 
-                options.TracesSampleRate = 1.0;
+                options.EnableTracing = true;
 
                 // Set a proxy for outgoing HTTP connections
                 options.HttpProxy = null; // new WebProxy("https://localhost:3128");
