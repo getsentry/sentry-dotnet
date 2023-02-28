@@ -21,49 +21,75 @@ public partial class ProfilerTests
         sut.Stacks.Add(stack);
     }
 
-    [Fact]
-    public Task SampleProfile_Serialization()
+    private SampleProfile CreateSampleProfile()
     {
-        var sut = new SampleProfile();
-        sut.Samples.Add(new()
+        var prof = new SampleProfile();
+
+        prof.Samples.Add(new()
         {
             StackId = 4,
             ThreadId = 5,
             Timestamp = 6
         });
-        sut.Samples.Add(new()
+        prof.Samples.Add(new()
         {
             StackId = 1,
             ThreadId = 2,
             Timestamp = 3
         });
 
-        sut.Frames.Add(new()
+        prof.Frames.Add(new()
         {
             Function = "Frame0"
         });
-        sut.Frames.Add(new()
+        prof.Frames.Add(new()
         {
             Function = "Frame1"
         });
-        sut.Frames.Add(new()
+        prof.Frames.Add(new()
         {
             Function = "Frame2"
         });
 
 
-        AddStack(sut, new() { 0, 1, 2 });
-        AddStack(sut, new() { 2, 2, 0 });
-        AddStack(sut, new() { 1, 0, 2 });
+        AddStack(prof, new() { 0, 1, 2 });
+        AddStack(prof, new() { 2, 2, 0 });
+        AddStack(prof, new() { 1, 0, 2 });
 
-        sut.Threads[1] = new()
+        prof.Threads[1] = new()
         {
             Name = "Thread 1"
         };
-        sut.Threads[5] = new()
+        prof.Threads[5] = new()
         {
             Name = "Thread 5"
         };
+
+        return prof;
+    }
+
+    [Fact]
+    public Task SampleProfile_Serialization()
+    {
+        var sut = CreateSampleProfile();
+        var json = sut.ToJsonString(_testOutputLogger);
+        return VerifyJson(json);
+    }
+
+    [Fact]
+    public Task ProfileInfo_Serialization()
+    {
+        var sut = new ProfileInfo();
+        sut.StartTimestamp = DateTimeOffset.UtcNow;
+        sut.DebugMeta.Images = new List<DebugImage> {
+            new () {
+                ImageAddress = "0xABCDEF"
+            }
+        };
+        sut.Profile = CreateSampleProfile();
+        sut.Environment = "env name";
+        sut.Release = "1.0 (123)";
+        sut.Transaction = new("tx name", "tx operation");
 
         var json = sut.ToJsonString(_testOutputLogger);
         return VerifyJson(json);
