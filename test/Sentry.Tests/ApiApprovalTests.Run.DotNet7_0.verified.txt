@@ -562,6 +562,7 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
+        public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }

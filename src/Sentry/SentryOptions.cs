@@ -548,6 +548,37 @@ public class SentryOptions
     /// </remarks>
     public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
+    /// <summary>
+    /// Simplified option for enabling or disabling tracing.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>true</c></term>
+    ///     <description>
+    ///       Tracing is enabled. <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> will be used if set,
+    ///       or 100% sample rate will be used otherwise.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>false</c></term>
+    ///     <description>
+    ///       Tracing is disabled, regardless of <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/>.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       Tracing is enabled only if <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> are set.
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// </summary>
+    public bool? EnableTracing { get; set; }
+
     private double _tracesSampleRate;
 
     /// <summary>
