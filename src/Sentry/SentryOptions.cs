@@ -579,14 +579,14 @@ public class SentryOptions
     /// </summary>
     public bool? EnableTracing { get; set; }
 
-    private double _tracesSampleRate;
+    private double? _tracesSampleRate;
 
     /// <summary>
     /// Indicates the percentage of the tracing data that is collected.
-    /// Setting this to <c>0</c> discards all trace data.
+    /// Setting this to <c>0.0</c> discards all trace data.
     /// Setting this to <c>1.0</c> collects all trace data.
     /// Values outside of this range are invalid.
-    /// Default value is <c>0</c>, which means tracing is disabled.
+    /// The default value is either <c>0.0</c> or <c>1.0</c>, depending on the <see cref="EnableTracing"/> property.
     /// </summary>
     /// <remarks>
     /// Random sampling rate is only applied to transactions that don't already
@@ -595,13 +595,13 @@ public class SentryOptions
     /// </remarks>
     public double TracesSampleRate
     {
-        get => _tracesSampleRate;
+        get => _tracesSampleRate ?? (EnableTracing is true ? 1.0 : 0.0);
         set
         {
-            if (value is < 0 or > 1)
+            if (value is < 0.0 or > 1.0)
             {
                 throw new InvalidOperationException(
-                    $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1.");
+                    $"The value {value} is not a valid tracing sample rate. Use values between 0.0 and 1.0.");
             }
 
             _tracesSampleRate = value;
