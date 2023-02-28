@@ -4,7 +4,7 @@ namespace Sentry.Internal;
 /// A GrowableArray that can be used as a key in a Dictionary.
 /// Note: it must be Seal()-ed before used as a key and can't be changed afterwards.
 /// </summary>
-internal sealed class HashableGrowableArray<T> : IEquatable<HashableGrowableArray<T>> where T : notnull
+internal sealed class HashableGrowableArray<T> : IEnumerable<T>, IEquatable<HashableGrowableArray<T>> where T : notnull
 {
     private GrowableArray<T> _items;
     private int _hashCode = 0;
@@ -91,6 +91,10 @@ internal sealed class HashableGrowableArray<T> : IEquatable<HashableGrowableArra
     }
 
     public override bool Equals(object? obj) => obj is HashableGrowableArray<T> other && Equals(other);
+
+    public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => _items.GetEnumerator();
 }
 
 /// <summary>
