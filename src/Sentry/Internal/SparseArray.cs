@@ -45,19 +45,19 @@ internal sealed class SparseScalarArray<T> where T : IEquatable<T>
 }
 
 /// <summary>
-/// Sparse array for objects. Null value is considered a missing item.
+/// Sparse array. Null value is considered a missing item.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-internal sealed class SparseObjectArray<T> where T : class
+internal sealed class SparseArray<T>
 {
     private GrowableArray<T?> _items;
 
-    public SparseObjectArray()
+    public SparseArray()
     {
         _items = new GrowableArray<T?>();
     }
 
-    public SparseObjectArray(int capacity)
+    public SparseArray(int capacity)
     {
         _items = new GrowableArray<T?>(capacity);
     }
@@ -71,9 +71,10 @@ internal sealed class SparseObjectArray<T> where T : class
         set
         {
             // Increase the capacity of the sparse array so that the key can fit.
+            _items.Reserve(index);
             while (_items.Count <= index)
             {
-                _items.Add(null);
+                _items.Add(default);
             }
             _items[index] = value;
         }

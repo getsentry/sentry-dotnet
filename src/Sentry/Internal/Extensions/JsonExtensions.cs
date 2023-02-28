@@ -334,9 +334,9 @@ internal static class JsonExtensions
         writer.WriteStringDictionaryValue(dic);
     }
 
-    public static void WriteArrayValue(
+    public static void WriteArrayValue<T>(
         this Utf8JsonWriter writer,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         if (arr is not null)
@@ -356,10 +356,10 @@ internal static class JsonExtensions
         }
     }
 
-    public static void WriteArray(
+    public static void WriteArray<T>(
         this Utf8JsonWriter writer,
         string propertyName,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         writer.WritePropertyName(propertyName);

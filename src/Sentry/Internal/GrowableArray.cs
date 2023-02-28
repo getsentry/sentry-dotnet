@@ -102,7 +102,7 @@ internal sealed class HashableGrowableArray<T> : IEquatable<HashableGrowableArra
 /// Adapted to null-safety from the original version licensed under MIT and located at:
 /// https://github.com/microsoft/perfview/blob/050c303943e74ff51ce584b2717e578d96684e85/src/FastSerialization/GrowableArray.cs
 /// </remarks>
-internal struct GrowableArray<T>
+internal struct GrowableArray<T> : IEnumerable<T>
 {
     /// <summary>
     /// Create an empty growable array.
@@ -149,6 +149,14 @@ internal struct GrowableArray<T>
         get
         {
             return arrayLength;
+        }
+    }
+
+    public void Reserve(int size)
+    {
+        if (arrayLength < size)
+        {
+            Realloc(size);
         }
     }
 
@@ -358,33 +366,48 @@ internal struct GrowableArray<T>
     private int arrayLength;
     #endregion
 
-    // This allows 'foreach' to work.  We are not a true IEnumerable however.
-    /// <summary>
-    /// Implementation of foreach protocol
-    /// </summary>
-    /// <returns></returns>
-    public GrowableArrayEnumerator GetEnumerator() { return new GrowableArrayEnumerator(this); }
+    // Implementation of IEnumerable.
+    IEnumerator IEnumerable.GetEnumerator() => new GrowableArrayEnumerator(this);
+
+    // Implementation of IEnumerable<T>.
+    public IEnumerator<T> GetEnumerator() => new GrowableArrayEnumerator(this);
+
+    internal void Add(object value)
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
-    /// Enumerator for foreach interface
+    /// IEnumerator implementation.
     /// </summary>
-    public struct GrowableArrayEnumerator
+    public struct GrowableArrayEnumerator : IEnumerator<T>
     {
-        /// <summary>
-        /// implementation of IEnumerable interface
-        /// </summary>
+        object IEnumerator.Current => Current!;
+
         public T Current
         {
-            get { return array[cur]; }
+            get
+            {
+                if (cur < 0 || cur >= end)
+                {
+                    throw new InvalidOperationException();
+                }
+                return array[cur]!;
+            }
         }
-        /// <summary>
-        /// implementation of IEnumerable interface
-        /// </summary>
+
         public bool MoveNext()
         {
             cur++;
             return cur < end;
         }
+
+        public void Reset()
+        {
+            cur = -1;
+        }
+
+        public void Dispose() { }
 
         #region private
         internal GrowableArrayEnumerator(GrowableArray<T> growableArray)
