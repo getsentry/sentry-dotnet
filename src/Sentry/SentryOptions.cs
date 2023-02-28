@@ -549,6 +549,12 @@ public class SentryOptions
     public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
     /// <summary>
+    /// Indicates whether tracing is enabled, via any combination of
+    /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
+    /// </summary>
+    internal bool IsTracingEnabled => EnableTracing ?? (_tracesSampleRate > 0.0 || TracesSampler is not null);
+
+    /// <summary>
     /// Simplified option for enabling or disabling tracing.
     /// <list type="table">
     ///   <listheader>
