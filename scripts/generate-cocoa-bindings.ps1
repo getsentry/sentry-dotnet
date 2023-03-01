@@ -83,7 +83,7 @@ $Text = $Text -replace '(?m)^(partial interface|interface|delegate)\b', "[Intern
 $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 
 # Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
-$Text = $Text -replace ': INSCopying,', ':' -replace '[:,] INSCopying', ''
+$Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
