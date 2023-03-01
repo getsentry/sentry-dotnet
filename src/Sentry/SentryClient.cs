@@ -140,7 +140,7 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        CaptureEnvelope(Envelope.FromTransaction(transaction));
+        CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
     private Transaction? BeforeSendTransaction(Transaction transaction)
