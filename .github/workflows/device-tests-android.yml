@@ -90,7 +90,7 @@ jobs:
       #     path: |
       #       ~/.android/avd/*
       #       ~/.android/adb*
-      #     key: avd-hwaccel-${{ matrix.api-level }}
+      #     key: avd-linux-${{ matrix.api-level }}
 
       # - name: Create AVD and generate snapshot for caching
       #   if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -104,7 +104,7 @@ jobs:
       #     ram-size: 2048M
       #     arch: x86_64
       #     disk-size: 4096M
-      #     emulator-options: -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+      #     emulator-options: -no-window -accel on -gpu host -noaudio -no-boot-anim -camera-back none
       #     disable-animations: false
       #     script: echo "Generated AVD snapshot for caching."
 
@@ -119,7 +119,7 @@ jobs:
           ram-size: 2048M
           arch: x86_64
           disk-size: 4096M
-          emulator-options: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-snapshot-save -no-window -accel on -gpu host -noaudio -no-boot-anim -camera-back none
           disable-animations: false
           script: xharness android test --output-directory=./test_output --app=bin/io.sentry.dotnet.maui.device.testapp-Signed.apk --package-name=io.sentry.dotnet.maui.device.testapp
 
