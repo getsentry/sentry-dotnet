@@ -3,6 +3,7 @@ Set-StrictMode -Version Latest
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
 $CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
 $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
+$BackupPath = "$BindingsPath/obj/_unpatched"
 
 # Ensure running on macOS
 if (!$IsMacOS) {
@@ -28,11 +29,17 @@ sharpie bind -sdk iphoneos -quiet `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
     -o $BindingsPath
 
+# Ensure backup path exists
+if (!(Test-Path $BackupPath)) {
+    New-Item -ItemType Directory -Path $BackupPath
+}
+
 ################################################################################
 # Patch StructsAndEnums.cs
 ################################################################################
 $File = 'StructsAndEnums.cs'
 Write-Output "Patching $File"
+Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
 # Tabs to spaces
@@ -57,6 +64,7 @@ $Text | Out-File "$BindingsPath/$File"
 ################################################################################
 $File = 'ApiDefinitions.cs'
 Write-Output "Patching $File"
+Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
 # Tabs to spaces
