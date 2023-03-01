@@ -13,11 +13,11 @@ namespace Sentry.Extensions.Profiling;
 using SentryProfileStackTrace = HashableGrowableArray<int>;
 
 /// <summary>
-/// Processes TraceLog to compose a SamplingProfiler.
+/// Processes TraceLog to produce a SampleProfile.
 ///
 /// Based on https://github.com/microsoft/perfview/blob/d4c209ad680`2de03ff4c595714b2b7714da036f/src/TraceEvent/Computers/SampleProfilerThreadTimeComputer.cs
 /// </summary>
-internal class SamplingProfiler
+internal class TraceLogProcessor
 {
     // /// <summary>
     // /// If set we compute thread time using Tasks
@@ -90,7 +90,7 @@ internal class SamplingProfiler
     //private StackSourceFrameIndex _cpuFrameIndex;
     private ActivityComputer _activityComputer;                        // Used to compute stacks for Tasks
 
-    public SamplingProfiler(TraceLog traceLog)
+    public TraceLogProcessor(TraceLog traceLog)
     {
         _traceLog = traceLog;
         _eventSource = _traceLog.Events.GetSource();

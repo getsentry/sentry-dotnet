@@ -155,6 +155,11 @@ internal class Hub : IHubEx, IDisposable
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
+
+            if (transaction.IsSampled is true && _options.TransactionProfiler is { } profiler)
+            {
+                profiler.OnTransactionStart(transaction);
+            }
         }
 
         // Use the provided DSC, or create one based on this transaction.

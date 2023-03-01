@@ -17,6 +17,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string TypeValueSession = "session";
     private const string TypeValueAttachment = "attachment";
     private const string TypeValueClientReport = "client_report";
+    private const string TypeValueProfile = "profile";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";
@@ -198,6 +199,19 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(transaction));
+    }
+
+    /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="profileInfo"/>.
+    /// </summary>
+    internal static EnvelopeItem FromProfileInfo(ProfileInfo profileInfo)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueProfile
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(profileInfo));
     }
 
     /// <summary>

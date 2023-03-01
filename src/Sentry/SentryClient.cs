@@ -119,6 +119,8 @@ public class SentryClient : ISentryClient, IDisposable
             _options.LogWarning("Capturing a transaction which has not been finished. " +
                                 "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
                                 "to properly finalize the transaction and send it to Sentry.");
+
+            // TODO FIXME - this is problematic because ITransactionProfiler?.OnTransactionFinish() isn't called.
         }
 
         // Sampling decision MUST have been made at this point
@@ -283,7 +285,7 @@ public class SentryClient : ISentryClient, IDisposable
         if (filters.Any(f => f.Filter(exception)))
         {
             // The event should be filtered based on the given exception
-            return new[] {exception};
+            return new[] { exception };
         }
 
         if (exception is AggregateException aggregate &&
@@ -304,7 +306,7 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     /// <param name="envelope">The envelope.</param>
     /// <returns>true if the enveloped was queued, false otherwise.</returns>
-    private bool CaptureEnvelope(Envelope envelope)
+    public bool CaptureEnvelope(Envelope envelope)
     {
         if (Worker.EnqueueEnvelope(envelope))
         {

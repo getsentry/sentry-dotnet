@@ -285,10 +285,15 @@ public sealed class Envelope : ISerializable, IDisposable
             header = CreateHeader(eventId);
         }
 
-        var items = new[]
+        var items = new List<EnvelopeItem>()
         {
             EnvelopeItem.FromTransaction(transaction)
         };
+
+        if (transaction.ProfileInfo is { } profileInfo)
+        {
+            items.Add(EnvelopeItem.FromProfileInfo(profileInfo));
+        }
 
         return new Envelope(eventId, header, items);
     }
