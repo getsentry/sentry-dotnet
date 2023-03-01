@@ -541,6 +541,65 @@ public partial class HubTests
         transaction.IsSampled.Should().BeFalse();
     }
 
+    [Fact]
+    public void StartTransaction_EnableTracing_SampledIn()
+    {
+        // Arrange
+        _fixture.Options.EnableTracing = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_DisableTracing_SampledOut()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.Options.EnableTracing = false;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
+    [Fact]
+    public void StartTransaction_EnableTracing_Sampler_SampledIn()
+    {
+        // Arrange
+        _fixture.Options.TracesSampler = _ => 1.0;
+        _fixture.Options.EnableTracing = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.IsSampled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void StartTransaction_DisableTracing_Sampler_SampledOut()
+    {
+        // Arrange
+        _fixture.Options.TracesSampler = _ => 1.0;
+        _fixture.Options.EnableTracing = false;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("name", "operation");
+
+        // Assert
+        transaction.IsSampled.Should().BeFalse();
+    }
+
     [Theory]
     [InlineData(0.25f)]
     [InlineData(0.50f)]

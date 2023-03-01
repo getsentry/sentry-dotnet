@@ -665,6 +665,77 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_RejectEvent()
+    {
+        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction(
+            new Transaction("test name", "test operation")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_ModifyEvent()
+    {
+        Transaction received = null;
+        _fixture.SentryOptions.BeforeSendTransaction = tx => received = tx;
+
+        var transaction = new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction(transaction);
+
+        Assert.Same(transaction, received);
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_SamplingNull_DropsEvent()
+    {
+        _fixture.SentryOptions.SampleRate = null;
+
+        Transaction received = null;
+        _fixture.SentryOptions.BeforeSendTransaction = e => received = e;
+
+        var transaction = new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        var sut = _fixture.GetSut();
+
+        sut.CaptureTransaction(transaction);
+
+        Assert.Same(transaction, received);
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
+    {
+        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction( new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        });
+
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+    }
+
+    [Fact]
     public void Dispose_Worker_FlushCalled()
     {
         var client = _fixture.GetSut();

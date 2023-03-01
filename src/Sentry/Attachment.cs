@@ -31,7 +31,12 @@ public enum AttachmentType
     /// Plain-text log file obtained from UE4 crashes.
     /// During event ingestion, the last logs are extracted into event breadcrumbs.
     /// </summary>
-    UnrealLogs
+    UnrealLogs,
+
+    /// <summary>
+    /// A JSON attachment containing the View Hierarchy
+    /// </summary>
+    ViewHierarchy
 }
 
 /// <summary>

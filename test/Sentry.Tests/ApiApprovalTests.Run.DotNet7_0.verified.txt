@@ -17,6 +17,7 @@ namespace Sentry
         AppleCrashReport = 2,
         UnrealContext = 3,
         UnrealLogs = 4,
+        ViewHierarchy = 5,
     }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
     public sealed class Breadcrumb : Sentry.IJsonSerializable
@@ -546,6 +547,7 @@ namespace Sentry
         public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
         public System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?>? BeforeBreadcrumb { get; set; }
         public System.Func<Sentry.SentryEvent, Sentry.SentryEvent?>? BeforeSend { get; set; }
+        public System.Func<Sentry.Transaction, Sentry.Transaction?>? BeforeSendTransaction { get; set; }
         public string? CacheDirectoryPath { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }
@@ -560,6 +562,7 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
+        public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
@@ -1043,6 +1046,25 @@ namespace Sentry
         public string? Name { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.UserFeedback FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class ViewHierarchy : Sentry.IJsonSerializable
+    {
+        public ViewHierarchy(string renderingSystem) { }
+        public string RenderingSystem { get; set; }
+        public System.Collections.Generic.List<Sentry.ViewHierarchyNode> Windows { get; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+    }
+    public class ViewHierarchyAttachment : Sentry.Attachment
+    {
+        public ViewHierarchyAttachment(Sentry.IAttachmentContent content) { }
+    }
+    public abstract class ViewHierarchyNode : Sentry.IJsonSerializable
+    {
+        protected ViewHierarchyNode(string type) { }
+        public System.Collections.Generic.List<Sentry.ViewHierarchyNode> Children { get; set; }
+        public string Type { get; set; }
+        protected abstract void WriteAdditionalProperties(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
 }
 namespace Sentry.Extensibility

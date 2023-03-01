@@ -34,4 +34,54 @@ public class SentryOptionsTests
         var sut = new SentryOptions();
         Assert.True(sut.AttachStacktrace);
     }
+
+    [Fact]
+    public void EnableTracing_Default_Null()
+    {
+        var sut = new SentryOptions();
+        Assert.Null(sut.EnableTracing);
+    }
+
+    [Fact]
+    public void IsTracingEnabled_Default_False()
+    {
+        var sut = new SentryOptions();
+        Assert.False(sut.IsTracingEnabled);
+    }
+
+    [Fact]
+    public void EnableTracing_WhenNull()
+    {
+        var sut = new SentryOptions
+        {
+            EnableTracing = null
+        };
+
+        Assert.Null(sut.EnableTracing);
+        Assert.Equal(0.0, sut.TracesSampleRate);
+    }
+
+    [Fact]
+    public void EnableTracing_WhenFalse()
+    {
+        var sut = new SentryOptions
+        {
+            EnableTracing = false
+        };
+
+        Assert.False(sut.EnableTracing);
+        Assert.Equal(0.0, sut.TracesSampleRate);
+    }
+
+    [Fact]
+    public void EnableTracing_WhenTrue()
+    {
+        var sut = new SentryOptions
+        {
+            EnableTracing = true
+        };
+
+        Assert.True(sut.EnableTracing);
+        Assert.Equal(1.0, sut.TracesSampleRate);
+    }
 }

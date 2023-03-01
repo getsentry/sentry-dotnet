@@ -108,7 +108,7 @@ public static partial class SentrySdk
             }
 
             // These options we have behind feature flags
-            if (options.Android.EnableAndroidSdkTracing)
+            if (options.IsTracingEnabled && options.Android.EnableAndroidSdkTracing)
             {
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
 
