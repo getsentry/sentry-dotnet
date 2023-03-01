@@ -44,6 +44,7 @@
   </Target>
   <Target Name="_InnerBuildSentryCocoaSDK">
     <Exec Command="$(MSBuildThisFileDirectory)../../scripts/build-sentry-cocoa.sh" />
+    <Exec Command="pwsh $(MSBuildThisFileDirectory)../../scripts/generate-cocoa-bindings.ps1" />
   </Target>
 
 </Project>
