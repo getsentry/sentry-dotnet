@@ -27,7 +27,7 @@ internal sealed class ProfileInfo : IJsonSerializable
 
     public SampleProfile Profile { get; set; } = new();
 
-    public DateTimeOffset StartTimestamp { get; set; } = new();
+    public DateTimeOffset StartTimestamp { get; set; } = DateTimeOffset.UtcNow;
 
     public string? Environment { get; set; }
 
