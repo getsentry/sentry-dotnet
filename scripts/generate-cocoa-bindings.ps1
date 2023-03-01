@@ -31,7 +31,7 @@ sharpie bind -sdk iphoneos -quiet `
 
 # Ensure backup path exists
 if (!(Test-Path $BackupPath)) {
-    New-Item -ItemType Directory -Path $BackupPath
+    New-Item -ItemType Directory -Path $BackupPath | Out-Null
 }
 
 ################################################################################

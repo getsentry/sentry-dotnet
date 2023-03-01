@@ -1165,7 +1165,7 @@ interface SentryId
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryMeasurementUnit
+interface SentryMeasurementUnit 
 {
     // -(instancetype _Nonnull)initWithUnit:(NSString * _Nonnull)unit;
     [Export ("initWithUnit:")]
@@ -1754,7 +1754,7 @@ partial interface SentryScope : SentrySerializable
 // @interface SentrySpanId : NSObject <NSCopying>
 [BaseType (typeof(NSObject))]
 [Internal]
-interface SentrySpanId
+interface SentrySpanId 
 {
     // -(instancetype _Nonnull)initWithUUID:(NSUUID * _Nonnull)uuid;
     [Export ("initWithUUID:")]
