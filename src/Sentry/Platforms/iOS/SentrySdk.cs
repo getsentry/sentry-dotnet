@@ -161,7 +161,7 @@ public static partial class SentrySdk
         };
 
         // Set hybrid SDK name
-        CocoaSdk.PrivateSentrySdkOnly.SetSdkName("sentry.cocoa.dotnet");
+        SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
 
         // Now initialize the Cocoa SDK
         SentryCocoaSdk.StartWithOptionsObject(cocoaOptions);
