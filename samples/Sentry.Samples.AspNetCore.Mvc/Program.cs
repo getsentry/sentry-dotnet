@@ -1,5 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore;
+using Sentry;
+using Sentry.Extensions.Profiling;
 
 namespace Samples.AspNetCore.Mvc;
 
@@ -42,6 +44,12 @@ public static class Program
 
                 // Configures the root scope
                 options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
+
+                options.TracesSampleRate = 1.0;
+
+                options.AddIntegration(new ProfilingIntegration());
+
+                options.Debug = true;
             })
             .Build();
 }

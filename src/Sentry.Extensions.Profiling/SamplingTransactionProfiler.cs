@@ -38,7 +38,8 @@ internal class ProfilerSession
     public MemoryStream Finish()
     {
         _session.Stop();
-        _copyTask.Wait(1000); // TODO handle timeout
+        _copyTask.Wait(10000); // TODO handle timeout
+        _stream.Position = 0;
         return _stream;
     }
 }
@@ -63,10 +64,19 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             var startTimestamp = _session.StartTimestamp;
             _session = null;
 
-            var eventSource = new EventPipeEventSource(nettraceStream);
+            // TODO EventPipeEventSource(Stream stream) sets isStreaming =  true even though the stream is pre-collected.
+            //      This causes read issues when converting to ETLX. So we must write it to file first (or stream to file).
+            // var eventSource = new EventPipeEventSource(nettraceStream);
+            var etlFilePath = Path.GetTempFileName();
+            using (FileStream file = new FileStream(etlFilePath, FileMode.Create, System.IO.FileAccess.Write))
+            {
+                nettraceStream.CopyTo(file);
+                file.Flush();
+                nettraceStream.Dispose();
+            }
+            var eventSource = new EventPipeEventSource(etlFilePath);
 
             var etlxFilePath = Path.GetTempFileName();
-
             try
             {
                 // We convert the EventPipe log (ETL) to ETLX to get processed stack traces.
@@ -83,7 +93,9 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 {
                     Contexts = transaction.Contexts,
                     Environment = transaction.Environment,
-                    Platform = transaction.Platform,
+                    // TODO FIXME - see https://discord.com/channels/621778831602221064/621783515423440927/1080182836163788800
+                    // Platform = transaction.Platform,
+                    Platform = "dotnet",
                     Release = transaction.Release,
                     StartTimestamp = startTimestamp,
                     Profile = profile
@@ -94,6 +106,10 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 if (File.Exists(etlxFilePath))
                 {
                     File.Delete(etlxFilePath);
+                }
+                if (File.Exists(etlFilePath))
+                {
+                    File.Delete(etlFilePath);
                 }
             }
         }
