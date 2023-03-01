@@ -47,13 +47,16 @@ then
         ../$CARTHAGE build --use-xcframeworks --no-skip-current --platform macCatalyst
         mv Carthage/Build Carthage/Build-maccatalyst
 
+        # Copy headers - used for generating bindings
+        mkdir Carthage/Headers
+        find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
+
         echo $SHA > $SHAFILE
         echo ""
     fi
 
     # Remove anything we don't want to bundle in the nuget package.
-    cd Carthage
-    find . \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
+    find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 fi
 
 popd > /dev/null
