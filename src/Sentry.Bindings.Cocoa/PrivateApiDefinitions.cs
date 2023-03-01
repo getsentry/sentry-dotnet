@@ -13,3 +13,27 @@ partial interface SentryScope
     [return: NullAllowed]
     SentryEvent ApplyToEvent (SentryEvent @event, nuint maxBreadcrumbs);
 }
+
+// The following types are type-forwarded in various public headers, but have no headers of their own.
+// Generate stub classes so the APIs that use them can still operate.
+
+[Internal]
+[DisableDefaultCtor]
+[BaseType (typeof(NSObject))]
+interface SentrySession
+{
+}
+
+[Internal]
+[DisableDefaultCtor]
+[BaseType (typeof(NSObject))]
+interface SentrySdkInfo
+{
+}
+
+[Internal]
+[DisableDefaultCtor]
+[BaseType (typeof(NSObject))]
+interface SentryTraceContext
+{
+}

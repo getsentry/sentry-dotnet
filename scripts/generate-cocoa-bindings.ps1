@@ -22,11 +22,13 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
 }
 
 # Generate bindings
+# NOTE: We pull in SentryEnvelope.h manually, because it's in HybridPublic but not imported by PrivateSentrySDKOnly.h
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk iphoneos -quiet `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
+    "$CocoaSdkPath/Carthage/Headers/SentryEnvelope.h" `
     -o $BindingsPath
 
 # Ensure backup path exists
@@ -139,9 +141,6 @@ $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
 
 # Fix broken line comment
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
-
-# Remove APIs that use non-public objects
-$Text = $Text -replace '(?ms)\n?^ *// [^\n]*(?:SentryTraceContext|SentryEnvelope|SentrySession)\b.*?$.*?[;}]\n', ''
 
 # Remove default IsEqual implementation (already implemented by NSObject)
 $Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
