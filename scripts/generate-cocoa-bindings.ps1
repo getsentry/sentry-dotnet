@@ -139,5 +139,8 @@ $Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.Mac
 $Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
 $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 
+# Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
+$Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
+
 $Text | Out-File "$BindingsPath/$File"
 Write-Output 'Done!'

@@ -1647,7 +1647,7 @@ interface SentrySamplingContext
 // @interface SentryScope : NSObject <SentrySerializable>
 [BaseType (typeof(NSObject))]
 [Internal]
-interface SentryScope : SentrySerializable
+partial interface SentryScope : SentrySerializable
 {
     // @property (nonatomic, strong) id<SentrySpan> _Nullable span;
     [NullAllowed, Export ("span", ArgumentSemantic.Strong)]

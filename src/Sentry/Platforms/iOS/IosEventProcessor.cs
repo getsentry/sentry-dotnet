@@ -36,6 +36,7 @@ internal class IosEventProcessor : ISentryEventProcessor, IDisposable
         var @event = new CocoaSdk.SentryEvent();
         SentryCocoaSdk.ConfigureScope(scope =>
         {
+            // TODO: As of Sentry Cocoa 8.0.0, this is a private API.  Find a better way!
             scope.ApplyToEvent(@event, 0);
         });
 
