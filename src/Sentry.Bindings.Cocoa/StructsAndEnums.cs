@@ -25,15 +25,6 @@ internal enum SentryLevel : ulong
 }
 
 [Native]
-internal enum SentryPermissionStatus : long
-{
-    Unknown = 0,
-    Granted,
-    Partial,
-    Denied
-}
-
-[Native]
 internal enum SentryTransactionNameSource : long
 {
     Custom = 0,
@@ -42,14 +33,6 @@ internal enum SentryTransactionNameSource : long
     View,
     Component,
     Task
-}
-
-[Native]
-internal enum SentryAppStartType : ulong
-{
-    Warm,
-    Cold,
-    Unknown
 }
 
 [Native]
@@ -63,7 +46,9 @@ internal enum SentryError : long
     JsonConversionError = 104,
     CouldNotFindDirectory = 105,
     RequestError = 106,
-    EventNotSent = 107
+    EventNotSent = 107,
+    FileIO = 108,
+    Kernel = 109
 }
 
 [Native]
@@ -98,10 +83,9 @@ internal enum SentrySpanStatus : ulong
 }
 
 [Native]
-internal enum SentrySessionStatus : ulong
+internal enum SentryAppStartType : ulong
 {
-    Ok = 0,
-    Exited = 1,
-    Crashed = 2,
-    Abnormal = 3
+    Warm,
+    Cold,
+    Unknown
 }
