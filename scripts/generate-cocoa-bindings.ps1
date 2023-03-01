@@ -128,11 +128,16 @@ $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
 # Fix broken line comment
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
 
-# Remove APIs that use SentryTraceContext because it does not have a public header
-$Text = $Text -replace '(?ms)\n?^ *// [^\n]*SentryTraceContext.*?$.*?[;}]\n', ''
+# Remove APIs that use non-public objects
+$Text = $Text -replace '(?ms)\n?^ *// [^\n]*(?:SentryTraceContext|SentryEnvelope|SentrySession)\b.*?$.*?[;}]\n', ''
 
 # Remove default IsEqual implementation (already implemented by NSObject)
 $Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
+
+# Replace obsolete platform avaialbility attributes
+$Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.MacCatalyst, '
+$Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
+$Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 
 $Text | Out-File "$BindingsPath/$File"
 Write-Output 'Done!'
