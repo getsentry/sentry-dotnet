@@ -27,7 +27,6 @@ public static partial class SentrySdk
         cocoaOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
         cocoaOptions.Dsn = options.Dsn;
         cocoaOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
-        cocoaOptions.Environment = options.Environment;
         cocoaOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
         cocoaOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
         cocoaOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
@@ -36,6 +35,11 @@ public static partial class SentrySdk
         cocoaOptions.SendClientReports = options.SendClientReports;
         cocoaOptions.SendDefaultPii = options.SendDefaultPii;
         cocoaOptions.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
+
+        if (options.Environment is { } environment)
+        {
+            cocoaOptions.Environment = environment;
+        }
 
         // These options are not available in the Sentry Cocoa SDK
         // cocoaOptions.? = options.InitCacheFlushTimeout;
@@ -111,14 +115,14 @@ public static partial class SentrySdk
         cocoaOptions.Dist = options.Distribution;
         cocoaOptions.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
         cocoaOptions.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
-        cocoaOptions.EnableAutoPerformanceTracking = options.iOS.EnableAutoPerformanceTracking;
-        cocoaOptions.EnableCoreDataTracking = options.iOS.EnableCoreDataTracking;
-        cocoaOptions.EnableFileIOTracking = options.iOS.EnableFileIOTracking;
+        cocoaOptions.EnableAutoPerformanceTracing = options.iOS.EnableAutoPerformanceTracing;
+        cocoaOptions.EnableCoreDataTracing = options.iOS.EnableCoreDataTracing;
+        cocoaOptions.EnableFileIOTracing = options.iOS.EnableFileIOTracing;
         cocoaOptions.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
         cocoaOptions.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
-        cocoaOptions.EnableOutOfMemoryTracking = options.iOS.EnableOutOfMemoryTracking;
+        cocoaOptions.EnableWatchdogTerminationTracking = options.iOS.EnableWatchdogTerminationTracking;
         cocoaOptions.EnableSwizzling = options.iOS.EnableSwizzling;
-        cocoaOptions.EnableUIViewControllerTracking = options.iOS.EnableUIViewControllerTracking;
+        cocoaOptions.EnableUIViewControllerTracing = options.iOS.EnableUIViewControllerTracing;
         cocoaOptions.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
         cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
         cocoaOptions.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
@@ -164,7 +168,7 @@ public static partial class SentrySdk
         SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
 
         // Now initialize the Cocoa SDK
-        SentryCocoaSdk.StartWithOptionsObject(cocoaOptions);
+        SentryCocoaSdk.StartWithOptions(cocoaOptions);
 
         // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new IosEventProcessor(cocoaOptions));
