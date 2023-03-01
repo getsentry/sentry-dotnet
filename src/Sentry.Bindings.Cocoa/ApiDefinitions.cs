@@ -6,7 +6,7 @@ namespace Sentry.CocoaSdk;
 
 [Static]
 [Internal]
-interface Constants
+partial interface Constants
 {
     // extern double SentryVersionNumber;
     [Field ("SentryVersionNumber", "__Internal")]
@@ -16,10 +16,6 @@ interface Constants
     [Field ("SentryVersionString", "__Internal")]
     [return: PlainString]
     NSString SentryVersionString { get; }
-
-    // extern NSString *const _Nonnull SentryErrorDomain __attribute__((visibility("default")));
-    [Field ("SentryErrorDomain", "__Internal")]
-    NSString SentryErrorDomain { get; }
 }
 
 // typedef void (^SentryRequestFinished)(NSError * _Nullable);
@@ -56,102 +52,6 @@ delegate NSNumber SentryTracesSamplerCallback (SentrySamplingContext samplingCon
 // typedef void (^SentrySpanCallback)(id<SentrySpan> _Nullable);
 [Internal]
 delegate void SentrySpanCallback ([NullAllowed] SentrySpan span);
-
-// typedef void (^SentryOnAppStartMeasurementAvailable)(SentryAppStartMeasurement * _Nullable);
-[Internal]
-delegate void SentryOnAppStartMeasurementAvailable ([NullAllowed] SentryAppStartMeasurement appStartMeasurement);
-
-// @interface PrivateSentrySDKOnly : NSObject
-[BaseType (typeof(NSObject), Name="PrivateSentrySDKOnly")]
-[Internal]
-interface PrivateSentrySdkOnly
-{
-    // +(void)storeEnvelope:(SentryEnvelope * _Nonnull)envelope;
-    [Static]
-    [Export ("storeEnvelope:")]
-    void StoreEnvelope (SentryEnvelope envelope);
-
-    // +(void)captureEnvelope:(SentryEnvelope * _Nonnull)envelope;
-    [Static]
-    [Export ("captureEnvelope:")]
-    void CaptureEnvelope (SentryEnvelope envelope);
-
-    // +(SentryEnvelope * _Nullable)envelopeWithData:(NSData * _Nonnull)data;
-    [Static]
-    [Export ("envelopeWithData:")]
-    [return: NullAllowed]
-    SentryEnvelope EnvelopeWithData (NSData data);
-
-    // +(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages;
-    [Static]
-    [Export ("getDebugImages")]
-    SentryDebugMeta[] DebugImages { get; }
-
-    // +(void)setSdkName:(NSString * _Nonnull)sdkName andVersionString:(NSString * _Nonnull)versionString;
-    [Static]
-    [Export ("setSdkName:andVersionString:")]
-    void SetSdkName (string sdkName, string versionString);
-
-    // +(void)setSdkName:(NSString * _Nonnull)sdkName;
-    [Static]
-    [Export ("setSdkName:")]
-    void SetSdkName (string sdkName);
-
-    // +(NSString * _Nonnull)getSdkName;
-    [Static]
-    [Export ("getSdkName")]
-    string SdkName { get; }
-
-    // +(NSString * _Nonnull)getSdkVersionString;
-    [Static]
-    [Export ("getSdkVersionString")]
-    string SdkVersionString { get; }
-
-    // @property (copy, nonatomic, class) SentryOnAppStartMeasurementAvailable _Nullable onAppStartMeasurementAvailable;
-    [Static]
-    [NullAllowed, Export ("onAppStartMeasurementAvailable", ArgumentSemantic.Copy)]
-    SentryOnAppStartMeasurementAvailable OnAppStartMeasurementAvailable { get; set; }
-
-    // @property (readonly, nonatomic, class) SentryAppStartMeasurement * _Nullable appStartMeasurement;
-    [Static]
-    [NullAllowed, Export ("appStartMeasurement")]
-    SentryAppStartMeasurement AppStartMeasurement { get; }
-
-    // @property (readonly, copy, nonatomic, class) NSString * _Nonnull installationID;
-    [Static]
-    [Export ("installationID")]
-    string InstallationID { get; }
-
-    // @property (readonly, copy, nonatomic, class) SentryOptions * _Nonnull options;
-    [Static]
-    [Export ("options", ArgumentSemantic.Copy)]
-    SentryOptions Options { get; }
-
-    // @property (assign, nonatomic, class) BOOL appStartMeasurementHybridSDKMode;
-    [Static]
-    [Export ("appStartMeasurementHybridSDKMode")]
-    bool AppStartMeasurementHybridSdkMode { get; set; }
-
-    // @property (assign, nonatomic, class) BOOL framesTrackingMeasurementHybridSDKMode;
-    [Static]
-    [Export ("framesTrackingMeasurementHybridSDKMode")]
-    bool FramesTrackingMeasurementHybridSdkMode { get; set; }
-
-    // @property (readonly, assign, nonatomic, class) BOOL isFramesTrackingRunning;
-    [Static]
-    [Export ("isFramesTrackingRunning")]
-    bool IsFramesTrackingRunning { get; }
-
-    // @property (readonly, assign, nonatomic, class) SentryScreenFrames * _Nonnull currentScreenFrames;
-    [Static]
-    [Export ("currentScreenFrames", ArgumentSemantic.Assign)]
-    SentryScreenFrames CurrentScreenFrames { get; }
-
-    // +(NSArray<NSData *> * _Nonnull)captureScreenshots;
-    [Static]
-    [Export ("captureScreenshots")]
-    NSData[] CaptureScreenshots();
-}
 
 // @interface SentryAppStartMeasurement : NSObject
 [BaseType (typeof(NSObject))]
@@ -197,7 +97,8 @@ interface SentryAppStartMeasurement
 }
 
 // @protocol SentrySerializable <NSObject>
-[Protocol] [Model]
+[Protocol]
+[Model]
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
@@ -288,10 +189,6 @@ interface SentryBreadcrumb : SentrySerializable
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
     NSDictionary<NSString, NSObject> Serialize();
-
-    // // -(BOOL)isEqual:(id _Nullable)other;
-    // [Export ("isEqual:")]
-    // bool IsEqual ([NullAllowed] NSObject other);
 
     // -(BOOL)isEqualToBreadcrumb:(SentryBreadcrumb * _Nonnull)breadcrumb;
     [Export ("isEqualToBreadcrumb:")]
@@ -452,15 +349,6 @@ interface SentryEnvelopeHeader
     [Export ("initWithId:")]
     NativeHandle Constructor ([NullAllowed] SentryId eventId);
 
-    // // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId traceContext:(SentryTraceContext * _Nullable)traceContext;
-    // [Export ("initWithId:traceContext:")]
-    // NativeHandle Constructor ([NullAllowed] SentryId eventId, [NullAllowed] SentryTraceContext traceContext);
-
-    // // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId sdkInfo:(SentrySdkInfo * _Nullable)sdkInfo traceContext:(SentryTraceContext * _Nullable)traceContext __attribute__((objc_designated_initializer));
-    // [Export ("initWithId:sdkInfo:traceContext:")]
-    // [DesignatedInitializer]
-    // NativeHandle Constructor ([NullAllowed] SentryId eventId, [NullAllowed] SentrySdkInfo sdkInfo, [NullAllowed] SentryTraceContext traceContext);
-
     // @property (readonly, copy, nonatomic) SentryId * _Nullable eventId;
     [NullAllowed, Export ("eventId", ArgumentSemantic.Copy)]
     SentryId EventId { get; }
@@ -468,10 +356,6 @@ interface SentryEnvelopeHeader
     // @property (readonly, copy, nonatomic) SentrySdkInfo * _Nullable sdkInfo;
     [NullAllowed, Export ("sdkInfo", ArgumentSemantic.Copy)]
     SentrySdkInfo SdkInfo { get; }
-
-    // // @property (readonly, copy, nonatomic) SentryTraceContext * _Nullable traceContext;
-    // [NullAllowed, Export ("traceContext", ArgumentSemantic.Copy)]
-    // SentryTraceContext TraceContext { get; }
 }
 
 // @interface SentryEnvelopeItemHeader : NSObject
@@ -588,6 +472,13 @@ interface SentryEnvelope
     // @property (readonly, nonatomic, strong) NSArray<SentryEnvelopeItem *> * _Nonnull items;
     [Export ("items", ArgumentSemantic.Strong)]
     SentryEnvelopeItem[] Items { get; }
+}
+
+partial interface Constants
+{
+    // extern NSString *const _Nonnull SentryErrorDomain __attribute__((visibility("default")));
+    [Field ("SentryErrorDomain", "__Internal")]
+    NSString SentryErrorDomain { get; }
 }
 
 // @interface SentryEvent : NSObject <SentrySerializable>
@@ -1052,8 +943,7 @@ interface SentryOptions
     bool EnableAutoBreadcrumbTracking { get; set; }
 
     // @property (retain, nonatomic) NSArray * _Nonnull tracePropagationTargets;
-    [Export ("tracePropagationTargets", ArgumentSemantic.Retain)]
-    NSObject[] TracePropagationTargets { get; set; }
+    [Export ("tracePropagationTargets", ArgumentSemantic.Retain)]    NSObject[] TracePropagationTargets { get; set; }
 
     // @property (assign, nonatomic) BOOL enableCaptureFailedRequests;
     [Export ("enableCaptureFailedRequests")]
@@ -1064,8 +954,7 @@ interface SentryOptions
     SentryHttpStatusCodeRange[] FailedRequestStatusCodes { get; set; }
 
     // @property (nonatomic, strong) NSArray * _Nonnull failedRequestTargets;
-    [Export ("failedRequestTargets", ArgumentSemantic.Strong)]
-    NSObject[] FailedRequestTargets { get; set; }
+    [Export ("failedRequestTargets", ArgumentSemantic.Strong)]    NSObject[] FailedRequestTargets { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>
@@ -1149,9 +1038,10 @@ interface SentrySpanContext : SentrySerializable
 }
 
 // @protocol SentrySpan <SentrySerializable>
-[Protocol, Model]
-[BaseType (typeof(NSObject))]
+[Protocol]
+[Model]
 [Internal]
+[BaseType (typeof(NSObject))]
 interface SentrySpan : SentrySerializable
 {
     // @required @property (readonly, nonatomic) SentrySpanContext * _Nonnull context;
@@ -1399,7 +1289,7 @@ interface SentryId
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryMeasurementUnit // : INSCopying
+interface SentryMeasurementUnit 
 {
     // -(instancetype _Nonnull)initWithUnit:(NSString * _Nonnull)unit;
     [Export ("initWithUnit:")]
@@ -1686,10 +1576,10 @@ interface SentryRequest : SentrySerializable
 }
 
 // @interface SentrySDK : NSObject
-[BaseType (typeof(NSObject), Name="SentrySDK")]
+[BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentrySdk
+interface SentrySDK
 {
     // @property (readonly, nonatomic, class) id<SentrySpan> _Nullable span;
     [Static]
@@ -2054,7 +1944,7 @@ interface SentrySdkInfo : SentrySerializable
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentrySession : SentrySerializable //, INSCopying
+interface SentrySession : SentrySerializable
 {
     // -(instancetype _Nonnull)initWithReleaseName:(NSString * _Nonnull)releaseName;
     [Export ("initWithReleaseName:")]
@@ -2136,7 +2026,7 @@ interface SentrySession : SentrySerializable //, INSCopying
 // @interface SentrySpanId : NSObject <NSCopying>
 [BaseType (typeof(NSObject))]
 [Internal]
-interface SentrySpanId // : INSCopying
+interface SentrySpanId 
 {
     // -(instancetype _Nonnull)initWithUUID:(NSUUID * _Nonnull)uuid;
     [Export ("initWithUUID:")]
@@ -2279,7 +2169,7 @@ interface SentryTransactionContext
 // @interface SentryUser : NSObject <SentrySerializable, NSCopying>
 [BaseType (typeof(NSObject))]
 [Internal]
-interface SentryUser : SentrySerializable //, INSCopying
+interface SentryUser : SentrySerializable
 {
     // @property (copy, atomic) NSString * _Nullable userId;
     [NullAllowed, Export ("userId")]
@@ -2308,10 +2198,6 @@ interface SentryUser : SentrySerializable //, INSCopying
     // -(instancetype _Nonnull)initWithUserId:(NSString * _Nonnull)userId;
     [Export ("initWithUserId:")]
     NativeHandle Constructor (string userId);
-
-    // // -(BOOL)isEqual:(id _Nullable)other;
-    // [Export ("isEqual:")]
-    // bool IsEqual ([NullAllowed] NSObject other);
 
     // -(BOOL)isEqualToUser:(SentryUser * _Nonnull)user;
     [Export ("isEqualToUser:")]
@@ -2347,4 +2233,100 @@ interface SentryUserFeedback : SentrySerializable
     // @property (copy, nonatomic) NSString * _Nonnull comments;
     [Export ("comments")]
     string Comments { get; set; }
+}
+
+// typedef void (^SentryOnAppStartMeasurementAvailable)(SentryAppStartMeasurement * _Nullable);
+[Internal]
+delegate void SentryOnAppStartMeasurementAvailable ([NullAllowed] SentryAppStartMeasurement appStartMeasurement);
+
+// @interface PrivateSentrySDKOnly : NSObject
+[BaseType (typeof(NSObject))]
+[Internal]
+interface PrivateSentrySDKOnly
+{
+    // +(void)storeEnvelope:(SentryEnvelope * _Nonnull)envelope;
+    [Static]
+    [Export ("storeEnvelope:")]
+    void StoreEnvelope (SentryEnvelope envelope);
+
+    // +(void)captureEnvelope:(SentryEnvelope * _Nonnull)envelope;
+    [Static]
+    [Export ("captureEnvelope:")]
+    void CaptureEnvelope (SentryEnvelope envelope);
+
+    // +(SentryEnvelope * _Nullable)envelopeWithData:(NSData * _Nonnull)data;
+    [Static]
+    [Export ("envelopeWithData:")]
+    [return: NullAllowed]
+    SentryEnvelope EnvelopeWithData (NSData data);
+
+    // +(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages;
+    [Static]
+    [Export ("getDebugImages")]
+    SentryDebugMeta[] DebugImages { get; }
+
+    // +(void)setSdkName:(NSString * _Nonnull)sdkName andVersionString:(NSString * _Nonnull)versionString;
+    [Static]
+    [Export ("setSdkName:andVersionString:")]
+    void SetSdkName (string sdkName, string versionString);
+
+    // +(void)setSdkName:(NSString * _Nonnull)sdkName;
+    [Static]
+    [Export ("setSdkName:")]
+    void SetSdkName (string sdkName);
+
+    // +(NSString * _Nonnull)getSdkName;
+    [Static]
+    [Export ("getSdkName")]
+    string SdkName { get; }
+
+    // +(NSString * _Nonnull)getSdkVersionString;
+    [Static]
+    [Export ("getSdkVersionString")]
+    string SdkVersionString { get; }
+
+    // @property (copy, nonatomic, class) SentryOnAppStartMeasurementAvailable _Nullable onAppStartMeasurementAvailable;
+    [Static]
+    [NullAllowed, Export ("onAppStartMeasurementAvailable", ArgumentSemantic.Copy)]
+    SentryOnAppStartMeasurementAvailable OnAppStartMeasurementAvailable { get; set; }
+
+    // @property (readonly, nonatomic, class) SentryAppStartMeasurement * _Nullable appStartMeasurement;
+    [Static]
+    [NullAllowed, Export ("appStartMeasurement")]
+    SentryAppStartMeasurement AppStartMeasurement { get; }
+
+    // @property (readonly, copy, nonatomic, class) NSString * _Nonnull installationID;
+    [Static]
+    [Export ("installationID")]
+    string InstallationID { get; }
+
+    // @property (readonly, copy, nonatomic, class) SentryOptions * _Nonnull options;
+    [Static]
+    [Export ("options", ArgumentSemantic.Copy)]
+    SentryOptions Options { get; }
+
+    // @property (assign, nonatomic, class) BOOL appStartMeasurementHybridSDKMode;
+    [Static]
+    [Export ("appStartMeasurementHybridSDKMode")]
+    bool AppStartMeasurementHybridSDKMode { get; set; }
+
+    // @property (assign, nonatomic, class) BOOL framesTrackingMeasurementHybridSDKMode;
+    [Static]
+    [Export ("framesTrackingMeasurementHybridSDKMode")]
+    bool FramesTrackingMeasurementHybridSDKMode { get; set; }
+
+    // @property (readonly, assign, nonatomic, class) BOOL isFramesTrackingRunning;
+    [Static]
+    [Export ("isFramesTrackingRunning")]
+    bool IsFramesTrackingRunning { get; }
+
+    // @property (readonly, assign, nonatomic, class) SentryScreenFrames * _Nonnull currentScreenFrames;
+    [Static]
+    [Export ("currentScreenFrames", ArgumentSemantic.Assign)]
+    SentryScreenFrames CurrentScreenFrames { get; }
+
+    // +(NSArray<NSData *> * _Nonnull)captureScreenshots;
+    [Static]
+    [Export ("captureScreenshots")]
+    NSData[] CaptureScreenshots();
 }

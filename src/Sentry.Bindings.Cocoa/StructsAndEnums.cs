@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using Foundation;
 using ObjCRuntime;
 
 namespace Sentry.CocoaSdk;
@@ -63,7 +65,6 @@ internal enum SentryError : long
     RequestError = 106,
     EventNotSent = 107
 }
-
 
 [Native]
 internal enum SentrySampleDecision : ulong
