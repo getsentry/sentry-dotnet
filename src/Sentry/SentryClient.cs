@@ -98,6 +98,8 @@ public class SentryClient : ISentryClient, IDisposable
     /// <inheritdoc />
     public void CaptureTransaction(Transaction transaction)
     {
+        transaction.ProfileInfo = _options.TransactionProfiler?.OnTransactionFinish(transaction);
+
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
             _options.LogWarning("Transaction dropped due to empty id.");
@@ -119,8 +121,6 @@ public class SentryClient : ISentryClient, IDisposable
             _options.LogWarning("Capturing a transaction which has not been finished. " +
                                 "Please call transaction.Finish() instead of hub.CaptureTransaction(transaction) " +
                                 "to properly finalize the transaction and send it to Sentry.");
-
-            // TODO FIXME - this is problematic because ITransactionProfiler?.OnTransactionFinish() isn't called.
         }
 
         // Sampling decision MUST have been made at this point

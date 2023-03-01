@@ -56,9 +56,13 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         }
     }
 
-    public ProfileInfo? OnTransactionFinish(ITransaction transaction)
+    public ProfileInfo? OnTransactionFinish(Transaction transaction)
     {
-        if (_session?.StartedBy == transaction)
+        // TODO we to match the same transaction start & end... Or even better, create a new instance of ITransactionProfiler when attaching to transaction.
+        //      This interface was based on what sentry-java does, but we don't have to do the same thing maybe?
+        //      We cannot check `StartedBy` anymore, because that's an instance of `TransactionTracer`.
+        //if (_session?.StartedBy == transaction)
+        if (_session is not null)
         {
             var nettraceStream = _session.Finish();
             var startTimestamp = _session.StartTimestamp;

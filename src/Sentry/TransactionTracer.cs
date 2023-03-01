@@ -258,8 +258,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
-        var profileInfo = _hub.GetSentryOptions()?.TransactionProfiler?.OnTransactionFinish(this);
-
         Status ??= SpanStatus.Ok;
         EndTimestamp = _stopwatch.CurrentDateTimeOffset;
 
@@ -275,13 +273,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
         // Client decides whether to discard this transaction based on sampling
-        var transaction = new Transaction(this);
-        if (profileInfo is not null)
-        {
-            profileInfo.Transaction = transaction;
-            transaction.ProfileInfo = profileInfo;
-        }
-        _hub.CaptureTransaction(transaction);
+        _hub.CaptureTransaction(new Transaction(this));
     }
 
     /// <inheritdoc />

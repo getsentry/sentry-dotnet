@@ -6,5 +6,5 @@ internal interface ITransactionProfiler
 {
     void OnTransactionStart(ITransaction transaction);
 
-    ProfileInfo? OnTransactionFinish(ITransaction transaction);
+    ProfileInfo? OnTransactionFinish(Transaction transaction);
 }

@@ -14,7 +14,7 @@ internal sealed class ProfileInfo : IJsonSerializable
     /// </summary>
     public SentryId EventId { get; private set; } = SentryId.Create();
 
-    public DebugMeta DebugMeta { get; set; } = new();
+    public DebugMeta DebugMeta { get; set; } = new() { Images = new() };
 
     private readonly Contexts _contexts = new();
 
@@ -48,8 +48,17 @@ internal sealed class ProfileInfo : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("release", Release);
         writer.WriteStringIfNotWhiteSpace("environment", Environment);
         writer.WriteSerializable("debug_meta", DebugMeta, logger);
-        writer.WriteSerializable("device", _contexts.Device, logger);
-        writer.WriteSerializable("os", _contexts.OperatingSystem, logger);
+        // TODO writer.WriteSerializable("device", _contexts.Device, logger);
+        //  https://github.com/getsentry/relay/blob/master/relay-profiling/src/sample.rs#L117
+        writer.WriteStartObject("device");
+        writer.WriteString("architecture", _contexts.Device.Architecture ?? "x86_64");
+        writer.WriteEndObject();
+        // TODO writer.WriteSerializable("os", _contexts.OperatingSystem, logger);
+        //  https://github.com/getsentry/relay/blob/master/relay-profiling/src/sample.rs#L102
+        writer.WriteStartObject("os");
+        writer.WriteString("name", "Windows");
+        writer.WriteString("version", "10.0.22621");
+        writer.WriteEndObject();
         writer.WriteSerializable("runtime", _contexts.Runtime, logger);
         writer.WriteSerializable("profile", Profile, logger);
 
