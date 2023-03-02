@@ -69,12 +69,12 @@ public partial class SentryOptions
         /// <summary>
         /// When enabled, the SDK tracks when the application stops responding for a specific amount of
         /// time defined by the <see cref="AppHangTimeoutInterval"/> option.
-        /// The default value is <c>false</c> (disabled).
+        /// The default value is <c>true</c> (enabled).
         /// </summary>
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/
         /// </remarks>
-        public bool EnableAppHangTracking { get; set; } = false;
+        public bool EnableAppHangTracking { get; set; } = true;
 
         /// <summary>
         /// When enabled, the SDK adds breadcrumbs for various system events.
@@ -95,30 +95,76 @@ public partial class SentryOptions
         /// See: https://docs.sentry.io/platforms/apple/performance/
         /// And: https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#opt-out
         /// </remarks>
-        public bool EnableAutoPerformanceTracking { get; set; } = true;
+        public bool EnableAutoPerformanceTracing { get; set; } = true;
 
         /// <summary>
-        /// This feature is experimental.
+        /// When enabled, the SDK tracks performance for <see cref="UIViewController"/> subclasses and HTTP requests
+        /// automatically. It also measures the app start and slow and frozen frames.
+        /// The default value is <c>true</c> (enabled).
+        /// </summary>
+        /// <remarks>
+        /// Performance Monitoring must be enabled for this option to take effect.
+        /// See: https://docs.sentry.io/platforms/apple/performance/
+        /// And: https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#opt-out
+        /// </remarks>
+        [Obsolete("Use EnableAutoPerformanceTracing instead.  This property will be removed in a future version.")]
+        public bool EnableAutoPerformanceTracking
+        {
+            get => EnableAutoPerformanceTracing;
+            set => EnableAutoPerformanceTracing = value;
+        }
+
+        /// <summary>
         /// When enabled, the SDK tracks the performance of Core Data operations.
         /// It requires enabling performance monitoring.
-        /// The default value is <c>false</c> (disabled).
+        /// The default value is <c>true</c> (enabled).
         /// </summary>
         /// <remarks>
         /// Performance Monitoring must be enabled for this option to take effect.
         /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#core-data-instrumentation
         /// </remarks>
-        public bool EnableCoreDataTracking { get; set; } = false;
+        public bool EnableCoreDataTracing { get; set; } = true;
 
         /// <summary>
-        /// This feature is experimental.
+        /// When enabled, the SDK tracks the performance of Core Data operations.
+        /// It requires enabling performance monitoring.
+        /// The default value is <c>true</c> (enabled).
+        /// </summary>
+        /// <remarks>
+        /// Performance Monitoring must be enabled for this option to take effect.
+        /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#core-data-instrumentation
+        /// </remarks>
+        [Obsolete("Use EnableCoreDataTracing instead.  This property will be removed in a future version.")]
+        public bool EnableCoreDataTracking
+        {
+            get => EnableCoreDataTracing;
+            set => EnableCoreDataTracing = value;
+        }
+
+        /// <summary>
         /// When enabled, the SDK tracks performance for file IO reads and writes with <see cref="NSData"/>
         /// if auto performance tracking and <see cref="EnableSwizzling"/> are enabled.
-        /// The default value is <c>false</c> (disabled).
+        /// The default value is <c>true</c> (enabled).
         /// </summary>
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#file-io-instrumentation
         /// </remarks>
-        public bool EnableFileIOTracking { get; set; } = false;
+        public bool EnableFileIOTracing { get; set; } = true;
+
+        /// <summary>
+        /// When enabled, the SDK tracks performance for file IO reads and writes with <see cref="NSData"/>
+        /// if auto performance tracking and <see cref="EnableSwizzling"/> are enabled.
+        /// The default value is <c>true</c> (enabled).
+        /// </summary>
+        /// <remarks>
+        /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#file-io-instrumentation
+        /// </remarks>
+        [Obsolete("Use EnableFileIOTracing instead.  This property will be removed in a future version.")]
+        public bool EnableFileIOTracking
+        {
+            get => EnableFileIOTracing;
+            set => EnableFileIOTracing = value;
+        }
 
         /// <summary>
         /// When enabled, the SDK adds breadcrumbs for each network request
@@ -138,13 +184,27 @@ public partial class SentryOptions
         public bool EnableNetworkTracking { get; set; } = true;
 
         /// <summary>
+        /// Whether to enable watchdog termination tracking or not.
+        /// The default value is <c>true</c> (enabled).
+        /// </summary>
+        /// <remarks>
+        /// https://docs.sentry.io/platforms/apple/configuration/watchdog-terminations/
+        /// </remarks>
+        public bool EnableWatchdogTerminationTracking { get; set; } = true;
+
+        /// <summary>
         /// Whether to enable out of memory tracking or not.
         /// The default value is <c>true</c> (enabled).
         /// </summary>
         /// <remarks>
         /// https://docs.sentry.io/platforms/apple/configuration/out-of-memory/
         /// </remarks>
-        public bool EnableOutOfMemoryTracking { get; set; } = true;
+        [Obsolete("Use EnableWatchdogTerminationTracking instead.  This property will be removed in a future version.")]
+        public bool EnableOutOfMemoryTracking
+        {
+            get => EnableWatchdogTerminationTracking;
+            set => EnableWatchdogTerminationTracking = value;
+        }
 
         /// <summary>
         /// Whether the SDK should use swizzling or not.
@@ -166,10 +226,23 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#uiviewcontroller-instrumentation
         /// </remarks>
-        public bool EnableUIViewControllerTracking { get; set; } = true;
+        public bool EnableUIViewControllerTracing { get; set; } = true;
 
         /// <summary>
-        /// This feature is experimental.
+        /// When enabled, the SDK tracks performance for <see cref="UIViewController"/> subclasses.
+        /// The default value is <c>true</c> (enabled).
+        /// </summary>
+        /// <remarks>
+        /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#uiviewcontroller-instrumentation
+        /// </remarks>
+        [Obsolete("Use EnableUIViewControllerTracing instead.")]
+        public bool EnableUIViewControllerTracking
+        {
+            get => EnableUIViewControllerTracing;
+            set => EnableUIViewControllerTracing = value;
+        }
+
+        /// <summary>
         /// When enabled, the SDK creates transactions for UI events like buttons clicks, switch toggles,
         /// and other UI elements that uses <see cref="UIControl.SendAction(Selector, NSObject?, UIEvent?)"/>.
         /// The default value is <c>false</c> (disabled).

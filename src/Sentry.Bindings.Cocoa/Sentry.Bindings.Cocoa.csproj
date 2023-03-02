@@ -12,6 +12,7 @@
 
     <!-- Set up the binding project. -->
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
+    <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
 
@@ -43,6 +44,7 @@
   </Target>
   <Target Name="_InnerBuildSentryCocoaSDK">
     <Exec Command="$(MSBuildThisFileDirectory)../../scripts/build-sentry-cocoa.sh" />
+    <Exec Command="pwsh $(MSBuildThisFileDirectory)../../scripts/generate-cocoa-bindings.ps1" />
   </Target>
 
 </Project>
