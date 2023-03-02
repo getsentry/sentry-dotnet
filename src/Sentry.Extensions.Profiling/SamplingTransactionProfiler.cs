@@ -97,7 +97,8 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 {
                     Contexts = transaction.Contexts,
                     Environment = transaction.Environment,
-                    // TODO FIXME - see https://discord.com/channels/621778831602221064/621783515423440927/1080182836163788800
+                    Transaction = transaction,
+                    // TODO FIXME - see https://github.com/getsentry/relay/pull/1902
                     // Platform = transaction.Platform,
                     Platform = "dotnet",
                     Release = transaction.Release,

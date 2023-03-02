@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Xml.Xsl;
 using Sentry;
 using Sentry.Extensibility;
+using Sentry.Extensions.Profiling;
 
 // One of the ways to set your DSN is via an attribute:
 // It could be set via AssemblyInfo.cs and patched via CI.
@@ -82,7 +83,7 @@ internal static class Program
             o.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
             // Enable SDK logging with Debug level
-            o.Debug = true;
+            o.Debug = false;
             // To change the verbosity, use:
             // o.DiagnosticLevel = SentryLevel.Info;
             // To use a custom logger:
@@ -103,8 +104,13 @@ internal static class Program
 
             // Control/override how to apply the State object into the scope
             o.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
+
+            o.TracesSampleRate = 1.0;
+
+            o.AddIntegration(new ProfilingIntegration());
         }))
         {
+            var tx = SentrySdk.StartTransaction("app", "run");
             // Ignored by its type due to the setting above
             SentrySdk.CaptureException(new XsltCompileException());
 
@@ -139,6 +145,7 @@ internal static class Program
                 s.AddAttachment(typeof(Program).Assembly.Location);
             });
 
+            FindPrimeNumber(100000);
             var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
 
             // Send an user feedback linked to the warning.
@@ -171,6 +178,8 @@ internal static class Program
                     },
                     Level = SentryLevel.Debug
                 });
+
+                FindPrimeNumber(100000);
             }
             // Console output will show queue being flushed.
             await SentrySdk.FlushAsync();
@@ -202,7 +211,35 @@ internal static class Program
 
             SentrySdk.CaptureException(
                 new Exception("Error outside of the admin section: Goes to the default DSN"));
+
+            tx.Finish();
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
+    }
+
+    private static long FindPrimeNumber(int n)
+    {
+        int count = 0;
+        long a = 2;
+        while (count < n)
+        {
+            long b = 2;
+            int prime = 1;// to check if found a prime
+            while (b * b <= a)
+            {
+                if (a % b == 0)
+                {
+                    prime = 0;
+                    break;
+                }
+                b++;
+            }
+            if (prime > 0)
+            {
+                count++;
+            }
+            a++;
+        }
+        return (--a);
     }
 
     private class AdminPartMiddleware

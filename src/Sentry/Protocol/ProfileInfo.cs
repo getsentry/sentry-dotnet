@@ -60,7 +60,6 @@ internal sealed class ProfileInfo : IJsonSerializable
         writer.WriteString("version", "10.0.22621");
         writer.WriteEndObject();
         writer.WriteSerializable("runtime", _contexts.Runtime, logger);
-        writer.WriteSerializable("profile", Profile, logger);
 
         if (Transaction is not null)
         {
@@ -72,6 +71,7 @@ internal sealed class ProfileInfo : IJsonSerializable
             writer.WriteEndObject();
         }
 
+        writer.WriteSerializable("profile", Profile, logger);
         writer.WriteEndObject();
     }
 }
