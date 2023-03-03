@@ -41,9 +41,10 @@ jobs:
   android:
     needs: [build]
     name: Run Android API-${{ matrix.api-level }} Test
-    # MacOS is required for the emulator, per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
-    # We use macos-12 because macos-latest will soon point there anyway, per https://github.com/actions/runner-images/issues/6384
-    runs-on: macos-12
+
+    # Requires a "larger runner", for nested virtualization support
+    runs-on: ubuntu-latest-4-cores
+
     strategy:
       fail-fast: false
       matrix:
@@ -52,6 +53,14 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
     steps:
+
+      # See https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      - name: Enable KVM group perms
+        run: |
+            echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+            sudo udevadm control --reload-rules
+            sudo udevadm trigger --name-match=kvm
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -81,7 +90,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-hwaccel-${{ matrix.api-level }}
+          key: ${{ runner.os }}-avd-api${{ matrix.api-level }}
 
       - name: Create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
