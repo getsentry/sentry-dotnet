@@ -6,7 +6,7 @@ public class JsonTests
 
     public JsonTests(ITestOutputHelper output)
     {
-        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+        _testOutputLogger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
     }
 
     public static Exception GenerateException(string description)
@@ -171,35 +171,46 @@ public class JsonTests
         Assert.Equal(expectedSerializedData, serializedString);
     }
 
-    private class NonSerializableValue
-    {
-#pragma warning disable CA1822 // Mark members as static
-        public string Thrower => throw new InvalidDataException();
-#pragma warning restore CA1822
-    }
-
-    [Fact]
-    public void WriteDynamic_NonSerializableValue_LogException()
+    [Theory]
+    [MemberData(nameof(NonSerializableObjectTestData))]
+    public void WriteDynamic_NonSerializableObject_LogException(object testObject)
     {
         //Assert
-        var logger = Substitute.For<IDiagnosticLogger>();
-
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
         {
             writer.WriteStartObject();
 
             // Act
-            writer.WriteDynamic("property_name", new NonSerializableValue(), logger);
+            writer.WriteDynamic("property_name", testObject, _testOutputLogger);
 
             writer.WriteEndObject();
         }
 
         // Assert
-        logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
-            Arg.Any<InvalidDataException>(),
+        _testOutputLogger.Received(1).Log(
+            Arg.Is(SentryLevel.Error),
+            "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            Arg.Any<Exception>(),
             Arg.Any<object[]>());
+    }
+
+    public static IEnumerable<object[]> NonSerializableObjectTestData =>
+        new[]
+        {
+            new object[] {new NonSerializableType1()},
+            new object[] {new NonSerializableType2()},
+        };
+
+    public class NonSerializableType1
+    {
+#pragma warning disable CA1822 // Mark members as static
+        public string Thrower => throw new InvalidDataException();
+#pragma warning restore CA1822
+    }
+
+    public class NonSerializableType2
+    {
+        public NonSerializableType2 Evil => this;
     }
 }
