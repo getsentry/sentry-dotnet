@@ -174,6 +174,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Android.AssemblyRead
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Profiling", "src\Sentry.Extensions.Profiling\Sentry.Extensions.Profiling.csproj", "{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Profiling.Tests", "test\Sentry.Extensions.Profiling.Tests\Sentry.Extensions.Profiling.Tests.csproj", "{2E750A7C-561D-4959-B967-042755139D84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -421,6 +423,10 @@ Global
 		{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E750A7C-561D-4959-B967-042755139D84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E750A7C-561D-4959-B967-042755139D84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E750A7C-561D-4959-B967-042755139D84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E750A7C-561D-4959-B967-042755139D84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -488,6 +494,7 @@ Global
 		{C96CB65D-3D2D-404E-85C0-69A3FC03B48F} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{2E750A7C-561D-4959-B967-042755139D84} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

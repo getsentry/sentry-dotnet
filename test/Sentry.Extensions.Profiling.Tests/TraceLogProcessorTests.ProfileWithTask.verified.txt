@@ -1,0 +1,7466 @@
+﻿{
+  thread_metadata: {
+    0: {
+      name: Thread 0
+    },
+    2: {
+      name: Thread 2
+    },
+    3: {
+      name: Thread 3
+    },
+    4: {
+      name: Thread 4
+    },
+    5: {
+      name: Thread 5
+    },
+    6: {
+      name: Thread 6
+    },
+    8: {
+      name: Thread 8
+    },
+    9: {
+      name: Thread 9
+    },
+    11: {
+      name: Thread 11
+    },
+    12: {
+      name: Thread 12
+    }
+  },
+  stacks: [
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      8
+    ],
+    [
+      15,
+      16,
+      17,
+      13,
+      18,
+      8
+    ],
+    [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      8
+    ],
+    [
+      105,
+      101,
+      102,
+      103,
+      104,
+      8
+    ],
+    [
+      106,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      107,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      19,
+      20,
+      108,
+      109,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      114,
+      8
+    ],
+    [
+      9,
+      10,
+      11,
+      115,
+      13,
+      116,
+      8
+    ],
+    [
+      117,
+      118,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      119,
+      120,
+      90,
+      91,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      121,
+      122,
+      123,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      116,
+      8
+    ],
+    [
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      91,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      117,
+      122,
+      123,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      116,
+      8
+    ],
+    [
+      137,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      91,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      9,
+      10,
+      11,
+      12,
+      13,
+      39,
+      8
+    ],
+    [
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      152,
+      153,
+      154,
+      150,
+      155,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      156,
+      157,
+      153,
+      154,
+      150,
+      155,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      174,
+      175,
+      176,
+      177,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      153,
+      154,
+      150,
+      155,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      92,
+      93,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      63,
+      73,
+      74,
+      75,
+      76,
+      68,
+      69,
+      77,
+      78,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      185,
+      186,
+      187,
+      188,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      9,
+      10,
+      11,
+      12,
+      13,
+      80,
+      8
+    ],
+    [
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      187,
+      188,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      196,
+      197,
+      198,
+      188,
+      158,
+      159,
+      160,
+      161,
+      162,
+      163,
+      164,
+      165,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      199,
+      200,
+      201,
+      202,
+      63,
+      203,
+      204,
+      66,
+      67,
+      68,
+      205,
+      206,
+      207,
+      208,
+      79,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      225,
+      226,
+      227,
+      228,
+      63,
+      229,
+      230,
+      66,
+      67,
+      68,
+      231,
+      232,
+      233,
+      234,
+      235,
+      63,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      202,
+      63,
+      203,
+      204,
+      238,
+      242,
+      243,
+      244,
+      245,
+      246,
+      63,
+      247,
+      248,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      225,
+      226,
+      227,
+      228,
+      63,
+      229,
+      230,
+      66,
+      67,
+      68,
+      231,
+      232,
+      233,
+      234,
+      235,
+      63,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      202,
+      63,
+      203,
+      204,
+      238,
+      242,
+      243,
+      244,
+      245,
+      246,
+      63,
+      247,
+      248,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267,
+      268,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      225,
+      226,
+      227,
+      228,
+      63,
+      229,
+      230,
+      66,
+      67,
+      68,
+      231,
+      232,
+      233,
+      234,
+      235,
+      63,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      202,
+      63,
+      203,
+      204,
+      238,
+      242,
+      243,
+      244,
+      245,
+      246,
+      63,
+      247,
+      248,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      269,
+      270,
+      271,
+      272,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      225,
+      226,
+      227,
+      228,
+      63,
+      229,
+      230,
+      66,
+      67,
+      68,
+      231,
+      232,
+      233,
+      234,
+      235,
+      63,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      202,
+      63,
+      203,
+      204,
+      238,
+      242,
+      243,
+      244,
+      245,
+      246,
+      63,
+      247,
+      248,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      273,
+      274,
+      275,
+      276,
+      272,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      225,
+      226,
+      227,
+      228,
+      63,
+      229,
+      230,
+      66,
+      67,
+      68,
+      231,
+      232,
+      233,
+      234,
+      235,
+      63,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      202,
+      63,
+      203,
+      204,
+      238,
+      242,
+      243,
+      244,
+      245,
+      246,
+      63,
+      247,
+      248,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      277,
+      278,
+      279,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      225,
+      226,
+      227,
+      228,
+      63,
+      229,
+      230,
+      66,
+      67,
+      68,
+      231,
+      232,
+      233,
+      234,
+      235,
+      63,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      202,
+      63,
+      203,
+      204,
+      238,
+      242,
+      243,
+      244,
+      245,
+      246,
+      63,
+      247,
+      248,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      280,
+      281,
+      282,
+      283,
+      284,
+      285,
+      286,
+      256,
+      257,
+      258,
+      259,
+      260,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      225,
+      226,
+      227,
+      228,
+      63,
+      229,
+      230,
+      66,
+      67,
+      68,
+      231,
+      232,
+      233,
+      234,
+      235,
+      63,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      202,
+      63,
+      203,
+      204,
+      238,
+      242,
+      243,
+      244,
+      245,
+      246,
+      63,
+      247,
+      248,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      287,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      269,
+      270,
+      271,
+      272,
+      254,
+      288,
+      289,
+      283,
+      284,
+      285,
+      286,
+      290,
+      63,
+      291,
+      292,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      294,
+      295,
+      63,
+      296,
+      297,
+      66,
+      67,
+      68,
+      298,
+      299,
+      300,
+      301,
+      302,
+      63,
+      303,
+      304,
+      238,
+      239,
+      240,
+      245,
+      287,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      305,
+      306,
+      307,
+      308,
+      309,
+      290,
+      63,
+      291,
+      292,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      294,
+      295,
+      63,
+      296,
+      297,
+      66,
+      67,
+      68,
+      298,
+      299,
+      300,
+      301,
+      302,
+      63,
+      303,
+      304,
+      238,
+      239,
+      240,
+      245,
+      287,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      310,
+      307,
+      308,
+      309,
+      290,
+      63,
+      291,
+      292,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      294,
+      295,
+      63,
+      296,
+      297,
+      66,
+      67,
+      68,
+      298,
+      299,
+      300,
+      301,
+      302,
+      63,
+      303,
+      304,
+      238,
+      239,
+      240,
+      245,
+      287,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      311,
+      312,
+      313,
+      314,
+      315,
+      307,
+      308,
+      309,
+      290,
+      63,
+      291,
+      292,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      294,
+      295,
+      63,
+      296,
+      297,
+      66,
+      67,
+      68,
+      298,
+      299,
+      300,
+      301,
+      302,
+      63,
+      303,
+      304,
+      238,
+      239,
+      240,
+      245,
+      287,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      316,
+      317,
+      63,
+      318,
+      319,
+      66,
+      67,
+      68,
+      320,
+      321,
+      322,
+      222,
+      63,
+      223,
+      224,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      323,
+      324,
+      63,
+      325,
+      326,
+      66,
+      67,
+      68,
+      231,
+      232,
+      327,
+      328,
+      290,
+      63,
+      291,
+      292,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      294,
+      295,
+      63,
+      296,
+      297,
+      66,
+      67,
+      68,
+      298,
+      299,
+      300,
+      301,
+      302,
+      63,
+      303,
+      304,
+      238,
+      239,
+      240,
+      245,
+      287,
+      249,
+      250,
+      251,
+      8
+    ],
+    [
+      329,
+      330,
+      331,
+      332,
+      333,
+      334,
+      63,
+      335,
+      336,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      337,
+      338,
+      63,
+      339,
+      340,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      341,
+      342,
+      34,
+      343,
+      344,
+      37,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      345,
+      346,
+      347,
+      330,
+      331,
+      332,
+      333,
+      334,
+      63,
+      335,
+      336,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      337,
+      338,
+      63,
+      339,
+      340,
+      66,
+      67,
+      68,
+      205,
+      206,
+      293,
+      341,
+      342,
+      34,
+      343,
+      344,
+      37,
+      38,
+      13,
+      80,
+      8
+    ],
+    [
+      19,
+      20,
+      108,
+      109,
+      110,
+      34,
+      111,
+      112,
+      113,
+      37,
+      38,
+      13,
+      39,
+      8
+    ],
+    [
+      9,
+      10,
+      11,
+      12,
+      13,
+      114,
+      8
+    ],
+    [
+      9,
+      10,
+      11,
+      115,
+      13,
+      348,
+      8
+    ],
+    [
+      66,
+      67,
+      68,
+      349,
+      350,
+      351,
+      352,
+      112,
+      113,
+      37,
+      38,
+      13,
+      116,
+      8
+    ],
+    [
+      353,
+      354,
+      355,
+      33,
+      63,
+      356,
+      357,
+      66,
+      67,
+      68,
+      349,
+      350,
+      351,
+      352,
+      112,
+      113,
+      37,
+      38,
+      13,
+      116,
+      8
+    ],
+    [
+      358,
+      359,
+      355,
+      33,
+      63,
+      356,
+      357,
+      66,
+      67,
+      68,
+      349,
+      350,
+      351,
+      352,
+      112,
+      113,
+      37,
+      38,
+      13,
+      116,
+      8
+    ],
+    [
+      360,
+      358,
+      359,
+      355,
+      33,
+      63,
+      356,
+      357,
+      66,
+      67,
+      68,
+      349,
+      350,
+      351,
+      352,
+      112,
+      113,
+      37,
+      38,
+      13,
+      116,
+      8
+    ]
+  ],
+  frames: [
+    {
+      function: System.Threading.Monitor.Wait(class System.Object,int32),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.ManualResetEventSlim.Wait(int32,value class System.Threading.CancellationToken),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.SpinThenBlockingWait(int32,value class System.Threading.CancellationToken),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.InternalWaitCore(int32,value class System.Threading.CancellationToken),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(class System.Threading.Tasks.Task),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.TaskAwaiter.GetResult(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: Program.<Main>(),
+      module: Sentry.Samples.Console.Customized,
+      instruction_addr: 0x11
+    },
+    {
+      function: System.Threading.LowLevelLifoSemaphore.WaitForSignal(int32),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.LowLevelLifoSemaphore.Wait(int32,bool),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Thread.StartCallback(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.WaitHandle.WaitOneNoCheck(int32),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.WaitHandle.WaitOne(int32),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.PortableThreadPool+GateThread.GateThreadStart(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.IO.Pipes.PipeStream.ReadCore(value class System.Span`1<unsigned int8>),
+      module: System.IO.Pipes.il
+    },
+    {
+      function: System.IO.Pipes.PipeStream.Read(unsigned int8[],int32,int32),
+      module: System.IO.Pipes.il
+    },
+    {
+      function: System.IO.BinaryReader.ReadBytes(int32),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcHeader.Parse(class System.IO.BinaryReader),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      instruction_addr: 0xe
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcMessage.Parse(class System.IO.Stream),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      instruction_addr: 0x16
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.Read(class System.IO.Stream),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      instruction_addr: 0x0
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageGetContinuation(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      instruction_addr: 0x19
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession.Start(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      instruction_addr: 0xd
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.DiagnosticsClient.StartEventPipeSession(class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      instruction_addr: 0x0
+    },
+    {
+      function: ProfilerSession..ctor(class System.Object),
+      module: Sentry.Extensions.Profiling,
+      instruction_addr: 0x7a
+    },
+    {
+      function: SamplingTransactionProfiler.OnTransactionStart(class Sentry.ITransaction),
+      module: Sentry.Extensions.Profiling,
+      instruction_addr: 0xe
+    },
+    {
+      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext),
+      module: Sentry,
+      instruction_addr: 0x111
+    },
+    {
+      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>),
+      module: Sentry,
+      instruction_addr: 0x0
+    },
+    {
+      function: Program+<Main>d__2.MoveNext(),
+      module: Sentry.Samples.Console.Customized,
+      instruction_addr: 0x19a
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(class System.Threading.Thread,class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x59
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecuteFromThreadPool(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler+<SendAsync>d__3.MoveNext(),
+      module: Sentry,
+      instruction_addr: 0x1d0
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: Sentry,
+      instruction_addr: 0x39
+    },
+    {
+      function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: Sentry.Internal.Http.RetryAfterHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: Sentry,
+      instruction_addr: 0x0
+    },
+    {
+      function: Sentry.Internal.Http.RetryAfterHandler+<SendAsync>d__8.MoveNext(),
+      module: Sentry,
+      instruction_addr: 0x67
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: Sentry.Internal.Http.RetryAfterHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: Sentry,
+      instruction_addr: 0x39
+    },
+    {
+      function: System.Net.Http.HttpMessageInvoker.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpClient+<<SendAsync>g__Core|83_0>d.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(class System.Net.Http.HttpRequestMessage,value class System.Net.Http.HttpCompletionOption,class System.Threading.CancellationTokenSource,bool,class System.Threading.CancellationTokenSource,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpClient.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Net.Http.HttpCompletionOption,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpClient.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: Sentry.Internal.Http.HttpTransport+<SendEnvelopeAsync>d__3.MoveNext(),
+      module: Sentry,
+      instruction_addr: 0x6d
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: Sentry.Internal.Http.HttpTransport.SendEnvelopeAsync(class Sentry.Protocol.Envelopes.Envelope,value class System.Threading.CancellationToken),
+      module: Sentry,
+      instruction_addr: 0x39
+    },
+    {
+      function: Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20.MoveNext(),
+      module: Sentry,
+      instruction_addr: 0x1ba
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Threading.ExecutionContext.RunInternal(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(class System.Runtime.CompilerServices.IAsyncStateMachineBox,bool),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.RunContinuations(class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.FinishContinuations(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.Boolean].TrySetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Boolean].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31.MoveNext(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(class System.Action,bool),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.RunContinuations(class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task+CancellationPromise`1[System.Boolean].System.Threading.Tasks.ITaskCompletionAction.Invoke(class System.Threading.Tasks.Task),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.CompletionActionInvoker.System.Threading.IThreadPoolWorkItem.Execute(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.NetworkInformation.HostInformationPal.GetFixedInfo(),
+      module: System.Net.Primitives.il
+    },
+    {
+      function: System.Net.NetworkInformation.HostInformationPal+<>c.<get_FixedInfo>b__7_0(),
+      module: System.Net.Primitives.il
+    },
+    {
+      function: System.Threading.LazyInitializer.EnsureInitializedCore(!!0&,bool&,class System.Object&,class System.Func`1<!!0>),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x24
+    },
+    {
+      function: System.Threading.LazyInitializer.EnsureInitialized(!!0&,bool&,class System.Object&,class System.Func`1<!!0>),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xe
+    },
+    {
+      function: System.Net.NetworkInformation.HostInformationPal.get_FixedInfo(),
+      module: System.Net.Primitives.il
+    },
+    {
+      function: System.Net.CookieContainer.CreateFqdnMyDomain(),
+      module: System.Net.Primitives.il
+    },
+    {
+      function: System.Net.CookieContainer..cctor(),
+      module: System.Net.Primitives.il
+    },
+    {
+      function: System.Net.CookieContainer..ctor(),
+      module: System.Net.Primitives.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionSettings.CloneAndNormalize(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.SocketsHttpHandler.SetupHandlerChain(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: Sentry,
+      instruction_addr: 0x0
+    },
+    {
+      function: System.Runtime.CompilerServices.CastHelpers.StelemRef_Helper(class System.Object&,void*,class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Reflection.RuntimeParameterInfo.GetParameters(class System.IRuntimeMethodInfo,class System.Reflection.MemberInfo,class System.Signature,class System.Reflection.ParameterInfo&,bool),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Reflection.RuntimeMethodInfo.FetchNonReturnParameters(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Reflection.RuntimeMethodInfo.GetParameters(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Diagnostics.Tracing.EventSource.CreateManifestAndDescriptors(class System.Type,class System.String,class System.Diagnostics.Tracing.EventSource,value class System.Diagnostics.Tracing.EventManifestOptions),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Diagnostics.Tracing.EventSource.DoCommand(class System.Diagnostics.Tracing.EventCommandEventArgs),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Diagnostics.Tracing.EventSource.SendCommand(class System.Diagnostics.Tracing.EventListener,value class System.Diagnostics.Tracing.EventProviderType,int32,int32,value class System.Diagnostics.Tracing.EventCommand,bool,value class System.Diagnostics.Tracing.EventLevel,value class System.Diagnostics.Tracing.EventKeywords,class System.Collections.Generic.IDictionary`2<class System.String,class System.String>),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Diagnostics.Tracing.EventSource+OverrideEventProvider.OnControllerCommand(value class System.Diagnostics.Tracing.ControllerCommand,class System.Collections.Generic.IDictionary`2<class System.String,class System.String>,int32,int32),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Diagnostics.Tracing.EventProvider.EtwEnableCallBack(value class System.Guid&,int32,unsigned int8,int64,int64,value class EVENT_FILTER_DESCRIPTOR*,void*),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Diagnostics.Tracing.EventSource.DoCommand(class System.Diagnostics.Tracing.EventCommandEventArgs),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext),
+      module: Sentry,
+      instruction_addr: 0x12b
+    },
+    {
+      function: System.Net.NetworkInformation.HostInformationPal.GetFixedInfo(),
+      module: System.Net.Primitives.il
+    },
+    {
+      function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.Int32].InnerInvoke(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.ExecuteEntryUnsafe(class System.Threading.Thread),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.ExecuteFromThreadPool(class System.Threading.Thread),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: Program.FindPrimeNumber(int32),
+      module: Sentry.Samples.Console.Customized,
+      instruction_addr: 0x13
+    },
+    {
+      function: Program+<Main>d__2.MoveNext(),
+      module: Sentry.Samples.Console.Customized,
+      instruction_addr: 0x1ce
+    },
+    {
+      function: System.Net.Security.SslClientAuthenticationOptionsExtensions.ShallowClone(class System.Net.Security.SslClientAuthenticationOptions),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionSettings.CloneAndNormalize(),
+      module: System.Net.Http.il
+    },
+    {
+      function: Program.FindPrimeNumber(int32),
+      module: Sentry.Samples.Console.Customized,
+      instruction_addr: 0x16
+    },
+    {
+      function: Program+<>c.<Main>b__2_9(),
+      module: Sentry.Samples.Console.Customized,
+      instruction_addr: 0x0
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.Int64].InnerInvoke(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Http.WinInetProxyHelper..ctor(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpWindowsProxy.TryCreate(class System.Net.IWebProxy&),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.SystemProxyInfo.ConstructSystemProxy(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Lazy`1[System.__Canon].ViaFactory(value class System.Threading.LazyThreadSafetyMode),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Lazy`1[System.__Canon].ExecutionAndPublication(class System.LazyHelper,bool),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Lazy`1[System.__Canon].CreateValue(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Lazy`1[System.__Canon].get_Value(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Http.HttpClient+<>c.<get_DefaultProxy>b__15_0(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Threading.LazyInitializer.EnsureInitializedCore(!!0&,class System.Func`1<!!0>),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.LazyInitializer.EnsureInitialized(!!0&,class System.Func`1<!!0>),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Http.HttpClient.get_DefaultProxy(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPoolManager..ctor(class System.Net.Http.HttpConnectionSettings),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.SocketsHttpHandler.SetupHandlerChain(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpWindowsProxy.TryCreate(class System.Net.IWebProxy&),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Diagnostics.Activity..cctor(),
+      module: System.Diagnostics.DiagnosticSource.il
+    },
+    {
+      function: System.Diagnostics.Activity.get_Current(),
+      module: System.Diagnostics.DiagnosticSource.il
+    },
+    {
+      function: System.Net.Http.DiagnosticsHandler.IsEnabled(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.DiagnosticsHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.RedirectHandler+<SendAsync>d__4.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.RedirectHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.DecompressionHandler+<SendAsync>d__16.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.DecompressionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpMessageHandlerStage.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPoolManager.SendAsyncCore(class System.Net.Http.HttpRequestMessage,class System.Uri,bool,bool,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPoolManager.SendAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.DiagnosticsHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Collections.Concurrent.ConcurrentDictionary`2[System.Net.Http.HttpConnectionPoolManager+HttpConnectionKey,System.__Canon].TryAdd(!0,!1),
+      module: System.Collections.Concurrent.il,
+      instruction_addr: 0xc
+    },
+    {
+      function: System.Net.Http.HttpConnectionPoolManager.SendAsyncCore(class System.Net.Http.HttpRequestMessage,class System.Uri,bool,bool,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(class System.String,int32,class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool.ConnectAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<AddHttp11ConnectionAsync>d__74.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool.AddHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<>c__DisplayClass75_0.<CheckForHttp11ConnectionInjection>b__0(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.__Canon].InnerInvoke(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xe
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xc
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool.GetHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPoolManager.SendAsyncCore(class System.Net.Http.HttpRequestMessage,class System.Uri,bool,bool,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs.InitializeInternals(),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.EndPoint,value class System.Threading.CancellationToken),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Net.NameResolutionPal.GetAddrInfoAsync(class System.String,bool,value class System.Net.Sockets.AddressFamily,value class System.Threading.CancellationToken),
+      module: system.net.nameresolution.il
+    },
+    {
+      function: System.Net.Dns.GetHostEntryOrAddressesCoreAsync(class System.String,bool,bool,bool,value class System.Net.Sockets.AddressFamily,value class System.Threading.CancellationToken),
+      module: system.net.nameresolution.il
+    },
+    {
+      function: System.Net.Dns.GetHostAddressesAsync(class System.String,value class System.Net.Sockets.AddressFamily,value class System.Threading.CancellationToken),
+      module: system.net.nameresolution.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs.DnsConnectAsync(class System.Net.DnsEndPoint,value class System.Net.Sockets.SocketType,value class System.Net.Sockets.ProtocolType),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.Sockets.SocketAsyncEventArgs,bool,bool),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.ConnectAsync(class System.Net.Sockets.Socket),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.EndPoint,value class System.Threading.CancellationToken),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xe
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].AwaitUnsafeOnCompleted(!!0&,!!1&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xc
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs.DoOperationConnectEx(class System.Net.Sockets.Socket,class System.Net.Sockets.SafeSocketHandle),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.Sockets.SocketAsyncEventArgs,bool,bool),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d.MoveNext(),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.__Canon].TrySetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].SetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.NameResolutionPal+GetAddrInfoExState.System.Threading.IThreadPoolWorkItem.Execute(),
+      module: system.net.nameresolution.il
+    },
+    {
+      function: System.Net.Security.SafeFreeContextBuffer.EnumeratePackages(int32&,class System.Net.Security.SafeFreeContextBuffer&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.SSPISecureChannelType.EnumerateSecurityPackages(int32&,class System.Net.Security.SafeFreeContextBuffer&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.SSPIWrapper.EnumerateSecurityPackages(class System.Net.ISSPIInterface),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.SSPIWrapper.GetVerifyPackageInfo(class System.Net.ISSPIInterface,class System.String,bool),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStreamPal.VerifyPackageInfo(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel..ctor(class System.Net.Security.SslAuthenticationOptions,class System.Net.Security.SslStream),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.ValidateCreateContext(class System.Net.Security.SslClientAuthenticationOptions,class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.LocalCertSelectionCallback),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.AuthenticateAsClientAsync(class System.Net.Security.SslClientAuthenticationOptions,value class System.Threading.CancellationToken),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(class System.Net.Security.SslClientAuthenticationOptions,class System.Net.Http.HttpRequestMessage,bool,class System.IO.Stream,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.ValueTuple`2[System.__Canon,System.__Canon]].TrySetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].SetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.Threading.Tasks.VoidTaskResult].TrySetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Threading.Tasks.VoidTaskResult].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder.SetResult(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d.MoveNext(),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.ThreadPool+<>c.<.cctor>b__87_0(class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.InvokeContinuation(class System.Action`1<class System.Object>,class System.Object,bool,bool),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.OnCompleted(class System.Net.Sockets.SocketAsyncEventArgs),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d.MoveNext(),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1[System.Boolean].SignalCompletion(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1[System.Boolean].SetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs+MultiConnectSocketAsyncEventArgs.OnCompleted(class System.Net.Sockets.SocketAsyncEventArgs),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs.OnCompletedInternal(),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs.ExecutionCallback(class System.Object),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Threading.ExecutionContext.Run(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Threading.ThreadPoolBoundHandleOverlapped.CompletionCallback(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading._IOCompletionCallback.PerformIOCompletionCallback(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.AcquireClientCredentials(unsigned int8[]&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.NextMessage(value class System.ReadOnlySpan`1<unsigned int8>),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Security.SslStream.ForceAuthenticationAsync(!!0,bool,unsigned int8[],bool),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.ProcessAuthenticationAsync(bool,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.AuthenticateAsClientAsync(class System.Net.Security.SslClientAuthenticationOptions,value class System.Threading.CancellationToken),
+      module: System.Net.Security.il
+    },
+    {
+      function: Interop+Advapi32.OpenThreadToken(value class System.Security.Principal.TokenAccessLevels,value class System.Security.Principal.WinSecurityContext,class Microsoft.Win32.SafeHandles.SafeAccessTokenHandle&),
+      module: System.Security.Principal.Windows.il
+    },
+    {
+      function: System.Security.Principal.WindowsIdentity.GetCurrentToken(value class System.Security.Principal.TokenAccessLevels,bool,bool&,int32&),
+      module: System.Security.Principal.Windows.il
+    },
+    {
+      function: System.Security.Principal.WindowsIdentity.RunImpersonatedInternal(class Microsoft.Win32.SafeHandles.SafeAccessTokenHandle,class System.Action),
+      module: System.Security.Principal.Windows.il
+    },
+    {
+      function: System.Security.Principal.WindowsIdentity.RunImpersonated(class Microsoft.Win32.SafeHandles.SafeAccessTokenHandle,class System.Func`1<!!0>),
+      module: System.Security.Principal.Windows.il
+    },
+    {
+      function: System.Net.Security.SslStreamPal.AcquireCredentialsHandle(value class CredentialUse,value class SCH_CREDENTIALS*),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStreamPal.AcquireCredentialsHandleSchCredentials(class System.Net.Security.SslStreamCertificateContext,value class System.Security.Authentication.SslProtocols,value class System.Net.Security.EncryptionPolicy,bool),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStreamPal.AcquireCredentialsHandle(class System.Net.Security.SslStreamCertificateContext,value class System.Security.Authentication.SslProtocols,value class System.Net.Security.EncryptionPolicy,bool),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.AcquireClientCredentials(unsigned int8[]&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SafeDeleteContext.MustRunInitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,bool,unsigned int8*,value class ContextFlags,value class Endianness,value class SecBufferDesc*,class System.Net.Security.SafeDeleteContext,value class SecBufferDesc&,value class ContextFlags&,class System.Net.Security.SafeFreeContextBuffer),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SafeDeleteContext.InitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,class System.Net.Security.SafeDeleteSslContext&,class System.String,value class ContextFlags,value class Endianness,value class System.Net.Security.InputSecurityBuffers,value class System.Net.Security.SecurityBuffer&,value class ContextFlags&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStreamPal.InitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,class System.Net.Security.SafeDeleteSslContext&,class System.String,value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&,class System.Net.Security.SslAuthenticationOptions),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Collections.Generic.Dictionary`2[System.Net.SecurityStatusPalErrorCode,Interop+SECURITY_STATUS].Add(!0,!1),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x8
+    },
+    {
+      function: System.Net.SecurityStatusAdapterPal..cctor(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(value class SECURITY_STATUS,bool),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStreamPal.InitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,class System.Net.Security.SafeDeleteSslContext&,class System.String,value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&,class System.Net.Security.SslAuthenticationOptions),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Collections.Concurrent.ConcurrentDictionary`2[System.Net.Security.SslSessionsCache+SslCredKey,System.__Canon].set_Item(!0,!1),
+      module: System.Collections.Concurrent.il,
+      instruction_addr: 0x22
+    },
+    {
+      function: System.Net.Security.SslSessionsCache.CacheCredential(class System.Net.Security.SafeFreeCredentials,unsigned int8[],value class System.Security.Authentication.SslProtocols,bool,value class System.Net.Security.EncryptionPolicy,bool),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x7
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xc
+    },
+    {
+      function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Security.SslStream.ReceiveBlobAsync(!!0),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+      module: System.Net.Sockets.il
+    },
+    {
+      function: System.Net.Security.SslStream.ProcessBlob(int32),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].SetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.Int32].TrySetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Int32].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.Int32].SetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Net.CertificateValidationPal.GetRemoteCertificate(class System.Net.Security.SafeDeleteContext,bool,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.SslAuthenticationOptions),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+      module: System.Net.Security.il
+    },
+    {
+      function: Internal.Cryptography.Pal.ChainPal.BuildChain(bool,class Internal.Cryptography.ICertificatePal,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,class System.Security.Cryptography.OidCollection,class System.Security.Cryptography.OidCollection,value class System.Security.Cryptography.X509Certificates.X509RevocationMode,value class System.Security.Cryptography.X509Certificates.X509RevocationFlag,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,value class System.Security.Cryptography.X509Certificates.X509ChainTrustMode,value class System.DateTime,value class System.TimeSpan,bool),
+      module: System.Security.Cryptography.X509Certificates.il
+    },
+    {
+      function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2,bool),
+      module: System.Security.Cryptography.X509Certificates.il
+    },
+    {
+      function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2),
+      module: System.Security.Cryptography.X509Certificates.il
+    },
+    {
+      function: System.Net.CertificateValidation.BuildChainAndVerifyProperties(class System.Security.Cryptography.X509Certificates.X509Chain,class System.Security.Cryptography.X509Certificates.X509Certificate2,bool,bool,class System.String),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].TrySetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].SetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.SetResult(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Http.HttpConnection+<SendAsyncCore>d__64.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x3e
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x5
+    },
+    {
+      function: System.Net.Http.HttpConnection.SendAsyncCore(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon].MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon]].ExecutionContextCallback(class System.Object),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x15
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon]].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x59
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon]].ExecuteFromThreadPool(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xe
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0xc
+    },
+    {
+      function: System.Net.Http.HttpConnection+<SendAsyncCore>d__64.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Threading.Tasks.Task.FinishStageThree(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.FinishStageTwo(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.FinishSlow(bool),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: Sentry.Transaction..ctor(class Sentry.ITransaction),
+      module: Sentry,
+      instruction_addr: 0xcb
+    },
+    {
+      function: Sentry.TransactionTracer.Finish(),
+      module: Sentry,
+      instruction_addr: 0xa4
+    },
+    {
+      function: Program+<Main>d__2.MoveNext(),
+      module: Sentry.Samples.Console.Customized,
+      instruction_addr: 0x232
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(class System.Threading.Thread),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x4c
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(),
+      module: System.Private.CoreLib.il,
+      instruction_addr: 0x6
+    },
+    {
+      function: Sentry.Internal.Hub.CaptureTransaction(class Sentry.Transaction),
+      module: Sentry,
+      instruction_addr: 0xf5
+    },
+    {
+      function: Sentry.TransactionTracer.Finish(),
+      module: Sentry,
+      instruction_addr: 0xa9
+    },
+    {
+      function: Sentry.SentryClient.CaptureTransaction(class Sentry.Transaction),
+      module: Sentry,
+      instruction_addr: 0x18
+    }
+  ],
+  samples: [
+    {
+      elapsed_since_start_ns: 374200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 382500,
+      thread_id: 3,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 388300,
+      thread_id: 4,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 396700,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 420000,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 2331500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 2334100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 2336700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 2341800,
+      thread_id: 5,
+      stack_id: 3
+    },
+    {
+      elapsed_since_start_ns: 2361900,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 2377600,
+      thread_id: 0,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 4301800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 4307500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 4309000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 4314800,
+      thread_id: 5,
+      stack_id: 3
+    },
+    {
+      elapsed_since_start_ns: 4328600,
+      thread_id: 6,
+      stack_id: 5
+    },
+    {
+      elapsed_since_start_ns: 4331500,
+      thread_id: 0,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 6314000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 6317000,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 6318400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 6322400,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 6335900,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 6342900,
+      thread_id: 8,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 6344300,
+      thread_id: 9,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 8427700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 8432400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 8433900,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 8438500,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 8453000,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 8457900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 8462900,
+      thread_id: 9,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 10531200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 10534300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 10535600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 10539200,
+      thread_id: 5,
+      stack_id: 12
+    },
+    {
+      elapsed_since_start_ns: 10561400,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 10565500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 10567800,
+      thread_id: 9,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 12526700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 12530700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 12533500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 12537100,
+      thread_id: 5,
+      stack_id: 12
+    },
+    {
+      elapsed_since_start_ns: 12551500,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 12555300,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 12557700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 14507700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 14510400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 14511700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 14513000,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 14535000,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 14540400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 14543500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 16488499,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 16491100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 16492400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 16495000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 16510800,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 16515100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 16518300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 18542700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 18547000,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 18548300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 18549500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 18563100,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 18570200,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 18573500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 20546400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 20549200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 20550500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 20562000,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 20576800,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 20580900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 20584100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 22536300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 22538700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 22540200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 22547800,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 22549000,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 22554600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 22557700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 24541500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 24544500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 24545800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 24559600,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 24561100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 24565400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 24568700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 26566100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 26569000,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 26570600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 26578400,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 26579700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 26584000,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 26587300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 28540800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 28543800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 28545100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 28546300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 28547300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 28552400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 28555700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 30595000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 30597200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 30598400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 30599800,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 30600700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 30604800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 30607600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 32531399,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 32539200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 32541300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 32542499,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 32543599,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 32548000,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 32551900,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 34543800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 34547800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 34549500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 34550600,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 34552600,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 34557900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 34561100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 36543400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 36546800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 36551000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 36552300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 36553500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 36559200,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 36562700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 38547700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 38550100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 38551400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 38552500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 38553600,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 38559800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 38563000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 40555300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 40558200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 40559500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 40561900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 40563000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 40569400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 40572800,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 42543900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 42547900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 42549400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 42550700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 42551800,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 42556800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 42561000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 44566100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 44568700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 44570000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 44571200,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 44573200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 44578100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 44581500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 46554100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 46556800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 46560400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 46561600,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 46562600,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 46567500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 46571000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 48613700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 48617300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 48618800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 48619900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 48620900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 48627400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 48631000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 50543900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 50546400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 50547800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 50550300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 50551300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 50556400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 50559500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 52544000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 52549700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 52551300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 52552400,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 52553500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 52558800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 52564000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 54576000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 54579900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 54581900,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 54583300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 54586300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 54593100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 54596800,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 56553800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 56557100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 56559800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 56561000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 56562100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 56567200,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 56571700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 58537000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 58539500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 58540700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 58541900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 58542900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 58549800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 58552500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 60537200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 60539300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 60540500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 60541900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 60542900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 60546500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 60549100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 62559800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 62563000,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 62564300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 62565500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 62566500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 62572000,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 62575500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 64558899,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 64562600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 64563999,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 64565100,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 64566400,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 64572800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 64576499,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 66544900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 66547900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 66549600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 66550900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 66551900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 66557199,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 66560700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 68545500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 68548200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 68549500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 68550600,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 68551900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 68556600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 68559800,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 71059300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 71062100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 71063400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 71064800,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 71065900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 71070700,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 71074100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 73054500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 73061200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 73062600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 73063800,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 73064800,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 73070100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 73073600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 75038000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 75039700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 75040700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 75042000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 75043000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 75046400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 75049000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 77046100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 77048600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 77050300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 77051400,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 77052500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 77057200,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 77060600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 79033700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 79035800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 79037100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 79038300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 79039500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 79043400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 79046100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 81029900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 81031500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 81032700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 81033700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 81034700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 81037900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 81040200,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 83033500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 83035500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 83036800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 83038000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 83039000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 83042800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 83045500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 85033000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 85034500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 85035500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 85036700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 85037700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 85041000,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 85043400,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 87037800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 87040800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 87042000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 87043400,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 87044500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 87048400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 87052100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 89089600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 89091900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 89093300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 89094500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 89096400,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 89100500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 89103000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 91117100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 91119100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 91121200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 91122500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 91123700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 91127400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 91130700,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 93116800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 93118200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 93119200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 93120200,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 93121100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 93125100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 93127300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 95124200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 95125900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 95126900,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 95129500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 95130500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 95134100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 95136600,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 97118100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 97120300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 97121300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 97122300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 97123200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 97127000,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 97129200,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 99119600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 99121600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 99122700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 99126800,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 99127900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 99131600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 99134100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 101118500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 101119900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 101121100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 101122100,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 101123000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 101126100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 101128500,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 103117900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 103119300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 103120200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 103121200,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 103122300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 103125300,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 103127500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 105208100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 105211000,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 105212300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 105213500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 105215500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 105220400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 105223800,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 107134800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 107136600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 107138600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 107139700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 107140700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 107144200,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 107146800,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 109421400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 109424400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 109425700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 109426900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 109427900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 109436700,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 109440100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 111166300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 111168800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 111170100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 111172700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 111173700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 111177800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 111180700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 113154400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 113156700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 113157700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 113158700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 113159600,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 113162600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 113165600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 115155100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 115157100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 115158300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 115159500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 115161400,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 115165100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 115167600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 117154200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 117155800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 117157600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 117158600,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 117159600,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 117162700,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 117165000,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 119179200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 119181700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 119182900,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 119184000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 119185000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 119189400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 119192400,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 121281700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 121284300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 121285600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 121287000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 121288000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 121292800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 121296100,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 123276900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 123280100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 123281400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 123282700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 123294300,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 123301400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 123305000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 125222500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 125224300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 125225400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 125226500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 125227800,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 125232600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 125235300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 127281300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 127283600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 127284900,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 127286000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 127287000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 127291100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 127294100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 129270900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 129272400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 129273300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 129274300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 129275500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 129278600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 129280900,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 131222199,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 131223600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 131224500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 131229400,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 131230400,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 131233499,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 131235700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 133235199,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 133238200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 133239499,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 133240600,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 133241700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 133246700,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 133249900,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 135236400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 135243100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 135244500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 135246100,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 135247200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 135252000,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 135255200,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 137247300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 137250700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 137252400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 137253700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 137254700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 137288600,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 137293200,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 137296500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 139257100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 139260100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 139261600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 139263000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 139264100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 139279500,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 139285100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 139288600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 141289900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 141293600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 141295000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 141296200,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 141297200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 141317600,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 141322700,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 141326200,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 143254500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 143257400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 143259000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 143260100,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 143261200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 143276300,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 143280100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 143285800,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 145250100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 145253100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 145254700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 145255900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 145258500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 145275600,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 145280300,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 145283800,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 147233000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 147236200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 147237300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 147238400,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 147239400,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 147252200,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 147256500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 147259100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 149228100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 149230100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 149231100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 149233200,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 149234200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 149248600,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 149251800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 149255300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 151246600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 151249500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 151250800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 151252000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 151254000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 151259200,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 151262700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 153226500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 153228100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 153229900,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 153231100,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 153232100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 153235500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 153237800,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 155263200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 155266100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 155267200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 155268300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 155269400,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 155276700,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 155279300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 157230200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 157231700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 157232700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 157236000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 157237000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 157240300,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 157242700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 159228000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 159230700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 159231800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 159232900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 159233900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 159237500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 159242200,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 161247500,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 161250400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 161251900,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 161253100,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 161258300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 161260600,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 161265100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 161268600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 163269400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 163273400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 163274700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 163275900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 163276900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 163294400,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 163301800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 163305000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 165256300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 165259100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 165260500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 165263800,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 165264900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 165279200,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 165283400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 165287700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 167247200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 167249800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 167251100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 167252300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 167254100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 167263000,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 167267100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 167270500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 169234400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 169239500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 169240800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 169242000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 169243000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 169256800,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 169260300,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 169263100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 171280600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 171283100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 171284400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 171285900,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 171287000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 171304300,
+      thread_id: 11,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 171308100,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 171311000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 173354700,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 173357700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 173359100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 173360400,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 173374900,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 173379900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 173383400,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 175321400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 175324100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 175325600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 175327000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 175337500,
+      thread_id: 6,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 175342000,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 175345100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 177308300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 177310300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 177311400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 177312500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 177313500,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 177316800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 177319300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 179314900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 179317300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 179318500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 179319700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 179321100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 179325500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 179328300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 181305300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 181306900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 181308200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 181309200,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 181310200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 181313600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 181315900,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 183332200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 183334700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 183336200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 183337300,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 183338900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 183343900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 183347500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 185315900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 185318700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 185320400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 185322000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 185323200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 185327500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 185330400,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 187314300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 187317700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 187319200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 187320500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 187321800,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 187326900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 187330500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 189327200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 189329800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 189331000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 189332800,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 189334100,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 189338500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 189341600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 191313300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 191315400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 191316800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 191318000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 191319000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 191322600,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 191325300,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 193309300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 193311500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 193312800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 193314100,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 193315200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 193319300,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 193322000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 195304100,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 195306200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 195307500,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 195312500,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 195313700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 195317500,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 195320100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 197301200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 197303000,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 197304000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 197305000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 197306000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 197309400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 197311600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 199304600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 199306600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 199307800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 199309000,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 199310300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 199313900,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 199316400,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 201302900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 201304500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 201305700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 201306700,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 201307700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 201310800,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 201313400,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 203318300,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 203320200,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 203321300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 203322400,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 203323700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 203327700,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 203330400,
+      thread_id: 9,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 205305600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 205307100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 205308200,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 205309200,
+      thread_id: 5,
+      stack_id: 18
+    },
+    {
+      elapsed_since_start_ns: 205310200,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 205313400,
+      thread_id: 8,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 205315700,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 207313200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 207315300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 207316300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 207320500,
+      thread_id: 5,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 207321600,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 207323300,
+      thread_id: 8,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 207326000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 207327100,
+      thread_id: 12,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 209304400,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 209305900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 209306800,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 209309200,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 209310300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 209312700,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 209315000,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 209316200,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 211323800,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 211326800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 211329700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 211334100,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 211335300,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 211337100,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 211341500,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 211342700,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 213310900,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 213312400,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 213313400,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 213316100,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 213318000,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 213319600,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 213322200,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 213323300,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 215323200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 215327900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 215329300,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 215333700,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 215334900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 215337400,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 215343100,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 215344400,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 217311200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 217313500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 217316000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 217319800,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 217320900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 217322600,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 217325600,
+      thread_id: 9,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 217327600,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 219271000,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 219273700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 219275100,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 219279200,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 219280600,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 219282400,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 219285900,
+      thread_id: 9,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 219287100,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 221262600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 221265300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 221266600,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 221270500,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 221271900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 221273700,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 221279700,
+      thread_id: 9,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 221281000,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 223259200,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 223260800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 223261700,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 223264800,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 223265900,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 223267500,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 223271600,
+      thread_id: 9,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 223272900,
+      thread_id: 12,
+      stack_id: 46
+    },
+    {
+      elapsed_since_start_ns: 225258600,
+      thread_id: 2,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 225260100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 225261000,
+      thread_id: 4,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 225263600,
+      thread_id: 5,
+      stack_id: 44
+    },
+    {
+      elapsed_since_start_ns: 225264700,
+      thread_id: 6,
+      stack_id: 25
+    },
+    {
+      elapsed_since_start_ns: 225266500,
+      thread_id: 8,
+      stack_id: 45
+    },
+    {
+      elapsed_since_start_ns: 225270100,
+      thread_id: 9,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 225271200,
+      thread_id: 12,
+      stack_id: 46
+    }
+  ]
+}

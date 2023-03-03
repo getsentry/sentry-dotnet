@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Extensions.Profiling\Sentry.Extensions.Profiling.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.410101" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.0.5" />
+
+  </ItemGroup>
+
+</Project>
