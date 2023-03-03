@@ -20,6 +20,7 @@
   <attr path="/api/package[@name='io.sentry']" name="managedName">Sentry.JavaSdk</attr>
   <attr path="/api/package[@name='io.sentry.android.core']" name="managedName">Sentry.JavaSdk.Android.Core</attr>
   <attr path="/api/package[@name='io.sentry.android.core.internal.gestures']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Gestures</attr>
+  <attr path="/api/package[@name='io.sentry.android.core.internal.modules']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Modules</attr>
   <attr path="/api/package[@name='io.sentry.android.core.internal.util']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Util</attr>
   <attr path="/api/package[@name='io.sentry.android.ndk']" name="managedName">Sentry.JavaSdk.Android.Ndk</attr>
   <attr path="/api/package[@name='io.sentry.android.supplemental']" name="managedName">Sentry.JavaSdk.Android.Supplemental</attr>
@@ -29,12 +30,16 @@
   <attr path="/api/package[@name='io.sentry.exception']" name="managedName">Sentry.JavaSdk.Exception</attr>
   <attr path="/api/package[@name='io.sentry.hints']" name="managedName">Sentry.JavaSdk.Hints</attr>
   <attr path="/api/package[@name='io.sentry.instrumentation.file']" name="managedName">Sentry.JavaSdk.Instrumentation.File</attr>
+  <attr path="/api/package[@name='io.sentry.internal.gestures']" name="managedName">Sentry.JavaSdk.Internal.Gestures</attr>
+  <attr path="/api/package[@name='io.sentry.internal.modules']" name="managedName">Sentry.JavaSdk.Internal.Modules</attr>
   <attr path="/api/package[@name='io.sentry.transport']" name="managedName">Sentry.JavaSdk.Transport</attr>
+  <attr path="/api/package[@name='io.sentry.profilemeasurements']" name="managedName">Sentry.JavaSdk.ProfileMeasurements</attr>
   <attr path="/api/package[@name='io.sentry.protocol']" name="managedName">Sentry.JavaSdk.Protocol</attr>
   <attr path="/api/package[@name='io.sentry.util']" name="managedName">Sentry.JavaSdk.Util</attr>
+  <attr path="/api/package[@name='io.sentry.util.thread']" name="managedName">Sentry.JavaSdk.Util.Thread</attr>
   <attr path="/api/package[@name='io.sentry.vendor']" name="managedName">Sentry.JavaSdk.Vendor</attr>
-  <attr path="/api/package[@name='io.sentry.vendor.gson.stream']" name="managedName">Sentry.JavaSdk.Vendor.Gson.Stream</attr>
   <attr path="/api/package[@name='io.sentry.vendor.gson.internal.bind.util']" name="managedName">Sentry.JavaSdk.Vendor.Gson.Internal.Bind.Util</attr>
+  <attr path="/api/package[@name='io.sentry.vendor.gson.stream']" name="managedName">Sentry.JavaSdk.Vendor.Gson.Stream</attr>
 
   <!--
     These properties have conflicts that create BG8401 warnings ("Skipping '...' due to a duplicate field or property name.")
