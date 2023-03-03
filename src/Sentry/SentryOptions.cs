@@ -801,28 +801,24 @@ public class SentryOptions
             throw new ArgumentNullException(nameof(converter));
         }
 
-        // only add if we don't have this instance already
-        var converters = JsonExtensions.SerializerOptions.Converters;
-        if (converters.Contains(converter))
-        {
-            return;
-        }
+        JsonExtensions.AddJsonConverter(converter);
+    }
 
-        try
-        {
-            converters.Add(converter);
-        }
-        catch (InvalidOperationException)
-        {
-            // If we've already started using the serializer, then it's too late to add more converters.
-            // The following exception message may occur (depending on STJ version):
-            // "Serializer options cannot be changed once serialization or deserialization has occurred."
-            // We'll swallow this, because it's likely to only have occurred in our own unit tests,
-            // or in a scenario where the Sentry SDK has been initialized multiple times,
-            // in which case we have the converter from the first initialization already.
-            // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
-            // See https://github.com/dotnet/runtime/pull/74431
-        }
+    /// <summary>
+    /// When <c>true</c>, if an object being serialized to JSON contains references to other objects, and the
+    /// serialized object graph exceed the maximum allowable depth, the object will instead be serialized using
+    /// <see cref="ReferenceHandler.Preserve"/> (from System.Text.Json) - which adds <c>$id</c> and <c>$ref</c>
+    /// metadata to the JSON.  When <c>false</c>, an object graph exceeding the maximum depth will be truncated.
+    /// The default value is <c>true</c>.
+    /// </summary>
+    /// <remarks>
+    /// This option applies only to complex objects being added to Sentry events as contexts or extras, which do not
+    /// implement <see cref="IJsonSerializable"/>.
+    /// </remarks>
+    public bool JsonPreserveReferences
+    {
+        get => JsonExtensions.JsonPreserveReferences;
+        set => JsonExtensions.JsonPreserveReferences = value;
     }
 
     /// <summary>

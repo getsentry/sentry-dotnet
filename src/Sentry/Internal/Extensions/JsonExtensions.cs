@@ -5,24 +5,72 @@ namespace Sentry.Internal.Extensions;
 
 internal static class JsonExtensions
 {
-    // The Json options with a preset of rules that will remove dangerous and problematic
-    // data from the serialized object.
-    internal static JsonSerializerOptions SerializerOptions { get; private set; } = GetSerializerOptions();
-
-    // For testing, we need a way to reset the options instance when we add custom converters.
-    internal static void ResetSerializerOptions() => SerializerOptions = GetSerializerOptions();
-
-    private static JsonSerializerOptions GetSerializerOptions() => new()
+    private static readonly JsonConverter[] DefaultConverters =
     {
-        Converters =
-        {
-            new SentryJsonConverter(),
-            new IntPtrJsonConverter(),
-            new IntPtrNullableJsonConverter(),
-            new UIntPtrJsonConverter(),
-            new UIntPtrNullableJsonConverter()
-        }
+        new SentryJsonConverter(),
+        new IntPtrJsonConverter(),
+        new IntPtrNullableJsonConverter(),
+        new UIntPtrJsonConverter(),
+        new UIntPtrNullableJsonConverter()
     };
+
+    internal static bool JsonPreserveReferences { get; set; } = true;
+    private static JsonSerializerOptions SerializerOptions = null!;
+    private static JsonSerializerOptions AltSerializerOptions = null!;
+
+    static JsonExtensions()
+    {
+        ResetSerializerOptions();
+    }
+
+    internal static void ResetSerializerOptions()
+    {
+        SerializerOptions = new JsonSerializerOptions()
+            .AddDefaultConverters();
+
+        AltSerializerOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve
+            }
+            .AddDefaultConverters();
+    }
+
+    internal static void AddJsonConverter(JsonConverter converter)
+    {
+        // only add if we don't have this instance already
+        var converters = SerializerOptions.Converters;
+        if (converters.Contains(converter))
+        {
+            return;
+        }
+
+        try
+        {
+            SerializerOptions.Converters.Add(converter);
+            AltSerializerOptions.Converters.Add(converter);
+        }
+        catch (InvalidOperationException)
+        {
+            // If we've already started using the serializer, then it's too late to add more converters.
+            // The following exception message may occur (depending on STJ version):
+            // "Serializer options cannot be changed once serialization or deserialization has occurred."
+            // We'll swallow this, because it's likely to only have occurred in our own unit tests,
+            // or in a scenario where the Sentry SDK has been initialized multiple times,
+            // in which case we have the converter from the first initialization already.
+            // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
+            // See https://github.com/dotnet/runtime/pull/74431
+        }
+    }
+
+    private static JsonSerializerOptions AddDefaultConverters(this JsonSerializerOptions options)
+    {
+        foreach (var converter in DefaultConverters)
+        {
+            options.Converters.Add(converter);
+        }
+
+        return options;
+    }
 
     public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
     {
@@ -421,7 +469,26 @@ internal static class JsonExtensions
         }
         else
         {
-            JsonSerializer.Serialize(writer, value, SerializerOptions);
+            if (!JsonPreserveReferences)
+            {
+                JsonSerializer.Serialize(writer, value, SerializerOptions);
+                return;
+            }
+
+            try
+            {
+                // Use an intermediate temporary stream, so we can retry if serialization fails.
+                using var tempStream = new MemoryStream();
+                using var tempWriter = new Utf8JsonWriter(tempStream, writer.Options);
+                JsonSerializer.Serialize(tempWriter, value, SerializerOptions);
+                tempWriter.Flush();
+                writer.WriteRawValue(tempStream.ToArray());
+            }
+            catch (JsonException)
+            {
+                // Retry, preserving references to avoid cyclical dependency.
+                JsonSerializer.Serialize(writer, value, AltSerializerOptions);
+            }
         }
     }
 

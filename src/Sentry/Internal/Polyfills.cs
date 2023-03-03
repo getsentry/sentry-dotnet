@@ -138,3 +138,14 @@ internal static partial class PolyfillExtensions
     }
 }
 #endif
+
+#if !NET6_0_OR_GREATER
+internal static partial class PolyfillExtensions
+{
+    public static void WriteRawValue(this Utf8JsonWriter writer, byte[] utf8Json)
+    {
+        using var document = JsonDocument.Parse(utf8Json);
+        document.RootElement.WriteTo(writer);
+    }
+}
+#endif
