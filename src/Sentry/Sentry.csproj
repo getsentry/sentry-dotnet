@@ -58,7 +58,7 @@
   </ItemGroup>
 
   <!-- Prefer bundled version of System.Text.Json to avoid extra dependencies -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461' or '$(TargetFramework)' == 'netcoreapp3.0'">
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
