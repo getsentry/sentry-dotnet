@@ -448,10 +448,19 @@ internal static class JsonExtensions
             // Render an empty JSON object instead of null. This allows a round trip where this property name is the
             // key to a map which would otherwise not be set and result in a different object.
             // This affects envelope size which isn't recomputed after a roundtrip.
-            if (originalPropertyDepth == writer.CurrentDepth)
+
+            // If the last token written was ":", then we must write a property value.
+            // If the last token written was "{", then we can't write a property value.
+            // Since either could happen, we will *try* to write a "{" and ignore any failure.
+            try
             {
                 writer.WriteStartObject();
             }
+            catch (InvalidOperationException)
+            {
+            }
+
+            // Now we can close each open object until we get back to the original depth.
             while (originalPropertyDepth < writer.CurrentDepth)
             {
                 writer.WriteEndObject();
