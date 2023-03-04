@@ -463,6 +463,20 @@ internal static class JsonExtensions
         {
             writer.WriteStringValue(dto);
         }
+        else if (value is TimeSpan timeSpan)
+        {
+            writer.WriteStringValue(timeSpan.ToString("g", CultureInfo.InvariantCulture));
+        }
+#if NET6_0_OR_GREATER
+        else if (value is DateOnly date)
+        {
+            writer.WriteStringValue(date.ToString("O", CultureInfo.InvariantCulture));
+        }
+        else if (value is TimeOnly time)
+        {
+            writer.WriteStringValue(time.ToString("HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture));
+        }
+#endif
         else if (value is IFormattable formattable)
         {
             writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
