@@ -12,6 +12,7 @@
 ### Fixes
 
 - Fix assembly not found on Android in Debug configuration ([#2175](https://github.com/getsentry/sentry-dotnet/pull/2175))
+- Fix context object with circular reference prevents event from being sent ([#2210](https://github.com/getsentry/sentry-dotnet/pull/2210))
 
 ### Dependencies
 
