@@ -175,7 +175,8 @@ public class JsonTests
     [MemberData(nameof(NonSerializableObjectTestData))]
     public void WriteDynamic_NonSerializableObject_LogException(object testObject)
     {
-        //Assert
+        // Arrange
+        JsonExtensions.JsonPreserveReferences = false;
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
         {
@@ -195,22 +196,45 @@ public class JsonTests
             Arg.Any<object[]>());
     }
 
+    [Fact]
+    public void WriteDynamic_ComplexObject_PreserveReferences()
+    {
+        // Arrange
+        JsonExtensions.JsonPreserveReferences = true;
+        var testObject = new SelfReferencedObject();
+        using var stream = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(stream))
+        {
+            writer.WriteStartObject();
+
+            // Act
+            writer.WriteDynamic("property_name", testObject, _testOutputLogger);
+
+            writer.WriteEndObject();
+        }
+
+        var json = Encoding.UTF8.GetString(stream.ToArray());
+
+        // Assert
+        Assert.Equal("{\"property_name\":{\"$id\":\"1\",\"Object\":{\"$ref\":\"1\"}}}", json);
+    }
+
     public static IEnumerable<object[]> NonSerializableObjectTestData =>
         new[]
         {
-            new object[] {new NonSerializableType1()},
-            new object[] {new NonSerializableType2()},
+            new object[] {new NonSerializableObject()},
+            new object[] {new SelfReferencedObject()},
         };
 
-    public class NonSerializableType1
+    public class NonSerializableObject
     {
 #pragma warning disable CA1822 // Mark members as static
         public string Thrower => throw new InvalidDataException();
 #pragma warning restore CA1822
     }
 
-    public class NonSerializableType2
+    public class SelfReferencedObject
     {
-        public NonSerializableType2 Evil => this;
+        public SelfReferencedObject Object => this;
     }
 }
