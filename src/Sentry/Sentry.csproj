@@ -81,7 +81,7 @@
       <SentryCLIDownload Include="sentry-cli-Linux-i686" FileHash="e13aa44c84860ab3e47fc3a52aa576685f25c792d3d74ee32c42a0bb3b873266" />
       <SentryCLIDownload Include="sentry-cli-Linux-x86_64" FileHash="0de8f58be0687d8c0cc78591c3ba33ced93b5976eac1ddb713c1074f1d3403e0" />
       <SentryCLIDownload Include="sentry-cli-Windows-i686.exe" FileHash="a5d48ba4145c6be807456e3e24381994b0082746572494155724dd18b1c6330b" />
-      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" FileHash="981d0a882cca003fd144ce0f91530247f52ecace62e9acf17ad436de578a1a90"/>
+      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" FileHash="981d0a882cca003fd144ce0f91530247f52ecace62e9acf17ad436de578a1a90" />
     </ItemGroup>
 
     <!-- Download the files -->
