@@ -54,13 +54,21 @@ jobs:
     # Requires a "larger runner", for nested virtualization support
     runs-on: ubuntu-latest-4-cores
 
+    # We currently test on:
+    #  Android  5 (API 21) - because it's the oldest version we can support with .NET
+    #  Android 10 (API 29) - because it's the oldest version still in active support
+    #  Android 11 (API 30) - because it has an ATD image, designed for testing
+    #  Android 13 (API 33) - because it's the latest stable version
+
     strategy:
       fail-fast: false
       matrix:
-        api-level: [27, 28, 29, 30, 31] # emulators for API 32 and 33 are flaky - skip for now
+        api-level: [21, 29, 30, 33]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
+      ANDROID_AVD_TARGET: ${{ matrix.api-level == 30 && 'aosp_atd' || matrix.api-level > 31 && 'google_apis' || 'default' }}
+      ANDROID_AVD_ARCH: ${{ matrix.api-level >= 31 && 'x86_64' || 'x86' }}
     steps:
 
       # See https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
@@ -94,7 +102,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: ${{ runner.os }}-avd-api${{ matrix.api-level }}
+          key: ${{ runner.os }}-AVD-API${{ matrix.api-level }}-${{ env.ANDROID_AVD_TARGET }}-${{ env.ANDROID_AVD_ARCH }}
 
       - name: Create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -102,11 +110,10 @@ jobs:
         uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b # pin@v2
         with:
           api-level: ${{ matrix.api-level }}
-          # We don't need the Google APIs, but the default images are not available for 32+
-          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }}
+          target: ${{ env.ANDROID_AVD_TARGET }}
+          arch: ${{ env.ANDROID_AVD_ARCH }}
           force-avd-creation: false
           ram-size: 2048M
-          arch: x86_64
           disk-size: 4096M
           emulator-options: -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
@@ -117,11 +124,10 @@ jobs:
         uses: reactivecircus/android-emulator-runner@d94c3fbe4fe6a29e4a5ba47c12fb47677c73656b # pin@v2
         with:
           api-level: ${{ matrix.api-level }}
-          # We don't need the Google APIs, but the default images are not available for 32+
-          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }}
+          target: ${{ env.ANDROID_AVD_TARGET }}
+          arch: ${{ env.ANDROID_AVD_ARCH }}
           force-avd-creation: false
           ram-size: 2048M
-          arch: x86_64
           disk-size: 4096M
           emulator-options: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
