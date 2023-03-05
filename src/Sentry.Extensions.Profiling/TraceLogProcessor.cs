@@ -37,7 +37,7 @@ internal class TraceLogProcessor
 
 
     private readonly TraceLog _traceLog;
-    TraceLogEventSource _eventSource;
+    private readonly TraceLogEventSource _eventSource;
 
     /// <summary>
     /// Output profile being built.
@@ -45,16 +45,16 @@ internal class TraceLogProcessor
     private readonly SampleProfile _profile = new();
 
     // A sparse array that maps from StackSourceFrameIndex to an index in the output Profile.frames.
-    private SparseScalarArray<int> _frameIndexes = new(-1, 1000);
+    private readonly SparseScalarArray<int> _frameIndexes = new(-1, 1000);
 
     // A dictionary from a StackTrace sealed array to an index in the output Profile.stacks.
-    private Dictionary<SentryProfileStackTrace, int> _stackIndexes = new(100);
+    private readonly Dictionary<SentryProfileStackTrace, int> _stackIndexes = new(100);
 
     //private Tracing.StartStopActivityComputer _startStopActivities;    // Tracks start-stop activities so we can add them to the top above thread in the stack.
 
     // UNKNOWN_ASYNC support
     ///// <summary>
-    ///// Used to create UNKNOWN frames for start-stop activities.   This is indexed by Tracing.StartStopActivityIndex.
+    ///// Used to create UNKNOWN frames for start-stop activities.   This is indexed by StartStopActivityIndex.
     ///// and for each start-stop activity indicates when unknown time starts.   However if that activity still
     ///// has known activities associated with it then the number will be negative, and its value is the
     ///// ref-count of known activities (thus when it falls to 0, it we set it to the start of unknown time.
@@ -66,7 +66,7 @@ internal class TraceLogProcessor
     ///// maps thread ID to the current TOP-MOST start-stop activity running on that thread.   Used to updated _unknownTimeStartMsec
     ///// to figure out when to put in UNKNOWN_ASYNC nodes.
     ///// </summary>
-    //private Tracing.StartStopActivity[] _threadToStartStopActivity;
+    //private StartStopActivity[] _threadToStartStopActivity;
 
     ///// <summary>
     ///// Sadly, with AWAIT nodes might come into existence AFTER we would have normally identified
@@ -388,8 +388,20 @@ internal class TraceLogProcessor
                 break;
             }
 
-            stackTrace.Add(AddStackFrame(tlFrameIndex));
-            callstackIndex = _stackSource.GetCallerIndex(callstackIndex);
+            // "tlFrameIndex" may point to "CodeAddresses" or "Threds" or "Processes"
+            // See TraceEventStackSource.GetFrameName() code for details.
+            // We only care about the CodeAddresses bit because we don't want to show Threads and Processes in the stack trace.
+            CodeAddressIndex codeAddressIndex = _stackSource.GetFrameCodeAddress(tlFrameIndex);
+            if (codeAddressIndex != CodeAddressIndex.Invalid)
+            {
+                stackTrace.Add(AddStackFrame(codeAddressIndex));
+                callstackIndex = _stackSource.GetCallerIndex(callstackIndex);
+            }
+            else
+            {
+                // No need to traverse further up the stack when we're on the thread/process.
+                break;
+            }
         }
 
         int result = -1;
@@ -409,15 +421,14 @@ internal class TraceLogProcessor
     /// <summary>
     /// Check if the frame is already stored in the output Profile, or adds it.
     /// </summary>
-    /// <param name="frameIndex"></param>
     /// <returns>The index to the output Profile frames array.</returns>
-    private int AddStackFrame(StackSourceFrameIndex frameIndex)
+    private int AddStackFrame(CodeAddressIndex codeAddressIndex)
     {
-        var key = (int)frameIndex;
+        var key = (int)codeAddressIndex;
 
         if (!_frameIndexes.ContainsKey(key))
         {
-            _profile.Frames.Add(CreateStackFrame(frameIndex));
+            _profile.Frames.Add(CreateStackFrame(codeAddressIndex));
             _frameIndexes[key] = _profile.Frames.Count - 1;
         }
 
@@ -445,37 +456,33 @@ internal class TraceLogProcessor
     }
 
     // TODO align this with Sentry's StackTraceFactory
-    private SentryStackFrame CreateStackFrame(StackSourceFrameIndex frameIndex)
+    private SentryStackFrame CreateStackFrame(CodeAddressIndex codeAddressIndex)
     {
         var frame = new SentryStackFrame();
 
-        CodeAddressIndex codeAddressIndex = _stackSource.GetFrameCodeAddress(frameIndex);
-        if (codeAddressIndex != CodeAddressIndex.Invalid)
+        TraceMethod method = _traceLog.CodeAddresses.Methods[_traceLog.CodeAddresses.MethodIndex(codeAddressIndex)];
+        if (method is not null)
         {
-            TraceMethod method = _traceLog.CodeAddresses.Methods[_traceLog.CodeAddresses.MethodIndex(codeAddressIndex)];
-            if (method is not null)
+            frame.Function = method.FullMethodName;
+
+            TraceModuleFile moduleFile = method.MethodModuleFile;
+            if (moduleFile is not null)
             {
-                frame.Function = method.FullMethodName;
-
-                TraceModuleFile moduleFile = method.MethodModuleFile;
-                if (moduleFile is not null)
-                {
-                    frame.Module = moduleFile.Name;
-                }
+                frame.Module = moduleFile.Name;
             }
-
-            var ilOffset = _traceLog.CodeAddresses.ILOffset(codeAddressIndex);
-            if (ilOffset >= 0)
-            {
-                frame.InstructionAddress = $"0x{ilOffset:x}";
-            }
-
-            // TODO check if this is useful
-            // Displays the optimization tier of each code version executed for the method.
-            //if (ShowOptimizationTiers) {
-            //    text = TraceMethod.PrefixOptimizationTier(text, _traceLog.CodeAddresses.OptimizationTier(codeAddress));
-            //}
         }
+
+        var ilOffset = _traceLog.CodeAddresses.ILOffset(codeAddressIndex);
+        if (ilOffset >= 0)
+        {
+            frame.InstructionAddress = $"0x{ilOffset:x}";
+        }
+
+        // TODO check if this is useful
+        // Displays the optimization tier of each code version executed for the method.
+        //if (ShowOptimizationTiers) {
+        //    text = TraceMethod.PrefixOptimizationTier(text, _traceLog.CodeAddresses.OptimizationTier(codeAddress));
+        //}
 
         return frame;
     }
@@ -501,11 +508,6 @@ internal class TraceLogProcessor
     // ANYTHING happened on this thread.   Thus we log the stack of the activity so that data does not need a stack.
     private void OnTaskUnblock(TraceEvent data)
     {
-        if (_activityComputer == null)
-        {
-            return;
-        }
-
         TraceThread thread = data.Thread();
         if (thread != null)
         {
