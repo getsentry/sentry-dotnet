@@ -484,11 +484,15 @@ internal class TraceLogProcessor
             frame.InstructionAddress = $"0x{ilOffset:x}";
         }
 
-        // TODO check if this is useful
-        // Displays the optimization tier of each code version executed for the method.
-        //if (ShowOptimizationTiers) {
-        //    text = TraceMethod.PrefixOptimizationTier(text, _traceLog.CodeAddresses.OptimizationTier(codeAddress));
-        //}
+        // Displays the optimization tier of each code version executed for the method. E.g. "QuickJitted"
+        if (frame.Function is not null)
+        {
+            var optimizationTier = _traceLog.CodeAddresses.OptimizationTier(codeAddressIndex);
+            if (optimizationTier != Microsoft.Diagnostics.Tracing.Parsers.Clr.OptimizationTier.Unknown)
+            {
+                frame.Function = $"{frame.Function} {{{optimizationTier}}}";
+            }
+        }
 
         return frame;
     }
