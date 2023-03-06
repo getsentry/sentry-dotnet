@@ -19,7 +19,7 @@ public static class ApiExtensions
               typeof(InternalsVisibleToAttribute).FullName,
               typeof(TargetFrameworkAttribute).FullName
             },
-            WhitelistedNamespacePrefixes = new[] { "Sentry", "Microsoft" }
+            AllowNamespacePrefixes = new[] { "Sentry", "Microsoft" }
         };
         var apiText = assembly.GeneratePublicApi(generatorOptions);
 
