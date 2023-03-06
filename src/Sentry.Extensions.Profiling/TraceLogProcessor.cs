@@ -466,8 +466,8 @@ internal class TraceLogProcessor
     {
         var frame = new SentryStackFrame();
 
-        TraceMethod method = _traceLog.CodeAddresses.Methods[_traceLog.CodeAddresses.MethodIndex(codeAddressIndex)];
-        if (method is not null)
+        var methodIndex = _traceLog.CodeAddresses.MethodIndex(codeAddressIndex);
+        if (_traceLog.CodeAddresses.Methods[methodIndex] is { } method)
         {
             frame.Function = method.FullMethodName;
 
@@ -478,10 +478,13 @@ internal class TraceLogProcessor
             }
         }
 
-        var ilOffset = _traceLog.CodeAddresses.ILOffset(codeAddressIndex);
-        if (ilOffset >= 0)
+        if (_traceLog.CodeAddresses.ILOffset(codeAddressIndex) is { } ilOffset && ilOffset >= 0)
         {
-            frame.InstructionAddress = $"0x{ilOffset:x}";
+            frame.InstructionOffset = ilOffset;
+        }
+        else if (_traceLog.CodeAddresses.Address(codeAddressIndex) is { } address)
+        {
+            frame.InstructionAddress = $"0x{address:x}";
         }
 
         // Displays the optimization tier of each code version executed for the method. E.g. "QuickJitted"

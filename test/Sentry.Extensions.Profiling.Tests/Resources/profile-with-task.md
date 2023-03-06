@@ -52,6 +52,6 @@ Subsequently, the following code was used to produce the `.etlx` file we actuall
 
 ```cs
 var etlFilePath = Path.Combine(_resourcesPath, "profile-with-task.nettrace");
-var etlxFilePath = Path.Combine(_resourcesPath, "profile-with-task.etlx");
+var etlxFilePath = Path.ChangeExtension(etlFilePath, ".etlx");
 TraceLog.CreateFromEventTraceLogFile(etlFilePath, etlxFilePath);
 ```
