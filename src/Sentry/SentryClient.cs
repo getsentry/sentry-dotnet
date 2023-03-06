@@ -311,6 +311,13 @@ public class SentryClient : ISentryClient, IDisposable
         if (Worker.EnqueueEnvelope(envelope))
         {
             _options.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId(_options.DiagnosticLogger));
+            // XXX
+            using (FileStream file = new FileStream($"c:/dev/dotnet/temp/{envelope.TryGetEventId()}-envelope.txt", FileMode.OpenOrCreate, System.IO.FileAccess.Write))
+            {
+                file.Position = 0;
+                envelope.Serialize(file, _options.DiagnosticLogger);
+                file.Flush();
+            }
             return true;
         }
 
