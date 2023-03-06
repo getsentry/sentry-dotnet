@@ -31,7 +31,7 @@
   <Target Name="CheckSentryCLI" AfterTargets="Build" Condition="'$(InnerTargets)' == ''">
     <PropertyGroup>
       <!-- Set defaults for the Sentry properties. -->
-      <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == '' And '$(Configuration)' == 'Release'">true</SentryUploadSymbols>
+      <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
 
       <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
