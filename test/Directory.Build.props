@@ -53,7 +53,7 @@
   <ItemGroup Condition="'$(TargetPlatformIdentifier)'==''">
     <PackageReference Include="Verify.Xunit" Version="19.*" />
     <PackageReference Include="Verify.DiffPlex" Version="2.*" />
-    <PackageReference Include="PublicApiGenerator" Version="10.*" />
+    <PackageReference Include="PublicApiGenerator" Version="11.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" PrivateAssets="All" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.*" PrivateAssets="All" />
   </ItemGroup>
