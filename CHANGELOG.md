@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.29.0
 
 **Notice:** The `<SentryUploadSymbols>` MSBuild property previously defaulted to `true` for projects compiled in `Release` configuration.
 It is now `false` by default.  To continue uploading symbols, you must opt-in by setting it to `true`.
