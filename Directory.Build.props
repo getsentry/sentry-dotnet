@@ -12,12 +12,23 @@
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
 
-    <!-- Configure Sentry CLI -->
+  <!--
+    Configure Sentry CLI
+    NOTE: Authentication is not set here.  Instead:
+    - In CI, `SENTRY_AUTH_TOKEN` is set as an environment variable via a GitHub Actions secret.
+    - In dev, you can either set `SENTRY_AUTH_TOKEN` manually, or you can set an auth token
+      in your ~/.sentryclirc file.  See https://docs.sentry.io/product/cli/configuration/
+
+    There is also a a `SentryAuthToken` msbuild property, but it should be used sparingly.
+    If using it, be careful that the auth token does not get committed to source control.
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <SentryOrg>sentry-sdks</SentryOrg>
     <SentryProject>sentry-dotnet</SentryProject>
-    <SentryUploadSources Condition="'$(Configuration)' == 'Release'">true</SentryUploadSources>
-
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
 
   <!--
