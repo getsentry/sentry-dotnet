@@ -568,6 +568,7 @@ namespace Sentry
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
         public bool IsEnvironmentUser { get; set; }
         public bool IsGlobalModeEnabled { get; set; }
+        public bool JsonPreserveReferences { get; set; }
         public bool KeepAggregateException { get; set; }
         public long MaxAttachmentSize { get; set; }
         public int MaxBreadcrumbs { get; set; }

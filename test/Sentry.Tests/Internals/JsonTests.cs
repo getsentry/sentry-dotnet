@@ -6,7 +6,7 @@ public class JsonTests
 
     public JsonTests(ITestOutputHelper output)
     {
-        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+        _testOutputLogger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
     }
 
     public static Exception GenerateException(string description)
@@ -171,35 +171,70 @@ public class JsonTests
         Assert.Equal(expectedSerializedData, serializedString);
     }
 
-    private class NonSerializableValue
+    [Theory]
+    [MemberData(nameof(NonSerializableObjectTestData))]
+    public void WriteDynamic_NonSerializableObject_LogException(object testObject)
     {
-#pragma warning disable CA1822 // Mark members as static
-        public string Thrower => throw new InvalidDataException();
-#pragma warning restore CA1822
-    }
-
-    [Fact]
-    public void WriteDynamic_NonSerializableValue_LogException()
-    {
-        //Assert
-        var logger = Substitute.For<IDiagnosticLogger>();
-
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
+        // Arrange
+        JsonExtensions.JsonPreserveReferences = false;
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
         {
             writer.WriteStartObject();
 
             // Act
-            writer.WriteDynamic("property_name", new NonSerializableValue(), logger);
+            writer.WriteDynamic("property_name", testObject, _testOutputLogger);
 
             writer.WriteEndObject();
         }
 
         // Assert
-        logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
-            Arg.Any<InvalidDataException>(),
+        _testOutputLogger.Received(1).Log(
+            Arg.Is(SentryLevel.Error),
+            "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            Arg.Any<Exception>(),
             Arg.Any<object[]>());
+    }
+
+    [Fact]
+    public void WriteDynamic_ComplexObject_PreserveReferences()
+    {
+        // Arrange
+        JsonExtensions.JsonPreserveReferences = true;
+        var testObject = new SelfReferencedObject();
+        using var stream = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(stream))
+        {
+            writer.WriteStartObject();
+
+            // Act
+            writer.WriteDynamic("property_name", testObject, _testOutputLogger);
+
+            writer.WriteEndObject();
+        }
+
+        var json = Encoding.UTF8.GetString(stream.ToArray());
+
+        // Assert
+        Assert.Equal("{\"property_name\":{\"$id\":\"1\",\"Object\":{\"$ref\":\"1\"}}}", json);
+    }
+
+    public static IEnumerable<object[]> NonSerializableObjectTestData =>
+        new[]
+        {
+            new object[] {new NonSerializableObject()},
+            new object[] {new SelfReferencedObject()},
+        };
+
+    public class NonSerializableObject
+    {
+#pragma warning disable CA1822 // Mark members as static
+        public string Thrower => throw new InvalidDataException();
+#pragma warning restore CA1822
+    }
+
+    public class SelfReferencedObject
+    {
+        public SelfReferencedObject Object => this;
     }
 }
