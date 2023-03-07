@@ -98,4 +98,17 @@ internal sealed class SparseArray<T>
             }
         }
     }
+
+    public List<int> Keys()
+    {
+        var list = new List<int>();
+        for (int i = 0; i < _items.Count; i++)
+        {
+            if (_items[i] is { } value)
+            {
+                list.Add(i);
+            }
+        }
+        return list;
+    }
 }

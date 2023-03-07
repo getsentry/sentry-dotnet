@@ -15,7 +15,7 @@ using SentryProfileStackTrace = HashableGrowableArray<int>;
 /// <summary>
 /// Processes TraceLog to produce a SampleProfile.
 ///
-/// Based on https://github.com/microsoft/perfview/blob/d4c209ad680`2de03ff4c595714b2b7714da036f/src/TraceEvent/Computers/SampleProfilerThreadTimeComputer.cs
+/// Based on https://github.com/microsoft/perfview/blob/ff6e8e6c4118a26521515f41ae77f15981d68c53/src/TraceEvent/Computers/SampleProfilerThreadTimeComputer.cs
 /// </summary>
 internal class TraceLogProcessor
 {
@@ -127,6 +127,8 @@ internal class TraceLogProcessor
 
             // We can provide a bit of extra value (and it is useful for debugging) if we immediately log a CPU
             // sample when we schedule or start a task.  That we we get the very instant it starts.
+            // TODO does this make sense without "System.Threading.Tasks.TplEventSource" being enabled?
+            //      see https://learn.microsoft.com/en-us/dotnet/core/diagnostics/well-known-event-providers#systemthreadingtaskstpleventsource-provider
             var tplProvider = new TplEtwProviderTraceEventParser(_eventSource);
             tplProvider.AwaitTaskContinuationScheduledSend += OnSampledProfile;
             tplProvider.TaskScheduledSend += OnSampledProfile;
@@ -394,7 +396,7 @@ internal class TraceLogProcessor
                 break;
             }
 
-            // "tlFrameIndex" may point to "CodeAddresses" or "Threds" or "Processes"
+            // "tlFrameIndex" may point to "CodeAddresses" or "Threads" or "Processes"
             // See TraceEventStackSource.GetFrameName() code for details.
             // We only care about the CodeAddresses bit because we don't want to show Threads and Processes in the stack trace.
             CodeAddressIndex codeAddressIndex = _stackSource.GetFrameCodeAddress(tlFrameIndex);
@@ -413,9 +415,10 @@ internal class TraceLogProcessor
         int result = -1;
         if (stackTrace.Count > 0)
         {
-            stackTrace.Seal(5);
+            stackTrace.Seal();
             if (!_stackIndexes.TryGetValue(stackTrace, out result))
             {
+                stackTrace.Trim(5);
                 _profile.Stacks.Add(stackTrace);
                 _stackIndexes[stackTrace] = _profile.Stacks.Count - 1;
             }
@@ -461,7 +464,6 @@ internal class TraceLogProcessor
         return key;
     }
 
-    // TODO align this with Sentry's StackTraceFactory
     private SentryStackFrame CreateStackFrame(CodeAddressIndex codeAddressIndex)
     {
         var frame = new SentryStackFrame();
@@ -476,26 +478,28 @@ internal class TraceLogProcessor
             {
                 frame.Module = moduleFile.Name;
             }
-        }
 
-        if (_traceLog.CodeAddresses.ILOffset(codeAddressIndex) is { } ilOffset && ilOffset >= 0)
-        {
-            frame.InstructionOffset = ilOffset;
-        }
-        else if (_traceLog.CodeAddresses.Address(codeAddressIndex) is { } address)
-        {
-            frame.InstructionAddress = $"0x{address:x}";
-        }
-
-        // Displays the optimization tier of each code version executed for the method. E.g. "QuickJitted"
-        if (frame.Function is not null)
-        {
-            var optimizationTier = _traceLog.CodeAddresses.OptimizationTier(codeAddressIndex);
-            if (optimizationTier != Microsoft.Diagnostics.Tracing.Parsers.Clr.OptimizationTier.Unknown)
+            // Displays the optimization tier of each code version executed for the method. E.g. "QuickJitted"
+            if (frame.Function is not null)
             {
-                frame.Function = $"{frame.Function} {{{optimizationTier}}}";
+                var optimizationTier = _traceLog.CodeAddresses.OptimizationTier(codeAddressIndex);
+                if (optimizationTier != Microsoft.Diagnostics.Tracing.Parsers.Clr.OptimizationTier.Unknown)
+                {
+                    frame.Function = $"{frame.Function} {{{optimizationTier}}}";
+                }
             }
+
         }
+
+        // TODO enable this once we implement symbolication (we will need to send debug_meta too), see StackTraceFactory.
+        // if (_traceLog.CodeAddresses.ILOffset(codeAddressIndex) is { } ilOffset && ilOffset >= 0)
+        // {
+        //     frame.InstructionOffset = ilOffset;
+        // }
+        // else if (_traceLog.CodeAddresses.Address(codeAddressIndex) is { } address)
+        // {
+        //     frame.InstructionAddress = $"0x{address:x}";
+        // }
 
         return frame;
     }

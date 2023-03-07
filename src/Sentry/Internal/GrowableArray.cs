@@ -43,21 +43,23 @@ internal sealed class HashableGrowableArray<T> : IEnumerable<T>, IEquatable<Hash
     /// <summary>
     /// Seal this array so that it cannot be changed anymore and can be hashed.
     /// </summary>
-    /// <param name="maxWaste">
-    /// If more or equal to zero, trims the size of the array so that no more than the given number of slots are wasted.
-    /// </param>
-    public void Seal(int maxWaste = -1)
+    public void Seal()
     {
         Debug.Assert(!_sealed);
         _sealed = true;
-        if (maxWaste >= 0)
-        {
-            _items.Trim(maxWaste);
-        }
         foreach (var item in _items)
         {
             _hashCode ^= item.GetHashCode();
         }
+    }
+
+    /// <summary>
+    /// Trims the size of the array so that no more than 'maxWaste' slots are wasted.
+    /// You can call this even on Seal()'ed array because it doesn't affect the content and thus the hash code.
+    /// </summary>
+    public void Trim(int maxWaste)
+    {
+        _items.Trim(maxWaste);
     }
 
     public void Add(T item)
