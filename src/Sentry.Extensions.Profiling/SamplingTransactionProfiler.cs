@@ -116,7 +116,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
 
             using var eventLog = new TraceLog(etlxFilePath);
             var processor = new TraceLogProcessor(eventLog);
-            processor.MaxTimestampNs = (ulong)((_endTime.Value - _startTime).TotalMilliseconds * 1_000_000);
+            processor.MaxTimestampMs = (ulong)(_endTime.Value - _startTime).TotalMilliseconds;
             var profile = processor.Process(_cancellationToken);
             if (_cancellationToken.IsCancellationRequested)
             {

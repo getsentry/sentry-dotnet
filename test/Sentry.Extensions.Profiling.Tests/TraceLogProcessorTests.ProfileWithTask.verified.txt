@@ -1,8 +1,5 @@
 ﻿{
   thread_metadata: {
-    0: {
-      name: Thread 0
-    },
     2: {
       name: Thread 2
     },
@@ -136,103 +133,6 @@
     [
       76,
       77,
-      78,
-      79,
-      80,
-      81,
-      82,
-      83,
-      84,
-      85,
-      86,
-      87,
-      88,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      58,
-      68,
-      69,
-      70,
-      71,
-      63,
-      64,
-      72,
-      73,
-      74,
-      34,
-      11
-    ],
-    [
-      89,
-      90,
-      91,
-      92,
-      93,
-      94,
-      95,
-      96,
-      97,
-      98
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      99
-    ],
-    [
-      100,
-      96,
-      97,
-      98
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      101
-    ],
-    [
-      102,
-      27,
-      28,
       29,
       30,
       31,
@@ -242,8 +142,6 @@
       11
     ],
     [
-      103,
-      77,
       78,
       79,
       80,
@@ -255,6 +153,11 @@
       86,
       87,
       88,
+      89,
+      90,
+      91,
+      92,
+      93,
       35,
       36,
       37,
@@ -304,120 +207,67 @@
     [
       15,
       16,
+      94,
+      95,
+      96,
+      30,
+      97,
+      98,
+      99,
+      33,
+      34,
+      11
+    ],
+    [
+      76,
+      100,
+      101,
+      96,
+      30,
+      97,
+      98,
+      99,
+      33,
+      34,
+      11
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      102
+    ],
+    [
+      103,
       104,
       105,
       106,
-      30,
       107,
       108,
       109,
-      33,
-      34,
-      11
-    ],
-    [
-      7,
-      8,
-      9,
       110,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      111
-    ],
-    [
+      111,
       112,
       113,
-      29,
-      30,
-      31,
-      32,
-      33,
-      34,
-      11
-    ],
-    [
       114,
       115,
-      85,
-      86,
-      87,
-      88,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      58,
-      68,
-      69,
-      70,
-      71,
-      63,
-      64,
-      72,
-      73,
-      74,
-      34,
-      11
-    ],
-    [
       116,
       117,
       118,
-      106,
+      96,
       30,
-      107,
-      108,
-      109,
+      97,
+      98,
+      99,
       33,
       34,
       11
     ],
     [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      119
-    ],
-    [
+      119,
       120,
       121,
       122,
@@ -431,165 +281,19 @@
       130,
       131,
       132,
-      86,
-      87,
-      88,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      58,
-      68,
-      69,
-      70,
-      71,
-      63,
-      64,
-      72,
-      73,
-      74,
-      34,
-      11
-    ],
-    [
-      112,
-      117,
-      118,
-      106,
-      30,
-      107,
-      108,
-      109,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      133
-    ],
-    [
+      133,
       134,
-      122,
-      123,
-      124,
-      125,
-      126,
-      127,
-      128,
-      129,
-      130,
-      131,
-      132,
-      86,
-      87,
-      88,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      58,
-      68,
-      69,
-      70,
-      71,
-      63,
-      64,
-      72,
-      73,
-      74,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      135
-    ],
-    [
+      135,
       136,
       137,
       138,
       139,
       140,
       141,
+      132,
       142,
-      143,
-      144,
-      145,
-      146,
-      147,
-      148,
-      149,
-      87,
-      88,
+      92,
+      93,
       35,
       36,
       37,
@@ -635,6 +339,69 @@
       74,
       34,
       11
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      143
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      144
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      145
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      146
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      147
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      148
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      149
     ],
     [
       0,
@@ -646,68 +413,13 @@
       150
     ],
     [
-      151,
-      152,
-      153,
-      148,
-      154,
-      140,
-      141,
-      142,
-      143,
-      144,
-      145,
-      146,
-      147,
-      148,
-      149,
-      87,
-      88,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      58,
-      68,
-      69,
-      70,
-      71,
-      63,
-      64,
-      72,
-      73,
-      74,
-      34,
-      11
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      151
     ],
     [
       0,
@@ -716,83 +428,31 @@
       3,
       4,
       5,
-      155
+      152
     ],
     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      153
+    ],
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      154
+    ],
+    [
+      155,
       156,
       157,
-      152,
-      153,
-      148,
-      154,
-      140,
-      141,
-      142,
-      143,
-      144,
-      145,
-      146,
-      147,
-      148,
-      149,
-      87,
-      88,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      58,
-      68,
-      69,
-      70,
-      71,
-      63,
-      64,
-      72,
-      73,
-      74,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      158
-    ],
-    [
+      158,
       159,
       160,
       161,
@@ -804,176 +464,49 @@
       167,
       168,
       169,
+      58,
       170,
       171,
+      61,
+      62,
+      63,
       172,
       173,
       174,
-      106,
-      30,
-      107,
-      108,
-      109,
-      33,
-      34,
-      11
-    ],
-    [
       175,
+      58,
       176,
       177,
+      61,
+      62,
+      63,
       178,
       179,
       180,
       181,
       182,
+      58,
       183,
       184,
       185,
-      152,
-      153,
-      148,
-      154,
-      140,
-      141,
-      142,
-      143,
-      144,
-      145,
-      146,
-      147,
-      148,
-      149,
-      87,
-      88,
-      35,
-      36,
-      37,
-      38,
-      39,
-      40,
-      41,
-      42,
-      43,
-      44,
-      45,
-      46,
-      47,
-      48,
-      49,
-      50,
-      51,
-      52,
-      53,
-      54,
-      55,
-      56,
-      57,
-      58,
-      59,
-      60,
-      61,
-      62,
-      63,
-      64,
-      65,
-      66,
-      67,
-      58,
-      68,
-      69,
-      70,
-      71,
-      63,
-      64,
-      72,
-      73,
-      74,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      186
-    ],
-    [
+      186,
       187,
       188,
       189,
+      58,
       190,
-      159,
-      160,
-      161,
-      162,
-      163,
-      164,
-      165,
-      166,
-      167,
-      168,
-      169,
-      170,
-      171,
-      172,
-      173,
-      174,
-      106,
-      30,
-      107,
-      108,
-      109,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      191
-    ],
-    [
+      191,
+      185,
       192,
       193,
       194,
       195,
       196,
+      58,
       197,
       198,
-      189,
-      190,
-      159,
-      160,
-      161,
-      162,
-      163,
-      164,
-      165,
-      166,
-      167,
-      168,
-      169,
-      170,
-      171,
-      172,
-      173,
-      174,
-      106,
-      30,
-      107,
-      108,
-      109,
-      33,
-      34,
-      11
+      199,
+      200
     ],
     [
       0,
@@ -982,13 +515,16 @@
       3,
       4,
       5,
-      199
+      201
     ],
     [
-      200,
-      201,
       202,
-      190,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
       159,
       160,
       161,
@@ -1000,73 +536,49 @@
       167,
       168,
       169,
+      58,
       170,
       171,
+      61,
+      62,
+      63,
       172,
       173,
       174,
-      106,
-      30,
-      107,
-      108,
-      109,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      203
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      204
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      205
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      206
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      207
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      208
+      175,
+      58,
+      176,
+      177,
+      61,
+      62,
+      63,
+      178,
+      179,
+      180,
+      181,
+      182,
+      58,
+      183,
+      184,
+      185,
+      186,
+      187,
+      188,
+      189,
+      58,
+      190,
+      191,
+      185,
+      192,
+      193,
+      194,
+      195,
+      196,
+      58,
+      197,
+      198,
+      199,
+      200
     ],
     [
       0,
@@ -1087,238 +599,47 @@
       210
     ],
     [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      211
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      212
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      213
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      214
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      215
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      216
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      217
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      218
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      219
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      220
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      221
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      222
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      223
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      224
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      225
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      226
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      227
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      228
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      229
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      230
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      231
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      232
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      233
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      234
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      235
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      236
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      58,
+      220,
+      221,
+      61,
+      62,
+      63,
+      222,
+      223,
+      224,
+      225,
+      226,
+      58,
+      227,
+      228,
+      61,
+      62,
+      63,
+      229,
+      230,
+      231,
+      232,
+      233,
+      58,
+      234,
+      235,
+      185,
+      186,
+      187,
+      195,
+      236,
+      199,
+      200
     ],
     [
       0,
@@ -1357,1399 +678,10 @@
       240
     ],
     [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      241
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      242
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      243
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      244
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      245
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      246
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      247
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      248
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      249
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      250
-    ],
-    [
-      251,
-      252,
-      253,
-      254,
-      58,
-      255,
-      256,
-      61,
-      62,
-      63,
-      257,
-      258,
-      259,
-      260,
-      74,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      261
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      262
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      263
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      264
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      265
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      266
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      267
-    ],
-    [
-      268,
-      269,
-      270,
-      271,
-      272,
-      273,
-      274,
-      275,
-      276,
-      277,
-      278,
-      279,
-      280,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      284,
-      285,
-      286,
-      287,
-      58,
-      288,
-      289,
-      61,
-      62,
-      63,
-      290,
-      291,
-      292,
-      293,
-      294,
-      58,
-      295,
-      296,
-      297,
-      298,
-      299,
-      300,
-      254,
-      58,
-      255,
-      256,
-      297,
-      301,
-      302,
-      303,
-      304,
-      305,
-      58,
-      306,
-      307,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      310
-    ],
-    [
-      311,
-      312,
-      313,
-      314,
-      315,
-      316,
-      317,
-      318,
-      319,
-      276,
-      277,
-      278,
-      279,
-      280,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      284,
-      285,
-      286,
-      287,
-      58,
-      288,
-      289,
-      61,
-      62,
-      63,
-      290,
-      291,
-      292,
-      293,
-      294,
-      58,
-      295,
-      296,
-      297,
-      298,
-      299,
-      300,
-      254,
-      58,
-      255,
-      256,
-      297,
-      301,
-      302,
-      303,
-      304,
-      305,
-      58,
-      306,
-      307,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      320
-    ],
-    [
-      321,
-      322,
-      323,
-      324,
-      325,
-      326,
-      327,
-      328,
-      312,
-      313,
-      314,
-      315,
-      316,
-      317,
-      318,
-      319,
-      276,
-      277,
-      278,
-      279,
-      280,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      284,
-      285,
-      286,
-      287,
-      58,
-      288,
-      289,
-      61,
-      62,
-      63,
-      290,
-      291,
-      292,
-      293,
-      294,
-      58,
-      295,
-      296,
-      297,
-      298,
-      299,
-      300,
-      254,
-      58,
-      255,
-      256,
-      297,
-      301,
-      302,
-      303,
-      304,
-      305,
-      58,
-      306,
-      307,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      329
-    ],
-    [
-      330,
-      331,
-      332,
-      333,
-      313,
-      314,
-      315,
-      316,
-      317,
-      318,
-      319,
-      276,
-      277,
-      278,
-      279,
-      280,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      284,
-      285,
-      286,
-      287,
-      58,
-      288,
-      289,
-      61,
-      62,
-      63,
-      290,
-      291,
-      292,
-      293,
-      294,
-      58,
-      295,
-      296,
-      297,
-      298,
-      299,
-      300,
-      254,
-      58,
-      255,
-      256,
-      297,
-      301,
-      302,
-      303,
-      304,
-      305,
-      58,
-      306,
-      307,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      334
-    ],
-    [
-      335,
-      336,
-      337,
-      338,
-      333,
-      313,
-      314,
-      315,
-      316,
-      317,
-      318,
-      319,
-      276,
-      277,
-      278,
-      279,
-      280,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      284,
-      285,
-      286,
-      287,
-      58,
-      288,
-      289,
-      61,
-      62,
-      63,
-      290,
-      291,
-      292,
-      293,
-      294,
-      58,
-      295,
-      296,
-      297,
-      298,
-      299,
-      300,
-      254,
-      58,
-      255,
-      256,
-      297,
-      301,
-      302,
-      303,
-      304,
-      305,
-      58,
-      306,
-      307,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      339
-    ],
-    [
-      340,
-      341,
-      342,
-      313,
-      314,
-      315,
-      316,
-      317,
-      318,
-      319,
-      276,
-      277,
-      278,
-      279,
-      280,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      284,
-      285,
-      286,
-      287,
-      58,
-      288,
-      289,
-      61,
-      62,
-      63,
-      290,
-      291,
-      292,
-      293,
-      294,
-      58,
-      295,
-      296,
-      297,
-      298,
-      299,
-      300,
-      254,
-      58,
-      255,
-      256,
-      297,
-      301,
-      302,
-      303,
-      304,
-      305,
-      58,
-      306,
-      307,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      343
-    ],
-    [
-      344,
-      345,
-      346,
-      347,
-      348,
-      349,
-      350,
-      315,
-      316,
-      317,
-      318,
-      319,
-      276,
-      277,
-      278,
-      279,
-      280,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      284,
-      285,
-      286,
-      287,
-      58,
-      288,
-      289,
-      61,
-      62,
-      63,
-      290,
-      291,
-      292,
-      293,
-      294,
-      58,
-      295,
-      296,
-      297,
-      298,
-      299,
-      300,
-      254,
-      58,
-      255,
-      256,
-      297,
-      301,
-      302,
-      303,
-      304,
-      305,
-      58,
-      306,
-      307,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      351
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      352
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      353
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      354
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      355
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      356
-    ],
-    [
-      357,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      358
-    ],
-    [
-      330,
-      331,
-      332,
-      333,
-      313,
-      359,
-      360,
-      347,
-      348,
-      349,
-      350,
-      361,
-      58,
-      362,
-      363,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      365,
-      366,
-      58,
-      367,
-      368,
-      61,
-      62,
-      63,
-      369,
-      370,
-      371,
-      372,
-      373,
-      58,
-      374,
-      375,
-      297,
-      298,
-      299,
-      304,
-      357,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      376
-    ],
-    [
-      377,
-      378,
-      379,
-      380,
-      381,
-      361,
-      58,
-      362,
-      363,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      365,
-      366,
-      58,
-      367,
-      368,
-      61,
-      62,
-      63,
-      369,
-      370,
-      371,
-      372,
-      373,
-      58,
-      374,
-      375,
-      297,
-      298,
-      299,
-      304,
-      357,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      382
-    ],
-    [
-      383,
-      379,
-      380,
-      381,
-      361,
-      58,
-      362,
-      363,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      365,
-      366,
-      58,
-      367,
-      368,
-      61,
-      62,
-      63,
-      369,
-      370,
-      371,
-      372,
-      373,
-      58,
-      374,
-      375,
-      297,
-      298,
-      299,
-      304,
-      357,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      384
-    ],
-    [
-      385,
-      386,
-      387,
-      388,
-      389,
-      379,
-      380,
-      381,
-      361,
-      58,
-      362,
-      363,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      365,
-      366,
-      58,
-      367,
-      368,
-      61,
-      62,
-      63,
-      369,
-      370,
-      371,
-      372,
-      373,
-      58,
-      374,
-      375,
-      297,
-      298,
-      299,
-      304,
-      357,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      390
-    ],
-    [
-      391,
-      392,
-      58,
-      393,
-      394,
-      61,
-      62,
-      63,
-      395,
-      396,
-      397,
-      281,
-      58,
-      282,
-      283,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      398,
-      399,
-      58,
-      400,
-      401,
-      61,
-      62,
-      63,
-      290,
-      291,
-      402,
-      403,
-      361,
-      58,
-      362,
-      363,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      365,
-      366,
-      58,
-      367,
-      368,
-      61,
-      62,
-      63,
-      369,
-      370,
-      371,
-      372,
-      373,
-      58,
-      374,
-      375,
-      297,
-      298,
-      299,
-      304,
-      357,
-      308,
-      309
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      404
-    ],
-    [
-      405,
-      406,
-      407,
-      408,
-      409,
-      410,
-      58,
-      411,
-      412,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      413,
-      414,
-      58,
-      415,
-      416,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      417,
-      418,
-      30,
-      419,
-      420,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      421
-    ],
-    [
-      422,
-      423,
-      424,
-      406,
-      407,
-      408,
-      409,
-      410,
-      58,
-      411,
-      412,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      413,
-      414,
-      58,
-      415,
-      416,
-      61,
-      62,
-      63,
-      257,
-      258,
-      364,
-      417,
-      418,
-      30,
-      419,
-      420,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      425
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      426
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      427
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      428
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      429
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      430
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      431
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      432
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      433
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      434
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      435
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      436
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      437
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      438
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      439
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      440
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      441
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      442
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      443
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      444
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      445
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      446
-    ],
-    [
-      61,
-      62,
-      63,
-      447,
-      448,
-      449,
-      450,
-      108,
-      109,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      451
-    ],
-    [
-      452,
-      453,
-      454,
-      29,
-      58,
-      455,
-      456,
-      61,
-      62,
-      63,
-      447,
-      448,
-      449,
-      450,
-      108,
-      109,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      457
-    ],
-    [
-      458,
-      459,
-      454,
-      29,
-      58,
-      455,
-      456,
-      61,
-      62,
-      63,
-      447,
-      448,
-      449,
-      450,
-      108,
-      109,
-      33,
-      34,
-      11
-    ],
-    [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      460
-    ],
-    [
-      461,
-      458,
-      459,
-      454,
-      29,
-      58,
-      455,
-      456,
-      61,
-      62,
-      63,
-      447,
-      448,
-      449,
-      450,
-      108,
-      109,
-      33,
-      34,
+      7,
+      8,
+      9,
+      241,
       11
     ]
   ],
@@ -3055,179 +987,11 @@
       module: Sentry.Samples.Console.Customized
     },
     {
-      function: System.Net.NetworkInformation.HostInformationPal.GetFixedInfo(),
-      module: System.Net.Primitives.il
-    },
-    {
-      function: System.Net.NetworkInformation.HostInformationPal+<>c.<get_FixedInfo>b__7_0(),
-      module: System.Net.Primitives.il
-    },
-    {
-      function: System.Threading.LazyInitializer.EnsureInitializedCore(!!0&,bool&,class System.Object&,class System.Func`1<!!0>) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.LazyInitializer.EnsureInitialized(!!0&,bool&,class System.Object&,class System.Func`1<!!0>) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.NetworkInformation.HostInformationPal.get_FixedInfo(),
-      module: System.Net.Primitives.il
-    },
-    {
-      function: System.Net.CookieContainer.CreateFqdnMyDomain(),
-      module: System.Net.Primitives.il
-    },
-    {
-      function: System.Net.CookieContainer..cctor(),
-      module: System.Net.Primitives.il
-    },
-    {
-      function: System.Net.CookieContainer..ctor(),
-      module: System.Net.Primitives.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionSettings.CloneAndNormalize(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.SocketsHttpHandler.SetupHandlerChain(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
-      module: Sentry
-    },
-    {
-      function: System.Runtime.CompilerServices.CastHelpers.StelemRef_Helper(class System.Object&,void*,class System.Object),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Reflection.RuntimeParameterInfo.GetParameters(class System.IRuntimeMethodInfo,class System.Reflection.MemberInfo,class System.Signature,class System.Reflection.ParameterInfo&,bool),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Reflection.RuntimeMethodInfo.FetchNonReturnParameters(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Reflection.RuntimeMethodInfo.GetParameters(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Diagnostics.Tracing.EventSource.CreateManifestAndDescriptors(class System.Type,class System.String,class System.Diagnostics.Tracing.EventSource,value class System.Diagnostics.Tracing.EventManifestOptions),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Diagnostics.Tracing.EventSource.DoCommand(class System.Diagnostics.Tracing.EventCommandEventArgs),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Diagnostics.Tracing.EventSource.SendCommand(class System.Diagnostics.Tracing.EventListener,value class System.Diagnostics.Tracing.EventProviderType,int32,int32,value class System.Diagnostics.Tracing.EventCommand,bool,value class System.Diagnostics.Tracing.EventLevel,value class System.Diagnostics.Tracing.EventKeywords,class System.Collections.Generic.IDictionary`2<class System.String,class System.String>),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Diagnostics.Tracing.EventSource+OverrideEventProvider.OnControllerCommand(value class System.Diagnostics.Tracing.ControllerCommand,class System.Collections.Generic.IDictionary`2<class System.String,class System.String>,int32,int32),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Diagnostics.Tracing.EventProvider.EtwEnableCallBack(value class System.Guid&,int32,unsigned int8,int64,int64,value class EVENT_FILTER_DESCRIPTOR*,void*),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Diagnostics.Tracing.EventSource.DoCommand(class System.Diagnostics.Tracing.EventCommandEventArgs),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext) {QuickJitted},
-      module: Sentry
-    },
-    {
-      function: System.Net.NetworkInformation.HostInformationPal.GetFixedInfo(),
-      module: System.Net.Primitives.il
-    },
-    {
-      function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task`1[System.Int32].InnerInvoke(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task.ExecuteEntryUnsafe(class System.Threading.Thread),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task.ExecuteFromThreadPool(class System.Threading.Thread),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
       function: Program.FindPrimeNumber(int32) {Optimized},
       module: Sentry.Samples.Console.Customized
     },
     {
       function: Program+<Main>d__2.MoveNext() {Optimized},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Security.SslClientAuthenticationOptionsExtensions.ShallowClone(class System.Net.Security.SslClientAuthenticationOptions),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionSettings.CloneAndNormalize(),
-      module: System.Net.Http.il
-    },
-    {
-      function: Program.FindPrimeNumber(int32) {Optimized},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program+<>c.<Main>b__2_9() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Threading.Tasks.Task`1[System.Int64].InnerInvoke(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
       module: Sentry.Samples.Console.Customized
     },
     {
@@ -3283,104 +1047,48 @@
       module: System.Net.Http.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Http.HttpWindowsProxy.TryCreate(class System.Net.IWebProxy&),
-      module: System.Net.Http.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Diagnostics.Activity..cctor(),
-      module: System.Diagnostics.DiagnosticSource.il
-    },
-    {
-      function: System.Diagnostics.Activity.get_Current(),
-      module: System.Diagnostics.DiagnosticSource.il
-    },
-    {
-      function: System.Net.Http.DiagnosticsHandler.IsEnabled(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.DiagnosticsHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.RedirectHandler+<SendAsync>d__4.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Http.RedirectHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.DecompressionHandler+<SendAsync>d__16.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Http.DecompressionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.HttpMessageHandlerStage.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
       function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
       module: System.Net.Http.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+      module: Sentry
+    },
+    {
+      function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.Int32].InnerInvoke(),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.ExecuteEntryUnsafe(class System.Threading.Thread),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task.ExecuteFromThreadPool(class System.Threading.Thread),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: Program+<>c.<Main>b__2_9() {QuickJitted},
       module: Sentry.Samples.Console.Customized
     },
     {
-      function: System.Net.Http.HttpConnectionPoolManager.SendAsyncCore(class System.Net.Http.HttpRequestMessage,class System.Uri,bool,bool,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionPoolManager.SendAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.DiagnosticsHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Collections.Concurrent.ConcurrentDictionary`2[System.Net.Http.HttpConnectionPoolManager+HttpConnectionKey,System.__Canon].TryAdd(!0,!1) {QuickJitted},
-      module: System.Collections.Concurrent.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionPoolManager.SendAsyncCore(class System.Net.Http.HttpRequestMessage,class System.Uri,bool,bool,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
+      function: System.Threading.Tasks.Task`1[System.Int64].InnerInvoke(),
+      module: System.Private.CoreLib.il
     },
     {
       function: Program.<Main>() {QuickJitted},
@@ -3495,19 +1203,23 @@
       module: System.Net.Http.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
+      function: System.Net.Http.HttpConnectionPoolManager.SendAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
     },
     {
-      function: System.Net.Sockets.SocketAsyncEventArgs.InitializeInternals(),
-      module: System.Net.Sockets.il
+      function: System.Net.Http.HttpConnectionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
     },
     {
-      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.EndPoint,value class System.Threading.CancellationToken),
-      module: System.Net.Sockets.il
+      function: System.Net.Http.HttpMessageHandlerStage.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
     },
     {
-      function: System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98.MoveNext(),
+      function: System.Net.Http.DiagnosticsHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.RedirectHandler+<SendAsync>d__4.MoveNext(),
       module: System.Net.Http.il
     },
     {
@@ -3515,51 +1227,31 @@
       module: System.Private.CoreLib.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.NameResolutionPal.GetAddrInfoAsync(class System.String,bool,value class System.Net.Sockets.AddressFamily,value class System.Threading.CancellationToken),
-      module: system.net.nameresolution.il
-    },
-    {
-      function: System.Net.Dns.GetHostEntryOrAddressesCoreAsync(class System.String,bool,bool,bool,value class System.Net.Sockets.AddressFamily,value class System.Threading.CancellationToken),
-      module: system.net.nameresolution.il
-    },
-    {
-      function: System.Net.Dns.GetHostAddressesAsync(class System.String,value class System.Net.Sockets.AddressFamily,value class System.Threading.CancellationToken),
-      module: system.net.nameresolution.il
-    },
-    {
-      function: System.Net.Sockets.SocketAsyncEventArgs.DnsConnectAsync(class System.Net.DnsEndPoint,value class System.Net.Sockets.SocketType,value class System.Net.Sockets.ProtocolType),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.Sockets.SocketAsyncEventArgs,bool,bool),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.ConnectAsync(class System.Net.Sockets.Socket),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.EndPoint,value class System.Threading.CancellationToken),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
       module: System.Private.CoreLib.il
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
+      function: System.Net.Http.RedirectHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.DecompressionHandler+<SendAsync>d__16.MoveNext(),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
       module: System.Private.CoreLib.il
     },
     {
-      function: System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98.MoveNext(),
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Http.DecompressionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+      module: System.Net.Http.il
+    },
+    {
+      function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
       module: System.Net.Http.il
     },
     {
@@ -3611,243 +1303,35 @@
       module: Sentry.Samples.Console.Customized
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Sockets.SocketAsyncEventArgs.DoOperationConnectEx(class System.Net.Sockets.Socket,class System.Net.Sockets.SafeSocketHandle),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: System.Net.Sockets.Socket.ConnectAsync(class System.Net.Sockets.SocketAsyncEventArgs,bool,bool),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d.MoveNext(),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext() {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task`1[System.__Canon].TrySetResult(!0),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].SetResult(!0),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.NameResolutionPal+GetAddrInfoExState.System.Threading.IThreadPoolWorkItem.Execute(),
-      module: system.net.nameresolution.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Security.SafeFreeContextBuffer.EnumeratePackages(int32&,class System.Net.Security.SafeFreeContextBuffer&),
+      function: System.Net.Security.SecureChannel.AcquireClientCredentials(unsigned int8[]&),
       module: System.Net.Security.il
     },
     {
-      function: System.Net.SSPISecureChannelType.EnumerateSecurityPackages(int32&,class System.Net.Security.SafeFreeContextBuffer&),
+      function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
       module: System.Net.Security.il
     },
     {
-      function: System.Net.SSPIWrapper.EnumerateSecurityPackages(class System.Net.ISSPIInterface),
+      function: System.Net.Security.SecureChannel.NextMessage(value class System.ReadOnlySpan`1<unsigned int8>),
       module: System.Net.Security.il
     },
     {
-      function: System.Net.SSPIWrapper.GetVerifyPackageInfo(class System.Net.ISSPIInterface,class System.String,bool),
+      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
       module: System.Net.Security.il
     },
     {
-      function: System.Net.Security.SslStreamPal.VerifyPackageInfo(),
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Net.Security.SslStream.ForceAuthenticationAsync(!!0,bool,unsigned int8[],bool),
       module: System.Net.Security.il
     },
     {
-      function: System.Net.Security.SecureChannel..ctor(class System.Net.Security.SslAuthenticationOptions,class System.Net.Security.SslStream),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStream.ValidateCreateContext(class System.Net.Security.SslClientAuthenticationOptions,class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.LocalCertSelectionCallback),
+      function: System.Net.Security.SslStream.ProcessAuthenticationAsync(bool,bool,value class System.Threading.CancellationToken),
       module: System.Net.Security.il
     },
     {
@@ -3955,6 +1439,18 @@
       module: System.Net.Sockets.il
     },
     {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext() {QuickJitted},
+      module: System.Private.CoreLib.il
+    },
+    {
       function: System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1[System.Boolean].SignalCompletion(),
       module: System.Private.CoreLib.il
     },
@@ -3989,138 +1485,6 @@
     {
       function: System.Threading._IOCompletionCallback.PerformIOCompletionCallback(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
       module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Security.SecureChannel.AcquireClientCredentials(unsigned int8[]&),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SecureChannel.NextMessage(value class System.ReadOnlySpan`1<unsigned int8>),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Security.SslStream.ForceAuthenticationAsync(!!0,bool,unsigned int8[],bool),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStream.ProcessAuthenticationAsync(bool,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStream.AuthenticateAsClientAsync(class System.Net.Security.SslClientAuthenticationOptions,value class System.Threading.CancellationToken),
-      module: System.Net.Security.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Interop+Advapi32.OpenThreadToken(value class System.Security.Principal.TokenAccessLevels,value class System.Security.Principal.WinSecurityContext,class Microsoft.Win32.SafeHandles.SafeAccessTokenHandle&),
-      module: System.Security.Principal.Windows.il
-    },
-    {
-      function: System.Security.Principal.WindowsIdentity.GetCurrentToken(value class System.Security.Principal.TokenAccessLevels,bool,bool&,int32&),
-      module: System.Security.Principal.Windows.il
-    },
-    {
-      function: System.Security.Principal.WindowsIdentity.RunImpersonatedInternal(class Microsoft.Win32.SafeHandles.SafeAccessTokenHandle,class System.Action),
-      module: System.Security.Principal.Windows.il
-    },
-    {
-      function: System.Security.Principal.WindowsIdentity.RunImpersonated(class Microsoft.Win32.SafeHandles.SafeAccessTokenHandle,class System.Func`1<!!0>),
-      module: System.Security.Principal.Windows.il
-    },
-    {
-      function: System.Net.Security.SslStreamPal.AcquireCredentialsHandle(value class CredentialUse,value class SCH_CREDENTIALS*),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStreamPal.AcquireCredentialsHandleSchCredentials(class System.Net.Security.SslStreamCertificateContext,value class System.Security.Authentication.SslProtocols,value class System.Net.Security.EncryptionPolicy,bool),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStreamPal.AcquireCredentialsHandle(class System.Net.Security.SslStreamCertificateContext,value class System.Security.Authentication.SslProtocols,value class System.Net.Security.EncryptionPolicy,bool),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SecureChannel.AcquireClientCredentials(unsigned int8[]&),
-      module: System.Net.Security.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Security.SafeDeleteContext.MustRunInitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,bool,unsigned int8*,value class ContextFlags,value class Endianness,value class SecBufferDesc*,class System.Net.Security.SafeDeleteContext,value class SecBufferDesc&,value class ContextFlags&,class System.Net.Security.SafeFreeContextBuffer),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SafeDeleteContext.InitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,class System.Net.Security.SafeDeleteSslContext&,class System.String,value class ContextFlags,value class Endianness,value class System.Net.Security.InputSecurityBuffers,value class System.Net.Security.SecurityBuffer&,value class ContextFlags&),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStreamPal.InitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,class System.Net.Security.SafeDeleteSslContext&,class System.String,value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&,class System.Net.Security.SslAuthenticationOptions),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
-      module: System.Net.Security.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Collections.Generic.Dictionary`2[System.Net.SecurityStatusPalErrorCode,Interop+SECURITY_STATUS].Add(!0,!1) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.SecurityStatusAdapterPal..cctor(),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(value class SECURITY_STATUS,bool),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStreamPal.InitializeSecurityContext(class System.Net.Security.SafeFreeCredentials&,class System.Net.Security.SafeDeleteSslContext&,class System.String,value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&,class System.Net.Security.SslAuthenticationOptions),
-      module: System.Net.Security.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Collections.Concurrent.ConcurrentDictionary`2[System.Net.Security.SslSessionsCache+SslCredKey,System.__Canon].set_Item(!0,!1) {QuickJitted},
-      module: System.Collections.Concurrent.il
-    },
-    {
-      function: System.Net.Security.SslSessionsCache.CacheCredential(class System.Net.Security.SafeFreeCredentials,unsigned int8[],value class System.Security.Authentication.SslProtocols,bool,value class System.Net.Security.EncryptionPolicy,bool),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
-      module: System.Net.Security.il
     },
     {
       function: Program.<Main>() {QuickJitted},
@@ -4163,35 +1527,35 @@
       module: Sentry.Samples.Console.Customized
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
+      function: Internal.Cryptography.Pal.ChainPal.BuildChain(bool,class Internal.Cryptography.ICertificatePal,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,class System.Security.Cryptography.OidCollection,class System.Security.Cryptography.OidCollection,value class System.Security.Cryptography.X509Certificates.X509RevocationMode,value class System.Security.Cryptography.X509Certificates.X509RevocationFlag,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,value class System.Security.Cryptography.X509Certificates.X509ChainTrustMode,value class System.DateTime,value class System.TimeSpan,bool),
+      module: System.Security.Cryptography.X509Certificates.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
+      function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2,bool),
+      module: System.Security.Cryptography.X509Certificates.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
+      function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2),
+      module: System.Security.Cryptography.X509Certificates.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
-      module: System.Net.Sockets.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Security.SslStream.ProcessBlob(int32),
+      function: System.Net.CertificateValidation.BuildChainAndVerifyProperties(class System.Security.Cryptography.X509Certificates.X509Chain,class System.Security.Cryptography.X509Certificates.X509Certificate2,bool,bool,class System.String),
       module: System.Net.Security.il
     },
     {
-      function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+      function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.SslAuthenticationOptions),
+      module: System.Net.Security.il
+    },
+    {
+      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
       module: System.Net.Security.il
     },
     {
@@ -4204,6 +1568,14 @@
     },
     {
       function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Threading.Tasks.Task`1[System.__Canon].TrySetResult(!0),
+      module: System.Private.CoreLib.il
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
       module: System.Private.CoreLib.il
     },
     {
@@ -4255,348 +1627,28 @@
       module: System.Private.CoreLib.il
     },
     {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.CertificateValidationPal.GetRemoteCertificate(class System.Net.Security.SafeDeleteContext,bool,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection&),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.SslAuthenticationOptions),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-      module: System.Net.Security.il
+      function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+      module: System.Net.Sockets.il
     },
     {
       function: Program.<Main>() {QuickJitted},
       module: Sentry.Samples.Console.Customized
     },
     {
-      function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
-      module: System.Net.Security.il
+      function: Program.<Main>() {QuickJitted},
+      module: Sentry.Samples.Console.Customized
     },
     {
       function: Program.<Main>() {QuickJitted},
       module: Sentry.Samples.Console.Customized
     },
     {
-      function: Internal.Cryptography.Pal.ChainPal.BuildChain(bool,class Internal.Cryptography.ICertificatePal,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,class System.Security.Cryptography.OidCollection,class System.Security.Cryptography.OidCollection,value class System.Security.Cryptography.X509Certificates.X509RevocationMode,value class System.Security.Cryptography.X509Certificates.X509RevocationFlag,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,value class System.Security.Cryptography.X509Certificates.X509ChainTrustMode,value class System.DateTime,value class System.TimeSpan,bool),
-      module: System.Security.Cryptography.X509Certificates.il
-    },
-    {
-      function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2,bool),
-      module: System.Security.Cryptography.X509Certificates.il
-    },
-    {
-      function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2),
-      module: System.Security.Cryptography.X509Certificates.il
-    },
-    {
-      function: System.Net.CertificateValidation.BuildChainAndVerifyProperties(class System.Security.Cryptography.X509Certificates.X509Chain,class System.Security.Cryptography.X509Certificates.X509Certificate2,bool,bool,class System.String),
-      module: System.Net.Security.il
-    },
-    {
-      function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
-      module: System.Net.Security.il
-    },
-    {
       function: Program.<Main>() {QuickJitted},
       module: Sentry.Samples.Console.Customized
     },
     {
-      function: System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
       module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99].MoveNext(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99].MoveNext() {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].TrySetResult(!0),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].SetResult(!0),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2].ExecutionContextCallback(class System.Object) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2].MoveNext(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2].MoveNext() {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.SetResult(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-      module: System.Net.Security.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Net.Http.HttpConnection+<SendAsyncCore>d__64.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Http.HttpConnection.SendAsyncCore(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84].ExecutionContextCallback(class System.Object) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84].MoveNext(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84].MoveNext() {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76].ExecutionContextCallback(class System.Object) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76].MoveNext(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76].MoveNext() {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon].MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon]].ExecutionContextCallback(class System.Object) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon]].MoveNext(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Threading.Tasks.TaskCompletionSourceWithCancellation`1+<WaitWithCancellationAsync>d__1[System.__Canon]].ExecuteFromThreadPool(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Net.Http.HttpConnection+<SendAsyncCore>d__64.MoveNext(),
-      module: System.Net.Http.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Threading.Tasks.Task.FinishStageThree(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task.FinishStageTwo(),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task.FinishSlow(bool),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Sentry.Transaction..ctor(class Sentry.ITransaction) {QuickJitted},
-      module: Sentry
-    },
-    {
-      function: Sentry.TransactionTracer.Finish() {Optimized},
-      module: Sentry
-    },
-    {
-      function: Program+<Main>d__2.MoveNext() {Optimized},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(class System.Threading.Thread) {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext() {QuickJitted},
-      module: System.Private.CoreLib.il
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Sentry.Internal.Hub.CaptureTransaction(class Sentry.Transaction) {Optimized},
-      module: Sentry
-    },
-    {
-      function: Sentry.TransactionTracer.Finish() {Optimized},
-      module: Sentry
-    },
-    {
-      function: Program.<Main>() {QuickJitted},
-      module: Sentry.Samples.Console.Customized
-    },
-    {
-      function: Sentry.SentryClient.CaptureTransaction(class Sentry.Transaction) {QuickJitted},
-      module: Sentry
     }
   ],
   samples: [
@@ -4626,136 +1678,6 @@
       stack_id: 0
     },
     {
-      elapsed_since_start_ns: 2331500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 2334100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 2336700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 2341800,
-      thread_id: 5,
-      stack_id: 3
-    },
-    {
-      elapsed_since_start_ns: 2361900,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 2377600,
-      thread_id: 0,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 4301800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 4307500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 4309000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 4314800,
-      thread_id: 5,
-      stack_id: 3
-    },
-    {
-      elapsed_since_start_ns: 4328600,
-      thread_id: 6,
-      stack_id: 6
-    },
-    {
-      elapsed_since_start_ns: 4331500,
-      thread_id: 0,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 6314000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 6317000,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 6318400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 6322400,
-      thread_id: 5,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 6335900,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 6342900,
-      thread_id: 8,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 6344300,
-      thread_id: 9,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 8427700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 8432400,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 8433900,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 8438500,
-      thread_id: 5,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 8453000,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 8457900,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 8462900,
-      thread_id: 9,
-      stack_id: 0
-    },
-    {
       elapsed_since_start_ns: 10531200,
       thread_id: 2,
       stack_id: 0
@@ -4773,7 +1695,7 @@
     {
       elapsed_since_start_ns: 10539200,
       thread_id: 5,
-      stack_id: 16
+      stack_id: 0
     },
     {
       elapsed_since_start_ns: 10561400,
@@ -4783,152 +1705,12 @@
     {
       elapsed_since_start_ns: 10565500,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 0
     },
     {
       elapsed_since_start_ns: 10567800,
       thread_id: 9,
       stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 12526700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 12530700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 12533500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 12537100,
-      thread_id: 5,
-      stack_id: 16
-    },
-    {
-      elapsed_since_start_ns: 12551500,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 12555300,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 12557700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 14507700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 14510400,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 14511700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 14513000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 14535000,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 14540400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 14543500,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 16488499,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 16491100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 16492400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 16495000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 16510800,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 16515100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 16518300,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 18542700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 18547000,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 18548300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 18549500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 18563100,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 18570200,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 18573500,
-      thread_id: 9,
-      stack_id: 21
     },
     {
       elapsed_since_start_ns: 20546400,
@@ -4958,152 +1740,12 @@
     {
       elapsed_since_start_ns: 20580900,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 20584100,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 22536300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 22538700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 22540200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 22547800,
-      thread_id: 5,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 22549000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 22554600,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 22557700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 24541500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 24544500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 24545800,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 24559600,
-      thread_id: 5,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 24561100,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 24565400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 24568700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 26566100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 26569000,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 26570600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 26578400,
-      thread_id: 5,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 26579700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 26584000,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 26587300,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 28540800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 28543800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 28545100,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 28546300,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 28547300,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 28552400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 28555700,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 30595000,
@@ -5133,152 +1775,12 @@
     {
       elapsed_since_start_ns: 30604800,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 30607600,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 32531399,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 32539200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 32541300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 32542499,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 32543599,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 32548000,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 32551900,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 34543800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 34547800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 34549500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 34550600,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 34552600,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 34557900,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 34561100,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 36543400,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 36546800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 36551000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 36552300,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 36553500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 36559200,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 36562700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 38547700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 38550100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 38551400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 38552500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 38553600,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 38559800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 38563000,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 40555300,
@@ -5308,152 +1810,12 @@
     {
       elapsed_since_start_ns: 40569400,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 40572800,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 42543900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 42547900,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 42549400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 42550700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 42551800,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 42556800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 42561000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 44566100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 44568700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 44570000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 44571200,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 44573200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 44578100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 44581500,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 46554100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 46556800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 46560400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 46561600,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 46562600,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 46567500,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 46571000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 48613700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 48617300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 48618800,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 48619900,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 48620900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 48627400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 48631000,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 50543900,
@@ -5483,152 +1845,12 @@
     {
       elapsed_since_start_ns: 50556400,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 50559500,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 52544000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 52549700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 52551300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 52552400,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 52553500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 52558800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 52564000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 54576000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 54579900,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 54581900,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 54583300,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 54586300,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 54593100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 54596800,
-      thread_id: 9,
-      stack_id: 18
-    },
-    {
-      elapsed_since_start_ns: 56553800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 56557100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 56559800,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 56561000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 56562100,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 56567200,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 56571700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 58537000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 58539500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 58540700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 58541900,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 58542900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 58549800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 58552500,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 60537200,
@@ -5658,152 +1880,12 @@
     {
       elapsed_since_start_ns: 60546500,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 60549100,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 62559800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 62563000,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 62564300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 62565500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 62566500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 62572000,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 62575500,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 64558899,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 64562600,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 64563999,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 64565100,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 64566400,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 64572800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 64576499,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 66544900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 66547900,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 66549600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 66550900,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 66551900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 66557199,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 66560700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 68545500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 68548200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 68549500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 68550600,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 68551900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 68556600,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 68559800,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 71059300,
@@ -5833,117 +1915,12 @@
     {
       elapsed_since_start_ns: 71070700,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 71074100,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 73054500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 73061200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 73062600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 73063800,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 73064800,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 73070100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 73073600,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 75038000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 75039700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 75040700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 75042000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 75043000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 75046400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 75049000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 77046100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 77048600,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 77050300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 77051400,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 77052500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 77057200,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 77060600,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 79033700,
@@ -5973,152 +1950,12 @@
     {
       elapsed_since_start_ns: 79043400,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 79046100,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 81029900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 81031500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 81032700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 81033700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 81034700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 81037900,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 81040200,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 83033500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 83035500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 83036800,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 83038000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 83039000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 83042800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 83045500,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 85033000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 85034500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 85035500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 85036700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 85037700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 85041000,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 85043400,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 87037800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 87040800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 87042000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 87043400,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 87044500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 87048400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 87052100,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 89089600,
@@ -6148,152 +1985,12 @@
     {
       elapsed_since_start_ns: 89100500,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 89103000,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 91117100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 91119100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 91121200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 91122500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 91123700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 91127400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 91130700,
-      thread_id: 9,
-      stack_id: 18
-    },
-    {
-      elapsed_since_start_ns: 93116800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 93118200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 93119200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 93120200,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 93121100,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 93125100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 93127300,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 95124200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 95125900,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 95126900,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 95129500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 95130500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 95134100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 95136600,
-      thread_id: 9,
-      stack_id: 18
-    },
-    {
-      elapsed_since_start_ns: 97118100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 97120300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 97121300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 97122300,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 97123200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 97127000,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 97129200,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 99119600,
@@ -6323,152 +2020,12 @@
     {
       elapsed_since_start_ns: 99131600,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 99134100,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 101118500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 101119900,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 101121100,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 101122100,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 101123000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 101126100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 101128500,
-      thread_id: 9,
-      stack_id: 18
-    },
-    {
-      elapsed_since_start_ns: 103117900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 103119300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 103120200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 103121200,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 103122300,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 103125300,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 103127500,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 105208100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 105211000,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 105212300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 105213500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 105215500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 105220400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 105223800,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 107134800,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 107136600,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 107138600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 107139700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 107140700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 107144200,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 107146800,
-      thread_id: 9,
-      stack_id: 18
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 109421400,
@@ -6498,152 +2055,12 @@
     {
       elapsed_since_start_ns: 109436700,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 109440100,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 111166300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 111168800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 111170100,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 111172700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 111173700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 111177800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 111180700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 113154400,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 113156700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 113157700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 113158700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 113159600,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 113162600,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 113165600,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 115155100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 115157100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 115158300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 115159500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 115161400,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 115165100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 115167600,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 117154200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 117155800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 117157600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 117158600,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 117159600,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 117162700,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 117165000,
-      thread_id: 9,
-      stack_id: 18
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 119179200,
@@ -6673,152 +2090,12 @@
     {
       elapsed_since_start_ns: 119189400,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 119192400,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 121281700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 121284300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 121285600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 121287000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 121288000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 121292800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 121296100,
-      thread_id: 9,
-      stack_id: 18
-    },
-    {
-      elapsed_since_start_ns: 123276900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 123280100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 123281400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 123282700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 123294300,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 123301400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 123305000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 125222500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 125224300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 125225400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 125226500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 125227800,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 125232600,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 125235300,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 127281300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 127283600,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 127284900,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 127286000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 127287000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 127291100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 127294100,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 129270900,
@@ -6848,157 +2125,12 @@
     {
       elapsed_since_start_ns: 129278600,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 129280900,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 131222199,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 131223600,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 131224500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 131229400,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 131230400,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 131233499,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 131235700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 133235199,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 133238200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 133239499,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 133240600,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 133241700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 133246700,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 133249900,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 135236400,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 135243100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 135244500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 135246100,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 135247200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 135252000,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 135255200,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 137247300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 137250700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 137252400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 137253700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 137254700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 137288600,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 137293200,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 137296500,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 139257100,
@@ -7033,172 +2165,12 @@
     {
       elapsed_since_start_ns: 139285100,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 139288600,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 141289900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 141293600,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 141295000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 141296200,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 141297200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 141317600,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 141322700,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 141326200,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 143254500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 143257400,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 143259000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 143260100,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 143261200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 143276300,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 143280100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 143285800,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 145250100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 145253100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 145254700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 145255900,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 145258500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 145275600,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 145280300,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 145283800,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 147233000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 147236200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 147237300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 147238400,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 147239400,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 147252200,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 147256500,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 147259100,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 149228100,
@@ -7233,152 +2205,12 @@
     {
       elapsed_since_start_ns: 149251800,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 149255300,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 151246600,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 151249500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 151250800,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 151252000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 151254000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 151259200,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 151262700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 153226500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 153228100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 153229900,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 153231100,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 153232100,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 153235500,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 153237800,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 155263200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 155266100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 155267200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 155268300,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 155269400,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 155276700,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 155279300,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 157230200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 157231700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 157232700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 157236000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 157237000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 157240300,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 157242700,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 159228000,
@@ -7408,172 +2240,12 @@
     {
       elapsed_since_start_ns: 159237500,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 159242200,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 161247500,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 161250400,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 161251900,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 161253100,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 161258300,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 161260600,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 161265100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 161268600,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 163269400,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 163273400,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 163274700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 163275900,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 163276900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 163294400,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 163301800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 163305000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 165256300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 165259100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 165260500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 165263800,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 165264900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 165279200,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 165283400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 165287700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 167247200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 167249800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 167251100,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 167252300,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 167254100,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 167263000,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 167267100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 167270500,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 169234400,
@@ -7608,157 +2280,12 @@
     {
       elapsed_since_start_ns: 169260300,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 169263100,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 171280600,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 171283100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 171284400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 171285900,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 171287000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 171304300,
-      thread_id: 11,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 171308100,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 171311000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 173354700,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 173357700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 173359100,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 173360400,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 173374900,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 173379900,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 173383400,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 175321400,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 175324100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 175325600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 175327000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 175337500,
-      thread_id: 6,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 175342000,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 175345100,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 177308300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 177310300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 177311400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 177312500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 177313500,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 177316800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 177319300,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 179314900,
@@ -7788,152 +2315,12 @@
     {
       elapsed_since_start_ns: 179325500,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 179328300,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 181305300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 181306900,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 181308200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 181309200,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 181310200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 181313600,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 181315900,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 183332200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 183334700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 183336200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 183337300,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 183338900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 183343900,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 183347500,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 185315900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 185318700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 185320400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 185322000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 185323200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 185327500,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 185330400,
-      thread_id: 9,
-      stack_id: 18
-    },
-    {
-      elapsed_since_start_ns: 187314300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 187317700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 187319200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 187320500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 187321800,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 187326900,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 187330500,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 189327200,
@@ -7963,152 +2350,12 @@
     {
       elapsed_since_start_ns: 189338500,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 189341600,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 191313300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 191315400,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 191316800,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 191318000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 191319000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 191322600,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 191325300,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 193309300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 193311500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 193312800,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 193314100,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 193315200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 193319300,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 193322000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 195304100,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 195306200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 195307500,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 195312500,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 195313700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 195317500,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 195320100,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 197301200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 197303000,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 197304000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 197305000,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 197306000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 197309400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 197311600,
-      thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 199304600,
@@ -8138,157 +2385,12 @@
     {
       elapsed_since_start_ns: 199313900,
       thread_id: 8,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 199316400,
       thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 201302900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 201304500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 201305700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 201306700,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 201307700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 201310800,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 201313400,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 203318300,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 203320200,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 203321300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 203322400,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 203323700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 203327700,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 203330400,
-      thread_id: 9,
-      stack_id: 18
-    },
-    {
-      elapsed_since_start_ns: 205305600,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 205307100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 205308200,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 205309200,
-      thread_id: 5,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 205310200,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 205313400,
-      thread_id: 8,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 205315700,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 207313200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 207315300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 207316300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 207320500,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 207321600,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 207323300,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 207326000,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 207327100,
-      thread_id: 12,
-      stack_id: 14
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 209304400,
@@ -8308,7 +2410,7 @@
     {
       elapsed_since_start_ns: 209309200,
       thread_id: 5,
-      stack_id: 13
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 209310300,
@@ -8323,157 +2425,12 @@
     {
       elapsed_since_start_ns: 209315000,
       thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 209316200,
       thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 211323800,
-      thread_id: 2,
       stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 211326800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 211329700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 211334100,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 211335300,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 211337100,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 211341500,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 211342700,
-      thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 213310900,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 213312400,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 213313400,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 213316100,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 213318000,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 213319600,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 213322200,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 213323300,
-      thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 215323200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 215327900,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 215329300,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 215333700,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 215334900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 215337400,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 215343100,
-      thread_id: 9,
-      stack_id: 21
-    },
-    {
-      elapsed_since_start_ns: 215344400,
-      thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 217311200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 217313500,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 217316000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 217319800,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 217320900,
-      thread_id: 6,
-      stack_id: 1
     },
     {
       elapsed_since_start_ns: 217322600,
@@ -8483,172 +2440,12 @@
     {
       elapsed_since_start_ns: 217325600,
       thread_id: 9,
-      stack_id: 21
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 217327600,
       thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 219271000,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 219273700,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 219275100,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 219279200,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 219280600,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 219282400,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 219285900,
-      thread_id: 9,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 219287100,
-      thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 221262600,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 221265300,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 221266600,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 221270500,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 221271900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 221273700,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 221279700,
-      thread_id: 9,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 221281000,
-      thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 223259200,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 223260800,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 223261700,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 223264800,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 223265900,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 223267500,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 223271600,
-      thread_id: 9,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 223272900,
-      thread_id: 12,
-      stack_id: 14
-    },
-    {
-      elapsed_since_start_ns: 225258600,
-      thread_id: 2,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 225260100,
-      thread_id: 3,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 225261000,
-      thread_id: 4,
-      stack_id: 2
-    },
-    {
-      elapsed_since_start_ns: 225263600,
-      thread_id: 5,
-      stack_id: 13
-    },
-    {
-      elapsed_since_start_ns: 225264700,
-      thread_id: 6,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 225266500,
-      thread_id: 8,
-      stack_id: 1
-    },
-    {
-      elapsed_since_start_ns: 225270100,
-      thread_id: 9,
-      stack_id: 0
-    },
-    {
-      elapsed_since_start_ns: 225271200,
-      thread_id: 12,
-      stack_id: 14
+      stack_id: 35
     }
   ]
 }
