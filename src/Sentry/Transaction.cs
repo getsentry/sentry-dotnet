@@ -192,6 +192,8 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
+    internal ITransactionProfiler? TransactionProfiler { get; set; }
+
     internal ProfileInfo? ProfileInfo { get; set; }
 
     // This constructor is used for deserialization purposes.
@@ -266,6 +268,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         {
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+            TransactionProfiler = transactionTracer.TransactionProfiler;
             _measurements = transactionTracer.Measurements.ToDictionary();
         }
     }

@@ -98,8 +98,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// <inheritdoc />
     public void CaptureTransaction(Transaction transaction)
     {
-        transaction.ProfileInfo = _options.TransactionProfiler?.OnTransactionFinish(transaction);
-
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
             _options.LogWarning("Transaction dropped due to empty id.");
@@ -142,7 +140,21 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+        // If there's a profiler attached, we will capture the transaction once the profiler finished collecting.
+        if (processedTransaction.TransactionProfiler is { } profiler)
+        {
+            // TODO keep tasks around so we try to complete them while closing the client?
+            profiler.Collect(processedTransaction).ContinueWith(task =>
+            {
+                processedTransaction.ProfileInfo = task.Result;
+                CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+            });
+        }
+        else
+        {
+            // In case no profiling is happening - capture immediately.
+            CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+        }
     }
 
     private Transaction? BeforeSendTransaction(Transaction transaction)

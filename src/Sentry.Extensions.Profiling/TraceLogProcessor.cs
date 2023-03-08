@@ -87,6 +87,8 @@ internal class TraceLogProcessor
 
     private ActivityComputer _activityComputer;                        // Used to compute stacks for Tasks
 
+    public ulong MaxTimestampNs { get; set; } = UInt64.MaxValue;
+
     public TraceLogProcessor(TraceLog traceLog)
     {
         _traceLog = traceLog;
@@ -358,6 +360,13 @@ internal class TraceLogProcessor
             return;
         }
 
+        // Trim samples coming after the profiling has been stopped (i.e. after the Stop() IPC request has been sent).
+        var timestampNs = (ulong)(timestampMs * 1_000_000);
+        if (timestampMs > MaxTimestampNs)
+        {
+            return;
+        }
+
         var stackIndex = AddStackTrace(callstackIndex);
         if (stackIndex < 0)
         {
@@ -372,7 +381,7 @@ internal class TraceLogProcessor
 
         _profile.Samples.Add(new()
         {
-            Timestamp = (ulong)(timestampMs * 1_000_000),
+            Timestamp = timestampNs,
             StackId = stackIndex,
             ThreadId = threadIndex
         });

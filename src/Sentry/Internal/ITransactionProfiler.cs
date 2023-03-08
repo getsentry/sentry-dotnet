@@ -2,9 +2,29 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
+/// <summary>
+/// Factory to create/attach profilers when a transaction starts.
+/// </summary>
+internal interface ITransactionProfilerFactory
+{
+    /// <summary>
+    /// Called during transaction start to start a new profiler, if applicable.
+    /// </summary>
+    ITransactionProfiler? OnTransactionStart(ITransaction tracer, DateTimeOffset now, CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// A profiler collecting ProfileInfo for a given transaction.
+/// </summary>
 internal interface ITransactionProfiler
 {
-    void OnTransactionStart(ITransaction transaction);
+    /// <summary>
+    /// Called when the transaction ends - this should stop profile samples collection.
+    /// </summary>
+    void OnTransactionFinish(DateTimeOffset now);
 
-    ProfileInfo? OnTransactionFinish(Transaction transaction);
+    /// <summary>
+    /// Process and collect the profile.
+    /// </summary>
+    Task<ProfileInfo?> Collect(Transaction transaction);
 }

@@ -13,13 +13,20 @@
     ]
   },
   device: {
-    type: device
+    architecture: x86_64
   },
   os: {
-    type: os
+    name: Windows,
+    version: 10.0.22621
   },
   runtime: {
     type: runtime
+  },
+  transaction: {
+    active_thread_id: 0,
+    id: Guid_2,
+    name: tx name,
+    trace_id: Guid_3
   },
   profile: {
     thread_metadata: {
@@ -70,11 +77,5 @@
         stack_id: 1
       }
     ]
-  },
-  transaction: {
-    active_thread_id: 0,
-    id: Guid_2,
-    name: tx name,
-    trace_id: Guid_3
   }
 }

@@ -10,12 +10,12 @@ internal class SampleProfilerSession
     private EventPipeSession _session;
     private MemoryStream _stream = new MemoryStream();
     private Task _copyTask;
-    public readonly DateTimeOffset StartTimestamp;
-    public readonly object? StartedBy;
+    private CancellationToken _cancellationToken;
+    private CancellationTokenRegistration _cancellationTokenStopRegistration;
 
-    public SampleProfilerSession(object startedBy)
+    public SampleProfilerSession(CancellationToken cancellationToken)
     {
-        StartedBy = startedBy;
+        _cancellationToken = cancellationToken;
         _client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
 
         var providers = new[]
@@ -26,15 +26,16 @@ internal class SampleProfilerSession
 
         // The size of the runtime's buffer for collecting events in MB, same as the current default in StartEventPipeSession().
         var circularBufferMB = 256;
-        StartTimestamp = DateTimeOffset.UtcNow;
         _session = _client.StartEventPipeSession(providers, true, circularBufferMB);
-        _copyTask = _session.EventStream.CopyToAsync(_stream);
+        _copyTask = _session.EventStream.CopyToAsync(_stream, _cancellationToken);
+        _cancellationTokenStopRegistration = _cancellationToken.Register(() => _session.Stop(), false);
     }
 
-    public MemoryStream Finish()
+    public async Task<MemoryStream> Finish()
     {
-        _session.Stop();
-        _copyTask.Wait(10000); // TODO handle timeout
+        _cancellationTokenStopRegistration.Unregister();
+        await Task.WhenAny(_session.StopAsync(CancellationToken.None), Task.Delay(10_000)).ConfigureAwait(false);
+        await _copyTask.ConfigureAwait(false);
         _stream.Position = 0;
         return _stream;
     }

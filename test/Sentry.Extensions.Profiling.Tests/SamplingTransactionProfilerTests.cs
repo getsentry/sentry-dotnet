@@ -11,24 +11,25 @@ public class SamplingTransactionProfilerTests
     }
 
     [Fact]
-    public void TransactionProfilerWorks()
+    public async void TransactionProfilerWorks()
     {
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
 
-        var sut = new SamplingTransactionProfiler();
-        var watch = Stopwatch.StartNew();
-        sut.OnTransactionStart(transactionTracer);
+        var factory = new SamplingTransactionProfilerFactory();
+        var clock = SentryStopwatch.StartNew();
+        var sut = factory.OnTransactionStart(transactionTracer, clock.CurrentDateTimeOffset, CancellationToken.None);
+        transactionTracer.TransactionProfiler = sut;
         for (int i = 0; i < 10; i++)
         {
             _testOutputLogger.LogDebug("sleeping...");
             Thread.Sleep(20);
         }
-        var transaction = new Transaction(transactionTracer);
-        var profileInfo = sut.OnTransactionFinish(transaction);
-        watch.Stop();
-        var elapsedNanoseconds = (ulong)watch.ElapsedMilliseconds * 1_000_000;
+        sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
+        var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
+        var transaction = new Transaction(transactionTracer);
+        var profileInfo = await sut.Collect(transaction);
         Assert.NotNull(profileInfo);
         var profile = profileInfo.Profile;
         profile.Samples.Should().NotBeEmpty();
