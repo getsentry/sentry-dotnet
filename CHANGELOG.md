@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.2.0 to v8.3.0 ([#2220](https://github.com/getsentry/sentry-dotnet/pull/2220))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#830)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.2.0...8.3.0)
+
 ## 3.29.0
 
 **Notice:** The `<SentryUploadSymbols>` MSBuild property previously defaulted to `true` for projects compiled in `Release` configuration.

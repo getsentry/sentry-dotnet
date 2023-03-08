@@ -738,6 +738,10 @@ interface SentryOptions
     [Export ("enableFileIOTracing")]
     bool EnableFileIOTracing { get; set; }
 
+    // @property (nonatomic) BOOL enableTracing;
+    [Export ("enableTracing")]
+    bool EnableTracing { get; set; }
+
     // @property (nonatomic, strong) NSNumber * _Nullable tracesSampleRate;
     [NullAllowed, Export ("tracesSampleRate", ArgumentSemantic.Strong)]
     NSNumber TracesSampleRate { get; set; }
