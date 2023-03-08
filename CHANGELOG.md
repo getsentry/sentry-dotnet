@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix debug files not uploading for `packages.config` nuget ([#2224](https://github.com/getsentry/sentry-dotnet/pull/2224))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.2.0 to v8.3.0 ([#2220](https://github.com/getsentry/sentry-dotnet/pull/2220))
