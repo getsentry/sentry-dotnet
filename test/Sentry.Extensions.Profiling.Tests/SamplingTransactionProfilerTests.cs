@@ -10,8 +10,33 @@ public class SamplingTransactionProfilerTests
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }
 
+    private void ValidateProfile(SampleProfile profile, ulong maxTimestampNs)
+    {
+        profile.Samples.Should().NotBeEmpty();
+        profile.Frames.Should().NotBeEmpty();
+        profile.Stacks.Should().NotBeEmpty();
+
+        var threadIds = profile.Threads.Keys();
+
+        foreach (var sample in profile.Samples)
+        {
+            sample.Timestamp.Should().BeInRange(0, maxTimestampNs);
+            sample.StackId.Should().BeInRange(0, profile.Stacks.Count);
+            sample.ThreadId.Should().BeOneOf(threadIds);
+        }
+
+        profile.Threads.Foreach((i, thread) =>
+        {
+            thread.Name.Should().NotBeNullOrEmpty();
+        });
+
+        // We can't check that all Frame names are filled because there may be native frames which we currently don't filter out.
+        // Let's just check there are some frames with names...
+        profile.Frames.Where((frame) => frame.Function is not null).Should().NotBeEmpty();
+    }
+
     [Fact]
-    public async void TransactionProfilerWorks()
+    public async void Profiler_StartedNormally_Works()
     {
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
@@ -31,27 +56,28 @@ public class SamplingTransactionProfilerTests
         var transaction = new Transaction(transactionTracer);
         var profileInfo = await sut.Collect(transaction);
         Assert.NotNull(profileInfo);
-        var profile = profileInfo.Profile;
-        profile.Samples.Should().NotBeEmpty();
-        profile.Frames.Should().NotBeEmpty();
-        profile.Stacks.Should().NotBeEmpty();
+        ValidateProfile(profileInfo.Profile, elapsedNanoseconds);
+    }
 
-        var threadIds = profile.Threads.Keys();
+    [Fact]
+    public async void Profiler_AfterTimeout_Stops()
+    {
+        var hub = Substitute.For<IHub>();
 
-        foreach (var sample in profile.Samples)
+        var clock = SentryStopwatch.StartNew();
+        var limitMs = 50;
+        var sut = new SamplingTransactionProfiler(clock.CurrentDateTimeOffset, CancellationToken.None, limitMs);
+        for (int i = 0; i < 10; i++)
         {
-            sample.Timestamp.Should().BeInRange(0, elapsedNanoseconds);
-            sample.StackId.Should().BeInRange(0, profile.Stacks.Count);
-            sample.ThreadId.Should().BeOneOf(threadIds);
+            _testOutputLogger.LogDebug("sleeping...");
+            Thread.Sleep(20);
         }
+        clock.Elapsed.TotalMilliseconds.Should().BeGreaterThan(limitMs * 4);
+        sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
 
-        profile.Threads.Foreach((i, thread) =>
-        {
-            thread.Name.Should().NotBeNullOrEmpty();
-        });
+        var profileInfo = await sut.Collect(new Transaction("foo", "bar"));
 
-        // We can't check that all Frame names are filled because there may be native frames which we currently don't filter out.
-        // Let's just check there are some frames with names...
-        profile.Frames.Where((frame) => frame.Function is not null).Should().NotBeEmpty();
+        Assert.NotNull(profileInfo);
+        ValidateProfile(profileInfo.Profile, (ulong)(limitMs * 1_000_000));
     }
 }

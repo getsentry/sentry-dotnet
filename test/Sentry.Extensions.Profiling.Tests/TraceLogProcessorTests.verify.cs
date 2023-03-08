@@ -37,7 +37,7 @@ public class TraceLogProcessorTests
         var etlxFilePath = Path.Combine(_resourcesPath, "profile-with-task.etlx");
         using var eventLog = new TraceLog(etlxFilePath);
         var processor = new TraceLogProcessor(eventLog);
-        var profile = processor.Process();
+        var profile = processor.Process(CancellationToken.None);
 
         var json = profile.ToJsonString(_testOutputLogger);
         return VerifyJson(json);

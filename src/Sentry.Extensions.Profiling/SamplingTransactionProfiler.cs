@@ -1,10 +1,6 @@
-using System.Diagnostics.Tracing;
-using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
-using Microsoft.Diagnostics.Tracing.Parsers;
-using Sentry;
-using Sentry.Extensions.Profiling;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -18,13 +14,16 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     const int TRUE = 1;
     const int FALSE = 0;
 
+    // Stop profiling after the given number of milliseconds.
+    const int TIME_LIMIT_MS = 30_000;
+
     /// <inheritdoc />
     public ITransactionProfiler? OnTransactionStart(ITransaction _, DateTimeOffset now, CancellationToken cancellationToken)
     {
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
-            var profiler = new SamplingTransactionProfiler(now, cancellationToken);
+            var profiler = new SamplingTransactionProfiler(now, cancellationToken, TIME_LIMIT_MS);
             profiler.OnFinish = () => _inProgress = FALSE;
             return profiler;
         }
@@ -41,18 +40,33 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     private Task<MemoryStream>? _data;
     public Action? OnFinish;
 
-    public SamplingTransactionProfiler(DateTimeOffset now, CancellationToken cancellationToken)
+    public SamplingTransactionProfiler(DateTimeOffset now, CancellationToken cancellationToken, int timeoutMs)
     {
         _startTime = now;
         _session = new(cancellationToken);
         _cancellationToken = cancellationToken;
+        Task.Delay(timeoutMs, cancellationToken).ContinueWith(_ => Stop(now + TimeSpan.FromMilliseconds(timeoutMs)));
+    }
+
+    private void Stop(DateTimeOffset now)
+    {
+        if (_endTime is null)
+        {
+            lock (_session)
+            {
+                if (_endTime is null)
+                {
+                    _endTime = now;
+                    _data = _session.Finish();
+                }
+            }
+        }
     }
 
     /// <inheritdoc />
     public void OnTransactionFinish(DateTimeOffset now)
     {
-        _endTime = now;
-        _data = _session.Finish();
+        Stop(now);
         OnFinish?.Invoke();
     }
 
@@ -103,13 +117,11 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             using var eventLog = new TraceLog(etlxFilePath);
             var processor = new TraceLogProcessor(eventLog);
             processor.MaxTimestampNs = (ulong)((_endTime.Value - _startTime).TotalMilliseconds * 1_000_000);
-
+            var profile = processor.Process(_cancellationToken);
             if (_cancellationToken.IsCancellationRequested)
             {
                 return null;
             }
-
-            var profile = processor.Process();
 
             return new()
             {

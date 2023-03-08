@@ -223,10 +223,11 @@ internal class TraceLogProcessor
         sampleEventParser.ThreadSample += OnSampledProfile;
     }
 
-    public SampleProfile Process()
+    public SampleProfile Process(CancellationToken cancellationToken)
     {
-
+        var registration = cancellationToken.Register(_eventSource.StopProcessing);
         _eventSource.Process();
+        registration.Unregister();
         return _profile;
     }
 
@@ -362,8 +363,11 @@ internal class TraceLogProcessor
 
         // Trim samples coming after the profiling has been stopped (i.e. after the Stop() IPC request has been sent).
         var timestampNs = (ulong)(timestampMs * 1_000_000);
-        if (timestampMs > MaxTimestampNs)
+        if (timestampNs > MaxTimestampNs)
         {
+            // We can completely stop processing after the first sample that is after the timeout.
+            // Samples are ordered (tested manually...) so no need to go through the rest.
+            _eventSource.StopProcessing();
             return;
         }
 
