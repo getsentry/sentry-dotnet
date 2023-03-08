@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Get debug image for Full PDB format on Windows ([#2222](https://github.com/getsentry/sentry-dotnet/pull/2222))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.2.0 to v8.3.0 ([#2220](https://github.com/getsentry/sentry-dotnet/pull/2220))
