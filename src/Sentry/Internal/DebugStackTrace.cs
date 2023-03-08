@@ -418,18 +418,33 @@ internal class DebugStackTrace : SentryStackTrace
                 var checksumHex = checksum.Checksum.AsSpan().ToHexString();
                 debugChecksum = $"{checksum.AlgorithmName}:{checksumHex}";
             }
-            if (!entry.IsPortableCodeView)
-            {
-                continue;
-            }
-            var codeView = peReader.ReadCodeViewDebugDirectoryData(entry);
 
-            // Together 16B of the Guid concatenated with 4B of the TimeDateStamp field of the entry form a PDB ID that
-            // should be used to match the PE/COFF image with the associated PDB (instead of Guid and Age).
-            // Matching PDB ID is stored in the #Pdb stream of the .pdb file.
-            // See https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
-            debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
-            debugFile = codeView.Path;
+            if (entry.Type == DebugDirectoryEntryType.CodeView)
+            {
+                var codeView = peReader.ReadCodeViewDebugDirectoryData(entry);
+                debugFile = codeView.Path;
+
+                // Specification:
+                // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
+                //
+                // See also:
+                // https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype
+                //
+                // Note: Matching PDB ID is stored in the #Pdb stream of the .pdb file.
+
+                if (entry.IsPortableCodeView)
+                {
+                    // Portable PDB Format
+                    // Version Major=any, Minor=0x504d
+                    debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
+                }
+                else
+                {
+                    // Full PDB Format (Windows only)
+                    // Version Major=0, Minor=0
+                    debugId = $"{codeView.Guid}-{codeView.Age}";
+                }
+            }
         }
 
         // well, we are out of luck :-(
