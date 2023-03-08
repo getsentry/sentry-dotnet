@@ -144,11 +144,14 @@ public class SentryClient : ISentryClient, IDisposable
         if (processedTransaction.TransactionProfiler is { } profiler)
         {
             // TODO keep tasks around so we try to complete them while closing the client?
+
             profiler.Collect(processedTransaction).ContinueWith(task =>
             {
                 processedTransaction.ProfileInfo = task.Result;
                 CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
-            });
+            })
+            .Wait() // XXX synchronous for now to actually capture anything
+            ;
         }
         else
         {
@@ -324,12 +327,12 @@ public class SentryClient : ISentryClient, IDisposable
         {
             _options.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId(_options.DiagnosticLogger));
             // XXX
-            using (FileStream file = new FileStream($"c:/dev/dotnet/temp/{envelope.TryGetEventId()}-envelope.txt", FileMode.OpenOrCreate, System.IO.FileAccess.Write))
-            {
-                file.Position = 0;
-                envelope.Serialize(file, _options.DiagnosticLogger);
-                file.Flush();
-            }
+            // using (FileStream file = new FileStream($"c:/dev/dotnet/temp/{envelope.TryGetEventId()}-envelope.txt", FileMode.OpenOrCreate, System.IO.FileAccess.Write))
+            // {
+            //     file.Position = 0;
+            //     envelope.Serialize(file, _options.DiagnosticLogger);
+            //     file.Flush();
+            // }
             return true;
         }
 

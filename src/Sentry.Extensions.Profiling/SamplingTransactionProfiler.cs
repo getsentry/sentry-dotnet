@@ -145,8 +145,8 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             if (File.Exists(etlFilePath))
             {
                 // XXX
-                // File.Delete(etlFilePath);
-                File.Move(etlFilePath, $"c:/dev/dotnet/temp/{transaction.EventId}.nettrace");
+                // File.Move(etlFilePath, $"c:/dev/dotnet/temp/{transaction.EventId}.nettrace");
+                File.Delete(etlFilePath);
             }
         }
     }
