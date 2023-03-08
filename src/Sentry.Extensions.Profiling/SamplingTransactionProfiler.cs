@@ -1,6 +1,5 @@
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
-using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol;
 

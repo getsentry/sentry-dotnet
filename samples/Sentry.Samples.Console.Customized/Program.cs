@@ -213,6 +213,7 @@ internal static class Program
                 new Exception("Error outside of the admin section: Goes to the default DSN"));
 
             tx.Finish();
+            Thread.Sleep(2000); // xxx waiting manually at the moment so that the profile is actually sent
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 

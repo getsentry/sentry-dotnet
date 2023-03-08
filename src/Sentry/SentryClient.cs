@@ -149,9 +149,7 @@ public class SentryClient : ISentryClient, IDisposable
             {
                 processedTransaction.ProfileInfo = task.Result;
                 CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
-            })
-            .Wait() // XXX synchronous for now to actually capture anything
-            ;
+            });
         }
         else
         {
