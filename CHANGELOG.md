@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Get debug image for Full PDB format on Windows ([#2222](https://github.com/getsentry/sentry-dotnet/pull/2222))
 - Fix debug files not uploading for `packages.config` nuget ([#2224](https://github.com/getsentry/sentry-dotnet/pull/2224))
 
 ### Dependencies
