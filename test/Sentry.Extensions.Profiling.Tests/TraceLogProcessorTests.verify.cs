@@ -32,15 +32,33 @@ public class TraceLogProcessorTests
     //     var json = profile.ToJsonString(_testOutputLogger);
     // }
 
-    [Fact]
-    public Task ProfileWithTask()
+    private SampleProfile GetProfile()
     {
         var etlxFilePath = Path.Combine(_resourcesPath, "profile-with-task.etlx");
         using var eventLog = new TraceLog(etlxFilePath);
         var processor = new TraceLogProcessor(eventLog);
-        var profile = processor.Process(CancellationToken.None);
+        return processor.Process(CancellationToken.None);
+    }
 
+    [Fact]
+    public Task ProfileWithTask()
+    {
+        var profile = GetProfile();
         var json = profile.ToJsonString(_testOutputLogger);
+        return VerifyJson(json);
+    }
+
+    [Fact]
+    public Task ProfileInfoWithTask()
+    {
+        var transaction = new Transaction("name", "op");
+        transaction.Contexts.Device.Architecture = "arch";
+        transaction.Contexts.Device.Model = "device model";
+        transaction.Contexts.Device.Manufacturer = "device make";
+        transaction.Contexts.OperatingSystem.RawDescription = "Microsoft Windows 6.3.9600";
+        var profile = GetProfile();
+        var profileInfo = SamplingTransactionProfiler.CreateProfileInfo(transaction, DateTimeOffset.UtcNow, profile);
+        var json = profileInfo.ToJsonString(_testOutputLogger);
         return VerifyJson(json);
     }
 }

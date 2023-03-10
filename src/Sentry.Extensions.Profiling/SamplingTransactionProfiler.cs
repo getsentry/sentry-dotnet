@@ -110,18 +110,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 return null;
             }
 
-            return new()
-            {
-                Contexts = transaction.Contexts,
-                Environment = transaction.Environment,
-                Transaction = transaction,
-                // TODO FIXME - see https://github.com/getsentry/relay/pull/1902
-                // Platform = transaction.Platform,
-                Platform = "dotnet",
-                Release = transaction.Release,
-                StartTimestamp = _startTime,
-                Profile = profile
-            };
+            return CreateProfileInfo(transaction, _startTime, profile);
         }
         finally
         {
@@ -131,6 +120,22 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 File.Delete(traceLog.FilePath);
             }
         }
+    }
+
+    internal static ProfileInfo CreateProfileInfo(Transaction transaction, DateTimeOffset startTime, SampleProfile profile)
+    {
+        return new()
+        {
+            Contexts = transaction.Contexts,
+            Environment = transaction.Environment,
+            Transaction = transaction,
+            // TODO FIXME - see https://github.com/getsentry/relay/pull/1902
+            // Platform = transaction.Platform,
+            Platform = "dotnet",
+            Release = transaction.Release,
+            StartTimestamp = startTime,
+            Profile = profile
+        };
     }
 
     // We need the TraceLog for all the stack processing it does.

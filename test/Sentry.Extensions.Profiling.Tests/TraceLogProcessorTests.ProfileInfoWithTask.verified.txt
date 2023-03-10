@@ -1,0 +1,2476 @@
+﻿{
+  version: 1,
+  event_id: Guid_1,
+  timestamp: DateTimeOffset_1,
+  platform: dotnet,
+  debug_meta: {},
+  device: {
+    architecture: arch,
+    manufacturer: device make,
+    model: device model
+  },
+  os: {
+    name: Windows,
+    version: 6.3.9600
+  },
+  runtime: {
+    type: runtime
+  },
+  transaction: {
+    active_thread_id: 0,
+    id: Guid_2,
+    name: name,
+    trace_id: Guid_3
+  },
+  profile: {
+    thread_metadata: {
+      2: {
+        name: Thread 2
+      },
+      3: {
+        name: Thread 3
+      },
+      4: {
+        name: Thread 4
+      },
+      5: {
+        name: Thread 5
+      },
+      6: {
+        name: Thread 6
+      },
+      8: {
+        name: Thread 8
+      },
+      9: {
+        name: Thread 9
+      },
+      11: {
+        name: Thread 11
+      },
+      12: {
+        name: Thread 12
+      }
+    },
+    stacks: [
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      [
+        12,
+        13,
+        14,
+        11
+      ],
+      [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        11
+      ],
+      [
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        58,
+        68,
+        69,
+        70,
+        71,
+        63,
+        64,
+        72,
+        73,
+        74,
+        34,
+        11
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        75
+      ],
+      [
+        76,
+        77,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        11
+      ],
+      [
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        58,
+        68,
+        69,
+        70,
+        71,
+        63,
+        64,
+        72,
+        73,
+        74,
+        34,
+        11
+      ],
+      [
+        15,
+        16,
+        94,
+        95,
+        96,
+        30,
+        97,
+        98,
+        99,
+        33,
+        34,
+        11
+      ],
+      [
+        76,
+        100,
+        101,
+        96,
+        30,
+        97,
+        98,
+        99,
+        33,
+        34,
+        11
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        102
+      ],
+      [
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        96,
+        30,
+        97,
+        98,
+        99,
+        33,
+        34,
+        11
+      ],
+      [
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        132,
+        142,
+        92,
+        93,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        58,
+        68,
+        69,
+        70,
+        71,
+        63,
+        64,
+        72,
+        73,
+        74,
+        34,
+        11
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        143
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        144
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        145
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        146
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        147
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        148
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        149
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        150
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        151
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        152
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        153
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        154
+      ],
+      [
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        58,
+        170,
+        171,
+        61,
+        62,
+        63,
+        172,
+        173,
+        174,
+        175,
+        58,
+        176,
+        177,
+        61,
+        62,
+        63,
+        178,
+        179,
+        180,
+        181,
+        182,
+        58,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        58,
+        190,
+        191,
+        185,
+        192,
+        193,
+        194,
+        195,
+        196,
+        58,
+        197,
+        198,
+        199,
+        200
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        201
+      ],
+      [
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        58,
+        170,
+        171,
+        61,
+        62,
+        63,
+        172,
+        173,
+        174,
+        175,
+        58,
+        176,
+        177,
+        61,
+        62,
+        63,
+        178,
+        179,
+        180,
+        181,
+        182,
+        58,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        58,
+        190,
+        191,
+        185,
+        192,
+        193,
+        194,
+        195,
+        196,
+        58,
+        197,
+        198,
+        199,
+        200
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        209
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        210
+      ],
+      [
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        58,
+        220,
+        221,
+        61,
+        62,
+        63,
+        222,
+        223,
+        224,
+        225,
+        226,
+        58,
+        227,
+        228,
+        61,
+        62,
+        63,
+        229,
+        230,
+        231,
+        232,
+        233,
+        58,
+        234,
+        235,
+        185,
+        186,
+        187,
+        195,
+        236,
+        199,
+        200
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        237
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        238
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        239
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        240
+      ],
+      [
+        7,
+        8,
+        9,
+        241,
+        11
+      ]
+    ],
+    frames: [
+      {
+        function: System.Threading.Monitor.Wait(class System.Object,int32),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.ManualResetEventSlim.Wait(int32,value class System.Threading.CancellationToken),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.SpinThenBlockingWait(int32,value class System.Threading.CancellationToken),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.InternalWaitCore(int32,value class System.Threading.CancellationToken),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(class System.Threading.Tasks.Task),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.TaskAwaiter.GetResult(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Threading.LowLevelLifoSemaphore.WaitForSignal(int32),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.LowLevelLifoSemaphore.Wait(int32,bool),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Thread.StartCallback(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.WaitHandle.WaitOneNoCheck(int32),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.WaitHandle.WaitOne(int32),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.PortableThreadPool+GateThread.GateThreadStart(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.IO.Pipes.PipeStream.ReadCore(value class System.Span`1<unsigned int8>),
+        module: System.IO.Pipes.il
+      },
+      {
+        function: System.IO.Pipes.PipeStream.Read(unsigned int8[],int32,int32),
+        module: System.IO.Pipes.il
+      },
+      {
+        function: System.IO.BinaryReader.ReadBytes(int32),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Microsoft.Diagnostics.NETCore.Client.IpcHeader.Parse(class System.IO.BinaryReader) {QuickJitted},
+        module: Microsoft.Diagnostics.NETCore.Client
+      },
+      {
+        function: Microsoft.Diagnostics.NETCore.Client.IpcMessage.Parse(class System.IO.Stream) {QuickJitted},
+        module: Microsoft.Diagnostics.NETCore.Client
+      },
+      {
+        function: Microsoft.Diagnostics.NETCore.Client.IpcClient.Read(class System.IO.Stream) {QuickJitted},
+        module: Microsoft.Diagnostics.NETCore.Client
+      },
+      {
+        function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageGetContinuation(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage) {QuickJitted},
+        module: Microsoft.Diagnostics.NETCore.Client
+      },
+      {
+        function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession.Start(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32) {QuickJitted},
+        module: Microsoft.Diagnostics.NETCore.Client
+      },
+      {
+        function: Microsoft.Diagnostics.NETCore.Client.DiagnosticsClient.StartEventPipeSession(class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32) {QuickJitted},
+        module: Microsoft.Diagnostics.NETCore.Client
+      },
+      {
+        function: ProfilerSession..ctor(class System.Object) {QuickJitted},
+        module: Sentry.Extensions.Profiling
+      },
+      {
+        function: SamplingTransactionProfiler.OnTransactionStart(class Sentry.ITransaction) {QuickJitted},
+        module: Sentry.Extensions.Profiling
+      },
+      {
+        function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext) {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>) {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: Program+<Main>d__2.MoveNext() {Optimized},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(class System.Threading.Thread,class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecuteFromThreadPool(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler+<SendAsync>d__3.MoveNext() {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: Sentry.Internal.Http.RetryAfterHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: Sentry.Internal.Http.RetryAfterHandler+<SendAsync>d__8.MoveNext() {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Sentry.Internal.Http.RetryAfterHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: System.Net.Http.HttpMessageInvoker.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpClient+<<SendAsync>g__Core|83_0>d.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(class System.Net.Http.HttpRequestMessage,value class System.Net.Http.HttpCompletionOption,class System.Threading.CancellationTokenSource,bool,class System.Threading.CancellationTokenSource,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpClient.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Net.Http.HttpCompletionOption,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpClient.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: Sentry.Internal.Http.HttpTransport+<SendEnvelopeAsync>d__3.MoveNext() {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Sentry.Internal.Http.HttpTransport.SendEnvelopeAsync(class Sentry.Protocol.Envelopes.Envelope,value class System.Threading.CancellationToken) {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20.MoveNext() {Optimized},
+        module: Sentry
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.ExecutionContext.RunInternal(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(class System.Runtime.CompilerServices.IAsyncStateMachineBox,bool),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.RunContinuations(class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.FinishContinuations(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.Boolean].TrySetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Boolean].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31.MoveNext(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(class System.Action,bool),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.RunContinuations(class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task+CancellationPromise`1[System.Boolean].System.Threading.Tasks.ITaskCompletionAction.Invoke(class System.Threading.Tasks.Task),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.CompletionActionInvoker.System.Threading.IThreadPoolWorkItem.Execute(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.FindPrimeNumber(int32) {Optimized},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program+<Main>d__2.MoveNext() {Optimized},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Net.Http.WinInetProxyHelper..ctor(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpWindowsProxy.TryCreate(class System.Net.IWebProxy&),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.SystemProxyInfo.ConstructSystemProxy(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Lazy`1[System.__Canon].ViaFactory(value class System.Threading.LazyThreadSafetyMode),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Lazy`1[System.__Canon].ExecutionAndPublication(class System.LazyHelper,bool),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Lazy`1[System.__Canon].CreateValue(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Lazy`1[System.__Canon].get_Value(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpClient+<>c.<get_DefaultProxy>b__15_0(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Threading.LazyInitializer.EnsureInitializedCore(!!0&,class System.Func`1<!!0>),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.LazyInitializer.EnsureInitialized(!!0&,class System.Func`1<!!0>),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpClient.get_DefaultProxy(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPoolManager..ctor(class System.Net.Http.HttpConnectionSettings),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.SocketsHttpHandler.SetupHandlerChain(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+        module: Sentry
+      },
+      {
+        function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.Int32].InnerInvoke(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.ExecuteEntryUnsafe(class System.Threading.Thread),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task.ExecuteFromThreadPool(class System.Threading.Thread),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Program+<>c.<Main>b__2_9() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.Int64].InnerInvoke(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(class System.String,int32,class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool.ConnectAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<AddHttp11ConnectionAsync>d__74.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool.AddHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<>c__DisplayClass75_0.<CheckForHttp11ConnectionInjection>b__0(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.__Canon].InnerInvoke(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool.GetHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPoolManager.SendAsyncCore(class System.Net.Http.HttpRequestMessage,class System.Uri,bool,bool,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPoolManager.SendAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpMessageHandlerStage.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.DiagnosticsHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.RedirectHandler+<SendAsync>d__4.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.RedirectHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.DecompressionHandler+<SendAsync>d__16.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.DecompressionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Net.Security.SecureChannel.AcquireClientCredentials(unsigned int8[]&),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SecureChannel.NextMessage(value class System.ReadOnlySpan`1<unsigned int8>),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Security.SslStream.ForceAuthenticationAsync(!!0,bool,unsigned int8[],bool),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SslStream.ProcessAuthenticationAsync(bool,bool,value class System.Threading.CancellationToken),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SslStream.AuthenticateAsClientAsync(class System.Net.Security.SslClientAuthenticationOptions,value class System.Threading.CancellationToken),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(class System.Net.Security.SslClientAuthenticationOptions,class System.Net.Http.HttpRequestMessage,bool,class System.IO.Stream,value class System.Threading.CancellationToken),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.ValueTuple`2[System.__Canon,System.__Canon]].TrySetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].SetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98.MoveNext(),
+        module: System.Net.Http.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.Threading.Tasks.VoidTaskResult].TrySetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Threading.Tasks.VoidTaskResult].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder.SetResult(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d.MoveNext(),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.ThreadPool+<>c.<.cctor>b__87_0(class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.InvokeContinuation(class System.Action`1<class System.Object>,class System.Object,bool,bool),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.OnCompleted(class System.Net.Sockets.SocketAsyncEventArgs),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d.MoveNext(),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1[System.Boolean].SignalCompletion(),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1[System.Boolean].SetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Sockets.SocketAsyncEventArgs+MultiConnectSocketAsyncEventArgs.OnCompleted(class System.Net.Sockets.SocketAsyncEventArgs),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Net.Sockets.SocketAsyncEventArgs.OnCompletedInternal(),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Net.Sockets.SocketAsyncEventArgs.ExecutionCallback(class System.Object),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Threading.ExecutionContext.Run(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: System.Threading.ThreadPoolBoundHandleOverlapped.CompletionCallback(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading._IOCompletionCallback.PerformIOCompletionCallback(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Security.SslStream.ReceiveBlobAsync(!!0),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+        module: System.Net.Security.il
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Internal.Cryptography.Pal.ChainPal.BuildChain(bool,class Internal.Cryptography.ICertificatePal,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,class System.Security.Cryptography.OidCollection,class System.Security.Cryptography.OidCollection,value class System.Security.Cryptography.X509Certificates.X509RevocationMode,value class System.Security.Cryptography.X509Certificates.X509RevocationFlag,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,value class System.Security.Cryptography.X509Certificates.X509ChainTrustMode,value class System.DateTime,value class System.TimeSpan,bool),
+        module: System.Security.Cryptography.X509Certificates.il
+      },
+      {
+        function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2,bool),
+        module: System.Security.Cryptography.X509Certificates.il
+      },
+      {
+        function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2),
+        module: System.Security.Cryptography.X509Certificates.il
+      },
+      {
+        function: System.Net.CertificateValidation.BuildChainAndVerifyProperties(class System.Security.Cryptography.X509Certificates.X509Chain,class System.Security.Cryptography.X509Certificates.X509Certificate2,bool,bool,class System.String),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.SslAuthenticationOptions),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.__Canon].TrySetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].SetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Threading.Tasks.Task`1[System.Int32].TrySetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Int32].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.Int32].SetResult(!0),
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
+        module: System.Net.Security.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
+        module: System.Private.CoreLib.il
+      },
+      {
+        function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
+        module: System.Net.Sockets.il
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: Program.<Main>() {QuickJitted},
+        module: Sentry.Samples.Console.Customized
+      },
+      {
+        function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+        module: System.Private.CoreLib.il
+      }
+    ],
+    samples: [
+      {
+        elapsed_since_start_ns: 374200,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 382500,
+        thread_id: 3,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 388300,
+        thread_id: 4,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 396700,
+        thread_id: 5,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 420000,
+        thread_id: 6,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 10531200,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 10534300,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 10535600,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 10539200,
+        thread_id: 5,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 10561400,
+        thread_id: 6,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 10565500,
+        thread_id: 8,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 10567800,
+        thread_id: 9,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 20546400,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 20549200,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 20550500,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 20562000,
+        thread_id: 5,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 20576800,
+        thread_id: 6,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 20580900,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 20584100,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 30595000,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 30597200,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 30598400,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 30599800,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 30600700,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 30604800,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 30607600,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 40555300,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 40558200,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 40559500,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 40561900,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 40563000,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 40569400,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 40572800,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 50543900,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 50546400,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 50547800,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 50550300,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 50551300,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 50556400,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 50559500,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 60537200,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 60539300,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 60540500,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 60541900,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 60542900,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 60546500,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 60549100,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 71059300,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 71062100,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 71063400,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 71064800,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 71065900,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 71070700,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 71074100,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 79033700,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 79035800,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 79037100,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 79038300,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 79039500,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 79043400,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 79046100,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 89089600,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 89091900,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 89093300,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 89094500,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 89096400,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 89100500,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 89103000,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 99119600,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 99121600,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 99122700,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 99126800,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 99127900,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 99131600,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 99134100,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 109421400,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 109424400,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 109425700,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 109426900,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 109427900,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 109436700,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 109440100,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 119179200,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 119181700,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 119182900,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 119184000,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 119185000,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 119189400,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 119192400,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 129270900,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 129272400,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 129273300,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 129274300,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 129275500,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 129278600,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 129280900,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 139257100,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 139260100,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 139261600,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 139263000,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 139264100,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 139279500,
+        thread_id: 11,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 139285100,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 139288600,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 149228100,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 149230100,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 149231100,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 149233200,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 149234200,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 149248600,
+        thread_id: 11,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 149251800,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 149255300,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 159228000,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 159230700,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 159231800,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 159232900,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 159233900,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 159237500,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 159242200,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 169234400,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 169239500,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 169240800,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 169242000,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 169243000,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 169256800,
+        thread_id: 11,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 169260300,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 169263100,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 179314900,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 179317300,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 179318500,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 179319700,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 179321100,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 179325500,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 179328300,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 189327200,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 189329800,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 189331000,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 189332800,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 189334100,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 189338500,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 189341600,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 199304600,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 199306600,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 199307800,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 199309000,
+        thread_id: 5,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 199310300,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 199313900,
+        thread_id: 8,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 199316400,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 209304400,
+        thread_id: 2,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 209305900,
+        thread_id: 3,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 209306800,
+        thread_id: 4,
+        stack_id: 2
+      },
+      {
+        elapsed_since_start_ns: 209309200,
+        thread_id: 5,
+        stack_id: 8
+      },
+      {
+        elapsed_since_start_ns: 209310300,
+        thread_id: 6,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 209312700,
+        thread_id: 8,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 209315000,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 209316200,
+        thread_id: 12,
+        stack_id: 0
+      },
+      {
+        elapsed_since_start_ns: 217322600,
+        thread_id: 8,
+        stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 217325600,
+        thread_id: 9,
+        stack_id: 9
+      },
+      {
+        elapsed_since_start_ns: 217327600,
+        thread_id: 12,
+        stack_id: 35
+      }
+    ]
+  }
+}
