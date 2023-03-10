@@ -194,8 +194,6 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
 
     internal ITransactionProfiler? TransactionProfiler { get; set; }
 
-    internal ProfileInfo? ProfileInfo { get; set; }
-
     // This constructor is used for deserialization purposes.
     // It's required because some of the fields are mapped on 'contexts.trace'.
     // When deserializing, we don't parse those fields explicitly, but
