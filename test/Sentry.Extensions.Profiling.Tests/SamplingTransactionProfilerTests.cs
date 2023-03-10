@@ -81,7 +81,7 @@ public class SamplingTransactionProfilerTests
 
         var clock = SentryStopwatch.StartNew();
         var limitMs = 50;
-        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), clock.CurrentDateTimeOffset, CancellationToken.None, limitMs);
+        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), clock.CurrentDateTimeOffset, limitMs, CancellationToken.None);
         RunForMs(limitMs * 4);
         clock.Elapsed.TotalMilliseconds.Should().BeGreaterThan(limitMs * 4);
         sut.OnTransactionFinish(clock.CurrentDateTimeOffset);

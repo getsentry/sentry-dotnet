@@ -1,3 +1,4 @@
+using System.Threading;
 using FastSerialization;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
@@ -11,13 +12,13 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     // We only allow a single profile so let's keep track of the current status.
     internal int _inProgress = FALSE;
 
-    const int TRUE = 1;
-    const int FALSE = 0;
+    private const int TRUE = 1;
+    private const int FALSE = 0;
 
     // Stop profiling after the given number of milliseconds.
-    const int TIME_LIMIT_MS = 30_000;
+    private const int TIME_LIMIT_MS = 30_000;
 
-    private string _cacheDirectoryPath;
+    private readonly string _cacheDirectoryPath;
 
     public SamplingTransactionProfilerFactory(string cacheDirectoryPath)
     {
@@ -30,9 +31,10 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
-            var profiler = new SamplingTransactionProfiler(_cacheDirectoryPath, now, cancellationToken, TIME_LIMIT_MS);
-            profiler.OnFinish = () => _inProgress = FALSE;
-            return profiler;
+            return new SamplingTransactionProfiler(_cacheDirectoryPath, now, TIME_LIMIT_MS, cancellationToken)
+            {
+                OnFinish = () => _inProgress = FALSE
+            };
         }
         return null;
     }
@@ -41,21 +43,22 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
 internal class SamplingTransactionProfiler : ITransactionProfiler
 {
     public Action? OnFinish;
-    private SampleProfilerSession _session;
+    private readonly SampleProfilerSession _session;
     private readonly CancellationToken _cancellationToken;
     private readonly DateTimeOffset _startTime;
     private DateTimeOffset? _endTime;
     private Task<MemoryStream>? _data;
-    private string _cacheDirectoryPath;
+    private readonly string _cacheDirectoryPath;
     private Transaction? _transaction;
 
-    public SamplingTransactionProfiler(string cacheDirectoryPath, DateTimeOffset now, CancellationToken cancellationToken, int timeoutMs)
+    public SamplingTransactionProfiler(string cacheDirectoryPath, DateTimeOffset now, int timeoutMs, CancellationToken cancellationToken)
     {
         _cacheDirectoryPath = cacheDirectoryPath;
         _startTime = now;
-        _session = new(cancellationToken);
         _cancellationToken = cancellationToken;
-        Task.Delay(timeoutMs, cancellationToken).ContinueWith(_ => Stop(now + TimeSpan.FromMilliseconds(timeoutMs)));
+        _session = new(cancellationToken);
+        _cancellationToken.Register(() => Stop(now + TimeSpan.FromMilliseconds(timeoutMs)));
+        Task.Delay(timeoutMs, _cancellationToken).ContinueWith(_ => Stop(now + TimeSpan.FromMilliseconds(timeoutMs)), CancellationToken.None);
     }
 
     private void Stop(DateTimeOffset now)
@@ -87,7 +90,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         Debug.Assert(_endTime is not null);
         _transaction = transaction;
 
-        using var traceLog = await CreateTraceLog();
+        using var traceLog = await CreateTraceLogAsync().ConfigureAwait(false);
 
         if (traceLog is null)
         {
@@ -101,8 +104,10 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 return null;
             }
 
-            var processor = new TraceLogProcessor(traceLog);
-            processor.MaxTimestampMs = (ulong)(_endTime.Value - _startTime).TotalMilliseconds;
+            var processor = new TraceLogProcessor(traceLog)
+            {
+                MaxTimestampMs = (ulong)(_endTime.Value - _startTime).TotalMilliseconds
+            };
 
             var profile = processor.Process(_cancellationToken);
             if (_cancellationToken.IsCancellationRequested)
@@ -139,7 +144,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     // We need the TraceLog for all the stack processing it does.
-    private async Task<TraceLog?> CreateTraceLog()
+    private async Task<TraceLog?> CreateTraceLogAsync()
     {
         if (_data is null || _cancellationToken.IsCancellationRequested)
         {
@@ -207,5 +212,5 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         return new TraceLog(etlxPath);
     }
 
-    private BindingFlags _commonBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+    private readonly BindingFlags _commonBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 }

@@ -62,7 +62,7 @@ internal sealed class ProfileInfo : IJsonSerializable
 
         // TODO writer.WriteSerializable("os", _contexts.OperatingSystem, logger);
         //  https://github.com/getsentry/relay/blob/master/relay-profiling/src/sample.rs#L102
-        var rawOS = _contexts.OperatingSystem.RawDescription?.Replace("Microsoft Windows", "Windows")?.Split(" ", 2);
+        var rawOS = _contexts.OperatingSystem.RawDescription?.Replace("Microsoft Windows", "Windows")?.Split(' ', 2);
         writer.WriteStartObject("os");
         writer.WriteString("name", _contexts.OperatingSystem.Name ?? rawOS?.First() ?? "");
         writer.WriteString("version", _contexts.OperatingSystem.Version ?? rawOS?.Last() ?? "");

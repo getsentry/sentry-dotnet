@@ -14,7 +14,6 @@ using SentryProfileStackTrace = HashableGrowableArray<int>;
 
 /// <summary>
 /// Processes TraceLog to produce a SampleProfile.
-///
 /// Based on https://github.com/microsoft/perfview/blob/ff6e8e6c4118a26521515f41ae77f15981d68c53/src/TraceEvent/Computers/SampleProfilerThreadTimeComputer.cs
 /// </summary>
 internal class TraceLogProcessor
@@ -34,7 +33,6 @@ internal class TraceLogProcessor
     // /// </summary>
     // /// <value></value>
     // private bool IgnoreApplicationInsightsRequestsWithRelatedActivityId { get; set; } = true;
-
 
     private readonly TraceLog _traceLog;
     private readonly TraceLogEventSource _eventSource;
@@ -82,12 +80,12 @@ internal class TraceLogProcessor
     //private ThreadState[] _threadState;            // This maps thread (indexes) to what we know about the thread
 
     //private StackSourceSample _sample;                 // Reusable scratch space
-    private MutableTraceEventStackSource _stackSource; // The output source we are generating.
+    private readonly MutableTraceEventStackSource _stackSource; // The output source we are generating.
                                                        // private TraceEventStackSource _stackSource;
 
-    private ActivityComputer _activityComputer;                        // Used to compute stacks for Tasks
+    private readonly ActivityComputer _activityComputer;                        // Used to compute stacks for Tasks
 
-    public ulong MaxTimestampMs { get; set; } = UInt64.MaxValue;
+    public ulong MaxTimestampMs { get; set; } = ulong.MaxValue;
 
     public TraceLogProcessor(TraceLog traceLog)
     {
@@ -500,7 +498,6 @@ internal class TraceLogProcessor
                     frame.Function = $"{frame.Function} {{{optimizationTier}}}";
                 }
             }
-
         }
 
         // TODO enable this once we implement symbolication (we will need to send debug_meta too), see StackTraceFactory.
