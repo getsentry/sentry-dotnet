@@ -18,11 +18,21 @@ public class SamplingTransactionProfilerTests
 
         var threadIds = profile.Threads.Keys();
 
+        // Verify that downsampling works.
+        var previousSamplesByThread = new Dictionary<int, SampleProfile.Sample>();
+
         foreach (var sample in profile.Samples)
         {
             sample.Timestamp.Should().BeInRange(0, maxTimestampNs);
             sample.StackId.Should().BeInRange(0, profile.Stacks.Count);
             sample.ThreadId.Should().BeOneOf(threadIds);
+
+            if (previousSamplesByThread.TryGetValue(sample.ThreadId, out var prevSample))
+            {
+                sample.Timestamp.Should().BeGreaterThan(prevSample.Timestamp + 9_000_000,
+                    "Downsampling: there must be at least 9ms between samples on the same thread.");
+            }
+            previousSamplesByThread[sample.ThreadId] = sample;
         }
 
         profile.Threads.Foreach((i, thread) =>

@@ -35,6 +35,18 @@ public class TraceLogProcessorTests
     private SampleProfile GetProfile()
     {
         var etlxFilePath = Path.Combine(_resourcesPath, "profile-with-task.etlx");
+
+        // Code to update the ETLX (just for backup so we know how it came to be:)
+        // var etlFilePath = Path.Combine(_resourcesPath, "profile-with-task.nettrace");
+        // var source = new EventPipeEventSource(etlFilePath);
+        // new Downsampler().AttachTo(source);
+        // typeof(TraceLog)
+        // .GetMethod(
+        //     "CreateFromEventPipeEventSources",
+        //     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
+        //     new Type[] { typeof(TraceEventDispatcher), typeof(string), typeof(TraceLogOptions) })?
+        // .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
+
         using var eventLog = new TraceLog(etlxFilePath);
         var processor = new TraceLogProcessor(eventLog);
         return processor.Process(CancellationToken.None);

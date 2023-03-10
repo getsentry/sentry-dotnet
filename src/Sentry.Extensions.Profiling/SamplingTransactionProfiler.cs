@@ -174,9 +174,14 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 new PinnedStreamReader(nettraceStream, 16384, new SerializationConfiguration{ StreamLabelWidth = StreamLabelWidth.FourBytes }, StreamReaderAlignment.OneByte),
                 "stream",
                 false
-            });
+            }) as EventPipeEventSource;
 
-        return eventSource as EventPipeEventSource;
+        if (eventSource is not null)
+        {
+            new Downsampler().AttachTo(eventSource);
+        }
+
+        return eventSource;
     }
 
     private TraceLog? ConvertToETLX(EventPipeEventSource source)

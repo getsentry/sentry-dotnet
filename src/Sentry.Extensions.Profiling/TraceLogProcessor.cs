@@ -88,10 +88,6 @@ internal class TraceLogProcessor
     private ActivityComputer _activityComputer;                        // Used to compute stacks for Tasks
 
     public ulong MaxTimestampMs { get; set; } = UInt64.MaxValue;
-    public double SamplingRateMs { get; set; } = (double)1_000 / 101; // 101 Hz
-    private double NextSampleCounter;
-    private double NextSampleLow;
-    private double NextSampleHigh;
 
     public TraceLogProcessor(TraceLog traceLog)
     {
@@ -229,9 +225,6 @@ internal class TraceLogProcessor
 
     public SampleProfile Process(CancellationToken cancellationToken)
     {
-        NextSampleCounter = 0;
-        NextSampleLow = 0;
-        NextSampleHigh = -1;
         var registration = cancellationToken.Register(_eventSource.StopProcessing);
         _eventSource.Process();
         registration.Unregister();
@@ -377,12 +370,6 @@ internal class TraceLogProcessor
             return;
         }
 
-        // Reduce sampling rate from 1 Hz that is the default for the provider to the configured SamplingRateMs.
-        if (!MatchesSampleRate(timestampMs))
-        {
-            return;
-        }
-
         var stackIndex = AddStackTrace(callstackIndex);
         if (stackIndex < 0)
         {
@@ -401,32 +388,6 @@ internal class TraceLogProcessor
             StackId = stackIndex,
             ThreadId = threadIndex
         });
-    }
-
-    // Downsamples to the configured SamplingRateMs.
-    private bool MatchesSampleRate(double timestampMs)
-    {
-        // Don't sample until the NextSampleLow is reached.
-        if (NextSampleLow >= timestampMs)
-        {
-            NextSampleHigh = -1;
-            return false;
-        }
-
-        // This is the first sample after reaching the lower bound - configure the Upper bound to some reasonable value.
-        if (NextSampleHigh < 0)
-        {
-            NextSampleHigh = timestampMs + 0.9;
-        }
-        // After the upper bound is breached, advance the lower bound to the next window we care about.
-        else if (NextSampleHigh < timestampMs)
-        {
-            NextSampleCounter += 1;
-            NextSampleLow = SamplingRateMs * NextSampleCounter - 0.5;
-            return false;
-        }
-
-        return true;
     }
 
     /// <summary>
