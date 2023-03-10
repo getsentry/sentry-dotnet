@@ -1,3 +1,4 @@
+using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 
 namespace Sentry.Extensions.Profiling.Tests;

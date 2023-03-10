@@ -35,21 +35,26 @@ public class SamplingTransactionProfilerTests
         profile.Frames.Where((frame) => frame.Function is not null).Should().NotBeEmpty();
     }
 
+    private void RunForMs(int milliseconds)
+    {
+        for (int i = 0; i < milliseconds / 20; i++)
+        {
+            _testOutputLogger.LogDebug("sleeping...");
+            Thread.Sleep(20);
+        }
+    }
+
     [Fact]
     public async void Profiler_StartedNormally_Works()
     {
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
 
-        var factory = new SamplingTransactionProfilerFactory();
+        var factory = new SamplingTransactionProfilerFactory(Path.GetTempPath());
         var clock = SentryStopwatch.StartNew();
         var sut = factory.OnTransactionStart(transactionTracer, clock.CurrentDateTimeOffset, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
-        for (int i = 0; i < 10; i++)
-        {
-            _testOutputLogger.LogDebug("sleeping...");
-            Thread.Sleep(20);
-        }
+        RunForMs(100);
         sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
@@ -66,12 +71,8 @@ public class SamplingTransactionProfilerTests
 
         var clock = SentryStopwatch.StartNew();
         var limitMs = 50;
-        var sut = new SamplingTransactionProfiler(clock.CurrentDateTimeOffset, CancellationToken.None, limitMs);
-        for (int i = 0; i < 10; i++)
-        {
-            _testOutputLogger.LogDebug("sleeping...");
-            Thread.Sleep(20);
-        }
+        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), clock.CurrentDateTimeOffset, CancellationToken.None, limitMs);
+        RunForMs(limitMs * 4);
         clock.Elapsed.TotalMilliseconds.Should().BeGreaterThan(limitMs * 4);
         sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
 
