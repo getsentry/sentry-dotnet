@@ -107,7 +107,7 @@ internal static class Program
 
             o.TracesSampleRate = 1.0;
 
-            o.AddIntegration(new ProfilingIntegration());
+            o.AddIntegration(new ProfilingIntegration(Path.GetTempPath()));
         }))
         {
             var tx = SentrySdk.StartTransaction("app", "run");

@@ -18,11 +18,11 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
-    private readonly string _cacheDirectoryPath;
+    private readonly string _tempDirectoryPath;
 
-    public SamplingTransactionProfilerFactory(string cacheDirectoryPath)
+    public SamplingTransactionProfilerFactory(string tempDirectoryPath)
     {
-        _cacheDirectoryPath = cacheDirectoryPath;
+        _tempDirectoryPath = tempDirectoryPath;
     }
 
     /// <inheritdoc />
@@ -31,7 +31,7 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
-            return new SamplingTransactionProfiler(_cacheDirectoryPath, now, TIME_LIMIT_MS, cancellationToken)
+            return new SamplingTransactionProfiler(_tempDirectoryPath, now, TIME_LIMIT_MS, cancellationToken)
             {
                 OnFinish = () => _inProgress = FALSE
             };
@@ -48,12 +48,12 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     private readonly DateTimeOffset _startTime;
     private DateTimeOffset? _endTime;
     private Task<MemoryStream>? _data;
-    private readonly string _cacheDirectoryPath;
+    private readonly string _tempDirectoryPath;
     private Transaction? _transaction;
 
-    public SamplingTransactionProfiler(string cacheDirectoryPath, DateTimeOffset now, int timeoutMs, CancellationToken cancellationToken)
+    public SamplingTransactionProfiler(string tempDirectoryPath, DateTimeOffset now, int timeoutMs, CancellationToken cancellationToken)
     {
-        _cacheDirectoryPath = cacheDirectoryPath;
+        _tempDirectoryPath = tempDirectoryPath;
         _startTime = now;
         _cancellationToken = cancellationToken;
         _session = new(cancellationToken);
@@ -192,7 +192,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     private TraceLog? ConvertToETLX(EventPipeEventSource source)
     {
         Debug.Assert(_transaction is not null);
-        var etlxPath = Path.Combine(_cacheDirectoryPath, $"{_transaction.EventId}.etlx");
+        var etlxPath = Path.Combine(_tempDirectoryPath, $"{_transaction.EventId}.etlx");
         if (File.Exists(etlxPath))
         {
             File.Delete(etlxPath);

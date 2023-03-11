@@ -8,17 +8,19 @@ namespace Sentry.Extensions.Profiling;
 /// </summary>
 public class ProfilingIntegration : ISdkIntegration
 {
+    private string _tempDirectoryPath { get; set; }
+
+    /// <summary>
+    /// Initializes the the profiling integration.
+    /// </summary>
+    public ProfilingIntegration(string tempDirectoryPath)
+    {
+        _tempDirectoryPath = tempDirectoryPath;
+    }
+
     /// <inheritdoc/>
     public void Register(IHub hub, SentryOptions options)
     {
-        if (string.IsNullOrEmpty(options.CacheDirectoryPath))
-        {
-            options.TransactionProfilerFactory = null;
-            options.LogWarning($"Cannot use {typeof(ProfilingIntegration).Name} without CacheDirectoryPath.");
-        }
-        else
-        {
-            options.TransactionProfilerFactory = new SamplingTransactionProfilerFactory(options.CacheDirectoryPath);
-        }
+        options.TransactionProfilerFactory = new SamplingTransactionProfilerFactory(_tempDirectoryPath);
     }
 }

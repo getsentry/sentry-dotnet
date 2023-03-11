@@ -47,7 +47,7 @@ public static class Program
 
                 options.TracesSampleRate = 1.0;
 
-                options.AddIntegration(new ProfilingIntegration());
+                options.AddIntegration(new ProfilingIntegration(Path.GetTempPath()));
 
                 options.Debug = true;
             })
