@@ -90,6 +90,10 @@ public partial class ProfilerTests
         sut.Environment = "env name";
         sut.Release = "1.0 (123)";
         sut.Transaction = new("tx name", "tx operation");
+        sut.Contexts.Device.Architecture = "arch";
+        sut.Contexts.Device.Model = "device model";
+        sut.Contexts.Device.Manufacturer = "device make";
+        sut.Contexts.OperatingSystem.RawDescription = "Microsoft Windows 6.3.9600";
 
         var json = sut.ToJsonString(_testOutputLogger);
         return VerifyJson(json);

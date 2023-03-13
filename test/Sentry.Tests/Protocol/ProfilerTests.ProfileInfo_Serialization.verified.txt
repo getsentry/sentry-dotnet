@@ -13,11 +13,13 @@
     ]
   },
   device: {
-    architecture: x86_64
+    architecture: arch,
+    manufacturer: device make,
+    model: device model
   },
   os: {
     name: Windows,
-    version: 10.0.22621
+    version: 6.3.9600
   },
   runtime: {
     type: runtime
