@@ -74,17 +74,21 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         var clock = Stopwatch.StartNew();
         _cancellationToken.Register(() =>
         {
-            _logger?.LogDebug("Profiling cancelled.");
-            Stop(now + clock.Elapsed);
+            if (Stop(now + clock.Elapsed))
+            {
+                _logger?.LogDebug("Profiling cancelled.");
+            }
         });
         Task.Delay(timeoutMs, _cancellationToken).ContinueWith(_ =>
         {
-            _logger?.LogDebug("Profiling is being cut-of after {0} ms because the transaction takes longer than that.", timeoutMs);
-            Stop(now + TimeSpan.FromMilliseconds(timeoutMs));
+            if (Stop(now + TimeSpan.FromMilliseconds(timeoutMs)))
+            {
+                _logger?.LogDebug("Profiling is being cut-of after {0} ms because the transaction takes longer than that.", timeoutMs);
+            }
         }, CancellationToken.None);
     }
 
-    private void Stop(DateTimeOffset now)
+    private bool Stop(DateTimeOffset now)
     {
         if (_endTime is null)
         {
@@ -101,16 +105,20 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                     {
                         _logger?.LogWarning("Exception while stopping a profiler session.", e);
                     }
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     /// <inheritdoc />
     public void OnTransactionFinish(DateTimeOffset now)
     {
-        _logger?.LogDebug("Stopping profiling collection on transaction finish.");
-        Stop(now);
+        if (Stop(now))
+        {
+            _logger?.LogDebug("Stopping profiling collection on transaction finish.");
+        }
         OnFinish?.Invoke();
     }
 

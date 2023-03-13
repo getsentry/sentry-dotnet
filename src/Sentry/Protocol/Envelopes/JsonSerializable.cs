@@ -68,7 +68,7 @@ internal sealed class AsyncJsonSerializable : ISerializable
         await using (writer.ConfigureAwait(false))
 #endif
         {
-            if (await Source is { } source)
+            if (await Source.ConfigureAwait(false) is { } source)
             {
                 source.WriteTo(writer, logger);
                 await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
