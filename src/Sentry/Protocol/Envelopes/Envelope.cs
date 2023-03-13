@@ -26,25 +26,16 @@ public sealed class Envelope : ISerializable, IDisposable
     public IReadOnlyList<EnvelopeItem> Items { get; }
 
     /// <summary>
-    /// Envelope items that are being processed in the background.
-    /// </summary>
-    internal IReadOnlyList<AsyncEnvelopeItem> AsyncItems { get; }
-
-    /// <summary>
     /// Initializes an instance of <see cref="Envelope"/>.
     /// </summary>
     public Envelope(IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
         : this(null, header, items) { }
 
     private Envelope(SentryId? eventId, IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
-        : this(eventId, header, items, Array.Empty<AsyncEnvelopeItem>()) { }
-
-    private Envelope(SentryId? eventId, IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items, IReadOnlyList<AsyncEnvelopeItem> asyncItems)
     {
         _eventId = eventId;
         Header = header;
         Items = items;
-        AsyncItems = asyncItems;
     }
 
     /// <summary>
@@ -160,17 +151,6 @@ public sealed class Envelope : ISerializable, IDisposable
             await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
             await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
         }
-
-        // AsyncItems
-        foreach (var asyncItem in AsyncItems)
-        {
-            var item = await asyncItem.ConfigureAwait(false);
-            if (item is not null)
-            {
-                await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
     }
 
     /// <inheritdoc />
@@ -188,19 +168,6 @@ public sealed class Envelope : ISerializable, IDisposable
         {
             item.Serialize(stream, logger);
             stream.WriteNewline();
-        }
-
-        // AsyncItems
-        foreach (var asyncItem in AsyncItems)
-        {
-            asyncItem.ContinueWith(item =>
-            {
-                if (item.Result is { } v)
-                {
-                    v.Serialize(stream, logger);
-                    stream.WriteNewline();
-                }
-            }).Wait();
         }
     }
 
@@ -317,24 +284,17 @@ public sealed class Envelope : ISerializable, IDisposable
             header = CreateHeader(eventId);
         }
 
-        var items = new[]
+        var items = new List<EnvelopeItem>
         {
             EnvelopeItem.FromTransaction(transaction)
         };
 
-        IReadOnlyList<AsyncEnvelopeItem> asyncItems;
         if (transaction.TransactionProfiler is { } profiler)
         {
-            AsyncEnvelopeItem item = profiler.Collect(transaction).ContinueWith(
-                task => task.Result is null ? null : EnvelopeItem.FromProfileInfo(task.Result));
-            asyncItems = new[] { item };
-        }
-        else
-        {
-            asyncItems = Array.Empty<AsyncEnvelopeItem>();
+            items.Add(EnvelopeItem.FromProfileInfo(profiler.Collect(transaction)));
         }
 
-        return new Envelope(eventId, header, items, asyncItems);
+        return new Envelope(eventId, header, items);
     }
 
     /// <summary>

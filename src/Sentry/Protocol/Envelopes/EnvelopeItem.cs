@@ -204,14 +204,15 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="profileInfo"/>.
     /// </summary>
-    internal static EnvelopeItem FromProfileInfo(ProfileInfo profileInfo)
+    internal static EnvelopeItem FromProfileInfo(Task<ProfileInfo?> profileInfo)
     {
         var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
         {
             [TypeKey] = TypeValueProfile
         };
 
-        return new EnvelopeItem(header, new JsonSerializable(profileInfo));
+        var jsonSerializable = profileInfo.ContinueWith(task => task.Result as IJsonSerializable);
+        return new EnvelopeItem(header, new AsyncJsonSerializable(jsonSerializable));
     }
 
     /// <summary>

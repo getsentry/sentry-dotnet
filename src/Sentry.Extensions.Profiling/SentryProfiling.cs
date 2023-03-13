@@ -21,6 +21,6 @@ public class ProfilingIntegration : ISdkIntegration
     /// <inheritdoc/>
     public void Register(IHub hub, SentryOptions options)
     {
-        options.TransactionProfilerFactory = new SamplingTransactionProfilerFactory(_tempDirectoryPath);
+        options.TransactionProfilerFactory = new SamplingTransactionProfilerFactory(_tempDirectoryPath, options.DiagnosticLogger);
     }
 }
