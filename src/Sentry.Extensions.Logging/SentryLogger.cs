@@ -43,7 +43,10 @@ internal sealed class SentryLogger : ILogger
             return;
         }
 
-        var message = formatter?.Invoke(state, exception);
+        // TBD: If Sentry options contains an override for the formatter, use it instead of the default passed in
+        //var message = formatter?.Invoke(state, exception);
+        var sentryFormatter = new SentryLoggerFormatter();
+        var message = sentryFormatter.Invoke(state);
 
         if (ShouldCaptureEvent(logLevel, eventId, exception))
         {
