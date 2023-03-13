@@ -35,10 +35,18 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
             _logger?.LogDebug("Starting a sampling profiler session.");
-            return new SamplingTransactionProfiler(_tempDirectoryPath, now, TIME_LIMIT_MS, _logger, cancellationToken)
+            try
             {
-                OnFinish = () => _inProgress = FALSE
-            };
+                return new SamplingTransactionProfiler(_tempDirectoryPath, now, TIME_LIMIT_MS, _logger, cancellationToken)
+                {
+                    OnFinish = () => _inProgress = FALSE
+                };
+            }
+            catch (Exception e)
+            {
+                _logger?.LogWarning("Failed to start a profiler session.", e);
+                _inProgress = FALSE;
+            }
         }
         return null;
     }
@@ -85,7 +93,14 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 if (_endTime is null)
                 {
                     _endTime = now;
-                    _data = _session.Finish();
+                    try
+                    {
+                        _data = _session.Finish();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger?.LogWarning("Exception while stopping a profiler session.", e);
+                    }
                 }
             }
         }
@@ -102,49 +117,60 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     /// <inheritdoc />
     public async Task<ProfileInfo?> Collect(Transaction transaction)
     {
-        Debug.Assert(_data is not null, "OnTransactionFinish() wasn't called before Collect()");
-        Debug.Assert(_endTime is not null);
-        _transaction = transaction;
-        _logger?.LogDebug("Starting profile processing.");
-
-        using var traceLog = await CreateTraceLogAsync().ConfigureAwait(false);
-
-        if (traceLog is null)
+        if (_data is null || _endTime is null)
         {
+            _logger?.LogDebug("Profiling collection cannot proceed because it doesn't seem to have finished properly.");
             return null;
         }
+        _logger?.LogDebug("Starting profile processing.");
 
         try
         {
-            if (_cancellationToken.IsCancellationRequested)
+            _transaction = transaction;
+            using var traceLog = await CreateTraceLogAsync().ConfigureAwait(false);
+
+            if (traceLog is null)
             {
                 return null;
             }
 
-            _logger?.LogDebug("Converting profile to Sentry format.");
-
-            var processor = new TraceLogProcessor(traceLog)
+            try
             {
-                MaxTimestampMs = (ulong)(_endTime.Value - _startTime).TotalMilliseconds
-            };
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
 
-            var profile = processor.Process(_cancellationToken);
-            if (_cancellationToken.IsCancellationRequested)
-            {
-                return null;
+                _logger?.LogDebug("Converting profile to Sentry format.");
+
+                var processor = new TraceLogProcessor(traceLog)
+                {
+                    MaxTimestampMs = (ulong)(_endTime.Value - _startTime).TotalMilliseconds
+                };
+
+                var profile = processor.Process(_cancellationToken);
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
+
+                _logger?.LogDebug("Profiling successfully finished.");
+                return CreateProfileInfo(transaction, _startTime, profile);
             }
-
-            _logger?.LogDebug("Profiling successfully finished.");
-            return CreateProfileInfo(transaction, _startTime, profile);
+            finally
+            {
+                traceLog.Dispose();
+                if (File.Exists(traceLog.FilePath))
+                {
+                    _logger?.LogDebug("Removing temporarily file '{0}'.", traceLog.FilePath);
+                    File.Delete(traceLog.FilePath);
+                }
+            }
         }
-        finally
+        catch (Exception e)
         {
-            traceLog.Dispose();
-            if (File.Exists(traceLog.FilePath))
-            {
-                _logger?.LogDebug("Removing temporarily file '{0}'.", traceLog.FilePath);
-                File.Delete(traceLog.FilePath);
-            }
+            _logger?.LogWarning("Exception while collecting/processing a profiler session.", e);
+            return null;
         }
     }
 
