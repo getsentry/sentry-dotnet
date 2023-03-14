@@ -211,8 +211,8 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             [TypeKey] = TypeValueProfile
         };
 
-        var jsonSerializable = profileInfo.ContinueWith(task => task.Result as IJsonSerializable);
-        return new EnvelopeItem(header, new AsyncJsonSerializable(jsonSerializable));
+        var jsonSerializableTask = profileInfo.ContinueWith(task => task.Result as IJsonSerializable);
+        return new EnvelopeItem(header, new AsyncJsonSerializable(jsonSerializableTask));
     }
 
     /// <summary>

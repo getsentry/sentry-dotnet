@@ -20,6 +20,8 @@ internal class SampleProfilerSession
 
         var providers = new[]
         {
+            // Note: all events we need issued by "DotNETRuntime" provider are at "EventLevel.Informational"
+            // see https://learn.microsoft.com/en-us/dotnet/fundamentals/diagnostics/runtime-events
             new EventPipeProvider("Microsoft-Windows-DotNETRuntime", EventLevel.Informational, (long)ClrTraceEventParser.Keywords.Default),
             new EventPipeProvider("Microsoft-DotNETCore-SampleProfiler", EventLevel.Informational, (long)ClrTraceEventParser.Keywords.None)
         };
