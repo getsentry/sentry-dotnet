@@ -469,7 +469,7 @@ internal class TraceLogProcessor
             _profile.Threads[key] = new()
             {
                 // TODO it should be possible to get the actual name of the thread somehow - speedscope output has it among frames, e.g. "Thread (30396) (.NET ThreadPool)"
-                Name = thread.ThreadInfo ?? $"Thread {key}",
+                Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
             };
         }
 
