@@ -7,7 +7,7 @@ using Microsoft.Diagnostics.Tracing.Stacks;
 using Sentry.Internal;
 using Sentry.Protocol;
 
-namespace Sentry.Extensions.Profiling;
+namespace Sentry.Profiling;
 
 // A list of frame indexes.
 using SentryProfileStackTrace = HashableGrowableArray<int>;

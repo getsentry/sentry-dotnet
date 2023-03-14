@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <ProjectReference Include="..\..\src\Sentry.Extensions.Profiling\Sentry.Extensions.Profiling.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">

@@ -1,6 +1,6 @@
 using Sentry.Internal.Http;
 
-namespace Sentry.Extensions.Profiling.Tests;
+namespace Sentry.Profiling.Tests;
 
 public class SamplingTransactionProfilerTests
 {

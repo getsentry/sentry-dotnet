@@ -1,7 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Integrations;
 
-namespace Sentry.Extensions.Profiling;
+namespace Sentry.Profiling;
 
 /// <summary>
 /// Enables transaction performance profiling.

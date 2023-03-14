@@ -5,7 +5,7 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
 
-namespace Sentry.Extensions.Profiling;
+namespace Sentry.Profiling;
 
 internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
 {

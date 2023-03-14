@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore;
 using Sentry;
-using Sentry.Extensions.Profiling;
+using Sentry.Profiling;
 
 namespace Samples.AspNetCore.Mvc;
 

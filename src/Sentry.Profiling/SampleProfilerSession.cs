@@ -2,7 +2,7 @@ using System.Diagnostics.Tracing;
 using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Diagnostics.Tracing.Parsers;
 
-namespace Sentry.Extensions.Profiling;
+namespace Sentry.Profiling;
 
 internal class SampleProfilerSession
 {

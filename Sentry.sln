@@ -172,9 +172,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.TestUtils
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Android.AssemblyReader", "src\Sentry.Android.AssemblyReader\Sentry.Android.AssemblyReader.csproj", "{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Profiling", "src\Sentry.Extensions.Profiling\Sentry.Extensions.Profiling.csproj", "{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Profiling", "src\Sentry.Profiling\Sentry.Profiling.csproj", "{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Extensions.Profiling.Tests", "test\Sentry.Extensions.Profiling.Tests\Sentry.Extensions.Profiling.Tests.csproj", "{2E750A7C-561D-4959-B967-042755139D84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Profiling.Tests", "test\Sentry.Profiling.Tests\Sentry.Profiling.Tests.csproj", "{2E750A7C-561D-4959-B967-042755139D84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

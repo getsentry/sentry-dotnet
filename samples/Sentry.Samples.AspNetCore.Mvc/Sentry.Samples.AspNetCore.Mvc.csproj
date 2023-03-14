@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\src\Sentry.Extensions.Profiling\Sentry.Extensions.Profiling.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
   </ItemGroup>
 
   <ItemGroup>
