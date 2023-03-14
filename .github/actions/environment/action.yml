@@ -20,7 +20,7 @@ runs:
     - name: Install Android 33
       if: runner.os == 'Windows'
       shell: cmd
-      run: '%ANDROID_HOME%\tools\bin\sdkmanager "platforms;android-33"'
+      run: '%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager "platforms;android-33"'
 
     # Note, the following is needed on the windows-2019 image only.
     # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
