@@ -64,7 +64,7 @@ public class SamplingTransactionProfilerTests
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
 
-        var factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), _testOutputLogger);
+        var factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new SentryOptions { DiagnosticLogger = _testOutputLogger });
         var clock = SentryStopwatch.StartNew();
         var sut = factory.OnTransactionStart(transactionTracer, clock.CurrentDateTimeOffset, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
@@ -84,10 +84,10 @@ public class SamplingTransactionProfilerTests
     public void Profiler_AfterTimeout_Stops()
     {
         var hub = Substitute.For<IHub>();
-
+        var options = new SentryOptions { DiagnosticLogger = _testOutputLogger };
         var clock = SentryStopwatch.StartNew();
         var limitMs = 50;
-        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), clock.CurrentDateTimeOffset, limitMs, _testOutputLogger, CancellationToken.None);
+        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), clock.CurrentDateTimeOffset, limitMs, options, CancellationToken.None);
         RunForMs(limitMs * 4);
         clock.Elapsed.TotalMilliseconds.Should().BeGreaterThan(limitMs * 4);
         sut.OnTransactionFinish(clock.CurrentDateTimeOffset);

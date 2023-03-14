@@ -18,6 +18,7 @@ using SentryProfileStackTrace = HashableGrowableArray<int>;
 /// </summary>
 internal class TraceLogProcessor
 {
+    private readonly SentryOptions _options;
     // /// <summary>
     // /// If set we compute thread time using Tasks
     // /// </summary>
@@ -81,14 +82,15 @@ internal class TraceLogProcessor
 
     //private StackSourceSample _sample;                 // Reusable scratch space
     private readonly MutableTraceEventStackSource _stackSource; // The output source we are generating.
-                                                       // private TraceEventStackSource _stackSource;
+                                                                // private TraceEventStackSource _stackSource;
 
     private readonly ActivityComputer _activityComputer;                        // Used to compute stacks for Tasks
 
     public ulong MaxTimestampMs { get; set; } = ulong.MaxValue;
 
-    public TraceLogProcessor(TraceLog traceLog)
+    public TraceLogProcessor(SentryOptions options, TraceLog traceLog)
     {
+        _options = options;
         _traceLog = traceLog;
         _eventSource = _traceLog.Events.GetSource();
         _stackSource = new MutableTraceEventStackSource(_traceLog)
@@ -362,8 +364,8 @@ internal class TraceLogProcessor
         // Trim samples coming after the profiling has been stopped (i.e. after the Stop() IPC request has been sent).
         if (timestampMs > MaxTimestampMs)
         {
-            // We can completely stop processing after the first sample that is after the timeout.
-            // Samples are ordered (tested manually...) so no need to go through the rest.
+            // We can completely stop processing after the first sample that is after the timeout. Samples are
+            // ordered (I've checked this manually so I hope that assumption holds...) so no need to go through the rest.
             _eventSource.StopProcessing();
             return;
         }
@@ -498,6 +500,13 @@ internal class TraceLogProcessor
                     frame.Function = $"{frame.Function} {{{optimizationTier}}}";
                 }
             }
+
+            frame.ConfigureAppFrame(_options);
+        }
+        else
+        {
+            // native frame
+            frame.InApp = false;
         }
 
         // TODO enable this once we implement symbolication (we will need to send debug_meta too), see StackTraceFactory.

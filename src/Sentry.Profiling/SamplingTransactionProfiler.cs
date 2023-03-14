@@ -20,12 +20,12 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
 
     private readonly string _tempDirectoryPath;
 
-    private readonly IDiagnosticLogger? _logger;
+    private readonly SentryOptions _options;
 
-    public SamplingTransactionProfilerFactory(string tempDirectoryPath, IDiagnosticLogger? logger)
+    public SamplingTransactionProfilerFactory(string tempDirectoryPath, SentryOptions options)
     {
         _tempDirectoryPath = tempDirectoryPath;
-        _logger = logger;
+        _options = options;
     }
 
     /// <inheritdoc />
@@ -34,17 +34,17 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
-            _logger?.LogDebug("Starting a sampling profiler session.");
+            _options.LogDebug("Starting a sampling profiler session.");
             try
             {
-                return new SamplingTransactionProfiler(_tempDirectoryPath, now, TIME_LIMIT_MS, _logger, cancellationToken)
+                return new SamplingTransactionProfiler(_tempDirectoryPath, now, TIME_LIMIT_MS, _options, cancellationToken)
                 {
                     OnFinish = () => _inProgress = FALSE
                 };
             }
             catch (Exception e)
             {
-                _logger?.LogWarning("Failed to start a profiler session.", e);
+                _options.LogWarning("Failed to start a profiler session.", e);
                 _inProgress = FALSE;
             }
         }
@@ -62,11 +62,11 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     private Task<MemoryStream>? _data;
     private readonly string _tempDirectoryPath;
     private Transaction? _transaction;
-    private readonly IDiagnosticLogger? _logger;
+    private readonly SentryOptions _options;
 
-    public SamplingTransactionProfiler(string tempDirectoryPath, DateTimeOffset now, int timeoutMs, IDiagnosticLogger? logger, CancellationToken cancellationToken)
+    public SamplingTransactionProfiler(string tempDirectoryPath, DateTimeOffset now, int timeoutMs, SentryOptions options, CancellationToken cancellationToken)
     {
-        _logger = logger;
+        _options = options;
         _tempDirectoryPath = tempDirectoryPath;
         _startTime = now;
         _cancellationToken = cancellationToken;
@@ -76,14 +76,14 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         {
             if (Stop(now + clock.Elapsed))
             {
-                _logger?.LogDebug("Profiling cancelled.");
+                _options.LogDebug("Profiling cancelled.");
             }
         });
         Task.Delay(timeoutMs, _cancellationToken).ContinueWith(_ =>
         {
             if (Stop(now + TimeSpan.FromMilliseconds(timeoutMs)))
             {
-                _logger?.LogDebug("Profiling is being cut-of after {0} ms because the transaction takes longer than that.", timeoutMs);
+                _options.LogDebug("Profiling is being cut-of after {0} ms because the transaction takes longer than that.", timeoutMs);
             }
         }, CancellationToken.None);
     }
@@ -103,7 +103,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                     }
                     catch (Exception e)
                     {
-                        _logger?.LogWarning("Exception while stopping a profiler session.", e);
+                        _options.LogWarning("Exception while stopping a profiler session.", e);
                     }
                     return true;
                 }
@@ -117,7 +117,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     {
         if (Stop(now))
         {
-            _logger?.LogDebug("Stopping profiling collection on transaction finish.");
+            _options.LogDebug("Stopping profiling collection on transaction finish.");
         }
         OnFinish?.Invoke();
     }
@@ -127,10 +127,10 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     {
         if (_data is null || _endTime is null)
         {
-            _logger?.LogDebug("Profiling collection cannot proceed because it doesn't seem to have finished properly.");
+            _options.LogDebug("Profiling collection cannot proceed because it doesn't seem to have finished properly.");
             return null;
         }
-        _logger?.LogDebug("Starting profile processing.");
+        _options.LogDebug("Starting profile processing.");
 
         try
         {
@@ -149,9 +149,9 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                     return null;
                 }
 
-                _logger?.LogDebug("Converting profile to Sentry format.");
+                _options.LogDebug("Converting profile to Sentry format.");
 
-                var processor = new TraceLogProcessor(traceLog)
+                var processor = new TraceLogProcessor(_options, traceLog)
                 {
                     MaxTimestampMs = (ulong)(_endTime.Value - _startTime).TotalMilliseconds
                 };
@@ -162,7 +162,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                     return null;
                 }
 
-                _logger?.LogDebug("Profiling successfully finished.");
+                _options.LogDebug("Profiling successfully finished.");
                 return CreateProfileInfo(transaction, _startTime, profile);
             }
             finally
@@ -170,14 +170,14 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 traceLog.Dispose();
                 if (File.Exists(traceLog.FilePath))
                 {
-                    _logger?.LogDebug("Removing temporarily file '{0}'.", traceLog.FilePath);
+                    _options.LogDebug("Removing temporarily file '{0}'.", traceLog.FilePath);
                     File.Delete(traceLog.FilePath);
                 }
             }
         }
         catch (Exception e)
         {
-            _logger?.LogWarning("Exception while collecting/processing a profiler session.", e);
+            _options.LogWarning("Exception while collecting/processing a profiler session.", e);
             return null;
         }
     }
@@ -215,7 +215,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         using var eventSource = CreateEventPipeEventSource(nettraceStream);
         if (_cancellationToken.IsCancellationRequested || eventSource is null)
         {
-            _logger?.LogWarning("Couldn't initialize EventPipeEventSource.");
+            _options.LogWarning("Couldn't initialize EventPipeEventSource.");
             return null;
         }
 
@@ -240,7 +240,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         if (eventSource is not null)
         {
             // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
-            // _logger?.LogDebug("Profile will be downsampled before processing.");
+            // _options.LogDebug("Profile will be downsampled before processing.");
             new Downsampler().AttachTo(eventSource);
         }
 
@@ -251,10 +251,10 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     {
         Debug.Assert(_transaction is not null);
         var etlxPath = Path.Combine(_tempDirectoryPath, $"{_transaction.EventId}.etlx");
-        _logger?.LogDebug("Writing profile temporarily to '{0}'.", etlxPath);
+        _options.LogDebug("Writing profile temporarily to '{0}'.", etlxPath);
         if (File.Exists(etlxPath))
         {
-            _logger?.LogDebug("Temporary file '{0}' already exists, deleting first.", etlxPath);
+            _options.LogDebug("Temporary file '{0}' already exists, deleting first.", etlxPath);
             File.Delete(etlxPath);
         }
         typeof(TraceLog)
@@ -266,7 +266,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
 
         if (!File.Exists(etlxPath))
         {
-            _logger?.LogWarning("Profiler failed at CreateFromEventPipeEventSources() - temproary file '{0}' doesn't exist.", etlxPath);
+            _options.LogWarning("Profiler failed at CreateFromEventPipeEventSources() - temproary file '{0}' doesn't exist.", etlxPath);
             return null;
         }
 

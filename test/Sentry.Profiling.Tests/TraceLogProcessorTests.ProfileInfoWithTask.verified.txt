@@ -712,967 +712,1211 @@
     frames: [
       {
         function: System.Threading.Monitor.Wait(class System.Object,int32),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.ManualResetEventSlim.Wait(int32,value class System.Threading.CancellationToken),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.SpinThenBlockingWait(int32,value class System.Threading.CancellationToken),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.InternalWaitCore(int32,value class System.Threading.CancellationToken),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(class System.Threading.Tasks.Task),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.TaskAwaiter.GetResult(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
+      },
+      {
+        in_app: false
       },
       {
         function: System.Threading.LowLevelLifoSemaphore.WaitForSignal(int32),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.LowLevelLifoSemaphore.Wait(int32,bool),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Thread.StartCallback(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.WaitHandle.WaitOneNoCheck(int32),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.WaitHandle.WaitOne(int32),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.PortableThreadPool+GateThread.GateThreadStart(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.IO.Pipes.PipeStream.ReadCore(value class System.Span`1<unsigned int8>),
-        module: System.IO.Pipes.il
+        module: System.IO.Pipes.il,
+        in_app: false
       },
       {
         function: System.IO.Pipes.PipeStream.Read(unsigned int8[],int32,int32),
-        module: System.IO.Pipes.il
+        module: System.IO.Pipes.il,
+        in_app: false
       },
       {
         function: System.IO.BinaryReader.ReadBytes(int32),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Microsoft.Diagnostics.NETCore.Client.IpcHeader.Parse(class System.IO.BinaryReader) {QuickJitted},
-        module: Microsoft.Diagnostics.NETCore.Client
+        module: Microsoft.Diagnostics.NETCore.Client,
+        in_app: false
       },
       {
         function: Microsoft.Diagnostics.NETCore.Client.IpcMessage.Parse(class System.IO.Stream) {QuickJitted},
-        module: Microsoft.Diagnostics.NETCore.Client
+        module: Microsoft.Diagnostics.NETCore.Client,
+        in_app: false
       },
       {
         function: Microsoft.Diagnostics.NETCore.Client.IpcClient.Read(class System.IO.Stream) {QuickJitted},
-        module: Microsoft.Diagnostics.NETCore.Client
+        module: Microsoft.Diagnostics.NETCore.Client,
+        in_app: false
       },
       {
         function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageGetContinuation(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage) {QuickJitted},
-        module: Microsoft.Diagnostics.NETCore.Client
+        module: Microsoft.Diagnostics.NETCore.Client,
+        in_app: false
       },
       {
         function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession.Start(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32) {QuickJitted},
-        module: Microsoft.Diagnostics.NETCore.Client
+        module: Microsoft.Diagnostics.NETCore.Client,
+        in_app: false
       },
       {
         function: Microsoft.Diagnostics.NETCore.Client.DiagnosticsClient.StartEventPipeSession(class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32) {QuickJitted},
-        module: Microsoft.Diagnostics.NETCore.Client
+        module: Microsoft.Diagnostics.NETCore.Client,
+        in_app: false
       },
       {
         function: ProfilerSession..ctor(class System.Object) {QuickJitted},
-        module: Sentry.Extensions.Profiling
+        module: Sentry.Extensions.Profiling,
+        in_app: false
       },
       {
         function: SamplingTransactionProfiler.OnTransactionStart(class Sentry.ITransaction) {QuickJitted},
-        module: Sentry.Extensions.Profiling
+        module: Sentry.Extensions.Profiling,
+        in_app: false
       },
       {
         function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext) {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>) {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: Program+<Main>d__2.MoveNext() {Optimized},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(class System.Threading.Thread,class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecuteFromThreadPool(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler+<SendAsync>d__3.MoveNext() {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: Sentry.Internal.Http.RetryAfterHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: Sentry.Internal.Http.RetryAfterHandler+<SendAsync>d__8.MoveNext() {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Sentry.Internal.Http.RetryAfterHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: System.Net.Http.HttpMessageInvoker.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpClient+<<SendAsync>g__Core|83_0>d.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(class System.Net.Http.HttpRequestMessage,value class System.Net.Http.HttpCompletionOption,class System.Threading.CancellationTokenSource,bool,class System.Threading.CancellationTokenSource,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpClient.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Net.Http.HttpCompletionOption,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpClient.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: Sentry.Internal.Http.HttpTransport+<SendEnvelopeAsync>d__3.MoveNext() {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Sentry.Internal.Http.HttpTransport.SendEnvelopeAsync(class Sentry.Protocol.Envelopes.Envelope,value class System.Threading.CancellationToken) {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20.MoveNext() {Optimized},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.ExecutionContext.RunInternal(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(class System.Runtime.CompilerServices.IAsyncStateMachineBox,bool),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.RunContinuations(class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.FinishContinuations(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.Boolean].TrySetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Boolean].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31.MoveNext(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.AwaitTaskContinuation.RunOrScheduleAction(class System.Action,bool),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.RunContinuations(class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task+CancellationPromise`1[System.Boolean].System.Threading.Tasks.ITaskCompletionAction.Invoke(class System.Threading.Tasks.Task),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.CompletionActionInvoker.System.Threading.IThreadPoolWorkItem.Execute(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.FindPrimeNumber(int32) {Optimized},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program+<Main>d__2.MoveNext() {Optimized},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: System.Net.Http.WinInetProxyHelper..ctor(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpWindowsProxy.TryCreate(class System.Net.IWebProxy&),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.SystemProxyInfo.ConstructSystemProxy(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Lazy`1[System.__Canon].ViaFactory(value class System.Threading.LazyThreadSafetyMode),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Lazy`1[System.__Canon].ExecutionAndPublication(class System.LazyHelper,bool),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Lazy`1[System.__Canon].CreateValue(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Lazy`1[System.__Canon].get_Value(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpClient+<>c.<get_DefaultProxy>b__15_0(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Threading.LazyInitializer.EnsureInitializedCore(!!0&,class System.Func`1<!!0>),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.LazyInitializer.EnsureInitialized(!!0&,class System.Func`1<!!0>),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpClient.get_DefaultProxy(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPoolManager..ctor(class System.Net.Http.HttpConnectionSettings),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.SocketsHttpHandler.SetupHandlerChain(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
-        module: Sentry
+        module: Sentry,
+        in_app: true
       },
       {
         function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.Int32].InnerInvoke(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.ExecuteEntryUnsafe(class System.Threading.Thread),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task.ExecuteFromThreadPool(class System.Threading.Thread),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Program+<>c.<Main>b__2_9() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: System.Threading.Tasks.Task`1[System.Int64].InnerInvoke(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(class System.String,int32,class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool.ConnectAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<CreateHttp11ConnectionAsync>d__99.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<AddHttp11ConnectionAsync>d__74.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool.AddHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<>c__DisplayClass75_0.<CheckForHttp11ConnectionInjection>b__0(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.__Canon].InnerInvoke(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<GetHttp11ConnectionAsync>d__76.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool.GetHttp11ConnectionAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<SendWithVersionDetectionAndRetryAsync>d__84.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPoolManager.SendAsyncCore(class System.Net.Http.HttpRequestMessage,class System.Uri,bool,bool,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPoolManager.SendAsync(class System.Net.Http.HttpRequestMessage,bool,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpMessageHandlerStage.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.DiagnosticsHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.RedirectHandler+<SendAsync>d__4.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.RedirectHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.DecompressionHandler+<SendAsync>d__16.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.DecompressionHandler.SendAsync(class System.Net.Http.HttpRequestMessage,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.SocketsHttpHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: System.Net.Security.SecureChannel.AcquireClientCredentials(unsigned int8[]&),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SecureChannel.GenerateToken(value class System.ReadOnlySpan`1<unsigned int8>,unsigned int8[]&),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SecureChannel.NextMessage(value class System.ReadOnlySpan`1<unsigned int8>),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream.ForceAuthenticationAsync(!!0,bool,unsigned int8[],bool),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream.ProcessAuthenticationAsync(bool,bool,value class System.Threading.CancellationToken),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream.AuthenticateAsClientAsync(class System.Net.Security.SslClientAuthenticationOptions,value class System.Threading.CancellationToken),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Http.ConnectHelper+<EstablishSslConnectionAsync>d__2.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.ConnectHelper.EstablishSslConnectionAsync(class System.Net.Security.SslClientAuthenticationOptions,class System.Net.Http.HttpRequestMessage,bool,class System.IO.Stream,value class System.Threading.CancellationToken),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.ValueTuple`2[System.__Canon,System.__Canon]].TrySetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].SetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98.MoveNext(),
-        module: System.Net.Http.il
+        module: System.Net.Http.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.Threading.Tasks.VoidTaskResult].TrySetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Threading.Tasks.VoidTaskResult].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder.SetResult(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d.MoveNext(),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.ThreadPool+<>c.<.cctor>b__87_0(class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.InvokeContinuation(class System.Action`1<class System.Object>,class System.Object,bool,bool),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.Socket+AwaitableSocketAsyncEventArgs.OnCompleted(class System.Net.Sockets.SocketAsyncEventArgs),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d.MoveNext(),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1[System.Boolean].SignalCompletion(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1[System.Boolean].SetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.SocketAsyncEventArgs+MultiConnectSocketAsyncEventArgs.OnCompleted(class System.Net.Sockets.SocketAsyncEventArgs),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.SocketAsyncEventArgs.OnCompletedInternal(),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.SocketAsyncEventArgs.ExecutionCallback(class System.Object),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Threading.ExecutionContext.Run(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: System.Threading.ThreadPoolBoundHandleOverlapped.CompletionCallback(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading._IOCompletionCallback.PerformIOCompletionCallback(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream.ReceiveBlobAsync(!!0),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Internal.Cryptography.Pal.ChainPal.BuildChain(bool,class Internal.Cryptography.ICertificatePal,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,class System.Security.Cryptography.OidCollection,class System.Security.Cryptography.OidCollection,value class System.Security.Cryptography.X509Certificates.X509RevocationMode,value class System.Security.Cryptography.X509Certificates.X509RevocationFlag,class System.Security.Cryptography.X509Certificates.X509Certificate2Collection,value class System.Security.Cryptography.X509Certificates.X509ChainTrustMode,value class System.DateTime,value class System.TimeSpan,bool),
-        module: System.Security.Cryptography.X509Certificates.il
+        module: System.Security.Cryptography.X509Certificates.il,
+        in_app: false
       },
       {
         function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2,bool),
-        module: System.Security.Cryptography.X509Certificates.il
+        module: System.Security.Cryptography.X509Certificates.il,
+        in_app: false
       },
       {
         function: System.Security.Cryptography.X509Certificates.X509Chain.Build(class System.Security.Cryptography.X509Certificates.X509Certificate2),
-        module: System.Security.Cryptography.X509Certificates.il
+        module: System.Security.Cryptography.X509Certificates.il,
+        in_app: false
       },
       {
         function: System.Net.CertificateValidation.BuildChainAndVerifyProperties(class System.Security.Cryptography.X509Certificates.X509Chain,class System.Security.Cryptography.X509Certificates.X509Certificate2,bool,bool,class System.String),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SecureChannel.VerifyRemoteCertificate(class System.Net.Security.RemoteCertificateValidationCallback,class System.Net.Security.SslCertificateTrust,class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.ProtocolToken&,value class System.Net.Security.SslPolicyErrors&,value class System.Security.Cryptography.X509Certificates.X509ChainStatusFlags&),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream.CompleteHandshake(class System.Net.Security.SslAuthenticationOptions),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.__Canon].TrySetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].SetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Threading.Tasks.Task`1[System.Int32].TrySetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.Int32].SetExistingTaskResult(class System.Threading.Tasks.Task`1<!0>,!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.Int32].SetResult(!0),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter].MoveNext(),
-        module: System.Net.Security.il
+        module: System.Net.Security.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       },
       {
         function: System.Net.Sockets.SocketAsyncEventArgs+<>c.<.cctor>b__179_0(unsigned int32,unsigned int32,value class System.Threading.NativeOverlapped*),
-        module: System.Net.Sockets.il
+        module: System.Net.Sockets.il,
+        in_app: false
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: Program.<Main>() {QuickJitted},
-        module: Sentry.Samples.Console.Customized
+        module: Sentry.Samples.Console.Customized,
+        in_app: true
       },
       {
         function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
-        module: System.Private.CoreLib.il
+        module: System.Private.CoreLib.il,
+        in_app: false
       }
     ],
     samples: [

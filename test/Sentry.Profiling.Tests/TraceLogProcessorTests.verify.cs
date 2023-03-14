@@ -1,4 +1,3 @@
-using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 
 namespace Sentry.Profiling.Tests;
@@ -48,7 +47,7 @@ public class TraceLogProcessorTests
         // .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
 
         using var eventLog = new TraceLog(etlxFilePath);
-        var processor = new TraceLogProcessor(eventLog);
+        var processor = new TraceLogProcessor(new(), eventLog);
         return processor.Process(CancellationToken.None);
     }
 
