@@ -295,10 +295,10 @@ public class SentryOptionsExtensionsTests
     }
 
     [Theory]
-    [InlineData("Microsoft.")]
-    [InlineData("System.")]
-    [InlineData("FSharp.")]
-    [InlineData("Giraffe.")]
+    [InlineData("Microsoft")]
+    [InlineData("System")]
+    [InlineData("FSharp")]
+    [InlineData("Giraffe")]
     [InlineData("Newtonsoft.Json")]
     public void Integrations_Includes_MajorSystemPrefixes(string expected)
     {

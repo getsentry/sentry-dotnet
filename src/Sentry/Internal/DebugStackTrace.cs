@@ -280,6 +280,7 @@ internal class DebugStackTrace : SentryStackTrace
             // In Enhanced mode, Module (which in this case is the Namespace)
             // is already prepended to the function, after return type.
             // Removing here at the end because this is used to resolve InApp=true/false
+            // TODO what is this really about? we have already run ConfigureAppFrame() at this time...
             frame.Module = null;
         }
 
@@ -314,7 +315,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   RemotePrinterService in UpdateNotification at line 457:13
 
         var match = RegexAsyncFunctionName.Match(frame.Module);
-        if (match is {Success: true, Groups.Count: 3})
+        if (match is { Success: true, Groups.Count: 3 })
         {
             frame.Module = match.Groups[1].Value;
             frame.Function = match.Groups[2].Value;
@@ -339,7 +340,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   BeginInvokeAsynchronousActionMethod { <lambda> }
 
         var match = RegexAnonymousFunction.Match(frame.Function);
-        if (match is {Success: true, Groups.Count: 2})
+        if (match is { Success: true, Groups.Count: 2 })
         {
             frame.Function = match.Groups[1].Value + " { <lambda> }";
         }
@@ -363,7 +364,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   System.Threading.Tasks.Task`1 in InnerInvoke`
         //   or System.Collections.Generic.List`1 in get_Item
         var match = RegexAsyncReturn.Match(frame.Module);
-        if (match is {Success: true, Groups.Count: 2})
+        if (match is { Success: true, Groups.Count: 2 })
         {
             frame.Module = match.Groups[1].Value;
         }
@@ -429,41 +430,41 @@ internal class DebugStackTrace : SentryStackTrace
             switch (entry.Type)
             {
                 case DebugDirectoryEntryType.PdbChecksum:
-                {
-                    var checksum = peReader.ReadPdbChecksumDebugDirectoryData(entry);
-                    var checksumHex = checksum.Checksum.AsSpan().ToHexString();
-                    debugChecksum = $"{checksum.AlgorithmName}:{checksumHex}";
-                    break;
-                }
+                    {
+                        var checksum = peReader.ReadPdbChecksumDebugDirectoryData(entry);
+                        var checksumHex = checksum.Checksum.AsSpan().ToHexString();
+                        debugChecksum = $"{checksum.AlgorithmName}:{checksumHex}";
+                        break;
+                    }
 
                 case DebugDirectoryEntryType.CodeView:
-                {
-                    var codeView = peReader.ReadCodeViewDebugDirectoryData(entry);
-                    debugFile = codeView.Path;
-
-                    // Specification:
-                    // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
-                    //
-                    // See also:
-                    // https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype
-                    //
-                    // Note: Matching PDB ID is stored in the #Pdb stream of the .pdb file.
-
-                    if (entry.IsPortableCodeView)
                     {
-                        // Portable PDB Format
-                        // Version Major=any, Minor=0x504d
-                        debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
-                    }
-                    else
-                    {
-                        // Full PDB Format (Windows only)
-                        // Version Major=0, Minor=0
-                        debugId = $"{codeView.Guid}-{codeView.Age}";
-                    }
+                        var codeView = peReader.ReadCodeViewDebugDirectoryData(entry);
+                        debugFile = codeView.Path;
 
-                    break;
-                }
+                        // Specification:
+                        // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
+                        //
+                        // See also:
+                        // https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype
+                        //
+                        // Note: Matching PDB ID is stored in the #Pdb stream of the .pdb file.
+
+                        if (entry.IsPortableCodeView)
+                        {
+                            // Portable PDB Format
+                            // Version Major=any, Minor=0x504d
+                            debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
+                        }
+                        else
+                        {
+                            // Full PDB Format (Windows only)
+                            // Version Major=0, Minor=0
+                            debugId = $"{codeView.Guid}-{codeView.Age}";
+                        }
+
+                        break;
+                    }
             }
 
             if (debugId != null && debugChecksum != null)

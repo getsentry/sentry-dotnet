@@ -628,7 +628,7 @@ public class SentryOptions
 
     // The default propagation list will match anything, but adding to the list should clear that.
     private IList<TracePropagationTarget> _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
-        (new[] {new TracePropagationTarget(".*")}, clearOnNextAdd: true);
+        (new[] { new TracePropagationTarget(".*") }, clearOnNextAdd: true);
 
     /// <summary>
     /// A customizable list of <see cref="TracePropagationTarget"/> objects, each containing either a
@@ -861,15 +861,15 @@ public class SentryOptions
     {
         SettingLocator = new SettingLocator(this);
 
-        EventProcessorsProviders = new () {
+        EventProcessorsProviders = new() {
             () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
         };
 
-        TransactionProcessorsProviders = new () {
+        TransactionProcessorsProviders = new() {
             () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
         };
 
-        ExceptionProcessorsProviders = new () {
+        ExceptionProcessorsProviders = new() {
             () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
         };
 
@@ -879,17 +879,17 @@ public class SentryOptions
 
         ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
-        EventProcessors = new (){
+        EventProcessors = new(){
             // De-dupe to be the first to run
             new DuplicateEventDetectionEventProcessor(this),
             new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
         };
 
-        ExceptionProcessors = new (){
+        ExceptionProcessors = new(){
             new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)
         };
 
-        Integrations = new () {
+        Integrations = new() {
             // Auto-session tracking to be the first to run
             new AutoSessionTrackingIntegration(),
             new AppDomainUnhandledExceptionIntegration(),
@@ -920,16 +920,16 @@ public class SentryOptions
         iOS = new IosOptions(this);
 #endif
 
-        InAppExclude = new () {
-                "System.",
-                "Mono.",
-                "Sentry.",
-                "Microsoft.",
+        InAppExclude = new() {
+                "System",
+                "Mono",
+                "Sentry",
+                "Microsoft",
                 "MS", // MS.Win32, MS.Internal, etc: Desktop apps
                 "Newtonsoft.Json",
-                "FSharp.",
+                "FSharp",
                 "Serilog",
-                "Giraffe.",
+                "Giraffe",
                 "NLog",
                 "Npgsql",
                 "RabbitMQ",
@@ -947,9 +947,9 @@ public class SentryOptions
                 "IdentityModel",
                 "SqlitePclRaw",
                 "Xamarin",
-                "Android.", // Ex: Android.Runtime.JNINativeWrapper...
-                "Google.",
-                "MongoDB.",
+                "Android", // Ex: Android.Runtime.JNINativeWrapper...
+                "Google",
+                "MongoDB",
                 "Remotion.Linq",
                 "AutoMapper",
                 "Nest",
@@ -963,7 +963,7 @@ public class SentryOptions
 #if DEBUG
         InAppInclude = new()
         {
-            "Sentry.Samples."
+            "Sentry.Samples"
         };
 #endif
     }

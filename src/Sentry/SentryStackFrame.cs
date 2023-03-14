@@ -182,20 +182,40 @@ public sealed class SentryStackFrame : IJsonSerializable
     /// <remarks><see cref="InApp"/> will remain with the same value if previously set.</remarks>
     public void ConfigureAppFrame(SentryOptions options)
     {
-        var parameterName = Module ?? Function;
         if (InApp != null)
         {
             return;
         }
 
-        if (string.IsNullOrEmpty(parameterName))
+        if (!string.IsNullOrEmpty(Module))
+        {
+            ConfigureAppFrame(options, Module, mustIncludeSeparator: false);
+        }
+        else if (!string.IsNullOrEmpty(Function))
+        {
+            ConfigureAppFrame(options, Function, mustIncludeSeparator: true);
+        }
+        else
         {
             InApp = true;
-            return;
         }
+    }
 
-        InApp = options.InAppInclude?.Any(include => parameterName.StartsWith(include, StringComparison.Ordinal)) == true ||
-                options.InAppExclude?.Any(exclude => parameterName.StartsWith(exclude, StringComparison.Ordinal)) != true;
+    private void ConfigureAppFrame(SentryOptions options, string parameter, bool mustIncludeSeparator)
+    {
+        var resolver = (string prefix) =>
+        {
+            if (parameter.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                if (mustIncludeSeparator)
+                {
+                    return parameter.Length > prefix.Length && parameter[prefix.Length] == '.';
+                }
+                return true;
+            }
+            return false;
+        };
+        InApp = options.InAppInclude?.Any(resolver) == true || options.InAppExclude?.Any(resolver) != true;
     }
 
     /// <summary>
