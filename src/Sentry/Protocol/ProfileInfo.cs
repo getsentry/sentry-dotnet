@@ -73,7 +73,8 @@ internal sealed class ProfileInfo : IJsonSerializable
         if (Transaction is not null)
         {
             writer.WriteStartObject("transaction");
-            writer.WriteString("active_thread_id", "0"); // TODO
+            // TODO try to find out transaction thread ID and map that to an index.
+            writer.WriteString("active_thread_id", Profile.Threads.Keys().First().ToString());
             writer.WriteSerializable("id", Transaction.EventId, logger);
             writer.WriteString("name", Transaction.Name);
             writer.WriteSerializable("trace_id", Transaction.TraceId, logger);
