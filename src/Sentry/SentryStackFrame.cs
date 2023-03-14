@@ -182,12 +182,12 @@ public sealed class SentryStackFrame : IJsonSerializable
     /// <remarks><see cref="InApp"/> will remain with the same value if previously set.</remarks>
     public void ConfigureAppFrame(SentryOptions options)
     {
-        var parameterName = Module ?? Function;
         if (InApp != null)
         {
             return;
         }
 
+        var parameterName = Module ?? Function;
         if (string.IsNullOrEmpty(parameterName))
         {
             InApp = true;
