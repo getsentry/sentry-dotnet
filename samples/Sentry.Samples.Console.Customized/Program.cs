@@ -83,7 +83,7 @@ internal static class Program
             o.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
             // Enable SDK logging with Debug level
-            o.Debug = false;
+            o.Debug = true;
             // To change the verbosity, use:
             // o.DiagnosticLevel = SentryLevel.Info;
             // To use a custom logger:

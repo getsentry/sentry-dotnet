@@ -102,10 +102,10 @@
                 "name": "Sentry!Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2\u003cclass System.String,class System.Object\u003e,class Sentry.DynamicSamplingContext)"
             },
             {
-                "name": "Sentry.Profiling!SamplingTransactionProfiler.OnTransactionStart(class Sentry.ITransaction)"
+                "name": "Sentry.Extensions.Profiling!SamplingTransactionProfiler.OnTransactionStart(class Sentry.ITransaction)"
             },
             {
-                "name": "Sentry.Profiling!ProfilerSession..ctor(class System.Object)"
+                "name": "Sentry.Extensions.Profiling!ProfilerSession..ctor(class System.Object)"
             },
             {
                 "name": "Microsoft.Diagnostics.NETCore.Client!Microsoft.Diagnostics.NETCore.Client.DiagnosticsClient.StartEventPipeSession(class System.Collections.Generic.IEnumerable`1\u003cclass Microsoft.Diagnostics.NETCore.Client.EventPipeProvider\u003e,bool,int32)"

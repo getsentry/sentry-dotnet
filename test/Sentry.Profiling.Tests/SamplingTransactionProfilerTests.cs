@@ -2,6 +2,9 @@ using Sentry.Internal.Http;
 
 namespace Sentry.Profiling.Tests;
 
+// Note: we must not run tests in parallel because we only support profiling one transaction at a time.
+// That means setting up a test-collection with parallelization disabled and NOT using any async test functions.
+[CollectionDefinition("SamplingProfiler tests", DisableParallelization = true)]
 public class SamplingTransactionProfilerTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
@@ -56,7 +59,7 @@ public class SamplingTransactionProfilerTests
     }
 
     [Fact]
-    public async void Profiler_StartedNormally_Works()
+    public void Profiler_StartedNormally_Works()
     {
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
@@ -70,13 +73,15 @@ public class SamplingTransactionProfilerTests
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
         var transaction = new Transaction(transactionTracer);
-        var profileInfo = await sut.Collect(transaction);
+        var collectTask = sut.Collect(transaction);
+        collectTask.Wait();
+        var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
         ValidateProfile(profileInfo.Profile, elapsedNanoseconds);
     }
 
     [Fact]
-    public async void Profiler_AfterTimeout_Stops()
+    public void Profiler_AfterTimeout_Stops()
     {
         var hub = Substitute.For<IHub>();
 
@@ -87,7 +92,9 @@ public class SamplingTransactionProfilerTests
         clock.Elapsed.TotalMilliseconds.Should().BeGreaterThan(limitMs * 4);
         sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
 
-        var profileInfo = await sut.Collect(new Transaction("foo", "bar"));
+        var collectTask = sut.Collect(new Transaction("foo", "bar"));
+        collectTask.Wait();
+        var profileInfo = collectTask.Result;
 
         Assert.NotNull(profileInfo);
         ValidateProfile(profileInfo.Profile, (ulong)(limitMs * 1_000_000));
@@ -96,7 +103,7 @@ public class SamplingTransactionProfilerTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
+    public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
     {
         var tcs = new TaskCompletionSource<string>();
         async Task VerifyAsync(HttpRequestMessage message)
@@ -150,11 +157,11 @@ public class SamplingTransactionProfilerTests
             tx.Finish();
             var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
-            await hub.FlushAsync();
+            hub.FlushAsync().Wait();
 
             // Synchronizing in the tests to go through the caching and http transports
             cts.CancelAfter(options.FlushTimeout + TimeSpan.FromSeconds(1));
-            var ex = await Record.ExceptionAsync(() => tcs.Task);
+            var ex = Record.Exception(() => tcs.Task.Wait());
             Assert.Null(ex);
             Assert.True(tcs.Task.IsCompleted);
 
@@ -180,13 +187,13 @@ public class SamplingTransactionProfilerTests
         {
             // ensure the task is complete before leaving the test
             tcs.TrySetResult("");
-            await tcs.Task;
+            tcs.Task.Wait();
 
             if (options.Transport is CachingTransport cachingTransport)
             {
                 // Disposing the caching transport will ensure its worker
                 // is shut down before we try to dispose and delete the temp folder
-                await cachingTransport.DisposeAsync();
+                cachingTransport.Dispose();
             }
         }
     }

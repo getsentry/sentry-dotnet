@@ -10,7 +10,7 @@ public static class ApiExtensions
     {
         var generatorOptions = new ApiGeneratorOptions
         {
-            ExcludeAttributes = new []
+            ExcludeAttributes = new[]
             {
               typeof(AssemblyVersionAttribute).FullName,
               typeof(AssemblyFileVersionAttribute).FullName,

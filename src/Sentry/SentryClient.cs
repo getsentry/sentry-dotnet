@@ -304,7 +304,7 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     /// <param name="envelope">The envelope.</param>
     /// <returns>true if the enveloped was queued, false otherwise.</returns>
-    public bool CaptureEnvelope(Envelope envelope)
+    private bool CaptureEnvelope(Envelope envelope)
     {
         if (Worker.EnqueueEnvelope(envelope))
         {
