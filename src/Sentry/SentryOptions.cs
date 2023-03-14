@@ -863,21 +863,15 @@ public class SentryOptions
     {
         SettingLocator = new SettingLocator(this);
 
-        EventProcessorsProviders = new()
-        {
-            EventProcessorsProviders = new() {
+        EventProcessorsProviders = new() {
             () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
         };
 
-        TransactionProcessorsProviders = new()
-        {
-            TransactionProcessorsProviders = new() {
+        TransactionProcessorsProviders = new() {
             () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
         };
 
-        ExceptionProcessorsProviders = new()
-        {
-            ExceptionProcessorsProviders = new() {
+        ExceptionProcessorsProviders = new() {
             () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
         };
 
@@ -887,9 +881,7 @@ public class SentryOptions
 
         ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
-        EventProcessors = new()
-        {
-            EventProcessors = new(){
+        EventProcessors = new(){
             // De-dupe to be the first to run
             new DuplicateEventDetectionEventProcessor(this),
             new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
