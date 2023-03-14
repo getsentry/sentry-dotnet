@@ -55,3 +55,9 @@ var etlFilePath = Path.Combine(_resourcesPath, "profile-with-task.nettrace");
 var etlxFilePath = Path.ChangeExtension(etlFilePath, ".etlx");
 TraceLog.CreateFromEventTraceLogFile(etlFilePath, etlxFilePath);
 ```
+
+And for reference, you can create a JSON that can be displayed by [SpeedScope](https://speedscope.app):
+
+```shell-script
+dotnet-trace convert profile-with-task.nettrace --format Speedscope
+```

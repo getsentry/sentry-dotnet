@@ -35,11 +35,6 @@ internal sealed class HashableGrowableArray<T> : IEnumerable<T>, IEquatable<Hash
 
     public int Count => _items.Count;
 
-    //
-    // Summary:
-    //     Returns the underlying array. Should not be used most of the time!
-    public GrowableArray<T> UnderlyingArray => _items;
-
     /// <summary>
     /// Seal this array so that it cannot be changed anymore and can be hashed.
     /// </summary>

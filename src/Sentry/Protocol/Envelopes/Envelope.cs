@@ -5,8 +5,6 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol.Envelopes;
 
-using AsyncEnvelopeItem = Task<EnvelopeItem?>;
-
 /// <summary>
 /// Envelope.
 /// </summary>
