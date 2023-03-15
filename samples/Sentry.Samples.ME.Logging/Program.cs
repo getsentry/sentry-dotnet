@@ -29,6 +29,9 @@ internal class Program
                 o.AddLogEntryFilter((_, level, _, exception) => level < LogLevel.Critical && exception is DivideByZeroException);
 
                 o.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
+
+                // Enable object destructuring using {@Key} notion
+                o.SupportObjectDestructuring = true;
             });
         });
         var logger = loggerFactory.CreateLogger<Program>();
