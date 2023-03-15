@@ -131,12 +131,12 @@ internal class TraceLogProcessor
             // sample when we schedule or start a task.  That we we get the very instant it starts.
             // TODO does this make sense without "System.Threading.Tasks.TplEventSource" being enabled?
             //      see https://learn.microsoft.com/en-us/dotnet/core/diagnostics/well-known-event-providers#systemthreadingtaskstpleventsource-provider
-            var tplProvider = new TplEtwProviderTraceEventParser(_eventSource);
-            tplProvider.AwaitTaskContinuationScheduledSend += OnSampledProfile;
-            tplProvider.TaskScheduledSend += OnSampledProfile;
-            tplProvider.TaskExecuteStart += OnSampledProfile;
-            tplProvider.TaskWaitSend += OnSampledProfile;
-            tplProvider.TaskWaitStop += OnTaskUnblock;  // Log the activity stack even if you don't have a stack.
+            // var tplProvider = new TplEtwProviderTraceEventParser(_eventSource);
+            // tplProvider.AwaitTaskContinuationScheduledSend += OnSampledProfile;
+            // tplProvider.TaskScheduledSend += OnSampledProfile;
+            // tplProvider.TaskExecuteStart += OnSampledProfile;
+            // tplProvider.TaskWaitSend += OnSampledProfile;
+            // tplProvider.TaskWaitStop += OnTaskUnblock;  // Log the activity stack even if you don't have a stack.
         }
 
         // if (true) // GroupByStartStopActivity
@@ -216,8 +216,8 @@ internal class TraceLogProcessor
         //     };
         // }
 
-        _eventSource.Clr.GCAllocationTick += OnSampledProfile;
-        _eventSource.Clr.GCSampledObjectAllocation += OnSampledProfile;
+        // _eventSource.Clr.GCAllocationTick += OnSampledProfile;
+        // _eventSource.Clr.GCSampledObjectAllocation += OnSampledProfile;
 
         var sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
         sampleEventParser.ThreadSample += OnSampledProfile;
@@ -393,11 +393,10 @@ internal class TraceLogProcessor
     /// <summary>
     /// Adds stack trace and frames, if missing.
     /// </summary>
-    /// <param name="callstackIndex"></param>
     /// <returns>The index into the Profile's stacks list</returns>
     private int AddStackTrace(StackSourceCallStackIndex callstackIndex)
     {
-        SentryProfileStackTrace stackTrace = new(5);
+        SentryProfileStackTrace stackTrace = new(10);
         StackSourceFrameIndex tlFrameIndex;
         while (callstackIndex != StackSourceCallStackIndex.Invalid)
         {
@@ -430,9 +429,10 @@ internal class TraceLogProcessor
             stackTrace.Seal();
             if (!_stackIndexes.TryGetValue(stackTrace, out result))
             {
-                stackTrace.Trim(5);
+                stackTrace.Trim(10);
                 _profile.Stacks.Add(stackTrace);
-                _stackIndexes[stackTrace] = _profile.Stacks.Count - 1;
+                result = _profile.Stacks.Count - 1;
+                _stackIndexes[stackTrace] = result;
             }
         }
 

@@ -1,31 +1,31 @@
 ﻿{
   thread_metadata: {
     2: {
-      name: Thread 2
+      name: Thread 8548
     },
     3: {
-      name: Thread 3
+      name: Thread 25632
     },
     4: {
-      name: Thread 4
+      name: Thread 8088
     },
     5: {
-      name: Thread 5
+      name: Thread 12624
     },
     6: {
-      name: Thread 6
+      name: Thread 38228
     },
     8: {
-      name: Thread 8
+      name: Thread 28044
     },
     9: {
-      name: Thread 9
+      name: Thread 19604
     },
     11: {
-      name: Thread 11
+      name: Thread 5232
     },
     12: {
-      name: Thread 12
+      name: Thread 26136
     }
   },
   stacks: [
@@ -817,12 +817,12 @@
     {
       function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext) {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>) {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: Program+<Main>d__2.MoveNext() {Optimized},
@@ -862,7 +862,7 @@
     {
       function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler+<SendAsync>d__3.MoveNext() {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
@@ -877,7 +877,7 @@
     {
       function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Net.Http.DelegatingHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
@@ -887,12 +887,12 @@
     {
       function: Sentry.Internal.Http.RetryAfterHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: Sentry.Internal.Http.RetryAfterHandler+<SendAsync>d__8.MoveNext() {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
@@ -907,7 +907,7 @@
     {
       function: Sentry.Internal.Http.RetryAfterHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Net.Http.HttpMessageInvoker.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
@@ -947,7 +947,7 @@
     {
       function: Sentry.Internal.Http.HttpTransport+<SendEnvelopeAsync>d__3.MoveNext() {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
@@ -962,12 +962,12 @@
     {
       function: Sentry.Internal.Http.HttpTransport.SendEnvelopeAsync(class Sentry.Protocol.Envelopes.Envelope,value class System.Threading.CancellationToken) {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20.MoveNext() {Optimized},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].ExecutionContextCallback(class System.Object) {QuickJitted},
@@ -1152,7 +1152,7 @@
     {
       function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
       module: Sentry,
-      in_app: true
+      in_app: false
     },
     {
       function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
@@ -1904,27 +1904,27 @@
     {
       elapsed_since_start_ns: 382500,
       thread_id: 3,
-      stack_id: 0
+      stack_id: 1
     },
     {
       elapsed_since_start_ns: 388300,
       thread_id: 4,
-      stack_id: 0
+      stack_id: 2
     },
     {
       elapsed_since_start_ns: 396700,
       thread_id: 5,
-      stack_id: 0
+      stack_id: 3
     },
     {
       elapsed_since_start_ns: 420000,
       thread_id: 6,
-      stack_id: 0
+      stack_id: 4
     },
     {
       elapsed_since_start_ns: 10531200,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 5
     },
     {
       elapsed_since_start_ns: 10534300,
@@ -1939,27 +1939,27 @@
     {
       elapsed_since_start_ns: 10539200,
       thread_id: 5,
-      stack_id: 0
+      stack_id: 6
     },
     {
       elapsed_since_start_ns: 10561400,
       thread_id: 6,
-      stack_id: 0
+      stack_id: 7
     },
     {
       elapsed_since_start_ns: 10565500,
       thread_id: 8,
-      stack_id: 0
+      stack_id: 8
     },
     {
       elapsed_since_start_ns: 10567800,
       thread_id: 9,
-      stack_id: 0
+      stack_id: 9
     },
     {
       elapsed_since_start_ns: 20546400,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 10
     },
     {
       elapsed_since_start_ns: 20549200,
@@ -1974,12 +1974,12 @@
     {
       elapsed_since_start_ns: 20562000,
       thread_id: 5,
-      stack_id: 0
+      stack_id: 11
     },
     {
       elapsed_since_start_ns: 20576800,
       thread_id: 6,
-      stack_id: 0
+      stack_id: 12
     },
     {
       elapsed_since_start_ns: 20580900,
@@ -1994,7 +1994,7 @@
     {
       elapsed_since_start_ns: 30595000,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 13
     },
     {
       elapsed_since_start_ns: 30597200,
@@ -2029,7 +2029,7 @@
     {
       elapsed_since_start_ns: 40555300,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 14
     },
     {
       elapsed_since_start_ns: 40558200,
@@ -2064,7 +2064,7 @@
     {
       elapsed_since_start_ns: 50543900,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 15
     },
     {
       elapsed_since_start_ns: 50546400,
@@ -2099,7 +2099,7 @@
     {
       elapsed_since_start_ns: 60537200,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 16
     },
     {
       elapsed_since_start_ns: 60539300,
@@ -2134,7 +2134,7 @@
     {
       elapsed_since_start_ns: 71059300,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 17
     },
     {
       elapsed_since_start_ns: 71062100,
@@ -2169,7 +2169,7 @@
     {
       elapsed_since_start_ns: 79033700,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 18
     },
     {
       elapsed_since_start_ns: 79035800,
@@ -2204,7 +2204,7 @@
     {
       elapsed_since_start_ns: 89089600,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 19
     },
     {
       elapsed_since_start_ns: 89091900,
@@ -2239,7 +2239,7 @@
     {
       elapsed_since_start_ns: 99119600,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 20
     },
     {
       elapsed_since_start_ns: 99121600,
@@ -2274,7 +2274,7 @@
     {
       elapsed_since_start_ns: 109421400,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 21
     },
     {
       elapsed_since_start_ns: 109424400,
@@ -2309,7 +2309,7 @@
     {
       elapsed_since_start_ns: 119179200,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 22
     },
     {
       elapsed_since_start_ns: 119181700,
@@ -2344,7 +2344,7 @@
     {
       elapsed_since_start_ns: 129270900,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 23
     },
     {
       elapsed_since_start_ns: 129272400,
@@ -2379,7 +2379,7 @@
     {
       elapsed_since_start_ns: 139257100,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 24
     },
     {
       elapsed_since_start_ns: 139260100,
@@ -2404,7 +2404,7 @@
     {
       elapsed_since_start_ns: 139279500,
       thread_id: 11,
-      stack_id: 0
+      stack_id: 25
     },
     {
       elapsed_since_start_ns: 139285100,
@@ -2419,7 +2419,7 @@
     {
       elapsed_since_start_ns: 149228100,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 26
     },
     {
       elapsed_since_start_ns: 149230100,
@@ -2444,7 +2444,7 @@
     {
       elapsed_since_start_ns: 149248600,
       thread_id: 11,
-      stack_id: 0
+      stack_id: 27
     },
     {
       elapsed_since_start_ns: 149251800,
@@ -2459,7 +2459,7 @@
     {
       elapsed_since_start_ns: 159228000,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 28
     },
     {
       elapsed_since_start_ns: 159230700,
@@ -2494,7 +2494,7 @@
     {
       elapsed_since_start_ns: 169234400,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 29
     },
     {
       elapsed_since_start_ns: 169239500,
@@ -2519,7 +2519,7 @@
     {
       elapsed_since_start_ns: 169256800,
       thread_id: 11,
-      stack_id: 0
+      stack_id: 30
     },
     {
       elapsed_since_start_ns: 169260300,
@@ -2534,7 +2534,7 @@
     {
       elapsed_since_start_ns: 179314900,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 31
     },
     {
       elapsed_since_start_ns: 179317300,
@@ -2569,7 +2569,7 @@
     {
       elapsed_since_start_ns: 189327200,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 32
     },
     {
       elapsed_since_start_ns: 189329800,
@@ -2604,7 +2604,7 @@
     {
       elapsed_since_start_ns: 199304600,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 33
     },
     {
       elapsed_since_start_ns: 199306600,
@@ -2639,7 +2639,7 @@
     {
       elapsed_since_start_ns: 209304400,
       thread_id: 2,
-      stack_id: 0
+      stack_id: 34
     },
     {
       elapsed_since_start_ns: 209305900,
@@ -2674,7 +2674,7 @@
     {
       elapsed_since_start_ns: 209316200,
       thread_id: 12,
-      stack_id: 0
+      stack_id: 35
     },
     {
       elapsed_since_start_ns: 217322600,

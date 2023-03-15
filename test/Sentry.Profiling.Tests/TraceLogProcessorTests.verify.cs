@@ -19,15 +19,15 @@ public class TraceLogProcessorTests
     // [Fact]
     // public void ManualDebugging()
     // {
-    //     var etlFilePath = "C:/dev/dotnet/temp/f806155815dd40969608324788cf371b.nettrace";
+    //     var etlFilePath = "C:/dev/Aura.UI/profile.nettrace";
     //     var etlxFilePath = Path.ChangeExtension(etlFilePath, ".etlx");
     //     if (!File.Exists(etlxFilePath))
     //     {
     //         TraceLog.CreateFromEventTraceLogFile(etlFilePath, etlxFilePath);
     //     }
     //     using var eventLog = new TraceLog(etlxFilePath);
-    //     var processor = new TraceLogProcessor(eventLog);
-    //     var profile = processor.Process();
+    //     var processor = new TraceLogProcessor(new(), eventLog);
+    //     var profile = processor.Process(CancellationToken.None);
     //     var json = profile.ToJsonString(_testOutputLogger);
     // }
 
