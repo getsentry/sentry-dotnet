@@ -17,7 +17,7 @@ public class SentryLoggerTests
             Hub.ConfigureScope(Arg.Invoke(Scope));
         }
 
-        public SentryLogger GetSut() => new(CategoryName, Options, new MockClock(), Hub);
+        public SentryLogger GetSut() => new(CategoryName, Options, new MockClock(), Hub, SentryLoggerFormatter.Instance);
     }
 
     private readonly Fixture _fixture = new();
@@ -530,5 +530,50 @@ public class SentryLoggerTests
         var actual = sut.BeginScope("state");
 
         Assert.Same(actual, expected);
+    }
+
+    [Fact]
+    public void Log_SupportObjectDestructuring_enabled_SentryEvent()
+    {
+        const string template = "message with {@Obj}";
+
+        _fixture.Options.SupportObjectDestructuring = true;
+
+        SentryEvent capturedSentryEvent = null;
+        _fixture.Hub.CaptureEvent(Arg.Do<SentryEvent>(x => capturedSentryEvent = x));
+
+        var sut = _fixture.GetSut();
+
+        var parameter = new TestClass { Prop = "abc"};
+        var formattedMessage = template.Replace("{@Obj}", JsonSerializer.Serialize(parameter));
+
+        sut.LogCritical(template, parameter);
+
+        capturedSentryEvent.Message?.Message.Should().Be(template);
+        capturedSentryEvent.Message?.Formatted.Should().Be(formattedMessage);
+    }
+
+    [Fact]
+    public void Log_SupportObjectDestructuring_enabled_Breadcrumb()
+    {
+        const string template = "message with {@Obj}";
+
+        _fixture.Options.SupportObjectDestructuring = true;
+
+        var sut = _fixture.GetSut();
+
+        var parameter = new TestClass { Prop = "abc"};
+        var formattedMessage = template.Replace("{@Obj}", JsonSerializer.Serialize(parameter));
+
+        sut.LogCritical(template, parameter);
+
+        var breadcrumb = _fixture.Scope.Breadcrumbs.First();
+
+        breadcrumb.Message.Should().Be(formattedMessage);
+    }
+
+    private class TestClass
+    {
+        public string Prop { get; set; }
     }
 }

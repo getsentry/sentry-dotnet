@@ -6,21 +6,23 @@ namespace Sentry.Extensions.Logging;
 internal sealed class SentryLogger : ILogger
 {
     private readonly IHub _hub;
+    private readonly SentryLoggerFormatter _sentryLoggerFormatter;
     private readonly ISystemClock _clock;
     private readonly SentryLoggingOptions _options;
 
     internal string CategoryName { get; }
 
-    internal SentryLogger(
-        string categoryName,
+    internal SentryLogger(string categoryName,
         SentryLoggingOptions options,
         ISystemClock clock,
-        IHub hub)
+        IHub hub,
+        SentryLoggerFormatter sentryLoggerFormatter)
     {
         CategoryName = categoryName;
         _options = options;
         _clock = clock;
         _hub = hub;
+        _sentryLoggerFormatter = sentryLoggerFormatter;
     }
 
     public IDisposable BeginScope<TState>(TState state) => _hub.PushScope(state);
@@ -43,10 +45,9 @@ internal sealed class SentryLogger : ILogger
             return;
         }
 
-        // TBD: If Sentry options contains an override for the formatter, use it instead of the default passed in
-        //var message = formatter?.Invoke(state, exception);
-        var sentryFormatter = new SentryLoggerFormatter();
-        var message = sentryFormatter.Invoke(state);
+        var message = _options.SupportObjectDestructuring
+            ? _sentryLoggerFormatter.Invoke(state)
+            : formatter?.Invoke(state, exception);
 
         if (ShouldCaptureEvent(logLevel, eventId, exception))
         {

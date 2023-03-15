@@ -34,8 +34,7 @@ public class SentryLoggerProvider : ILoggerProvider
             options.Value)
     { }
 
-    internal SentryLoggerProvider(
-        IHub hub,
+    internal SentryLoggerProvider(IHub hub,
         ISystemClock clock,
         SentryLoggingOptions options)
     {
@@ -75,7 +74,7 @@ public class SentryLoggerProvider : ILoggerProvider
     /// </summary>
     /// <param name="categoryName">Category name.</param>
     /// <returns>A logger.</returns>
-    public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub);
+    public ILogger CreateLogger(string categoryName) => new SentryLogger(categoryName, _options, _clock, Hub, SentryLoggerFormatter.Instance);
 
     /// <summary>
     /// Dispose.

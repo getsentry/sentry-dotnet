@@ -2,6 +2,10 @@
 
 internal class SentryLoggerFormatter
 {
+    public static readonly SentryLoggerFormatter Instance = new();
+
+    private SentryLoggerFormatter() {}
+
     public string Invoke<TState>(TState state)
     {
         var dictionary = (state as IEnumerable<KeyValuePair<string, object>>)?.ToDictionary(i => i.Key, i => i.Value) ?? new Dictionary<string, object>();
@@ -24,21 +28,20 @@ internal class SentryLoggerFormatter
             var parameterKey = $"{{{key}}}";
 
             // Regular key
-            if (!key.StartsWith("@", StringComparison.OrdinalIgnoreCase))
+            if (!key.StartsWith("@", StringComparison.OrdinalIgnoreCase)
+                && dictionary.TryGetValue(key, out var parameterValue))
             {
-                if (dictionary.TryGetValue(key, out var obj))
-                {
-                    entry = entry.Replace(parameterKey, obj.ToString());
-                    continue;
-                }
+                entry = entry.Replace(parameterKey, parameterValue.ToString());
+                continue;
             }
 
-            // Object notation key
+            // Skip a key that's not found in the parameter objects collection
             if (!entry.Contains(parameterKey))
             {
                 continue;
             }
 
+            // Object destructuring key
             if (dictionary.TryGetValue(key, out var parameterObject))
             {
                 var serializedParameterObject = JsonSerializer.Serialize(parameterObject);

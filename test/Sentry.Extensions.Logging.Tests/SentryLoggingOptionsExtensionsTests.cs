@@ -30,4 +30,10 @@ public class SentryLoggingOptionsExtensionsTests
 
         Assert.Equal(expected, target.Tags[key]);
     }
+
+    [Fact]
+    public void SupportObjectDestructuring_disabled_by_default()
+    {
+        _sut.SupportObjectDestructuring.Should().BeFalse();
+    }
 }

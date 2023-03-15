@@ -48,4 +48,29 @@ public class SentryLoggingOptions : SentryOptions
     /// List of callbacks to be invoked when initializing the SDK
     /// </summary>
     internal Action<Scope>[] ConfigureScopeCallbacks { get; set; } = Array.Empty<Action<Scope>>();
+
+    /// <summary>
+    /// Gets or sets if logged object structure should be preserved. Disabled by default.
+    /// <remarks>Enable JSON object formatting with destructuring operator '@' for class-based object.</remarks>
+    /// <example>
+    /// namespace MyNamespace;
+    /// class MyClass
+    /// {
+    ///   public string MyProperty { get; set; }
+    /// }
+    ///
+    /// var obj = new MyClass { MyProperty = "testing" };
+    ///
+    /// // Enabled
+    /// sentryLoggingOptions.FormatLogParametersAsJson = true;
+    /// logger.LogInformation("Logged object: {Obj}, logged destructed object: {@Obj}", );
+    /// // logs: `Logged object: MyNamespace.MyClass, logged destructed object: { MyProperty: "testing" }`
+    ///
+    /// // Disabled
+    /// sentryLoggingOptions.FormatLogParametersAsJson = false;
+    /// logger.LogInformation("{Obj} {@Obj}");
+    /// // logs: `Logged object: MyNamespace.MyClass, logged destructed object: MyNamespace.MyClass`
+    /// </example>
+    /// </summary>
+    public bool SupportObjectDestructuring { get; set; }
 }
