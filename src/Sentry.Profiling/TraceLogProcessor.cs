@@ -492,14 +492,15 @@ internal class TraceLogProcessor
             }
 
             // Displays the optimization tier of each code version executed for the method. E.g. "QuickJitted"
-            if (frame.Function is not null)
-            {
-                var optimizationTier = _traceLog.CodeAddresses.OptimizationTier(codeAddressIndex);
-                if (optimizationTier != Microsoft.Diagnostics.Tracing.Parsers.Clr.OptimizationTier.Unknown)
-                {
-                    frame.Function = $"{frame.Function} {{{optimizationTier}}}";
-                }
-            }
+            // Doesn't seem very useful (not much users can do with this information) so disabling for now.
+            // if (frame.Function is not null)
+            // {
+            //     var optimizationTier = _traceLog.CodeAddresses.OptimizationTier(codeAddressIndex);
+            //     if (optimizationTier != Microsoft.Diagnostics.Tracing.Parsers.Clr.OptimizationTier.Unknown)
+            //     {
+            //         frame.Function = $"{frame.Function} {{{optimizationTier}}}";
+            //     }
+            // }
 
             frame.ConfigureAppFrame(_options);
         }

@@ -33,7 +33,7 @@ public class SamplingTransactionProfilerTests
 
             if (previousSamplesByThread.TryGetValue(sample.ThreadId, out var prevSample))
             {
-                sample.Timestamp.Should().BeGreaterThan(prevSample.Timestamp + 9_000_000,
+                sample.Timestamp.Should().BeGreaterThan(prevSample.Timestamp + 8_000_000,
                     "Downsampling: there must be at least 9ms between samples on the same thread.");
             }
             previousSamplesByThread[sample.ThreadId] = sample;

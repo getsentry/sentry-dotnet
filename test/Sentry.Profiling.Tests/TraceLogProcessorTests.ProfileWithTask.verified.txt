@@ -717,7 +717,7 @@
       in_app: false
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
@@ -775,62 +775,62 @@
       in_app: false
     },
     {
-      function: Microsoft.Diagnostics.NETCore.Client.IpcHeader.Parse(class System.IO.BinaryReader) {QuickJitted},
+      function: Microsoft.Diagnostics.NETCore.Client.IpcHeader.Parse(class System.IO.BinaryReader),
       module: Microsoft.Diagnostics.NETCore.Client,
       in_app: false
     },
     {
-      function: Microsoft.Diagnostics.NETCore.Client.IpcMessage.Parse(class System.IO.Stream) {QuickJitted},
+      function: Microsoft.Diagnostics.NETCore.Client.IpcMessage.Parse(class System.IO.Stream),
       module: Microsoft.Diagnostics.NETCore.Client,
       in_app: false
     },
     {
-      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.Read(class System.IO.Stream) {QuickJitted},
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.Read(class System.IO.Stream),
       module: Microsoft.Diagnostics.NETCore.Client,
       in_app: false
     },
     {
-      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageGetContinuation(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage) {QuickJitted},
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageGetContinuation(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage),
       module: Microsoft.Diagnostics.NETCore.Client,
       in_app: false
     },
     {
-      function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession.Start(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32) {QuickJitted},
+      function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession.Start(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32),
       module: Microsoft.Diagnostics.NETCore.Client,
       in_app: false
     },
     {
-      function: Microsoft.Diagnostics.NETCore.Client.DiagnosticsClient.StartEventPipeSession(class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32) {QuickJitted},
+      function: Microsoft.Diagnostics.NETCore.Client.DiagnosticsClient.StartEventPipeSession(class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32),
       module: Microsoft.Diagnostics.NETCore.Client,
       in_app: false
     },
     {
-      function: ProfilerSession..ctor(class System.Object) {QuickJitted},
+      function: ProfilerSession..ctor(class System.Object),
       module: Sentry.Extensions.Profiling,
       in_app: false
     },
     {
-      function: SamplingTransactionProfiler.OnTransactionStart(class Sentry.ITransaction) {QuickJitted},
+      function: SamplingTransactionProfiler.OnTransactionStart(class Sentry.ITransaction),
       module: Sentry.Extensions.Profiling,
       in_app: false
     },
     {
-      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext) {QuickJitted},
+      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext),
       module: Sentry,
       in_app: false
     },
     {
-      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>) {QuickJitted},
+      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>),
       module: Sentry,
       in_app: false
     },
     {
-      function: Program+<Main>d__2.MoveNext() {Optimized},
+      function: Program+<Main>d__2.MoveNext(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -840,12 +840,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecuteFromThreadPool(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Program+<Main>d__2].ExecuteFromThreadPool(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -860,22 +860,22 @@
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler+<SendAsync>d__3.MoveNext() {QuickJitted},
+      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler+<SendAsync>d__3.MoveNext(),
       module: Sentry,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
       module: Sentry,
       in_app: false
     },
@@ -885,27 +885,27 @@
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.RetryAfterHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+      function: Sentry.Internal.Http.RetryAfterHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
       module: Sentry,
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.RetryAfterHandler+<SendAsync>d__8.MoveNext() {QuickJitted},
+      function: Sentry.Internal.Http.RetryAfterHandler+<SendAsync>d__8.MoveNext(),
       module: Sentry,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.RetryAfterHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+      function: Sentry.Internal.Http.RetryAfterHandler.SendAsync(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
       module: Sentry,
       in_app: false
     },
@@ -920,12 +920,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -945,32 +945,32 @@
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.HttpTransport+<SendEnvelopeAsync>d__3.MoveNext() {QuickJitted},
+      function: Sentry.Internal.Http.HttpTransport+<SendEnvelopeAsync>d__3.MoveNext(),
       module: Sentry,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.HttpTransport.SendEnvelopeAsync(class Sentry.Protocol.Envelopes.Envelope,value class System.Threading.CancellationToken) {QuickJitted},
+      function: Sentry.Internal.Http.HttpTransport.SendEnvelopeAsync(class Sentry.Protocol.Envelopes.Envelope,value class System.Threading.CancellationToken),
       module: Sentry,
       in_app: false
     },
     {
-      function: Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20.MoveNext() {Optimized},
+      function: Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20.MoveNext(),
       module: Sentry,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -980,12 +980,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,Sentry.Internal.BackgroundWorker+<DoWorkAsync>d__20].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1020,17 +1020,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Boolean,System.Threading.SemaphoreSlim+<WaitUntilCountOrTimeoutAsync>d__31].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1060,17 +1060,17 @@
       in_app: false
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.FindPrimeNumber(int32) {Optimized},
+      function: Program.FindPrimeNumber(int32),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program+<Main>d__2.MoveNext() {Optimized},
+      function: Program+<Main>d__2.MoveNext(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
@@ -1150,7 +1150,7 @@
       in_app: false
     },
     {
-      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken) {QuickJitted},
+      function: Sentry.Internal.Http.GzipBufferedRequestBodyHandler.<>n__0(class System.Net.Http.HttpRequestMessage,value class System.Threading.CancellationToken),
       module: Sentry,
       in_app: false
     },
@@ -1185,7 +1185,7 @@
       in_app: false
     },
     {
-      function: Program+<>c.<Main>b__2_9() {QuickJitted},
+      function: Program+<>c.<Main>b__2_9(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
@@ -1195,12 +1195,12 @@
       in_app: false
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`2[System.__Canon,System.__Canon]].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1215,12 +1215,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon]].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1235,12 +1235,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1255,12 +1255,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1280,12 +1280,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1295,12 +1295,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1315,12 +1315,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1360,12 +1360,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1380,12 +1380,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1400,62 +1400,62 @@
       in_app: false
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
@@ -1480,12 +1480,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1510,12 +1510,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1530,17 +1530,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`3[System.__Canon,System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectAsync>d__97].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1560,17 +1560,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.ValueTuple`2[System.__Canon,System.__Canon],System.Net.Http.HttpConnectionPool+<ConnectToTcpHostAsync>d__98].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1595,17 +1595,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.Socket+<<ConnectAsync>g__WaitForConnectWithCancellation|277_0>d].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1630,17 +1630,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Sockets.SocketAsyncEventArgs+<<DnsConnectAsync>g__Core|112_0>d].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1690,17 +1690,17 @@
       in_app: false
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1710,12 +1710,12 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder`1[System.__Canon].Start(!!0&),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1730,12 +1730,12 @@
       in_app: false
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
@@ -1780,17 +1780,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Threading.Tasks.VoidTaskResult,System.Net.Security.SslStream+<ForceAuthenticationAsync>d__175`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1815,17 +1815,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,System.Net.Security.SslStream+<ReceiveBlobAsync>d__176`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1850,17 +1850,17 @@
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].ExecutionContextCallback(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread) {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(class System.Threading.Thread),
       module: System.Private.CoreLib.il,
       in_app: false
     },
     {
-      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext() {QuickJitted},
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.Int32,System.Net.Security.SslStream+<<FillHandshakeBufferAsync>g__InternalFillHandshakeBufferAsync|189_0>d`1[System.Net.Security.AsyncReadWriteAdapter]].MoveNext(),
       module: System.Private.CoreLib.il,
       in_app: false
     },
@@ -1870,22 +1870,22 @@
       in_app: false
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
     {
-      function: Program.<Main>() {QuickJitted},
+      function: Program.<Main>(),
       module: Sentry.Samples.Console.Customized,
       in_app: true
     },
