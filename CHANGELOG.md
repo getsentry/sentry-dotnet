@@ -5,6 +5,9 @@
 ### Fixes
 
 - Normalize StackFrame in-app resolution for modules & function prefixes ([#2234](https://github.com/getsentry/sentry-dotnet/pull/2234))
+### Features
+
+- Serialize objects as JSON (with @ prefix) ([#2231](https://github.com/getsentry/sentry-dotnet/pull/2231))
 
 ## 3.29.1
 
