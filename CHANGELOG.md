@@ -6,6 +6,12 @@
 
 - Normalize StackFrame in-app resolution for modules & function prefixes ([#2234](https://github.com/getsentry/sentry-dotnet/pull/2234))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.3.0 to v8.3.1 ([#2237](https://github.com/getsentry/sentry-dotnet/pull/2237))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#831)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.3.0...8.3.1)
+
 ## 3.29.1
 
 ### Fixes
