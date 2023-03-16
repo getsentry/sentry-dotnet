@@ -1,5 +1,6 @@
 using System.Diagnostics.Tracing;
 using Microsoft.Diagnostics.NETCore.Client;
+using Microsoft.Diagnostics.Tracing.EventPipe;
 using Microsoft.Diagnostics.Tracing.Parsers;
 
 namespace Sentry.Profiling;
@@ -23,7 +24,8 @@ internal class SampleProfilerSession
             // Note: all events we need issued by "DotNETRuntime" provider are at "EventLevel.Informational"
             // see https://learn.microsoft.com/en-us/dotnet/fundamentals/diagnostics/runtime-events
             new EventPipeProvider("Microsoft-Windows-DotNETRuntime", EventLevel.Informational, (long)ClrTraceEventParser.Keywords.Default),
-            new EventPipeProvider("Microsoft-DotNETCore-SampleProfiler", EventLevel.Informational, (long)ClrTraceEventParser.Keywords.None)
+            new EventPipeProvider("Microsoft-DotNETCore-SampleProfiler", EventLevel.Informational),
+            new EventPipeProvider("System.Threading.Tasks.TplEventSource", EventLevel.Informational, (long)TplEtwProviderTraceEventParser.Keywords.Default)
         };
 
         // The size of the runtime's buffer for collecting events in MB, same as the current default in StartEventPipeSession().

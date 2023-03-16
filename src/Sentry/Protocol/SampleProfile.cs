@@ -15,12 +15,17 @@ internal sealed class SampleProfile : IJsonSerializable
     public GrowableArray<Sample> Samples = new(10000);
     public GrowableArray<SentryStackFrame> Frames = new(100);
     public GrowableArray<SentryProfileStackTrace> Stacks = new(100);
-    public SparseArray<SentryThread> Threads = new(10);
+    public List<SentryThread> Threads = new(10);
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
-        writer.WriteSparseArray("thread_metadata", Threads, logger);
+        writer.WriteStartObject("thread_metadata");
+        for (var i = 0; i < Threads.Count; i++)
+        {
+            writer.WriteSerializable(i.ToString(), Threads[i], logger);
+        }
+        writer.WriteEndObject();
         writer.WriteArray("stacks", Stacks, logger);
         writer.WriteArray("frames", Frames, logger);
         writer.WriteArray("samples", Samples, logger);

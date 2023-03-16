@@ -162,8 +162,16 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                     return null;
                 }
 
-                _options.LogDebug("Profiling successfully finished.");
-                return CreateProfileInfo(transaction, _startTime, profile);
+                if (profile.Samples.Empty)
+                {
+                    _options.LogDebug("Profiling finished successfully but there are no samples, skipping.");
+                    return null;
+                }
+                else
+                {
+                    _options.LogDebug("Profiling finished successfully.");
+                    return CreateProfileInfo(transaction, _startTime, profile);
+                }
             }
             finally
             {

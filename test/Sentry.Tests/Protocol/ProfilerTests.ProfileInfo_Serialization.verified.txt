@@ -25,17 +25,17 @@
     type: runtime
   },
   transaction: {
-    active_thread_id: 1,
+    active_thread_id: 0,
     id: Guid_2,
     name: tx name,
     trace_id: Guid_3
   },
   profile: {
     thread_metadata: {
-      1: {
+      0: {
         name: Thread 1
       },
-      5: {
+      1: {
         name: Thread 5
       }
     },
@@ -70,12 +70,12 @@
     samples: [
       {
         elapsed_since_start_ns: 6,
-        thread_id: 5,
+        thread_id: 1,
         stack_id: 4
       },
       {
         elapsed_since_start_ns: 3,
-        thread_id: 2,
+        thread_id: 0,
         stack_id: 1
       }
     ]

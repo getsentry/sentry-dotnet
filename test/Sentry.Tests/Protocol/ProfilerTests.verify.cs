@@ -28,13 +28,13 @@ public partial class ProfilerTests
         prof.Samples.Add(new()
         {
             StackId = 4,
-            ThreadId = 5,
+            ThreadId = 1,
             Timestamp = 6
         });
         prof.Samples.Add(new()
         {
             StackId = 1,
-            ThreadId = 2,
+            ThreadId = 0,
             Timestamp = 3
         });
 
@@ -56,14 +56,14 @@ public partial class ProfilerTests
         AddStack(prof, new() { 2, 2, 0 });
         AddStack(prof, new() { 1, 0, 2 });
 
-        prof.Threads[1] = new()
+        prof.Threads.Add(new()
         {
             Name = "Thread 1"
-        };
-        prof.Threads[5] = new()
+        });
+        prof.Threads.Add(new()
         {
             Name = "Thread 5"
-        };
+        });
 
         return prof;
     }

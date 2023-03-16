@@ -20,8 +20,6 @@ public class SamplingTransactionProfilerTests
         profile.Frames.Should().NotBeEmpty();
         profile.Stacks.Should().NotBeEmpty();
 
-        var threadIds = profile.Threads.Keys();
-
         // Verify that downsampling works.
         var previousSamplesByThread = new Dictionary<int, SampleProfile.Sample>();
 
@@ -29,7 +27,7 @@ public class SamplingTransactionProfilerTests
         {
             sample.Timestamp.Should().BeInRange(0, maxTimestampNs);
             sample.StackId.Should().BeInRange(0, profile.Stacks.Count);
-            sample.ThreadId.Should().BeOneOf(threadIds);
+            sample.ThreadId.Should().BeInRange(0, profile.Threads.Count);
 
             if (previousSamplesByThread.TryGetValue(sample.ThreadId, out var prevSample))
             {
@@ -39,10 +37,10 @@ public class SamplingTransactionProfilerTests
             previousSamplesByThread[sample.ThreadId] = sample;
         }
 
-        profile.Threads.Foreach((i, thread) =>
+        foreach (var thread in profile.Threads)
         {
             thread.Name.Should().NotBeNullOrEmpty();
-        });
+        }
 
         // We can't check that all Frame names are filled because there may be native frames which we currently don't filter out.
         // Let's just check there are some frames with names...

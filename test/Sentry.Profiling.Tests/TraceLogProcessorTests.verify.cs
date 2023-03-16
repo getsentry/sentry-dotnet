@@ -1,3 +1,4 @@
+using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 
 namespace Sentry.Profiling.Tests;
@@ -33,18 +34,20 @@ public class TraceLogProcessorTests
 
     private SampleProfile GetProfile()
     {
-        var etlxFilePath = Path.Combine(_resourcesPath, "profile-with-task.etlx");
+        var etlxFilePath = Path.Combine(_resourcesPath, "sample.etlx");
 
-        // Code to update the ETLX (just for backup so we know how it came to be:)
-        // var etlFilePath = Path.Combine(_resourcesPath, "profile-with-task.nettrace");
-        // var source = new EventPipeEventSource(etlFilePath);
-        // new Downsampler().AttachTo(source);
-        // typeof(TraceLog)
-        // .GetMethod(
-        //     "CreateFromEventPipeEventSources",
-        //     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
-        //     new Type[] { typeof(TraceEventDispatcher), typeof(string), typeof(TraceLogOptions) })?
-        // .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
+        if (!File.Exists(etlxFilePath))
+        {
+            var etlFilePath = Path.ChangeExtension(etlxFilePath, "nettrace");
+            var source = new EventPipeEventSource(etlFilePath);
+            new Downsampler().AttachTo(source);
+            typeof(TraceLog)
+            .GetMethod(
+                "CreateFromEventPipeEventSources",
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static,
+                new Type[] { typeof(TraceEventDispatcher), typeof(string), typeof(TraceLogOptions) })?
+            .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
+        }
 
         using var eventLog = new TraceLog(etlxFilePath);
         var processor = new TraceLogProcessor(new(), eventLog);
@@ -52,7 +55,7 @@ public class TraceLogProcessorTests
     }
 
     [Fact]
-    public Task ProfileWithTask()
+    public Task Profile_Serialization_Works()
     {
         var profile = GetProfile();
         var json = profile.ToJsonString(_testOutputLogger);
@@ -60,7 +63,7 @@ public class TraceLogProcessorTests
     }
 
     [Fact]
-    public Task ProfileInfoWithTask()
+    public Task ProfileInfo_Serialization_Works()
     {
         var transaction = new Transaction("name", "op");
         transaction.Contexts.Device.Architecture = "arch";

@@ -49,6 +49,12 @@ internal class TraceLogProcessor
     // A dictionary from a StackTrace sealed array to an index in the output Profile.stacks.
     private readonly Dictionary<SentryProfileStackTrace, int> _stackIndexes = new(100);
 
+    // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
+    private readonly SparseScalarArray<int> _threadIndexes;
+
+    // A sparse array mapping from an ActivityIndex to an index in Profile.Threads.
+    private readonly SparseScalarArray<int> _activityIndexes = new(-1, 100);
+
     // private readonly StartStopActivityComputer _startStopActivities;    // Tracks start-stop activities so we can add them to the top above thread in the stack.
 
     // // UNKNOWN_ASYNC support
@@ -90,6 +96,7 @@ internal class TraceLogProcessor
 
     public TraceLogProcessor(SentryOptions options, TraceLog traceLog)
     {
+        _threadIndexes = new(-1, traceLog.Threads.Count);
         _options = options;
         _traceLog = traceLog;
         _eventSource = _traceLog.Events.GetSource();
@@ -106,7 +113,11 @@ internal class TraceLogProcessor
 
         if (true)//UseTasks)
         {
-            _activityComputer = new ActivityComputer(_eventSource, new SymbolReader(TextWriter.Null));
+            // TODO replace SymbolReader's http handler so that it doesn't do any actual requests.
+            _activityComputer = new ActivityComputer(_eventSource, new SymbolReader(TextWriter.Null))
+            {
+                NoCache = true, // Safer option, see its docs. Evaluate later if we can enable caching.
+            };
             // _activityComputer.AwaitUnblocks += delegate (TraceActivity activity, TraceEvent data)
             // {
             //     var sample = _sample;
@@ -136,7 +147,7 @@ internal class TraceLogProcessor
             // tplProvider.TaskScheduledSend += OnSampledProfile;
             // tplProvider.TaskExecuteStart += OnSampledProfile;
             // tplProvider.TaskWaitSend += OnSampledProfile;
-            // tplProvider.TaskWaitStop += OnTaskUnblock;  // Log the activity stack even if you don't have a stack.
+            // tplProvider.TaskWaitStop += OnSampledProfile;  // Log the activity stack even if you don't have a stack.
         }
 
         // if (true) // GroupByStartStopActivity
@@ -354,7 +365,7 @@ internal class TraceLogProcessor
     //    list.Add(sample);
     //}
 
-    private void AddSample(TraceThread thread, StackSourceCallStackIndex callstackIndex, double timestampMs)
+    private void AddSample(TraceThread thread, TraceActivity activity, StackSourceCallStackIndex callstackIndex, double timestampMs)
     {
         if (thread.ThreadIndex == ThreadIndex.Invalid || callstackIndex == StackSourceCallStackIndex.Invalid)
         {
@@ -376,7 +387,7 @@ internal class TraceLogProcessor
             return;
         }
 
-        var threadIndex = AddThread(thread);
+        var threadIndex = AddThreadOrActivity(thread, activity);
         if (threadIndex < 0)
         {
             return;
@@ -460,20 +471,51 @@ internal class TraceLogProcessor
     /// Check if the thread is already stored in the output Profile, or adds it.
     /// </summary>
     /// <returns>The index to the output Profile frames array.</returns>
-    private int AddThread(TraceThread thread)
+    private int AddThreadOrActivity(TraceThread thread, TraceActivity activity)
     {
-        var key = (int)thread.ThreadIndex;
-
-        if (!_profile.Threads.ContainsKey(key))
+        if (activity.IsThreadActivity)
         {
-            _profile.Threads[key] = new()
-            {
-                // TODO it should be possible to get the actual name of the thread somehow - speedscope output has it among frames, e.g. "Thread (30396) (.NET ThreadPool)"
-                Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
-            };
-        }
+            var key = (int)thread.ThreadIndex;
 
-        return key;
+            if (!_threadIndexes.ContainsKey(key))
+            {
+                _profile.Threads.Add(new()
+                {
+                    Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
+                });
+                _threadIndexes[key] = _profile.Threads.Count - 1;
+            }
+
+            return _threadIndexes[key];
+        }
+        else
+        {
+            var key = (int)activity.Index;
+
+            if (!_activityIndexes.ContainsKey(key))
+            {
+                _profile.Threads.Add(new()
+                {
+                    Name = $"Activity {ActivityPath(activity)}",
+                });
+                _activityIndexes[key] = _profile.Threads.Count - 1;
+            }
+
+            return _activityIndexes[key];
+        }
+    }
+
+    private static string ActivityPath(TraceActivity activity)
+    {
+        var creator = activity.Creator;
+        if (creator is null || creator.IsThreadActivity)
+        {
+            return activity.Index.ToString();
+        }
+        else
+        {
+            return $"{ActivityPath(creator)}/{activity.Index.ToString()}";
+        }
     }
 
     private SentryStackFrame CreateStackFrame(CodeAddressIndex codeAddressIndex)
@@ -528,39 +570,15 @@ internal class TraceLogProcessor
         TraceThread thread = data.Thread();
         if (thread != null)
         {
-            StackSourceCallStackIndex stackFrameIndex = GetCallStack(data, thread);
-            AddSample(thread, stackFrameIndex, data.TimeStampRelativeMSec);
-        }
-        else
-        {
-            Debug.WriteLine("Warning, no thread at " + data.TimeStampRelativeMSec.ToString("f3"));
-        }
-    }
-
-    // THis is for the TaskWaitEnd.  We want to have a stack event if 'data' does not have one, we lose the fact that
-    // ANYTHING happened on this thread.   Thus we log the stack of the activity so that data does not need a stack.
-    private void OnTaskUnblock(TraceEvent data)
-    {
-        TraceThread thread = data.Thread();
-        if (thread != null)
-        {
             TraceActivity activity = _activityComputer.GetCurrentActivity(thread);
-            StackSourceCallStackIndex stackFrameIndex = _activityComputer.GetCallStackForActivity(_stackSource, activity, GetTopFramesForActivityComputerCase(data, data.Thread()));
-            AddSample(thread, stackFrameIndex, data.TimeStampRelativeMSec);
+            // TODO expose ActivityComputer.GetCallStackWithActivityFrames() and use it - it's a bit faster because we also need to fetch thread & activity for AddSample().
+            StackSourceCallStackIndex stackFrameIndex = _activityComputer.GetCallStack(_stackSource, data, GetTopFramesForActivityComputerCase(data, thread));
+            AddSample(thread, activity, stackFrameIndex, data.TimeStampRelativeMSec);
         }
         else
         {
             Debug.WriteLine("Warning, no thread at " + data.TimeStampRelativeMSec.ToString("f3"));
         }
-    }
-
-    /// <summary>
-    /// Get the call stack for 'data'  Note that you thread must be data.Thread().   We pass it just to save the lookup.
-    /// </summary>
-    private StackSourceCallStackIndex GetCallStack(TraceEvent data, TraceThread thread)
-    {
-        Debug.Assert(data.Thread() == thread);
-        return _activityComputer.GetCallStack(_stackSource, data, GetTopFramesForActivityComputerCase(data, thread));
     }
 
     /// <summary>
