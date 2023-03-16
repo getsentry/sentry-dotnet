@@ -75,13 +75,13 @@
       Update with each new version.
     -->
     <ItemGroup>
-      <SentryCLIDownload Include="sentry-cli-Darwin-arm64" FileHash="f1f492107458244c75b884fbab70af20f0ac551aaac392768ac6b36b49e5e8ea" />
-      <SentryCLIDownload Include="sentry-cli-Darwin-x86_64" FileHash="535447e9b38c77d48be54183f0517389b0316245d09bd27c5cb4d456f0f6c779" />
-      <SentryCLIDownload Include="sentry-cli-Linux-aarch64" FileHash="7e3b5a5b458818dbc60f4cb78b1c7f51e8a0e4b62451e14a8a3c854496b216e5" />
-      <SentryCLIDownload Include="sentry-cli-Linux-i686" FileHash="59f4c6e2600b31a9004df921d2fcc2340545155e68b32d6bebaca3bcd3255ee3" />
-      <SentryCLIDownload Include="sentry-cli-Linux-x86_64" FileHash="61d1c1a34555920d48f2b3439a34b1825403a2f818d7b698159a7df6f7986b45" />
-      <SentryCLIDownload Include="sentry-cli-Windows-i686.exe" FileHash="61a0b5bc17421c1d1e21fe1af979475c214c93f514014b1c43c13da235d4e295" />
-      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" FileHash="78295ed9b00f782050c259eae2abf7c9017b19ad01c1445f885a4e6228d811ec" />
+      <SentryCLIDownload Include="sentry-cli-Darwin-arm64" FileHash="a8a575a4c6e50a624b657738bc3b215ef96b7ec322bb5d1f31ebd5030bb1a20e" />
+      <SentryCLIDownload Include="sentry-cli-Darwin-x86_64" FileHash="8e52fe90e26e0641a02d84f525d9cb6c47c86278c0e7c42de0a5e9d66baec032" />
+      <SentryCLIDownload Include="sentry-cli-Linux-aarch64" FileHash="ff50dd31f4a715ba6b362a56d1b4e53f0547566f8044fb024160dd54209477c3" />
+      <SentryCLIDownload Include="sentry-cli-Linux-i686" FileHash="3917ca31c27387366644b7d703fbcb56128bc92e3925cfb4b15dc0a97776594e" />
+      <SentryCLIDownload Include="sentry-cli-Linux-x86_64" FileHash="05e405eb1bee99a62731e39768059500900e4c5b512731a9ad91aabafec5650a" />
+      <SentryCLIDownload Include="sentry-cli-Windows-i686.exe" FileHash="ca7b1e642b0d17fdda2219cd16f1f514686d3a8daf09d4c2d0671f43b739f307" />
+      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" FileHash="80d85b3644c657a4b28430f6db630c9da2ad3c934ebf44c77cb28f893d766d8a" />
     </ItemGroup>
 
     <!-- Download the files -->

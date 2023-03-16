@@ -6,6 +6,12 @@
 
 - Normalize StackFrame in-app resolution for modules & function prefixes ([#2234](https://github.com/getsentry/sentry-dotnet/pull/2234))
 
+### Dependencies
+
+- Bump CLI from v2.14.4 to v2.15.1 ([#2238](https://github.com/getsentry/sentry-dotnet/pull/2238))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2151)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.14.4...2.15.1)
+
 ## 3.29.1
 
 ### Fixes
