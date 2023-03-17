@@ -1279,6 +1279,12 @@ namespace Sentry.Infrastructure
         public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
         protected abstract void LogMessage(string message);
     }
+    public class FileDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
+    {
+        public FileDiagnosticLogger(string path, bool alsoWriteToConsole = false) { }
+        public FileDiagnosticLogger(string path, Sentry.SentryLevel minimalLevel, bool alsoWriteToConsole = false) { }
+        protected override void LogMessage(string message) { }
+    }
     public interface ISystemClock
     {
         System.DateTimeOffset GetUtcNow();
