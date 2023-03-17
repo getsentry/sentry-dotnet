@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add `FileDiagnosticLogger` to assist with debugging the SDK ([#2242](https://github.com/getsentry/sentry-dotnet/pull/2242))
+
 ### Fixes
 
 - Normalize StackFrame in-app resolution for modules & function prefixes ([#2234](https://github.com/getsentry/sentry-dotnet/pull/2234))
