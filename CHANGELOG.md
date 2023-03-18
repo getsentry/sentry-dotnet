@@ -12,9 +12,10 @@
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#831)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.3.0...8.3.1)
 
-- Bump CLI from v2.14.4 to v2.15.1 ([#2238](https://github.com/getsentry/sentry-dotnet/pull/2238))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2151)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.14.4...2.15.1)
+- Bump CLI from v2.14.4 to v2.15.2 ([#2238](https://github.com/getsentry/sentry-dotnet/pull/2238), [#2244](https://github.com/getsentry/sentry-dotnet/pull/2244))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2152)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.14.4...2.15.2)
+
 - Bump Java SDK from v6.15.0 to v6.16.0 ([#2243](https://github.com/getsentry/sentry-dotnet/pull/2243))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6160)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.15.0...6.16.0)
