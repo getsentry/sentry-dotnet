@@ -216,10 +216,6 @@ interface SentryClient
     [Export ("captureUserFeedback:")]
     void CaptureUserFeedback (SentryUserFeedback userFeedback);
 
-    // -(void)captureSession:(SentrySession * _Nonnull)session __attribute__((swift_name("capture(session:)")));
-    [Export ("captureSession:")]
-    void CaptureSession (SentrySession session);
-
     // -(void)flush:(NSTimeInterval)timeout __attribute__((swift_name("flush(timeout:)")));
     [Export ("flush:")]
     void Flush (double timeout);
@@ -1038,10 +1034,6 @@ interface SentryHub
     // -(instancetype _Nonnull)initWithClient:(SentryClient * _Nullable)client andScope:(SentryScope * _Nullable)scope;
     [Export ("initWithClient:andScope:")]
     NativeHandle Constructor ([NullAllowed] SentryClient client, [NullAllowed] SentryScope scope);
-
-    // @property (readonly, nonatomic, strong) SentrySession * _Nullable session;
-    [NullAllowed, Export ("session", ArgumentSemantic.Strong)]
-    SentrySession Session { get; }
 
     // -(void)startSession;
     [Export ("startSession")]
@@ -2028,6 +2020,204 @@ interface SentryAppStartMeasurement
     NSDate DidFinishLaunchingTimestamp { get; }
 }
 
+// @interface SentrySdkInfo : NSObject <SentrySerializable>
+[BaseType (typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentrySdkInfo : SentrySerializable
+{
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull name;
+    [Export ("name")]
+    string Name { get; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull version;
+    [Export ("version")]
+    string Version { get; }
+
+    // -(instancetype _Nonnull)initWithName:(NSString * _Nonnull)name andVersion:(NSString * _Nonnull)version __attribute__((objc_designated_initializer));
+    [Export ("initWithName:andVersion:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (string name, string version);
+
+    // -(instancetype _Nonnull)initWithDict:(NSDictionary * _Nonnull)dict;
+    [Export ("initWithDict:")]
+    NativeHandle Constructor (NSDictionary dict);
+
+    // -(instancetype _Nonnull)initWithDict:(NSDictionary * _Nonnull)dict orDefaults:(SentrySdkInfo * _Nonnull)info;
+    [Export ("initWithDict:orDefaults:")]
+    NativeHandle Constructor (NSDictionary dict, SentrySdkInfo info);
+}
+
+// @interface SentryTraceContext : NSObject <SentrySerializable>
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryTraceContext : SentrySerializable
+{
+    // @property (readonly, nonatomic) SentryId * _Nonnull traceId;
+    [Export ("traceId")]
+    SentryId TraceId { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nonnull publicKey;
+    [Export ("publicKey")]
+    string PublicKey { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable releaseName;
+    [NullAllowed, Export ("releaseName")]
+    string ReleaseName { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable environment;
+    [NullAllowed, Export ("environment")]
+    string Environment { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable transaction;
+    [NullAllowed, Export ("transaction")]
+    string Transaction { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable userSegment;
+    [NullAllowed, Export ("userSegment")]
+    string UserSegment { get; }
+
+    // @property (nonatomic) NSString * _Nullable sampleRate;
+    [NullAllowed, Export ("sampleRate")]
+    string SampleRate { get; set; }
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction userSegment:(NSString * _Nullable)userSegment sampleRate:(NSString * _Nullable)sampleRate;
+    [Export ("initWithTraceId:publicKey:releaseName:environment:transaction:userSegment:sampleRate:")]
+    NativeHandle Constructor (SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string userSegment, [NullAllowed] string sampleRate);
+
+    // -(instancetype _Nullable)initWithScope:(SentryScope * _Nonnull)scope options:(SentryOptions * _Nonnull)options;
+    [Export ("initWithScope:options:")]
+    NativeHandle Constructor (SentryScope scope, SentryOptions options);
+
+    // -(instancetype _Nullable)initWithDict:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
+    [Export ("initWithDict:")]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
+
+    // -(instancetype _Nullable)initWithTracer:(SentryTracer * _Nonnull)tracer scope:(SentryScope * _Nullable)scope options:(SentryOptions * _Nonnull)options;
+    [Export ("initWithTracer:scope:options:")]
+    NativeHandle Constructor (SentryTracer tracer, [NullAllowed] SentryScope scope, SentryOptions options);
+
+    // -(SentryBaggage * _Nonnull)toBaggage;
+    [Export ("toBaggage")]
+    SentryBaggage ToBaggage();
+}
+
+// @interface SentryEnvelopeHeader : NSObject
+[BaseType (typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryEnvelopeHeader
+{
+    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId;
+    [Export ("initWithId:")]
+    NativeHandle Constructor ([NullAllowed] SentryId eventId);
+
+    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId traceContext:(SentryTraceContext * _Nullable)traceContext;
+    [Export ("initWithId:traceContext:")]
+    NativeHandle Constructor ([NullAllowed] SentryId eventId, [NullAllowed] SentryTraceContext traceContext);
+
+    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId sdkInfo:(SentrySdkInfo * _Nullable)sdkInfo traceContext:(SentryTraceContext * _Nullable)traceContext __attribute__((objc_designated_initializer));
+    [Export ("initWithId:sdkInfo:traceContext:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor ([NullAllowed] SentryId eventId, [NullAllowed] SentrySdkInfo sdkInfo, [NullAllowed] SentryTraceContext traceContext);
+
+    // @property (readonly, copy, nonatomic) SentryId * _Nullable eventId;
+    [NullAllowed, Export ("eventId", ArgumentSemantic.Copy)]
+    SentryId EventId { get; }
+
+    // @property (readonly, copy, nonatomic) SentrySdkInfo * _Nullable sdkInfo;
+    [NullAllowed, Export ("sdkInfo", ArgumentSemantic.Copy)]
+    SentrySdkInfo SdkInfo { get; }
+
+    // @property (readonly, copy, nonatomic) SentryTraceContext * _Nullable traceContext;
+    [NullAllowed, Export ("traceContext", ArgumentSemantic.Copy)]
+    SentryTraceContext TraceContext { get; }
+}
+
+// @interface SentryEnvelopeItem : NSObject
+[BaseType (typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryEnvelopeItem
+{
+    // -(instancetype _Nonnull)initWithEvent:(SentryEvent * _Nonnull)event;
+    [Export ("initWithEvent:")]
+    NativeHandle Constructor (SentryEvent @event);
+
+    // -(instancetype _Nonnull)initWithSession:(SentrySession * _Nonnull)session;
+    [Export ("initWithSession:")]
+    NativeHandle Constructor (SentrySession session);
+
+    // -(instancetype _Nonnull)initWithUserFeedback:(SentryUserFeedback * _Nonnull)userFeedback;
+    [Export ("initWithUserFeedback:")]
+    NativeHandle Constructor (SentryUserFeedback userFeedback);
+
+    // -(instancetype _Nullable)initWithAttachment:(SentryAttachment * _Nonnull)attachment maxAttachmentSize:(NSUInteger)maxAttachmentSize;
+    [Export ("initWithAttachment:maxAttachmentSize:")]
+    NativeHandle Constructor (SentryAttachment attachment, nuint maxAttachmentSize);
+
+    // -(instancetype _Nonnull)initWithHeader:(SentryEnvelopeItemHeader * _Nonnull)header data:(NSData * _Nonnull)data __attribute__((objc_designated_initializer));
+    [Export ("initWithHeader:data:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (SentryEnvelopeItemHeader header, NSData data);
+
+    // @property (readonly, nonatomic, strong) SentryEnvelopeItemHeader * _Nonnull header;
+    [Export ("header", ArgumentSemantic.Strong)]
+    SentryEnvelopeItemHeader Header { get; }
+
+    // @property (readonly, nonatomic, strong) NSData * _Nonnull data;
+    [Export ("data", ArgumentSemantic.Strong)]
+    NSData Data { get; }
+}
+
+// @interface SentryEnvelope : NSObject
+[BaseType (typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryEnvelope
+{
+    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)id singleItem:(SentryEnvelopeItem * _Nonnull)item;
+    [Export ("initWithId:singleItem:")]
+    NativeHandle Constructor ([NullAllowed] SentryId id, SentryEnvelopeItem item);
+
+    // -(instancetype _Nonnull)initWithHeader:(SentryEnvelopeHeader * _Nonnull)header singleItem:(SentryEnvelopeItem * _Nonnull)item;
+    [Export ("initWithHeader:singleItem:")]
+    NativeHandle Constructor (SentryEnvelopeHeader header, SentryEnvelopeItem item);
+
+    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)id items:(NSArray<SentryEnvelopeItem *> * _Nonnull)items;
+    [Export ("initWithId:items:")]
+    NativeHandle Constructor ([NullAllowed] SentryId id, SentryEnvelopeItem[] items);
+
+    // -(instancetype _Nonnull)initWithSession:(SentrySession * _Nonnull)session;
+    [Export ("initWithSession:")]
+    NativeHandle Constructor (SentrySession session);
+
+    // -(instancetype _Nonnull)initWithSessions:(NSArray<SentrySession *> * _Nonnull)sessions;
+    [Export ("initWithSessions:")]
+    NativeHandle Constructor (SentrySession[] sessions);
+
+    // -(instancetype _Nonnull)initWithHeader:(SentryEnvelopeHeader * _Nonnull)header items:(NSArray<SentryEnvelopeItem *> * _Nonnull)items __attribute__((objc_designated_initializer));
+    [Export ("initWithHeader:items:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (SentryEnvelopeHeader header, SentryEnvelopeItem[] items);
+
+    // -(instancetype _Nonnull)initWithEvent:(SentryEvent * _Nonnull)event;
+    [Export ("initWithEvent:")]
+    NativeHandle Constructor (SentryEvent @event);
+
+    // -(instancetype _Nonnull)initWithUserFeedback:(SentryUserFeedback * _Nonnull)userFeedback;
+    [Export ("initWithUserFeedback:")]
+    NativeHandle Constructor (SentryUserFeedback userFeedback);
+
+    // @property (readonly, nonatomic, strong) SentryEnvelopeHeader * _Nonnull header;
+    [Export ("header", ArgumentSemantic.Strong)]
+    SentryEnvelopeHeader Header { get; }
+
+    // @property (readonly, nonatomic, strong) NSArray<SentryEnvelopeItem *> * _Nonnull items;
+    [Export ("items", ArgumentSemantic.Strong)]
+    SentryEnvelopeItem[] Items { get; }
+}
+
 // @interface SentryScreenFrames : NSObject
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
@@ -2166,120 +2356,4 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("captureViewHierarchy")]
     NSData CaptureViewHierarchy();
-}
-
-// @interface SentryEnvelopeHeader : NSObject
-[BaseType (typeof(NSObject))]
-[DisableDefaultCtor]
-[Internal]
-interface SentryEnvelopeHeader
-{
-    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId;
-    [Export ("initWithId:")]
-    NativeHandle Constructor ([NullAllowed] SentryId eventId);
-
-    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId traceContext:(SentryTraceContext * _Nullable)traceContext;
-    [Export ("initWithId:traceContext:")]
-    NativeHandle Constructor ([NullAllowed] SentryId eventId, [NullAllowed] SentryTraceContext traceContext);
-
-    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)eventId sdkInfo:(SentrySdkInfo * _Nullable)sdkInfo traceContext:(SentryTraceContext * _Nullable)traceContext __attribute__((objc_designated_initializer));
-    [Export ("initWithId:sdkInfo:traceContext:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor ([NullAllowed] SentryId eventId, [NullAllowed] SentrySdkInfo sdkInfo, [NullAllowed] SentryTraceContext traceContext);
-
-    // @property (readonly, copy, nonatomic) SentryId * _Nullable eventId;
-    [NullAllowed, Export ("eventId", ArgumentSemantic.Copy)]
-    SentryId EventId { get; }
-
-    // @property (readonly, copy, nonatomic) SentrySdkInfo * _Nullable sdkInfo;
-    [NullAllowed, Export ("sdkInfo", ArgumentSemantic.Copy)]
-    SentrySdkInfo SdkInfo { get; }
-
-    // @property (readonly, copy, nonatomic) SentryTraceContext * _Nullable traceContext;
-    [NullAllowed, Export ("traceContext", ArgumentSemantic.Copy)]
-    SentryTraceContext TraceContext { get; }
-}
-
-// @interface SentryEnvelopeItem : NSObject
-[BaseType (typeof(NSObject))]
-[DisableDefaultCtor]
-[Internal]
-interface SentryEnvelopeItem
-{
-    // -(instancetype _Nonnull)initWithEvent:(SentryEvent * _Nonnull)event;
-    [Export ("initWithEvent:")]
-    NativeHandle Constructor (SentryEvent @event);
-
-    // -(instancetype _Nonnull)initWithSession:(SentrySession * _Nonnull)session;
-    [Export ("initWithSession:")]
-    NativeHandle Constructor (SentrySession session);
-
-    // -(instancetype _Nonnull)initWithUserFeedback:(SentryUserFeedback * _Nonnull)userFeedback;
-    [Export ("initWithUserFeedback:")]
-    NativeHandle Constructor (SentryUserFeedback userFeedback);
-
-    // -(instancetype _Nullable)initWithAttachment:(SentryAttachment * _Nonnull)attachment maxAttachmentSize:(NSUInteger)maxAttachmentSize;
-    [Export ("initWithAttachment:maxAttachmentSize:")]
-    NativeHandle Constructor (SentryAttachment attachment, nuint maxAttachmentSize);
-
-    // -(instancetype _Nonnull)initWithHeader:(SentryEnvelopeItemHeader * _Nonnull)header data:(NSData * _Nonnull)data __attribute__((objc_designated_initializer));
-    [Export ("initWithHeader:data:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor (SentryEnvelopeItemHeader header, NSData data);
-
-    // @property (readonly, nonatomic, strong) SentryEnvelopeItemHeader * _Nonnull header;
-    [Export ("header", ArgumentSemantic.Strong)]
-    SentryEnvelopeItemHeader Header { get; }
-
-    // @property (readonly, nonatomic, strong) NSData * _Nonnull data;
-    [Export ("data", ArgumentSemantic.Strong)]
-    NSData Data { get; }
-}
-
-// @interface SentryEnvelope : NSObject
-[BaseType (typeof(NSObject))]
-[DisableDefaultCtor]
-[Internal]
-interface SentryEnvelope
-{
-    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)id singleItem:(SentryEnvelopeItem * _Nonnull)item;
-    [Export ("initWithId:singleItem:")]
-    NativeHandle Constructor ([NullAllowed] SentryId id, SentryEnvelopeItem item);
-
-    // -(instancetype _Nonnull)initWithHeader:(SentryEnvelopeHeader * _Nonnull)header singleItem:(SentryEnvelopeItem * _Nonnull)item;
-    [Export ("initWithHeader:singleItem:")]
-    NativeHandle Constructor (SentryEnvelopeHeader header, SentryEnvelopeItem item);
-
-    // -(instancetype _Nonnull)initWithId:(SentryId * _Nullable)id items:(NSArray<SentryEnvelopeItem *> * _Nonnull)items;
-    [Export ("initWithId:items:")]
-    NativeHandle Constructor ([NullAllowed] SentryId id, SentryEnvelopeItem[] items);
-
-    // -(instancetype _Nonnull)initWithSession:(SentrySession * _Nonnull)session;
-    [Export ("initWithSession:")]
-    NativeHandle Constructor (SentrySession session);
-
-    // -(instancetype _Nonnull)initWithSessions:(NSArray<SentrySession *> * _Nonnull)sessions;
-    [Export ("initWithSessions:")]
-    NativeHandle Constructor (SentrySession[] sessions);
-
-    // -(instancetype _Nonnull)initWithHeader:(SentryEnvelopeHeader * _Nonnull)header items:(NSArray<SentryEnvelopeItem *> * _Nonnull)items __attribute__((objc_designated_initializer));
-    [Export ("initWithHeader:items:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor (SentryEnvelopeHeader header, SentryEnvelopeItem[] items);
-
-    // -(instancetype _Nonnull)initWithEvent:(SentryEvent * _Nonnull)event;
-    [Export ("initWithEvent:")]
-    NativeHandle Constructor (SentryEvent @event);
-
-    // -(instancetype _Nonnull)initWithUserFeedback:(SentryUserFeedback * _Nonnull)userFeedback;
-    [Export ("initWithUserFeedback:")]
-    NativeHandle Constructor (SentryUserFeedback userFeedback);
-
-    // @property (readonly, nonatomic, strong) SentryEnvelopeHeader * _Nonnull header;
-    [Export ("header", ArgumentSemantic.Strong)]
-    SentryEnvelopeHeader Header { get; }
-
-    // @property (readonly, nonatomic, strong) NSArray<SentryEnvelopeItem *> * _Nonnull items;
-    [Export ("items", ArgumentSemantic.Strong)]
-    SentryEnvelopeItem[] Items { get; }
 }
