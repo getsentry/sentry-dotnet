@@ -20,6 +20,13 @@ partial interface SentryScope
 [Internal]
 [DisableDefaultCtor]
 [BaseType (typeof(NSObject))]
+interface SentryBaggage
+{
+}
+
+[Internal]
+[DisableDefaultCtor]
+[BaseType (typeof(NSObject))]
 interface SentrySession
 {
 }
@@ -27,13 +34,6 @@ interface SentrySession
 [Internal]
 [DisableDefaultCtor]
 [BaseType (typeof(NSObject))]
-interface SentrySdkInfo
-{
-}
-
-[Internal]
-[DisableDefaultCtor]
-[BaseType (typeof(NSObject))]
-interface SentryTraceContext
+interface SentryTracer
 {
 }

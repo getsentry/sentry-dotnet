@@ -22,14 +22,13 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
 }
 
 # Generate bindings
-# NOTE: We pull in SentryEnvelope.h manually, because it's in HybridPublic but not imported by PrivateSentrySDKOnly.h
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk iphoneos -quiet `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
-    "$CocoaSdkPath/Carthage/Headers/SentryEnvelope.h" `
-    -o $BindingsPath
+    -o $BindingsPath `
+    -c -Wno-objc-property-no-attribute
 
 # Ensure backup path exists
 if (!(Test-Path $BackupPath)) {
