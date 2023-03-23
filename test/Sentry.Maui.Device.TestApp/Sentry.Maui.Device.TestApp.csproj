@@ -29,10 +29,20 @@
          https://docs.microsoft.com/en-us/dotnet/core/compatibility/sdk/5.0/referencing-executable-generates-error -->
     <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
 
-
     <!-- https://github.com/xamarin/xamarin-android/issues/6809 -->
     <NoWarn>$(NoWarn);XA4218</NoWarn>
 
+  </PropertyGroup>
+
+  <!--
+    Use the arm64 runtime when building on arm64 Macs.
+    See https://github.com/xamarin/xamarin-macios/issues/17841
+  -->
+  <PropertyGroup>
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios' And '$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And '$(OSArchitecture)' == 'Arm64' And ('$(_MacCatalystRuntimeIdentifier)' == 'maccatalyst-x64' Or ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">maccatalyst-arm64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
