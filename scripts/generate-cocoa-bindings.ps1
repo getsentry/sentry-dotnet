@@ -49,7 +49,7 @@ $Header = @"
 # Patch StructsAndEnums.cs
 ################################################################################
 $File = 'StructsAndEnums.cs'
-Write-Output "Patching $File"
+Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
@@ -76,7 +76,7 @@ $Text | Out-File "$BindingsPath/$File"
 # Patch ApiDefinitions.cs
 ################################################################################
 $File = 'ApiDefinitions.cs'
-Write-Output "Patching $File"
+Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
@@ -155,4 +155,3 @@ $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
 # Add header and output file
 $Text = "$Header`n`n$Text"
 $Text | Out-File "$BindingsPath/$File"
-Write-Output 'Done!'

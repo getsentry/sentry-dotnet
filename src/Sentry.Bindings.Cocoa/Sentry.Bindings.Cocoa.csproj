@@ -6,7 +6,7 @@
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
-    <SentryCocoaSdkDirectory>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
+    <SentryCocoaSdkDirectory>..\..\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
     <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
   </PropertyGroup>
 
@@ -29,24 +29,36 @@
     <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
   </ItemGroup>
 
+  <!-- Build the Sentry Cocoa SDK -->
+  <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+    Inputs="..\..\.git\modules\modules\sentry-cocoa\HEAD" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
+  </Target>
+  <Target Name="_InnerBuildSentryCocoaSDK">
+    <Exec Command="../../scripts/build-sentry-cocoa.sh" />
+  </Target>
+
+  <!-- Generate bindings -->
+  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+    Inputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha" Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
+  </Target>
+  <Target Name="_InnerGenerateSentryCocoaBindings">
+    <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
+  </Target>
+
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
-  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+    Inputs="$(GeneratedSourcesDir)SupportDelegates.g.cs" Outputs="$(GeneratedSourcesDir)SupportDelegates.g.cs.stamp">
     <PropertyGroup>
-      <GeneratedSupportDelegatesFile>$(MSBuildThisFileDirectory)$(GeneratedSourcesDir)SupportDelegates.g.cs</GeneratedSupportDelegatesFile>
+      <GeneratedSupportDelegatesFile>$(GeneratedSourcesDir)SupportDelegates.g.cs</GeneratedSupportDelegatesFile>
     </PropertyGroup>
+    <Message Text="Patching $(MSBuildThisFileDirectory)$(GeneratedSupportDelegatesFile)" Importance="High" />
     <WriteLinesToFile
       File="$(GeneratedSupportDelegatesFile)"
       Lines="$([System.IO.File]::ReadAllText($(GeneratedSupportDelegatesFile)).Replace('public delegate','internal delegate'))"
       Overwrite="true" />
-  </Target>
-
-  <!-- Build the Sentry Cocoa SDK -->
-  <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
-  </Target>
-  <Target Name="_InnerBuildSentryCocoaSDK">
-    <Exec Command="$(MSBuildThisFileDirectory)../../scripts/build-sentry-cocoa.sh" />
-    <Exec Command="pwsh $(MSBuildThisFileDirectory)../../scripts/generate-cocoa-bindings.ps1" />
+    <Touch Files="$(GeneratedSupportDelegatesFile).stamp" AlwaysCreate="true" />
   </Target>
 
 </Project>
