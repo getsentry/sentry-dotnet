@@ -29,6 +29,11 @@ jobs:
         with:
           submodules: recursive
 
+      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      - name: Set Environment Variables
+        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
       - name: Setup Environment
         uses: ./.github/actions/environment
 
@@ -58,14 +63,13 @@ jobs:
           path: "**/*.received.*"
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
-      # We use macOS for that so we we get all the iOS/macCatalyst targets in the packages
 
       - name: Create Nuget Packages (release only)
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Pack.slnf -c Release --no-build --nologo
 
       - name: Archive Nuget Packages (release only)
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}
