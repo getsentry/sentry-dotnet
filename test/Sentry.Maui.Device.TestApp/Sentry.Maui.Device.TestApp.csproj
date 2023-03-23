@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-
-    <TargetFrameworks>net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
-
-    <!-- Use arm runtime on arm Macs  -->
-    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
-    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64' And '$(RuntimeIdentifier)' == '' And '$(TargetPlatformIdentifier)' == 'ios'">iossimulator-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64' And '$(RuntimeIdentifier)' == '' And '$(TargetPlatformIdentifier)' == 'maccatalyst'">maccatalyst-arm64</RuntimeIdentifier>
+    <TargetFrameworks />
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <SingleProject>true</SingleProject>
