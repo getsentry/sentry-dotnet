@@ -75,10 +75,10 @@ jobs:
             --target=ios-simulator-64 \
             --launch-timeout=00:10:00 \
             --output-directory=./test_output \
-          ; export exitcode=$? ; echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT" ; exit $exitcode
+          ; export exitcode=$? ; echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
 
       - name: Retry Tests (if previous failed to run)
-        if: failure() && steps.first-run.outputs.exitcode > 1
+        if: steps.first-run.outputs.exitcode > 1
         run: >
           xharness apple test \
             --app=bin/Sentry.Maui.Device.TestApp.app \
