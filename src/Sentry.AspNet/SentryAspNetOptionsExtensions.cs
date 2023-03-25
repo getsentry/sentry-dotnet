@@ -15,6 +15,12 @@ public static class SentryAspNetOptionsExtensions
     /// </summary>
     public static void AddAspNet(this SentryOptions options, RequestSize maxRequestBodySize = RequestSize.None)
     {
+        if (options.EventProcessors?.OfType<SystemWebRequestEventProcessor>().Any() is true)
+        {
+            options.LogWarning($"{nameof(AddAspNet)} has already been called. Subsequent call will be ignored.");
+            return;
+        }
+
         var payloadExtractor = new RequestBodyExtractionDispatcher(
             new IRequestPayloadExtractor[] { new FormRequestPayloadExtractor(), new DefaultRequestPayloadExtractor() },
             options,

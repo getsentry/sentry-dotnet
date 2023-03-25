@@ -22,4 +22,31 @@ public class SentryAspNetOptionsExtensionsTests :
         Assert.Contains(extractor.Extractors, p => p.GetType() == typeof(FormRequestPayloadExtractor));
         Assert.Contains(extractor.Extractors, p => p.GetType() == typeof(DefaultRequestPayloadExtractor));
     }
+
+    [Fact]
+    public void AddAspNet_UsedMoreThanOnce_RegisterOnce()
+    {
+        var options = new SentryOptions();
+
+        options.AddAspNet();
+        options.AddAspNet();
+
+        Assert.Single(options.EventProcessors!, _ => _ is SystemWebRequestEventProcessor);
+    }
+
+    [Fact]
+    public void AddAspNet_UsedMoreThanOnce_LogWarning()
+    {
+        var options = new SentryOptions();
+        var logger = new InMemoryDiagnosticLogger();
+
+        options.DiagnosticLogger = logger;
+        options.Debug = true;
+
+        options.AddAspNet();
+        options.AddAspNet();
+
+        Assert.Single(logger.Entries, x => x.Level == SentryLevel.Warning
+                                           && x.Message.Contains("Subsequent call will be ignored."));
+    }
 }
