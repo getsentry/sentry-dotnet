@@ -63,7 +63,7 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
             @event.Request.Headers[key] = context.Request.Headers[key];
         }
 
-        if (_options?.SendDefaultPii == true)
+        if (_options.SendDefaultPii)
         {
             if (@event.User.Username == Environment.UserName)
             {
@@ -76,7 +76,7 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
             if (context.User.Identity is { } identity)
             {
                 @event.User.Username = identity.Name;
-                @event.User.Other.Add("IsAuthenticated", identity.IsAuthenticated.ToString());
+                @event.User.Other["IsAuthenticated"] = identity.IsAuthenticated.ToString();
             }
             if (context.User is ClaimsPrincipal claimsPrincipal)
             {
