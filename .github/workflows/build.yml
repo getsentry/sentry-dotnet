@@ -47,8 +47,13 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
+      - name: Build (for non-release branch)
+        if: env.CI_PUBLISHING_BUILD != 'true'
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo
+
+      - name: Build (for release branch)
+        if: env.CI_PUBLISHING_BUILD == 'true'
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
@@ -64,11 +69,11 @@ jobs:
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
 
-      - name: Create Nuget Packages (release only)
+      - name: Create Nuget Packages (release branch only)
         if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Pack.slnf -c Release --no-build --nologo
 
-      - name: Archive Nuget Packages (release only)
+      - name: Archive Nuget Packages (release branch only)
         if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v3
         with:
