@@ -51,7 +51,7 @@ jobs:
         if: env.CI_PUBLISHING_BUILD != 'true'
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo
 
-     - name: Build (for release branch)
+      - name: Build (for release branch)
         if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
         env:
