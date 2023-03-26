@@ -36,7 +36,7 @@
       This avoids attaching a debugger when we crash the app when targeting Windows while running in Visual Studio.
       It is not strictly necessary, but makes the demo sligtly cleaner.
     -->
-    <DefineConstants>DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
 
   </PropertyGroup>
 
