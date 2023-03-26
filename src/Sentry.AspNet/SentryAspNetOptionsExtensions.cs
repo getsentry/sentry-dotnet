@@ -13,12 +13,13 @@ public static class SentryAspNetOptionsExtensions
     /// <summary>
     /// Adds ASP.NET classic integration.
     /// </summary>
-    public static void AddAspNet(this SentryOptions options, RequestSize maxRequestBodySize = RequestSize.None)
+    public static SentryOptions AddAspNet(this SentryOptions options, RequestSize maxRequestBodySize = RequestSize.None)
     {
         if (options.EventProcessors?.OfType<SystemWebRequestEventProcessor>().Any() is true)
         {
             options.LogWarning($"{nameof(AddAspNet)} has already been called. Subsequent call will be ignored.");
-            return;
+
+            return options;
         }
 
         var payloadExtractor = new RequestBodyExtractionDispatcher(
@@ -35,5 +36,7 @@ public static class SentryAspNetOptionsExtensions
         options.Release ??= SystemWebVersionLocator.Resolve(options, HttpContext.Current);
         options.AddEventProcessor(eventProcessor);
         options.AddDiagnosticSourceIntegration();
+
+        return options;
     }
 }
