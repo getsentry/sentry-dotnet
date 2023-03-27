@@ -13,6 +13,10 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
@@ -42,3 +46,5 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@67a35a08586135a9573f4327e904ecbf517a882d # pin@v2
+        with:
+          category: '/language:csharp'
