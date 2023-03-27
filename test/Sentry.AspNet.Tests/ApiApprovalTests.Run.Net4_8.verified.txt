@@ -7,7 +7,7 @@
     }
     public static class SentryAspNetOptionsExtensions
     {
-        public static void AddAspNet(this Sentry.SentryOptions options, Sentry.Extensibility.RequestSize maxRequestBodySize = 0) { }
+        public static Sentry.SentryOptions AddAspNet(this Sentry.SentryOptions options, Sentry.Extensibility.RequestSize maxRequestBodySize = 0) { }
     }
     public static class SentryHttpServerUtilityExtensions
     {

@@ -6,4 +6,9 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <!-- Never use Sentry CLI for sample projects when building in CI. -->
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <UseSentryCLI>false</UseSentryCLI>
+  </PropertyGroup>
+
 </Project>

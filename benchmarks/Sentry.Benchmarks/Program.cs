@@ -16,8 +16,7 @@ internal class Program
     {
         public Config()
         {
-            AddJob(Job.Default.WithRuntime(CoreRuntime.Core21));
-            AddJob(Job.Default.WithRuntime(CoreRuntime.Core31));
+            AddJob(Job.Default.WithRuntime(CoreRuntime.Core60));
             AddDiagnoser(MemoryDiagnoser.Default);
             AddExporter(MarkdownExporter.GitHub);
             AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());

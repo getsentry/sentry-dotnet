@@ -29,6 +29,11 @@ jobs:
         with:
           submodules: recursive
 
+      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      - name: Set Environment Variables
+        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
       - name: Setup Environment
         uses: ./.github/actions/environment
 
@@ -42,8 +47,15 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
+      - name: Build (for non-release branch)
+        if: env.CI_PUBLISHING_BUILD != 'true'
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo
+
+      - name: Build (for release branch)
+        if: env.CI_PUBLISHING_BUILD == 'true'
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       # TMP: tests currently fail
       # - name: Test
@@ -55,8 +67,6 @@ jobs:
           script: test/sentry-cli-integration/run-script.ps1
           script-output-expected: test/sentry-cli-integration/script-output.expected
           server-output-expected: test/sentry-cli-integration/server-output-${{ runner.os }}.expected
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Upload symbol-upload test outputs
         if: failure()
@@ -73,14 +83,13 @@ jobs:
           path: '**/*.received.*'
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
-      # We use macOS for that so we we get all the iOS/macCatalyst targets in the packages
 
-      - name: Create Nuget Packages (release only)
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+      - name: Create Nuget Packages (release branch only)
+        if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Pack.slnf -c Release --no-build --nologo
 
-      - name: Archive Nuget Packages (release only)
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+      - name: Archive Nuget Packages (release branch only)
+        if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}

@@ -2,15 +2,14 @@
 
   <PropertyGroup>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
-    <NoWarn Condition="$(TargetFramework) == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
-    <DefineConstants>$(AdditionalConstants)</DefineConstants>
+    <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461;net6.0-android</TargetFrameworks>
-
-    <!-- On macOS, build the iOS and Mac Catalyst targets also. -->
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net6.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
@@ -46,6 +45,13 @@
   </ItemGroup>
   <!-- DiagnosticSource -->
 
+  <ItemGroup>
+    <PackageReference Include="Polyfill" Version="1.5.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <Reference Include="System.Net.Http" />
@@ -58,7 +64,7 @@
   </ItemGroup>
 
   <!-- Prefer bundled version of System.Text.Json to avoid extra dependencies -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461' or '$(TargetFramework)' == 'netcoreapp3.0'">
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
@@ -74,14 +80,31 @@
       Hashes are from https://release-registry.services.sentry.io/apps/sentry-cli/latest
       Update with each new version.
     -->
+    <PropertyGroup>
+      <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
+    </PropertyGroup>
     <ItemGroup>
-      <SentryCLIDownload Include="sentry-cli-Darwin-arm64" FileHash="5c3234a27ffde95ef3abe344b8ec48d0233d582029816c6b37a74581a189d431" />
-      <SentryCLIDownload Include="sentry-cli-Darwin-x86_64" FileHash="2f597027d36035beca9b4cad79e65370bf0dd4d6aa20842c907a8cae4c8d528a" />
-      <SentryCLIDownload Include="sentry-cli-Linux-aarch64" FileHash="01b39b3dd502d532846b741e612a1796ce727b79bb69cbab45b23126507717f8" />
-      <SentryCLIDownload Include="sentry-cli-Linux-i686" FileHash="05e52e80408ad1e513cdc2e6732486331bfdc122951478a91f44c6652b282cf7" />
-      <SentryCLIDownload Include="sentry-cli-Linux-x86_64" FileHash="217bcb4e5fd74b189be5a834ba835828eb6f7d97d3f676ef2da26f4de3df1729" />
-      <SentryCLIDownload Include="sentry-cli-Windows-i686.exe" FileHash="5d0a4c3c6a49ca7cd65b685aff0d56a2e79a29e841380ca493c6bc3656ebd8cb" />
-      <SentryCLIDownload Include="sentry-cli-Windows-x86_64.exe" FileHash="753d0f2cb65bfb5ab95d74d034c2d58451d5dcae1136e16b3e1aa0683ee1af95"/>
+      <SentryCLIDownload
+        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')"
+        Include="sentry-cli-Darwin-arm64" FileHash="ab3ee5b8d5063efecf5cad4b377eee63ad5e20c58b12dc4c44c38a180315981d" />
+      <SentryCLIDownload
+        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')"
+        Include="sentry-cli-Darwin-x86_64" FileHash="45be089d4a7ab45c76c5ef8eb5847da380735e3a8a78d5c0902b8f7ca64b8cea" />
+      <SentryCLIDownload
+        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')"
+        Include="sentry-cli-Linux-aarch64" FileHash="0a86384509757c2e1cf14499d27cdaa9f5a6d9bd0b1b8e375260c4715e67059f" />
+      <SentryCLIDownload
+        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')"
+        Include="sentry-cli-Linux-i686" FileHash="015d6837b36676b7ef613d7fa5d19ea703b82af059d526efbeda06cd83d02c2d" />
+      <SentryCLIDownload
+        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')"
+        Include="sentry-cli-Linux-x86_64" FileHash="0beccfae24d5162e11cdbfee01af7cd49046661ba3d53481226aff08d77443fe" />
+      <SentryCLIDownload
+        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')"
+        Include="sentry-cli-Windows-i686.exe" FileHash="7ef7442a8b8afc6a5f0ea57a083d87a98e73f9c4b42f9d9e9375d40f2e06a14f" />
+      <SentryCLIDownload
+        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')"
+        Include="sentry-cli-Windows-x86_64.exe" FileHash="4ce843558de6306bcfd6d5cd6dcf985b3e1eee266c9fdc3d24579a242c543e48" />
     </ItemGroup>
 
     <!-- Download the files -->

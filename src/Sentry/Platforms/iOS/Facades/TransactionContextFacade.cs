@@ -27,7 +27,8 @@ internal class TransactionContextFacade : ITransactionContext
 
     public string Description => _context.Description;
 
-    public SpanStatus? Status => _context.Status.ToSpanStatus();
+    // Note: SentrySpanContext.Status was removed from the Cocoa SDK in 8.0.0
+    public SpanStatus? Status => null; // _context.Status.ToSpanStatus();
 
     public bool? IsSampled => _context.Sampled.ToNullableBoolean();
 }

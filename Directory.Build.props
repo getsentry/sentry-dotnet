@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.28.1</Version>
+    <Version>3.29.1</Version>
     <LangVersion>10</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
@@ -12,12 +12,32 @@
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
 
-    <!-- Configure Sentry CLI -->
+  <!--
+    Configure Sentry CLI
+    NOTE: Authentication is not set here.  Instead:
+    - In CI, `SENTRY_AUTH_TOKEN` is set as an environment variable via a GitHub Actions secret.
+    - In dev, you can either set `SENTRY_AUTH_TOKEN` manually, or you can set an auth token
+      in your ~/.sentryclirc file.  See https://docs.sentry.io/product/cli/configuration/
+
+    There is also a a `SentryAuthToken` msbuild property, but it should be used sparingly.
+    If using it, be careful that the auth token does not get committed to source control.
+  -->
+  <PropertyGroup>
     <SentryOrg>sentry-sdks</SentryOrg>
     <SentryProject>sentry-dotnet</SentryProject>
-    <SentryUploadSources>true</SentryUploadSources>
+  </PropertyGroup>
 
+  <!-- By default we'll only upload with Sentry CLI in Release configuration. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadSources>true</SentryUploadSources>
+  </PropertyGroup>
+
+  <!-- If running in CI and auth token is not set, disable SentryCLI completely (to avoid logging warnings). -->
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' And '$(SENTRY_AUTH_TOKEN)' == ''">
+    <UseSentryCLI>false</UseSentryCLI>
   </PropertyGroup>
 
   <!--
@@ -53,7 +73,6 @@
   <ItemGroup>
     <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.*" PrivateAssets="All" />
     <PackageReference Include="Roslynator.Analyzers" Version="4.*" PrivateAssets="All" />
-    <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Import the root global usings, except for samples. -->
@@ -67,7 +86,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.13.0</SentryCLIVersion>
+    <SentryCLIVersion>2.16.0</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

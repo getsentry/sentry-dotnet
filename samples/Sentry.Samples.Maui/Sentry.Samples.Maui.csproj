@@ -36,8 +36,19 @@
       This avoids attaching a debugger when we crash the app when targeting Windows while running in Visual Studio.
       It is not strictly necessary, but makes the demo sligtly cleaner.
     -->
-    <DefineConstants>DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
 
+  </PropertyGroup>
+
+  <!--
+    Use the arm64 runtime when building on arm64 Macs.
+    See https://github.com/xamarin/xamarin-macios/issues/17841
+  -->
+  <PropertyGroup>
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios' And '$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And '$(OSArchitecture)' == 'Arm64' And ('$(_MacCatalystRuntimeIdentifier)' == 'maccatalyst-x64' Or ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">maccatalyst-arm64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>

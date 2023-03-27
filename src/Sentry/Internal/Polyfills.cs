@@ -5,6 +5,11 @@
 using Sentry.Internal.Http;
 #endif
 
+[EditorBrowsable(EditorBrowsableState.Never)]
+internal static partial class PolyfillExtensions
+{
+}
+
 #if NETFRAMEWORK || NETSTANDARD2_0
 internal static partial class PolyfillExtensions
 {
@@ -16,32 +21,16 @@ internal static partial class PolyfillExtensions
 
     public static bool Contains(this string str, char c) => str.IndexOf(c) >= 0;
 
-    public static bool Contains(this string str, string value, StringComparison comparisonType) =>
-        str.IndexOf(value, comparisonType) >= 0;
-
-    public static Task CopyToAsync(this Stream stream, Stream destination, CancellationToken cancellationToken) =>
-        stream.CopyToAsync(destination, 81920, cancellationToken);
-
     public static Task<int> ReadAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
         stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
 
     public static Task WriteAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
         stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
-
-    public static void Deconstruct<TKey, TValue>(
-        this KeyValuePair<TKey, TValue> pair,
-        out TKey key,
-        out TValue value)
-    {
-        key = pair.Key;
-        value = pair.Value;
-    }
 }
 
 namespace System.Collections.Generic
 {
-    using Linq;
-
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal static class PolyfillExtensions
     {
         public static TValue GetValueOrDefault<TKey, TValue>(
@@ -96,6 +85,7 @@ namespace System.Net.Http.Headers
 
 namespace System.Linq
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal static class PolyfillExtensions
     {
         public static IEnumerable<TSource> Append<TSource>(this IEnumerable<TSource> source, TSource element)
@@ -135,6 +125,17 @@ internal static partial class PolyfillExtensions
         }
 
         return content.ReadAsStreamAsync().Result;
+    }
+}
+#endif
+
+#if !NET6_0_OR_GREATER
+internal static partial class PolyfillExtensions
+{
+    public static void WriteRawValue(this Utf8JsonWriter writer, byte[] utf8Json)
+    {
+        using var document = JsonDocument.Parse(utf8Json);
+        document.RootElement.WriteTo(writer);
     }
 }
 #endif

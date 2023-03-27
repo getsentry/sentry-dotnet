@@ -93,7 +93,7 @@ internal class DebugStackTrace : SentryStackTrace
                 {
                     if (i != j)
                     {
-                        relocations.Add(DebugStackTrace.GetRelativeAddressMode(i), DebugStackTrace.GetRelativeAddressMode(j));
+                        relocations.Add(GetRelativeAddressMode(i), GetRelativeAddressMode(j));
                     }
                     found = true;
                 }
@@ -101,7 +101,7 @@ internal class DebugStackTrace : SentryStackTrace
 
             if (!found)
             {
-                relocations.Add(DebugStackTrace.GetRelativeAddressMode(i), DebugStackTrace.GetRelativeAddressMode(@event.DebugImages.Count));
+                relocations.Add(GetRelativeAddressMode(i), GetRelativeAddressMode(@event.DebugImages.Count));
                 @event.DebugImages.Add(DebugImages[i]);
             }
         }
@@ -213,7 +213,7 @@ internal class DebugStackTrace : SentryStackTrace
 
             if (AddDebugImage(method.Module) is { } moduleIdx && moduleIdx != DebugImageMissing)
             {
-                frame.AddressMode = DebugStackTrace.GetRelativeAddressMode(moduleIdx);
+                frame.AddressMode = GetRelativeAddressMode(moduleIdx);
 
                 try
                 {
@@ -280,6 +280,7 @@ internal class DebugStackTrace : SentryStackTrace
             // In Enhanced mode, Module (which in this case is the Namespace)
             // is already prepended to the function, after return type.
             // Removing here at the end because this is used to resolve InApp=true/false
+            // TODO what is this really about? we have already run ConfigureAppFrame() at this time...
             frame.Module = null;
         }
 
@@ -314,7 +315,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   RemotePrinterService in UpdateNotification at line 457:13
 
         var match = RegexAsyncFunctionName.Match(frame.Module);
-        if (match is {Success: true, Groups.Count: 3})
+        if (match is { Success: true, Groups.Count: 3 })
         {
             frame.Module = match.Groups[1].Value;
             frame.Function = match.Groups[2].Value;
@@ -339,7 +340,7 @@ internal class DebugStackTrace : SentryStackTrace
         //   BeginInvokeAsynchronousActionMethod { <lambda> }
 
         var match = RegexAnonymousFunction.Match(frame.Function);
-        if (match is {Success: true, Groups.Count: 2})
+        if (match is { Success: true, Groups.Count: 2 })
         {
             frame.Function = match.Groups[1].Value + " { <lambda> }";
         }
@@ -363,15 +364,15 @@ internal class DebugStackTrace : SentryStackTrace
         //   System.Threading.Tasks.Task`1 in InnerInvoke`
         //   or System.Collections.Generic.List`1 in get_Item
         var match = RegexAsyncReturn.Match(frame.Module);
-        if (match is {Success: true, Groups.Count: 2})
+        if (match is { Success: true, Groups.Count: 2 })
         {
             frame.Module = match.Groups[1].Value;
         }
     }
 
-    private PEReader? TryReadAssembly(string assemblyName)
+    private static PEReader? TryReadAssembly(string assemblyName, SentryOptions options)
     {
-        if (_options.AssemblyReader is { } reader)
+        if (options.AssemblyReader is { } reader)
         {
             return reader.Invoke(assemblyName);
         }
@@ -382,66 +383,104 @@ internal class DebugStackTrace : SentryStackTrace
     private int? AddDebugImage(Module module)
     {
         var id = module.ModuleVersionId;
-
         if (_debugImageIndexByModule.TryGetValue(id, out var idx))
         {
             return idx;
         }
 
-        var assemblyName = module.FullyQualifiedName;
-        using var peReader = TryReadAssembly(assemblyName);
-        if (peReader is null)
+        var debugImage = GetDebugImage(module, _options);
+        if (debugImage == null)
         {
-            _options.LogDebug("Skipping DebugImage for module '{0}' because assembly wasn't found: '{1}'",
-                    module.Name, assemblyName);
-            _debugImageIndexByModule.Add(id, DebugImageMissing); // don't try to resolve again
+            // don't try to resolve again
+            _debugImageIndexByModule.Add(id, DebugImageMissing);
             return null;
         }
 
-        string? codeId = null;
-        var headers = peReader.PEHeaders;
-        if (headers.PEHeader is { } peHeader)
+        idx = DebugImages.Count;
+        DebugImages.Add(debugImage);
+        _debugImageIndexByModule.Add(id, idx);
+
+        return idx;
+    }
+
+    internal static DebugImage? GetDebugImage(Module module, SentryOptions options)
+    {
+        var assemblyName = module.FullyQualifiedName;
+        using var peReader = TryReadAssembly(assemblyName, options);
+        if (peReader is null)
         {
-            codeId = $"{headers.CoffHeader.TimeDateStamp:X8}{peHeader.SizeOfImage:x}";
+            options.LogDebug("Skipping debug image for module '{0}' because assembly wasn't found: '{1}'",
+                module.Name, assemblyName);
+            return null;
         }
+
+        var headers = peReader.PEHeaders;
+        var codeId = headers.PEHeader is { } peHeader
+            ? $"{headers.CoffHeader.TimeDateStamp:X8}{peHeader.SizeOfImage:x}"
+            : null;
 
         string? debugId = null;
         string? debugFile = null;
         string? debugChecksum = null;
 
-        var debugDirs = peReader.ReadDebugDirectory();
-        foreach (var entry in debugDirs)
-        {
-            if (entry.Type == DebugDirectoryEntryType.PdbChecksum)
-            {
-                var checksum = peReader.ReadPdbChecksumDebugDirectoryData(entry);
-                var checksumHex = checksum.Checksum.AsSpan().ToHexString();
-                debugChecksum = $"{checksum.AlgorithmName}:{checksumHex}";
-            }
-            if (!entry.IsPortableCodeView)
-            {
-                continue;
-            }
-            var codeView = peReader.ReadCodeViewDebugDirectoryData(entry);
+        var debugDirectoryEntries = peReader.ReadDebugDirectory();
 
-            // Together 16B of the Guid concatenated with 4B of the TimeDateStamp field of the entry form a PDB ID that
-            // should be used to match the PE/COFF image with the associated PDB (instead of Guid and Age).
-            // Matching PDB ID is stored in the #Pdb stream of the .pdb file.
-            // See https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
-            debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
-            debugFile = codeView.Path;
+        foreach (var entry in debugDirectoryEntries)
+        {
+            switch (entry.Type)
+            {
+                case DebugDirectoryEntryType.PdbChecksum:
+                    {
+                        var checksum = peReader.ReadPdbChecksumDebugDirectoryData(entry);
+                        var checksumHex = checksum.Checksum.AsSpan().ToHexString();
+                        debugChecksum = $"{checksum.AlgorithmName}:{checksumHex}";
+                        break;
+                    }
+
+                case DebugDirectoryEntryType.CodeView:
+                    {
+                        var codeView = peReader.ReadCodeViewDebugDirectoryData(entry);
+                        debugFile = codeView.Path;
+
+                        // Specification:
+                        // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
+                        //
+                        // See also:
+                        // https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype
+                        //
+                        // Note: Matching PDB ID is stored in the #Pdb stream of the .pdb file.
+
+                        if (entry.IsPortableCodeView)
+                        {
+                            // Portable PDB Format
+                            // Version Major=any, Minor=0x504d
+                            debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
+                        }
+                        else
+                        {
+                            // Full PDB Format (Windows only)
+                            // Version Major=0, Minor=0
+                            debugId = $"{codeView.Guid}-{codeView.Age}";
+                        }
+
+                        break;
+                    }
+            }
+
+            if (debugId != null && debugChecksum != null)
+            {
+                // No need to keep looking, once we have both.
+                break;
+            }
         }
 
-        // well, we are out of luck :-(
         if (debugId == null)
         {
-            _options.LogInfo("Skipping DebugImage for module '{0}' because DebugId couldn't be determined", module.Name);
-            _debugImageIndexByModule.Add(id, DebugImageMissing); // don't try to resolve again
+            options.LogInfo("Skipping debug image for module '{0}' because the Debug ID couldn't be determined", module.Name);
             return null;
         }
 
-        idx = DebugImages.Count;
-        DebugImages.Add(new DebugImage
+        var debugImage = new DebugImage
         {
             Type = "pe_dotnet",
             CodeId = codeId,
@@ -449,10 +488,11 @@ internal class DebugStackTrace : SentryStackTrace
             DebugId = debugId,
             DebugChecksum = debugChecksum,
             DebugFile = debugFile,
-            ModuleVersionId = id,
-        });
-        _debugImageIndexByModule.Add(id, idx);
+            ModuleVersionId = module.ModuleVersionId,
+        };
 
-        return idx;
+        options.LogDebug("Got debug image for '{0}' having Debug ID: {1}", module.Name, debugId);
+
+        return debugImage;
     }
 }

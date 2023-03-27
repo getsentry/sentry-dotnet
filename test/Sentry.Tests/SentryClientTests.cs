@@ -665,6 +665,111 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_RejectEvent()
+    {
+        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction(
+            new Transaction("test name", "test operation")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now // finished
+            });
+
+        _ = _fixture.BackgroundWorker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_ModifyEvent()
+    {
+        Transaction received = null;
+        _fixture.SentryOptions.BeforeSendTransaction = tx => received = tx;
+
+        var transaction = new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction(transaction);
+
+        Assert.Same(transaction, received);
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_replaced_transaction_captured()
+    {
+        Transaction received = null;
+        _fixture.SentryOptions.BeforeSendTransaction = tx =>
+        {
+            received = new Transaction("name2", "operation2")
+            {
+                IsSampled = true,
+                EndTimestamp = DateTimeOffset.Now,
+                Description = "modified transaction"
+            };
+
+            return received;
+        };
+
+        var transaction = new Transaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        Envelope captured = null;
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(x => captured = x));
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction(transaction);
+
+        Assert.NotSame(transaction, received);
+
+        var capturedEnvelopedTransaction = captured.Items[0].Payload.As<JsonSerializable>().Source.As<Transaction>();
+        Assert.Same(received.Description, capturedEnvelopedTransaction.Description);
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_SamplingNull_DropsEvent()
+    {
+        _fixture.SentryOptions.SampleRate = null;
+
+        Transaction received = null;
+        _fixture.SentryOptions.BeforeSendTransaction = e => received = e;
+
+        var transaction = new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        var sut = _fixture.GetSut();
+
+        sut.CaptureTransaction(transaction);
+
+        Assert.Same(transaction, received);
+    }
+
+    [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
+    {
+        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+
+        var sut = _fixture.GetSut();
+        sut.CaptureTransaction( new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        });
+
+        _fixture.ClientReportRecorder.Received(1)
+            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+    }
+
+    [Fact]
     public void Dispose_Worker_FlushCalled()
     {
         var client = _fixture.GetSut();

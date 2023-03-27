@@ -151,6 +151,42 @@ public class SentryStackFrameTests
     }
 
     [Fact]
+    public void ConfigureAppFrame_WithDefaultOptions_RecognizesInAppFrame()
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame()
+        {
+            Function = "Program.<Main>() {QuickJitted}",
+            Module = "Console.Customized"
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp);
+    }
+
+    // Sentry internal frame is marked properly with default options.
+    // This is an actual frame as captured by Sentry.Profiling.
+    [Fact]
+    public void ConfigureAppFrame_WithDefaultOptions_RecognizesSentryInternalFrame()
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame()
+        {
+            Function = "Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>) {QuickJitted}",
+            Module = "Sentry"
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.False(sut.InApp);
+    }
+
+    [Fact]
     public void ConfigureAppFrame_InAppAlreadySet_InAppIgnored()
     {
         // Arrange

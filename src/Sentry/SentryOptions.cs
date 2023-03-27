@@ -315,6 +315,16 @@ public class SentryOptions
     public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
 
     /// <summary>
+    /// A callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <remarks>
+    /// The return of this transaction will be sent to Sentry. This allows the application
+    /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
+    /// should not be sent at all, return null from the callback.
+    /// </remarks>
+    public Func<Transaction, Transaction?>? BeforeSendTransaction { get; set; }
+
+    /// <summary>
     /// A callback invoked when a breadcrumb is about to be stored.
     /// </summary>
     /// <remarks>
@@ -538,14 +548,51 @@ public class SentryOptions
     /// </remarks>
     public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
-    private double _tracesSampleRate;
+    /// <summary>
+    /// Indicates whether tracing is enabled, via any combination of
+    /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
+    /// </summary>
+    internal bool IsTracingEnabled => EnableTracing ?? (_tracesSampleRate > 0.0 || TracesSampler is not null);
+
+    /// <summary>
+    /// Simplified option for enabling or disabling tracing.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>true</c></term>
+    ///     <description>
+    ///       Tracing is enabled. <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> will be used if set,
+    ///       or 100% sample rate will be used otherwise.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>false</c></term>
+    ///     <description>
+    ///       Tracing is disabled, regardless of <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/>.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       Tracing is enabled only if <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> are set.
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// </summary>
+    public bool? EnableTracing { get; set; }
+
+    private double? _tracesSampleRate;
 
     /// <summary>
     /// Indicates the percentage of the tracing data that is collected.
-    /// Setting this to <c>0</c> discards all trace data.
+    /// Setting this to <c>0.0</c> discards all trace data.
     /// Setting this to <c>1.0</c> collects all trace data.
     /// Values outside of this range are invalid.
-    /// Default value is <c>0</c>, which means tracing is disabled.
+    /// The default value is either <c>0.0</c> or <c>1.0</c>, depending on the <see cref="EnableTracing"/> property.
     /// </summary>
     /// <remarks>
     /// Random sampling rate is only applied to transactions that don't already
@@ -554,13 +601,13 @@ public class SentryOptions
     /// </remarks>
     public double TracesSampleRate
     {
-        get => _tracesSampleRate;
+        get => _tracesSampleRate ?? (EnableTracing is true ? 1.0 : 0.0);
         set
         {
-            if (value is < 0 or > 1)
+            if (value is < 0.0 or > 1.0)
             {
                 throw new InvalidOperationException(
-                    $"The value {value} is not a valid tracing sample rate. Use values between 0 and 1.");
+                    $"The value {value} is not a valid tracing sample rate. Use values between 0.0 and 1.0.");
             }
 
             _tracesSampleRate = value;
@@ -581,7 +628,7 @@ public class SentryOptions
 
     // The default propagation list will match anything, but adding to the list should clear that.
     private IList<TracePropagationTarget> _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
-        (new[] {new TracePropagationTarget(".*")}, clearOnNextAdd: true);
+        (new[] { new TracePropagationTarget(".*") }, clearOnNextAdd: true);
 
     /// <summary>
     /// A customizable list of <see cref="TracePropagationTarget"/> objects, each containing either a
@@ -754,28 +801,24 @@ public class SentryOptions
             throw new ArgumentNullException(nameof(converter));
         }
 
-        // only add if we don't have this instance already
-        var converters = JsonExtensions.SerializerOptions.Converters;
-        if (converters.Contains(converter))
-        {
-            return;
-        }
+        JsonExtensions.AddJsonConverter(converter);
+    }
 
-        try
-        {
-            converters.Add(converter);
-        }
-        catch (InvalidOperationException)
-        {
-            // If we've already started using the serializer, then it's too late to add more converters.
-            // The following exception message may occur (depending on STJ version):
-            // "Serializer options cannot be changed once serialization or deserialization has occurred."
-            // We'll swallow this, because it's likely to only have occurred in our own unit tests,
-            // or in a scenario where the Sentry SDK has been initialized multiple times,
-            // in which case we have the converter from the first initialization already.
-            // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
-            // See https://github.com/dotnet/runtime/pull/74431
-        }
+    /// <summary>
+    /// When <c>true</c>, if an object being serialized to JSON contains references to other objects, and the
+    /// serialized object graph exceed the maximum allowable depth, the object will instead be serialized using
+    /// <see cref="ReferenceHandler.Preserve"/> (from System.Text.Json) - which adds <c>$id</c> and <c>$ref</c>
+    /// metadata to the JSON.  When <c>false</c>, an object graph exceeding the maximum depth will be truncated.
+    /// The default value is <c>true</c>.
+    /// </summary>
+    /// <remarks>
+    /// This option applies only to complex objects being added to Sentry events as contexts or extras, which do not
+    /// implement <see cref="IJsonSerializable"/>.
+    /// </remarks>
+    public bool JsonPreserveReferences
+    {
+        get => JsonExtensions.JsonPreserveReferences;
+        set => JsonExtensions.JsonPreserveReferences = value;
     }
 
     /// <summary>
@@ -818,15 +861,15 @@ public class SentryOptions
     {
         SettingLocator = new SettingLocator(this);
 
-        EventProcessorsProviders = new () {
+        EventProcessorsProviders = new() {
             () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
         };
 
-        TransactionProcessorsProviders = new () {
+        TransactionProcessorsProviders = new() {
             () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
         };
 
-        ExceptionProcessorsProviders = new () {
+        ExceptionProcessorsProviders = new() {
             () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
         };
 
@@ -836,17 +879,17 @@ public class SentryOptions
 
         ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
-        EventProcessors = new (){
+        EventProcessors = new(){
             // De-dupe to be the first to run
             new DuplicateEventDetectionEventProcessor(this),
             new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
         };
 
-        ExceptionProcessors = new (){
+        ExceptionProcessors = new(){
             new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)
         };
 
-        Integrations = new () {
+        Integrations = new() {
             // Auto-session tracking to be the first to run
             new AutoSessionTrackingIntegration(),
             new AppDomainUnhandledExceptionIntegration(),
@@ -877,16 +920,16 @@ public class SentryOptions
         iOS = new IosOptions(this);
 #endif
 
-        InAppExclude = new () {
-                "System.",
-                "Mono.",
-                "Sentry.",
-                "Microsoft.",
+        InAppExclude = new() {
+                "System",
+                "Mono",
+                "Sentry",
+                "Microsoft",
                 "MS", // MS.Win32, MS.Internal, etc: Desktop apps
                 "Newtonsoft.Json",
-                "FSharp.",
+                "FSharp",
                 "Serilog",
-                "Giraffe.",
+                "Giraffe",
                 "NLog",
                 "Npgsql",
                 "RabbitMQ",
@@ -904,9 +947,9 @@ public class SentryOptions
                 "IdentityModel",
                 "SqlitePclRaw",
                 "Xamarin",
-                "Android.", // Ex: Android.Runtime.JNINativeWrapper...
-                "Google.",
-                "MongoDB.",
+                "Android", // Ex: Android.Runtime.JNINativeWrapper...
+                "Google",
+                "MongoDB",
                 "Remotion.Linq",
                 "AutoMapper",
                 "Nest",
@@ -920,7 +963,7 @@ public class SentryOptions
 #if DEBUG
         InAppInclude = new()
         {
-            "Sentry.Samples."
+            "Sentry.Samples"
         };
 #endif
     }

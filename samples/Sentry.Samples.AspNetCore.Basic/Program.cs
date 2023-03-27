@@ -12,24 +12,30 @@ public class Program
     public static IWebHost BuildWebHost(string[] args) =>
         WebHost.CreateDefaultBuilder(args)
 
-            // Add Sentry integration
-            // In this example, DSN and Release are set via environment variable:
-            // See: Properties/launchSettings.json
-            .UseSentry()
-            // It can also be defined via configuration (including appsettings.json)
-            // or coded explicitly, via parameter like:
-            // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
+            .UseSentry(o =>
+            {
+                // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
+                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+
+                // Enable Sentry performance monitoring
+                o.EnableTracing = true;
+
+#if DEBUG
+                // Log debug information about the Sentry SDK
+                o.Debug = true;
+#endif
+            })
 
             // The App:
             .Configure(app =>
             {
-                // An example ASP.NET Core middleware that throws an
-                // exception when serving a request to path: /throw
                 app.UseRouting();
 
                 // Enable Sentry performance monitoring
                 app.UseSentryTracing();
 
+                // An example ASP.NET Core middleware that throws an
+                // exception when serving a request to path: /throw
                 app.UseEndpoints(endpoints =>
                 {
                     // Reported events will be grouped by route pattern
