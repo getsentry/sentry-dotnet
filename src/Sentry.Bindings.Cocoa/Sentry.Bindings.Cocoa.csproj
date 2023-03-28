@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-    <TargetFramework Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net6.0-ios</TargetFramework>
-    <TargetFramework Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net6.0-maccatalyst</TargetFramework>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net6.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net6.0-maccatalyst</TargetFrameworks>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
