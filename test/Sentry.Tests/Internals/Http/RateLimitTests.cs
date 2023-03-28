@@ -21,6 +21,38 @@ public class RateLimitTests
     }
 
     [Fact]
+    public void Parse_MinimalFormat_EmptyCatgetory_Works()
+    {
+        // Arrange
+        const string value = "60:";
+
+        // Act
+        var rateLimit = RateLimit.Parse(value);
+
+        // Assert
+        rateLimit.Should().BeEquivalentTo(new RateLimit(
+            new[] { new RateLimitCategory("") },
+            TimeSpan.FromSeconds(60)
+        ));
+    }
+
+    [Fact]
+    public void Parse_MinimalFormat_EmptyCategory_IgnoresScope()
+    {
+        // Arrange
+        const string value = "60::organization";
+
+        // Act
+        var rateLimit = RateLimit.Parse(value);
+
+        // Assert
+        rateLimit.Should().BeEquivalentTo(new RateLimit(
+            new[] { new RateLimitCategory("") },
+            TimeSpan.FromSeconds(60)
+        ));
+    }
+
+    [Fact]
     public void Parse_FullFormat_Works()
     {
         // Arrange
