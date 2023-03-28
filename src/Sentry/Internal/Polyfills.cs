@@ -15,16 +15,6 @@ internal static partial class PolyfillExtensions
         stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
 }
 
-namespace System.Collections.Generic
-{
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static class PolyfillExtensions
-    {
-        public static IEnumerable<T> SkipLast<T>(this IEnumerable<T> source, int count) =>
-            source.Reverse().Skip(count).Reverse();
-    }
-}
-
 namespace System
 {
     internal static class HashCode
