@@ -16,6 +16,7 @@ BeforeAll {
             Param([string]$url)
             Write-Host "Building $Sample"
             dotnet build "samples/$sample/$sample.csproj" -c Release --no-restore --nologo `
+                /p:UseSentryCLI=true `
                 /p:SentryOrg=org `
                 /p:SentryProject=project `
                 /p:SentryUrl=$url `
