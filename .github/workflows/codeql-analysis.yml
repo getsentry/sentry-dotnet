@@ -13,6 +13,10 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
@@ -30,7 +34,7 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@168b99b3c22180941ae7dbdd5f5c9678ede476ba # pin@v2
+        uses: github/codeql-action/init@67a35a08586135a9573f4327e904ecbf517a882d # pin@v2
         with:
           languages: csharp
 
@@ -41,4 +45,6 @@ jobs:
         run: dotnet build Sentry-CI-CodeQL.slnf --no-restore --nologo
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@168b99b3c22180941ae7dbdd5f5c9678ede476ba # pin@v2
+        uses: github/codeql-action/analyze@67a35a08586135a9573f4327e904ecbf517a882d # pin@v2
+        with:
+          category: '/language:csharp'
