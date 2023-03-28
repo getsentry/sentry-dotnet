@@ -10,6 +10,7 @@
 
 - Normalize StackFrame in-app resolution for modules & function prefixes ([#2234](https://github.com/getsentry/sentry-dotnet/pull/2234))
 - Calling `AddAspNet` more than once should not block all errors from being sent ([#2253](https://github.com/getsentry/sentry-dotnet/pull/2253))
+- Fix Sentry CLI arguments when using custom URL or auth token parameters ([#2259](https://github.com/getsentry/sentry-dotnet/pull/2259))
 
 ### Dependencies
 
