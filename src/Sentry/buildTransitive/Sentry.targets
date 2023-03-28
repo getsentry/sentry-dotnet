@@ -47,9 +47,9 @@
       The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
     -->
     <PropertyGroup>
-      <SentryCLIOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIOptions) --api-key $(SentryApiKey)</SentryCLIOptions>
-      <SentryCLIOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIOptions) --auth-token $(SentryAuthToken)</SentryCLIOptions>
-      <SentryCLIOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIOptions) --url $(SentryUrl)</SentryCLIOptions>
+      <SentryCLIBaseOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIBaseOptions) --api-key $(SentryApiKey)</SentryCLIBaseOptions>
+      <SentryCLIBaseOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIBaseOptions) --auth-token $(SentryAuthToken)</SentryCLIBaseOptions>
+      <SentryCLIBaseOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIBaseOptions) --url $(SentryUrl)</SentryCLIBaseOptions>
       <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org $(SentryOrg)</SentryCLIOptions>
       <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project $(SentryProject)</SentryCLIOptions>
     </PropertyGroup>
@@ -86,7 +86,12 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(SentryCLI)' != ''">
-      <_SentryCLICommand>&quot;$(SentryCLI)&quot; info</_SentryCLICommand>
+      <_SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</_SentryCLIBaseCommand>
+      <_SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions)' != ''">$(_SentryCLIBaseCommand) $(SentryCLIBaseOptions)</_SentryCLIBaseCommand>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(SentryCLI)' != ''">
+      <_SentryCLICommand>$(_SentryCLIBaseCommand) info</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryOrg)' != '' And '$(SentryProject)' != ''">$(_SentryCLICommand) --no-defaults</_SentryCLICommand>
     </PropertyGroup>
     <Exec Condition="'$(SentryCLI)' != ''" Command="$(_SentryCLICommand)" IgnoreExitCode="true" ConsoleToMsBuild="true" StandardOutputImportance="Low">
@@ -123,7 +128,7 @@
       Text="Preparing to upload debug symbols and sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
 
     <PropertyGroup>
-      <_SentryCLICommand>&quot;$(SentryCLI)&quot; dif upload</_SentryCLICommand>
+      <_SentryCLICommand>$(_SentryCLIBaseCommand) dif upload</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryCLIOptions.Trim())' != ''">$(_SentryCLICommand) $(SentryCLIOptions.Trim())</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryUploadSources)' == 'true'">$(_SentryCLICommand) --include-sources</_SentryCLICommand>
       <_SentryCLICommand>$(_SentryCLICommand) $(IntermediateOutputPath)</_SentryCLICommand>
@@ -157,12 +162,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <_SentryCLICommand>&quot;$(SentryCLI)&quot; dif bundle-sources $(_SentryDebugInfoFile)</_SentryCLICommand>
+      <_SentryCLICommand>$(_SentryCLIBaseCommand) dif bundle-sources $(_SentryDebugInfoFile)</_SentryCLICommand>
     </PropertyGroup>
     <Exec Command="$(_SentryCLICommand)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" />
 
     <PropertyGroup>
-      <_SentryCLICommand>&quot;$(SentryCLI)&quot; dif upload</_SentryCLICommand>
+      <_SentryCLICommand>$(_SentryCLIBaseCommand) dif upload</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryCLIOptions.Trim())' != ''">$(_SentryCLICommand) $(SentryCLIOptions.Trim())</_SentryCLICommand>
       <_SentryCLICommand>$(_SentryCLICommand) $(_SentrySourceBundle)</_SentryCLICommand>
     </PropertyGroup>
