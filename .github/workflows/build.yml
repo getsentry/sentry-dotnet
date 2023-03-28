@@ -61,7 +61,7 @@ jobs:
         run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
       - name: Test symbol upload
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@d92a288b96bec406feb511d7c199399665f481ee
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: test
 
