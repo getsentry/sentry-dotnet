@@ -20,52 +20,73 @@
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 
-  <!-- Ben.Demystifier -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and !$(TargetFramework.StartsWith('net4'))">
-    <DefineConstants>$(DefineConstants);HAS_ASYNC_ENUMERATOR</DefineConstants>
-  </PropertyGroup>
+  <!--
+    Ben.Demystifier is compiled directly into Sentry.
+    Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
+  -->
   <ItemGroup>
     <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
       <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcoreapp')) or '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
-  <!-- Ben.Demystifier -->
 
-  <!-- DiagnosticSource -->
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
+  <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and '$(TargetFramework)' != 'net461'">
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <Compile Include="..\Sentry.DiagnosticSource\Internal\**\*.cs">
       <Link>Internal\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
-  <!-- DiagnosticSource -->
 
+  <!--
+    We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
+    https://github.com/SimonCropp/Polyfill
+  -->
   <ItemGroup>
     <PackageReference Include="Polyfill" Version="1.8.0" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  <!--
+    This section can be removed after the following issue is resolved:
+    https://github.com/SimonCropp/Polyfill/issues/14
+  -->
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.4" PrivateAssets="all"
+      Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" PrivateAssets="all"
+      Condition="$(TargetFramework.StartsWith('net4')) or '$(TargetFramework)' == 'netstandard2.0'" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" PrivateAssets="all"
+      Condition="$(TargetFramework.StartsWith('net46'))" />
+  </ItemGroup>
+
+  <!--
+    On .NET Framework, we need a package reference to System.Runtime.InteropServices.RuntimeInformation.
+    This is used in Sentry.PlatformAbstractions.RuntimeInfo.  It's already built-in for all other targets.
+  -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+
+  <!-- On .NET Framework, we need an assembly reference to System.Net.Http. -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461' or '$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-  </ItemGroup>
-
-  <!-- Prefer bundled version of System.Text.Json to avoid extra dependencies -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or '$(TargetFramework)' == 'net461' or '$(TargetFramework)' == 'netcoreapp3.0'">
+  <!-- System.Text.Json is already included with .NET 5 and higher. Add a direct reference for other targets. -->
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net5')) and !$(TargetFramework.StartsWith('net6'))">
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
+  <!--
+    Include Sentry's custom targets file in the nuget package.
+    This file contains targets that are invoked during the end-user's build.
+    The same file is included twice, so it ends up being used for both direct and transitive package references to Sentry.
+  -->
   <ItemGroup>
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
