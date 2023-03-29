@@ -64,6 +64,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         void ApplyOptions(SentryLoggingOptions sentryOptions)
         {
+            sentryOptions.AttachStacktrace = false;
             sentryOptions.TracesSampleRate = 1;
             sentryOptions.Transport = transport;
             sentryOptions.Dsn = ValidDsn;
@@ -116,7 +117,6 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         var result = await Verify(transport.Payloads)
             .ScrubInlineGuids()
-            .IgnoreMember<SentryEvent>(_ => _.SentryThreads)
             .IgnoreMember<IEventLike>(_ => _.Environment)
 
             // Really not sure why, but bytes received for this test varies randomly when run in CI
