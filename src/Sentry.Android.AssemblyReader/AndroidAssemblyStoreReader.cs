@@ -42,7 +42,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         if (name.EndsWith(".dll", ignoreCase: true, CultureInfo.InvariantCulture) ||
             name.EndsWith(".exe", ignoreCase: true, CultureInfo.InvariantCulture))
         {
-            if (_explorer.AssembliesByName.TryGetValue(name[..^4], out assembly))
+            if (_explorer.AssembliesByName.TryGetValue(name.Substring(0, name.Length - 4), out assembly))
             {
                 return assembly;
             }
@@ -336,7 +336,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
         {
             if (value.StartsWith("0x", StringComparison.Ordinal))
             {
-                return value[2..];
+                return value.Substring(2);
             }
 
             return value;

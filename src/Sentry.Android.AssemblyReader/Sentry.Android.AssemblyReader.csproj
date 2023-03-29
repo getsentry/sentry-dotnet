@@ -17,7 +17,6 @@
     <Using Include="K4os.Compression.LZ4" />
     <Using Remove="System.Text.Json" />
     <Using Remove="System.Text.Json.Serialization" />
-    <PackageReference Include="Polyfill" Version="1.8.0" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Use a separate readme, and don't add the changelog to the nuget. -->
