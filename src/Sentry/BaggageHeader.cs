@@ -31,11 +31,7 @@ internal class BaggageHeader
             .Where(kvp => kvp.Key.StartsWith(SentryKeyPrefix))
             .GroupBy(kvp => kvp.Key, kvp => kvp.Value)
             .ToDictionary(
-#if NETCOREAPP || NETSTANDARD2_1
                 g => g.Key[SentryKeyPrefix.Length..],
-#else
-                    g => g.Key.Substring(SentryKeyPrefix.Length),
-#endif
                 g => g.First());
 
     /// <summary>

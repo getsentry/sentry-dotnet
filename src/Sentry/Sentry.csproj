@@ -46,10 +46,11 @@
   <!-- DiagnosticSource -->
 
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.7.0" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="1.8.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>

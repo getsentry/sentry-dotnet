@@ -154,10 +154,6 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
     internal static string? FilterNewLineValue(object? value)
     {
         var str = value?.ToString();
-#if NETCOREAPP
-            return str?[(str.IndexOf('\n') + 1)..];
-#else
-        return str?.Substring(str.IndexOf('\n') + 1);
-#endif
+        return str?[(str.IndexOf('\n') + 1)..];
     }
 }
