@@ -423,7 +423,7 @@ public abstract class HttpTransportBase
 
                 var envelopeFile = File.Create(destination);
 #if NETFRAMEWORK || NETSTANDARD2_0
-                    using (envelopeFile)
+                using (envelopeFile)
 #else
                 await using (envelopeFile)
 #endif
