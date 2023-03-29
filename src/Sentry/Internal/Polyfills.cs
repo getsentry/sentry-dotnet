@@ -6,14 +6,6 @@ using Sentry.Internal.Http;
 #endif
 
 #if NETFRAMEWORK || NETSTANDARD2_0
-internal static partial class PolyfillExtensions
-{
-    public static Task<int> ReadAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
-        stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-
-    public static Task WriteAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken) =>
-        stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
-}
 
 namespace System
 {
@@ -54,22 +46,6 @@ namespace System.Net.Http.Headers
     }
 }
 
-namespace System.Linq
-{
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static class PolyfillExtensions
-    {
-        public static IEnumerable<TSource> Append<TSource>(this IEnumerable<TSource> source, TSource element)
-        {
-            foreach (var item in source)
-            {
-                yield return item;
-            }
-
-            yield return element;
-        }
-    }
-}
 #endif
 
 #if !NET5_0_OR_GREATER
