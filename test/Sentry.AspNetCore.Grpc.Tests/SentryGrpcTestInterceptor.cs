@@ -16,7 +16,7 @@ public class SentryGrpcTestInterceptor : Interceptor
         var handlers =
             httpContext.RequestServices.GetService<IEnumerable<GrpcRequestHandler<TRequest, TResponse>>>();
 
-        var methodName = context.Method.Substring(1).Replace('/', '.');
+        var methodName = context.Method[1..].Replace('/', '.');
 
         var handler = handlers.FirstOrDefault(p => p.Method.FullName == methodName);
 

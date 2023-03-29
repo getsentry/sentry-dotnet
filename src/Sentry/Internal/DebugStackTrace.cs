@@ -244,7 +244,7 @@ internal class DebugStackTrace : SentryStackTrace
             if (projectPath != null && frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
             {
                 frame.AbsolutePath = frameFileName;
-                frameFileName = frameFileName.Substring(projectPath.Length);
+                frameFileName = frameFileName[projectPath.Length..];
             }
             frame.FileName = frameFileName;
         }
