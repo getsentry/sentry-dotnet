@@ -50,7 +50,9 @@ internal static class HttpContextExtensions
         }
         else
         {
-            builder.Append(routePattern);
+            builder.Append(routePattern.StartsWith("/", StringComparison.OrdinalIgnoreCase)
+                ? routePattern[1..]
+                : routePattern);
         }
 
         return builder.ToString();
