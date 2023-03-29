@@ -47,7 +47,7 @@ internal class GzipBufferedRequestBodyHandler : DelegatingHandler
         {
             var gzipStream = new GZipStream(memoryStream, _compressionLevel, leaveOpen: true);
 #if NETFRAMEWORK || NETSTANDARD2_0
-                using (gzipStream)
+            using (gzipStream)
 #else
             await using (gzipStream)
 #endif

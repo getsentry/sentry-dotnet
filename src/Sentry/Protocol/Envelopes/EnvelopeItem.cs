@@ -121,7 +121,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // there's no advantage to doing so asynchronously.  We will get better perf from a synchronous approach.
         var payloadBuffer = BufferPayload(logger);
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using (payloadBuffer)
+        using (payloadBuffer)
 #else
         await using (payloadBuffer.ConfigureAwait(false))
 #endif
