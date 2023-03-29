@@ -46,10 +46,7 @@
   <!-- DiagnosticSource -->
 
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.5.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Polyfill" Version="1.7.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
