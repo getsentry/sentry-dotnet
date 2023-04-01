@@ -24,9 +24,9 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2161)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.14.4...2.16.1)
 
-- Bump Java SDK from v6.15.0 to v6.16.0 ([#2243](https://github.com/getsentry/sentry-dotnet/pull/2243))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6160)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.15.0...6.16.0)
+- Bump Java SDK from v6.15.0 to v6.17.0 ([#2243](https://github.com/getsentry/sentry-dotnet/pull/2243), [#2277](https://github.com/getsentry/sentry-dotnet/pull/2277))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6170)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.15.0...6.17.0)
 
 ## 3.29.1
 
