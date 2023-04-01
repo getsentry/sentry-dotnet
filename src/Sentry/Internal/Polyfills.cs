@@ -66,21 +66,33 @@ internal static partial class PolyfillExtensions
 }
 #endif
 
-#if !NET5_0_OR_GREATER
-internal static partial class PolyfillExtensions
+namespace System.Net.Http
 {
-    public static Stream ReadAsStream(this HttpContent content)
+    internal abstract class SerializableHttpContent : HttpContent
     {
-        if (content is EnvelopeHttpContent envelopeHttpContent)
+#if !NET5_0_OR_GREATER
+        protected virtual void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
+        {
+        }
+
+        internal Stream ReadAsStream(CancellationToken cancellationToken)
         {
             var stream = new MemoryStream();
-            envelopeHttpContent.SerializeToStream(stream);
+            SerializeToStream(stream, null, cancellationToken);
             stream.Seek(0, SeekOrigin.Begin);
             return stream;
         }
-
-        return content.ReadAsStreamAsync().Result;
+#endif
     }
+}
+
+#if !NET5_0_OR_GREATER
+internal static partial class PolyfillExtensions
+{
+    public static Stream ReadAsStream(this HttpContent content, CancellationToken cancellationToken = default) =>
+        content is SerializableHttpContent serializableContent
+            ? serializableContent.ReadAsStream(cancellationToken)
+            : content.ReadAsStreamAsync(cancellationToken).Result;
 }
 #endif
 
