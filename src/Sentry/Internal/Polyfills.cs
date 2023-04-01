@@ -1,12 +1,6 @@
-// Polyfills to bridge the missing APIs in older versions of the framework/standard.
-// In some cases, these just proxy calls to existing methods but also provide a signature that matches .netstd2.1
-
-#if !NET5_0_OR_GREATER
-using Sentry.Internal.Http;
-#endif
+// Polyfills to bridge the missing APIs in older targets.
 
 #if NETFRAMEWORK || NETSTANDARD2_0
-
 namespace System
 {
     internal static class HashCode
@@ -33,7 +27,6 @@ namespace System
         }
     }
 }
-
 #endif
 
 #if NETFRAMEWORK
@@ -45,34 +38,35 @@ namespace System.Net.Http.Headers
     {
     }
 }
-
 #endif
+
+namespace System.Net.Http
+{
+    internal abstract class SerializableHttpContent : HttpContent
+    {
+#if !NET5_0_OR_GREATER
+        protected virtual void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
+        {
+        }
+
+        internal Stream ReadAsStream(CancellationToken cancellationToken)
+        {
+            var stream = new MemoryStream();
+            SerializeToStream(stream, null, cancellationToken);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
+#endif
+    }
+}
 
 #if !NET5_0_OR_GREATER
 internal static partial class PolyfillExtensions
 {
-    public static Task<string> ReadAsStringAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
-        !cancellationToken.IsCancellationRequested
-            ? content.ReadAsStringAsync()
-            : Task.FromCanceled<string>(cancellationToken);
-
-    public static Task<Stream> ReadAsStreamAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
-        !cancellationToken.IsCancellationRequested
-            ? content.ReadAsStreamAsync()
-            : Task.FromCanceled<Stream>(cancellationToken);
-
-    public static Stream ReadAsStream(this HttpContent content)
-    {
-        if (content is EnvelopeHttpContent envelopeHttpContent)
-        {
-            var stream = new MemoryStream();
-            envelopeHttpContent.SerializeToStream(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            return stream;
-        }
-
-        return content.ReadAsStreamAsync().Result;
-    }
+    public static Stream ReadAsStream(this HttpContent content, CancellationToken cancellationToken = default) =>
+        content is SerializableHttpContent serializableContent
+            ? serializableContent.ReadAsStream(cancellationToken)
+            : content.ReadAsStreamAsync(cancellationToken).Result;
 }
 #endif
 

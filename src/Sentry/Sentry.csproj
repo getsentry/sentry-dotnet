@@ -48,18 +48,7 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.8.0" PrivateAssets="all" />
-  </ItemGroup>
-
-  <!--
-    This section can be removed after the following issue is resolved:
-    https://github.com/SimonCropp/Polyfill/issues/14
-  -->
-  <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.4" PrivateAssets="all"
-      Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" PrivateAssets="all"
-      Condition="$(TargetFramework.StartsWith('net4')) or '$(TargetFramework)' == 'netstandard2.0'" />
+    <PackageReference Include="Polyfill" Version="1.9.1" PrivateAssets="all" />
   </ItemGroup>
 
   <!--
@@ -78,21 +67,6 @@
   <!-- System.Text.Json is already included with .NET 5 and higher. Add a direct reference for other targets. -->
   <ItemGroup Condition="!$(TargetFramework.StartsWith('net5')) and !$(TargetFramework.StartsWith('net6'))">
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
-  </ItemGroup>
-
-  <!-- 
-    On .NET Framework, we need System.ValueTuple.dll to be present in the final application's directory.
-    We *should* already be getting this transitively as dependency of System.Text.Json.
-    However for some reason (not sure why), it doesn't always propogate.
-    
-    For example, if not referenced here (or if referenced with PrivateAssets="all"), then System.ValueTuple.dll
-    will not be present in the bin folder of Sentry.DiagnosticSource.Tests for .NET Framework.
-    It will compile, but tests will fail.
-
-    Add a direct reference to ensure it is always present for apps that target .NET Framework.
-  -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
   <!--

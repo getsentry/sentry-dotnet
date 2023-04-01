@@ -4,7 +4,7 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal.Http;
 
-internal class EnvelopeHttpContent : HttpContent
+internal class EnvelopeHttpContent : SerializableHttpContent
 {
     private readonly Envelope _envelope;
     private readonly IDiagnosticLogger? _logger;
@@ -30,11 +30,7 @@ internal class EnvelopeHttpContent : HttpContent
         }
     }
 
-#if NET5_0_OR_GREATER
-        protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
-#else
-    internal void SerializeToStream(Stream stream)
-#endif
+    protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
     {
         try
         {
