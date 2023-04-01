@@ -40,24 +40,6 @@ namespace System.Net.Http.Headers
 }
 #endif
 
-
-// This section can be removed after the following PR is merged:
-// https://github.com/SimonCropp/Polyfill/issues/19
-#if NETSTANDARD2_1
-internal static partial class PolyfillExtensions
-{
-    public static Task<string> ReadAsStringAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
-        !cancellationToken.IsCancellationRequested
-            ? content.ReadAsStringAsync()
-            : Task.FromCanceled<string>(cancellationToken);
-
-    public static Task<Stream> ReadAsStreamAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
-        !cancellationToken.IsCancellationRequested
-            ? content.ReadAsStreamAsync()
-            : Task.FromCanceled<Stream>(cancellationToken);
-}
-#endif
-
 namespace System.Net.Http
 {
     internal abstract class SerializableHttpContent : HttpContent
