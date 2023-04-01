@@ -48,7 +48,10 @@ namespace System.Net.Http.Headers
 
 #endif
 
-#if !NET5_0_OR_GREATER
+
+// This section can be removed after the following PR is merged:
+// https://github.com/SimonCropp/Polyfill/issues/19
+#if NETSTANDARD2_1
 internal static partial class PolyfillExtensions
 {
     public static Task<string> ReadAsStringAsync(this HttpContent content, CancellationToken cancellationToken = default) =>
@@ -60,7 +63,12 @@ internal static partial class PolyfillExtensions
         !cancellationToken.IsCancellationRequested
             ? content.ReadAsStreamAsync()
             : Task.FromCanceled<Stream>(cancellationToken);
+}
+#endif
 
+#if !NET5_0_OR_GREATER
+internal static partial class PolyfillExtensions
+{
     public static Stream ReadAsStream(this HttpContent content)
     {
         if (content is EnvelopeHttpContent envelopeHttpContent)
