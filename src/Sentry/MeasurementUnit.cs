@@ -82,7 +82,21 @@ public readonly partial struct MeasurementUnit : IEquatable<MeasurementUnit>
     public override bool Equals(object? obj) => obj is MeasurementUnit other && Equals(other);
 
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(_unit, _name, _unit?.GetType());
+    public override int GetHashCode()
+    {
+        var unitType = _unit?.GetType();
+#if NETSTANDARD2_0 || NETFRAMEWORK
+        unchecked
+        {
+            var hashCode = _unit != null ? _unit.GetHashCode() : 0;
+            hashCode = (hashCode * 397) ^ (_name != null ? _name.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (unitType != null ? unitType.GetHashCode() : 0);
+            return hashCode;
+        }
+#else
+        return HashCode.Combine(_unit, _name, unitType);
+#endif
+    }
 
     /// <summary>
     /// Returns true if the operands are equal.
