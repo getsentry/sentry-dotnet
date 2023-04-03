@@ -199,11 +199,7 @@ internal static class JsonExtensions
         }
 
         // It should be in hex format, such as "0x7fff5bf346c0"
-#if NETCOREAPP || NETSTANDARD2_1_OR_GREATER
         var substring = s[2..];
-#else
-        var substring = s.Substring(2);
-#endif
         if (s.StartsWith("0x") &&
             long.TryParse(substring, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
         {

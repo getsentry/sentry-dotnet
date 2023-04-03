@@ -292,7 +292,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
         var stream = _fileSystem.OpenFileForReading(file);
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using (stream)
+        using (stream)
 #else
         await using (stream.ConfigureAwait(false))
 #endif
@@ -414,7 +414,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
         var stream = _fileSystem.CreateFileForWriting(envelopeFilePath);
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using(stream)
+        using(stream)
 #else
         await using (stream.ConfigureAwait(false))
 #endif

@@ -50,6 +50,11 @@ internal static class HttpContextExtensions
         }
         else
         {
+            if (builder is { Length: > 1 } && builder[^1].Equals('/') && routePattern[0] == '/')
+            {
+                builder.Length--;
+            }
+
             builder.Append(routePattern);
         }
 

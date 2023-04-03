@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Reflection;
 
 namespace Sentry.Internal;
@@ -83,9 +84,9 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         @event.Release ??= Release;
         @event.Distribution ??= Distribution;
 
-        if (@event.Exception == null)
+        // if there's no exception with a stack trace, then get the current stack trace
+        if (@event.Exception?.StackTrace is null)
         {
-            // if there's no exception, get the current stack trace
             var stackTrace = SentryStackTraceFactoryAccessor().Create();
             if (stackTrace != null)
             {

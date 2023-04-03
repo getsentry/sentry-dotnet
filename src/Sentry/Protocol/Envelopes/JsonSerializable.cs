@@ -22,11 +22,7 @@ internal sealed class JsonSerializable : ISerializable
     {
         var writer = new Utf8JsonWriter(stream);
 
-#if NETFRAMEWORK || NETSTANDARD2_0
-            using (writer)
-#else
         await using (writer.ConfigureAwait(false))
-#endif
         {
             Source.WriteTo(writer, logger);
             await writer.FlushAsync(cancellationToken).ConfigureAwait(false);

@@ -55,13 +55,13 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
                         ExceptionDataTagKey.Length < keyValue.Key.Length)
                     {
                         // Set the key after the ExceptionDataTagKey string.
-                        sentryEvent.SetTag(keyValue.Key.Substring(ExceptionDataTagKey.Length), tagValue);
+                        sentryEvent.SetTag(keyValue.Key[ExceptionDataTagKey.Length..], tagValue);
                     }
                     else if (keyValue.Key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase) &&
                              ExceptionDataContextKey.Length < keyValue.Key.Length)
                     {
                         // Set the key after the ExceptionDataTagKey string.
-                        _ = sentryEvent.Contexts[keyValue.Key.Substring(ExceptionDataContextKey.Length)] = keyValue.Value;
+                        _ = sentryEvent.Contexts[keyValue.Key[ExceptionDataContextKey.Length..]] = keyValue.Value;
                     }
                     else
                     {

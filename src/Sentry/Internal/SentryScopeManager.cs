@@ -33,7 +33,7 @@ internal sealed class SentryScopeManager : IInternalScopeManager
     public KeyValuePair<Scope, ISentryClient> GetCurrent()
     {
         var current = ScopeAndClientStack;
-        return current[current.Length - 1];
+        return current[^1];
     }
 
     public void ConfigureScope(Action<Scope>? configureScope)
@@ -59,7 +59,7 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         }
 
         var currentScopeAndClientStack = ScopeAndClientStack;
-        var scope = currentScopeAndClientStack[currentScopeAndClientStack.Length - 1];
+        var scope = currentScopeAndClientStack[^1];
 
         if (scope.Key.Locked)
         {
@@ -86,7 +86,7 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         _options.LogDebug("New scope pushed.");
         var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length + 1];
         Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
-        newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new KeyValuePair<Scope, ISentryClient>(clonedScope, scope.Value);
+        newScopeAndClientStack[^1] = new KeyValuePair<Scope, ISentryClient>(clonedScope, scope.Value);
 
         ScopeAndClientStack = newScopeAndClientStack;
         return scopeSnapshot;
@@ -106,11 +106,11 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         _options.LogDebug("Binding a new client to the current scope.");
 
         var currentScopeAndClientStack = ScopeAndClientStack;
-        var top = currentScopeAndClientStack[currentScopeAndClientStack.Length - 1];
+        var top = currentScopeAndClientStack[^1];
 
         var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length];
         Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
-        newScopeAndClientStack[newScopeAndClientStack.Length - 1] = new KeyValuePair<Scope, ISentryClient>(top.Key, client ?? DisabledHub.Instance);
+        newScopeAndClientStack[^1] = new KeyValuePair<Scope, ISentryClient>(top.Key, client ?? DisabledHub.Instance);
         ScopeAndClientStack = newScopeAndClientStack;
     }
 
@@ -134,7 +134,7 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         {
             _options.LogDebug("Disposing scope.");
 
-            var previousScopeKey = _snapshot[_snapshot.Length - 1].Key;
+            var previousScopeKey = _snapshot[^1].Key;
             var currentScope = _scopeManager.ScopeAndClientStack;
 
             // Only reset the parent if this is still the current scope

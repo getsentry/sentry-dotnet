@@ -104,7 +104,7 @@ public sealed class Envelope : ISerializable, IDisposable
         var writer = new Utf8JsonWriter(stream);
 
 #if NETFRAMEWORK || NETSTANDARD2_0
-            await using (writer)
+        await using (writer)
 #else
         await using (writer.ConfigureAwait(false))
 #endif
