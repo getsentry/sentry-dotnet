@@ -5,26 +5,8 @@ namespace System
 {
     internal static class HashCode
     {
-        public static int Combine<T1, T2>(T1 value1, T2 value2)
-        {
-            unchecked
-            {
-                var hashCode = value1 != null ? value1.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ (value2 != null ? value2.GetHashCode() : 0);
-                return hashCode;
-            }
-        }
-
-        public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3)
-        {
-            unchecked
-            {
-                var hashCode = value1 != null ? value1.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ (value2 != null ? value2.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (value3 != null ? value3.GetHashCode() : 0);
-                return hashCode;
-            }
-        }
+        public static int Combine<T1, T2>(T1 value1, T2 value2) => (value1, value2).GetHashCode();
+        public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3) => (value1, value2, value3).GetHashCode();
     }
 }
 #endif
