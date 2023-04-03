@@ -1,3 +1,4 @@
+using FluentAssertions.Execution;
 namespace Sentry.Tests;
 
 public class ScopeTests
@@ -233,6 +234,51 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clear_SetsPropertiesToDefaultValues()
+    {
+        // Arrange
+        _sut.Level = SentryLevel.Warning;
+        _sut.Request = new() { Data = "request to be cleared" };
+        _sut.Contexts.Add("context to be cleared", "{}");
+        _sut.User = new User() { Username = "username to be cleared" };
+        _sut.Platform = "platform to be cleared";
+        _sut.Release = "release to be cleared";
+        _sut.Distribution = "distribution to be cleared";
+        _sut.Environment = "environment to be cleared";
+        _sut.TransactionName = "transaction name to be cleared";
+        _sut.Transaction = Substitute.For<ITransaction>();
+        _sut.Fingerprint = new[] { "fingerprint to be cleared" };
+        _sut.AddBreadcrumb(new(message: "breadcrumb to be cleared"));
+        _sut.SetExtra("extra", "extra to be cleared");
+        _sut.SetTag("tag", "tag to be cleared");
+        _sut.AddAttachment(new Attachment(default, default, default, "attachment to be cleared"));
+
+        // Act
+        _sut.Clear();
+
+        // Assert
+        var newScope = new Scope();
+        using (new AssertionScope())
+        {
+            _sut.Level.Should().Be(newScope.Level);
+            _sut.Request.Should().BeEquivalentTo(newScope.Request);
+            _sut.Contexts.Should().BeEquivalentTo(newScope.Contexts);
+            _sut.User.Should().BeEquivalentTo(newScope.User);
+            _sut.Platform.Should().Be(newScope.Platform);
+            _sut.Release.Should().Be(newScope.Release);
+            _sut.Distribution.Should().Be(newScope.Distribution);
+            _sut.Environment.Should().Be(newScope.Environment);
+            _sut.TransactionName.Should().Be(newScope.TransactionName);
+            _sut.Transaction.Should().Be(newScope.Transaction);
+            _sut.Fingerprint.Should().BeEquivalentTo(newScope.Fingerprint);
+            _sut.Breadcrumbs.Should().BeEquivalentTo(newScope.Breadcrumbs);
+            _sut.Extra.Should().BeEquivalentTo(newScope.Extra);
+            _sut.Tags.Should().BeEquivalentTo(newScope.Tags);
+            _sut.Attachments.Should().BeEquivalentTo(newScope.Attachments);
+        }
+    }
+
+    [Fact]
     public void ClearAttachments_HasAttachments_EmptyList()
     {
         // Arrange
@@ -248,6 +294,23 @@ public class ScopeTests
 
         // Assert
         scope.Attachments.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ClearBreadcrumbs_Breadcrumbs_EmptyList()
+    {
+        // Arrange
+        for (var i = 0; i < 5; i++)
+        {
+            _sut.AddBreadcrumb(new Breadcrumb());
+        }
+        _sut.Breadcrumbs.Should().NotBeEmpty("Sanity check: Arrange failed to configure Breadcrumbs");
+
+        // Act
+        _sut.ClearBreadcrumbs();
+
+        // Assert
+        _sut.Breadcrumbs.Should().BeEmpty();
     }
 
     [Theory]
