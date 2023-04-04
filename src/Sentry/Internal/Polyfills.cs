@@ -1,5 +1,16 @@
 // Polyfills to bridge the missing APIs in older targets.
 
+#if NETFRAMEWORK || NETSTANDARD2_0
+namespace System
+{
+    internal static class HashCode
+    {
+        public static int Combine<T1, T2>(T1 value1, T2 value2) => (value1, value2).GetHashCode();
+        public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3) => (value1, value2, value3).GetHashCode();
+    }
+}
+#endif
+
 #if NETFRAMEWORK
 namespace System.Net.Http.Headers
 {
