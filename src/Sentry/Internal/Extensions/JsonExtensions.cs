@@ -362,37 +362,6 @@ internal static class JsonExtensions
         writer.WriteArrayValue(arr, logger);
     }
 
-    public static void WriteSparseArrayValue<T>(
-        this Utf8JsonWriter writer,
-        SparseArray<T>? arr,
-        IDiagnosticLogger? logger)
-    {
-        if (arr is not null)
-        {
-            writer.WriteStartObject();
-            arr.Foreach((k, v) =>
-            {
-                writer.WritePropertyName(k.ToString());
-                writer.WriteDynamicValue(v, logger);
-            });
-            writer.WriteEndObject();
-        }
-        else
-        {
-            writer.WriteNullValue();
-        }
-    }
-
-    public static void WriteSparseArray<T>(
-        this Utf8JsonWriter writer,
-        string propertyName,
-        SparseArray<T>? arr,
-        IDiagnosticLogger? logger)
-    {
-        writer.WritePropertyName(propertyName);
-        writer.WriteSparseArrayValue(arr, logger);
-    }
-
     public static void WriteStringArrayValue(
         this Utf8JsonWriter writer,
         IEnumerable<string?>? arr)
