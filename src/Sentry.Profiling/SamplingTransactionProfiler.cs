@@ -113,7 +113,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     /// <inheritdoc />
-    public void OnTransactionFinish(DateTimeOffset now)
+    public void Finish(DateTimeOffset now)
     {
         if (Stop(now))
         {

@@ -21,7 +21,7 @@ internal interface ITransactionProfiler
     /// <summary>
     /// Called when the transaction ends - this should stop profile samples collection.
     /// </summary>
-    void OnTransactionFinish(DateTimeOffset now);
+    void Finish(DateTimeOffset now);
 
     /// <summary>
     /// Process and collect the profile.

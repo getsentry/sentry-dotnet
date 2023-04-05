@@ -67,7 +67,7 @@ public class SamplingTransactionProfilerTests
         var sut = factory.Start(transactionTracer, clock.CurrentDateTimeOffset, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
         RunForMs(100);
-        sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
+        sut.Finish(clock.CurrentDateTimeOffset);
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
         var transaction = new Transaction(transactionTracer);
@@ -88,7 +88,7 @@ public class SamplingTransactionProfilerTests
         var sut = new SamplingTransactionProfiler(Path.GetTempPath(), clock.CurrentDateTimeOffset, limitMs, options, CancellationToken.None);
         RunForMs(limitMs * 4);
         clock.Elapsed.TotalMilliseconds.Should().BeGreaterThan(limitMs * 4);
-        sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
+        sut.Finish(clock.CurrentDateTimeOffset);
 
         var collectTask = sut.Collect(new Transaction("foo", "bar"));
         collectTask.Wait();

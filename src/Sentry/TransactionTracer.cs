@@ -261,7 +261,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public void Finish()
     {
         var now = Stopwatch.CurrentDateTimeOffset;
-        TransactionProfiler?.OnTransactionFinish(now);
+        TransactionProfiler?.Finish(now);
         Status ??= SpanStatus.Ok;
         EndTimestamp = now;
 
