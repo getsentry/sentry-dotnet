@@ -1,7 +1,7 @@
 namespace Sentry.Tests.Protocol;
 
 [UsesVerify]
-public partial class ProfilerTests
+public class ProfilerTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
@@ -10,7 +10,7 @@ public partial class ProfilerTests
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }
 
-    private void AddStack(SampleProfile sut, List<int> frames)
+    private static void AddStack(SampleProfile sut, List<int> frames)
     {
         var stack = new HashableGrowableArray<int>();
         foreach (var frame in frames)
@@ -21,7 +21,7 @@ public partial class ProfilerTests
         sut.Stacks.Add(stack);
     }
 
-    private SampleProfile CreateSampleProfile()
+    private static SampleProfile CreateSampleProfile()
     {
         var prof = new SampleProfile();
 
