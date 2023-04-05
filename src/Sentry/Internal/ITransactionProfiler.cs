@@ -26,5 +26,5 @@ internal interface ITransactionProfiler
     /// <summary>
     /// Process and collect the profile.
     /// </summary>
-    Task<ProfileInfo?> Collect(Transaction transaction);
+    Task<ProfileInfo?> CollectAsync(Transaction transaction);
 }

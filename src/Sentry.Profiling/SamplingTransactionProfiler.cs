@@ -123,7 +123,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     /// <inheritdoc />
-    public async Task<ProfileInfo?> Collect(Transaction transaction)
+    public async Task<ProfileInfo?> CollectAsync(Transaction transaction)
     {
         if (_data is null || _endTime is null)
         {

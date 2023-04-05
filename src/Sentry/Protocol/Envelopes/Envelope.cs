@@ -289,8 +289,8 @@ public sealed class Envelope : ISerializable, IDisposable
 
         if (transaction.TransactionProfiler is { } profiler)
         {
-            // Profiler.Collect() must not throw but it may return null in which case the EnvelopeItem will be skipped.
-            items.Add(EnvelopeItem.FromProfileInfo(profiler.Collect(transaction)));
+            // Profiler.CollectAsync() must not throw but it may complete with null in which case the EnvelopeItem won't serialize.
+            items.Add(EnvelopeItem.FromProfileInfo(profiler.CollectAsync(transaction)));
         }
 
         return new Envelope(eventId, header, items);
