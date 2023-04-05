@@ -15,6 +15,7 @@ using SentryProfileStackTrace = HashableGrowableArray<int>;
 /// <summary>
 /// Processes TraceLog to produce a SampleProfile.
 /// Based on https://github.com/microsoft/perfview/blob/ff6e8e6c4118a26521515f41ae77f15981d68c53/src/TraceEvent/Computers/SampleProfilerThreadTimeComputer.cs
+/// Note that several parts of the code below are commented out as we intend to use this in follow up PRs
 /// </summary>
 internal class TraceLogProcessor
 {
