@@ -15,7 +15,7 @@ internal sealed class DebugMeta : IJsonSerializable
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
-        writer.WriteArray("images", Images, logger);
+        writer.WriteArrayIfNotEmpty("images", Images, logger);
         writer.WriteEndObject();
     }
 

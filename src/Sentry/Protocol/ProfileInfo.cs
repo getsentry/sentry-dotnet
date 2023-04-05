@@ -50,7 +50,10 @@ internal sealed class ProfileInfo : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("platform", Platform);
         writer.WriteStringIfNotWhiteSpace("release", Release);
         writer.WriteStringIfNotWhiteSpace("environment", Environment);
-        writer.WriteSerializable("debug_meta", DebugMeta, logger);
+        if (DebugMeta.Images?.Count > 0)
+        {
+            writer.WriteSerializable("debug_meta", DebugMeta, logger);
+        }
 
         // TODO writer.WriteSerializable("device", _contexts.Device, logger);
         //  https://github.com/getsentry/relay/blob/master/relay-profiling/src/sample.rs#L117
