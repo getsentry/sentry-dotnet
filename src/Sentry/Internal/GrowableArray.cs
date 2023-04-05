@@ -4,7 +4,7 @@ namespace Sentry.Internal;
 /// A GrowableArray that can be used as a key in a Dictionary.
 /// Note: it must be Seal()-ed before used as a key and can't be changed afterwards.
 /// </summary>
-internal sealed class HashableGrowableArray<T> : IEnumerable<T>, IEquatable<HashableGrowableArray<T>> where T : notnull
+internal struct HashableGrowableArray<T> : IReadOnlyList<T>, IEquatable<HashableGrowableArray<T>> where T : notnull
 {
     private GrowableArray<T> _items;
     private int _hashCode = 0;
@@ -44,7 +44,7 @@ internal sealed class HashableGrowableArray<T> : IEnumerable<T>, IEquatable<Hash
         _sealed = true;
         foreach (var item in _items)
         {
-            _hashCode ^= item.GetHashCode();
+            _hashCode = HashCode.Combine(_hashCode, item.GetHashCode());
         }
     }
 
@@ -63,28 +63,17 @@ internal sealed class HashableGrowableArray<T> : IEnumerable<T>, IEquatable<Hash
         _items.Add(item);
     }
 
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public override int GetHashCode()
     {
         Debug.Assert(_sealed);
         return _hashCode;
     }
 
-    public bool Equals(HashableGrowableArray<T>? rhs)
+    public bool Equals(HashableGrowableArray<T> other)
     {
         Debug.Assert(_sealed);
-        if (ReferenceEquals(this, rhs))
-            return true;
-        if (ReferenceEquals(rhs, null))
-            return false;
-        if (rhs._hashCode != _hashCode)
-            return false;
-        var ic = _items.Count;
-        if (ic != rhs._items.Count)
-            return false;
-        for (var i = 0; i < ic; ++i)
-            if (!Equals(_items[i], rhs._items[i]))
-                return false;
-        return true;
+        return _hashCode == other._hashCode && this.SequenceEqual(other);
     }
 
     public override bool Equals(object? obj) => obj is HashableGrowableArray<T> other && Equals(other);
@@ -103,7 +92,7 @@ internal sealed class HashableGrowableArray<T> : IEnumerable<T>, IEquatable<Hash
 /// Adapted to null-safety from the original version licensed under MIT and located at:
 /// https://github.com/microsoft/perfview/blob/050c303943e74ff51ce584b2717e578d96684e85/src/FastSerialization/GrowableArray.cs
 /// </remarks>
-internal struct GrowableArray<T> : IEnumerable<T>
+internal struct GrowableArray<T> : IReadOnlyList<T>
 {
     /// <summary>
     /// Create an empty growable array.

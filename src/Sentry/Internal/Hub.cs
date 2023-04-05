@@ -121,15 +121,15 @@ internal class Hub : IHubEx, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var tracer = new TransactionTracer(this, context);
+        var transaction = new TransactionTracer(this, context);
 
         // If tracing is explicitly disabled, we will always sample out.
         // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
         // that may have been already set (i.e.: from a sentry-trace header).
         if (_options.EnableTracing is false)
         {
-            tracer.IsSampled = false;
-            tracer.SampleRate = 0.0;
+            transaction.IsSampled = false;
+            transaction.SampleRate = 0.0;
         }
         else
         {
@@ -143,34 +143,34 @@ internal class Hub : IHubEx, IDisposable
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
-                    tracer.IsSampled = _randomValuesFactory.NextBool(sampleRate);
-                    tracer.SampleRate = sampleRate;
+                    transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                    transaction.SampleRate = sampleRate;
                 }
             }
 
             // Random sampling runs only if the sampling decision hasn't been made already.
-            if (tracer.IsSampled == null)
+            if (transaction.IsSampled == null)
             {
                 var sampleRate = _options.TracesSampleRate;
-                tracer.IsSampled = _randomValuesFactory.NextBool(sampleRate);
-                tracer.SampleRate = sampleRate;
+                transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                transaction.SampleRate = sampleRate;
             }
 
-            if (tracer.IsSampled is true && _options.TransactionProfilerFactory is { } profilerFactory)
+            if (transaction.IsSampled is true && _options.TransactionProfilerFactory is { } profilerFactory)
             {
                 // TODO cancellation token based on Hub being closed?
-                tracer.TransactionProfiler = profilerFactory.Start(tracer, tracer.Stopwatch.CurrentDateTimeOffset, CancellationToken.None);
+                transaction.TransactionProfiler = profilerFactory.Start(transaction, transaction.Stopwatch.CurrentDateTimeOffset, CancellationToken.None);
             }
         }
 
         // Use the provided DSC, or create one based on this transaction.
         // This must be done AFTER the sampling decision has been made.
-        tracer.DynamicSamplingContext =
-            dynamicSamplingContext ?? tracer.CreateDynamicSamplingContext(_options);
+        transaction.DynamicSamplingContext =
+            dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
 
         // A sampled out transaction still appears fully functional to the user
         // but will be dropped by the client and won't reach Sentry's servers.
-        return tracer;
+        return transaction;
     }
 
     public void BindException(Exception exception, ISpan span)
