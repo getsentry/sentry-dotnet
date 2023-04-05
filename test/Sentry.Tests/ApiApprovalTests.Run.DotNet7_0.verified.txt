@@ -395,7 +395,9 @@ namespace Sentry
         public void Apply(Sentry.IEventLike other) { }
         public void Apply(Sentry.Scope other) { }
         public void Apply(object state) { }
+        public void Clear() { }
         public void ClearAttachments() { }
+        public void ClearBreadcrumbs() { }
         public Sentry.Scope Clone() { }
         public Sentry.ISpan? GetSpan() { }
         public void SetExtra(string key, object? value) { }

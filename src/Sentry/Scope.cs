@@ -312,7 +312,7 @@ public class Scope : IEventLike, IHasDistribution
     /// <summary>
     /// Resets all the properties and collections within the scope to their default values. 
     /// </summary>
-    internal void Clear()
+    public void Clear()
     {
         Level = default;
         Request = new();
@@ -343,8 +343,10 @@ public class Scope : IEventLike, IHasDistribution
 #endif
     }
 
-    /// <inheritdoc />
-    internal void ClearBreadcrumbs()
+    /// <summary>
+    /// Removes all Breadcrumbs from the scope.
+    /// </summary>
+    public void ClearBreadcrumbs()
     {
 #if NETSTANDARD2_0 || NETFRAMEWORK
         // No Clear method on ConcurrentQueue for these target frameworks
