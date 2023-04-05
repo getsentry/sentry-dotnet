@@ -10,7 +10,7 @@ internal interface ITransactionProfilerFactory
     /// <summary>
     /// Called during transaction start to start a new profiler, if applicable.
     /// </summary>
-    ITransactionProfiler? OnTransactionStart(ITransaction tracer, DateTimeOffset now, CancellationToken cancellationToken);
+    ITransactionProfiler? Start(ITransaction transaction, DateTimeOffset now, CancellationToken cancellationToken);
 }
 
 /// <summary>

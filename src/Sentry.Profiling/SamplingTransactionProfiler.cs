@@ -29,7 +29,7 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     }
 
     /// <inheritdoc />
-    public ITransactionProfiler? OnTransactionStart(ITransaction _, DateTimeOffset now, CancellationToken cancellationToken)
+    public ITransactionProfiler? Start(ITransaction _, DateTimeOffset now, CancellationToken cancellationToken)
     {
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)

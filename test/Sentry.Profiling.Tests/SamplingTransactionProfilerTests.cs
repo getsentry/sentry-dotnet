@@ -64,7 +64,7 @@ public class SamplingTransactionProfilerTests
 
         var factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new SentryOptions { DiagnosticLogger = _testOutputLogger });
         var clock = SentryStopwatch.StartNew();
-        var sut = factory.OnTransactionStart(transactionTracer, clock.CurrentDateTimeOffset, CancellationToken.None);
+        var sut = factory.Start(transactionTracer, clock.CurrentDateTimeOffset, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
         RunForMs(100);
         sut.OnTransactionFinish(clock.CurrentDateTimeOffset);
