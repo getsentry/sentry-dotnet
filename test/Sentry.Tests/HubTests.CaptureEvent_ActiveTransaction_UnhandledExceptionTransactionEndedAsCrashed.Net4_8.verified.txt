@@ -40,7 +40,8 @@
               {
                 Mechanism: {
                   Type: generic,
-                  Handled: false
+                  Handled: false,
+                  Synthetic: false
                 }
               }
             ],

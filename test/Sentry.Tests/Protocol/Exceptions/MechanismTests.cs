@@ -17,6 +17,7 @@ public class MechanismTests
             Type = "mechanism type",
             Description = "mechanism description",
             Handled = true,
+            Synthetic = true,
             HelpLink = "https://helplink"
         };
 
@@ -30,6 +31,7 @@ public class MechanismTests
             "\"description\":\"mechanism description\"," +
             "\"help_link\":\"https://helplink\"," +
             "\"handled\":true," +
+            "\"synthetic\":true," +
             "\"data\":{\"data-key\":\"data-value\"}," +
             "\"meta\":{\"meta-key\":\"meta-value\"}}";
 
@@ -50,6 +52,7 @@ public class MechanismTests
         yield return new object[] { (new Mechanism(), "{\"type\":\"generic\"}") };
         yield return new object[] { (new Mechanism { Type = "some type" }, "{\"type\":\"some type\"}") };
         yield return new object[] { (new Mechanism { Handled = false }, "{\"type\":\"generic\",\"handled\":false}") };
+        yield return new object[] { (new Mechanism { Synthetic = true }, "{\"type\":\"generic\",\"synthetic\":true}") };
         yield return new object[] { (new Mechanism { HelpLink = "https://sentry.io/docs" }, "{\"type\":\"generic\",\"help_link\":\"https://sentry.io/docs\"}") };
         yield return new object[] { (new Mechanism { Description = "some desc" }, "{\"type\":\"generic\",\"description\":\"some desc\"}") };
         yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>("data-key", "data-value") } },

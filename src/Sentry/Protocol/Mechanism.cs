@@ -62,6 +62,11 @@ public sealed class Mechanism : IJsonSerializable
     public bool? Handled { get; set; }
 
     /// <summary>
+    /// Optional flag indicating whether the exception is synthetic.
+    /// </summary>
+    public bool Synthetic { get; set; }
+
+    /// <summary>
     /// Optional information from the operating system or runtime on the exception mechanism.
     /// </summary>
     /// <remarks>
@@ -87,6 +92,7 @@ public sealed class Mechanism : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("description", Description);
         writer.WriteStringIfNotWhiteSpace("help_link", HelpLink);
         writer.WriteBooleanIfNotNull("handled", Handled);
+        writer.WriteBooleanIfTrue("synthetic", Synthetic);
         writer.WriteDictionaryIfNotEmpty("data", InternalData!, logger);
         writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!, logger);
 
@@ -102,6 +108,7 @@ public sealed class Mechanism : IJsonSerializable
         var description = json.GetPropertyOrNull("description")?.GetString();
         var helpLink = json.GetPropertyOrNull("help_link")?.GetString();
         var handled = json.GetPropertyOrNull("handled")?.GetBoolean();
+        var synthetic = json.GetPropertyOrNull("synthetic")?.GetBoolean() ?? false;
         var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull();
         var meta = json.GetPropertyOrNull("meta")?.GetDictionaryOrNull();
 
@@ -111,6 +118,7 @@ public sealed class Mechanism : IJsonSerializable
             Description = description,
             HelpLink = helpLink,
             Handled = handled,
+            Synthetic = synthetic,
             InternalData = data?.WhereNotNullValue().ToDictionary(),
             InternalMeta = meta?.WhereNotNullValue().ToDictionary()
         };
@@ -118,6 +126,7 @@ public sealed class Mechanism : IJsonSerializable
 
     internal bool IsDefaultOrEmpty() =>
         Handled is null &&
+        Synthetic == false &&
         Type == DefaultType &&
         string.IsNullOrWhiteSpace(Description) &&
         string.IsNullOrWhiteSpace(HelpLink) &&

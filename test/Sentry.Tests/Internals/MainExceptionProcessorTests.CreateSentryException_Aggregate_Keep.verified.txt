@@ -12,7 +12,8 @@
     Value: ,
     Mechanism: {
       Type: AppDomain.UnhandledException,
-      Handled: false
+      Handled: false,
+      Synthetic: false
     },
     Data: {
       foo: bar
