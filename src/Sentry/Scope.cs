@@ -195,7 +195,11 @@ public class Scope : IEventLike, IHasDistribution
     /// <inheritdoc />
     public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
 
+#if NETSTANDARD2_0 || NETFRAMEWORK
+    private ConcurrentQueue<Breadcrumb> _breadcrumbs = new(); 
+#else
     private readonly ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
+#endif
 
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
@@ -306,6 +310,28 @@ public class Scope : IEventLike, IHasDistribution
     public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
 
     /// <summary>
+    /// Resets all the properties and collections within the scope to their default values. 
+    /// </summary>
+    public void Clear()
+    {
+        Level = default;
+        Request = new();
+        Contexts.Clear();
+        User = new();
+        Platform = default;
+        Release = default;
+        Distribution = default;
+        Environment = default;
+        TransactionName = default;
+        Transaction = default;
+        Fingerprint = Array.Empty<string>();
+        ClearBreadcrumbs();
+        _extra.Clear();
+        _tags.Clear();
+        ClearAttachments();
+    }
+
+    /// <summary>
     /// Clear all Attachments.
     /// </summary>
     public void ClearAttachments()
@@ -316,6 +342,20 @@ public class Scope : IEventLike, IHasDistribution
         _attachments.Clear();
 #endif
     }
+
+    /// <summary>
+    /// Removes all Breadcrumbs from the scope.
+    /// </summary>
+    public void ClearBreadcrumbs()
+    {
+#if NETSTANDARD2_0 || NETFRAMEWORK
+        // No Clear method on ConcurrentQueue for these target frameworks
+        Interlocked.Exchange(ref _breadcrumbs, new());
+#else
+        _breadcrumbs.Clear();
+#endif        
+    }
+
 
     /// <summary>
     /// Applies the data from this scope to another event-like object.

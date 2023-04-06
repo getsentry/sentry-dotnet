@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add Scope.Clear and Scope.ClearBreadcrumbs methods ([#2284](https://github.com/getsentry/sentry-dotnet/pull/2284))
+
 ### Features
 
 - Add `FileDiagnosticLogger` to assist with debugging the SDK ([#2242](https://github.com/getsentry/sentry-dotnet/pull/2242))
