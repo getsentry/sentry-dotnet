@@ -1,13 +1,11 @@
 [
   {
     Type: System.Exception,
-    Value: Inner message1,
-    Mechanism: {}
+    Value: Inner message1
   },
   {
     Type: System.Exception,
-    Value: Inner message2,
-    Mechanism: {}
+    Value: Inner message2
   },
   {
     Type: System.AggregateException,

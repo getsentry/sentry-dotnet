@@ -116,7 +116,7 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
-        _ = Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism!.Handled == null));
+        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == null));
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
-        _ = Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism!.Handled == true));
+        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == true));
     }
 
     [Fact]

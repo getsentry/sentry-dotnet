@@ -40,7 +40,7 @@ public class SentryExceptionTests
             "\"module\":\"Module\"," +
             "\"thread_id\":1," +
             "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
-            "\"mechanism\":{\"description\":\"Description\"}}",
+            "\"mechanism\":{\"type\":\"generic\",\"description\":\"Description\"}}",
             actual);
     }
 

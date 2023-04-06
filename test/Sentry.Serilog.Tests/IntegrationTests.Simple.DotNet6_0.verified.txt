@@ -180,7 +180,6 @@
                     }
                   ]
                 },
-                Mechanism: {},
                 Data: {
                   details: Do work always throws.
                 }

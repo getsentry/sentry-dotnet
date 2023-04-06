@@ -63,7 +63,11 @@ public sealed class SentryException : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("module", Module);
         writer.WriteNumberIfNotNull("thread_id", ThreadId.NullIfDefault());
         writer.WriteSerializableIfNotNull("stacktrace", Stacktrace, logger);
-        writer.WriteSerializableIfNotNull("mechanism", Mechanism, logger);
+
+        if (Mechanism?.IsDefaultOrEmpty() == false)
+        {
+            writer.WriteSerializableIfNotNull("mechanism", Mechanism, logger);
+        }
 
         writer.WriteEndObject();
     }
@@ -79,6 +83,11 @@ public sealed class SentryException : IJsonSerializable
         var threadId = json.GetPropertyOrNull("thread_id")?.GetInt32() ?? 0;
         var stacktrace = json.GetPropertyOrNull("stacktrace")?.Pipe(SentryStackTrace.FromJson);
         var mechanism = json.GetPropertyOrNull("mechanism")?.Pipe(Mechanism.FromJson);
+
+        if (mechanism?.IsDefaultOrEmpty() == true)
+        {
+            mechanism = null;
+        }
 
         return new SentryException
         {

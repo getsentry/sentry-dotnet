@@ -10,8 +10,7 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception,
-          Mechanism: {}
+          Value: my exception
         }
       ],
       Level: error,

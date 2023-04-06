@@ -1,8 +1,7 @@
 [
   {
     Type: System.Exception,
-    Value: Inner message1,
-    Mechanism: {}
+    Value: Inner message1
   },
   {
     Type: System.Exception,

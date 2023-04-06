@@ -49,8 +49,7 @@
                       FunctionId: ____
                     }
                   ]
-                },
-                Mechanism: {}
+                }
               }
             ],
             DebugImages: [

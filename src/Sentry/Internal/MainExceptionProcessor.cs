@@ -108,9 +108,14 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             Type = innerException.GetType().FullName,
             Module = innerException.GetType().Assembly.FullName,
             Value = innerException.Message,
-            ThreadId = Environment.CurrentManagedThreadId,
-            Mechanism = GetMechanism(innerException)
+            ThreadId = Environment.CurrentManagedThreadId
         };
+
+        var mechanism = GetMechanism(innerException);
+        if (!mechanism.IsDefaultOrEmpty())
+        {
+            sentryEx.Mechanism = mechanism;
+        }
 
         if (innerException.Data.Count != 0)
         {
