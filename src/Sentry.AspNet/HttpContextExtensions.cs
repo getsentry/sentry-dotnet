@@ -33,7 +33,7 @@ public static class HttpContextExtensions
 
     private static BaggageHeader? TryGetBaggageHeader(HttpContext context, SentryOptions? options)
     {
-        var value = context.Request.Headers.Get(SentryTraceHeader.HttpHeaderName);
+        var value = context.Request.Headers.Get(BaggageHeader.HttpHeaderName);
         if (string.IsNullOrWhiteSpace(value))
         {
             return null;
