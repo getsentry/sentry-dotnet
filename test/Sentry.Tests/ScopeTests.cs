@@ -237,44 +237,15 @@ public class ScopeTests
     public void Clear_SetsPropertiesToDefaultValues()
     {
         // Arrange
-        _sut.Level = SentryLevel.Warning;
-        _sut.Request = new() { Data = "request to be cleared" };
-        _sut.Contexts.Add("context to be cleared", "{}");
-        _sut.User = new User() { Username = "username to be cleared" };
-        _sut.Platform = "platform to be cleared";
-        _sut.Release = "release to be cleared";
-        _sut.Distribution = "distribution to be cleared";
-        _sut.Environment = "environment to be cleared";
-        _sut.TransactionName = "transaction name to be cleared";
-        _sut.Transaction = Substitute.For<ITransaction>();
-        _sut.Fingerprint = new[] { "fingerprint to be cleared" };
-        _sut.AddBreadcrumb(new(message: "breadcrumb to be cleared"));
-        _sut.SetExtra("extra", "extra to be cleared");
-        _sut.SetTag("tag", "tag to be cleared");
-        _sut.AddAttachment(new Attachment(default, default, default, "attachment to be cleared"));
+        _sut.ApplyFakeValues();
 
         // Act
         _sut.Clear();
 
         // Assert
-        var newScope = new Scope();
         using (new AssertionScope())
         {
-            _sut.Level.Should().Be(newScope.Level);
-            _sut.Request.Should().BeEquivalentTo(newScope.Request);
-            _sut.Contexts.Should().BeEquivalentTo(newScope.Contexts);
-            _sut.User.Should().BeEquivalentTo(newScope.User);
-            _sut.Platform.Should().Be(newScope.Platform);
-            _sut.Release.Should().Be(newScope.Release);
-            _sut.Distribution.Should().Be(newScope.Distribution);
-            _sut.Environment.Should().Be(newScope.Environment);
-            _sut.TransactionName.Should().Be(newScope.TransactionName);
-            _sut.Transaction.Should().Be(newScope.Transaction);
-            _sut.Fingerprint.Should().BeEquivalentTo(newScope.Fingerprint);
-            _sut.Breadcrumbs.Should().BeEquivalentTo(newScope.Breadcrumbs);
-            _sut.Extra.Should().BeEquivalentTo(newScope.Extra);
-            _sut.Tags.Should().BeEquivalentTo(newScope.Tags);
-            _sut.Attachments.Should().BeEquivalentTo(newScope.Attachments);
+            _sut.ShouldBeEquivalentTo(new Scope());
         }
     }
 
@@ -490,5 +461,45 @@ public class ScopeTests
 
         // Assert
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
+    }
+}
+
+public static class ScopeTestExtensions
+{
+    public static void ApplyFakeValues(this Scope scope, string salt = "fake")
+    {
+        scope.Request = new() { Data = $"{salt} request" };
+        scope.Contexts.Add($"{salt} context", "{}");
+        scope.User = new User() { Username = $"{salt} username" };
+        scope.Platform = $"{salt} platform";
+        scope.Release = $"{salt} release";
+        scope.Distribution = $"{salt} distribution";
+        scope.Environment = $"{salt} environment";
+        scope.TransactionName = $"{salt} transaction";
+        scope.Transaction = Substitute.For<ITransaction>();
+        scope.Fingerprint = new[] { $"{salt} fingerprint" };
+        scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
+        scope.SetExtra("extra", $"{salt} extra");
+        scope.SetTag("tag", $"{salt} tag");
+        scope.AddAttachment(new Attachment(default, default, default, $"{salt} attachment"));
+    }
+
+    public static void ShouldBeEquivalentTo(this Scope source, Scope target)
+    {
+        source.Level.Should().Be(target.Level);
+        source.Request.Should().BeEquivalentTo(target.Request);
+        source.Contexts.Should().BeEquivalentTo(target.Contexts);
+        source.User.Should().BeEquivalentTo(target.User);
+        source.Platform.Should().Be(target.Platform);
+        source.Release.Should().Be(target.Release);
+        source.Distribution.Should().Be(target.Distribution);
+        source.Environment.Should().Be(target.Environment);
+        source.TransactionName.Should().Be(target.TransactionName);
+        source.Transaction.Should().Be(target.Transaction);
+        source.Fingerprint.Should().BeEquivalentTo(target.Fingerprint);
+        source.Breadcrumbs.Should().BeEquivalentTo(target.Breadcrumbs);
+        source.Extra.Should().BeEquivalentTo(target.Extra);
+        source.Tags.Should().BeEquivalentTo(target.Tags);
+        source.Attachments.Should().BeEquivalentTo(target.Attachments);
     }
 }
