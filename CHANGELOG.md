@@ -2,12 +2,11 @@
 
 ## Unreleased
 
-- Add Scope.Clear and Scope.ClearBreadcrumbs methods ([#2284](https://github.com/getsentry/sentry-dotnet/pull/2284))
-
 ### Features
 
 - Add `FileDiagnosticLogger` to assist with debugging the SDK ([#2242](https://github.com/getsentry/sentry-dotnet/pull/2242))
 - Attach stack trace when events have captured an exception without a stack trace ([#2266](https://github.com/getsentry/sentry-dotnet/pull/2266))
+- Add Scope.Clear and Scope.ClearBreadcrumbs methods ([#2284](https://github.com/getsentry/sentry-dotnet/pull/2284))
 
 ### Fixes
 
@@ -15,6 +14,7 @@
 - Calling `AddAspNet` more than once should not block all errors from being sent ([#2253](https://github.com/getsentry/sentry-dotnet/pull/2253))
 - Fix Sentry CLI arguments when using custom URL or auth token parameters ([#2259](https://github.com/getsentry/sentry-dotnet/pull/2259))
 - Sentry.AspNetCore fix transaction name when path base is used and route starts with a slash ([#2265](https://github.com/getsentry/sentry-dotnet/pull/2265))
+- Fix Baggage header parsing in ASP.NET (Framework) ([#2293](https://github.com/getsentry/sentry-dotnet/pull/2293))
 
 ### Dependencies
 
