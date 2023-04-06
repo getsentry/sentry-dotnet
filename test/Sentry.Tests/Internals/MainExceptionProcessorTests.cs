@@ -120,6 +120,20 @@ public partial class MainExceptionProcessorTests
     }
 
     [Fact]
+    public void Process_ExceptionWith_HandledFalse()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = new Exception();
+
+        exp.Data.Add(Mechanism.HandledKey, false);
+
+        sut.Process(exp, evt);
+
+        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == false));
+    }
+
+    [Fact]
     public void Process_ExceptionWith_HandledTrue()
     {
         var sut = _fixture.GetSut();
@@ -127,7 +141,18 @@ public partial class MainExceptionProcessorTests
         var exp = new Exception();
 
         exp.Data.Add(Mechanism.HandledKey, true);
-        exp.Data.Add(Mechanism.MechanismKey, "Process_ExceptionWith_HandledTrue");
+
+        sut.Process(exp, evt);
+
+        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == true));
+    }
+
+    [Fact]
+    public void Process_ExceptionWith_HandledTrue_WhenCaught()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = GetHandledException();
 
         sut.Process(exp, evt);
 
@@ -330,5 +355,15 @@ public partial class MainExceptionProcessorTests
         Assert.Single(evt.Extra, expectedData2);
     }
 
-    // TODO: Test when the approach for parsing is finalized
+    private Exception GetHandledException()
+    {
+        try
+        {
+            throw new Exception();
+        }
+        catch (Exception exception)
+        {
+            return exception;
+        }
+    }
 }

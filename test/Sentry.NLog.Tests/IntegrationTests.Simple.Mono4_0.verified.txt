@@ -49,6 +49,11 @@
                       FunctionId: ____
                     }
                   ]
+                },
+                Mechanism: {
+                  Type: generic,
+                  Handled: true,
+                  Synthetic: false
                 }
               }
             ],

@@ -180,6 +180,11 @@
                     }
                   ]
                 },
+                Mechanism: {
+                  Type: generic,
+                  Handled: true,
+                  Synthetic: false
+                },
                 Data: {
                   details: Do work always throws.
                 }

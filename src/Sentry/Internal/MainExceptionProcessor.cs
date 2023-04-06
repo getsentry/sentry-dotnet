@@ -143,8 +143,21 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
         if (exception.Data[Mechanism.HandledKey] is bool handled)
         {
+            // The mechanism handled flag was set by an integration.
             mechanism.Handled = handled;
             exception.Data.Remove(Mechanism.HandledKey);
+        }
+        else if (exception.StackTrace != null)
+        {
+            // The exception was thrown, but it was caught by the user, not an integration.
+            // Thus, we can mark it as handled.
+            mechanism.Handled = true;
+        }
+        else
+        {
+            // The exception was never thrown.  It was just constructed and then captured.
+            // Thus, it is neither handled nor unhandled.
+            mechanism.Handled = null;
         }
 
         if (exception.Data[Mechanism.MechanismKey] is string mechanismName)
