@@ -44,13 +44,13 @@ public sealed class SentryException : IJsonSerializable
     public Mechanism? Mechanism { get; set; }
 
     /// <summary>
-    /// Arbitrary extra data that related to this error
+    /// Arbitrary extra data that is related to this error.
     /// </summary>
     /// <remarks>
-    /// The protocol does not yet support data at this level.
-    /// For this reason this property is not serialized.
-    /// The data is moved to the event level on Extra until such support is added
+    /// This property is obsolete and should no longer be used.
+    /// Anything added here will be ignored and not sent to Sentry.
     /// </remarks>
+    [Obsolete("Use SentryException.Mechanism.Data instead. This property will be removed in a future version.")]
     public IDictionary<string, object?> Data { get; } = new Dictionary<string, object?>(StringComparer.Ordinal);
 
     /// <inheritdoc />

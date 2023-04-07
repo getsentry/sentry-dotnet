@@ -12,99 +12,34 @@ public partial class MainExceptionProcessorTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void Process_ExceptionAndEventWithoutExtra_ExtraIsEmpty()
+    public void Process_ExceptionsWithoutData_MechanismDataIsEmpty()
     {
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
-        sut.Process(new Exception(), evt);
-
-        Assert.Empty(evt.Extra);
-    }
-
-    [Fact]
-    public void Process_ExceptionsWithoutData_ExtraIsEmpty()
-    {
-        var sut = _fixture.GetSut();
-        var evt = new SentryEvent();
-        sut.Process(new Exception("ex", new Exception()), evt);
-
-        Assert.Empty(evt.Extra);
-    }
-
-    [Fact]
-    public void Process_EventAndExceptionHaveExtra_DataCombined()
-    {
-        const string expectedKey = "extra";
-        const int expectedValue = 1;
-
-        var sut = _fixture.GetSut();
-
-        var evt = new SentryEvent();
-        evt.SetExtra(expectedKey, expectedValue);
-
-        var ex = new Exception();
-        ex.Data.Add("other extra", 2);
+        var ex = GetHandledException();
 
         sut.Process(ex, evt);
 
-        Assert.Equal(2, evt.Extra.Count);
-        Assert.Contains(evt.Extra, p => p.Key == expectedKey && p.Value is expectedValue);
+        var sentryException = evt.SentryExceptions!.Single();
+        Assert.Empty(sentryException.Mechanism!.Data);
     }
 
     [Fact]
-    public void Process_EventHasNoExtrasExceptionDoes_DataInEvent()
+    public void Process_ExceptionsWithData_MechanismDataIsPopulated()
     {
-        const string expectedKey = "extra";
-        const int expectedValue = 1;
-
         var sut = _fixture.GetSut();
-
         var evt = new SentryEvent();
-
-        var ex = new Exception();
-        ex.Data.Add(expectedKey, expectedValue);
+        var ex = GetHandledException();
+        ex.Data["foo"] = 123;
+        ex.Data["bar"] = 456;
 
         sut.Process(ex, evt);
 
-        var actual = Assert.Single(evt.Extra);
+        var sentryException = evt.SentryExceptions!.Single();
+        var data = sentryException.Mechanism!.Data;
 
-        Assert.Equal($"Exception[0][{expectedKey}]", actual.Key);
-        Assert.Equal(expectedValue, (int)actual.Value!);
-    }
-
-    [Fact]
-    public void Process_EventHasExtrasExceptionDoesnt_NotModified()
-    {
-        var sut = _fixture.GetSut();
-        var evt = new SentryEvent();
-        evt.SetExtra("extra", 1);
-        var expected = evt.Extra;
-
-        var ex = new Exception();
-
-        sut.Process(ex, evt);
-
-        Assert.Same(expected, evt.Extra);
-    }
-
-    [Fact]
-    public void Process_TwoExceptionsWithData_DataOnEventExtra()
-    {
-        var sut = _fixture.GetSut();
-        var evt = new SentryEvent();
-
-        var first = new Exception();
-        var firstValue = new object();
-        first.Data.Add("first", firstValue);
-        var second = new Exception("second", first);
-        var secondValue = new object();
-        second.Data.Add("second", secondValue);
-
-        sut.Process(second, evt);
-
-        Assert.Equal(2, evt.Extra.Count);
-        Assert.Contains(evt.Extra, e => e.Key == "Exception[0][first]" && e.Value == firstValue);
-        Assert.Contains(evt.Extra, e => e.Key == "Exception[1][second]" && e.Value == secondValue);
+        Assert.Contains(data, pair => pair.Key == "foo" && pair.Value.Equals(123));
+        Assert.Contains(data, pair => pair.Key == "bar" && pair.Value.Equals(456));
     }
 
     [Fact]
@@ -168,9 +103,9 @@ public partial class MainExceptionProcessorTests
             Data = { [new object()] = new object() }
         };
 
-        var actual = sut.CreateSentryExceptions(ex);
+        var actual = sut.CreateSentryExceptions(ex).Single();
 
-        Assert.Empty(actual.Single().Data);
+        Assert.Null(actual.Mechanism);
     }
 
     [Fact]
@@ -183,9 +118,12 @@ public partial class MainExceptionProcessorTests
 
         var last = evt.SentryExceptions!.Last();
         Assert.NotNull(last.Stacktrace);
-        Assert.False(last.Mechanism?.Handled);
-        Assert.NotNull(last.Mechanism?.Type);
-        Assert.NotEmpty(last.Data);
+
+        var mechanism = last.Mechanism;
+        Assert.NotNull(mechanism);
+        Assert.False(mechanism.Handled);
+        Assert.NotNull(mechanism.Type);
+        Assert.NotEmpty(mechanism.Data);
     }
 
     [Fact]
@@ -199,9 +137,12 @@ public partial class MainExceptionProcessorTests
 
         var last = evt.SentryExceptions!.Last();
         Assert.NotNull(last.Stacktrace);
-        Assert.False(last.Mechanism?.Handled);
-        Assert.NotNull(last.Mechanism?.Type);
-        Assert.NotEmpty(last.Data);
+
+        var mechanism = last.Mechanism;
+        Assert.NotNull(mechanism);
+        Assert.False(mechanism.Handled);
+        Assert.NotNull(mechanism.Type);
+        Assert.NotEmpty(mechanism.Data);
     }
 
     private static AggregateException BuildAggregateException()

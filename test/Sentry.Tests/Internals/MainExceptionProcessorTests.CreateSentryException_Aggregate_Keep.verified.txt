@@ -13,10 +13,10 @@
     Mechanism: {
       Type: AppDomain.UnhandledException,
       Handled: false,
-      Synthetic: false
-    },
-    Data: {
-      foo: bar
+      Synthetic: false,
+      Data: {
+        foo: bar
+      }
     }
   }
 ]
