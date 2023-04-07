@@ -16,9 +16,13 @@ public class MechanismTests
         {
             Type = "mechanism type",
             Description = "mechanism description",
+            Source = "exception source",
             Handled = true,
+            HelpLink = "https://helplink",
             Synthetic = true,
-            HelpLink = "https://helplink"
+            IsExceptionGroup = true,
+            ExceptionId = 123,
+            ParentId = 456
         };
 
         sut.Data.Add("data-key", "data-value");
@@ -29,9 +33,13 @@ public class MechanismTests
         const string expected =
             "{\"type\":\"mechanism type\"," +
             "\"description\":\"mechanism description\"," +
+            "\"source\":\"exception source\"," +
             "\"help_link\":\"https://helplink\"," +
             "\"handled\":true," +
             "\"synthetic\":true," +
+            "\"is_exception_group\":true," +
+            "\"exception_id\":123," +
+            "\"parent_id\":456," +
             "\"data\":{\"data-key\":\"data-value\"}," +
             "\"meta\":{\"meta-key\":\"meta-value\"}}";
 

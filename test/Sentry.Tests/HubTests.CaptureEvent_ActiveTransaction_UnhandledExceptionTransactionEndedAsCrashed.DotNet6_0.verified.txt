@@ -41,7 +41,8 @@
                 Mechanism: {
                   Type: generic,
                   Handled: false,
-                  Synthetic: false
+                  Synthetic: false,
+                  IsExceptionGroup: false
                 }
               }
             ],

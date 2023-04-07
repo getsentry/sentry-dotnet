@@ -118,26 +118,6 @@ public partial class MainExceptionProcessorTests
 
         var last = evt.SentryExceptions!.Last();
         Assert.NotNull(last.Stacktrace);
-
-        var mechanism = last.Mechanism;
-        Assert.NotNull(mechanism);
-        Assert.False(mechanism.Handled);
-        Assert.NotNull(mechanism.Type);
-        Assert.NotEmpty(mechanism.Data);
-    }
-
-    [Fact]
-    public void Process_AggregateException_Keep()
-    {
-        _fixture.SentryOptions.KeepAggregateException = true;
-        _fixture.SentryStackTraceFactory = _fixture.SentryOptions.SentryStackTraceFactory;
-        var sut = _fixture.GetSut();
-        var evt = new SentryEvent();
-        sut.Process(BuildAggregateException(), evt);
-
-        var last = evt.SentryExceptions!.Last();
-        Assert.NotNull(last.Stacktrace);
-
         var mechanism = last.Mechanism;
         Assert.NotNull(mechanism);
         Assert.False(mechanism.Handled);
