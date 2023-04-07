@@ -776,10 +776,14 @@ public class SentryOptions
     public Func<bool>? CrashedLastRun { get; set; }
 
     /// <summary>
-    /// Keep <see cref="AggregateException"/> in sentry logging.
-    /// The default behaviour is to only log <see cref="AggregateException.InnerExceptions"/> and not include the root <see cref="AggregateException"/>.
-    /// Set KeepAggregateException to true to include the root <see cref="AggregateException"/>.
+    /// This property is no longer used.  It will be removed in a future version.
     /// </summary>
+    /// <remarks>
+    /// All exceptions are now sent to Sentry, including <see cref="AggregateException"/>s.
+    /// The issue grouping rules in Sentry have been updated to accomodate "exception groups",
+    /// such as <see cref="AggregateException"/> in .NET.
+    /// </remarks>
+    [Obsolete("This property is no longer used.  It will be removed in a future version.")]
     public bool KeepAggregateException { get; set; }
 
     /// <summary>

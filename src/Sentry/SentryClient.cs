@@ -286,13 +286,15 @@ public class SentryClient : ISentryClient, IDisposable
             return new[] {exception};
         }
 
-        if (exception is AggregateException aggregate &&
-            aggregate.InnerExceptions.All(e => ApplyExceptionFilters(e) != null))
+        if (exception is AggregateException aggregate)
         {
-            // All inner exceptions of the aggregate matched a filter, so the event should be filtered.
-            // Note that _options.KeepAggregateException is not relevant here.  Even if we want to keep aggregate
-            // exceptions, we would still never send one if all of its children are supposed to be filtered.
-            return aggregate.InnerExceptions;
+            // Flatten the tree of aggregates such that all the inner exceptions are non-aggregates.
+            var innerExceptions = aggregate.Flatten().InnerExceptions;
+            if (innerExceptions.All(e => ApplyExceptionFilters(e) != null))
+            {
+                // All inner exceptions matched a filter, so the event should be filtered.
+                return innerExceptions;
+            }
         }
 
         // The event should not be filtered.
