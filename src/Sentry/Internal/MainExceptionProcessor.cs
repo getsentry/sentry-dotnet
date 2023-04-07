@@ -149,10 +149,16 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             mechanism.Handled = null;
         }
 
-        if (exception.Data[Mechanism.MechanismKey] is string mechanismName)
+        if (exception.Data[Mechanism.MechanismKey] is string mechanismType)
         {
-            mechanism.Type = mechanismName;
+            mechanism.Type = mechanismType;
             exception.Data.Remove(Mechanism.MechanismKey);
+        }
+
+        if (exception.Data[Mechanism.DescriptionKey] is string mechanismDescription)
+        {
+            mechanism.Description = mechanismDescription;
+            exception.Data.Remove(Mechanism.DescriptionKey);
         }
 
         // Copy remaining exception data to mechanism data.
