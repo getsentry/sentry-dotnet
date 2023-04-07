@@ -6,7 +6,8 @@
 
 - Add `FileDiagnosticLogger` to assist with debugging the SDK ([#2242](https://github.com/getsentry/sentry-dotnet/pull/2242))
 - Attach stack trace when events have captured an exception without a stack trace ([#2266](https://github.com/getsentry/sentry-dotnet/pull/2266))
-- Add Scope.Clear and Scope.ClearBreadcrumbs methods ([#2284](https://github.com/getsentry/sentry-dotnet/pull/2284))
+- Add `Scope.Clear` and `Scope.ClearBreadcrumbs` methods ([#2284](https://github.com/getsentry/sentry-dotnet/pull/2284))
+- Improvements to exception mechanism data ([#2294](https://github.com/getsentry/sentry-dotnet/pull/2294))
 
 ### Fixes
 
