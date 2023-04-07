@@ -15,14 +15,19 @@ namespace Sentry.Protocol;
 public sealed class Mechanism : IJsonSerializable
 {
     /// <summary>
-    /// Keys found inside of the Exception Dictionary to inform if the exception was handled and which mechanism tracked it.
+    /// Key found inside of <c>Exception.Data</c> to inform if the exception was handled.
     /// </summary>
     public static readonly string HandledKey = "Sentry:Handled";
 
     /// <summary>
-    /// Key found inside of the Exception.Data to inform if the exception which mechanism tracked it.
+    /// Key found inside of <c>Exception.Data</c> to inform which mechanism captured the exception.
     /// </summary>
     public static readonly string MechanismKey = "Sentry:Mechanism";
+
+    /// <summary>
+    /// Key found inside of <c>Exception.Data</c> to provide a description of the mechanism.
+    /// </summary>
+    public static readonly string DescriptionKey = "Sentry:Description";
 
     internal Dictionary<string, object>? InternalData { get; private set; }
 

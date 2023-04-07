@@ -1473,6 +1473,7 @@ namespace Sentry.Protocol
     }
     public sealed class Mechanism : Sentry.IJsonSerializable
     {
+        public static readonly string DescriptionKey;
         public static readonly string HandledKey;
         public static readonly string MechanismKey;
         public Mechanism() { }
@@ -1597,4 +1598,5 @@ public static class SentryExceptionExtensions
     public static void AddSentryContext(this System.Exception ex, string name, System.Collections.Generic.IReadOnlyDictionary<string, object> data) { }
     public static void AddSentryTag(this System.Exception ex, string name, string value) { }
     public static System.Collections.Generic.IEnumerable<System.Exception> EnumerateChainedExceptions(this System.Exception exception, Sentry.SentryOptions options) { }
+    public static void SetSentryMechanism(this System.Exception ex, string type, string? description = null, bool? handled = default) { }
 }
