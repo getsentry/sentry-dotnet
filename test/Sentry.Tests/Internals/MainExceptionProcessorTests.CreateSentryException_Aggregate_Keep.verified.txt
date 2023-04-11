@@ -1,23 +1,22 @@
 [
   {
     Type: System.Exception,
-    Value: Inner message1,
-    Mechanism: {}
+    Value: Inner message1
   },
   {
     Type: System.Exception,
-    Value: Inner message2,
-    Mechanism: {}
+    Value: Inner message2
   },
   {
     Type: System.AggregateException,
     Value: ,
     Mechanism: {
       Type: AppDomain.UnhandledException,
-      Handled: false
-    },
-    Data: {
-      foo: bar
+      Handled: false,
+      Synthetic: false,
+      Data: {
+        foo: bar
+      }
     }
   }
 ]

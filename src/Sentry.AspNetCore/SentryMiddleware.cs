@@ -120,8 +120,13 @@ internal class SentryMiddleware : IMiddleware
                 var exceptionFeature = context.Features.Get<IExceptionHandlerFeature?>();
                 if (exceptionFeature?.Error != null)
                 {
-                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature");
+                    const string description =
+                        "This exception was caught by an ASP.NET Core custom error handler. " +
+                        "The web server likely returned a customized error page as a result of this exception.";
+
+                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
                 }
+
                 if (_options.FlushBeforeRequestCompleted)
                 {
                     await FlushBeforeCompleted().ConfigureAwait(false);
@@ -129,7 +134,12 @@ internal class SentryMiddleware : IMiddleware
             }
             catch (Exception e)
             {
-                CaptureException(e, eventId, "SentryMiddleware.UnhandledException");
+                const string description =
+                    "This exception was captured by the Sentry ASP.NET Core middleware, and then re-thrown." +
+                    "The web server likely returned a 5xx error code as a result of this exception.";
+
+                CaptureException(e, eventId, "SentryMiddleware.UnhandledException", description);
+
                 if (_options.FlushBeforeRequestCompleted)
                 {
                     await FlushBeforeCompleted().ConfigureAwait(false);
@@ -142,10 +152,9 @@ internal class SentryMiddleware : IMiddleware
             // making the OnCompleted flush to not work.
             Task FlushBeforeCompleted() => hub.FlushAsync(_options.FlushTimeout);
 
-            void CaptureException(Exception e, SentryId evtId, string mechanism)
+            void CaptureException(Exception e, SentryId evtId, string mechanism, string description)
             {
-                e.Data[Mechanism.HandledKey] = false;
-                e.Data[Mechanism.MechanismKey] = mechanism;
+                e.SetSentryMechanism(mechanism, description, handled: false);
 
                 var evt = new SentryEvent(e, eventId: evtId);
 

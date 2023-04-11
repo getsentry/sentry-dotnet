@@ -15,28 +15,41 @@ namespace Sentry.Protocol;
 public sealed class Mechanism : IJsonSerializable
 {
     /// <summary>
-    /// Keys found inside of the Exception Dictionary to inform if the exception was handled and which mechanism tracked it.
+    /// Key found inside of <c>Exception.Data</c> to inform if the exception was handled.
     /// </summary>
     public static readonly string HandledKey = "Sentry:Handled";
 
     /// <summary>
-    /// Key found inside of the Exception.Data to inform if the exception which mechanism tracked it.
+    /// Key found inside of <c>Exception.Data</c> to inform which mechanism captured the exception.
     /// </summary>
     public static readonly string MechanismKey = "Sentry:Mechanism";
+
+    /// <summary>
+    /// Key found inside of <c>Exception.Data</c> to provide a description of the mechanism.
+    /// </summary>
+    public static readonly string DescriptionKey = "Sentry:Description";
 
     internal Dictionary<string, object>? InternalData { get; private set; }
 
     internal Dictionary<string, object>? InternalMeta { get; private set; }
 
+    private const string DefaultType = "generic";
+    private string _type = DefaultType;
+
     /// <summary>
     /// Required unique identifier of this mechanism determining rendering and processing of the mechanism data.
+    /// Defaults to <c>"generic"</c>.
     /// </summary>
     /// <remarks>
-    /// The type attribute is required to send any exception mechanism attribute,
-    /// even if the SDK cannot determine the specific mechanism.
-    /// In this case, set the type to "generic". See below for an example.
+    /// If <c>null</c>, empty, or whitespace are set, reverts to the default string <c>"generic"</c>.
+    /// Nullability is for backwards compatibility, and may be removed in a future major version.
     /// </remarks>
-    public string? Type { get; set; }
+    [AllowNull]
+    public string Type
+    {
+        get => _type;
+        set => _type = string.IsNullOrWhiteSpace(value) ? DefaultType : value;
+    }
 
     /// <summary>
     /// Optional human readable description of the error mechanism and a possible hint on how to solve this error.
@@ -52,6 +65,11 @@ public sealed class Mechanism : IJsonSerializable
     /// Optional flag indicating whether the exception has been handled by the user (e.g. via try..catch).
     /// </summary>
     public bool? Handled { get; set; }
+
+    /// <summary>
+    /// Optional flag indicating whether the exception is synthetic.
+    /// </summary>
+    public bool Synthetic { get; set; }
 
     /// <summary>
     /// Optional information from the operating system or runtime on the exception mechanism.
@@ -75,12 +93,13 @@ public sealed class Mechanism : IJsonSerializable
     {
         writer.WriteStartObject();
 
-        writer.WriteDictionaryIfNotEmpty("data", InternalData!, logger);
-        writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!, logger);
-        writer.WriteStringIfNotWhiteSpace("type", Type);
+        writer.WriteString("type", Type);
         writer.WriteStringIfNotWhiteSpace("description", Description);
         writer.WriteStringIfNotWhiteSpace("help_link", HelpLink);
         writer.WriteBooleanIfNotNull("handled", Handled);
+        writer.WriteBooleanIfTrue("synthetic", Synthetic);
+        writer.WriteDictionaryIfNotEmpty("data", InternalData!, logger);
+        writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!, logger);
 
         writer.WriteEndObject();
     }
@@ -90,21 +109,32 @@ public sealed class Mechanism : IJsonSerializable
     /// </summary>
     public static Mechanism FromJson(JsonElement json)
     {
-        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull();
-        var meta = json.GetPropertyOrNull("meta")?.GetDictionaryOrNull();
         var type = json.GetPropertyOrNull("type")?.GetString();
         var description = json.GetPropertyOrNull("description")?.GetString();
         var helpLink = json.GetPropertyOrNull("help_link")?.GetString();
         var handled = json.GetPropertyOrNull("handled")?.GetBoolean();
+        var synthetic = json.GetPropertyOrNull("synthetic")?.GetBoolean() ?? false;
+        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull();
+        var meta = json.GetPropertyOrNull("meta")?.GetDictionaryOrNull();
 
         return new Mechanism
         {
-            InternalData = data?.WhereNotNullValue().ToDictionary(),
-            InternalMeta = meta?.WhereNotNullValue().ToDictionary(),
             Type = type,
             Description = description,
             HelpLink = helpLink,
-            Handled = handled
+            Handled = handled,
+            Synthetic = synthetic,
+            InternalData = data?.WhereNotNullValue().ToDictionary(),
+            InternalMeta = meta?.WhereNotNullValue().ToDictionary()
         };
     }
+
+    internal bool IsDefaultOrEmpty() =>
+        Handled is null &&
+        Synthetic == false &&
+        Type == DefaultType &&
+        string.IsNullOrWhiteSpace(Description) &&
+        string.IsNullOrWhiteSpace(HelpLink) &&
+        !(InternalData?.Count > 0) &&
+        !(InternalMeta?.Count > 0);
 }
