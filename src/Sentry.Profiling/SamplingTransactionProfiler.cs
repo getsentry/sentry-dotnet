@@ -7,55 +7,10 @@ using Sentry.Protocol;
 
 namespace Sentry.Profiling;
 
-internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
-{
-    // We only allow a single profile so let's keep track of the current status.
-    internal int _inProgress = FALSE;
-
-    private const int TRUE = 1;
-    private const int FALSE = 0;
-
-    // Stop profiling after the given number of milliseconds.
-    private const int TIME_LIMIT_MS = 30_000;
-
-    private readonly string _tempDirectoryPath;
-
-    private readonly SentryOptions _options;
-
-    public SamplingTransactionProfilerFactory(string tempDirectoryPath, SentryOptions options)
-    {
-        _tempDirectoryPath = tempDirectoryPath;
-        _options = options;
-    }
-
-    /// <inheritdoc />
-    public ITransactionProfiler? Start(ITransaction _, CancellationToken cancellationToken)
-    {
-        // Start a profiler if one wasn't running yet.
-        if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
-        {
-            _options.LogDebug("Starting a sampling profiler session.");
-            try
-            {
-                return new SamplingTransactionProfiler(_tempDirectoryPath, TIME_LIMIT_MS, _options, cancellationToken)
-                {
-                    OnFinish = () => _inProgress = FALSE
-                };
-            }
-            catch (Exception e)
-            {
-                _options.LogWarning("Failed to start a profiler session.", e);
-                _inProgress = FALSE;
-            }
-        }
-        return null;
-    }
-}
-
 internal class SamplingTransactionProfiler : ITransactionProfiler
 {
     public Action? OnFinish;
-    private readonly SampleProfilerSession _session;
+    private SampleProfilerSession? _session;
     private readonly CancellationToken _cancellationToken;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private TimeSpan? _duration;
@@ -64,12 +19,16 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     private Transaction? _transaction;
     private readonly SentryOptions _options;
 
-    public SamplingTransactionProfiler(string tempDirectoryPath, int timeoutMs, SentryOptions options, CancellationToken cancellationToken)
+    public SamplingTransactionProfiler(string tempDirectoryPath, SentryOptions options, CancellationToken cancellationToken)
     {
         _options = options;
         _tempDirectoryPath = tempDirectoryPath;
         _cancellationToken = cancellationToken;
-        _session = new(cancellationToken);
+    }
+
+    public void Start(int timeoutMs)
+    {
+        _session = SampleProfilerSession.StartNew(_cancellationToken);
         _cancellationToken.Register(() =>
         {
             if (Stop())
@@ -88,7 +47,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
 
     private bool Stop(TimeSpan? duration = null)
     {
-        if (_duration is null)
+        if (_duration is null && _session is not null)
         {
             lock (_session)
             {
@@ -97,7 +56,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                     _duration = duration ?? _stopwatch.Elapsed;
                     try
                     {
-                        _data = _session.Finish();
+                        _data = _session.FinishAsync();
                     }
                     catch (Exception e)
                     {

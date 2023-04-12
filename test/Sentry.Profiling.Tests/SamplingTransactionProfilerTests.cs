@@ -83,8 +83,9 @@ public class SamplingTransactionProfilerTests
     {
         var hub = Substitute.For<IHub>();
         var options = new SentryOptions { DiagnosticLogger = _testOutputLogger };
+        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), options, CancellationToken.None);
         var limitMs = 50;
-        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), limitMs, options, CancellationToken.None);
+        sut.Start(limitMs);
         RunForMs(limitMs * 4);
         sut.Finish();
 
