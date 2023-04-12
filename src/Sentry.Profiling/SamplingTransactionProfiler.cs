@@ -29,7 +29,7 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     }
 
     /// <inheritdoc />
-    public ITransactionProfiler? Start(ITransaction _, DateTimeOffset now, CancellationToken cancellationToken)
+    public ITransactionProfiler? Start(ITransaction _, CancellationToken cancellationToken)
     {
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
@@ -37,7 +37,7 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
             _options.LogDebug("Starting a sampling profiler session.");
             try
             {
-                return new SamplingTransactionProfiler(_tempDirectoryPath, now, TIME_LIMIT_MS, _options, cancellationToken)
+                return new SamplingTransactionProfiler(_tempDirectoryPath, TIME_LIMIT_MS, _options, cancellationToken)
                 {
                     OnFinish = () => _inProgress = FALSE
                 };
@@ -57,46 +57,44 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     public Action? OnFinish;
     private readonly SampleProfilerSession _session;
     private readonly CancellationToken _cancellationToken;
-    private readonly DateTimeOffset _startTime;
-    private DateTimeOffset? _endTime;
+    private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private TimeSpan? _duration;
     private Task<MemoryStream>? _data;
     private readonly string _tempDirectoryPath;
     private Transaction? _transaction;
     private readonly SentryOptions _options;
 
-    public SamplingTransactionProfiler(string tempDirectoryPath, DateTimeOffset now, int timeoutMs, SentryOptions options, CancellationToken cancellationToken)
+    public SamplingTransactionProfiler(string tempDirectoryPath, int timeoutMs, SentryOptions options, CancellationToken cancellationToken)
     {
         _options = options;
         _tempDirectoryPath = tempDirectoryPath;
-        _startTime = now;
         _cancellationToken = cancellationToken;
         _session = new(cancellationToken);
-        var clock = Stopwatch.StartNew();
         _cancellationToken.Register(() =>
         {
-            if (Stop(now + clock.Elapsed))
+            if (Stop())
             {
                 _options.LogDebug("Profiling cancelled.");
             }
         });
         Task.Delay(timeoutMs, _cancellationToken).ContinueWith(_ =>
         {
-            if (Stop(now + TimeSpan.FromMilliseconds(timeoutMs)))
+            if (Stop(TimeSpan.FromMilliseconds(timeoutMs)))
             {
                 _options.LogDebug("Profiling is being cut-of after {0} ms because the transaction takes longer than that.", timeoutMs);
             }
         }, CancellationToken.None);
     }
 
-    private bool Stop(DateTimeOffset now)
+    private bool Stop(TimeSpan? duration = null)
     {
-        if (_endTime is null)
+        if (_duration is null)
         {
             lock (_session)
             {
-                if (_endTime is null)
+                if (_duration is null)
                 {
-                    _endTime = now;
+                    _duration = duration ?? _stopwatch.Elapsed;
                     try
                     {
                         _data = _session.Finish();
@@ -113,11 +111,11 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     /// <inheritdoc />
-    public void Finish(DateTimeOffset now)
+    public void Finish()
     {
-        if (Stop(now))
+        if (Stop())
         {
-            _options.LogDebug("Stopping profiling collection on transaction finish.");
+            _options.LogDebug("Profiling stopped on transaction finish.");
         }
         OnFinish?.Invoke();
     }
@@ -125,7 +123,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     /// <inheritdoc />
     public async Task<ProfileInfo?> CollectAsync(Transaction transaction)
     {
-        if (_data is null || _endTime is null)
+        if (_data is null || _duration is null)
         {
             _options.LogDebug("Profiling collection cannot proceed because it doesn't seem to have finished properly.");
             return null;
@@ -153,7 +151,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
 
                 var processor = new TraceLogProcessor(_options, traceLog)
                 {
-                    MaxTimestampMs = (ulong)(_endTime.Value - _startTime).TotalMilliseconds
+                    MaxTimestampMs = _duration.Value.TotalMilliseconds
                 };
 
                 var profile = processor.Process(_cancellationToken);
@@ -170,7 +168,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 else
                 {
                     _options.LogDebug("Profiling finished successfully.");
-                    return CreateProfileInfo(transaction, _startTime, profile);
+                    return CreateProfileInfo(transaction, profile);
                 }
             }
             finally
@@ -190,7 +188,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         }
     }
 
-    internal static ProfileInfo CreateProfileInfo(Transaction transaction, DateTimeOffset startTime, SampleProfile profile)
+    internal static ProfileInfo CreateProfileInfo(Transaction transaction, SampleProfile profile)
     {
         return new()
         {
@@ -201,7 +199,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             // Platform = transaction.Platform,
             Platform = "dotnet",
             Release = transaction.Release,
-            StartTimestamp = startTime,
+            StartTimestamp = transaction.StartTimestamp,
             Profile = profile
         };
     }

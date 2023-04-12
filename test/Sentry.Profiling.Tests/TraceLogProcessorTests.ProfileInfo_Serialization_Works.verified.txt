@@ -3,7 +3,6 @@
   event_id: Guid_1,
   timestamp: DateTimeOffset_1,
   platform: dotnet,
-  debug_meta: {},
   device: {
     architecture: arch,
     manufacturer: device make,

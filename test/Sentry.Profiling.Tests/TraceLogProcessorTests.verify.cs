@@ -71,7 +71,7 @@ public class TraceLogProcessorTests
         transaction.Contexts.Device.Manufacturer = "device make";
         transaction.Contexts.OperatingSystem.RawDescription = "Microsoft Windows 6.3.9600";
         var profile = GetProfile();
-        var profileInfo = SamplingTransactionProfiler.CreateProfileInfo(transaction, DateTimeOffset.UtcNow, profile);
+        var profileInfo = SamplingTransactionProfiler.CreateProfileInfo(transaction, profile);
         var json = profileInfo.ToJsonString(_testOutputLogger);
         return VerifyJson(json);
     }

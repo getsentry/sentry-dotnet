@@ -159,7 +159,7 @@ internal class Hub : IHubEx, IDisposable
             if (transaction.IsSampled is true && _options.TransactionProfilerFactory is { } profilerFactory)
             {
                 // TODO cancellation token based on Hub being closed?
-                transaction.TransactionProfiler = profilerFactory.Start(transaction, transaction.Stopwatch.CurrentDateTimeOffset, CancellationToken.None);
+                transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
             }
         }
 

@@ -64,10 +64,10 @@ public class SamplingTransactionProfilerTests
 
         var factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new SentryOptions { DiagnosticLogger = _testOutputLogger });
         var clock = SentryStopwatch.StartNew();
-        var sut = factory.Start(transactionTracer, clock.CurrentDateTimeOffset, CancellationToken.None);
+        var sut = factory.Start(transactionTracer, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
         RunForMs(100);
-        sut.Finish(clock.CurrentDateTimeOffset);
+        sut.Finish();
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
         var transaction = new Transaction(transactionTracer);
@@ -83,12 +83,10 @@ public class SamplingTransactionProfilerTests
     {
         var hub = Substitute.For<IHub>();
         var options = new SentryOptions { DiagnosticLogger = _testOutputLogger };
-        var clock = SentryStopwatch.StartNew();
         var limitMs = 50;
-        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), clock.CurrentDateTimeOffset, limitMs, options, CancellationToken.None);
+        var sut = new SamplingTransactionProfiler(Path.GetTempPath(), limitMs, options, CancellationToken.None);
         RunForMs(limitMs * 4);
-        clock.Elapsed.TotalMilliseconds.Should().BeGreaterThan(limitMs * 4);
-        sut.Finish(clock.CurrentDateTimeOffset);
+        sut.Finish();
 
         var collectTask = sut.CollectAsync(new Transaction("foo", "bar"));
         collectTask.Wait();

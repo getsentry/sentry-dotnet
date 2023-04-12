@@ -9,7 +9,7 @@ namespace Sentry;
 public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
 {
     private readonly IHub _hub;
-    internal readonly SentryStopwatch Stopwatch = SentryStopwatch.StartNew();
+    private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
     /// <inheritdoc />
     public SpanId SpanId
@@ -54,7 +54,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public string? Distribution { get; set; }
 
     /// <inheritdoc />
-    public DateTimeOffset StartTimestamp => Stopwatch.StartDateTimeOffset;
+    public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
 
     /// <inheritdoc />
     public DateTimeOffset? EndTimestamp { get; internal set; }
@@ -260,10 +260,9 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
-        var now = Stopwatch.CurrentDateTimeOffset;
-        TransactionProfiler?.Finish(now);
+        TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
-        EndTimestamp = now;
+        EndTimestamp = _stopwatch.CurrentDateTimeOffset;
 
         foreach (var span in _spans)
         {

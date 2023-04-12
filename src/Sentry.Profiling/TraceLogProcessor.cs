@@ -93,7 +93,7 @@ internal class TraceLogProcessor
 
     private readonly ActivityComputer _activityComputer;                        // Used to compute stacks for Tasks
 
-    public ulong MaxTimestampMs { get; set; } = ulong.MaxValue;
+    public double MaxTimestampMs { get; set; } = double.MaxValue;
 
     public TraceLogProcessor(SentryOptions options, TraceLog traceLog)
     {

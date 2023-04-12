@@ -10,7 +10,7 @@ internal interface ITransactionProfilerFactory
     /// <summary>
     /// Called during transaction start to start a new profiler, if applicable.
     /// </summary>
-    ITransactionProfiler? Start(ITransaction transaction, DateTimeOffset now, CancellationToken cancellationToken);
+    ITransactionProfiler? Start(ITransaction transaction, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -21,7 +21,7 @@ internal interface ITransactionProfiler
     /// <summary>
     /// Called when the transaction ends - this should stop profile samples collection.
     /// </summary>
-    void Finish(DateTimeOffset now);
+    void Finish();
 
     /// <summary>
     /// Process and collect the profile.
