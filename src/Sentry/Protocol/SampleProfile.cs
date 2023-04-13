@@ -12,10 +12,11 @@ using SentryProfileStackTrace = HashableGrowableArray<int>;
 /// </summary>
 internal sealed class SampleProfile : IJsonSerializable
 {
-    public GrowableArray<Sample> Samples { get; } = new(10000);
-    public GrowableArray<SentryStackFrame> Frames { get; } = new(100);
-    public GrowableArray<SentryProfileStackTrace> Stacks { get; } = new(100);
-    public List<SentryThread> Threads { get; } = new(10);
+    // Note: changing these to properties would break because GrowableArray is a struct.
+    internal GrowableArray<Sample> Samples = new(10000);
+    internal GrowableArray<SentryStackFrame> Frames = new(100);
+    internal GrowableArray<SentryProfileStackTrace> Stacks = new(100);
+    internal List<SentryThread> Threads = new(10);
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
