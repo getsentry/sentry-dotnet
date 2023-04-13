@@ -565,6 +565,32 @@ interface SentryFrame : SentrySerializable
     NSNumber StackStart { get; set; }
 }
 
+// @interface SentryGeo : NSObject <SentrySerializable, NSCopying>
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryGeo : SentrySerializable
+{
+    // @property (copy, atomic) NSString * _Nullable city;
+    [NullAllowed, Export ("city")]
+    string City { get; set; }
+
+    // @property (copy, atomic) NSString * _Nullable countryCode;
+    [NullAllowed, Export ("countryCode")]
+    string CountryCode { get; set; }
+
+    // @property (copy, atomic) NSString * _Nullable region;
+    [NullAllowed, Export ("region")]
+    string Region { get; set; }
+
+    // -(BOOL)isEqualToGeo:(SentryGeo * _Nonnull)geo;
+    [Export ("isEqualToGeo:")]
+    bool IsEqualToGeo (SentryGeo geo);
+
+    // -(NSUInteger)hash;
+    [Export ("hash")]
+    nuint Hash { get; }
+}
+
 // @interface SentryHttpStatusCodeRange : NSObject
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
@@ -832,6 +858,10 @@ interface SentryOptions
     [NoWatch, NoTV, Introduced (PlatformName.MacCatalyst, 15, 0), Introduced (PlatformName.MacOSX, 12, 0), Introduced (PlatformName.iOS, 15, 0)]
     [Export ("enableMetricKit")]
     bool EnableMetricKit { get; set; }
+
+    // @property (nonatomic) BOOL enableTimeToFullDisplay;
+    [Export ("enableTimeToFullDisplay")]
+    bool EnableTimeToFullDisplay { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>
@@ -1138,6 +1168,10 @@ interface SentryHub
     // -(void)setUser:(SentryUser * _Nullable)user;
     [Export ("setUser:")]
     void SetUser ([NullAllowed] SentryUser user);
+
+    // -(void)reportFullyDisplayed;
+    [Export ("reportFullyDisplayed")]
+    void ReportFullyDisplayed ();
 
     // -(void)flush:(NSTimeInterval)timeout __attribute__((swift_name("flush(timeout:)")));
     [Export ("flush:")]
@@ -1621,6 +1655,11 @@ interface SentrySDK
     [Export ("crash")]
     void Crash ();
 
+    // +(void)reportFullyDisplayed;
+    [Static]
+    [Export ("reportFullyDisplayed")]
+    void ReportFullyDisplayed ();
+
     // +(void)flush:(NSTimeInterval)timeout __attribute__((swift_name("flush(timeout:)")));
     [Static]
     [Export ("flush:")]
@@ -1932,6 +1971,14 @@ interface SentryUser : SentrySerializable
     // @property (copy, atomic) NSString * _Nullable segment;
     [NullAllowed, Export ("segment")]
     string Segment { get; set; }
+
+    // @property (copy, atomic) NSString * _Nullable name;
+    [NullAllowed, Export ("name")]
+    string Name { get; set; }
+
+    // @property (nonatomic, strong) SentryGeo * _Nullable geo;
+    [NullAllowed, Export ("geo", ArgumentSemantic.Strong)]
+    SentryGeo Geo { get; set; }
 
     // @property (atomic, strong) NSDictionary<NSString *,id> * _Nullable data;
     [NullAllowed, Export ("data", ArgumentSemantic.Strong)]

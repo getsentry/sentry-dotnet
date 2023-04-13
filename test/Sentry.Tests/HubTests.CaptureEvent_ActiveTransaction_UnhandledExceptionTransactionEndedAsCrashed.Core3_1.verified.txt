@@ -39,7 +39,9 @@
             SentryExceptions: [
               {
                 Mechanism: {
-                  Handled: false
+                  Type: generic,
+                  Handled: false,
+                  Synthetic: false
                 }
               }
             ],

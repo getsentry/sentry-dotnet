@@ -556,6 +556,17 @@ internal static class JsonExtensions
         }
     }
 
+    public static void WriteBooleanIfTrue(
+        this Utf8JsonWriter writer,
+        string propertyName,
+        bool? value)
+    {
+        if (value is true)
+        {
+            writer.WriteBoolean(propertyName, value.Value);
+        }
+    }
+
     public static void WriteNumberIfNotNull(
         this Utf8JsonWriter writer,
         string propertyName,

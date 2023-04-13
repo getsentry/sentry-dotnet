@@ -25,7 +25,6 @@ public class SentryExceptionTests
                     FileName = "FileName"
                 }}
             },
-            Data = { new KeyValuePair<string, object>("data-key", "data-value") },
             Mechanism = new Mechanism
             {
                 Description = "Description"
@@ -40,14 +39,7 @@ public class SentryExceptionTests
             "\"module\":\"Module\"," +
             "\"thread_id\":1," +
             "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
-            "\"mechanism\":{\"description\":\"Description\"}}",
+            "\"mechanism\":{\"type\":\"generic\",\"description\":\"Description\"}}",
             actual);
-    }
-
-    [Fact]
-    public void Data_Getter_NotNull()
-    {
-        var sut = new SentryException();
-        Assert.NotNull(sut.Data);
     }
 }

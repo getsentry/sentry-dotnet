@@ -394,7 +394,9 @@ namespace Sentry
         public void Apply(Sentry.IEventLike other) { }
         public void Apply(Sentry.Scope other) { }
         public void Apply(object state) { }
+        public void Clear() { }
         public void ClearAttachments() { }
+        public void ClearBreadcrumbs() { }
         public Sentry.Scope Clone() { }
         public Sentry.ISpan? GetSpan() { }
         public void SetExtra(string key, object? value) { }
@@ -1471,6 +1473,7 @@ namespace Sentry.Protocol
     }
     public sealed class Mechanism : Sentry.IJsonSerializable
     {
+        public static readonly string DescriptionKey;
         public static readonly string HandledKey;
         public static readonly string MechanismKey;
         public Mechanism() { }
@@ -1479,7 +1482,8 @@ namespace Sentry.Protocol
         public bool? Handled { get; set; }
         public string? HelpLink { get; set; }
         public System.Collections.Generic.IDictionary<string, object> Meta { get; }
-        public string? Type { get; set; }
+        public bool Synthetic { get; set; }
+        public string Type { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Mechanism FromJson(System.Text.Json.JsonElement json) { }
     }
@@ -1513,6 +1517,8 @@ namespace Sentry.Protocol
     public sealed class SentryException : Sentry.IJsonSerializable
     {
         public SentryException() { }
+        [System.Obsolete("Use SentryException.Mechanism.Data instead. This property will be removed in a fu" +
+            "ture version.")]
         public System.Collections.Generic.IDictionary<string, object?> Data { get; }
         public Sentry.Protocol.Mechanism? Mechanism { get; set; }
         public string? Module { get; set; }
@@ -1592,4 +1598,5 @@ public static class SentryExceptionExtensions
     public static void AddSentryContext(this System.Exception ex, string name, System.Collections.Generic.IReadOnlyDictionary<string, object> data) { }
     public static void AddSentryTag(this System.Exception ex, string name, string value) { }
     public static System.Collections.Generic.IEnumerable<System.Exception> EnumerateChainedExceptions(this System.Exception exception, Sentry.SentryOptions options) { }
+    public static void SetSentryMechanism(this System.Exception ex, string type, string? description = null, bool? handled = default) { }
 }

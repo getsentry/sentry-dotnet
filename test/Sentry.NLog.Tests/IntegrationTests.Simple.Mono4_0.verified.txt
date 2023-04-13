@@ -50,7 +50,11 @@
                     }
                   ]
                 },
-                Mechanism: {}
+                Mechanism: {
+                  Type: generic,
+                  Handled: true,
+                  Synthetic: false
+                }
               }
             ],
             DebugImages: [

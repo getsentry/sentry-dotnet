@@ -21,8 +21,12 @@ public static class SentryHttpServerUtilityExtensions
     {
         if (server.GetLastError() is { } exception)
         {
-            exception.Data[Mechanism.HandledKey] = false;
-            exception.Data[Mechanism.MechanismKey] = "HttpApplication.Application_Error";
+            exception.SetSentryMechanism(
+                "HttpApplication.Application_Error",
+                "This exception was caught by the ASP.NET global error handler. " +
+                "The web server likely returned a 5xx error code as a result of this exception.",
+                handled: false);
+
             return hub.CaptureException(exception);
         }
         return SentryId.Empty;

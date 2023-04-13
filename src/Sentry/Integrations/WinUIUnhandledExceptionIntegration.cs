@@ -116,8 +116,13 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         }
 
         // Set some useful data and capture the exception
-        exception.Data[Protocol.Mechanism.HandledKey] = handled;
-        exception.Data[Protocol.Mechanism.MechanismKey] = "Microsoft.UI.Xaml.UnhandledException";
+        var description = "This exception was caught by the Windows UI global error handler.";
+        if (!handled)
+        {
+            description += " The application likely crashed as a result of this exception.";
+        }
+
+        exception.SetSentryMechanism("Microsoft.UI.Xaml.UnhandledException", description, handled);
 
         // Call the internal implementation, so that we still capture even if the hub has been disabled.
         _hub.CaptureExceptionInternal(exception);
