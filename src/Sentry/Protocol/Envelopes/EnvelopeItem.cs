@@ -76,6 +76,27 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <returns>The file name or null.</returns>
     public string? TryGetFileName() => Header.GetValueOrDefault(FileNameKey) as string;
 
+    private async Task<MemoryStream> BufferPayloadAsync(IDiagnosticLogger? logger, CancellationToken cancellationToken)
+    {
+        var buffer = new MemoryStream();
+
+        if (Payload is JsonSerializable jsonSerializable)
+        {
+            // There's no advantage to buffer fully-materialized in-memory objects asynchronously,
+            // and there's some minor overhead in doing so.  Thus we will serialize synchronously.
+
+            // ReSharper disable once MethodHasAsyncOverloadWithCancellation
+            jsonSerializable.Serialize(buffer, logger);
+        }
+        else
+        {
+            await Payload.SerializeAsync(buffer, logger, cancellationToken).ConfigureAwait(false);
+        }
+
+        buffer.Seek(0, SeekOrigin.Begin);
+        return buffer;
+    }
+
     private MemoryStream BufferPayload(IDiagnosticLogger? logger)
     {
         var buffer = new MemoryStream();
@@ -117,9 +138,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // in item headers. Don't trust any previously calculated value to be correct.
         // See https://github.com/getsentry/sentry-dotnet/issues/1956
 
-        // NOTE: Previously we used BufferPayloadAsync, but since we buffer from in-memory objects to a MemoryStream
-        // there's no advantage to doing so asynchronously.  We will get better perf from a synchronous approach.
-        var payloadBuffer = BufferPayload(logger);
+        var payloadBuffer = await BufferPayloadAsync(logger, cancellationToken).ConfigureAwait(false);
 #if NETFRAMEWORK || NETSTANDARD2_0
         using (payloadBuffer)
 #else
