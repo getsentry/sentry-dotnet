@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Buffer payloads asynchronously when appropriate ([#2297](https://github.com/getsentry/sentry-dotnet/pull/2297))
+
 ### Dependencies
 
 - Bump CLI from v2.17.0 to v2.17.2 ([#2298](https://github.com/getsentry/sentry-dotnet/pull/2298))
