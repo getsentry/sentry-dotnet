@@ -97,11 +97,7 @@ internal struct GrowableArray<T> : IReadOnlyList<T>
     /// <summary>
     /// Create an empty growable array.
     /// </summary>
-    public GrowableArray()
-    {
-        array = new T[0];
-        arrayLength = 0;
-    }
+    public GrowableArray() : this(0) { }
 
     /// <summary>
     /// Create a growable array with the given initial size it will grow as needed.  There is also the
