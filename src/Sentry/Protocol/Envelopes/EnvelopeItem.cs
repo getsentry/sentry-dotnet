@@ -223,7 +223,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="source"/>.
     /// </summary>
-    internal static EnvelopeItem FromProfileInfo(Task<ProfileInfo?> source)
+    internal static EnvelopeItem FromProfileInfo(Task<ProfileInfo> source)
     {
         var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
         {

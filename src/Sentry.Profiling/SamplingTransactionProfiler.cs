@@ -80,70 +80,39 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     /// <inheritdoc />
-    public async Task<ProfileInfo?> CollectAsync(Transaction transaction)
+    public async Task<ProfileInfo> CollectAsync(Transaction transaction)
     {
         if (_data is null || _duration is null)
         {
-            _options.LogDebug("Profiling collection cannot proceed because it doesn't seem to have finished properly.");
-            return null;
+            throw new InvalidOperationException("Profiler.CollectAsync() called before Finish()");
         }
         _options.LogDebug("Starting profile processing.");
 
+        _transaction = transaction;
+        using var traceLog = await CreateTraceLogAsync().ConfigureAwait(false);
+
         try
         {
-            _transaction = transaction;
-            using var traceLog = await CreateTraceLogAsync().ConfigureAwait(false);
+            _options.LogDebug("Converting profile to Sentry format.");
 
-            if (traceLog is null)
+            _cancellationToken.ThrowIfCancellationRequested();
+            var processor = new TraceLogProcessor(_options, traceLog)
             {
-                return null;
-            }
+                MaxTimestampMs = _duration.Value.TotalMilliseconds
+            };
 
-            try
-            {
-                if (_cancellationToken.IsCancellationRequested)
-                {
-                    return null;
-                }
-
-                _options.LogDebug("Converting profile to Sentry format.");
-
-                var processor = new TraceLogProcessor(_options, traceLog)
-                {
-                    MaxTimestampMs = _duration.Value.TotalMilliseconds
-                };
-
-                var profile = processor.Process(_cancellationToken);
-                if (_cancellationToken.IsCancellationRequested)
-                {
-                    return null;
-                }
-
-                if (profile.Samples.Empty)
-                {
-                    _options.LogDebug("Profiling finished successfully but there are no samples, skipping.");
-                    return null;
-                }
-                else
-                {
-                    _options.LogDebug("Profiling finished successfully.");
-                    return CreateProfileInfo(transaction, profile);
-                }
-            }
-            finally
-            {
-                traceLog.Dispose();
-                if (File.Exists(traceLog.FilePath))
-                {
-                    _options.LogDebug("Removing temporarily file '{0}'.", traceLog.FilePath);
-                    File.Delete(traceLog.FilePath);
-                }
-            }
+            var profile = processor.Process(_cancellationToken);
+            _options.LogDebug("Profiling finished successfully.");
+            return CreateProfileInfo(transaction, profile);
         }
-        catch (Exception e)
+        finally
         {
-            _options.LogWarning("Exception while collecting/processing a profiler session.", e);
-            return null;
+            traceLog.Dispose();
+            if (File.Exists(traceLog.FilePath))
+            {
+                _options.LogDebug("Removing temporarily file '{0}'.", traceLog.FilePath);
+                File.Delete(traceLog.FilePath);
+            }
         }
     }
 
@@ -164,33 +133,19 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     // We need the TraceLog for all the stack processing it does.
-    private async Task<TraceLog?> CreateTraceLogAsync()
+    private async Task<TraceLog> CreateTraceLogAsync()
     {
-        if (_data is null || _cancellationToken.IsCancellationRequested)
-        {
-            return null;
-        }
-
+        _cancellationToken.ThrowIfCancellationRequested();
+        Debug.Assert(_data is not null);
         using var nettraceStream = await _data.ConfigureAwait(false);
-        if (_cancellationToken.IsCancellationRequested)
-        {
-            return null;
-        }
-
         using var eventSource = CreateEventPipeEventSource(nettraceStream);
-        if (_cancellationToken.IsCancellationRequested || eventSource is null)
-        {
-            _options.LogWarning("Couldn't initialize EventPipeEventSource.");
-            return null;
-        }
-
         return ConvertToETLX(eventSource);
     }
 
     // EventPipeEventSource(Stream stream) sets isStreaming = true even though the stream is pre-collected. This
     // causes read issues when converting to ETLX. It works fine if we use the private constructor, setting false.
     // TODO make a PR to change this
-    private EventPipeEventSource? CreateEventPipeEventSource(MemoryStream nettraceStream)
+    private EventPipeEventSource CreateEventPipeEventSource(MemoryStream nettraceStream)
     {
         var privateNewEventPipeEventSource = typeof(EventPipeEventSource).GetConstructor(
             _commonBindingFlags,
@@ -202,17 +157,19 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 false
             }) as EventPipeEventSource;
 
-        if (eventSource is not null)
+        if (eventSource is null)
         {
-            // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
-            // _options.LogDebug("Profile will be downsampled before processing.");
-            new Downsampler().AttachTo(eventSource);
+            throw new InvalidOperationException("Couldn't initialize EventPipeEventSource");
         }
+
+        // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
+        // _options.LogDebug("Profile will be downsampled before processing.");
+        new Downsampler().AttachTo(eventSource);
 
         return eventSource;
     }
 
-    private TraceLog? ConvertToETLX(EventPipeEventSource source)
+    private TraceLog ConvertToETLX(EventPipeEventSource source)
     {
         Debug.Assert(_transaction is not null);
         var etlxPath = Path.Combine(_tempDirectoryPath, $"{_transaction.EventId}.etlx");
@@ -222,6 +179,8 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             _options.LogDebug("Temporary file '{0}' already exists, deleting first.", etlxPath);
             File.Delete(etlxPath);
         }
+
+        _cancellationToken.ThrowIfCancellationRequested();
         typeof(TraceLog)
             .GetMethod(
                 "CreateFromEventPipeEventSources",
@@ -231,8 +190,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
 
         if (!File.Exists(etlxPath))
         {
-            _options.LogWarning("Profiler failed at CreateFromEventPipeEventSources() - temproary file '{0}' doesn't exist.", etlxPath);
-            return null;
+            throw new FileNotFoundException($"Profiler failed at CreateFromEventPipeEventSources() - temproary file doesn't exist", etlxPath);
         }
 
         return new TraceLog(etlxPath);

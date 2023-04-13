@@ -146,8 +146,15 @@ public sealed class Envelope : ISerializable, IDisposable
         // Items
         foreach (var item in Items)
         {
-            await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-            await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
+                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                logger?.LogWarning("Failed to serialize envelope item", e);
+            }
         }
     }
 
@@ -164,8 +171,15 @@ public sealed class Envelope : ISerializable, IDisposable
         // Items
         foreach (var item in Items)
         {
-            item.Serialize(stream, logger);
-            stream.WriteNewline();
+            try
+            {
+                item.Serialize(stream, logger);
+                stream.WriteNewline();
+            }
+            catch (Exception e)
+            {
+                logger?.LogWarning("Failed to serialize envelope item", e);
+            }
         }
     }
 
@@ -289,7 +303,7 @@ public sealed class Envelope : ISerializable, IDisposable
 
         if (transaction.TransactionProfiler is { } profiler)
         {
-            // Profiler.CollectAsync() must not throw but it may complete with null in which case the EnvelopeItem won't serialize.
+            // Profiler.CollectAsync() may throw in which case the EnvelopeItem won't serialize.
             items.Add(EnvelopeItem.FromProfileInfo(profiler.CollectAsync(transaction)));
         }
 
