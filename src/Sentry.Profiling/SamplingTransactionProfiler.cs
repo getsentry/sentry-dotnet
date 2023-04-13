@@ -190,7 +190,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
 
         if (!File.Exists(etlxPath))
         {
-            throw new FileNotFoundException($"Profiler failed at CreateFromEventPipeEventSources() - temproary file doesn't exist", etlxPath);
+            throw new FileNotFoundException($"Profiler failed at CreateFromEventPipeEventSources() - temporary file doesn't exist", etlxPath);
         }
 
         return new TraceLog(etlxPath);
