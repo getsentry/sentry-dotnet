@@ -6,6 +6,12 @@
 
 - Buffer payloads asynchronously when appropriate ([#2297](https://github.com/getsentry/sentry-dotnet/pull/2297))
 
+### Dependencies
+
+- Bump CLI from v2.17.0 to v2.17.2 ([#2298](https://github.com/getsentry/sentry-dotnet/pull/2298))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2172)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.0...2.17.2)
+
 ## 3.30.0
 
 ### Features
