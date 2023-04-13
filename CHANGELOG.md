@@ -6,6 +6,11 @@
 
 - Buffer payloads asynchronously when appropriate ([#2297](https://github.com/getsentry/sentry-dotnet/pull/2297))
 
+### Features
+
+- Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
+
+
 ## 3.30.0
 
 ### Features
