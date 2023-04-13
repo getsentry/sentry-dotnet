@@ -502,6 +502,58 @@ public class EnvelopeTests
             "helloworld\n");
     }
 
+    private class ThrowingSerializable : IJsonSerializable
+    {
+        public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
+        {
+            throw new InvalidOperationException("test");
+        }
+    }
+
+    [Fact]
+    public void Serialization_EnvelopeWithThrowingItem_DoesntThrow()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "attachment"},
+                    AsyncJsonSerializable.CreateFrom(Task.Run(() => new ThrowingSerializable()))
+                )
+            });
+
+        // Act
+        var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+    }
+
+    [Fact]
+    public async void AsyncSerialization_EnvelopeWithThrowingItem_DoesntThrow()
+    {
+        // Arrange
+        using var envelope = new Envelope(
+            new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
+            new[]
+            {
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = "attachment"},
+                    AsyncJsonSerializable.CreateFrom(Task.Run(() => new ThrowingSerializable()))
+                )
+            });
+
+        // Act
+        var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
+
+        // Assert
+        output.Should().Be(
+            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+    }
+
     [Fact]
     public async Task Deserialization_EnvelopeWithItemWithoutLength_Success()
     {
@@ -634,7 +686,7 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
-        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+        using var attachmentStream = new MemoryStream(new byte[] { 1, 2, 3 });
 
         var attachment = new Attachment(
             AttachmentType.Default,
@@ -671,7 +723,7 @@ public class EnvelopeTests
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.0.0" }
         };
 
-        using var attachmentStream = new MemoryStream(new byte[] {1, 2, 3});
+        using var attachmentStream = new MemoryStream(new byte[] { 1, 2, 3 });
 
         var attachment = new Attachment(
             AttachmentType.Default,
