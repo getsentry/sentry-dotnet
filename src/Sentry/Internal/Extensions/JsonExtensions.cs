@@ -330,9 +330,9 @@ internal static class JsonExtensions
         writer.WriteStringDictionaryValue(dic);
     }
 
-    public static void WriteArrayValue(
+    public static void WriteArrayValue<T>(
         this Utf8JsonWriter writer,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         if (arr is not null)
@@ -352,10 +352,10 @@ internal static class JsonExtensions
         }
     }
 
-    public static void WriteArray(
+    public static void WriteArray<T>(
         this Utf8JsonWriter writer,
         string propertyName,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         writer.WritePropertyName(propertyName);
@@ -739,13 +739,13 @@ internal static class JsonExtensions
         }
     }
 
-    public static void WriteArrayIfNotEmpty(
+    public static void WriteArrayIfNotEmpty<T>(
         this Utf8JsonWriter writer,
         string propertyName,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
-        var list = arr as IReadOnlyList<object?> ?? arr?.ToArray();
+        var list = arr as IReadOnlyList<T> ?? arr?.ToArray();
         if (list is not null && list.Count > 0)
         {
             writer.WriteArray(propertyName, list, logger);

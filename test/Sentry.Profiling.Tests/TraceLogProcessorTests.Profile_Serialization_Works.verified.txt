@@ -1,0 +1,1258 @@
+﻿{
+  thread_metadata: {
+    0: {
+      name: Thread 23364
+    },
+    1: {
+      name: Thread 5372
+    },
+    2: {
+      name: Thread 4688
+    },
+    3: {
+      name: Thread 24980
+    },
+    4: {
+      name: Thread 2152
+    },
+    5: {
+      name: Activity 18
+    },
+    6: {
+      name: Activity 18/24/28/32
+    },
+    7: {
+      name: Activity 23
+    },
+    8: {
+      name: Activity 23/39
+    }
+  },
+  stacks: [
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    [
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    [
+      23,
+      24,
+      25,
+      22
+    ],
+    [
+      26
+    ],
+    [
+      0,
+      1,
+      27
+    ],
+    [
+      28,
+      29,
+      30,
+      26
+    ],
+    [
+      31,
+      30,
+      26
+    ],
+    [
+      32,
+      33,
+      26
+    ],
+    [
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
+    ],
+    [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      38,
+      39,
+      40,
+      41
+    ],
+    [
+      52,
+      53,
+      51,
+      38,
+      39,
+      40,
+      41
+    ],
+    [
+      54,
+      53,
+      51,
+      38,
+      39,
+      40,
+      41
+    ],
+    [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      53,
+      51,
+      38,
+      39,
+      40,
+      41
+    ],
+    [
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      41
+    ],
+    [
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      85,
+      86,
+      41
+    ],
+    [
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      85,
+      86,
+      41
+    ],
+    [
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132
+    ],
+    [
+      133,
+      134,
+      135
+    ]
+  ],
+  frames: [
+    {
+      function: System.IO.Pipes.PipeStream.ReadCore(value class System.Span`1<unsigned int8>),
+      module: System.IO.Pipes.il,
+      in_app: false
+    },
+    {
+      function: System.IO.Pipes.PipeStream.Read(unsigned int8[],int32,int32),
+      module: System.IO.Pipes.il,
+      in_app: false
+    },
+    {
+      function: System.IO.BinaryReader.ReadBytes(int32),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcHeader.Parse(class System.IO.BinaryReader),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcMessage.Parse(class System.IO.Stream),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.Read(class System.IO.Stream),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageGetContinuation(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession.Start(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.DiagnosticsClient.StartEventPipeSession(class System.Collections.Generic.IEnumerable`1<class Microsoft.Diagnostics.NETCore.Client.EventPipeProvider>,bool,int32),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Sentry.Profiling.SampleProfilerSession..ctor(value class System.Threading.CancellationToken),
+      module: Sentry.Profiling,
+      in_app: false
+    },
+    {
+      function: Sentry.Profiling.SamplingTransactionProfiler..ctor(class System.String,value class System.DateTimeOffset,int32,class Sentry.SentryOptions,value class System.Threading.CancellationToken),
+      module: Sentry.Profiling,
+      in_app: false
+    },
+    {
+      function: Sentry.Profiling.SamplingTransactionProfilerFactory.OnTransactionStart(class Sentry.ITransaction,value class System.DateTimeOffset,value class System.Threading.CancellationToken),
+      module: Sentry.Profiling,
+      in_app: false
+    },
+    {
+      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>,class Sentry.DynamicSamplingContext),
+      module: Sentry,
+      in_app: false
+    },
+    {
+      function: Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>),
+      module: Sentry,
+      in_app: false
+    },
+    {
+      function: Sentry.HubExtensions.StartTransaction(class Sentry.IHub,class Sentry.ITransactionContext),
+      module: Sentry,
+      in_app: false
+    },
+    {
+      function: Sentry.HubExtensions.StartTransaction(class Sentry.IHub,class System.String,class System.String),
+      module: Sentry,
+      in_app: false
+    },
+    {
+      function: Sentry.SentrySdk.StartTransaction(class System.String,class System.String),
+      module: Sentry,
+      in_app: false
+    },
+    {
+      function: Aura.UI.Gallery.NetCore.Program.Main(class System.String[]),
+      module: Aura.UI.Gallery.NetCore,
+      in_app: true
+    },
+    {
+      in_app: false
+    },
+    {
+      function: System.Threading.LowLevelLifoSemaphore.WaitForSignal(int32),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Threading.LowLevelLifoSemaphore.Wait(int32,bool),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Threading.Thread.StartCallback(),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Threading.WaitHandle.WaitOneNoCheck(int32),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Threading.WaitHandle.WaitOne(int32),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Threading.PortableThreadPool+GateThread.GateThreadStart(),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Aura.UI.Gallery.NetCore.Program.Main(class System.String[]),
+      module: Aura.UI.Gallery.NetCore,
+      in_app: true
+    },
+    {
+      function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Avalonia.Win32.WinRT.Impl.__MicroComICompositorVTable.__MicroComModuleInit(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: <Module>..cctor(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      in_app: false
+    },
+    {
+      function: <Module>..cctor(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.AppBuilderDesktopExtensions.UsePlatformDetect(!!0),
+      module: avalonia.desktop,
+      in_app: true
+    },
+    {
+      function: Aura.UI.Gallery.NetCore.Program.BuildAvaloniaApp(),
+      module: Aura.UI.Gallery.NetCore,
+      in_app: true
+    },
+    {
+      function: Avalonia.StyledPropertyBase`1[Avalonia.Controls.WindowState]..ctor(class System.String,class System.Type,class Avalonia.StyledPropertyMetadata`1<!0>,bool,class System.Func`2<!0,bool>,class System.Action`2<class Avalonia.IAvaloniaObject,bool>),
+      module: Avalonia.Base,
+      in_app: true
+    },
+    {
+      function: Avalonia.StyledProperty`1[Avalonia.Controls.WindowState]..ctor(class System.String,class System.Type,class Avalonia.StyledPropertyMetadata`1<!0>,bool,class System.Func`2<!0,bool>,class System.Action`2<class Avalonia.IAvaloniaObject,bool>),
+      module: Avalonia.Base,
+      in_app: true
+    },
+    {
+      function: Avalonia.AvaloniaProperty.Register(class System.String,!!1,bool,value class Avalonia.Data.BindingMode,class System.Func`2<!!1,bool>,class System.Func`3<class Avalonia.IAvaloniaObject,!!1,!!1>,class System.Action`2<class Avalonia.IAvaloniaObject,bool>),
+      module: Avalonia.Base,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.Window..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime..ctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(!!0,class System.String[],value class Avalonia.Controls.ShutdownMode),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Aura.UI.Gallery.NetCore.Program.Main(class System.String[]),
+      module: Aura.UI.Gallery.NetCore,
+      in_app: true
+    },
+    {
+      function: Avalonia.Animation.Animation.RegisterAnimator(class System.Func`2<class Avalonia.AvaloniaProperty,bool>),
+      module: Avalonia.Animation,
+      in_app: true
+    },
+    {
+      function: Avalonia.Point..cctor(),
+      module: Avalonia.Visuals,
+      in_app: true
+    },
+    {
+      function: Avalonia.Point..ctor(float64,float64),
+      module: Avalonia.Visuals,
+      in_app: true
+    },
+    {
+      function: Avalonia.RelativePoint..ctor(float64,float64,value class Avalonia.RelativeUnit),
+      module: Avalonia.Visuals,
+      in_app: true
+    },
+    {
+      function: Avalonia.RelativePoint..cctor(),
+      module: Avalonia.Visuals,
+      in_app: true
+    },
+    {
+      function: Avalonia.Visual..cctor(),
+      module: Avalonia.Visuals,
+      in_app: true
+    },
+    {
+      function: Avalonia.Visual.AffectsRender(class Avalonia.AvaloniaProperty[]),
+      module: Avalonia.Visuals,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.Border..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.Primitives.TemplatedControl..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.Window..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.TextBlock..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.Primitives.TemplatedControl..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.TextBlock..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Concurrency.AsyncLock.Wait(!!0,class System.Action`1<!!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Concurrency.ImmediateScheduler+AsyncLockScheduler.Schedule(!!0,class System.Func`3<class System.Reactive.Concurrency.IScheduler,!!0,class System.IDisposable>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Linq.ObservableImpl.ToObservableRecursive`1+_[System.__Canon].LoopRec(class System.Reactive.Concurrency.IScheduler),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Linq.ObservableImpl.ToObservableRecursive`1+_+<>c[System.__Canon].<Run>b__3_0(class System.Reactive.Concurrency.IScheduler,class _<!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Concurrency.ImmediateScheduler.Schedule(!!0,class System.Func`3<class System.Reactive.Concurrency.IScheduler,!!0,class System.IDisposable>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Linq.ObservableImpl.ToObservableRecursive`1+_[System.__Canon].Run(class System.Collections.Generic.IEnumerable`1<!0>,class System.Reactive.Concurrency.IScheduler),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Linq.ObservableImpl.ToObservableRecursive`1[System.__Canon].Run(class _<!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Producer`2[System.__Canon,System.__Canon].SubscribeRaw(class System.IObserver`1<!0>,bool),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.ObservableExtensions.SubscribeSafe(class System.IObservable`1<!!0>,class System.IObserver`1<!!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Sink`2[System.__Canon,System.__Canon].Run(class System.IObservable`1<!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Linq.ObservableImpl.Merge`1+Observables[System.__Canon].Run(class _<!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Producer`2+<>c[System.__Canon,System.__Canon].<SubscribeRaw>b__1_0(value class System.ValueTuple`2<class System.Reactive.Producer`2<!0,!1>,!1>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Concurrency.Scheduler+<>c__75`1[System.ValueTuple`2[System.__Canon,System.__Canon]].<ScheduleAction>b__75_0(class System.Reactive.Concurrency.IScheduler,value class System.ValueTuple`2<class System.Action`1<!0>,!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Concurrency.CurrentThreadScheduler.Schedule(!!0,value class System.TimeSpan,class System.Func`3<class System.Reactive.Concurrency.IScheduler,!!0,class System.IDisposable>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Concurrency.LocalScheduler.Schedule(!!0,class System.Func`3<class System.Reactive.Concurrency.IScheduler,!!0,class System.IDisposable>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Concurrency.Scheduler.ScheduleAction(class System.Reactive.Concurrency.IScheduler,!!0,class System.Action`1<!!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Producer`2[System.__Canon,System.__Canon].SubscribeRaw(class System.IObserver`1<!0>,bool),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.Reactive.Producer`2[System.__Canon,System.__Canon].Subscribe(class System.IObserver`1<!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: System.ObservableExtensions.Subscribe(class System.IObservable`1<!!0>,class System.Action`1<!!0>),
+      module: system.reactive,
+      in_app: true
+    },
+    {
+      function: Avalonia.AvaloniaObjectExtensions.AddClassHandler(class System.IObservable`1<class Avalonia.AvaloniaPropertyChangedEventArgs>,class System.Action`2<!!0,class Avalonia.AvaloniaPropertyChangedEventArgs>),
+      module: Avalonia.Base,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.TextBlock..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: System.Xml.Linq.XDocument.Load(class System.IO.Stream,value class System.Xml.Linq.LoadOptions),
+      module: system.private.xml.linq.il,
+      in_app: true
+    },
+    {
+      function: System.Xml.Linq.XDocument.Load(class System.IO.Stream),
+      module: system.private.xml.linq.il,
+      in_app: true
+    },
+    {
+      function: Avalonia.Utilities.AvaloniaResourcesIndexReaderWriter.Read(class System.IO.Stream),
+      module: Avalonia.Base,
+      in_app: true
+    },
+    {
+      function: Avalonia.Shared.PlatformSupport.AssetLoader+AssemblyDescriptor..ctor(class System.Reflection.Assembly),
+      module: Avalonia.DesktopRuntime,
+      in_app: true
+    },
+    {
+      function: Avalonia.Shared.PlatformSupport.AssetLoader..ctor(class System.Reflection.Assembly),
+      module: Avalonia.DesktopRuntime,
+      in_app: true
+    },
+    {
+      function: Avalonia.Shared.PlatformSupport.StandardRuntimePlatformServices.Register(class System.Reflection.Assembly),
+      module: Avalonia.DesktopRuntime,
+      in_app: true
+    },
+    {
+      function: Avalonia.AppBuilder+<>c.<.ctor>b__0_0(class Avalonia.AppBuilder),
+      module: Avalonia.DesktopRuntime,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.AppBuilderBase`1+<>c__DisplayClass44_0[System.__Canon].<.ctor>b__0(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.AppBuilderBase`1[System.__Canon].Setup(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.AppBuilderBase`1[System.__Canon].SetupWithLifetime(class Avalonia.Controls.ApplicationLifetimes.IApplicationLifetime),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(!!0,class System.String[],value class Avalonia.Controls.ShutdownMode),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32.TrayIconImpl.ProcWnd(int,unsigned int32,int,int),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32.Win32Platform.WndProc(int,unsigned int32,int,int),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      in_app: false
+    },
+    {
+      function: Avalonia.Win32.Win32Platform.CreateMessageWindow(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32.Win32Platform..ctor(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32.Win32Platform..cctor(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32.Win32Platform.set_Options(class Avalonia.Win32PlatformOptions),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32.Win32Platform.Initialize(class Avalonia.Win32PlatformOptions),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32ApplicationExtensions+<>c__0`1[System.__Canon].<UseWin32>b__0_0(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.AppBuilderBase`1[System.__Canon].Setup(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: System.Drawing.SafeNativeMethods+Gdip.PlatformInitialize(),
+      module: system.drawing.common,
+      in_app: true
+    },
+    {
+      function: System.Drawing.SafeNativeMethods+Gdip..cctor(),
+      module: system.drawing.common,
+      in_app: true
+    },
+    {
+      function: System.Drawing.SafeNativeMethods+Gdip.GdipCreateBitmapFromScan0(int32,int32,int32,int32,value class System.Runtime.InteropServices.HandleRef,int&),
+      module: system.drawing.common,
+      in_app: true
+    },
+    {
+      function: System.Drawing.Bitmap..ctor(int32,int32,value class System.Drawing.Imaging.PixelFormat),
+      module: system.drawing.common,
+      in_app: true
+    },
+    {
+      function: System.Drawing.Bitmap..ctor(int32,int32),
+      module: system.drawing.common,
+      in_app: true
+    },
+    {
+      function: Avalonia.Win32.TrayIconImpl..cctor(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: System.Runtime.CompilerServices.TaskAwaiter.UnsafeOnCompletedInternal(class System.Threading.Tasks.Task,class System.Runtime.CompilerServices.IAsyncStateMachineBox,bool),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,class System.Runtime.CompilerServices.IAsyncStateMachineBox),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&,class System.Threading.Tasks.Task`1<!0>&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].AwaitUnsafeOnCompleted(!!0&,!!1&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.PidIpcEndpoint+<ConnectAsync>d__10.MoveNext(),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.PidIpcEndpoint.ConnectAsync(value class System.Threading.CancellationToken),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient+<SendMessageGetContinuationAsync>d__4.MoveNext(),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[Microsoft.Diagnostics.NETCore.Client.IpcResponse].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageGetContinuationAsync(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage,value class System.Threading.CancellationToken),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient+<SendMessageAsync>d__3.MoveNext(),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.IpcClient.SendMessageAsync(class Microsoft.Diagnostics.NETCore.Client.IpcEndpoint,class Microsoft.Diagnostics.NETCore.Client.IpcMessage,value class System.Threading.CancellationToken),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession+<StopAsync>d__11.MoveNext(),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Microsoft.Diagnostics.NETCore.Client.EventPipeSession.StopAsync(value class System.Threading.CancellationToken),
+      module: Microsoft.Diagnostics.NETCore.Client,
+      in_app: false
+    },
+    {
+      function: Sentry.Profiling.SampleProfilerSession+<Finish>d__7.MoveNext(),
+      module: Sentry.Profiling,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1[System.__Canon].Start(!!0&),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: Sentry.Profiling.SampleProfilerSession.Finish(),
+      module: Sentry.Profiling,
+      in_app: false
+    },
+    {
+      function: Sentry.Profiling.SamplingTransactionProfiler.Stop(value class System.DateTimeOffset),
+      module: Sentry.Profiling,
+      in_app: false
+    },
+    {
+      function: Sentry.Profiling.SamplingTransactionProfiler.OnTransactionFinish(value class System.DateTimeOffset),
+      module: Sentry.Profiling,
+      in_app: false
+    },
+    {
+      function: Sentry.TransactionTracer.Finish(),
+      module: Sentry,
+      in_app: false
+    },
+    {
+      function: Aura.UI.Gallery.NetCore.Program+<>c__DisplayClass1_0.<Main>b__1(class System.Threading.Tasks.Task),
+      module: Aura.UI.Gallery.NetCore,
+      in_app: true
+    },
+    {
+      function: System.Threading.Tasks.ContinuationTaskFromTask.InnerInvoke(),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,Microsoft.Diagnostics.NETCore.Client.IpcEndpointHelper+<ConnectAsync>d__1].MoveNext(),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.TaskAwaiter+<>c.<OutputWaitEtwEvents>b__12_0(class System.Action,class System.Threading.Tasks.Task),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
+      function: System.Runtime.CompilerServices.AsyncMethodBuilderCore+ContinuationWrapper.Invoke(),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    }
+  ],
+  samples: [
+    {
+      elapsed_since_start_ns: 402400,
+      thread_id: 0,
+      stack_id: 0
+    },
+    {
+      elapsed_since_start_ns: 410600,
+      thread_id: 1,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 421900,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 423600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 424900,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 11253400,
+      thread_id: 0,
+      stack_id: 3
+    },
+    {
+      elapsed_since_start_ns: 11260100,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 11261700,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 11264500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 11265600,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 19306300,
+      thread_id: 0,
+      stack_id: 5
+    },
+    {
+      elapsed_since_start_ns: 19314800,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 19316900,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 19320000,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 19324300,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 29299500,
+      thread_id: 0,
+      stack_id: 6
+    },
+    {
+      elapsed_since_start_ns: 29316000,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 29319500,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 29322300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 29324000,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 39242400,
+      thread_id: 0,
+      stack_id: 7
+    },
+    {
+      elapsed_since_start_ns: 39246300,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 39247600,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 39248800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 39249800,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 49342400,
+      thread_id: 0,
+      stack_id: 8
+    },
+    {
+      elapsed_since_start_ns: 49374000,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 49377700,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 49386100,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 49388800,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 59314300,
+      thread_id: 0,
+      stack_id: 9
+    },
+    {
+      elapsed_since_start_ns: 59327100,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 59331500,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 59335300,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 59336700,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 69285100,
+      thread_id: 0,
+      stack_id: 10
+    },
+    {
+      elapsed_since_start_ns: 69308800,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 69313800,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 69318900,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 69320700,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 79256000,
+      thread_id: 0,
+      stack_id: 11
+    },
+    {
+      elapsed_since_start_ns: 79267700,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 79269800,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 79272700,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 79274300,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 89281600,
+      thread_id: 0,
+      stack_id: 12
+    },
+    {
+      elapsed_since_start_ns: 89286500,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 89287400,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 89289600,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 89290800,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 99260200,
+      thread_id: 0,
+      stack_id: 13
+    },
+    {
+      elapsed_since_start_ns: 99267900,
+      thread_id: 5,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 99269600,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 99271500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 99272800,
+      thread_id: 4,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 108784600,
+      thread_id: 0,
+      stack_id: 14
+    },
+    {
+      elapsed_since_start_ns: 108788100,
+      thread_id: 1,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 108790300,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 108792800,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 108797900,
+      thread_id: 6,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 118800200,
+      thread_id: 0,
+      stack_id: 15
+    },
+    {
+      elapsed_since_start_ns: 118810700,
+      thread_id: 7,
+      stack_id: 16
+    },
+    {
+      elapsed_since_start_ns: 118815700,
+      thread_id: 2,
+      stack_id: 2
+    },
+    {
+      elapsed_since_start_ns: 118818500,
+      thread_id: 3,
+      stack_id: 1
+    },
+    {
+      elapsed_since_start_ns: 118824700,
+      thread_id: 6,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 118832200,
+      thread_id: 8,
+      stack_id: 17
+    }
+  ]
+}

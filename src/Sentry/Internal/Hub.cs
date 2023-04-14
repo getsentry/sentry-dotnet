@@ -155,6 +155,12 @@ internal class Hub : IHubEx, IDisposable
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
+
+            if (transaction.IsSampled is true && _options.TransactionProfilerFactory is { } profilerFactory)
+            {
+                // TODO cancellation token based on Hub being closed?
+                transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
+            }
         }
 
         // Use the provided DSC, or create one based on this transaction.
