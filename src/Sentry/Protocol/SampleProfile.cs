@@ -2,6 +2,10 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
+#if NETFRAMEWORK
+using Sentry.PlatformAbstractions;
+#endif
+
 namespace Sentry.Protocol;
 
 // A list of frame indexes.
@@ -27,7 +31,26 @@ internal sealed class SampleProfile : IJsonSerializable
             writer.WriteSerializable(i.ToString(), Threads[i], logger);
         }
         writer.WriteEndObject();
+
+#if NETFRAMEWORK
+        if (PlatformAbstractions.Runtime.Current.IsMono())
+        {
+            // STJ doesn't like HashableGrowableArray on Mono, failing with:
+            //   Invalid IL code in (wrapper dynamic-method) object:.ctor (): IL_0005: ret
+            // We can work around this by converting them to regular arrays.
+            // (This appears fixed as of STJ 6.0.5, but that's too high of a minimal dependency for us.)
+            // Probably we won't ever hit this for real, because we only support profiling on .NET 6+
+            // but this allows the tests to pass.
+            var stacks = Stacks.Select(s => s.ToArray());
+            writer.WriteArray("stacks", stacks, logger);
+        }
+        else
+        {
+            writer.WriteArray("stacks", Stacks, logger);
+        }
+#else
         writer.WriteArray("stacks", Stacks, logger);
+#endif
         writer.WriteArray("frames", Frames, logger);
         writer.WriteArray("samples", Samples, logger);
         writer.WriteEndObject();
