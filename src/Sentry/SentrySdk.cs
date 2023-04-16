@@ -279,8 +279,6 @@ public static partial class SentrySdk
     /// </remarks>
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public static void WithScope(Action<Scope> scopeCallback)
         => CurrentHub.WithScope(scopeCallback);
