@@ -9,7 +9,7 @@
 ### Fixes
 
 - Buffer payloads asynchronously when appropriate ([#2297](https://github.com/getsentry/sentry-dotnet/pull/2297))
-- Restore Restore `System.Reflection.Metadata` dependency for .NET Core 3 ([#2302](https://github.com/getsentry/sentry-dotnet/pull/2302))
+- Restore `System.Reflection.Metadata` dependency for .NET Core 3 ([#2302](https://github.com/getsentry/sentry-dotnet/pull/2302))
 
 ### Dependencies
 
