@@ -477,9 +477,7 @@ public class SentrySdkTests : IDisposable
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
         var invoked = false;
-#pragma warning disable CS0618
         SentrySdk.WithScope(_ => invoked = true);
-#pragma warning restore CS0618
         Assert.False(invoked);
     }
 
@@ -501,9 +499,7 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => expected = s);
 
         Scope actual = null;
-#pragma warning disable CS0618
         SentrySdk.WithScope(s => actual = s);
-#pragma warning restore CS0618
 
         Assert.NotNull(actual);
         Assert.NotSame(expected, actual);
