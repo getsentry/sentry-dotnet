@@ -115,7 +115,7 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         using (PushScope())
         {
             var scope = GetCurrent();
-            await scopeCallback.Invoke(scope.Key);
+            await scopeCallback.Invoke(scope.Key).ConfigureAwait(false);
         }
     }
 
@@ -124,7 +124,7 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         using (PushScope())
         {
             var scope = GetCurrent();
-            return await scopeCallback.Invoke(scope.Key);
+            return await scopeCallback.Invoke(scope.Key).ConfigureAwait(false);
         }
     }
 
