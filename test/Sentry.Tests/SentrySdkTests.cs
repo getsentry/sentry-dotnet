@@ -477,7 +477,35 @@ public class SentrySdkTests : IDisposable
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
         var invoked = false;
-        SentrySdk.WithScope(_ => invoked = true);
+
+        // Note: Specifying void in the lambda ensures we are testing WithScope, rather than WithScope<T>.
+        SentrySdk.WithScope(void (_) => invoked = true);
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public void WithScopeT_DisabledSdk_CallbackNeverInvoked()
+    {
+        var invoked = SentrySdk.WithScope(_ => true);
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task WithScopeAsync_DisabledSdk_CallbackNeverInvoked()
+    {
+        var invoked = false;
+        await SentrySdk.WithScopeAsync(_ =>
+        {
+            invoked = true;
+            return Task.CompletedTask;
+        });
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task WithScopeAsyncT_DisabledSdk_CallbackNeverInvoked()
+    {
+        var invoked = await SentrySdk.WithScopeAsync(_ => Task.FromResult(true));
         Assert.False(invoked);
     }
 
@@ -499,7 +527,85 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => expected = s);
 
         Scope actual = null;
-        SentrySdk.WithScope(s => actual = s);
+        // Note: Specifying void in the lambda ensures we are testing WithScope, rather than WithScope<T>.
+        SentrySdk.WithScope(void (s) => actual = s);
+
+        Assert.NotNull(actual);
+        Assert.NotSame(expected, actual);
+        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
+    }
+
+    [Fact]
+    public void WithScopeT_InvokedWithNewScope()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            IsGlobalModeEnabled = false,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false
+        };
+
+        using var _ = SentrySdk.Init(options);
+
+        Scope expected = null;
+        SentrySdk.ConfigureScope(s => expected = s);
+
+        var actual = SentrySdk.WithScope(s => s);
+
+        Assert.NotNull(actual);
+        Assert.NotSame(expected, actual);
+        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
+    }
+
+    [Fact]
+    public async Task WithScopeAsync_InvokedWithNewScope()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            IsGlobalModeEnabled = false,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false
+        };
+
+        using var _ = SentrySdk.Init(options);
+
+        Scope expected = null;
+        SentrySdk.ConfigureScope(s => expected = s);
+
+        Scope actual = null;
+        await SentrySdk.WithScopeAsync(s =>
+        {
+            actual = s;
+            return Task.CompletedTask;
+        });
+
+        Assert.NotNull(actual);
+        Assert.NotSame(expected, actual);
+        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
+    }
+
+    [Fact]
+    public async Task WithScopeAsyncT_InvokedWithNewScope()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            IsGlobalModeEnabled = false,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false
+        };
+
+        using var _ = SentrySdk.Init(options);
+
+        Scope expected = null;
+        SentrySdk.ConfigureScope(s => expected = s);
+
+        var actual = await SentrySdk.WithScopeAsync(Task.FromResult);
 
         Assert.NotNull(actual);
         Assert.NotSame(expected, actual);

@@ -1147,4 +1147,84 @@ public partial class HubTests
         await transport.Received(1)
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public void WithScope_Works()
+    {
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        hub.WithScope(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+        });
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    [Fact]
+    public void WithScopeT_Works()
+    {
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        var result = hub.WithScope(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+
+            return true;
+        });
+
+        Assert.True(result);
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    [Fact]
+    public async Task WithScopeAsync_Works()
+    {
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        await hub.WithScopeAsync(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+
+            return Task.CompletedTask;
+        });
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    [Fact]
+    public async Task WithScopeAsyncT_Works()
+    {
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        var result = await hub.WithScopeAsync(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+
+            return Task.FromResult(true);
+        });
+
+        Assert.True(result);
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
 }
