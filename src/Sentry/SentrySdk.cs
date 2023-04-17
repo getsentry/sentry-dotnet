@@ -272,7 +272,7 @@ public static partial class SentrySdk
         => CurrentHub.AddBreadcrumb(clock, message, category, type, data, level);
 
     /// <summary>
-    /// Runs the callback with a new scope which gets dropped at the end.
+    /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
@@ -286,7 +286,7 @@ public static partial class SentrySdk
         => CurrentHub.WithScope(scopeCallback);
 
     /// <summary>
-    /// Runs the callback with a new scope which gets dropped at the end.
+    /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
@@ -301,7 +301,7 @@ public static partial class SentrySdk
         => CurrentHub.WithScope(scopeCallback);
 
     /// <summary>
-    /// Runs the asynchronous callback with a new scope which gets dropped at the end.
+    /// Runs the asynchronous callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
@@ -317,7 +317,7 @@ public static partial class SentrySdk
         => CurrentHub.WithScopeAsync(scopeCallback);
 
     /// <summary>
-    /// Runs the asynchronous callback with a new scope which gets dropped at the end.
+    /// Runs the asynchronous callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.

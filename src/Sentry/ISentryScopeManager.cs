@@ -44,7 +44,7 @@ public interface ISentryScopeManager
     IDisposable PushScope<TState>(TState state);
 
     /// <summary>
-    /// Runs the callback with a new scope which gets dropped at the end.
+    /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to

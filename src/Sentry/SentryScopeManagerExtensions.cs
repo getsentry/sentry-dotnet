@@ -9,7 +9,7 @@ namespace Sentry;
 public static class SentryScopeManagerExtensions
 {
     /// <summary>
-    /// Runs the callback with a new scope which gets dropped at the end.
+    /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
@@ -30,7 +30,7 @@ public static class SentryScopeManagerExtensions
         };
 
     /// <summary>
-    /// Runs the asynchronous callback with a new scope which gets dropped at the end.
+    /// Runs the asynchronous callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
@@ -52,7 +52,7 @@ public static class SentryScopeManagerExtensions
         };
 
     /// <summary>
-    /// Runs the asynchronous callback with a new scope which gets dropped at the end.
+    /// Runs the asynchronous callback within a new scope.
     /// </summary>
     /// <remarks>
     /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
