@@ -272,18 +272,65 @@ public static partial class SentrySdk
         => CurrentHub.AddBreadcrumb(clock, message, category, type, data, level);
 
     /// <summary>
-    /// Runs the callback with a new scope which gets dropped at the end.
+    /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
-    /// Pushes a new scope, runs the callback, pops the scope.
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
     /// </remarks>
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public static void WithScope(Action<Scope> scopeCallback)
         => CurrentHub.WithScope(scopeCallback);
+
+    /// <summary>
+    /// Runs the callback within a new scope.
+    /// </summary>
+    /// <remarks>
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
+    /// </remarks>
+    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
+    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+    /// <returns>The result from the callback.</returns>
+    [DebuggerStepThrough]
+    public static T? WithScope<T>(Func<Scope, T?> scopeCallback)
+        => CurrentHub.WithScope(scopeCallback);
+
+    /// <summary>
+    /// Runs the asynchronous callback within a new scope.
+    /// </summary>
+    /// <remarks>
+    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
+    /// </remarks>
+    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
+    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+    /// <returns>An async task to await the callback.</returns>
+    [DebuggerStepThrough]
+    public static Task WithScopeAsync(Func<Scope, Task> scopeCallback)
+        => CurrentHub.WithScopeAsync(scopeCallback);
+
+    /// <summary>
+    /// Runs the asynchronous callback within a new scope.
+    /// </summary>
+    /// <remarks>
+    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
+    /// </remarks>
+    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
+    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+    /// <returns>An async task to await the result of the callback.</returns>
+    [DebuggerStepThrough]
+    public static Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
+        => CurrentHub.WithScopeAsync(scopeCallback);
 
     /// <summary>
     /// Configures the scope through the callback.

@@ -44,10 +44,12 @@ public interface ISentryScopeManager
     IDisposable PushScope<TState>(TState state);
 
     /// <summary>
-    /// Runs the callback with a new scope which gets dropped at the end.
+    /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
-    /// Pushes a new scope, runs the callback, pops the scope.
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
     /// </remarks>
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
