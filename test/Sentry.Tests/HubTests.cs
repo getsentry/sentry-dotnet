@@ -1151,6 +1151,7 @@ public partial class HubTests
     [Fact]
     public void WithScope_Works()
     {
+        _fixture.Options.IsGlobalModeEnabled = false;
         var hub = _fixture.GetSut();
         var originalScope = GetCurrentScope(hub);
 
@@ -1168,6 +1169,7 @@ public partial class HubTests
     [Fact]
     public void WithScopeT_Works()
     {
+        _fixture.Options.IsGlobalModeEnabled = false;
         var hub = _fixture.GetSut();
         var originalScope = GetCurrentScope(hub);
 
@@ -1189,6 +1191,7 @@ public partial class HubTests
     [Fact]
     public async Task WithScopeAsync_Works()
     {
+        _fixture.Options.IsGlobalModeEnabled = false;
         var hub = _fixture.GetSut();
         var originalScope = GetCurrentScope(hub);
 
@@ -1208,6 +1211,7 @@ public partial class HubTests
     [Fact]
     public async Task WithScopeAsyncT_Works()
     {
+        _fixture.Options.IsGlobalModeEnabled = false;
         var hub = _fixture.GetSut();
         var originalScope = GetCurrentScope(hub);
 
