@@ -8,6 +8,8 @@ public class EnvelopeTests
     private readonly IDiagnosticLogger _testOutputLogger;
     private readonly MockClock _fakeClock;
 
+    private const string TestAttachmentText = "\xef\xbb\xbfHello\r\n";
+
     public EnvelopeTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
@@ -80,8 +82,10 @@ public class EnvelopeTests
         var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+        output.Should().Be("""
+            {"event_id":"12c2d058d58442709aa2eca08bf20986","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+
+            """);
     }
 
     [Fact]
@@ -96,15 +100,20 @@ public class EnvelopeTests
         var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+        output.Should().Be("""
+            {"event_id":"12c2d058d58442709aa2eca08bf20986","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+
+            """);
     }
 
     [Fact]
     public async Task Deserialization_EnvelopeWithoutItems_Success()
     {
         // Arrange
-        using var input = "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\"}\n".ToMemoryStream();
+        using var input = """
+            {"event_id":"12c2d058d58442709aa2eca08bf20986"}
+
+            """.ToMemoryStream();
 
         using var expectedEnvelope = new Envelope(
             new Dictionary<string, object> { ["event_id"] = "12c2d058d58442709aa2eca08bf20986" },
@@ -127,8 +136,9 @@ public class EnvelopeTests
             {
                 new EnvelopeItem(
                     new Dictionary<string, object>{["type"] = "session"},
-                    new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
-                        .ToMemoryStream())
+                    new StreamSerializable("""
+                        {"started": "2020-02-07T14:16:00Z","attrs":{"release":"sentry-test@1.0.0"}}
+                        """.ToMemoryStream())
                 )
             });
 
@@ -136,10 +146,12 @@ public class EnvelopeTests
         var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"session\",\"length\":75}\n" +
-            "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n");
+        output.Should().Be("""
+            {"sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"session","length":75}
+            {"started": "2020-02-07T14:16:00Z","attrs":{"release":"sentry-test@1.0.0"}}
+
+            """);
     }
 
     [Fact]
@@ -152,8 +164,9 @@ public class EnvelopeTests
             {
                 new EnvelopeItem(
                     new Dictionary<string, object>{["type"] = "session"},
-                    new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
-                        .ToMemoryStream())
+                    new StreamSerializable("""
+                        {"started": "2020-02-07T14:16:00Z","attrs":{"release":"sentry-test@1.0.0"}}
+                        """.ToMemoryStream())
                 )
             });
 
@@ -161,21 +174,24 @@ public class EnvelopeTests
         var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"session\",\"length\":75}\n" +
-            "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n");
+        output.Should().Be("""
+            {"sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"session","length":75}
+            {"started": "2020-02-07T14:16:00Z","attrs":{"release":"sentry-test@1.0.0"}}
+
+            """);
     }
 
     [Fact]
     public async Task Deserialization_EnvelopeWithoutHeader_Success()
     {
         // Arrange
-        using var input = (
-                "{}\n" +
-                "{\"type\":\"fake\",\"length\":75}\n" +
-                "{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}\n"
-            ).ToMemoryStream();
+        using var input = """
+                {}
+                {"type":"fake","length":75}
+                {"started": "2020-02-07T14:16:00Z","attrs":{"release":"sentry-test@1.0.0"}}
+
+                """.ToMemoryStream();
 
         using var expectedEnvelope = new Envelope(
             new Dictionary<string, object>(),
@@ -183,8 +199,9 @@ public class EnvelopeTests
             {
                 new EnvelopeItem(
                     new Dictionary<string, object>{["type"] = "fake"},
-                    new StreamSerializable("{\"started\": \"2020-02-07T14:16:00Z\",\"attrs\":{\"release\":\"sentry-test@1.0.0\"}}"
-                        .ToMemoryStream())
+                    new StreamSerializable("""
+                        {"started": "2020-02-07T14:16:00Z","attrs":{"release":"sentry-test@1.0.0"}}
+                        """.ToMemoryStream())
                 )
             });
 
@@ -215,7 +232,7 @@ public class EnvelopeTests
                         ["content_type"] = "text/plain",
                         ["filename"] = "hello.txt"
                     },
-                    new StreamSerializable("\xef\xbb\xbfHello\r\n".ToMemoryStream())
+                    new StreamSerializable(TestAttachmentText.ToMemoryStream())
                 ),
 
                 new EnvelopeItem(
@@ -226,7 +243,9 @@ public class EnvelopeTests
                         ["content_type"] = "application/json",
                         ["filename"] = "application.log"
                     },
-                    new StreamSerializable("{\"message\":\"hello world\",\"level\":\"error\"}".ToMemoryStream())
+                    new StreamSerializable("""
+                        {"message":"hello world","level":"error"}
+                        """.ToMemoryStream())
                 )
             });
 
@@ -234,12 +253,14 @@ public class EnvelopeTests
         var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
-            "\xef\xbb\xbfHello\r\n\n" +
-            "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
-            "{\"message\":\"hello world\",\"level\":\"error\"}\n");
+        output.Should().Be($$"""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","dsn":"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"attachment","length":13,"content_type":"text/plain","filename":"hello.txt"}
+            {{TestAttachmentText}}
+            {"type":"event","length":41,"content_type":"application/json","filename":"application.log"}
+            {"message":"hello world","level":"error"}
+
+            """);
     }
 
     [Fact]
@@ -262,7 +283,7 @@ public class EnvelopeTests
                         ["content_type"] = "text/plain",
                         ["filename"] = "hello.txt"
                     },
-                    new StreamSerializable("\xef\xbb\xbfHello\r\n".ToMemoryStream())
+                    new StreamSerializable(TestAttachmentText.ToMemoryStream())
                 ),
 
                 new EnvelopeItem(
@@ -273,7 +294,7 @@ public class EnvelopeTests
                         ["content_type"] = "application/json",
                         ["filename"] = "application.log"
                     },
-                    new StreamSerializable("{\"message\":\"hello world\",\"level\":\"error\"}".ToMemoryStream())
+                    new StreamSerializable("""{"message":"hello world","level":"error"}""".ToMemoryStream())
                 )
             });
 
@@ -281,24 +302,27 @@ public class EnvelopeTests
         var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
-            "\xef\xbb\xbfHello\r\n\n" +
-            "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
-            "{\"message\":\"hello world\",\"level\":\"error\"}\n");
+        output.Should().Be($$"""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","dsn":"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"attachment","length":13,"content_type":"text/plain","filename":"hello.txt"}
+            {{TestAttachmentText}}
+            {"type":"event","length":41,"content_type":"application/json","filename":"application.log"}
+            {"message":"hello world","level":"error"}
+
+            """);
     }
 
     [Fact]
     public async Task Deserialization_EnvelopeWithTwoItems_Success()
     {
-        using var input = (
-                "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"dsn\":\"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42\"}\n" +
-                "{\"type\":\"attachment\",\"length\":13,\"content_type\":\"text/plain\",\"filename\":\"hello.txt\"}\n" +
-                "\xef\xbb\xbfHello\r\n\n" +
-                "{\"type\":\"event\",\"length\":41,\"content_type\":\"application/json\",\"filename\":\"application.log\"}\n" +
-                "{\"message\":\"hello world\",\"level\":\"error\"}\n"
-            ).ToMemoryStream();
+        using var input = $$"""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","dsn":"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42"}
+            {"type":"attachment","length":13,"content_type":"text/plain","filename":"hello.txt"}
+            {{TestAttachmentText}}
+            {"type":"event","length":41,"content_type":"application/json","filename":"application.log"}
+            {"message":"hello world","level":"error"}
+
+            """.ToMemoryStream();
 
         using var expectedEnvelope = new Envelope(
             new Dictionary<string, object>
@@ -315,7 +339,7 @@ public class EnvelopeTests
                         ["content_type"] = "text/plain",
                         ["filename"] = "hello.txt"
                     },
-                    new StreamSerializable("\xef\xbb\xbfHello\r\n".ToMemoryStream())
+                    new StreamSerializable(TestAttachmentText.ToMemoryStream())
                 ),
 
                 new EnvelopeItem(
@@ -325,7 +349,7 @@ public class EnvelopeTests
                         ["content_type"] = "application/json",
                         ["filename"] = "application.log"
                     },
-                    new StreamSerializable("{\"message\":\"hello world\",\"level\":\"error\"}".ToMemoryStream())
+                    new StreamSerializable("""{"message":"hello world","level":"error"}""".ToMemoryStream())
                 )
             });
 
@@ -367,12 +391,14 @@ public class EnvelopeTests
         var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"attachment\",\"length\":0}\n" +
-            "\n" +
-            "{\"type\":\"attachment\",\"length\":0}\n" +
-            "\n");
+        output.Should().Be("""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"attachment","length":0}
+
+            {"type":"attachment","length":0}
+
+
+            """);
     }
 
     [Fact]
@@ -406,25 +432,28 @@ public class EnvelopeTests
         var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"attachment\",\"length\":0}\n" +
-            "\n" +
-            "{\"type\":\"attachment\",\"length\":0}\n" +
-            "\n");
+        output.Should().Be("""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"attachment","length":0}
+
+            {"type":"attachment","length":0}
+
+
+            """);
     }
 
     [Fact]
     public async Task Deserialization_EnvelopeWithTwoEmptyItems_Success()
     {
         // Arrange
-        using var input = (
-                "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
-                "{\"type\":\"attachment\",\"length\":0}\n" +
-                "\n" +
-                "{\"type\":\"attachment\",\"length\":0}\n" +
-                "\n"
-            ).ToMemoryStream();
+        using var input = """
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc"}
+            {"type":"attachment","length":0}
+
+            {"type":"attachment","length":0}
+
+
+            """.ToMemoryStream();
 
         using var expectedEnvelope = new Envelope(
             new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
@@ -472,10 +501,12 @@ public class EnvelopeTests
         var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"attachment\",\"length\":10}\n" +
-            "helloworld\n");
+        output.Should().Be("""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"attachment","length":10}
+            helloworld
+
+            """);
     }
 
     [Fact]
@@ -496,10 +527,12 @@ public class EnvelopeTests
         var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n" +
-            "{\"type\":\"attachment\",\"length\":10}\n" +
-            "helloworld\n");
+        output.Should().Be("""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+            {"type":"attachment","length":10}
+            helloworld
+
+            """);
     }
 
     private class ThrowingSerializable : IJsonSerializable
@@ -528,8 +561,10 @@ public class EnvelopeTests
         var output = envelope.SerializeToString(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+        output.Should().Be("""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+
+            """);
     }
 
     [Fact]
@@ -550,19 +585,22 @@ public class EnvelopeTests
         var output = await envelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+        output.Should().Be("""
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+
+            """);
     }
 
     [Fact]
     public async Task Deserialization_EnvelopeWithItemWithoutLength_Success()
     {
         // Arrange
-        using var input = (
-                "{\"event_id\":\"9ec79c33ec9942ab8353589fcb2e04dc\"}\n" +
-                "{\"type\":\"attachment\"}\n" +
-                "helloworld\n"
-            ).ToMemoryStream();
+        using var input = """
+            {"event_id":"9ec79c33ec9942ab8353589fcb2e04dc"}
+            {"type":"attachment"}
+            helloworld
+
+            """.ToMemoryStream();
 
         using var expectedEnvelope = new Envelope(
             new Dictionary<string, object> { ["event_id"] = "9ec79c33ec9942ab8353589fcb2e04dc" },
@@ -910,8 +948,10 @@ public class EnvelopeTests
         var output = await deserialized.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
         // Assert
-        output.Should().Be(
-            "{\"event_id\":\"12c2d058d58442709aa2eca08bf20986\",\"sent_at\":\"9999-12-31T23:59:59.9999999+00:00\"}\n");
+        output.Should().Be("""
+            {"event_id":"12c2d058d58442709aa2eca08bf20986","sent_at":"9999-12-31T23:59:59.9999999+00:00"}
+
+            """);
     }
 
     [Fact]
@@ -951,11 +991,11 @@ public class EnvelopeTests
         var length2 = serialized2.Split('\n', StringSplitOptions.RemoveEmptyEntries).Last().Length;
 
         // the header should contain those lengths
-        Assert.Contains($@"{{""type"":""event"",""length"":{length1}}}", serialized1);
-        Assert.Contains($@"{{""type"":""event"",""length"":{length2}}}", serialized2);
+        Assert.Contains($$"""{"type":"event","length":{{length1}}}""", serialized1);
+        Assert.Contains($$"""{"type":"event","length":{{length2}}}""", serialized2);
 
         // this is the main difference between them
-        Assert.Contains(@"{""foo"":""2020-01-01T00:00:00+01:00""}", serialized1);
-        Assert.Contains(@"{""foo"":""2020-01-01T00:00:00\u002B01:00""}", serialized2);
+        Assert.Contains("""{"foo":"2020-01-01T00:00:00+01:00"}""", serialized1);
+        Assert.Contains("""{"foo":"2020-01-01T00:00:00\u002B01:00"}""", serialized2);
     }
 }

@@ -24,16 +24,20 @@ public class OperatingSystemTests
             Rooted = true
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
         Assert.Equal(
-            "{\"type\":\"os\"," +
-            "\"name\":\"Windows\"," +
-            "\"version\":\"2016\"," +
-            "\"raw_description\":\"Windows 2016\"," +
-            "\"build\":\"14393\"," +
-            "\"kernel_version\":\"who knows\"," +
-            "\"rooted\":true}",
+            """
+            {
+              "type": "os",
+              "name": "Windows",
+              "version": "2016",
+              "raw_description": "Windows 2016",
+              "build": "14393",
+              "kernel_version": "who knows",
+              "rooted": true
+            }
+            """,
             actual);
     }
 
@@ -71,11 +75,11 @@ public class OperatingSystemTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new OperatingSystem(), "{\"type\":\"os\"}") };
-        yield return new object[] { (new OperatingSystem { Name = "some name" }, "{\"type\":\"os\",\"name\":\"some name\"}") };
-        yield return new object[] { (new OperatingSystem { RawDescription = "some Name, some version" }, "{\"type\":\"os\",\"raw_description\":\"some Name, some version\"}") };
-        yield return new object[] { (new OperatingSystem { Build = "some build" }, "{\"type\":\"os\",\"build\":\"some build\"}") };
-        yield return new object[] { (new OperatingSystem { KernelVersion = "some kernel version" }, "{\"type\":\"os\",\"kernel_version\":\"some kernel version\"}") };
-        yield return new object[] { (new OperatingSystem { Rooted = false }, "{\"type\":\"os\",\"rooted\":false}") };
+        yield return new object[] { (new OperatingSystem(), """{"type":"os"}""") };
+        yield return new object[] { (new OperatingSystem { Name = "some name" }, """{"type":"os","name":"some name"}""") };
+        yield return new object[] { (new OperatingSystem { RawDescription = "some Name, some version" }, """{"type":"os","raw_description":"some Name, some version"}""") };
+        yield return new object[] { (new OperatingSystem { Build = "some build" }, """{"type":"os","build":"some build"}""") };
+        yield return new object[] { (new OperatingSystem { KernelVersion = "some kernel version" }, """{"type":"os","kernel_version":"some kernel version"}""") };
+        yield return new object[] { (new OperatingSystem { Rooted = false }, """{"type":"os","rooted":false}""") };
     }
 }

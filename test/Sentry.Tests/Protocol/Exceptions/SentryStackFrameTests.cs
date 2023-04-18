@@ -35,30 +35,40 @@ public class SentryStackFrameTests
             AddressMode = "rel:0"
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{" +
-            "\"pre_context\":[\"pre\"]," +
-            "\"post_context\":[\"post\"]," +
-            "\"vars\":{\"var\":\"val\"}," +
-            "\"frames_omitted\":[1,2]," +
-            "\"filename\":\"FileName\"," +
-            "\"function\":\"Function\"," +
-            "\"module\":\"Module\"," +
-            "\"lineno\":1," +
-            "\"colno\":2," +
-            "\"abs_path\":\"AbsolutePath\"," +
-            "\"context_line\":\"ContextLine\"," +
-            "\"in_app\":true," +
-            "\"package\":\"Package\"," +
-            "\"platform\":\"Platform\"," +
-            "\"image_addr\":\"0x3\"," +
-            "\"symbol_addr\":\"0x4\"," +
-            "\"instruction_addr\":\"0xffffffff\"," +
-            "\"instruction_offset\":5," +
-            "\"addr_mode\":\"rel:0\"" +
-            "}",
+        Assert.Equal("""
+            {
+              "pre_context": [
+                "pre"
+              ],
+              "post_context": [
+                "post"
+              ],
+              "vars": {
+                "var": "val"
+              },
+              "frames_omitted": [
+                1,
+                2
+              ],
+              "filename": "FileName",
+              "function": "Function",
+              "module": "Module",
+              "lineno": 1,
+              "colno": 2,
+              "abs_path": "AbsolutePath",
+              "context_line": "ContextLine",
+              "in_app": true,
+              "package": "Package",
+              "platform": "Platform",
+              "image_addr": "0x3",
+              "symbol_addr": "0x4",
+              "instruction_addr": "0xffffffff",
+              "instruction_offset": 5,
+              "addr_mode": "rel:0"
+            }
+            """,
             actual);
 
         var parsed = Json.Parse(actual, SentryStackFrame.FromJson);

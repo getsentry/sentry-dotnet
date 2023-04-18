@@ -40,12 +40,24 @@ public class SdkVersionTests
         sut.AddPackage("Sentry.AspNetCore", "2.0");
         sut.AddPackage("Sentry", "1.0");
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{\"packages\":[{\"name\":\"Sentry\",\"version\":\"1.0\"},{\"name\":\"Sentry.AspNetCore\",\"version\":\"2.0\"}]," +
-            "\"name\":\"Sentry.Test.SDK\"," +
-            "\"version\":\"0.0.1-preview1\"}",
+        Assert.Equal("""
+            {
+              "packages": [
+                {
+                  "name": "Sentry",
+                  "version": "1.0"
+                },
+                {
+                  "name": "Sentry.AspNetCore",
+                  "version": "2.0"
+                }
+              ],
+              "name": "Sentry.Test.SDK",
+              "version": "0.0.1-preview1"
+            }
+            """,
             actual);
     }
 
@@ -61,12 +73,12 @@ public class SdkVersionTests
     public static IEnumerable<object[]> TestCases()
     {
         yield return new object[] { (new SdkVersion(), "{}") };
-        yield return new object[] { (new SdkVersion { Name = "some name" }, "{\"name\":\"some name\"}") };
-        yield return new object[] { (new SdkVersion { Version = "some version" }, "{\"version\":\"some version\"}") };
+        yield return new object[] { (new SdkVersion { Name = "some name" }, """{"name":"some name"}""") };
+        yield return new object[] { (new SdkVersion { Version = "some version" }, """{"version":"some version"}""") };
         var sdk = new SdkVersion();
         sdk.AddPackage("b", "2");
         sdk.AddPackage("a", "1");
-        yield return new object[] { (sdk, "{\"packages\":[{\"name\":\"a\",\"version\":\"1\"},{\"name\":\"b\",\"version\":\"2\"}]}") };
+        yield return new object[] { (sdk, """{"packages":[{"name":"a","version":"1"},{"name":"b","version":"2"}]}""") };
     }
 
     [Fact]
