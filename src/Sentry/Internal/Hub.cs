@@ -99,6 +99,12 @@ internal class Hub : IHubEx, IDisposable
 
     public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
 
+    public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
+
+    public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
+
+    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
+
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
     public ITransaction StartTransaction(
