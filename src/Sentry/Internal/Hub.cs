@@ -97,17 +97,7 @@ internal class Hub : IHubEx, IDisposable
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
-    public void WithScope(Action<Scope> scopeCallback)
-    {
-        try
-        {
-            ScopeManager.WithScope(scopeCallback);
-        }
-        catch (Exception e)
-        {
-            _options.LogError("Failure to run callback WithScope", e);
-        }
-    }
+    public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
 
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
