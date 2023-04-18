@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>3.30.0</Version>
-    <LangVersion>10</LangVersion>
+    <LangVersion>11</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
