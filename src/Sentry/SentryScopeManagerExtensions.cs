@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Internal;
 
 namespace Sentry;
@@ -24,7 +25,7 @@ public static class SentryScopeManagerExtensions
     public static T? WithScope<T>(this ISentryScopeManager scopeManager, Func<Scope, T?> scopeCallback) =>
         scopeManager switch
         {
-            Hub hub => hub.ScopeManager.WithScope(scopeCallback),
+            IHubEx hub => hub.WithScope(scopeCallback),
             IInternalScopeManager manager => manager.WithScope(scopeCallback),
             _ => default
         };
@@ -46,7 +47,7 @@ public static class SentryScopeManagerExtensions
     public static Task WithScopeAsync(this ISentryScopeManager scopeManager, Func<Scope, Task> scopeCallback) =>
         scopeManager switch
         {
-            Hub hub => hub.ScopeManager.WithScopeAsync(scopeCallback),
+            IHubEx hub => hub.WithScopeAsync(scopeCallback),
             IInternalScopeManager manager => manager.WithScopeAsync(scopeCallback),
             _ => Task.CompletedTask
         };
@@ -68,7 +69,7 @@ public static class SentryScopeManagerExtensions
     public static Task<T?> WithScopeAsync<T>(this ISentryScopeManager scopeManager, Func<Scope, Task<T?>> scopeCallback) =>
         scopeManager switch
         {
-            Hub hub => hub.ScopeManager.WithScopeAsync(scopeCallback),
+            IHubEx hub => hub.WithScopeAsync(scopeCallback),
             IInternalScopeManager manager => manager.WithScopeAsync(scopeCallback),
             _ => Task.FromResult(default(T))
         };
