@@ -523,6 +523,33 @@ public class SentryOptions
     public string? CacheDirectoryPath { get; set; }
 
     /// <summary>
+    /// The SDK will only capture HTTP Client errors if it is enabled.
+    ///
+    /// <see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.
+    ///
+    /// Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.
+    /// 
+    /// Defaults to false due to PII reasons.
+    /// </summary>
+    public bool CaptureFailedRequests { get; set; } = false;
+
+    /// <summary>
+    /// The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.
+    ///
+    /// Defaults to 500-599 (Server error responses only).
+    /// </summary>
+    public List<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange> { (500, 599) };
+
+    /// <summary>
+    /// The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.
+    ///
+    /// Targets may be URLs or Regular expressions.
+    ///
+    /// Matches "*." by default.
+    /// </summary>
+    public List<string> FailedRequestTargets { get; set; } = new List<string> { ".*" };
+
+    /// <summary>
     /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
     /// Used for testing.
     /// </summary>
