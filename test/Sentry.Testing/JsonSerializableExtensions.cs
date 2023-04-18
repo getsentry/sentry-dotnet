@@ -1,5 +1,7 @@
 internal static class JsonSerializableExtensions
 {
+    private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
     public static string ToJsonString(this IJsonSerializable serializable, IDiagnosticLogger logger = null, bool indented = false) =>
         WriteToJsonString(writer => writer.WriteSerializableValue(serializable, logger), indented);
 
@@ -21,7 +23,7 @@ internal static class JsonSerializableExtensions
         writeAction(writer);
         writer.Flush();
 
-        return Encoding.UTF8.GetString(buffer.WrittenSpan);
+        var result = Encoding.UTF8.GetString(buffer.WrittenSpan);
 #else
         // This implementation is compatible with older targets
         using var stream = new MemoryStream();
@@ -33,7 +35,10 @@ internal static class JsonSerializableExtensions
         // Using a reader will avoid copying to an intermediate byte array
         stream.Seek(0, SeekOrigin.Begin);
         using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
+        var result =  reader.ReadToEnd();
 #endif
+
+        // Standardize on \n on all platforms, for consistency in tests.
+        return IsWindows ? result.Replace("\r\n", "\n") : result;
     }
 }
