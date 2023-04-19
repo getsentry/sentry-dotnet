@@ -23,7 +23,7 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
 }
 
 # Get iPhone SDK version
-$iPhoneSdkVersion = sharpie xcode -sdks | grep -o 'iphoneos\S*'
+$iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
