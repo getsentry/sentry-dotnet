@@ -298,7 +298,7 @@ public static partial class SentrySdk
     /// <returns>The result from the callback.</returns>
     [DebuggerStepThrough]
     public static T? WithScope<T>(Func<Scope, T?> scopeCallback)
-        => CurrentHub.WithScope(scopeCallback);
+        => CurrentHub is IHubEx hub ? hub.WithScope(scopeCallback) : default;
 
     /// <summary>
     /// Runs the asynchronous callback within a new scope.
@@ -314,7 +314,7 @@ public static partial class SentrySdk
     /// <returns>An async task to await the callback.</returns>
     [DebuggerStepThrough]
     public static Task WithScopeAsync(Func<Scope, Task> scopeCallback)
-        => CurrentHub.WithScopeAsync(scopeCallback);
+        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.CompletedTask;
 
     /// <summary>
     /// Runs the asynchronous callback within a new scope.
@@ -330,7 +330,7 @@ public static partial class SentrySdk
     /// <returns>An async task to await the result of the callback.</returns>
     [DebuggerStepThrough]
     public static Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
-        => CurrentHub.WithScopeAsync(scopeCallback);
+        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.FromResult(default(T));
 
     /// <summary>
     /// Configures the scope through the callback.
@@ -368,6 +368,11 @@ public static partial class SentrySdk
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
         => CurrentHub.CaptureEvent(evt, scope);
+
+    internal static SentryId CaptureEventInternal(SentryEvent evt, Scope? scope)
+        => CurrentHub is IHubEx hub
+            ? hub.CaptureEventInternal(evt, scope)
+            : CurrentHub.CaptureEvent(evt, scope);
 
     /// <summary>
     /// Captures an event with a configurable scope.

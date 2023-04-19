@@ -1,4 +1,5 @@
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.Extensibility;
 
@@ -11,7 +12,7 @@ namespace Sentry.Extensibility;
 /// </remarks>
 /// <inheritdoc cref="IHub" />
 [DebuggerStepThrough]
-public sealed class HubAdapter : IHub
+public sealed class HubAdapter : IHub, IHubEx
 {
     /// <summary>
     /// The single instance which forwards all calls to <see cref="SentrySdk"/>
@@ -170,6 +171,12 @@ public sealed class HubAdapter : IHub
         => SentrySdk.CaptureEvent(evt);
 
     /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Scope? scope)
+        => SentrySdk.CaptureEventInternal(evt, scope);
+
+    /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
@@ -223,4 +230,22 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
         => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    public T? WithScope<T>(Func<Scope, T?> scopeCallback)
+        => SentrySdk.WithScope(scopeCallback);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    public Task WithScopeAsync(Func<Scope, Task> scopeCallback)
+        => SentrySdk.WithScopeAsync(scopeCallback);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
+        => SentrySdk.WithScopeAsync(scopeCallback);
 }
