@@ -31,15 +31,27 @@ public class SentryExceptionTests
             }
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{\"type\":\"Type\"," +
-            "\"value\":\"Value\"," +
-            "\"module\":\"Module\"," +
-            "\"thread_id\":1," +
-            "\"stacktrace\":{\"frames\":[{\"filename\":\"FileName\"}]}," +
-            "\"mechanism\":{\"type\":\"generic\",\"description\":\"Description\"}}",
+        Assert.Equal("""
+            {
+              "type": "Type",
+              "value": "Value",
+              "module": "Module",
+              "thread_id": 1,
+              "stacktrace": {
+                "frames": [
+                  {
+                    "filename": "FileName"
+                  }
+                ]
+              },
+              "mechanism": {
+                "type": "generic",
+                "description": "Description"
+              }
+            }
+            """,
             actual);
     }
 }
