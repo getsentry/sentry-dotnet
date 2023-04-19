@@ -15,7 +15,7 @@ internal static class SerializableExtensions
     {
         var stream = new MemoryStream();
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using (stream)
+        using (stream)
 #else
         await using (stream.ConfigureAwait(false))
 #endif

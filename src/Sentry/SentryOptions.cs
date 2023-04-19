@@ -671,6 +671,8 @@ public class SentryOptions
         }
     }
 
+    internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
+
     private StackTraceMode? _stackTraceMode;
 
     /// <summary>

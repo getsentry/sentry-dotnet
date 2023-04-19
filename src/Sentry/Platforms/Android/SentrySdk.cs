@@ -186,9 +186,16 @@ public static partial class SentrySdk
 
     private static void AndroidEnvironment_UnhandledExceptionRaiser(object? _, RaiseThrowableEventArgs e)
     {
-        e.Exception.Data[Mechanism.HandledKey] = e.Handled;
-        e.Exception.Data[Mechanism.MechanismKey] = "UnhandledExceptionRaiser";
+        var description = "This exception was caught by the Android global error handler.";
+        if (!e.Handled)
+        {
+            description += " The application likely crashed as a result of this exception.";
+        }
+
+        e.Exception.SetSentryMechanism("UnhandledExceptionRaiser", description, e.Handled);
+
         CaptureException(e.Exception);
+
         if (!e.Handled)
         {
             Close();

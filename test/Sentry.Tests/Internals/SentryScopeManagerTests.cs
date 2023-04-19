@@ -1,3 +1,4 @@
+using FluentAssertions.Execution;
 using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Tests.Internals;
@@ -207,6 +208,44 @@ public class SentryScopeManagerTests
     }
 
     [Fact]
+    public void Scope_Clear_DoesntAffectParentScope()
+    {
+        var sut = _fixture.GetSut();
+
+        //Set some values on the scope (and store these to compare later)
+        sut.GetCurrent().Key.ApplyFakeValues();
+        Scope fakeValues = sut.GetCurrent().Key.Clone();
+        fakeValues.Transaction.Should().NotBeNull(); // Sanity check... make sure it's not nulls everywhere
+
+        //Push a new scope
+        var root = sut.PushScope();
+
+        // Ensure the values are there
+        using (new AssertionScope())
+        {
+            sut.GetCurrent().Key.ShouldBeEquivalentTo(fakeValues);
+        }
+
+        // Clear the child scope
+        sut.GetCurrent().Key.Clear();
+
+        //Ensure the values are gone
+        using (new AssertionScope())
+        {
+            sut.GetCurrent().Key.ShouldBeEquivalentTo(new Scope());
+        }
+
+        //Pop the scope
+        root.Dispose();
+
+        //Ensure the value have returned
+        using (new AssertionScope())
+        {
+            sut.GetCurrent().Key.ShouldBeEquivalentTo(fakeValues);
+        }
+    }
+
+    [Fact]
     public async Task AsyncTasks_IsolatedScopes()
     {
         var sut = _fixture.GetSut();
@@ -329,6 +368,7 @@ public class SentryScopeManagerTests
         scope1.Should().BeSameAs(scope2);
         client1.Should().BeSameAs(client2);
     }
+
 
     [Fact]
     public void GlobalMode_Disabled_Uses_AsyncLocalScopeStackContainer()

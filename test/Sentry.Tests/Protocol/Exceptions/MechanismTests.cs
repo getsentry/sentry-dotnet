@@ -17,22 +17,32 @@ public class MechanismTests
             Type = "mechanism type",
             Description = "mechanism description",
             Handled = true,
-            HelpLink = "https://helplink",
+            Synthetic = true,
+            HelpLink = "https://helplink"
         };
 
         sut.Data.Add("data-key", "data-value");
         sut.Meta.Add("meta-key", "meta-value");
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{\"data\":{\"data-key\":\"data-value\"}," +
-            "\"meta\":{\"meta-key\":\"meta-value\"}," +
-            "\"type\":\"mechanism type\"," +
-            "\"description\":\"mechanism description\"," +
-            "\"help_link\":\"https://helplink\"," +
-            "\"handled\":true}",
-            actual);
+        const string expected = """
+            {
+              "type": "mechanism type",
+              "description": "mechanism description",
+              "help_link": "https://helplink",
+              "handled": true,
+              "synthetic": true,
+              "data": {
+                "data-key": "data-value"
+              },
+              "meta": {
+                "meta-key": "meta-value"
+              }
+            }
+            """;
+
+        Assert.Equal(expected, actual);
     }
 
     [Theory]
@@ -46,14 +56,14 @@ public class MechanismTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new Mechanism(), "{}") };
-        yield return new object[] { (new Mechanism { Type = "some type" }, "{\"type\":\"some type\"}") };
-        yield return new object[] { (new Mechanism { Handled = false }, "{\"handled\":false}") };
-        yield return new object[] { (new Mechanism { HelpLink = "https://sentry.io/docs" }, "{\"help_link\":\"https://sentry.io/docs\"}") };
-        yield return new object[] { (new Mechanism { Description = "some desc" }, "{\"description\":\"some desc\"}") };
-        yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>("data-key", "data-value") } },
-            "{\"data\":{\"data-key\":\"data-value\"}}") };
-        yield return new object[] { (new Mechanism { Meta = { new KeyValuePair<string, object>("meta-key", "meta-value") } },
-            "{\"meta\":{\"meta-key\":\"meta-value\"}}") };
+        yield return new object[] { (new Mechanism(), """{"type":"generic"}""") };
+        yield return new object[] { (new Mechanism { Type = "some type" }, """{"type":"some type"}""") };
+        yield return new object[] { (new Mechanism { Handled = false }, """{"type":"generic","handled":false}""") };
+        yield return new object[] { (new Mechanism { Handled = true }, """{"type":"generic","handled":true}""") };
+        yield return new object[] { (new Mechanism { Synthetic = true }, """{"type":"generic","synthetic":true}""") };
+        yield return new object[] { (new Mechanism { HelpLink = "https://sentry.io/docs" }, """{"type":"generic","help_link":"https://sentry.io/docs"}""") };
+        yield return new object[] { (new Mechanism { Description = "some desc" }, """{"type":"generic","description":"some desc"}""") };
+        yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>("data-key", "data-value") } }, """{"type":"generic","data":{"data-key":"data-value"}}""") };
+        yield return new object[] { (new Mechanism { Meta = { new KeyValuePair<string, object>("meta-key", "meta-value") } }, """{"type":"generic","meta":{"meta-key":"meta-value"}}""") };
     }
 }

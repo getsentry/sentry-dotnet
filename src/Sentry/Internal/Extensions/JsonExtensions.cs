@@ -199,11 +199,7 @@ internal static class JsonExtensions
         }
 
         // It should be in hex format, such as "0x7fff5bf346c0"
-#if NETCOREAPP || NETSTANDARD2_1_OR_GREATER
         var substring = s[2..];
-#else
-        var substring = s.Substring(2);
-#endif
         if (s.StartsWith("0x") &&
             long.TryParse(substring, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
         {
@@ -334,9 +330,9 @@ internal static class JsonExtensions
         writer.WriteStringDictionaryValue(dic);
     }
 
-    public static void WriteArrayValue(
+    public static void WriteArrayValue<T>(
         this Utf8JsonWriter writer,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         if (arr is not null)
@@ -356,10 +352,10 @@ internal static class JsonExtensions
         }
     }
 
-    public static void WriteArray(
+    public static void WriteArray<T>(
         this Utf8JsonWriter writer,
         string propertyName,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         writer.WritePropertyName(propertyName);
@@ -560,6 +556,17 @@ internal static class JsonExtensions
         }
     }
 
+    public static void WriteBooleanIfTrue(
+        this Utf8JsonWriter writer,
+        string propertyName,
+        bool? value)
+    {
+        if (value is true)
+        {
+            writer.WriteBoolean(propertyName, value.Value);
+        }
+    }
+
     public static void WriteNumberIfNotNull(
         this Utf8JsonWriter writer,
         string propertyName,
@@ -732,13 +739,13 @@ internal static class JsonExtensions
         }
     }
 
-    public static void WriteArrayIfNotEmpty(
+    public static void WriteArrayIfNotEmpty<T>(
         this Utf8JsonWriter writer,
         string propertyName,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
-        var list = arr as IReadOnlyList<object?> ?? arr?.ToArray();
+        var list = arr as IReadOnlyList<T> ?? arr?.ToArray();
         if (list is not null && list.Count > 0)
         {
             writer.WriteArray(propertyName, list, logger);

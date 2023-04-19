@@ -10,8 +10,7 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception,
-          Mechanism: {}
+          Value: my exception
         }
       ],
       Level: error,
@@ -52,7 +51,7 @@
           IsSampled: true,
           Extra: {
             bytes_received: 167,
-            bytes_sent : 542,
+            bytes_sent : 536,
             db.connection_id: Guid_1,
             db.operation_id: Guid_2,
             rows_sent: 1
@@ -61,9 +60,7 @@
         {
           IsFinished: true,
           Operation: db.query,
-          Description:
-insert into MyTable (Value)
-values (@value);,
+          Description: insert into MyTable (Value) values (@value);,
           Status: Ok,
           IsSampled: true,
           Extra: {

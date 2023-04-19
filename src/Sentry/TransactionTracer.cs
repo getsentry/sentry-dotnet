@@ -172,6 +172,8 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
+    internal ITransactionProfiler? TransactionProfiler { get; set; }
+
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
@@ -258,6 +260,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
+        TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
         EndTimestamp = _stopwatch.CurrentDateTimeOffset;
 

@@ -56,9 +56,7 @@ public static class TestDbBuilder
 #endif
 
         command.Parameters.AddWithValue("value", "SHOULD NOT APPEAR IN PAYLOAD");
-        command.CommandText = @"
-insert into MyTable (Value)
-values (@value);";
+        command.CommandText = "insert into MyTable (Value) values (@value);";
         await command.ExecuteNonQueryAsync();
     }
 

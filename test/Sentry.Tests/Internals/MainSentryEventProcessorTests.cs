@@ -467,6 +467,18 @@ public class MainSentryEventProcessorTests
     }
 
     [Fact]
+    public void Process_AttachStacktraceTrueAndExceptionInEventHasNoStackTrace_CallsStacktraceFactory()
+    {
+        _fixture.SentryOptions.AttachStacktrace = true;
+        var sut = _fixture.GetSut();
+
+        var evt = new SentryEvent(new Exception());
+        _ = sut.Process(evt);
+
+        _ = _fixture.SentryStackTraceFactory.Received(1).Create();
+    }
+
+    [Fact]
     public void Process_AttachStacktraceTrueAndExistentThreadInEvent_AddsNewThread()
     {
         var expected = new SentryStackTrace();
@@ -481,18 +493,6 @@ public class MainSentryEventProcessorTests
         Assert.Equal(2, evt.SentryThreads.Count());
         Assert.Equal("first", evt.SentryThreads.First().Name);
         Assert.Equal("second", evt.SentryThreads.Last().Name);
-    }
-
-    [Fact]
-    public void Process_AttachStacktraceTrueAndExceptionInEvent_DoesNotCallStacktraceFactory()
-    {
-        _fixture.SentryOptions.AttachStacktrace = true;
-        var sut = _fixture.GetSut();
-
-        var evt = new SentryEvent(new Exception());
-        _ = sut.Process(evt);
-
-        _ = _fixture.SentryStackTraceFactory.DidNotReceive().Create();
     }
 
     [Fact]

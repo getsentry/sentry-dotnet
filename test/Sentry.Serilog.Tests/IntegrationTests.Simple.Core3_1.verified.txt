@@ -180,9 +180,13 @@
                     }
                   ]
                 },
-                Mechanism: {},
-                Data: {
-                  details: Do work always throws.
+                Mechanism: {
+                  Type: generic,
+                  Handled: true,
+                  Synthetic: false,
+                  Data: {
+                    details: Do work always throws.
+                  }
                 }
               }
             ],
@@ -221,7 +225,6 @@
               }
             ],
             Extra: {
-              Exception[0][details]: Do work always throws.,
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
             }

@@ -147,6 +147,7 @@ public class HttpContextExtensionsTests
     [Theory]
     [InlineData("myPath/some/Path", "/myPath", "some/Path")]
     [InlineData("some/Path", null, "some/Path")]
+    [InlineData("api/health", "/api", "/health")]
     [InlineData(null, null, "")]
     [InlineData(null, null, null)]
     public void NewRouteFormat_WithPathBase_MatchesExpectedRoute(string expectedRoute, string pathBase, string rawRoute)

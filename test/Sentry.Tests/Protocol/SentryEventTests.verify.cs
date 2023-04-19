@@ -65,14 +65,20 @@ public partial class SentryEventTests
         sut.Fingerprint = new[] { "fingerprint" };
         sut.SetTag("tag_key", "tag_value");
 
-        var actualString = sut.ToJsonString(_testOutputLogger);
+        var actualString = sut.ToJsonString(_testOutputLogger, indented: true);
 
         await VerifyJson(actualString);
 
-        actualString.Should().Contain(
-            "\"debug_meta\":{\"images\":[" +
-            "{\"type\":\"wasm\",\"debug_id\":\"900f7d1b868432939de4457478f34720\"}" +
-            "]}");
+        actualString.Should().Contain("""
+              "debug_meta": {
+                "images": [
+                  {
+                    "type": "wasm",
+                    "debug_id": "900f7d1b868432939de4457478f34720"
+                  }
+                ]
+              }
+            """);
 
         var actual = Json.Parse(actualString, SentryEvent.FromJson);
 

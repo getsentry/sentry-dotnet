@@ -1,3 +1,4 @@
+using FluentAssertions.Execution;
 namespace Sentry.Tests;
 
 public class ScopeTests
@@ -233,6 +234,22 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clear_SetsPropertiesToDefaultValues()
+    {
+        // Arrange
+        _sut.ApplyFakeValues();
+
+        // Act
+        _sut.Clear();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            _sut.ShouldBeEquivalentTo(new Scope());
+        }
+    }
+
+    [Fact]
     public void ClearAttachments_HasAttachments_EmptyList()
     {
         // Arrange
@@ -248,6 +265,23 @@ public class ScopeTests
 
         // Assert
         scope.Attachments.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ClearBreadcrumbs_Breadcrumbs_EmptyList()
+    {
+        // Arrange
+        for (var i = 0; i < 5; i++)
+        {
+            _sut.AddBreadcrumb(new Breadcrumb());
+        }
+        _sut.Breadcrumbs.Should().NotBeEmpty("Sanity check: Arrange failed to configure Breadcrumbs");
+
+        // Act
+        _sut.ClearBreadcrumbs();
+
+        // Assert
+        _sut.Breadcrumbs.Should().BeEmpty();
     }
 
     [Theory]
@@ -427,5 +461,45 @@ public class ScopeTests
 
         // Assert
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
+    }
+}
+
+public static class ScopeTestExtensions
+{
+    public static void ApplyFakeValues(this Scope scope, string salt = "fake")
+    {
+        scope.Request = new() { Data = $"{salt} request" };
+        scope.Contexts.Add($"{salt} context", "{}");
+        scope.User = new User() { Username = $"{salt} username" };
+        scope.Platform = $"{salt} platform";
+        scope.Release = $"{salt} release";
+        scope.Distribution = $"{salt} distribution";
+        scope.Environment = $"{salt} environment";
+        scope.TransactionName = $"{salt} transaction";
+        scope.Transaction = Substitute.For<ITransaction>();
+        scope.Fingerprint = new[] { $"{salt} fingerprint" };
+        scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
+        scope.SetExtra("extra", $"{salt} extra");
+        scope.SetTag("tag", $"{salt} tag");
+        scope.AddAttachment(new Attachment(default, default, default, $"{salt} attachment"));
+    }
+
+    public static void ShouldBeEquivalentTo(this Scope source, Scope target)
+    {
+        source.Level.Should().Be(target.Level);
+        source.Request.Should().BeEquivalentTo(target.Request);
+        source.Contexts.Should().BeEquivalentTo(target.Contexts);
+        source.User.Should().BeEquivalentTo(target.User);
+        source.Platform.Should().Be(target.Platform);
+        source.Release.Should().Be(target.Release);
+        source.Distribution.Should().Be(target.Distribution);
+        source.Environment.Should().Be(target.Environment);
+        source.TransactionName.Should().Be(target.TransactionName);
+        source.Transaction.Should().Be(target.Transaction);
+        source.Fingerprint.Should().BeEquivalentTo(target.Fingerprint);
+        source.Breadcrumbs.Should().BeEquivalentTo(target.Breadcrumbs);
+        source.Extra.Should().BeEquivalentTo(target.Extra);
+        source.Tags.Should().BeEquivalentTo(target.Tags);
+        source.Attachments.Should().BeEquivalentTo(target.Attachments);
     }
 }

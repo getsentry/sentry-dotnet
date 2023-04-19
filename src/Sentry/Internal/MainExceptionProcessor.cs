@@ -6,8 +6,9 @@ namespace Sentry.Internal;
 
 internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 {
-    internal static readonly string ExceptionDataTagKey = "sentry:tag:";
-    internal static readonly string ExceptionDataContextKey = "sentry:context:";
+    private const string ExceptionDataKeyPrefix = "sentry:";
+    internal const string ExceptionDataTagKey = ExceptionDataKeyPrefix + "tag:";
+    internal const string ExceptionDataContextKey = ExceptionDataKeyPrefix + "context:";
 
     private readonly SentryOptions _options;
     internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
@@ -24,55 +25,55 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
         var sentryExceptions = CreateSentryExceptions(exception);
 
-        MoveExceptionExtrasToEvent(sentryEvent, sentryExceptions);
+        MoveExceptionDataToEvent(sentryEvent, sentryExceptions);
 
         sentryEvent.SentryExceptions = sentryExceptions;
     }
 
-    // SentryException.Extra is not supported by Sentry yet.
-    // Move the extras to the Event Extra while marking
-    // by index the Exception which owns it.
-    private static void MoveExceptionExtrasToEvent(
-        SentryEvent sentryEvent,
-        IReadOnlyList<SentryException> sentryExceptions)
+    private static void MoveExceptionDataToEvent(SentryEvent sentryEvent, IEnumerable<SentryException> sentryExceptions)
     {
-        for (var i = 0; i < sentryExceptions.Count; i++)
-        {
-            var sentryException = sentryExceptions[i];
+        var keysToRemove = new List<string>();
 
-            if (sentryException.Data.Count <= 0)
+        var i = 0;
+        foreach (var sentryException in sentryExceptions)
+        {
+            var data = sentryException.Mechanism?.Data;
+            if (data is null || data.Count == 0)
             {
+                i++;
                 continue;
             }
 
-            foreach (var keyValue in sentryException.Data)
+            foreach (var (key, value) in data)
             {
-                if (keyValue.Key.StartsWith("sentry:", StringComparison.OrdinalIgnoreCase) &&
-                    keyValue.Value != null)
+                if (key.Length > ExceptionDataTagKey.Length &&
+                    value is string stringValue &&
+                    key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (keyValue.Key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase) &&
-                        keyValue.Value is string tagValue &&
-                        ExceptionDataTagKey.Length < keyValue.Key.Length)
-                    {
-                        // Set the key after the ExceptionDataTagKey string.
-                        sentryEvent.SetTag(keyValue.Key.Substring(ExceptionDataTagKey.Length), tagValue);
-                    }
-                    else if (keyValue.Key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase) &&
-                             ExceptionDataContextKey.Length < keyValue.Key.Length)
-                    {
-                        // Set the key after the ExceptionDataTagKey string.
-                        _ = sentryEvent.Contexts[keyValue.Key.Substring(ExceptionDataContextKey.Length)] = keyValue.Value;
-                    }
-                    else
-                    {
-                        sentryEvent.SetExtra($"Exception[{i}][{keyValue.Key}]", sentryException.Data[keyValue.Key]);
-                    }
+                    sentryEvent.SetTag(key[ExceptionDataTagKey.Length..], stringValue);
+                    keysToRemove.Add(key);
                 }
-                else
+                else if (key.Length > ExceptionDataContextKey.Length &&
+                         !value.IsNull() &&
+                         key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase))
                 {
-                    sentryEvent.SetExtra($"Exception[{i}][{keyValue.Key}]", sentryException.Data[keyValue.Key]);
+                    sentryEvent.Contexts[key[ExceptionDataContextKey.Length..]] = value;
+                    keysToRemove.Add(key);
+                }
+                else if (key.StartsWith(ExceptionDataKeyPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    sentryEvent.SetExtra($"Exception[{i}][{key}]", value);
+                    keysToRemove.Add(key);
                 }
             }
+
+            foreach (var key in keysToRemove)
+            {
+                data.Remove(key);
+            }
+
+            keysToRemove.Clear();
+            i++;
         }
     }
 
@@ -91,7 +92,6 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             // Exceptions are sent from oldest to newest, so the details belong on the LAST exception.
             var last = exceptions.Last();
             last.Mechanism = original.Mechanism;
-            original.Data.TryCopyTo(last.Data);
 
             // In some cases the stack trace is already positioned on the inner exception.
             // Only copy it over when it is missing.
@@ -101,33 +101,27 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         return exceptions;
     }
 
-    private SentryException BuildSentryException(Exception innerException)
+    private SentryException BuildSentryException(Exception exception)
     {
         var sentryEx = new SentryException
         {
-            Type = innerException.GetType().FullName,
-            Module = innerException.GetType().Assembly.FullName,
-            Value = innerException.Message,
-            ThreadId = Environment.CurrentManagedThreadId,
-            Mechanism = GetMechanism(innerException)
+            Type = exception.GetType().FullName,
+            Module = exception.GetType().Assembly.FullName,
+            Value = exception.Message,
+            ThreadId = Environment.CurrentManagedThreadId
         };
 
-        if (innerException.Data.Count != 0)
+        var mechanism = GetMechanism(exception);
+        if (!mechanism.IsDefaultOrEmpty())
         {
-            foreach (var key in innerException.Data.Keys)
-            {
-                if (key is string keyString)
-                {
-                    sentryEx.Data[keyString] = innerException.Data[key];
-                }
-            }
+            sentryEx.Mechanism = mechanism;
         }
 
-        sentryEx.Stacktrace = SentryStackTraceFactoryAccessor().Create(innerException);
+        sentryEx.Stacktrace = SentryStackTraceFactoryAccessor().Create(exception);
         return sentryEx;
     }
 
-    internal static Mechanism GetMechanism(Exception exception)
+    private static Mechanism GetMechanism(Exception exception)
     {
         var mechanism = new Mechanism();
 
@@ -138,14 +132,39 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
         if (exception.Data[Mechanism.HandledKey] is bool handled)
         {
+            // The mechanism handled flag was set by an integration.
             mechanism.Handled = handled;
             exception.Data.Remove(Mechanism.HandledKey);
         }
-
-        if (exception.Data[Mechanism.MechanismKey] is string mechanismName)
+        else if (exception.StackTrace != null)
         {
-            mechanism.Type = mechanismName;
+            // The exception was thrown, but it was caught by the user, not an integration.
+            // Thus, we can mark it as handled.
+            mechanism.Handled = true;
+        }
+        else
+        {
+            // The exception was never thrown.  It was just constructed and then captured.
+            // Thus, it is neither handled nor unhandled.
+            mechanism.Handled = null;
+        }
+
+        if (exception.Data[Mechanism.MechanismKey] is string mechanismType)
+        {
+            mechanism.Type = mechanismType;
             exception.Data.Remove(Mechanism.MechanismKey);
+        }
+
+        if (exception.Data[Mechanism.DescriptionKey] is string mechanismDescription)
+        {
+            mechanism.Description = mechanismDescription;
+            exception.Data.Remove(Mechanism.DescriptionKey);
+        }
+
+        // Copy remaining exception data to mechanism data.
+        foreach (var key in exception.Data.Keys.OfType<string>())
+        {
+            mechanism.Data[key] = exception.Data[key]!;
         }
 
         return mechanism;

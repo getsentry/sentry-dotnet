@@ -77,7 +77,7 @@ internal class GzipRequestBodyHandler : DelegatingHandler
 #if NETFRAMEWORK || NETSTANDARD2_0
             using (gzipStream)
 #else
-                await using (gzipStream.ConfigureAwait(false))
+            await using (gzipStream.ConfigureAwait(false))
 #endif
             {
                 await _content.CopyToAsync(gzipStream).ConfigureAwait(false);

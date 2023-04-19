@@ -16,6 +16,7 @@ public class IntegrationTests
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
+            AttachStacktrace = false,
             TracesSampleRate = 1,
             Transport = transport,
             Dsn = ValidDsn,
