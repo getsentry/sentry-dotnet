@@ -71,7 +71,17 @@ public static partial class SentrySdk
     /// <remarks>
     /// If the DSN is not found, the SDK will not change state.
     /// </remarks>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     public static IDisposable Init() => Init((string?)null);
 
     /// <summary>
@@ -82,7 +92,17 @@ public static partial class SentrySdk
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
     /// <param name="dsn">The dsn.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     public static IDisposable Init(string? dsn) => !Dsn.IsDisabled(dsn)
         ? Init(c => c.Dsn = dsn)
         : DisabledHub.Instance;
@@ -91,7 +111,17 @@ public static partial class SentrySdk
     /// Initializes the SDK with an optional configuration options callback.
     /// </summary>
     /// <param name="configureOptions">The configuration options callback.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     public static IDisposable Init(Action<SentryOptions>? configureOptions)
     {
         var options = new SentryOptions();
@@ -107,7 +137,17 @@ public static partial class SentrySdk
     /// <remarks>
     /// Used by integrations which have their own delegates.
     /// </remarks>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static IDisposable Init(SentryOptions options) => UseHub(InitHub(options));
 
