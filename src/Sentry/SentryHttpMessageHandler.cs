@@ -108,19 +108,6 @@ public class SentryHttpMessageHandler : DelegatingHandler
         }
     }
 
-    /// <summary>
-    /// Automaticlaly capture HTTP Client errors when captureFailedRequests
-    /// </summary>
-    /// <param name="request">The HttpRequestMessage sent</param>
-    /// <param name="response">The HttpResponse received</param>
-    private void CaptureEvent(HttpRequestMessage request, HttpResponseMessage response)
-    {
-        if (_options?.CaptureFailedRequests is false)
-            return;
-
-        throw new NotImplementedException();
-    }
-
     private void AddSentryTraceHeader(HttpRequestMessage request)
     {
         // Set trace header if it hasn't already been set

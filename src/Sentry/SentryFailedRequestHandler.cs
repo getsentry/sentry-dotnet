@@ -12,6 +12,8 @@ namespace Sentry
         private readonly IHub _hub;
         private readonly SentryOptions? _options;
 
+        public string MechanismType { get => "SentryFailedRequestHandler"; }
+
         /// <summary>
         /// Initializes an instance of <see cref="SentryFailedRequestHandler"/>.
         /// </summary>
@@ -35,38 +37,28 @@ namespace Sentry
             if (_options?.CaptureFailedRequests is false)
                 return;
 
-            // Don't capture successful requets
+            // Don't capture events for successful requets
             if (_options?.FailedRequestStatusCodes.Any(range => range.Contains(response.StatusCode)) is false)
                 return;
 
-            /*
-            Note the Sentry Java SDK strips the query string and fragment from the URL. However that limits
-            how this feature can be used. If the user wants to ignore the query string and fragment, they can
-            do so explicitly via regex pattern matching. We've left the query/fragment entact in this SDK.
-            */
+            // Ignore requests to the Sentry DSN
             var uri = request.RequestUri;
             var requestString = uri?.OriginalString ?? "";
-
-            // Ignore requests to the Sentry DSN
             if (_options?.Dsn is { } dsn && new SubstringOrRegexPattern(dsn).IsMatch(requestString))
                 return;
 
-            // Only capture requets matching the FailedRequestTargets
+            // Ignore requests that don't match the FailedRequestTargets
             if (_options?.FailedRequestTargets.ContainsMatch(requestString) is false)
                 return;
 
             // Capture the event
-            throw new NotImplementedException();
-
-            //_hub.CaptureEvent()
-
+            var exception = new SentryHttpClientException($"HTTP Client Error with status code: {response.StatusCode}");
+            exception.SetSentryMechanism(MechanismType);
+            var @event = new SentryEvent(exception);
+            _hub.CaptureEvent(@event);
 
             /*
-            val exception = SentryHttpClientException(
-                "HTTP Client Error with status code: ${response.code}"
-            )
-            val mechanismException = ExceptionMechanismException(mechanism, exception, Thread.currentThread(), true)
-            val event = SentryEvent(mechanismException)
+             * Copied from SentryOkHttpInterceptorTest.kt in the Java SDK for reference
 
             val hint = Hint()
             hint.set(OKHTTP_REQUEST, request)
