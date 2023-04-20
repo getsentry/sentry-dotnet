@@ -4,12 +4,6 @@ using Sentry;
 using Sentry.Extensibility;
 using Sentry.Profiling;
 
-// Tracks the release which sent the event and enables more features: https://docs.sentry.io/learn/releases/
-// Much like the DSN above, this is only one of the ways to define the release.
-// If not set here, it can also be defined via appsettings.json, environment variable 'SENTRY_RELEASE' and AssemblyVersion
-// STANDARD_CI_SOURCE_REVISION_ID -> TeamCity: %build.vcs.number%, VSTS: BUILD_SOURCEVERSION, Travis-CI: TRAVIS_COMMIT, AppVeyor: APPVEYOR_REPO_COMMIT, CircleCI: CIRCLE_SHA1
-[assembly: AssemblyInformationalVersion("e386dfd")]
-
 internal static class Program
 {
     private static async Task Main()
