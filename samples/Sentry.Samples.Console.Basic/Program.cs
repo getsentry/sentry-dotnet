@@ -40,33 +40,37 @@ var transaction = SentrySdk.StartTransaction("Program Main", "function");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
 // Do some work. (This is where you'd have your own application logic.)
-FirstFunction();
-SecondFunction();
-ThirdFunction();
+await FirstFunctionAsync();
+await SecondFunctionAsync();
+await ThirdFunctionAsync();
 
 // Always try to finish the transaction successfully.
 // Unhandled exceptions will fail the transaction automatically.
 // Optionally, you can try/catch the exception, and call transaction.Finish(exception) on failure.
 transaction.Finish();
 
-void FirstFunction()
+async Task FirstFunctionAsync()
 {
     // This shows how you might instrument a particular function.
-    var span = transaction.StartChild("function", nameof(FirstFunction));
+    var span = transaction.StartChild("function", nameof(FirstFunctionAsync));
 
     // Simulate doing some work
-    Thread.Sleep(100);
+    await Task.Delay(100);
 
     // Finish the span successfully.
     span.Finish();
 }
 
-void SecondFunction()
+async Task SecondFunctionAsync()
 {
-    var span = transaction.StartChild("function", nameof(SecondFunction));
+    var span = transaction.StartChild("function", nameof(SecondFunctionAsync));
 
     try
     {
+        // Simulate doing some work
+        await Task.Delay(100);
+
+        // Throw an exception
         throw new ApplicationException("Something happened!");
     }
     catch (Exception exception)
@@ -79,9 +83,12 @@ void SecondFunction()
     span.Finish();
 }
 
-void ThirdFunction()
+async Task ThirdFunctionAsync()
 {
-    var span = transaction.StartChild("function", nameof(ThirdFunction));
+    var span = transaction.StartChild("function", nameof(ThirdFunctionAsync));
+
+    // Simulate doing some work
+    await Task.Delay(100);
 
     // This is an example of an unhandled exception.  It will be captured automatically.
     throw new InvalidOperationException("Something happened that crashed the app!");
