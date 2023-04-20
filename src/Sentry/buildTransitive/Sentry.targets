@@ -40,20 +40,6 @@
   </Target>
 
   <Target Name="PrepareSentryCLI" AfterTargets="CheckSentryCLI" Condition="'$(UseSentryCLI)' == 'true'">
-
-    <!--
-      The Sentry configuration can be set manually in MSBuild properties if desired.
-      Otherwise the default configuration will be used, as reported by "sentry-cli info".
-      The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
-    -->
-    <PropertyGroup>
-      <SentryCLIBaseOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIBaseOptions) --api-key $(SentryApiKey)</SentryCLIBaseOptions>
-      <SentryCLIBaseOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIBaseOptions) --auth-token $(SentryAuthToken)</SentryCLIBaseOptions>
-      <SentryCLIBaseOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIBaseOptions) --url $(SentryUrl)</SentryCLIBaseOptions>
-      <SentryCLIOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIOptions) --org $(SentryOrg)</SentryCLIOptions>
-      <SentryCLIOptions Condition="'$(SentryProject)' != ''">$(SentryCLIOptions) --project $(SentryProject)</SentryCLIOptions>
-    </PropertyGroup>
-
     <!--
       If Sentry was added via PackageReference, PkgSentry will already be set to the path of the Sentry nuget package.
       However, older-style projects using packages.config will need us to resolve the path manually.
@@ -85,13 +71,27 @@
       <SentryCLI Condition="!Exists('$(SentryCLI)')"/>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(SentryCLI)' != ''">
-      <_SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</_SentryCLIBaseCommand>
-      <_SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions)' != ''">$(_SentryCLIBaseCommand) $(SentryCLIBaseOptions)</_SentryCLIBaseCommand>
+    <!--
+      The Sentry configuration can be set manually in MSBuild properties if desired.
+      Otherwise the default configuration will be used, as reported by "sentry-cli info".
+      The defaults can be set either via config file, or environment variables, per: https://docs.sentry.io/product/cli/configuration/
+    -->
+    <PropertyGroup>
+      <SentryCLIBaseOptions Condition="'$(SentryApiKey)' != ''">$(SentryCLIBaseOptions) --api-key $(SentryApiKey)</SentryCLIBaseOptions>
+      <SentryCLIBaseOptions Condition="'$(SentryAuthToken)' != ''">$(SentryCLIBaseOptions) --auth-token $(SentryAuthToken)</SentryCLIBaseOptions>
+      <SentryCLIBaseOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIBaseOptions) --url $(SentryUrl)</SentryCLIBaseOptions>
+      <SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</SentryCLIBaseCommand>
+      <SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions.Trim())' != ''">$(SentryCLIBaseCommand) $(SentryCLIBaseOptions.Trim())</SentryCLIBaseCommand>
+
+      <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
+      <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
+      <SentryCLIUploadOptions Condition="'$(SentryUploadSources)' == 'true'">$(SentryCLIUploadOptions) --include-sources</SentryCLIUploadOptions>
+      <SentryCLIUploadCommand>$(SentryCLIBaseCommand) debug-files upload</SentryCLIUploadCommand>
+      <SentryCLIUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIUploadCommand>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(SentryCLI)' != ''">
-      <_SentryCLICommand>$(_SentryCLIBaseCommand) info</_SentryCLICommand>
+      <_SentryCLICommand>$(SentryCLIBaseCommand) info</_SentryCLICommand>
       <_SentryCLICommand Condition="'$(SentryOrg)' != '' And '$(SentryProject)' != ''">$(_SentryCLICommand) --no-defaults</_SentryCLICommand>
     </PropertyGroup>
     <Exec Condition="'$(SentryCLI)' != ''" Command="$(_SentryCLICommand)" IgnoreExitCode="true" ConsoleToMsBuild="true" StandardOutputImportance="Low">
@@ -127,13 +127,7 @@
     <Message Importance="High" Condition="'$(SentryUploadSources)' == 'true'"
       Text="Preparing to upload debug symbols and sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
 
-    <PropertyGroup>
-      <_SentryCLICommand>$(_SentryCLIBaseCommand) dif upload</_SentryCLICommand>
-      <_SentryCLICommand Condition="'$(SentryCLIOptions.Trim())' != ''">$(_SentryCLICommand) $(SentryCLIOptions.Trim())</_SentryCLICommand>
-      <_SentryCLICommand Condition="'$(SentryUploadSources)' == 'true'">$(_SentryCLICommand) --include-sources</_SentryCLICommand>
-      <_SentryCLICommand>$(_SentryCLICommand) $(IntermediateOutputPath)</_SentryCLICommand>
-    </PropertyGroup>
-    <Exec Command="$(_SentryCLICommand)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+    <Exec Command="$(SentryCLIUploadCommand) $(IntermediateOutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
 
@@ -144,7 +138,7 @@
 
     <MSBuild Condition="'$(_SentryCLIExitCode)' != '0' And '$(SentryUploadSources)' == 'true'"
       Projects="$(MSBuildProjectFile)" Targets="UploadSymbolsToSentry"
-      Properties="SentryUploadSymbols=true;SentryUploadSources=false;SentryCLI=$(SentryCLI);SentryCLIOptions=$(SentryCLIOptions)" />
+      Properties="SentryUploadSymbols=true;SentryCLI=$(SentryCLI);SentryCLIBaseOptions=$(SentryCLIBaseOptions);SentryCLIUploadOptions=$(SentryCLIUploadOptions)" />
 
   </Target>
 
@@ -161,22 +155,12 @@
       <_SentrySourceBundle>@(IntermediateAssembly->'$(IntermediateOutputPath)%(FileName).src.zip')</_SentrySourceBundle>
     </PropertyGroup>
 
-    <PropertyGroup>
-      <_SentryCLICommand>$(_SentryCLIBaseCommand) dif bundle-sources $(_SentryDebugInfoFile)</_SentryCLICommand>
-    </PropertyGroup>
-    <Exec Command="$(_SentryCLICommand)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" />
-
-    <PropertyGroup>
-      <_SentryCLICommand>$(_SentryCLIBaseCommand) dif upload</_SentryCLICommand>
-      <_SentryCLICommand Condition="'$(SentryCLIOptions.Trim())' != ''">$(_SentryCLICommand) $(SentryCLIOptions.Trim())</_SentryCLICommand>
-      <_SentryCLICommand>$(_SentryCLICommand) $(_SentrySourceBundle)</_SentryCLICommand>
-    </PropertyGroup>
-    <Exec Command="$(_SentryCLICommand)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" Condition="Exists('$(_SentrySourceBundle)')">
+    <Exec Command="&quot;$(SentryCLI)&quot; debug-files bundle-sources $(_SentryDebugInfoFile)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" />
+    <Exec Command="$(SentryCLIUploadCommand) $(_SentrySourceBundle)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" Condition="Exists('$(_SentrySourceBundle)')">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
 
     <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload sources." />
 
   </Target>
-
 </Project>
