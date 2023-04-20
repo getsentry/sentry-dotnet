@@ -23,6 +23,11 @@ namespace Sentry
             return new HttpStatusCodeRange(range.start, range.end);
         }
 
+        public static implicit operator HttpStatusCodeRange(int statusCode)
+        {
+            return new HttpStatusCodeRange(statusCode);
+        }
+
         public static implicit operator HttpStatusCodeRange(HttpStatusCode statusCode)
         {
             return new HttpStatusCodeRange((int)statusCode);

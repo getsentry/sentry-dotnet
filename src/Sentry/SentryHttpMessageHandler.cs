@@ -10,6 +10,7 @@ public class SentryHttpMessageHandler : DelegatingHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
+    private readonly ISentryFailedRequestHandler? _failedRequestHandler;
 
     /// <summary>
     /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
@@ -18,12 +19,14 @@ public class SentryHttpMessageHandler : DelegatingHandler
     {
         _hub = hub;
         _options = hub.GetSentryOptions();
+        _failedRequestHandler = new SentryFailedRequestHandler(_hub, _options);
     }
 
-    internal SentryHttpMessageHandler(IHub hub, SentryOptions options)
+    internal SentryHttpMessageHandler(IHub hub, ISentryFailedRequestHandler failedRequestHandler, SentryOptions options)
     {
         _hub = hub;
         _options = options;
+        _failedRequestHandler = failedRequestHandler;
     }
 
     /// <summary>
@@ -35,8 +38,8 @@ public class SentryHttpMessageHandler : DelegatingHandler
         InnerHandler = innerHandler;
     }
 
-    internal SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub, SentryOptions options)
-        : this(hub, options)
+    internal SentryHttpMessageHandler(HttpMessageHandler innerHandler, ISentryFailedRequestHandler failedRequestHandler, IHub hub, SentryOptions options)
+        : this(hub, failedRequestHandler, options)
     {
         InnerHandler = innerHandler;
     }
@@ -65,7 +68,7 @@ public class SentryHttpMessageHandler : DelegatingHandler
         var requestMethod = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
-        if (_options?.TracePropagationTargets.ShouldPropagateTrace(url) is true or null)
+        if (_options?.TracePropagationTargets.ContainsMatch(url) is true or null)
         {
             AddSentryTraceHeader(request);
             AddBaggageHeader(request);
@@ -90,8 +93,8 @@ public class SentryHttpMessageHandler : DelegatingHandler
             };
             _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 
-            // Create events for failed requests, if enabled
-            CaptureEvent(request, response);
+            // Create events for failed requests
+            _failedRequestHandler?.CaptureEvent(request, response);
 
             // This will handle unsuccessful status codes as well
             span?.Finish(SpanStatusConverter.FromHttpStatusCode(response.StatusCode));
@@ -108,11 +111,13 @@ public class SentryHttpMessageHandler : DelegatingHandler
     /// <summary>
     /// Automaticlaly capture HTTP Client errors when captureFailedRequests
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="response"></param>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <param name="request">The HttpRequestMessage sent</param>
+    /// <param name="response">The HttpResponse received</param>
     private void CaptureEvent(HttpRequestMessage request, HttpResponseMessage response)
     {
+        if (_options?.CaptureFailedRequests is false)
+            return;
+
         throw new NotImplementedException();
     }
 
