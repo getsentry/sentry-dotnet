@@ -119,10 +119,12 @@ internal class Hub : IHubEx, IDisposable
     {
         var transaction = new TransactionTracer(this, context);
 
-        // If tracing is explicitly disabled, we will always sample out.
+        // If the hub is disabled, we will always sample out.  In other words, starting a transaction
+        // after disposing the hub will result in that transaction not being sent to Sentry.
+        // Additionally, we will always sample out if tracing is explicitly disabled.
         // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
         // that may have been already set (i.e.: from a sentry-trace header).
-        if (_options.EnableTracing is false)
+        if (!IsEnabled || _options.EnableTracing is false)
         {
             transaction.IsSampled = false;
             transaction.SampleRate = 0.0;
@@ -386,10 +388,14 @@ internal class Hub : IHubEx, IDisposable
 
     public void CaptureTransaction(Transaction transaction)
     {
-        if (!IsEnabled)
-        {
-            return;
-        }
+        // Note: The hub should capture transactions even if it is disabled.
+        // This allows transactions to be reported as failed when they encountered an unhandled exception,
+        // in the case where the hub was disabled before the transaction was captured.
+        // For example, that can happen with a top-level async main because IDisposables are processed before
+        // the unhandled exception event fires.
+        //
+        // Any transactions started after the hub was disabled will already be sampled out and thus will
+        // not be passed along to sentry when captured here.
 
         try
         {
