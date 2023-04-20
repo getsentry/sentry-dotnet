@@ -10,8 +10,8 @@
 
 using Sentry;
 
-// Initialize the Sentry SDK, disposing when the application is shutting down.
-using var _ = SentrySdk.Init(options =>
+// Initialize the Sentry SDK.  (It is not necessary to dispose it.)
+SentrySdk.Init(options =>
 {
     // A Sentry Data Source Name (DSN) is required.
     // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
