@@ -4,13 +4,29 @@ public class ClientReportTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
     private readonly ClientReport _testClientReport;
-    private const string TestJsonString =
-        "{" +
-        "\"timestamp\":\"9999-12-31T23:59:59.9999999+00:00\"," + "\"discarded_events\":[" +
-        "{\"reason\":\"before_send\",\"category\":\"attachment\",\"quantity\":1}," +
-        "{\"reason\":\"cache_overflow\",\"category\":\"error\",\"quantity\":2}," +
-        "{\"reason\":\"event_processor\",\"category\":\"security\",\"quantity\":3}]" +
-        "}";
+
+    private const string TestJsonString = """
+    {
+      "timestamp": "9999-12-31T23:59:59.9999999+00:00",
+      "discarded_events": [
+        {
+          "reason": "before_send",
+          "category": "attachment",
+          "quantity": 1
+        },
+        {
+          "reason": "cache_overflow",
+          "category": "error",
+          "quantity": 2
+        },
+        {
+          "reason": "event_processor",
+          "category": "security",
+          "quantity": 3
+        }
+      ]
+    }
+    """;
 
     public ClientReportTests(ITestOutputHelper output)
     {
@@ -29,7 +45,7 @@ public class ClientReportTests
     [Fact]
     public void Serializes()
     {
-        var jsonString = _testClientReport.ToJsonString(_testOutputLogger);
+        var jsonString = _testClientReport.ToJsonString(_testOutputLogger, indented: true);
         Assert.Equal(TestJsonString, jsonString);
     }
 

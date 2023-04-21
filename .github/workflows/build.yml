@@ -60,12 +60,17 @@ jobs:
       - name: Test
         run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
+      - name: Test symbol upload
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        with:
+          path: test
+
       - name: Upload Verify Results
         if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: verify-test-results
-          path: "**/*.received.*"
+          path: '**/*.received.*'
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
 

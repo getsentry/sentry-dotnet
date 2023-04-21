@@ -29,7 +29,9 @@
       <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
+
+  <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netcoreapp'))">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
 
@@ -92,25 +94,25 @@
     <ItemGroup>
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Darwin-arm64" FileHash="b45c3d1fdb403fdfdbce0c0a009a529a803290ea058941ae7a09d8856aeffd06" />
+        Include="sentry-cli-Darwin-arm64" FileHash="e9c352402970fd0bd9b3bec27c0d19e6b74220f35c48651cc0a9396c39a13e33" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Darwin-x86_64" FileHash="40469a50a74cebfd04c449336809e998c4df941d8aa683971ce1d1f581276502" />
+        Include="sentry-cli-Darwin-x86_64" FileHash="d4dbe03f23997469940647157b3990de6fc5c14ccc926b26a0c3a8daad4709dc" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Linux-aarch64" FileHash="9cc2d84b09b3e0e0d062b8893f1d5dec1eee512f465cc2d0dbcf51ca6620d1a0" />
+        Include="sentry-cli-Linux-aarch64" FileHash="dd0cd28b3daa422c0c1bb748d276d74ec65d84a2241e77ab04ebf96f6b200faf" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Linux-i686" FileHash="f9ec33357136423f5aac598c8c42fc0f6795a29a332dfc34099c6ba8b1307a0b" />
+        Include="sentry-cli-Linux-i686" FileHash="cd641ec59233e8f04e5e06122e69d9431b02fafcef6d751e6a134410152605a4" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Linux-x86_64" FileHash="18bfbae6c184d976d30f54375815fabe6cfb4e6b7786298bc56f4f1c76a96c2c" />
+        Include="sentry-cli-Linux-x86_64" FileHash="45834bbedcf3f7ec901159f8f9c885d3b0b93cab959ac7f288c56ed37e741d72" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Windows-i686.exe" FileHash="91da10de2fbdde03aae6f11af3544108d946366afbaaebec982d26fa27ae315a" />
+        Include="sentry-cli-Windows-i686.exe" FileHash="55d9578d429f89309b4edc3588ed7d40ff9b90b6a4e96c32e5754775c970b385" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')"
-        Include="sentry-cli-Windows-x86_64.exe" FileHash="1042ec8ec50bca8bc68a3b8b6e58cda6cadf63c23f4245af62971a8e3af2eccd" />
+        Include="sentry-cli-Windows-x86_64.exe" FileHash="d87cceb5edfef2e4744c0fe49ba6de0b86da0767406d6803a4525bf5539d98d7" />
     </ItemGroup>
 
     <!-- Download the files -->

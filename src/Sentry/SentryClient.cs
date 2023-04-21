@@ -283,7 +283,7 @@ public class SentryClient : ISentryClient, IDisposable
         if (filters.Any(f => f.Filter(exception)))
         {
             // The event should be filtered based on the given exception
-            return new[] {exception};
+            return new[] { exception };
         }
 
         if (exception is AggregateException aggregate)

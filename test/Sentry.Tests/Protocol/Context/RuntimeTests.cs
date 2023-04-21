@@ -20,9 +20,17 @@ public class RuntimeTests
             RawDescription = ".NET Framework 4.7.2"
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal("{\"type\":\"runtime\",\"name\":\".NET Framework\",\"version\":\"4.7.2\",\"raw_description\":\".NET Framework 4.7.2\",\"build\":\"461814\"}", actual);
+        Assert.Equal("""
+            {
+              "type": "runtime",
+              "name": ".NET Framework",
+              "version": "4.7.2",
+              "raw_description": ".NET Framework 4.7.2",
+              "build": "461814"
+            }
+            """, actual);
     }
 
     [Fact]
@@ -59,11 +67,11 @@ public class RuntimeTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new Runtime(), "{\"type\":\"runtime\"}") };
-        yield return new object[] { (new Runtime { Name = "some name" }, "{\"type\":\"runtime\",\"name\":\"some name\"}") };
-        yield return new object[] { (new Runtime { Version = "some version" }, "{\"type\":\"runtime\",\"version\":\"some version\"}") };
-        yield return new object[] { (new Runtime { Identifier = "some identifier" }, "{\"type\":\"runtime\",\"identifier\":\"some identifier\"}") };
-        yield return new object[] { (new Runtime { Build = "some build" }, "{\"type\":\"runtime\",\"build\":\"some build\"}") };
-        yield return new object[] { (new Runtime { RawDescription = "some Name, some version" }, "{\"type\":\"runtime\",\"raw_description\":\"some Name, some version\"}") };
+        yield return new object[] { (new Runtime(), """{"type":"runtime"}""") };
+        yield return new object[] { (new Runtime { Name = "some name" }, """{"type":"runtime","name":"some name"}""") };
+        yield return new object[] { (new Runtime { Version = "some version" }, """{"type":"runtime","version":"some version"}""") };
+        yield return new object[] { (new Runtime { Identifier = "some identifier" }, """{"type":"runtime","identifier":"some identifier"}""") };
+        yield return new object[] { (new Runtime { Build = "some build" }, """{"type":"runtime","build":"some build"}""") };
+        yield return new object[] { (new Runtime { RawDescription = "some Name, some version" }, """{"type":"runtime","raw_description":"some Name, some version"}""") };
     }
 }

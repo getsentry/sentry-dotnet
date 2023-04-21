@@ -1,4 +1,5 @@
 Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
 $CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
@@ -21,9 +22,12 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
         -CategoryActivity Error -ErrorAction Stop
 }
 
+# Get iPhone SDK version
+$iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
+
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
-sharpie bind -sdk iphoneos -quiet `
+sharpie bind -sdk $iPhoneSdkVersion -quiet `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `

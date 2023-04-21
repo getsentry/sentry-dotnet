@@ -4,17 +4,24 @@
 
 ### Features
 
+- Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
 - .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
+- Improve `WithScope` and add `WithScopeAsync` ([#2303](https://github.com/getsentry/sentry-dotnet/pull/2303)) ([#2309](https://github.com/getsentry/sentry-dotnet/pull/2309))
 
 ### Fixes
 
 - Buffer payloads asynchronously when appropriate ([#2297](https://github.com/getsentry/sentry-dotnet/pull/2297))
+- Restore `System.Reflection.Metadata` dependency for .NET Core 3 ([#2302](https://github.com/getsentry/sentry-dotnet/pull/2302))
+- Capture open transactions on disabled hubs ([#2319](https://github.com/getsentry/sentry-dotnet/pull/2319))
 
 ### Dependencies
 
-- Bump CLI from v2.17.0 to v2.17.2 ([#2298](https://github.com/getsentry/sentry-dotnet/pull/2298))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2172)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.0...2.17.2)
+- Bump CLI from v2.17.0 to v2.17.4 ([#2298](https://github.com/getsentry/sentry-dotnet/pull/2298), [#2318](https://github.com/getsentry/sentry-dotnet/pull/2318), [#2321](https://github.com/getsentry/sentry-dotnet/pull/2321))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2174)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.0...2.17.4)
+- Bump Cocoa SDK from v8.4.0 to v8.5.0 ([#2310](https://github.com/getsentry/sentry-dotnet/pull/2310))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#850)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.4.0...8.5.0)
 
 ## 3.30.0
 
