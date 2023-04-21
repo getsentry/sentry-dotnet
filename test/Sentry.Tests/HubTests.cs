@@ -23,6 +23,7 @@ public partial class HubTests
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
+                EnableTracing = true,
                 AutoSessionTracking = false
             };
 
@@ -1098,11 +1099,11 @@ public partial class HubTests
         }
 
         // Act
-        var t = hub.StartTransaction("test", "test");
-        t.Finish();
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureTransaction(Arg.Any<Transaction>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled));
     }
 
 #if ANDROID && CI_BUILD
