@@ -45,6 +45,32 @@
     </Compile>
   </ItemGroup>
 
+  <!-- Profiling is supported only for select TargetFrameworks -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <_ProfilingSupported>true</_ProfilingSupported>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    <!-- Required for TraceEvent -->
+  </PropertyGroup>
+
+  <!-- Profiling dependencies are compiled directly into Sentry. -->
+  <ItemGroup Condition="'$(_ProfilingSupported)' == 'true'">
+    <Compile Include="../../modules/perfview/src/TraceEvent/**/*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="../../modules/perfview/src/FastSerialization/**/*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="../../modules/perfview/src/Utilities/**/*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <!-- Exclude samples, tests and some problematic files -->
+    <Compile Remove="../../modules/perfview/src/TraceEvent/Samples/**/*" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/Properties/**/*" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/AutomatedAnalysis/**/*" />
+    <Compile Remove="../../modules/perfview/src/**/*.Tests/**/*" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/ETWReloggerTraceEventSource.cs" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/Symbols/NativeSymbolModule.cs" />
+  </ItemGroup>
+
   <!--
     We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
     https://github.com/SimonCropp/Polyfill
@@ -92,35 +118,17 @@
       <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
     </PropertyGroup>
     <ItemGroup>
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Darwin-arm64" FileHash="e9c352402970fd0bd9b3bec27c0d19e6b74220f35c48651cc0a9396c39a13e33" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Darwin-x86_64" FileHash="d4dbe03f23997469940647157b3990de6fc5c14ccc926b26a0c3a8daad4709dc" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Linux-aarch64" FileHash="dd0cd28b3daa422c0c1bb748d276d74ec65d84a2241e77ab04ebf96f6b200faf" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Linux-i686" FileHash="cd641ec59233e8f04e5e06122e69d9431b02fafcef6d751e6a134410152605a4" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Linux-x86_64" FileHash="45834bbedcf3f7ec901159f8f9c885d3b0b93cab959ac7f288c56ed37e741d72" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Windows-i686.exe" FileHash="55d9578d429f89309b4edc3588ed7d40ff9b90b6a4e96c32e5754775c970b385" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')"
-        Include="sentry-cli-Windows-x86_64.exe" FileHash="d87cceb5edfef2e4744c0fe49ba6de0b86da0767406d6803a4525bf5539d98d7" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="e9c352402970fd0bd9b3bec27c0d19e6b74220f35c48651cc0a9396c39a13e33" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="d4dbe03f23997469940647157b3990de6fc5c14ccc926b26a0c3a8daad4709dc" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="dd0cd28b3daa422c0c1bb748d276d74ec65d84a2241e77ab04ebf96f6b200faf" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="cd641ec59233e8f04e5e06122e69d9431b02fafcef6d751e6a134410152605a4" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="45834bbedcf3f7ec901159f8f9c885d3b0b93cab959ac7f288c56ed37e741d72" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="55d9578d429f89309b4edc3588ed7d40ff9b90b6a4e96c32e5754775c970b385" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="d87cceb5edfef2e4744c0fe49ba6de0b86da0767406d6803a4525bf5539d98d7" />
     </ItemGroup>
 
     <!-- Download the files -->
-    <DownloadFile
-      SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)"
-      DestinationFolder="$(SentryCLIDirectory)"
-      Condition="!Exists('$(SentryCLIDirectory)%(Identity)')"
-      Retries="3">
+    <DownloadFile SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)" DestinationFolder="$(SentryCLIDirectory)" Condition="!Exists('$(SentryCLIDirectory)%(Identity)')" Retries="3">
       <Output TaskParameter="DownloadedFile" ItemName="SentryCLIDownloadedFile" />
     </DownloadFile>
 
