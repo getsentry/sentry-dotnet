@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sentry.Protocol;
-
 namespace Sentry
 {
     internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
     {
         private readonly IHub _hub;
-        private readonly SentryOptions? _options;
+        private readonly SentryOptions _options;
 
-        public string MechanismType { get => "SentryFailedRequestHandler"; }
+        public const string MechanismType = "SentryFailedRequestHandler";
 
         /// <summary>
         /// Initializes an instance of <see cref="SentryFailedRequestHandler"/>.
@@ -42,9 +35,8 @@ namespace Sentry
                 return;
 
             // Ignore requests to the Sentry DSN
-            var uri = request.RequestUri;
-            var requestString = uri?.OriginalString ?? "";
-            if (_options?.Dsn is { } dsn && new SubstringOrRegexPattern(dsn).IsMatch(requestString))
+            var uri = response.RequestMessage.RequestUri;
+            if (_options.Dsn is { } dsn && new Uri(dsn).Host.Equals(uri.Host, StringComparison.OrdinalIgnoreCase))
                 return;
 
             // Ignore requests that don't match the FailedRequestTargets
@@ -52,10 +44,15 @@ namespace Sentry
                 return;
 
             // Capture the event
-            var exception = new SentryHttpClientException($"HTTP Client Error with status code: {response.StatusCode}");
-            exception.SetSentryMechanism(MechanismType);
-            var @event = new SentryEvent(exception);
-            _hub.CaptureEvent(@event);
+            try
+            {
+                response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException exception)
+            {
+                exception.SetSentryMechanism(MechanismType);
+                _hub.CaptureException(exception);
+            }
 
             /*
              * Copied from SentryOkHttpInterceptorTest.kt in the Java SDK for reference

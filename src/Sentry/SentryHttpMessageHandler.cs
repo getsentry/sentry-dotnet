@@ -19,10 +19,13 @@ public class SentryHttpMessageHandler : DelegatingHandler
     {
         _hub = hub;
         _options = hub.GetSentryOptions();
-        _failedRequestHandler = new SentryFailedRequestHandler(_hub, _options);
+        if (_options != null)
+        {
+            _failedRequestHandler = new SentryFailedRequestHandler(_hub, _options);
+        }
     }
 
-    internal SentryHttpMessageHandler(IHub hub, ISentryFailedRequestHandler failedRequestHandler, SentryOptions options)
+    internal SentryHttpMessageHandler(IHub hub, SentryOptions options, ISentryFailedRequestHandler? failedRequestHandler = null)
     {
         _hub = hub;
         _options = options;
@@ -38,8 +41,8 @@ public class SentryHttpMessageHandler : DelegatingHandler
         InnerHandler = innerHandler;
     }
 
-    internal SentryHttpMessageHandler(HttpMessageHandler innerHandler, ISentryFailedRequestHandler failedRequestHandler, IHub hub, SentryOptions options)
-        : this(hub, failedRequestHandler, options)
+    internal SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub, SentryOptions options, ISentryFailedRequestHandler? failedRequestHandler = null)
+        : this(hub, options, failedRequestHandler)
     {
         InnerHandler = innerHandler;
     }

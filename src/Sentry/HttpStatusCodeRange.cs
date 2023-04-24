@@ -1,6 +1,6 @@
-namespace Sentry
+namespace Sentry;
 {
-    public record HttpStatusCodeRange
+    public readonly record struct HttpStatusCodeRange
     {
         public int Start { get; init; }
 
@@ -18,10 +18,7 @@ namespace Sentry
             End = Math.Max(start, end);
         }
 
-        public static implicit operator HttpStatusCodeRange((int start, int end) range)
-        {
-            return new HttpStatusCodeRange(range.start, range.end);
-        }
+        public static implicit operator HttpStatusCodeRange((int Start, int End) range) => new(range.Start, range.End);
 
         public static implicit operator HttpStatusCodeRange(int statusCode)
         {

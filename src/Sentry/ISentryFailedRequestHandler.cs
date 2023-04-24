@@ -2,6 +2,6 @@
 {
     internal interface ISentryFailedRequestHandler
     {
-        void CaptureEvent(HttpRequestMessage request, HttpResponseMessage response);
+        void HandleResponse(HttpResponseMessage response);
     }
 }
