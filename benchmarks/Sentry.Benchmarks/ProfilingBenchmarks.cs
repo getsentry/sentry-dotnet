@@ -13,25 +13,41 @@ public class ProfilingBenchmarks
     private IHub _hub = Substitute.For<IHub>();
     private ITransactionProfilerFactory _factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new());
 
-    [Benchmark]
-    public void WithoutProfiling()
+    public IEnumerable<object[]> Arguments()
     {
-        var tt = new TransactionTracer(_hub, "test", "");
-        RunForMs(TxRuntimeMs);
-        var transaction = new Transaction(tt);
+        yield return new object[] { false, false, false, 0 };
+
+        foreach (var processing in new[] { true, false })
+        {
+            foreach (var rundown in new[] { true, false })
+            {
+                foreach (var bufferMB in new[] { 32, 256 })
+                {
+                    yield return new object[] { true, processing, rundown, bufferMB };
+                }
+            }
+        }
     }
 
     [Benchmark]
-    public void WithProfiling()
+    [ArgumentsSource(nameof(Arguments))]
+    public void Transaction(bool profiling, bool processing, bool rundown, int bufferMB)
     {
         var tt = new TransactionTracer(_hub, "test", "");
-        var sut = _factory.Start(tt, CancellationToken.None);
-        tt.TransactionProfiler = sut;
+        SampleProfilerSession.RequestRundown = rundown;
+        SampleProfilerSession.CircularBufferMB = bufferMB;
+        if (profiling)
+        {
+            tt.TransactionProfiler = _factory.Start(tt, CancellationToken.None);
+        }
         RunForMs(TxRuntimeMs);
-        sut.Finish();
+        tt.TransactionProfiler?.Finish();
         var transaction = new Transaction(tt);
-        var collectTask = sut.CollectAsync(transaction);
-        collectTask.Wait();
+        if (processing)
+        {
+            var collectTask = tt.TransactionProfiler.CollectAsync(transaction);
+            collectTask.Wait();
+        }
     }
 
     private void RunForMs(int milliseconds)
