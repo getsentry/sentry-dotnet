@@ -91,6 +91,17 @@ public sealed class Request : IJsonSerializable
     /// <value>The other.</value>
     public IDictionary<string, string> Other => InternalOther ??= new Dictionary<string, string>();
 
+    internal void AddHeaders(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers)
+    {
+        foreach (var header in headers)
+        {
+            Headers.Add(
+                header.Key,
+                string.Join("; ", header.Value)
+            );
+        }
+    }
+
     /// <summary>
     /// Clones this instance.
     /// </summary>

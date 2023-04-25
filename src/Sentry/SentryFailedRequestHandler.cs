@@ -1,3 +1,7 @@
+using System.Net;
+using System.Reflection.PortableExecutable;
+using Sentry.Internal;
+
 namespace Sentry;
 
 internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
@@ -5,6 +9,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
     private readonly IHub _hub;
     private readonly SentryOptions _options;
 
+    public const string ResponseKey = "response";
     public const string MechanismType = "SentryFailedRequestHandler";
 
     internal SentryFailedRequestHandler(IHub hub, SentryOptions options)
@@ -15,6 +20,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
 
     public void HandleResponse(HttpResponseMessage response)
     {
+        // Ensure reponse and request are not null
         if (response?.RequestMessage is null)
         {
             return;
@@ -54,46 +60,36 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
         catch (HttpRequestException exception)
         {
             exception.SetSentryMechanism(MechanismType);
-            _hub.CaptureException(exception);
-        }
 
-        /*
-         * Copied from SentryOkHttpInterceptorTest.kt in the Java SDK for reference
+            var @event = new SentryEvent(exception);
 
-        val hint = Hint()
-        hint.set(OKHTTP_REQUEST, request)
-        hint.set(OKHTTP_RESPONSE, response)
-
-        val sentryRequest = io.sentry.protocol.Request().apply {
-            url = requestUrl
-            // Cookie is only sent if isSendDefaultPii is enabled
-            cookies = if (hub.options.isSendDefaultPii) request.headers["Cookie"] else null
-            method = request.method
-            queryString = query
-            headers = getHeaders(request.headers)
-            fragment = urlFragment
-
-            request.body?.contentLength().ifHasValidLength {
-                bodySize = it
+            var sentryRequest = new Request
+            {
+                Url = uri?.AbsoluteUri,
+                QueryString = uri?.Query,
+                Method = response.RequestMessage.Method.Method,                
+            };
+            if (_options?.SendDefaultPii is true)
+            {
+                sentryRequest.Cookies = response.RequestMessage.Headers.GetCookies();
+                sentryRequest.AddHeaders(response.RequestMessage.Headers);
             }
-        }
 
-        val sentryResponse = io.sentry.protocol.Response().apply {
-            // Cookie is only sent if isSendDefaultPii is enabled due to PII
-            cookies = if (hub.options.isSendDefaultPii) response.headers["Cookie"] else null
-            headers = getHeaders(response.headers)
-            statusCode = response.code
-
-            response.body?.contentLength().ifHasValidLength {
-                bodySize = it
+            var responseContext = new ResponseContext
+            {
+                BodySize = response.Content?.Headers?.ContentLength ?? null,
+                StatusCode = (short)response.StatusCode
+            };
+            if (_options?.SendDefaultPii is true)
+            {
+                responseContext.Cookies = response.Headers.GetCookies();
+                responseContext.AddHeaders(response.Headers);
             }
+
+            @event.Request = sentryRequest;
+            @event.Contexts[ResponseKey] = responseContext;
+
+            _hub.CaptureEvent(@event);
         }
-
-        event.request = sentryRequest
-        event.contexts.setResponse(sentryResponse)
-
-        hub.captureEvent(event, hint)
-    } 
-         */
     }
 }

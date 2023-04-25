@@ -123,40 +123,24 @@ public class SentryFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_Capture_Mechanism()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void HandleResponse_Capture_Hints()
-    {
-        throw new NotImplementedException();
-
-        //verify(fixture.hub).captureEvent(
-        //    any(),
-        //    check<Hint> {
-        //    assertNotNull(it.get(TypeCheckHint.OKHTTP_REQUEST))
-        //        assertNotNull(it.get(TypeCheckHint.OKHTTP_RESPONSE))
-        //    }
-        //)
-    }
-
-    [Fact]
     public void HandleResponse_Capture_RequestAndResponse()
     {
         // Arrange
         var options = new SentryOptions
         {
-            CaptureFailedRequests = true
+            CaptureFailedRequests = true,
+            SendDefaultPii = true
         };
         var sut = GetSut(options);
 
         var url = "http://foo/bar/hello";
-        var queryString = "myQuery=myValue";
+        var queryString = "?myQuery=myValue";
         var fragment = "myFragment";
+        var absoluteUri = $"{url}{queryString}#{fragment}";
         var response = InternalServerErrorResponse(); // This is in the range
-        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, $"{url}?{queryString}#{fragment}");
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Post, absoluteUri);
+        response.Headers.Add("myHeader", "myValue");
+        response.Content = new StringContent("Something broke!", Encoding.UTF8, "text/plain");
 
         // Act
         SentryEvent @event = null;
@@ -168,122 +152,61 @@ public class SentryFailedRequestHandlerTests
         {
             @event.Should().NotBeNull();
 
+            // Ensure the mechanism is set
+            @event.Exception.Data[Mechanism.MechanismKey].Should().Be(
+                SentryFailedRequestHandler.MechanismType
+                );
+
+            // Ensure the request properties are captured
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());
-            @event.Request.Url.Should().Be(url);
+            @event.Request.Url.Should().Be(absoluteUri);
             @event.Request.QueryString.Should().Be(queryString);
-            // Not sure how we want to handle fragments in .NET... potentially we add a Fragment
-            // property to the Request class, but that might be a breaking change.
-            // @event.Request.Other.Should().Contain(other => other.Key == "fragment" && other.Value == fragment);
 
-            throw new NotImplementedException("Test doesn't yet check for the response is set") ;
-            //@event.Contexts.Should().Contain(x =>
-            //    x.Key == "response"
-            //    && (
-            //        x.Value is JsonElement
-            //        || x.Value is string)
-            //    );
+            // Ensure the response context is captured
+            @event.Contexts.Should().Contain(x =>
+                x.Key == SentryFailedRequestHandler.ResponseKey
+                && x.Value is ResponseContext
+                );
+            var responseContext = @event.Contexts[SentryFailedRequestHandler.ResponseKey] as ResponseContext;
+            responseContext?.StatusCode.Should().Be((short)response.StatusCode);
+            responseContext?.BodySize.Should().Be(response.Content.Headers.ContentLength);
+            responseContext?.Headers.Count.Should().Be(1);
+            responseContext?.Headers.Should().ContainKey("myHeader");
+            responseContext?.Headers.Should().ContainValue("myValue");
         }
-
-        /*
-            @Test
-            fun `captures an error event with request and response fields set`() {
-                val statusCode = 500
-                val sut = fixture.getSut(
-                    captureFailedRequests = true,
-                    httpStatusCode = statusCode,
-                    responseBody = "fail"
-                )
-
-                val request = getRequest(url = "/hello?myQuery=myValue#myFragment")
-                val response = sut.newCall(request).execute()
-
-                verify(fixture.hub).captureEvent(
-                    check {
-                        val sentryRequest = it.request!!
-                        assertEquals("http://localhost:${fixture.server.port}/hello", sentryRequest.url)
-                        assertEquals("myQuery=myValue", sentryRequest.queryString)
-                        assertEquals("myFragment", sentryRequest.fragment)
-                        assertEquals("GET", sentryRequest.method)
-
-                        // because of isSendDefaultPii
-                        assertNull(sentryRequest.headers)
-                        assertNull(sentryRequest.cookies)
-
-                        val sentryResponse = it.contexts.response!!
-                        assertEquals(statusCode, sentryResponse.statusCode)
-                        assertEquals(response.body!!.contentLength(), sentryResponse.bodySize)
-
-                        // because of isSendDefaultPii
-                        assertNull(sentryRequest.headers)
-                        assertNull(sentryRequest.cookies)
-
-                        assertTrue(it.throwable is SentryHttpClientException)
-                    },
-                    any<Hint>()
-                )
-            }
-         */
     }
 
     [Fact]
-    public void HandleResponse_Capture_RequestBodySize()
+    public void HandleResponse_Capture_Default_SkipCookiesAndHeaders()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            SendDefaultPii = false
+        };
+        var sut = GetSut(options);
 
-        /*
-                @Test
-                fun `captures an error event with request body size`() {
-                    val sut = fixture.getSut(
-                        captureFailedRequests = true,
-                        httpStatusCode = 500,
-                    )
+        var response = InternalServerErrorResponse(); // This is in the range
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Post, "http://foo/bar");
+        response.Headers.Add("myHeader", "myValue");
+        response.Content = new StringContent("Something broke!", Encoding.UTF8, "text/plain");
+        response.Headers.Add("Cookie", "myCookie=myValue");
 
-                    val body = "fail"
-                        .toRequestBody(
-                            "text/plain"
-                                .toMediaType()
-                        )
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e));
+        sut.HandleResponse(response);
 
-                    sut.newCall(postRequest(body = body)).execute()
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Should().NotBeNull();
 
-                    verify(fixture.hub).captureEvent(
-                        check {
-                            val sentryRequest = it.request!!
-                            assertEquals(body.contentLength(), sentryRequest.bodySize)
-                        },
-                        any<Hint>()
-                    )
-                }
-         */
-    }
-
-    [Fact]
-    public void HandleResponse_Capture_Headers()
-    {
-        throw new NotImplementedException();
-
-        /*
-                @Test
-                fun `captures an error event with headers`() {
-                    val sut = fixture.getSut(
-                        captureFailedRequests = true,
-                        httpStatusCode = 500,
-                        sendDefaultPii = true
-                    )
-
-                    sut.newCall(getRequest()).execute()
-
-                    verify(fixture.hub).captureEvent(
-                        check {
-                            val sentryRequest = it.request!!
-                            assertEquals("myValue", sentryRequest.headers!!["myHeader"])
-
-                            val sentryResponse = it.contexts.response!!
-                            assertEquals("myValue", sentryResponse.headers!!["myResponseHeader"])
-                        },
-                        any<Hint>()
-                    )
-                }  
-         */
+            // Cookies and headers are not captured
+            var responseContext = @event.Contexts[SentryFailedRequestHandler.ResponseKey] as ResponseContext;
+            responseContext?.Headers.Should().BeNullOrEmpty();
+            responseContext?.Cookies.Should().BeNullOrEmpty();
+        }
     }
 }

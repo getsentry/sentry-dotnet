@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Create a Sentry event for failed HTTP requests ([#2320](https://github.com/getsentry/sentry-dotnet/pull/2320))
 
 ### Features
 
