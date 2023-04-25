@@ -1,7 +1,8 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
-namespace Sentry;
+namespace Sentry.Protocol;
 
 /// <summary>
 /// Sentry Response context interface.
@@ -22,8 +23,13 @@ namespace Sentry;
 ///}
 /// </example>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/types/#responsecontext"/>
-public sealed class ResponseContext : IJsonSerializable
+public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatable<Response>
 {
+    /// <summary>
+    /// Tells Sentry which type of context this is.
+    /// </summary>
+    public const string Type = "response";
+
     internal Dictionary<string, string>? InternalHeaders { get; set; }
 
     /// <summary>
@@ -67,27 +73,34 @@ public sealed class ResponseContext : IJsonSerializable
     /// <summary>
     /// Clones this instance.
     /// </summary>
-    public ResponseContext Clone()
+    public Response Clone()
     {
-        var response = new ResponseContext();
+        var response = new Response();
 
-        CopyTo(response);
+        response.UpdateFrom(this);
 
         return response;
     }
 
-    internal void CopyTo(ResponseContext? response)
+    public void UpdateFrom(Response source)
     {
-        if (response == null)
+        if (source == null)
         {
             return;
         }
 
-        response.BodySize ??= BodySize;
-        response.Cookies ??= Cookies;
-        response.StatusCode ??= StatusCode;
+        BodySize ??= source.BodySize;
+        Cookies ??= source.Cookies;
+        StatusCode ??= source.StatusCode;
+        source.InternalHeaders?.TryCopyTo(Headers);
+    }
 
-        InternalHeaders?.TryCopyTo(response.Headers);
+    public void UpdateFrom(object source)
+    {
+        if (source is Response response)
+        {
+            ((IUpdatable<Response>)this).UpdateFrom(response);
+        }
     }
 
     /// <inheritdoc />
@@ -95,6 +108,7 @@ public sealed class ResponseContext : IJsonSerializable
     {
         writer.WriteStartObject();
 
+        writer.WriteString("type", Type);
         writer.WriteNumberIfNotNull("body_size", BodySize);
         writer.WriteStringIfNotWhiteSpace("cookies", Cookies);
         writer.WriteStringDictionaryIfNotEmpty("headers", InternalHeaders!);
@@ -106,14 +120,14 @@ public sealed class ResponseContext : IJsonSerializable
     /// <summary>
     /// Parses from JSON.
     /// </summary>
-    public static ResponseContext FromJson(JsonElement json)
+    public static Response FromJson(JsonElement json)
     {
         var bodySize = json.GetPropertyOrNull("body_size")?.GetInt64();
         var cookies = json.GetPropertyOrNull("cookies")?.GetString();
         var headers = json.GetPropertyOrNull("headers")?.GetStringDictionaryOrNull();
         var statusCode = json.GetPropertyOrNull("status_code")?.GetInt16();
 
-        return new ResponseContext
+        return new Response
         {
             BodySize = bodySize,
             Cookies = cookies,

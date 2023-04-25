@@ -388,17 +388,6 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Request FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class ResponseContext : Sentry.IJsonSerializable
-    {
-        public ResponseContext() { }
-        public long? BodySize { get; set; }
-        public string? Cookies { get; set; }
-        public System.Collections.Generic.IDictionary<string, string> Headers { get; }
-        public short? StatusCode { get; set; }
-        public Sentry.ResponseContext Clone() { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.ResponseContext FromJson(System.Text.Json.JsonElement json) { }
-    }
     public class Scope : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags
     {
         public Scope(Sentry.SentryOptions? options) { }
@@ -1539,6 +1528,17 @@ namespace Sentry.Protocol
         public string? Version { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.OperatingSystem FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class Response : Sentry.IJsonSerializable
+    {
+        public Response() { }
+        public long? BodySize { get; set; }
+        public string? Cookies { get; set; }
+        public System.Collections.Generic.IDictionary<string, string> Headers { get; }
+        public short? StatusCode { get; set; }
+        public Sentry.Protocol.Response Clone() { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.Protocol.Response FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class Runtime : Sentry.IJsonSerializable
     {

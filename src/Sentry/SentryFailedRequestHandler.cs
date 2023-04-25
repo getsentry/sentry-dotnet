@@ -1,6 +1,7 @@
 using System.Net;
 using System.Reflection.PortableExecutable;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -9,7 +10,6 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
     private readonly IHub _hub;
     private readonly SentryOptions _options;
 
-    public const string ResponseKey = "response";
     public const string MechanismType = "SentryFailedRequestHandler";
 
     internal SentryFailedRequestHandler(IHub hub, SentryOptions options)
@@ -75,11 +75,10 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
                 sentryRequest.AddHeaders(response.RequestMessage.Headers);
             }
 
-            var responseContext = new ResponseContext
-            {
-                BodySize = response.Content?.Headers?.ContentLength ?? null,
-                StatusCode = (short)response.StatusCode
-            };
+            var responseContext = new Response();
+            responseContext.StatusCode = (short)response.StatusCode;
+            responseContext.BodySize = response.Content?.Headers?.ContentLength;
+
             if (_options?.SendDefaultPii is true)
             {
                 responseContext.Cookies = response.Headers.GetCookies();
@@ -87,7 +86,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
             }
 
             @event.Request = sentryRequest;
-            @event.Contexts[ResponseKey] = responseContext;
+            @event.Contexts[Response.Type] = responseContext;
 
             _hub.CaptureEvent(@event);
         }

@@ -1,11 +1,11 @@
 # Changelog
 
 ## Unreleased
-- Create a Sentry event for failed HTTP requests ([#2320](https://github.com/getsentry/sentry-dotnet/pull/2320))
 
 ### Features
 
 - Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
+- Create a Sentry event for failed HTTP requests ([#2320](https://github.com/getsentry/sentry-dotnet/pull/2320))
 
 ### Fixes
 

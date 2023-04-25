@@ -164,15 +164,18 @@ public class SentryFailedRequestHandlerTests
 
             // Ensure the response context is captured
             @event.Contexts.Should().Contain(x =>
-                x.Key == SentryFailedRequestHandler.ResponseKey
-                && x.Value is ResponseContext
+                x.Key == Response.Type
+                && x.Value is Response
                 );
-            var responseContext = @event.Contexts[SentryFailedRequestHandler.ResponseKey] as ResponseContext;
+            var responseContext = @event.Contexts[Response.Type] as Response;
             responseContext?.StatusCode.Should().Be((short)response.StatusCode);
+#if !NETFRAMEWORK
+            // .NET 4.8 doesn't set the Content-Length header
+            // https://github.com/dotnet/runtime/issues/16162
             responseContext?.BodySize.Should().Be(response.Content.Headers.ContentLength);
-            responseContext?.Headers.Count.Should().Be(1);
-            responseContext?.Headers.Should().ContainKey("myHeader");
-            responseContext?.Headers.Should().ContainValue("myValue");
+#endif
+            @event.Contexts.Response?.Headers.Should().ContainKey("myHeader");
+            @event.Contexts.Response?.Headers.Should().ContainValue("myValue");
         }
     }
 
@@ -204,9 +207,8 @@ public class SentryFailedRequestHandlerTests
             @event.Should().NotBeNull();
 
             // Cookies and headers are not captured
-            var responseContext = @event.Contexts[SentryFailedRequestHandler.ResponseKey] as ResponseContext;
-            responseContext?.Headers.Should().BeNullOrEmpty();
-            responseContext?.Cookies.Should().BeNullOrEmpty();
+            @event.Contexts.Response?.Headers.Should().BeNullOrEmpty();
+            @event.Contexts.Response?.Cookies.Should().BeNullOrEmpty();
         }
     }
 }

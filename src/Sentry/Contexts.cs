@@ -36,6 +36,8 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
     /// </remarks>
     public OperatingSystem OperatingSystem => this.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
 
+    public Response Response => this.GetOrCreate<Response>(Response.Type);
+
     /// <summary>
     /// This describes a runtime in more detail.
     /// </summary>
@@ -143,6 +145,10 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
             else if (string.Equals(type, OperatingSystem.Type, StringComparison.OrdinalIgnoreCase))
             {
                 result[name] = OperatingSystem.FromJson(value);
+            }
+            else if (string.Equals(type, Response.Type, StringComparison.OrdinalIgnoreCase))
+            {
+                result[name] = Response.FromJson(value);
             }
             else if (string.Equals(type, Runtime.Type, StringComparison.OrdinalIgnoreCase))
             {

@@ -137,7 +137,7 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
-    public class HttpStatusCodeRange : System.IEquatable<Sentry.HttpStatusCodeRange>
+    public readonly struct HttpStatusCodeRange : System.IEquatable<Sentry.HttpStatusCodeRange>
     {
         public HttpStatusCodeRange(int statusCode) { }
         public HttpStatusCodeRange(int start, int end) { }
@@ -148,8 +148,8 @@ namespace Sentry
         public static Sentry.HttpStatusCodeRange op_Implicit(int statusCode) { }
         public static Sentry.HttpStatusCodeRange op_Implicit(System.Net.HttpStatusCode statusCode) { }
         public static Sentry.HttpStatusCodeRange op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
-                "start",
-                "end"})] System.ValueTuple<int, int> range) { }
+                "Start",
+                "End"})] System.ValueTuple<int, int> range) { }
         public static Sentry.HttpStatusCodeRange op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "start",
                 "end"})] System.ValueTuple<System.Net.HttpStatusCode, System.Net.HttpStatusCode> range) { }
@@ -925,6 +925,8 @@ namespace Sentry
     {
         public SubstringOrRegexPattern(System.Text.RegularExpressions.Regex regex) { }
         public SubstringOrRegexPattern(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
         public override string ToString() { }
         public static Sentry.SubstringOrRegexPattern op_Implicit(string substringOrRegexPattern) { }
     }
@@ -1526,6 +1528,17 @@ namespace Sentry.Protocol
         public string? Version { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.OperatingSystem FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class Response : Sentry.IJsonSerializable
+    {
+        public Response() { }
+        public long? BodySize { get; set; }
+        public string? Cookies { get; set; }
+        public System.Collections.Generic.IDictionary<string, string> Headers { get; }
+        public short? StatusCode { get; set; }
+        public Sentry.Protocol.Response Clone() { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.Protocol.Response FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class Runtime : Sentry.IJsonSerializable
     {

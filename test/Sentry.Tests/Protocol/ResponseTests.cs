@@ -1,12 +1,12 @@
-namespace Sentry.Tests;
+namespace Sentry.Tests.Protocol;
 
-public class ResponseContextTests
+public class ResponseTests
 {
     [Fact]
     public void Clone_CopyValues()
     {
         // Arrange
-        var sut = new ResponseContext
+        var sut = new Response
         {
             BodySize = 42,
             Cookies = "PHPSESSID=298zf09hf012fh2; csrftoken=u32t4o3tb3gg43; _gat=1;",
@@ -29,7 +29,7 @@ public class ResponseContextTests
     public void ToJson_CopyValues()
     {
         // Arrange
-        var expected = new ResponseContext
+        var expected = new Response
         {
             BodySize = 42,
             Cookies = "PHPSESSID=298zf09hf012fh2; csrftoken=u32t4o3tb3gg43; _gat=1;",
@@ -39,7 +39,7 @@ public class ResponseContextTests
 
         // Act
         var json = JsonDocument.Parse(expected.ToJsonString());
-        var actual = ResponseContext.FromJson(json.RootElement);
+        var actual = Response.FromJson(json.RootElement);
 
         // Assert
         actual.BodySize.Should().Be(expected.BodySize);
@@ -53,7 +53,7 @@ public class ResponseContextTests
     public void AddHeaders_CreatesOneEntryPerHeader()
     {
         // Arrange
-        var sut = new ResponseContext();
+        var sut = new Response();
         var headers = new List<KeyValuePair<string, IEnumerable<string>>>
         {
             new("X-Test", new[] { "header1", "header2" })
