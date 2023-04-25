@@ -11,6 +11,7 @@ internal class SampleProfilerSession
     private readonly Task _copyTask;
 
     private readonly CancellationTokenRegistration _stopRegistration;
+    private bool _stopped;
 
     private SampleProfilerSession(EventPipeSession session, MemoryStream stream, Task copyTask, CancellationTokenRegistration stopRegistration)
     {
@@ -44,8 +45,19 @@ internal class SampleProfilerSession
         return new SampleProfilerSession(session, stream, copyTask, stopRegistration);
     }
 
+    public void Stop()
+    {
+        if (!_stopped)
+        {
+            _stopRegistration.Unregister();
+            _session.Stop();
+            _stopped = true;
+        }
+    }
+
     public async Task<MemoryStream> FinishAsync()
     {
+        Stop();
         _stopRegistration.Unregister();
         await _session.StopAsync(CancellationToken.None).ConfigureAwait(false);
         await _copyTask.ConfigureAwait(false);
