@@ -39,7 +39,7 @@ public class ProfilingBenchmarks
         var clock = Stopwatch.StartNew();
         while (clock.ElapsedMilliseconds < milliseconds)
         {
-            // Rather arbitrary numnbers here, just to keep get the profiler to capture something.
+            // Rather arbitrary numnbers here, just to get the profiler to capture something.
             FindPrimeNumber(milliseconds);
             Thread.Sleep(milliseconds / 10);
         }
