@@ -405,7 +405,6 @@ public abstract class HttpTransportBase
                 .SerializeToStringAsync(_options.DiagnosticLogger, _clock, cancellationToken).ConfigureAwait(false);
             _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n", eventId, payload);
 
-
             // SDK is in debug mode, and envelope was too large. To help troubleshoot:
             const string persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
             if (response.StatusCode == HttpStatusCode.RequestEntityTooLarge

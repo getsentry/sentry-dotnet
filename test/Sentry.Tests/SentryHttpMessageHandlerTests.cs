@@ -44,7 +44,7 @@ public class SentryHttpMessageHandlerTests
             SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
-        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, failedRequestHandler, hub, options);
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub, options, failedRequestHandler);
         using var client = new HttpClient(sentryHandler);
 
         // Act
@@ -76,7 +76,7 @@ public class SentryHttpMessageHandlerTests
             SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
-        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, failedRequestHandler, hub, options);
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub, options, failedRequestHandler);
         using var client = new HttpClient(sentryHandler);
 
         // Act
@@ -220,7 +220,7 @@ public class SentryHttpMessageHandlerTests
         var options = new SentryOptions();
         var url = "https://localhost/";
 
-        using var sentryHandler = new SentryHttpMessageHandler(hub, failedRequestHandler, options);
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, failedRequestHandler);
         sentryHandler.InnerHandler = new FakeHttpMessageHandler(); // No reason to reach the Internet here
         using var client = new HttpClient(sentryHandler);
 
@@ -228,6 +228,6 @@ public class SentryHttpMessageHandlerTests
         await client.GetAsync(url);
 
         // Assert
-        failedRequestHandler.Received(1).CaptureEvent(Arg.Any<HttpRequestMessage>(), Arg.Any<HttpResponseMessage>());
+        failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
     }
 }

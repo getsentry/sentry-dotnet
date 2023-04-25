@@ -523,20 +523,16 @@ public class SentryOptions
     public string? CacheDirectoryPath { get; set; }
 
     /// <summary>
-    /// The SDK will only capture HTTP Client errors if it is enabled.
-    ///
-    /// <see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.
-    ///
-    /// Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.
-    /// 
-    /// Defaults to false due to PII reasons.
+    /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
+    /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
+    /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
+    /// <para>Defaults to false due to PII reasons.</para>
     /// </summary>
     public bool CaptureFailedRequests { get; set; } = false;
 
     /// <summary>
-    /// The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.
-    ///
-    /// Defaults to 500-599 (Server error responses only).
+    /// <para>The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.</para>
+    /// <para>Defaults to 500-599 (Server error responses only).</para>
     /// </summary>
     public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange> { (500, 599) };
 
@@ -546,11 +542,9 @@ public class SentryOptions
         );
 
     /// <summary>
-    /// The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.
-    ///
-    /// Targets may be URLs or Regular expressions.
-    ///
-    /// Matches "*." by default.
+    /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
+    /// <para>Targets may be URLs or Regular expressions.</para>
+    /// <para>Matches "*." by default.</para>
     /// </summary>
     public IList<SubstringOrRegexPattern> FailedRequestTargets {
         get => _failedRequestTargets;

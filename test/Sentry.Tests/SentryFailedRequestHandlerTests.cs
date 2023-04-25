@@ -10,23 +10,20 @@ public class SentryFailedRequestHandlerTests
     {
         _hub = Substitute.For<IHub>();
     }
-    
+
     private SentryFailedRequestHandler GetSut(SentryOptions options)
     {
         return new SentryFailedRequestHandler(_hub, options);
     }
 
-    private static HttpResponseMessage OKResponse()
-        => new HttpResponseMessage(HttpStatusCode.OK);
-
     private static HttpResponseMessage ForbiddenResponse()
-        => new HttpResponseMessage(HttpStatusCode.Forbidden);
+        => new(HttpStatusCode.Forbidden);
 
     private static HttpResponseMessage InternalServerErrorResponse()
-        => new HttpResponseMessage(HttpStatusCode.InternalServerError);
+        => new(HttpStatusCode.InternalServerError);
 
     [Fact]
-    public void CaptureEvent_Disabled_DontCapture()
+    public void HandleResponse_Disabled_DontCapture()
     {
         // Arrange
         var sut = GetSut(new SentryOptions
@@ -34,18 +31,18 @@ public class SentryFailedRequestHandlerTests
             CaptureFailedRequests = false
         });
 
-        var request = new HttpRequestMessage();
         var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage();
 
         // Act
-        sut.CaptureEvent(request, response);
+        sut.HandleResponse(response);
 
         // Assert
         _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
-    public void CaptureEvent_EnabledButNotInRange_DontCapture()
+    public void HandleResponse_EnabledButNotInRange_DontCapture()
     {
         // Arrange
         var sut = GetSut(new SentryOptions
@@ -53,18 +50,18 @@ public class SentryFailedRequestHandlerTests
             CaptureFailedRequests = true
         });
 
-        var request = new HttpRequestMessage();
         var response = ForbiddenResponse(); // 403 is not in default range (500-599)
+        response.RequestMessage = new HttpRequestMessage();
 
         // Act
-        sut.CaptureEvent(request, response);
+        sut?.HandleResponse(response);
 
         // Assert
-        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _hub?.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
-    public void CaptureEvent_RequestsToSentryDsn_DontCapture()
+    public void HandleResponse_RequestsToSentryDsn_DontCapture()
     {
         // Arrange
         var options = new SentryOptions
@@ -74,18 +71,18 @@ public class SentryFailedRequestHandlerTests
         };
         var sut = GetSut(options);
 
-        var request = new HttpRequestMessage(HttpMethod.Post, options.Dsn); 
-        var response = InternalServerErrorResponse(); 
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Post, options.Dsn);
 
         // Act
-        sut.CaptureEvent(request, response);
+        sut.HandleResponse(response);
 
         // Assert
         _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
-    public void CaptureEvent_NoMatchingTarget_DontCapture()
+    public void HandleResponse_NoMatchingTarget_DontCapture()
     {
         // Arrange
         var options = new SentryOptions
@@ -95,18 +92,18 @@ public class SentryFailedRequestHandlerTests
         };
         var sut = GetSut(options);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "http://bar/"); 
         var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://bar/");
 
         // Act
-        sut.CaptureEvent(request, response);
+        sut.HandleResponse(response);
 
         // Assert
         _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
-    public void CaptureEvent_Capture_FailedRequest()
+    public void HandleResponse_Capture_FailedRequest()
     {
         // Arrange
         var options = new SentryOptions
@@ -115,24 +112,24 @@ public class SentryFailedRequestHandlerTests
         };
         var sut = GetSut(options);
 
-        var request = new HttpRequestMessage();
-        var response = InternalServerErrorResponse(); 
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage();
 
         // Act
-        sut.CaptureEvent(request, response);
+        sut.HandleResponse(response);
 
         // Assert
         _hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>());
     }
 
     [Fact]
-    public void CaptureEvent_Capture_Mechanism()
+    public void HandleResponse_Capture_Mechanism()
     {
         throw new NotImplementedException();
     }
 
     [Fact]
-    public void CaptureEvent_Capture_Hints()
+    public void HandleResponse_Capture_Hints()
     {
         throw new NotImplementedException();
 
@@ -146,7 +143,7 @@ public class SentryFailedRequestHandlerTests
     }
 
     [Fact]
-    public void CaptureEvent_Capture_RequestAndResponse()
+    public void HandleResponse_Capture_RequestAndResponse()
     {
         // Arrange
         var options = new SentryOptions
@@ -158,17 +155,17 @@ public class SentryFailedRequestHandlerTests
         var url = "http://foo/bar/hello";
         var queryString = "myQuery=myValue";
         var fragment = "myFragment";
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{url}?{queryString}#{fragment}");
         var response = InternalServerErrorResponse(); // This is in the range
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, $"{url}?{queryString}#{fragment}");
 
         // Act
         SentryEvent @event = null;
         _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e));
-        sut.CaptureEvent(request, response);
+        sut.HandleResponse(response);
 
         // Assert
         using (new AssertionScope())
-        {            
+        {
             @event.Should().NotBeNull();
 
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());
@@ -228,9 +225,8 @@ public class SentryFailedRequestHandlerTests
          */
     }
 
-
     [Fact]
-    public void CaptureEvent_Capture_RequestBodySize()
+    public void HandleResponse_Capture_RequestBodySize()
     {
         throw new NotImplementedException();
 
@@ -261,9 +257,8 @@ public class SentryFailedRequestHandlerTests
          */
     }
 
-
     [Fact]
-    public void CaptureEvent_Capture_Headers()
+    public void HandleResponse_Capture_Headers()
     {
         throw new NotImplementedException();
 

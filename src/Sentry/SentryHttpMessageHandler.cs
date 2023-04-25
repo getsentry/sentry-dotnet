@@ -97,7 +97,7 @@ public class SentryHttpMessageHandler : DelegatingHandler
             _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 
             // Create events for failed requests
-            _failedRequestHandler?.CaptureEvent(request, response);
+            _failedRequestHandler?.HandleResponse(response);
 
             // This will handle unsuccessful status codes as well
             span?.Finish(SpanStatusConverter.FromHttpStatusCode(response.StatusCode));

@@ -1,3 +1,5 @@
+using NSubstitute.ExceptionExtensions;
+
 namespace Sentry.Tests;
 
 public class HttpStatusCodeRangeTests
@@ -6,8 +8,8 @@ public class HttpStatusCodeRangeTests
     public void HttpStatusCodeRange_Includes_Start()
     {
         // Arrange
-        int start = 100;
-        int end = 200;
+        var start = 100;
+        var end = 200;
         HttpStatusCodeRange sut = (start, end);
 
         // Act
@@ -21,8 +23,8 @@ public class HttpStatusCodeRangeTests
     public void HttpStatusCodeRange_Includes_End()
     {
         // Arrange
-        int start = 100;
-        int end = 200;
+        var start = 100;
+        var end = 200;
 
         HttpStatusCodeRange sut = (start, end);
 
@@ -37,8 +39,8 @@ public class HttpStatusCodeRangeTests
     public void HttpStatusCodeRange_Excludes_BelowStart()
     {
         // Arrange
-        int start = 100;
-        int end = 200;
+        var start = 100;
+        var end = 200;
         HttpStatusCodeRange sut = (start, end);
 
         // Act
@@ -52,8 +54,8 @@ public class HttpStatusCodeRangeTests
     public void HttpStatusCodeRange_Excludes_AboveEnd()
     {
         // Arrange
-        int start = 100;
-        int end = 200;
+        var start = 100;
+        var end = 200;
         HttpStatusCodeRange sut = (start, end);
 
         // Act
@@ -64,18 +66,14 @@ public class HttpStatusCodeRangeTests
     }
 
     [Fact]
-    public void HttpStatusCodeRange_Can_Be_Inverted()
+    public void HttpStatusCodeRange_Start_After_End_Throws()
     {
         // Arrange
-        int start = 100;
-        int end = 200;
-        HttpStatusCodeRange sut = (end, start);
+        var start = 200;
+        var end = 100;
 
-        // Act
-        var inRange = sut.Contains(101);
-
-        // Assert
-        inRange.Should().BeTrue();
+        // Act & Assert
+        Assert.ThrowsAny<ArgumentOutOfRangeException>(() => new HttpStatusCodeRange(start, end));
     }
 
     [Fact]
