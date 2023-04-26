@@ -197,6 +197,8 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
         ) ?? false;
     }
 
+    internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
+
     /// <summary>
     /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
     /// </summary>
