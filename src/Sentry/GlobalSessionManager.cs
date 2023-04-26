@@ -340,7 +340,6 @@ internal class GlobalSessionManager : ISessionManager
             EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
         }
 
-        AddSessionBreadcrumb("Starting Sentry Session");
         _options.LogInfo("Started new session (SID: {0}; DID: {1}).",
             session.Id, session.DistinctId);
 
@@ -360,7 +359,6 @@ internal class GlobalSessionManager : ISessionManager
             session.ReportError();
         }
 
-        AddSessionBreadcrumb("Ending Sentry Session");
         _options.LogInfo("Ended session (SID: {0}; DID: {1}) with status '{2}'.",
             session.Id, session.DistinctId, status);
 
@@ -390,8 +388,6 @@ internal class GlobalSessionManager : ISessionManager
     {
         if (_currentSession is { } session)
         {
-            AddSessionBreadcrumb("Pausing Sentry Session");
-
             var now = _clock.GetUtcNow();
             _lastPauseTimestamp = now;
             PersistSession(session.CreateUpdate(false, now), now);
@@ -408,8 +404,6 @@ internal class GlobalSessionManager : ISessionManager
 
             return Array.Empty<SessionUpdate>();
         }
-
-        AddSessionBreadcrumb("Resuming Sentry Session");
 
         // Reset the pause timestamp since the session is about to be resumed
         _lastPauseTimestamp = null;
@@ -472,7 +466,4 @@ internal class GlobalSessionManager : ISessionManager
 
         return null;
     }
-
-    private static void AddSessionBreadcrumb(string message)
-        => SentrySdk.AddBreadcrumb(message, "app.lifecycle", "session");
 }
