@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 
 namespace Sentry.Internal;
 
@@ -58,14 +59,12 @@ internal class Hub : IHubEx, IDisposable
 
         _enricher = new Enricher(options);
 
-        var integrations = options.Integrations;
-        if (integrations?.Count > 0)
+        // An integration _can_ deregister itself, so make a copy of the list before iterating.
+        var integrations = options.Integrations?.ToList() ?? Enumerable.Empty<ISdkIntegration>();
+        foreach (var integration in integrations)
         {
-            foreach (var integration in integrations)
-            {
-                options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                integration.Register(this, options);
-            }
+            options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
+            integration.Register(this, options);
         }
     }
 
