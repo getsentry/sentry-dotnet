@@ -263,6 +263,15 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
+    /// Removes all event processors of type <typeparamref name="TProcessor"/>
+    /// </summary>
+    /// <typeparam name="TProcessor">The type of processor(s) to remove.</typeparam>
+    /// <param name="options">The SentryOptions to remove the processor(s) from.</param>
+    public static void RemoveEventProcessor<TProcessor>(this SentryOptions options)
+        where TProcessor : ISentryEventProcessor
+        => options.EventProcessors?.RemoveAll(processor => processor is TProcessor);
+
+    /// <summary>
     /// Adds an event processor provider which is invoked when creating a <see cref="SentryEvent"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor provider.</param>
@@ -312,6 +321,15 @@ public static class SentryOptionsExtensions
             options.TransactionProcessors.AddRange(processors);
         }
     }
+
+    /// <summary>
+    /// Removes all transaction processors of type <typeparamref name="TProcessor"/>
+    /// </summary>
+    /// <typeparam name="TProcessor">The type of processor(s) to remove.</typeparam>
+    /// <param name="options">The SentryOptions to remove the processor(s) from.</param>
+    public static void RemoveTransactionProcessor<TProcessor>(this SentryOptions options)
+        where TProcessor : ISentryTransactionProcessor
+        => options.TransactionProcessors?.RemoveAll(processor => processor is TProcessor);
 
     /// <summary>
     /// Adds an transaction processor provider which is invoked when creating a <see cref="Transaction"/>.
