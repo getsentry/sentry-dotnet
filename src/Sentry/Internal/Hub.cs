@@ -348,7 +348,13 @@ internal class Hub : IHubEx, IDisposable
                 actualScope.SessionUpdate = _sessionManager.ReportError();
             }
 
-            var id = currentScope.Value.CaptureEvent(evt, actualScope);
+            // When a transaction is present, copy its DSC to the event.
+            var transaction = actualScope.Transaction as TransactionTracer;
+            evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
+
+            // Now capture the event with the Sentry client on the current scope.
+            var sentryClient = currentScope.Value;
+            var id = sentryClient.CaptureEvent(evt, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
@@ -357,7 +363,7 @@ internal class Hub : IHubEx, IDisposable
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                actualScope.Transaction?.Finish(SpanStatus.Aborted);
+                transaction?.Finish(SpanStatus.Aborted);
             }
 
             return id;
