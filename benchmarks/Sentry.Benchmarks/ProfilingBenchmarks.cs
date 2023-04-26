@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using Microsoft.Diagnostics.NETCore.Client;
 using NSubstitute;
 using Sentry.Internal;
 using Sentry.Profiling;
@@ -7,23 +8,24 @@ namespace Sentry.Benchmarks;
 
 public class ProfilingBenchmarks
 {
-    [Params(25, 100, 1000, 10000)]
-    public int TxRuntimeMs;
-
     private IHub _hub = Substitute.For<IHub>();
     private ITransactionProfilerFactory _factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new());
 
     public IEnumerable<object[]> Arguments()
     {
-        yield return new object[] { false, false, false, 0 };
-
-        foreach (var processing in new[] { true, false })
+        foreach (var runtimeMs in new[] { 25, 100, 1000, 10000 })
         {
-            foreach (var rundown in new[] { true, false })
+            yield return new object[] { runtimeMs, false, false, false, 0 };
+
+            foreach (var processing in new[] { true, false })
             {
-                foreach (var bufferMB in new[] { 32, 256 })
+                foreach (var rundown in new[] { true, false })
                 {
-                    yield return new object[] { true, processing, rundown, bufferMB };
+                    // Note (ID): different buffer size doesn't make any difference in performance.
+                    foreach (var bufferMB in new[] { /* 32,*/ 256 })
+                    {
+                        yield return new object[] { runtimeMs, true, processing, rundown, bufferMB };
+                    }
                 }
             }
         }
@@ -31,7 +33,7 @@ public class ProfilingBenchmarks
 
     [Benchmark]
     [ArgumentsSource(nameof(Arguments))]
-    public void Transaction(bool profiling, bool processing, bool rundown, int bufferMB)
+    public void Transaction(int runtimeMs, bool profiling, bool processing, bool rundown, int bufferMB)
     {
         var tt = new TransactionTracer(_hub, "test", "");
         SampleProfilerSession.RequestRundown = rundown;
@@ -40,7 +42,7 @@ public class ProfilingBenchmarks
         {
             tt.TransactionProfiler = _factory.Start(tt, CancellationToken.None);
         }
-        RunForMs(TxRuntimeMs);
+        RunForMs(runtimeMs);
         tt.TransactionProfiler?.Finish();
         var transaction = new Transaction(tt);
         if (processing)
@@ -85,5 +87,24 @@ public class ProfilingBenchmarks
             a++;
         }
         return (--a);
+    }
+
+    [Benchmark]
+    public void DiagnosticsClientNew()
+    {
+        var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
+    }
+
+    [Benchmark]
+    public void SessionStartStop()
+    {
+        var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
+        var session = client.StartEventPipeSession(
+            SampleProfilerSession.Providers,
+            SampleProfilerSession.RequestRundown,
+            SampleProfilerSession.CircularBufferMB
+        );
+        session.EventStream.Dispose();
+        session.Dispose();
     }
 }

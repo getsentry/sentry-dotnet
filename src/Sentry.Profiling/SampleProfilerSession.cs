@@ -62,8 +62,6 @@ internal class SampleProfilerSession
     public async Task<MemoryStream> FinishAsync()
     {
         Stop();
-        _stopRegistration.Unregister();
-        await _session.StopAsync(CancellationToken.None).ConfigureAwait(false);
         await _copyTask.ConfigureAwait(false);
         _session.Dispose();
         _stream.Position = 0;
