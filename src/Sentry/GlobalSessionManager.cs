@@ -374,8 +374,8 @@ internal class GlobalSessionManager : ISessionManager
         var session = Interlocked.Exchange(ref _currentSession, null);
         if (session is null)
         {
-            _options.LogDebug("Failed to end session because there is none active.");
 
+            _options.LogWarning("Failed to end session because there is none active.");
             return null;
         }
 
@@ -386,24 +386,35 @@ internal class GlobalSessionManager : ISessionManager
 
     public void PauseSession()
     {
-        if (_currentSession is { } session)
+        if (_currentSession is not { } session)
         {
-            var now = _clock.GetUtcNow();
-            _lastPauseTimestamp = now;
-            PersistSession(session.CreateUpdate(false, now), now);
+            _options.LogWarning("Attempted to pause a session, but a session has not been started.");
+            return;
         }
+
+        _options.LogInfo("Pausing session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
+
+        var now = _clock.GetUtcNow();
+        _lastPauseTimestamp = now;
+        PersistSession(session.CreateUpdate(false, now), now);
     }
 
     public IReadOnlyList<SessionUpdate> ResumeSession()
     {
+        if (_currentSession is not { } session)
+        {
+            _options.LogWarning("Attempted to resume a session, but a session has not been started.");
+            return Array.Empty<SessionUpdate>();
+        }
+
         // Ensure a session has been paused before
         if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
         {
-            _options.LogDebug(
-                "Attempted to resume a session, but the current session hasn't been paused.");
-
+            _options.LogWarning("Attempted to resume a session, but the current session hasn't been paused.");
             return Array.Empty<SessionUpdate>();
         }
+
+        _options.LogInfo("Resuming session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
 
         // Reset the pause timestamp since the session is about to be resumed
         _lastPauseTimestamp = null;
@@ -435,9 +446,8 @@ internal class GlobalSessionManager : ISessionManager
             return updates;
         }
 
-        _options.LogDebug(
-            "Paused session has been paused for {0}, which is shorter than the configured timeout.",
-            pauseDuration);
+        _options.LogInfo("Resumed session (SID: {0}; DID: {1}) after being paused for {2}.",
+            session.Id, session.DistinctId, pauseDuration);
 
         return Array.Empty<SessionUpdate>();
     }
