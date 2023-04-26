@@ -129,6 +129,14 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
+    /// Removes all filters of type <typeparamref name="TFilter"/>
+    /// </summary>
+    /// <typeparam name="TFilter">The type of filter(s) to remove.</typeparam>
+    /// <param name="options">The SentryOptions to remove the filter(s) from.</param>
+    public static void RemoveExceptionFilter<TFilter>(this SentryOptions options) where TFilter : IExceptionFilter
+        => options.ExceptionFilters = options.ExceptionFilters?.Where(p => p.GetType() != typeof(TFilter)).ToList();
+
+    /// <summary>
     /// Ignore exception of type <typeparamref name="TException"/> or derived.
     /// </summary>
     /// <typeparam name="TException">The type of the exception to ignore.</typeparam>
