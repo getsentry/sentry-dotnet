@@ -13,6 +13,7 @@ public class ProfilingBenchmarks
     private IHub _hub = Substitute.For<IHub>();
     private ITransactionProfilerFactory _factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new());
 
+    #region full transaction profiling
     public IEnumerable<object[]> ProfilerArguments()
     {
         foreach (var runtimeMs in new[] { 25, 100, 1000, 10000 })
@@ -41,6 +42,9 @@ public class ProfilingBenchmarks
         }
         return result;
     }
+    #endregion
+
+    #region utilities
 
     private long RunForMs(int milliseconds)
     {
@@ -80,7 +84,9 @@ public class ProfilingBenchmarks
         }
         return (--a);
     }
+    #endregion
 
+    #region Profiling session, DiagnosticsClient, etc.
     // Disabled because it skews the result table because it's in nanoseconds so everything else is printed as ns.
     // [Benchmark]
     public DiagnosticsClient DiagnosticsClientNew()
@@ -148,4 +154,39 @@ public class ProfilingBenchmarks
         var session = SampleProfilerSession.StartNew(CancellationToken.None);
         session.Stop();
     }
+    #endregion
+
+    #region Measure overhead of having a profiler enabled while doing work.
+    public int[] OverheadRunArguments { get; } = new[] { 10_000, 100_000 };
+
+    [BenchmarkCategory("overhead"), Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(OverheadRunArguments))]
+    public long DoHardWork(int n)
+    {
+        return ProfilingBenchmarks.FindPrimeNumber(n);
+    }
+
+    [BenchmarkCategory("overhead"), Benchmark]
+    [ArgumentsSource(nameof(OverheadRunArguments))]
+    public long DoHardWorkWhileProfiling(int n)
+    {
+        return ProfilingBenchmarks.FindPrimeNumber(n);
+    }
+
+    private ITransactionProfiler _profiler;
+
+    [GlobalSetup(Target = nameof(DoHardWorkWhileProfiling))]
+    public void StartProfiler()
+    {
+        _profiler = _factory.Start(new TransactionTracer(_hub, "", ""), CancellationToken.None);
+    }
+
+    [GlobalCleanup(Target = nameof(DoHardWorkWhileProfiling))]
+    public void StopProfiler()
+    {
+        _profiler?.Finish();
+        _profiler?.CollectAsync(new Transaction("", "")).Wait();
+        _profiler = null;
+    }
+    #endregion
 }
