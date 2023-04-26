@@ -6,6 +6,7 @@
 
 - Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
 - Improve `WithScope` and add `WithScopeAsync` ([#2303](https://github.com/getsentry/sentry-dotnet/pull/2303)) ([#2309](https://github.com/getsentry/sentry-dotnet/pull/2309))
+- Build .NET Standard 2.1 for Unity ([#2328](https://github.com/getsentry/sentry-dotnet/pull/2328))
 - Include Dynamic Sampling Context with error events, when there's a transaction ([#2332](https://github.com/getsentry/sentry-dotnet/pull/2332))
 
 ### Fixes
