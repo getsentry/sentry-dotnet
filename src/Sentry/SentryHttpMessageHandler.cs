@@ -47,7 +47,13 @@ public class SentryHttpMessageHandler : DelegatingHandler
     {
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? _hub.GetSentryOptions();
-        InnerHandler = innerHandler ?? new HttpClientHandler();
+
+        // Only assign the inner handler if it is supplied.  We can't assign null or it will throw.
+        // We also cannot assign a default value here, or it will throw when used with HttpMessageHandlerBuilderFilter.
+        if (innerHandler is not null)
+        {
+            InnerHandler = innerHandler;
+        }
     }
 
     /// <inheritdoc />
@@ -92,6 +98,10 @@ public class SentryHttpMessageHandler : DelegatingHandler
 
     private (ISpan? Span, string Method, string Url) ProcessRequest(HttpRequestMessage request)
     {
+        // Assign a default inner handler for convenience the first time this is used.
+        // We can't do this in a constructor, or it will throw when used with HttpMessageHandlerBuilderFilter.
+        InnerHandler ??= new HttpClientHandler();
+
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 

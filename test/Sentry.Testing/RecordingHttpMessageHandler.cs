@@ -4,10 +4,7 @@ public class RecordingHttpMessageHandler : DelegatingHandler
 {
     private readonly List<HttpRequestMessage> _requests = new();
 
-    public RecordingHttpMessageHandler()
-    {
-        InnerHandler = new FakeHttpMessageHandler();
-    }
+    public RecordingHttpMessageHandler() { }
 
     public RecordingHttpMessageHandler(HttpMessageHandler innerHandler) => InnerHandler = innerHandler;
 
