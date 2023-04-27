@@ -12,56 +12,49 @@ public class SentryHttpMessageHandler : DelegatingHandler
     private readonly SentryOptions? _options;
 
     /// <summary>
-    /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
-    /// </summary>
-    public SentryHttpMessageHandler(IHub hub)
-    {
-        _hub = hub;
-        _options = hub.GetSentryOptions();
-    }
-
-    internal SentryHttpMessageHandler(IHub hub, SentryOptions options)
-    {
-        _hub = hub;
-        _options = options;
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
-    /// </summary>
-    public SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub)
-        : this(hub)
-    {
-        InnerHandler = innerHandler;
-    }
-
-    internal SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub, SentryOptions options)
-        : this(hub, options)
-    {
-        InnerHandler = innerHandler;
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
-    /// </summary>
-    public SentryHttpMessageHandler(HttpMessageHandler innerHandler)
-        : this(innerHandler, HubAdapter.Instance) { }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="SentryHttpMessageHandler"/>.
+    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
     /// </summary>
     public SentryHttpMessageHandler()
-        : this(HubAdapter.Instance) { }
+        : this(default, default, default) { }
+
+    /// <summary>
+    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
+    /// </summary>
+    /// <param name="innerHandler">An inner message handler to delegate calls to.</param>
+    public SentryHttpMessageHandler(HttpMessageHandler innerHandler)
+        : this(default, default, innerHandler) { }
+
+    /// <summary>
+    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
+    /// </summary>
+    /// <param name="hub">The Sentry hub.</param>
+    public SentryHttpMessageHandler(IHub hub)
+        : this(hub, default)
+    {
+    }
+
+    /// <summary>
+    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
+    /// </summary>
+    /// <param name="innerHandler">An inner message handler to delegate calls to.</param>
+    /// <param name="hub">The Sentry hub.</param>
+    public SentryHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub)
+        : this(hub, default, innerHandler)
+    {
+    }
+
+    internal SentryHttpMessageHandler(IHub? hub, SentryOptions? options, HttpMessageHandler? innerHandler = default)
+    {
+        _hub = hub ?? HubAdapter.Instance;
+        _options = options ?? _hub.GetSentryOptions();
+        InnerHandler = innerHandler ?? new HttpClientHandler();
+    }
 
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        // Prevent null reference exception in the following call
-        // in case the user didn't set an inner handler.
-        InnerHandler ??= new HttpClientHandler();
-
         var requestMethod = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
