@@ -55,7 +55,44 @@ public class SentryHttpMessageHandler : DelegatingHandler
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var requestMethod = request.Method.Method.ToUpperInvariant();
+        var (span, method, url) = ProcessRequest(request);
+
+        try
+        {
+            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            HandleResponse(response, span, method, url);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            span?.Finish(ex);
+            throw;
+        }
+    }
+
+#if NET5_0_OR_GREATER
+    /// <inheritdoc />
+    protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var (span, method, url) = ProcessRequest(request);
+
+        try
+        {
+            var response = base.Send(request, cancellationToken);
+            HandleResponse(response, span, method, url);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            span?.Finish(ex);
+            throw;
+        }
+    }
+#endif
+
+    private (ISpan? Span, string Method, string Url) ProcessRequest(HttpRequestMessage request)
+    {
+        var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
         if (_options?.TracePropagationTargets.ShouldPropagateTrace(url) is true or null)
@@ -66,33 +103,25 @@ public class SentryHttpMessageHandler : DelegatingHandler
 
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        var span = _hub.GetSpan()?.StartChild(
-            "http.client",
-            // e.g. "GET https://example.com"
-            $"{requestMethod} {url}");
+        // e.g. "GET https://example.com"
+        var span = _hub.GetSpan()?.StartChild("http.client", $"{method} {url}");
 
-        try
+        return (span, method, url);
+    }
+
+    private void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url)
+    {
+        var breadcrumbData = new Dictionary<string, string>
         {
-            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            {"url", url},
+            {"method", method},
+            {"status_code", ((int) response.StatusCode).ToString()}
+        };
+        _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 
-            var breadcrumbData = new Dictionary<string, string>
-            {
-                { "url", url },
-                { "method", requestMethod },
-                { "status_code", ((int)response.StatusCode).ToString() }
-            };
-            _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
-
-            // This will handle unsuccessful status codes as well
-            span?.Finish(SpanStatusConverter.FromHttpStatusCode(response.StatusCode));
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            span?.Finish(ex);
-            throw;
-        }
+        // This will handle unsuccessful status codes as well
+        var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
+        span?.Finish(status);
     }
 
     private void AddSentryTraceHeader(HttpRequestMessage request)
