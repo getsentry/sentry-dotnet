@@ -169,7 +169,7 @@ public class SentryFailedRequestHandlerTests
                 );
             var responseContext = @event.Contexts[Response.Type] as Response;
             responseContext?.StatusCode.Should().Be((short)response.StatusCode);
-#if !NETFRAMEWORK
+#if NET5_0_OR_GREATER
             // .NET 4.8 doesn't set the Content-Length header
             // https://github.com/dotnet/runtime/issues/16162
             responseContext?.BodySize.Should().Be(response.Content.Headers.ContentLength);

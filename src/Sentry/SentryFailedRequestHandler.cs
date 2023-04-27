@@ -67,7 +67,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
             {
                 Url = uri?.AbsoluteUri,
                 QueryString = uri?.Query,
-                Method = response.RequestMessage.Method.Method,                
+                Method = response.RequestMessage.Method.Method,
             };
             if (_options?.SendDefaultPii is true)
             {
@@ -75,9 +75,15 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
                 sentryRequest.AddHeaders(response.RequestMessage.Headers);
             }
 
-            var responseContext = new Response();
-            responseContext.StatusCode = (short)response.StatusCode;
+            var responseContext = new Response {
+                StatusCode = (short)response.StatusCode
+            };
+
+            // .NET 4.8 doesn't set the Content-Length header
+            // https://github.com/dotnet/runtime/issues/16162
+#if NET5_0_OR_GREATER
             responseContext.BodySize = response.Content?.Headers?.ContentLength;
+#endif
 
             if (_options?.SendDefaultPii is true)
             {

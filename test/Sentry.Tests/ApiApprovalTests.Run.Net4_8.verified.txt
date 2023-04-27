@@ -65,6 +65,7 @@ namespace Sentry
         public Sentry.Protocol.Device Device { get; }
         public Sentry.Protocol.Gpu Gpu { get; }
         public Sentry.Protocol.OperatingSystem OperatingSystem { get; }
+        public Sentry.Protocol.Response Response { get; }
         public Sentry.Protocol.Runtime Runtime { get; }
         public Sentry.Protocol.Trace Trace { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
@@ -1545,12 +1546,15 @@ namespace Sentry.Protocol
     }
     public sealed class Response : Sentry.IJsonSerializable
     {
+        public const string Type = "response";
         public Response() { }
         public long? BodySize { get; set; }
         public string? Cookies { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Headers { get; }
         public short? StatusCode { get; set; }
         public Sentry.Protocol.Response Clone() { }
+        public void UpdateFrom(Sentry.Protocol.Response source) { }
+        public void UpdateFrom(object source) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Response FromJson(System.Text.Json.JsonElement json) { }
     }
