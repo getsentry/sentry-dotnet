@@ -6,48 +6,41 @@ public class ViewHierarchyTests
     public void WriteTo_ContainsRenderingSystemAndWindows()
     {
         // Arrange
-        using var stream = new MemoryStream();
-        using var writer = new Utf8JsonWriter(stream);
         var sut = new ViewHierarchy("Test_Rendering_System");
 
         // Act
-        sut.WriteTo(writer, null);
-
-        writer.Flush();
-        stream.Seek(0, SeekOrigin.Begin);
+        var actual = sut.ToJsonString(indented: true);
 
         // Assert
-        var serializedViewHierarchy = new StreamReader(stream, Encoding.ASCII).ReadToEnd();
-        serializedViewHierarchy.Should().Be(
-            "{" +
-                "\"rendering_system\":\"Test_Rendering_System\"," +
-                "\"windows\":[]" +
-            "}");
+        Assert.Equal("""
+            {
+              "rendering_system": "Test_Rendering_System",
+              "windows": []
+            }
+            """, actual);
     }
 
     [Fact]
     public void WriteTo_ContainsRenderingSystemAndOneWindow()
     {
         // Arrange
-        using var stream = new MemoryStream();
-        using var writer = new Utf8JsonWriter(stream);
         var sut = new ViewHierarchy("Test_Rendering_System");
         sut.Windows.Add(new ViewHierarchyNodeTests.TestViewHierarchyNode("Test_Node"));
 
         // Act
-        sut.WriteTo(writer, null);
-
-        writer.Flush();
-        stream.Seek(0, SeekOrigin.Begin);
+        var actual = sut.ToJsonString(indented: true);
 
         // Assert
-        var serializedViewHierarchy = new StreamReader(stream, Encoding.ASCII).ReadToEnd();
-        serializedViewHierarchy.Should().Be(
-            "{" +
-                "\"rendering_system\":\"Test_Rendering_System\"," +
-                "\"windows\":[" +
-                    "{\"type\":\"Test_Node\",\"children\":[]}" +
-                "]" +
-            "}");
+        Assert.Equal("""
+            {
+              "rendering_system": "Test_Rendering_System",
+              "windows": [
+                {
+                  "type": "Test_Node",
+                  "children": []
+                }
+              ]
+            }
+            """, actual);
     }
 }

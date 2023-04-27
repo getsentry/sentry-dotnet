@@ -73,7 +73,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(int.MaxValue);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":2147483647}", json);
+        Assert.Equal("""{"value":2147483647}""", json);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(long.MaxValue);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":9223372036854775807}", json);
+        Assert.Equal("""{"value":9223372036854775807}""", json);
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(ulong.MaxValue);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":18446744073709551615}", json);
+        Assert.Equal("""{"value":18446744073709551615}""", json);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(double.MaxValue);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":1.7976931348623157E+308}", json);
+        Assert.Equal("""{"value":1.7976931348623157E+308}""", json);
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(int.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":2147483647,\"unit\":\"none\"}", json);
+        Assert.Equal("""{"value":2147483647,"unit":"none"}""", json);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(long.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":9223372036854775807,\"unit\":\"none\"}", json);
+        Assert.Equal("""{"value":9223372036854775807,"unit":"none"}""", json);
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(ulong.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":18446744073709551615,\"unit\":\"none\"}", json);
+        Assert.Equal("""{"value":18446744073709551615,"unit":"none"}""", json);
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(double.MaxValue, MeasurementUnit.None);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":1.7976931348623157E+308,\"unit\":\"none\"}", json);
+        Assert.Equal("""{"value":1.7976931348623157E+308,"unit":"none"}""", json);
     }
 
     [Fact]
@@ -137,7 +137,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(int.MaxValue, MeasurementUnit.Duration.Second);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":2147483647,\"unit\":\"second\"}", json);
+        Assert.Equal("""{"value":2147483647,"unit":"second"}""", json);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(long.MaxValue, MeasurementUnit.Duration.Second);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":9223372036854775807,\"unit\":\"second\"}", json);
+        Assert.Equal("""{"value":9223372036854775807,"unit":"second"}""", json);
     }
 
     [Fact]
@@ -153,7 +153,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(ulong.MaxValue, MeasurementUnit.Duration.Second);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":18446744073709551615,\"unit\":\"second\"}", json);
+        Assert.Equal("""{"value":18446744073709551615,"unit":"second"}""", json);
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public partial class MeasurementTests
     {
         var m = new Measurement(double.MaxValue, MeasurementUnit.Duration.Second);
         var json = m.ToJsonString();
-        Assert.Equal("{\"value\":1.7976931348623157E+308,\"unit\":\"second\"}", json);
+        Assert.Equal("""{"value":1.7976931348623157E+308,"unit":"second"}""", json);
     }
 
     [Fact]

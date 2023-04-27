@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 
 namespace Sentry.Internal;
 
@@ -58,14 +59,12 @@ internal class Hub : IHubEx, IDisposable
 
         _enricher = new Enricher(options);
 
-        var integrations = options.Integrations;
-        if (integrations?.Count > 0)
+        // An integration _can_ deregister itself, so make a copy of the list before iterating.
+        var integrations = options.Integrations?.ToList() ?? Enumerable.Empty<ISdkIntegration>();
+        foreach (var integration in integrations)
         {
-            foreach (var integration in integrations)
-            {
-                options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                integration.Register(this, options);
-            }
+            options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
+            integration.Register(this, options);
         }
     }
 
@@ -97,17 +96,13 @@ internal class Hub : IHubEx, IDisposable
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
-    public void WithScope(Action<Scope> scopeCallback)
-    {
-        try
-        {
-            ScopeManager.WithScope(scopeCallback);
-        }
-        catch (Exception e)
-        {
-            _options.LogError("Failure to run callback WithScope", e);
-        }
-    }
+    public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
+
+    public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
+
+    public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
+
+    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
 
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
@@ -123,10 +118,12 @@ internal class Hub : IHubEx, IDisposable
     {
         var transaction = new TransactionTracer(this, context);
 
-        // If tracing is explicitly disabled, we will always sample out.
+        // If the hub is disabled, we will always sample out.  In other words, starting a transaction
+        // after disposing the hub will result in that transaction not being sent to Sentry.
+        // Additionally, we will always sample out if tracing is explicitly disabled.
         // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
         // that may have been already set (i.e.: from a sentry-trace header).
-        if (_options.EnableTracing is false)
+        if (!IsEnabled || _options.EnableTracing is false)
         {
             transaction.IsSampled = false;
             transaction.SampleRate = 0.0;
@@ -350,7 +347,13 @@ internal class Hub : IHubEx, IDisposable
                 actualScope.SessionUpdate = _sessionManager.ReportError();
             }
 
-            var id = currentScope.Value.CaptureEvent(evt, actualScope);
+            // When a transaction is present, copy its DSC to the event.
+            var transaction = actualScope.Transaction as TransactionTracer;
+            evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
+
+            // Now capture the event with the Sentry client on the current scope.
+            var sentryClient = currentScope.Value;
+            var id = sentryClient.CaptureEvent(evt, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
@@ -359,7 +362,7 @@ internal class Hub : IHubEx, IDisposable
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                actualScope.Transaction?.Finish(SpanStatus.Aborted);
+                transaction?.Finish(SpanStatus.Aborted);
             }
 
             return id;
@@ -390,10 +393,14 @@ internal class Hub : IHubEx, IDisposable
 
     public void CaptureTransaction(Transaction transaction)
     {
-        if (!IsEnabled)
-        {
-            return;
-        }
+        // Note: The hub should capture transactions even if it is disabled.
+        // This allows transactions to be reported as failed when they encountered an unhandled exception,
+        // in the case where the hub was disabled before the transaction was captured.
+        // For example, that can happen with a top-level async main because IDisposables are processed before
+        // the unhandled exception event fires.
+        //
+        // Any transactions started after the hub was disabled will already be sampled out and thus will
+        // not be passed along to sentry when captured here.
 
         try
         {

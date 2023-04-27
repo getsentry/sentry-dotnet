@@ -34,7 +34,7 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@d186a2a36cc67bfa1b860e6170d37fb9634742c7 # pin@v2
+        uses: github/codeql-action/init@b2c19fb9a2a485599ccf4ed5d65527d94bc57226 # pin@v2
         with:
           languages: csharp
 
@@ -45,6 +45,6 @@ jobs:
         run: dotnet build Sentry-CI-CodeQL.slnf --no-restore --nologo
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@d186a2a36cc67bfa1b860e6170d37fb9634742c7 # pin@v2
+        uses: github/codeql-action/analyze@b2c19fb9a2a485599ccf4ed5d65527d94bc57226 # pin@v2
         with:
           category: '/language:csharp'

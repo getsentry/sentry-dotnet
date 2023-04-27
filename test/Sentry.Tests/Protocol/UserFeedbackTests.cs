@@ -18,15 +18,17 @@ public class UserFeedbackTests
         using var stream = new MemoryStream();
 
         // Act
-        var serializedContent = userFeedback.ToJsonString(_testOutputLogger);
+        var actual = userFeedback.ToJsonString(_testOutputLogger, indented: true);
 
         // Assert
-        serializedContent.Should().Be(
-            "{" +
-            "\"event_id\":\"acbe351c61494e7b807fd7e82a435ffc\"," +
-            "\"name\":\"myName\"," +
-            "\"email\":\"myEmail@service.com\"," +
-            "\"comments\":\"my comment\"" +
-            "}");
+        Assert.Equal("""
+            {
+              "event_id": "acbe351c61494e7b807fd7e82a435ffc",
+              "name": "myName",
+              "email": "myEmail@service.com",
+              "comments": "my comment"
+            }
+            """,
+            actual);
     }
 }

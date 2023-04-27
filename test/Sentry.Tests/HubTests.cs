@@ -23,6 +23,7 @@ public partial class HubTests
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
+                EnableTracing = true,
                 AutoSessionTracking = false
             };
 
@@ -1098,11 +1099,11 @@ public partial class HubTests
         }
 
         // Act
-        var t = hub.StartTransaction("test", "test");
-        t.Finish();
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureTransaction(Arg.Any<Transaction>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled));
     }
 
 #if ANDROID && CI_BUILD
@@ -1147,4 +1148,88 @@ public partial class HubTests
         await transport.Received(1)
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public void WithScope_Works()
+    {
+        _fixture.Options.IsGlobalModeEnabled = false;
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        hub.WithScope(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+        });
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    [Fact]
+    public void WithScopeT_Works()
+    {
+        _fixture.Options.IsGlobalModeEnabled = false;
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        var result = hub.WithScope(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+
+            return true;
+        });
+
+        Assert.True(result);
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    [Fact]
+    public async Task WithScopeAsync_Works()
+    {
+        _fixture.Options.IsGlobalModeEnabled = false;
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        await hub.WithScopeAsync(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+
+            return Task.CompletedTask;
+        });
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    [Fact]
+    public async Task WithScopeAsyncT_Works()
+    {
+        _fixture.Options.IsGlobalModeEnabled = false;
+        var hub = _fixture.GetSut();
+        var originalScope = GetCurrentScope(hub);
+
+        var result = await hub.WithScopeAsync(scope =>
+        {
+            var newScope = GetCurrentScope(hub);
+            Assert.Same(newScope, scope);
+            Assert.NotSame(originalScope, scope);
+
+            return Task.FromResult(true);
+        });
+
+        Assert.True(result);
+
+        var finalScope = GetCurrentScope(hub);
+        Assert.Same(originalScope, finalScope);
+    }
+
+    private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
 }

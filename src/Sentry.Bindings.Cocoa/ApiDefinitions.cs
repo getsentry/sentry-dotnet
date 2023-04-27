@@ -2124,8 +2124,8 @@ interface SentryTraceContext : SentrySerializable
     [NullAllowed, Export ("userSegment")]
     string UserSegment { get; }
 
-    // @property (nonatomic) NSString * _Nullable sampleRate;
-    [NullAllowed, Export ("sampleRate")]
+    // @property (nonatomic, strong) NSString * _Nullable sampleRate;
+    [NullAllowed, Export ("sampleRate", ArgumentSemantic.Strong)]
     string SampleRate { get; set; }
 
     // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction userSegment:(NSString * _Nullable)userSegment sampleRate:(NSString * _Nullable)sampleRate;
@@ -2353,6 +2353,11 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("getSdkVersionString")]
     string SdkVersionString { get; }
+
+    // +(NSDictionary * _Nonnull)getExtraContext;
+    [Static]
+    [Export ("getExtraContext")]
+    NSDictionary ExtraContext { get; }
 
     // @property (copy, nonatomic, class) SentryOnAppStartMeasurementAvailable _Nullable onAppStartMeasurementAvailable;
     [Static]
