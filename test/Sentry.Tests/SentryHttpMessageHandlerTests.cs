@@ -31,6 +31,7 @@ public class SentryHttpMessageHandlerTests
     {
         // Arrange
         var hub = Substitute.For<IHub>();
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
         var options = new SentryOptions
         {
             TracePropagationTargets = new List<TracePropagationTarget>
@@ -43,7 +44,7 @@ public class SentryHttpMessageHandlerTests
             SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
-        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub, options);
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub, options, failedRequestHandler);
         using var client = new HttpClient(sentryHandler);
 
         // Act
@@ -62,6 +63,7 @@ public class SentryHttpMessageHandlerTests
     {
         // Arrange
         var hub = Substitute.For<IHub>();
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
         var options = new SentryOptions
         {
             TracePropagationTargets = new List<TracePropagationTarget>
@@ -74,7 +76,7 @@ public class SentryHttpMessageHandlerTests
             SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
-        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub, options);
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub, options, failedRequestHandler);
         using var client = new HttpClient(sentryHandler);
 
         // Act
@@ -198,6 +200,7 @@ public class SentryHttpMessageHandlerTests
         // Assert
         Assert.Equal(expectedType, breadcrumbGenerated.Type);
         Assert.Equal(expectedCategory, breadcrumbGenerated.Category);
+        Assert.NotNull(breadcrumbGenerated.Data);
 
         Assert.True(breadcrumbGenerated.Data.ContainsKey(urlKey));
         Assert.Equal(expectedBreadcrumbData[urlKey], breadcrumbGenerated.Data[urlKey]);
@@ -207,5 +210,25 @@ public class SentryHttpMessageHandlerTests
 
         Assert.True(breadcrumbGenerated.Data.ContainsKey(statusKey));
         Assert.Equal(expectedBreadcrumbData[statusKey], breadcrumbGenerated.Data[statusKey]);
+    }
+
+    [Fact]
+    public async Task SendAsync_Executed_FailedRequestsCaptured()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        var url = "https://localhost/";
+
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, failedRequestHandler);
+        sentryHandler.InnerHandler = new FakeHttpMessageHandler(); // No reason to reach the Internet here
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        await client.GetAsync(url);
+
+        // Assert
+        failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
     }
 }
