@@ -18,29 +18,31 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         {
             _hub.ConfigureScope(scope =>
             {
-                var transaction = _hub.StartTransaction(context.FunctionDefinition.Name, context.FunctionDefinition.EntryPoint);
+                var transaction = _hub.StartTransaction(context.FunctionDefinition.Name, "function");
                 scope.Transaction = transaction;
 
                 // TODO: how to indicate transaction was aborted
                 context.CancellationToken.Register(() => scope.SetExtra("aborted", true));
 
-                scope.SetTag("function.name", context.FunctionDefinition.Name);
-                scope.SetTag("function.entryPoint", context.FunctionDefinition.EntryPoint);
-                scope.SetTag("function.invocationId", context.InvocationId);
-
                 scope.UnsetTag("AzureFunctions_FunctionName");
                 scope.UnsetTag("AzureFunctions_InvocationId");
-                scope.UnsetTag("functionName");
-                scope.UnsetTag("invocationId");
+
+                scope.Contexts["function"] = new Dictionary<string, string>
+                {
+                    { "name", context.FunctionDefinition.Name },
+                    { "entryPoint", context.FunctionDefinition.EntryPoint },
+                    { "invocationId", context.InvocationId }
+                };
             });
 
-            await next(context);
+            await next(context).ConfigureAwait(false);
         }
         catch (Exception exception)
         {
-            // TODO: do I need to do here anything at all?
-
-            var ex = exception;
+            exception.SetSentryMechanism(nameof(SentryFunctionsWorkerMiddleware),
+                "This exception was caught by the Sentry Functions middleware. " +
+                "The Function has thrown an exception that was not handled by the user code.",
+                handled: false);
 
             throw;
         }

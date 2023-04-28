@@ -1,5 +1,7 @@
 ﻿using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Sentry.AzureFunctions.Worker;
 
@@ -10,6 +12,8 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
         builder.UseMiddleware<SentryFunctionsWorkerMiddleware>();
 
         // TODO: do we need to abstract/hide ILoggingBuilder.AddSentry(options => ...) and implement it here or not?
+
+        builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSentry(optionsConfiguration));
 
         return builder;
     }
