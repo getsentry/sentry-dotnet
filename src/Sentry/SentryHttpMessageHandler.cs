@@ -10,6 +10,7 @@ public class SentryHttpMessageHandler : DelegatingHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
+    private readonly ISentryFailedRequestHandler? _failedRequestHandler;
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
@@ -43,16 +44,23 @@ public class SentryHttpMessageHandler : DelegatingHandler
     {
     }
 
-    internal SentryHttpMessageHandler(IHub? hub, SentryOptions? options, HttpMessageHandler? innerHandler = default)
+    internal SentryHttpMessageHandler(IHub? hub, SentryOptions? options, HttpMessageHandler? innerHandler = default, ISentryFailedRequestHandler? failedRequestHandler = null)
     {
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? _hub.GetSentryOptions();
+        _failedRequestHandler = failedRequestHandler;
 
         // Only assign the inner handler if it is supplied.  We can't assign null or it will throw.
         // We also cannot assign a default value here, or it will throw when used with HttpMessageHandlerBuilderFilter.
         if (innerHandler is not null)
         {
             InnerHandler = innerHandler;
+        }
+
+        // Use the default failed request handler if none was supplied - but options is required.
+        if (_failedRequestHandler == null && _options != null)
+        {
+            _failedRequestHandler = new SentryFailedRequestHandler(_hub, _options);
         }
     }
 
@@ -105,7 +113,7 @@ public class SentryHttpMessageHandler : DelegatingHandler
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
-        if (_options?.TracePropagationTargets.ShouldPropagateTrace(url) is true or null)
+        if (_options?.TracePropagationTargets.ContainsMatch(url) is true or null)
         {
             AddSentryTraceHeader(request);
             AddBaggageHeader(request);
@@ -128,6 +136,9 @@ public class SentryHttpMessageHandler : DelegatingHandler
             {"status_code", ((int) response.StatusCode).ToString()}
         };
         _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
+
+        // Create events for failed requests
+        _failedRequestHandler?.HandleResponse(response);
 
         // This will handle unsuccessful status codes as well
         var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);

@@ -65,6 +65,7 @@ namespace Sentry
         public Sentry.Protocol.Device Device { get; }
         public Sentry.Protocol.Gpu Gpu { get; }
         public Sentry.Protocol.OperatingSystem OperatingSystem { get; }
+        public Sentry.Protocol.Response Response { get; }
         public Sentry.Protocol.Runtime Runtime { get; }
         public Sentry.Protocol.Trace Trace { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
@@ -136,6 +137,23 @@ namespace Sentry
     public static class HasTagsExtensions
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
+    }
+    public readonly struct HttpStatusCodeRange : System.IEquatable<Sentry.HttpStatusCodeRange>
+    {
+        public HttpStatusCodeRange(int statusCode) { }
+        public HttpStatusCodeRange(int start, int end) { }
+        public int End { get; init; }
+        public int Start { get; init; }
+        public bool Contains(int statusCode) { }
+        public bool Contains(System.Net.HttpStatusCode statusCode) { }
+        public static Sentry.HttpStatusCodeRange op_Implicit(int statusCode) { }
+        public static Sentry.HttpStatusCodeRange op_Implicit(System.Net.HttpStatusCode statusCode) { }
+        public static Sentry.HttpStatusCodeRange op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Start",
+                "End"})] System.ValueTuple<int, int> range) { }
+        public static Sentry.HttpStatusCodeRange op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "start",
+                "end"})] System.ValueTuple<System.Net.HttpStatusCode, System.Net.HttpStatusCode> range) { }
     }
     public static class HubExtensions
     {
@@ -552,6 +570,7 @@ namespace Sentry
         public System.Func<Sentry.SentryEvent, Sentry.SentryEvent?>? BeforeSend { get; set; }
         public System.Func<Sentry.Transaction, Sentry.Transaction?>? BeforeSendTransaction { get; set; }
         public string? CacheDirectoryPath { get; set; }
+        public bool CaptureFailedRequests { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }
         public System.Func<System.Net.Http.HttpClientHandler>? CreateHttpClientHandler { get; set; }
@@ -567,6 +586,8 @@ namespace Sentry
         public bool EnableScopeSync { get; set; }
         public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
+        public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
+        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
@@ -914,12 +935,21 @@ namespace Sentry
         public StreamAttachmentContent(System.IO.Stream stream) { }
         public System.IO.Stream GetStream() { }
     }
+    [System.ComponentModel.TypeConverter(typeof(Sentry.SubstringOrRegexPatternTypeConverter))]
+    public class SubstringOrRegexPattern
+    {
+        public SubstringOrRegexPattern(System.Text.RegularExpressions.Regex regex) { }
+        public SubstringOrRegexPattern(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
+        public override string ToString() { }
+        public static Sentry.SubstringOrRegexPattern op_Implicit(string substringOrRegexPattern) { }
+    }
     [System.ComponentModel.TypeConverter(typeof(Sentry.TracePropagationTargetTypeConverter))]
-    public class TracePropagationTarget
+    public class TracePropagationTarget : Sentry.SubstringOrRegexPattern
     {
         public TracePropagationTarget(System.Text.RegularExpressions.Regex regex) { }
         public TracePropagationTarget(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
-        public override string ToString() { }
     }
     public class Transaction : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.IJsonSerializable, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
@@ -1514,6 +1544,20 @@ namespace Sentry.Protocol
         public string? Version { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.OperatingSystem FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class Response : Sentry.IJsonSerializable
+    {
+        public const string Type = "response";
+        public Response() { }
+        public long? BodySize { get; set; }
+        public string? Cookies { get; set; }
+        public System.Collections.Generic.IDictionary<string, string> Headers { get; }
+        public short? StatusCode { get; set; }
+        public Sentry.Protocol.Response Clone() { }
+        public void UpdateFrom(Sentry.Protocol.Response source) { }
+        public void UpdateFrom(object source) { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.Protocol.Response FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class Runtime : Sentry.IJsonSerializable
     {

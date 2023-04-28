@@ -5,6 +5,7 @@
 ### Features
 
 - Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
+- Create a Sentry event for failed HTTP requests ([#2320](https://github.com/getsentry/sentry-dotnet/pull/2320))
 - Improve `WithScope` and add `WithScopeAsync` ([#2303](https://github.com/getsentry/sentry-dotnet/pull/2303)) ([#2309](https://github.com/getsentry/sentry-dotnet/pull/2309))
 - Build .NET Standard 2.1 for Unity ([#2328](https://github.com/getsentry/sentry-dotnet/pull/2328))
 - Add `RemoveExceptionFilter`, `RemoveEventProcessor` and `RemoveTransactionProcessor` extension methods on `SentryOptions` ([#2331](https://github.com/getsentry/sentry-dotnet/pull/2331))
@@ -17,6 +18,7 @@
 - Capture open transactions on disabled hubs ([#2319](https://github.com/getsentry/sentry-dotnet/pull/2319))
 - Remove session breadcrumbs ([#2333](https://github.com/getsentry/sentry-dotnet/pull/2333))
 - Support synchronous `HttpClient.Send` in `SentryHttpMessageHandler` ([#2336](https://github.com/getsentry/sentry-dotnet/pull/2336))
+- Fix ASP.NET Core issue with missing context when using capture methods that configure scope ([#2339](https://github.com/getsentry/sentry-dotnet/pull/2339))
 
 ### Dependencies
 
@@ -26,6 +28,9 @@
 - Bump Cocoa SDK from v8.4.0 to v8.5.0 ([#2310](https://github.com/getsentry/sentry-dotnet/pull/2310))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#850)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.4.0...8.5.0)
+- Bump Java SDK from v6.17.0 to v6.18.0 ([#2338](https://github.com/getsentry/sentry-dotnet/pull/2338))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6180)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.17.0...6.18.0)
 
 ## 3.30.0
 

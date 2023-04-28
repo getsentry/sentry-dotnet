@@ -84,4 +84,25 @@ public class SentryOptionsTests
         Assert.True(sut.EnableTracing);
         Assert.Equal(1.0, sut.TracesSampleRate);
     }
+
+    [Fact]
+    public void CaptureFailedRequests_ByDefault_IsFalse()
+    {
+        var sut = new SentryOptions();
+        Assert.False(sut.CaptureFailedRequests, "CaptureFailedRequests should be false by default to protect potentially PII (Privately Identifiable Information)");
+    }
+
+    [Fact]
+    public void FailedRequestStatusCodes_ByDefault_ShouldIncludeServerErrors()
+    {
+        var sut = new SentryOptions();
+        Assert.Contains((500, 599), sut.FailedRequestStatusCodes);
+    }
+
+    [Fact]
+    public void FailedRequestTargets_ByDefault_MatchesAnyUrl()
+    {
+        var sut = new SentryOptions();
+        Assert.Contains(".*", sut.FailedRequestTargets);
+    }
 }
