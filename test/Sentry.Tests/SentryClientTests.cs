@@ -217,9 +217,11 @@ public partial class SentryClientTests
 
         var evaluated = false;
         object actualSender = null;
-        scope.OnEvaluating += (sender, _) =>
+        object actualScope = null;
+        scope.OnEvaluating += (sender, activeScope) =>
         {
             actualSender = sender;
+            actualScope = activeScope;
             evaluated = true;
         };
 
@@ -227,6 +229,7 @@ public partial class SentryClientTests
 
         Assert.True(evaluated);
         Assert.Same(scope, actualSender);
+        Assert.Same(scope, actualScope);
     }
 
     [Fact]

@@ -86,6 +86,8 @@ public class EventProcessorTests
             Transport = transport,
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
-            AttachStacktrace = false
+            AttachStacktrace = false,
+            Release = "release",
+            InitNativeSdks = false
         };
 }

@@ -628,8 +628,14 @@ namespace Sentry
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors(this Sentry.SentryOptions options) { }
+        public static void RemoveEventProcessor<TProcessor>(this Sentry.SentryOptions options)
+            where TProcessor : Sentry.Extensibility.ISentryEventProcessor { }
+        public static void RemoveExceptionFilter<TFilter>(this Sentry.SentryOptions options)
+            where TFilter : Sentry.Extensibility.IExceptionFilter { }
         public static void RemoveIntegration<TIntegration>(this Sentry.SentryOptions options)
             where TIntegration : Sentry.Integrations.ISdkIntegration { }
+        public static void RemoveTransactionProcessor<TProcessor>(this Sentry.SentryOptions options)
+            where TProcessor : Sentry.Extensibility.ISentryTransactionProcessor { }
         public static Sentry.SentryOptions UseStackTraceFactory(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
     }
     public static class SentryScopeManagerExtensions

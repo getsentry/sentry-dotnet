@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 
 namespace Sentry.Internal;
 
@@ -58,14 +59,12 @@ internal class Hub : IHubEx, IDisposable
 
         _enricher = new Enricher(options);
 
-        var integrations = options.Integrations;
-        if (integrations?.Count > 0)
+        // An integration _can_ deregister itself, so make a copy of the list before iterating.
+        var integrations = options.Integrations?.ToList() ?? Enumerable.Empty<ISdkIntegration>();
+        foreach (var integration in integrations)
         {
-            foreach (var integration in integrations)
-            {
-                options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                integration.Register(this, options);
-            }
+            options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
+            integration.Register(this, options);
         }
     }
 
@@ -348,7 +347,13 @@ internal class Hub : IHubEx, IDisposable
                 actualScope.SessionUpdate = _sessionManager.ReportError();
             }
 
-            var id = currentScope.Value.CaptureEvent(evt, actualScope);
+            // When a transaction is present, copy its DSC to the event.
+            var transaction = actualScope.Transaction as TransactionTracer;
+            evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
+
+            // Now capture the event with the Sentry client on the current scope.
+            var sentryClient = currentScope.Value;
+            var id = sentryClient.CaptureEvent(evt, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
@@ -357,7 +362,7 @@ internal class Hub : IHubEx, IDisposable
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                actualScope.Transaction?.Finish(SpanStatus.Aborted);
+                transaction?.Finish(SpanStatus.Aborted);
             }
 
             return id;

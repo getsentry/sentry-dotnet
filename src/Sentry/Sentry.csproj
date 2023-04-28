@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <!-- Platform-specific props included here -->
@@ -50,7 +50,7 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.9.1" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="1.18.0" PrivateAssets="all" />
   </ItemGroup>
 
   <!--
