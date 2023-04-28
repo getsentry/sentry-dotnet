@@ -81,7 +81,7 @@ public class Scope : IEventLike, IHasDistribution
     /// but execution at a later time, when more data is available.
     /// </remarks>
     /// <see cref="Evaluate"/>
-    internal event EventHandler? OnEvaluating;
+    internal event EventHandler<Scope>? OnEvaluating;
 
     /// <inheritdoc />
     public SentryLevel? Level { get; set; }
@@ -464,6 +464,8 @@ public class Scope : IEventLike, IHasDistribution
     public Scope Clone()
     {
         var clone = new Scope(Options);
+        clone.OnEvaluating = OnEvaluating;
+
         Apply(clone);
 
         foreach (var processor in EventProcessors)
@@ -500,7 +502,7 @@ public class Scope : IEventLike, IHasDistribution
 
             try
             {
-                OnEvaluating?.Invoke(this, EventArgs.Empty);
+                OnEvaluating?.Invoke(this, this);
             }
             catch (Exception ex)
             {
