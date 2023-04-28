@@ -21,6 +21,8 @@ public class SentryHttpMessageHandlerBuilderFilterTests
         public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next) =>
             handlerBuilder =>
             {
+                // Set the fake handler to prevent outgoing HTTP requests in this test.
+                handlerBuilder.PrimaryHandler = new FakeHttpMessageHandler();
                 handlerBuilder.AdditionalHandlers.Add(_handler);
                 next(handlerBuilder);
             };
@@ -34,7 +36,7 @@ public class SentryHttpMessageHandlerBuilderFilterTests
         // Will use this to record outgoing requests
         using var recorder = new RecordingHttpMessageHandler();
 
-        var hub = new Internal.Hub(new SentryOptions
+        var hub = new Hub(new SentryOptions
         {
             Dsn = ValidDsn
         });
@@ -64,11 +66,6 @@ public class SentryHttpMessageHandlerBuilderFilterTests
                         using var httpClient = ctx.RequestServices
                             .GetRequiredService<IHttpClientFactory>()
                             .CreateClient();
-
-                        // The framework setup pipeline would end up adding an HttpClientHandler and this test
-                        // would require access to the Internet. So overriding it here
-                        // so the request stops at our stub:
-                        recorder.InnerHandler = new FakeHttpMessageHandler();
 
                         await httpClient.GetAsync("https://fake.tld");
                     });

@@ -6,20 +6,21 @@ public class RecordingHttpMessageHandler : DelegatingHandler
 
     public RecordingHttpMessageHandler() { }
 
-    public RecordingHttpMessageHandler(HttpMessageHandler innerHandler) =>
-        InnerHandler = innerHandler;
+    public RecordingHttpMessageHandler(HttpMessageHandler innerHandler) => InnerHandler = innerHandler;
 
-    protected override async Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // Clone the request to avoid ObjectDisposedException
-        _requests.Add(await request.CloneAsync());
-
-        InnerHandler ??= new FakeHttpMessageHandler();
-
+        _requests.Add(await request.CloneAsync(cancellationToken));
         return await base.SendAsync(request, cancellationToken);
     }
+
+#if NET5_0_OR_GREATER
+    protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        _requests.Add(request.Clone(cancellationToken));
+        return base.Send(request, cancellationToken);
+    }
+#endif
 
     public IReadOnlyList<HttpRequestMessage> GetRequests() => _requests.ToArray();
 

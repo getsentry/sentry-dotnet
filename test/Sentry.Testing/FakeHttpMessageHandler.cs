@@ -12,13 +12,11 @@ public class FakeHttpMessageHandler : DelegatingHandler
 
     public FakeHttpMessageHandler() { }
 
-    protected override Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken)
-    {
-        return Task.FromResult(
-            _getResponse is not null
-                ? _getResponse(request)
-                : new HttpResponseMessage(HttpStatusCode.OK));
-    }
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
+        Task.FromResult(_getResponse?.Invoke(request) ?? new HttpResponseMessage(HttpStatusCode.OK));
+
+#if NET5_0_OR_GREATER
+    protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken) =>
+        _getResponse?.Invoke(request) ?? new HttpResponseMessage(HttpStatusCode.OK);
+#endif
 }
