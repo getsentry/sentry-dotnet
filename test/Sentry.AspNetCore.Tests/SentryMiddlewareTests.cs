@@ -195,6 +195,26 @@ public class SentryMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_OnEvaluatingClonedScope_HttpContextDataSet()
+    {
+        const string expectedTraceIdentifier = "trace id";
+        _ = _fixture.HttpContext.TraceIdentifier.Returns(expectedTraceIdentifier);
+        var scope = new Scope();
+        _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(c => c.Arg<Action<Scope>>()(scope));
+
+        var sut = _fixture.GetSut();
+
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+
+        var clonedScope = scope.Clone();
+
+        clonedScope.Evaluate();
+
+        Assert.Equal(expectedTraceIdentifier, clonedScope.Tags[nameof(HttpContext.TraceIdentifier)]);
+    }
+
+    [Fact]
     public async Task InvokeAsync_ScopePushedAndPopped_OnHappyPath()
     {
         var disposable = Substitute.For<IDisposable>();
