@@ -41,6 +41,10 @@ public class SubstringOrRegexPattern
     /// </remarks>
     public SubstringOrRegexPattern(Regex regex) => _regex = regex;
 
+    /// <summary>
+    /// Implicitly converts a <see cref="string"/> to a <see cref="SubstringOrRegexPattern"/>.
+    /// </summary>
+    /// <param name="substringOrRegexPattern"></param>
     public static implicit operator SubstringOrRegexPattern(string substringOrRegexPattern)
     {
         return new SubstringOrRegexPattern(substringOrRegexPattern);

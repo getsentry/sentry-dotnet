@@ -36,6 +36,9 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
     /// </remarks>
     public OperatingSystem OperatingSystem => this.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
 
+    /// <summary>
+    /// Response interface that contains information on any HTTP response related to the event.
+    /// </summary>
     public Response Response => this.GetOrCreate<Response>(Response.Type);
 
     /// <summary>

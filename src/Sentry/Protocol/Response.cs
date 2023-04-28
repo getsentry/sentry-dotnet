@@ -82,6 +82,10 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
         return response;
     }
 
+    /// <summary>
+    /// Updates this instance with data from the properties in the <paramref name="source"/>,
+    /// unless there is already a value in the existing property.
+    /// </summary>
     public void UpdateFrom(Response source)
     {
         if (source == null)
@@ -95,6 +99,10 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
         source.InternalHeaders?.TryCopyTo(Headers);
     }
 
+    /// <summary>
+    /// Updates this instance with data from the properties in the <paramref name="source"/>,
+    /// unless there is already a value in the existing property.
+    /// </summary>
     public void UpdateFrom(object source)
     {
         if (source is Response response)
