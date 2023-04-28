@@ -56,6 +56,10 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                     _duration = duration ?? _stopwatch.Elapsed;
                     try
                     {
+                        // Stop the session synchronously so we can let the factory know it can start a new one.
+                        _session.Stop();
+                        OnFinish?.Invoke();
+                        // Then finish collecting the data asynchronously.
                         _data = _session.FinishAsync();
                     }
                     catch (Exception e)
@@ -76,7 +80,6 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         {
             _options.LogDebug("Profiling stopped on transaction finish.");
         }
-        OnFinish?.Invoke();
     }
 
     /// <inheritdoc />
