@@ -15,6 +15,8 @@
     <ItemGroup>
         <None Update="host.json" CopyToOutputDirectory="PreserveNewest" />
         <None Update="local.settings.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+        <None Update="local.settings.json.template" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never">
+        </None>
     </ItemGroup>
   
     <ItemGroup>
