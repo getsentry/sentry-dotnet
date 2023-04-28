@@ -16,6 +16,7 @@
 - Restore `System.Reflection.Metadata` dependency for .NET Core 3 ([#2302](https://github.com/getsentry/sentry-dotnet/pull/2302))
 - Capture open transactions on disabled hubs ([#2319](https://github.com/getsentry/sentry-dotnet/pull/2319))
 - Remove session breadcrumbs ([#2333](https://github.com/getsentry/sentry-dotnet/pull/2333))
+- Fix ASP.NET Core issue with missing context when using capture methods that configure scope ([#2339](https://github.com/getsentry/sentry-dotnet/pull/2339))
 
 ### Dependencies
 
