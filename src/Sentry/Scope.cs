@@ -119,7 +119,10 @@ public class Scope : IEventLike, IHasDistribution
     /// <inheritdoc />
     public User User
     {
-        get => _user ??= new User { PropertyChanged = UserChanged };
+        get => _user ??= new User
+        {
+            PropertyChanged = UserChanged
+        };
         set
         {
             _user = value;
@@ -127,6 +130,7 @@ public class Scope : IEventLike, IHasDistribution
             {
                 _user.PropertyChanged = UserChanged;
             }
+
             UserChanged.Invoke(_user);
         }
     }
@@ -196,7 +200,7 @@ public class Scope : IEventLike, IHasDistribution
     public IReadOnlyList<string> Fingerprint { get; set; } = Array.Empty<string>();
 
 #if NETSTANDARD2_0 || NETFRAMEWORK
-    private ConcurrentQueue<Breadcrumb> _breadcrumbs = new(); 
+    private ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
 #else
     private readonly ConcurrentQueue<Breadcrumb> _breadcrumbs = new();
 #endif
@@ -215,10 +219,9 @@ public class Scope : IEventLike, IHasDistribution
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
 #if NETSTANDARD2_0 || NETFRAMEWORK
-        private ConcurrentBag<Attachment> _attachments = new();
+    private ConcurrentBag<Attachment> _attachments = new();
 #else
     private readonly ConcurrentBag<Attachment> _attachments = new();
-
 #endif
 
     /// <summary>
@@ -310,7 +313,7 @@ public class Scope : IEventLike, IHasDistribution
     public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
 
     /// <summary>
-    /// Resets all the properties and collections within the scope to their default values. 
+    /// Resets all the properties and collections within the scope to their default values.
     /// </summary>
     public void Clear()
     {
@@ -337,7 +340,7 @@ public class Scope : IEventLike, IHasDistribution
     public void ClearAttachments()
     {
 #if NETSTANDARD2_0 || NETFRAMEWORK
-            Interlocked.Exchange(ref _attachments, new());
+        Interlocked.Exchange(ref _attachments, new());
 #else
         _attachments.Clear();
 #endif
@@ -353,7 +356,7 @@ public class Scope : IEventLike, IHasDistribution
         Interlocked.Exchange(ref _breadcrumbs, new());
 #else
         _breadcrumbs.Clear();
-#endif        
+#endif
     }
 
 
@@ -501,9 +504,7 @@ public class Scope : IEventLike, IHasDistribution
             }
             catch (Exception ex)
             {
-                Options.DiagnosticLogger?.LogError(
-                    "Failed invoking event handler.",
-                    ex);
+                Options.DiagnosticLogger?.LogError("Failed invoking event handler.", ex);
             }
             finally
             {
