@@ -1,5 +1,3 @@
-using NSubstitute.ExceptionExtensions;
-
 namespace Sentry.Tests;
 
 public class HttpStatusCodeRangeTests

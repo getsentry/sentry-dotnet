@@ -26,11 +26,11 @@ namespace Sentry;
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/request/"/>
 public sealed class Request : IJsonSerializable
 {
-    internal Dictionary<string, string>? InternalEnv { get; set; }
+    internal Dictionary<string, string>? InternalEnv { get; private set; }
 
-    internal Dictionary<string, string>? InternalOther { get; set; }
+    internal Dictionary<string, string>? InternalOther { get; private set; }
 
-    internal Dictionary<string, string>? InternalHeaders { get; set; }
+    internal Dictionary<string, string>? InternalHeaders { get; private set; }
 
     /// <summary>
     /// Gets or sets the full request URL, if available.
@@ -95,10 +95,7 @@ public sealed class Request : IJsonSerializable
     {
         foreach (var header in headers)
         {
-            Headers.Add(
-                header.Key,
-                string.Join("; ", header.Value)
-            );
+            Headers.Add(header.Key, string.Join("; ", header.Value));
         }
     }
 
@@ -169,7 +166,7 @@ public sealed class Request : IJsonSerializable
 
         return new Request
         {
-            InternalEnv = env?.WhereNotNullValue()?.ToDictionary(),
+            InternalEnv = env?.WhereNotNullValue().ToDictionary(),
             InternalOther = other?.WhereNotNullValue().ToDictionary(),
             InternalHeaders = headers?.WhereNotNullValue().ToDictionary(),
             Url = url,

@@ -200,6 +200,7 @@ public class SentryHttpMessageHandlerTests
         // Assert
         Assert.Equal(expectedType, breadcrumbGenerated.Type);
         Assert.Equal(expectedCategory, breadcrumbGenerated.Category);
+        Assert.NotNull(breadcrumbGenerated.Data);
 
         Assert.True(breadcrumbGenerated.Data.ContainsKey(urlKey));
         Assert.Equal(expectedBreadcrumbData[urlKey], breadcrumbGenerated.Data[urlKey]);

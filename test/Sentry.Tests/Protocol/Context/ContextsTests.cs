@@ -115,8 +115,7 @@ public class ContextsTests
         var actual = Json.Parse(actualString, Contexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
-        var expectedString = "{\"response\":{\"type\":\"response\",\"status_code\":200}}";
-        Assert.Equal(expectedString, actualString);
+        Assert.Equal("""{"response":{"type":"response","status_code":200}}""", actualString);
     }
 
     [Fact]

@@ -1,6 +1,3 @@
-using System.Net;
-using System.Reflection.PortableExecutable;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -20,37 +17,53 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
 
     public void HandleResponse(HttpResponseMessage response)
     {
-        // Ensure reponse and request are not null
-        if (response?.RequestMessage is null)
+        // Ensure request is not null
+        if (response.RequestMessage is null)
         {
             return;
         }
 
         // Don't capture if the option is disabled
-        if (_options?.CaptureFailedRequests is false)
+        if (!_options.CaptureFailedRequests)
         {
             return;
         }
 
-        // Don't capture events for successful requets
-        if (_options?.FailedRequestStatusCodes.Any(range => range.Contains(response.StatusCode)) is false)
+        // Don't capture events for successful requests
+        if (!_options.FailedRequestStatusCodes.Any(range => range.Contains(response.StatusCode)))
         {
             return;
         }
 
         // Ignore requests to the Sentry DSN
         var uri = response.RequestMessage.RequestUri;
-        if (_options?.Dsn is { } dsn && new Uri(dsn).Host.Equals(uri?.Host, StringComparison.OrdinalIgnoreCase))
+        if (uri != null)
         {
-            return;
+            if (_options.Dsn is { } dsn && new Uri(dsn).Host.Equals(uri.Host, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            // Ignore requests that don't match the FailedRequestTargets
+            var requestString = uri.ToString();
+            if (!_options.FailedRequestTargets.ContainsMatch(requestString))
+            {
+                return;
+            }
         }
 
-        // Ignore requests that don't match the FailedRequestTargets
-        var requestString = uri?.OriginalString ?? "";
-        if (_options?.FailedRequestTargets.ContainsMatch(requestString) is false)
-        {
-            return;
-        }
+#if NET5_0_OR_GREATER
+        // Starting with .NET 5, the content and headers are guaranteed to not be null.
+        var bodySize = response.Content.Headers.ContentLength;
+#else
+        // We have to get the content body size before calling EnsureSuccessStatusCode,
+        // because older implementations of EnsureSuccessStatusCode disposes the content.
+        // See https://github.com/dotnet/runtime/issues/24845
+
+        // The ContentLength might be null (but that's ok).
+        // See https://github.com/dotnet/runtime/issues/16162
+        var bodySize = response.Content?.Headers?.ContentLength;
+#endif
 
         // Capture the event
         try
@@ -69,23 +82,19 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
                 QueryString = uri?.Query,
                 Method = response.RequestMessage.Method.Method,
             };
-            if (_options?.SendDefaultPii is true)
+
+            if (_options.SendDefaultPii)
             {
                 sentryRequest.Cookies = response.RequestMessage.Headers.GetCookies();
                 sentryRequest.AddHeaders(response.RequestMessage.Headers);
             }
 
             var responseContext = new Response {
-                StatusCode = (short)response.StatusCode
+                StatusCode = (short)response.StatusCode,
+                BodySize = bodySize
             };
 
-            // .NET 4.8 doesn't set the Content-Length header
-            // https://github.com/dotnet/runtime/issues/16162
-#if NET5_0_OR_GREATER
-            responseContext.BodySize = response.Content?.Headers?.ContentLength;
-#endif
-
-            if (_options?.SendDefaultPii is true)
+            if (_options.SendDefaultPii)
             {
                 responseContext.Cookies = response.Headers.GetCookies();
                 responseContext.AddHeaders(response.Headers);

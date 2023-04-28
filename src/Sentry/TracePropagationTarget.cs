@@ -1,5 +1,7 @@
 namespace Sentry;
 
+// TODO: Replace TracePropagationTarget with SubstringOrRegexPattern in next major version.
+
 /// <summary>
 /// Provides a pattern that can be used to identify which destinations will have <c>sentry-trace</c> and
 /// <c>baggage</c> headers propagated to, for purposes of distributed tracing.

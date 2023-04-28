@@ -3,7 +3,7 @@ using Sentry.Internal;
 namespace Sentry;
 
 /// <summary>
-/// Provides a pattern that can be used to match against other strings.
+/// Provides a pattern that can be used to match against other strings as either a substring or regular expression.
 /// </summary>
 [TypeConverter(typeof(SubstringOrRegexPatternTypeConverter))]
 public class SubstringOrRegexPattern
@@ -13,9 +13,7 @@ public class SubstringOrRegexPattern
     private readonly StringComparison _stringComparison;
 
     /// <summary>
-    /// Constructs a <see cref="SubstringOrRegexPattern"/> instance that will match when the provided
-    /// <paramref name="substringOrRegexPattern"/> is either found as a substring within the outgoing request URL,
-    /// or matches as a regular expression pattern against the outgoing request URL.
+    /// Constructs a <see cref="SubstringOrRegexPattern"/> instance.
     /// </summary>
     /// <param name="substringOrRegexPattern">The substring or regular expression pattern to match on.</param>
     /// <param name="comparison">The string comparison type to use when matching.</param>
@@ -29,8 +27,7 @@ public class SubstringOrRegexPattern
     }
 
     /// <summary>
-    /// Constructs a <see cref="SubstringOrRegexPattern"/> instance that will match when the provided
-    /// <paramref name="regex"/> object matches the outgoing request URL.
+    /// Constructs a <see cref="SubstringOrRegexPattern"/> instance.
     /// </summary>
     /// <param name="regex"></param>
     /// <remarks>
@@ -67,10 +64,10 @@ public class SubstringOrRegexPattern
         return ToString().GetHashCode();
     }
 
-    internal bool IsMatch(string url) =>
+    internal bool IsMatch(string str) =>
         _substring == ".*" || // perf shortcut
-        (_substring != null && url.Contains(_substring, _stringComparison)) ||
-        _regex?.IsMatch(url) == true;
+        (_substring != null && str.Contains(_substring, _stringComparison)) ||
+        _regex?.IsMatch(str) == true;
 
     private static Regex? TryParseRegex(string pattern, StringComparison comparison)
     {
@@ -107,8 +104,8 @@ public class SubstringOrRegexPattern
 
 internal static class SubstringOrRegexPatternExtensions
 {
-    public static bool ContainsMatch(this IEnumerable<SubstringOrRegexPattern> targets, string url) =>
-        targets.Any(t => t.IsMatch(url));
+    public static bool ContainsMatch(this IEnumerable<SubstringOrRegexPattern> targets, string str) =>
+        targets.Any(t => t.IsMatch(str));
 
     /// <summary>
     /// During configuration binding, .NET 6 and lower used to just call Add on the existing item.

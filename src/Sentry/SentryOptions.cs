@@ -528,7 +528,7 @@ public class SentryOptions
     /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
     /// <para>Defaults to false due to PII reasons.</para>
     /// </summary>
-    public bool CaptureFailedRequests { get; set; } = false;
+    public bool CaptureFailedRequests { get; set; }
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.</para>
@@ -538,8 +538,7 @@ public class SentryOptions
 
     // The default failed request target list will match anything, but adding to the list should clear that.
     private IList<SubstringOrRegexPattern> _failedRequestTargets = new AutoClearingList<SubstringOrRegexPattern>(
-        new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true
-        );
+        new[] {new SubstringOrRegexPattern(".*")}, clearOnNextAdd: true);
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>

@@ -131,6 +131,7 @@ public class SentryFailedRequestHandlerTests
             CaptureFailedRequests = true,
             SendDefaultPii = true
         };
+
         var sut = GetSut(options);
 
         var url = "http://foo/bar/hello";
@@ -153,9 +154,7 @@ public class SentryFailedRequestHandlerTests
             @event.Should().NotBeNull();
 
             // Ensure the mechanism is set
-            @event.Exception.Data[Mechanism.MechanismKey].Should().Be(
-                SentryFailedRequestHandler.MechanismType
-                );
+            @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryFailedRequestHandler.MechanismType);
 
             // Ensure the request properties are captured
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());
@@ -163,19 +162,14 @@ public class SentryFailedRequestHandlerTests
             @event.Request.QueryString.Should().Be(queryString);
 
             // Ensure the response context is captured
-            @event.Contexts.Should().Contain(x =>
-                x.Key == Response.Type
-                && x.Value is Response
-                );
+            @event.Contexts.Should().Contain(x => x.Key == Response.Type && x.Value is Response);
+
             var responseContext = @event.Contexts[Response.Type] as Response;
             responseContext?.StatusCode.Should().Be((short)response.StatusCode);
-#if NET5_0_OR_GREATER
-            // .NET 4.8 doesn't set the Content-Length header
-            // https://github.com/dotnet/runtime/issues/16162
             responseContext?.BodySize.Should().Be(response.Content.Headers.ContentLength);
-#endif
-            @event.Contexts.Response?.Headers.Should().ContainKey("myHeader");
-            @event.Contexts.Response?.Headers.Should().ContainValue("myValue");
+
+            @event.Contexts.Response.Headers.Should().ContainKey("myHeader");
+            @event.Contexts.Response.Headers.Should().ContainValue("myValue");
         }
     }
 
@@ -207,8 +201,8 @@ public class SentryFailedRequestHandlerTests
             @event.Should().NotBeNull();
 
             // Cookies and headers are not captured
-            @event.Contexts.Response?.Headers.Should().BeNullOrEmpty();
-            @event.Contexts.Response?.Cookies.Should().BeNullOrEmpty();
+            @event.Contexts.Response.Headers.Should().BeNullOrEmpty();
+            @event.Contexts.Response.Cookies.Should().BeNullOrEmpty();
         }
     }
 }

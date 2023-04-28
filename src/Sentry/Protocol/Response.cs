@@ -30,18 +30,16 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     /// </summary>
     public const string Type = "response";
 
-    internal Dictionary<string, string>? InternalHeaders { get; set; }
+    internal Dictionary<string, string>? InternalHeaders { get; private set; }
 
     /// <summary>
     /// Gets or sets the HTTP response body size.
     /// </summary>
-    /// <value>The request URL.</value>
     public long? BodySize { get; set; }
 
     /// <summary>
     /// Gets or sets (optional) cookie values
     /// </summary>
-    /// <value>The other.</value>
     public string? Cookies { get; set; }
 
     /// <summary>
@@ -50,7 +48,6 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     /// <remarks>
     /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
     /// </remarks>
-    /// <value>The headers.</value>
     public IDictionary<string, string> Headers => InternalHeaders ??= new Dictionary<string, string>();
 
     /// <summary>
@@ -88,11 +85,6 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     /// </summary>
     public void UpdateFrom(Response source)
     {
-        if (source == null)
-        {
-            return;
-        }
-
         BodySize ??= source.BodySize;
         Cookies ??= source.Cookies;
         StatusCode ??= source.StatusCode;
@@ -107,7 +99,7 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     {
         if (source is Response response)
         {
-            ((IUpdatable<Response>)this).UpdateFrom(response);
+            UpdateFrom(response);
         }
     }
 
