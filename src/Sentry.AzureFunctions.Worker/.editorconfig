@@ -1,0 +1,5 @@
+# https: //docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference
+[*.cs]
+
+# Justification: Azure Functions (single thread) project
+dotnet_diagnostic.CA2007.severity = none
