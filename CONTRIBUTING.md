@@ -31,7 +31,7 @@ You may also need other platform dependencies.  See https://docs.microsoft.com/d
 
 ### Targeting Android, iOS and macCatalyst
 
-Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project, they are [conditionally targeted](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/src/Sentry/Sentry.csproj#L19-L21) when the platform is Android, iOS or macCatalyst and currently we compile these _only when building on a Mac_.
+Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project, they are [conditionally targeted](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/src/Sentry/Sentry.csproj#L19-L21) when the platform is Android, iOS or macCatalyst.  We build for Android on all platforms, but currently compile iOS and macCatalyst _only when building on a Mac_.
 
 ```
 <!-- Platform-specific props included here -->
