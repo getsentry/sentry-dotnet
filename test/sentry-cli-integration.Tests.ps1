@@ -13,12 +13,7 @@ BeforeAll {
     function DotnetBuild([string]$Sample, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = '')
     {
         $rootDir = "$(Get-Item $PSScriptRoot/../../)"
-
-        if ($TargetFramework -ne '') {
-            $framework = @('-f', $TargetFramework)
-        } else {
-            $framework = ''
-        }
+        $framework = $TargetFramework -eq '' ? '' : @('-f', $TargetFramework)
 
         Invoke-SentryServer {
             Param([string]$url)
