@@ -196,9 +196,6 @@ dotnet_diagnostic.RCS1080.severity = silent
 # Declare type inside namespace
 dotnet_diagnostic.RCS1110.severity = silent
 
-# Do not directly await a Task
-dotnet_diagnostic.CA2007.severity = error
-
 csharp_using_directive_placement = outside_namespace:suggestion
 csharp_prefer_simple_using_statement = true:suggestion
 csharp_style_namespace_declarations = file_scoped:warning
