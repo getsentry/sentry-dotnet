@@ -127,7 +127,7 @@
     <Message Importance="High" Condition="'$(SentryUploadSources)' == 'true'"
       Text="Preparing to upload debug symbols and sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
 
-    <Exec Command="$(SentryCLIUploadCommand) $(IntermediateOutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+    <Exec Command="$(SentryCLIUploadCommand) $(OutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
 
