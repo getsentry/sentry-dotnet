@@ -108,7 +108,7 @@ Describe 'CLI-integration' {
         )
     }
 
-    if ([RuntimeInformation]::IsOSPlatform([OSPlatform]::OSX)) {
+    if (![RuntimeInformation]::IsOSPlatform([OSPlatform]::OSX)) {
         # Remaining tests run on macOS only
         return
     }
