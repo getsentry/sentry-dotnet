@@ -23,8 +23,6 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
                 var transaction = _hub.StartTransaction(transactionName, "function");
                 scope.Transaction = transaction;
 
-                context.CancellationToken.Register(() => scope.SetExtra("aborted", true));
-
                 scope.UnsetTag("AzureFunctions_FunctionName");
                 scope.UnsetTag("AzureFunctions_InvocationId");
 
@@ -34,6 +32,8 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
                     { "entryPoint", context.FunctionDefinition.EntryPoint },
                     { "invocationId", context.InvocationId }
                 };
+
+                context.CancellationToken.ThrowIfCancellationRequested();
             });
 
             await next(context).ConfigureAwait(false);
