@@ -85,7 +85,6 @@
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
-      <SentryCLIUploadOptions Condition="'$(SentryUploadSources)' == 'true'">$(SentryCLIUploadOptions) --include-sources</SentryCLIUploadOptions>
       <SentryCLIUploadCommand>$(SentryCLIBaseCommand) debug-files upload</SentryCLIUploadCommand>
       <SentryCLIUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIUploadCommand>
     </PropertyGroup>
@@ -110,11 +109,6 @@
     <PropertyGroup Condition="'$(_SentryCLIExitCode)' != '0'">
       <SentryCLI />
     </PropertyGroup>
-  </Target>
-
-  <!-- Upload symbols (and possibly sources) to Sentry after the build. -->
-  <Target Name="UploadSymbolsToSentry" AfterTargets="Build;Publish" DependsOnTargets="PrepareSentryCLI"
-    Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
 
     <Warning Condition="'$(SentryUploadSources)' == 'true' And '$(EmbedAllSources)' == 'true'"
       Text="Both SentryUploadSources and EmbedAllSources are enabled.  Disabling SentryUploadSources." />
@@ -122,29 +116,26 @@
       <SentryUploadSources>false</SentryUploadSources>
     </PropertyGroup>
 
-    <Message Importance="High" Condition="'$(SentryUploadSources)' != 'true'"
+  </Target>
+
+  <!-- Upload symbols to Sentry after the build. -->
+  <Target Name="UploadSymbolsToSentry" AfterTargets="Build;Publish" DependsOnTargets="PrepareSentryCLI"
+    Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
+
+    <Message Importance="High"
       Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-    <Message Importance="High" Condition="'$(SentryUploadSources)' == 'true'"
-      Text="Preparing to upload debug symbols and sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
 
     <Exec Command="$(SentryCLIUploadCommand) $(OutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
 
-    <Warning Condition="'$(_SentryCLIExitCode)' != '0' And '$(SentryUploadSources)' != 'true'"
-      Text="Sentry CLI could not upload debug files." />
-    <Warning Condition="'$(_SentryCLIExitCode)' != '0' And '$(SentryUploadSources)' == 'true'"
-      Text="Sentry CLI could not upload debug files with sources.  Will retry without sources." />
-
-    <MSBuild Condition="'$(_SentryCLIExitCode)' != '0' And '$(SentryUploadSources)' == 'true'"
-      Projects="$(MSBuildProjectFile)" Targets="UploadSymbolsToSentry"
-      Properties="SentryUploadSymbols=true;SentryCLI=$(SentryCLI);SentryCLIBaseOptions=$(SentryCLIBaseOptions);SentryCLIUploadOptions=$(SentryCLIUploadOptions)" />
+    <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload debug files." />
 
   </Target>
 
-  <!-- Upload sources to Sentry after the build, if we didn't upload them with the symbols. -->
+  <!-- Upload sources to Sentry after the build. -->
   <Target Name="UploadSourcesToSentry" AfterTargets="Build;UploadSymbolsToSentry" DependsOnTargets="PrepareSentryCLI"
-    Condition="'$(SentryUploadSources)' == 'true' And '$(SentryUploadSymbols)' != 'true' And '$(SentryCLI)' != ''">
+    Condition="'$(SentryUploadSources)' == 'true' And '$(SentryCLI)' != ''">
 
     <Message Importance="High" Condition="'$(SentryUploadSources)' == 'true'"
       Text="Preparing to upload sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
