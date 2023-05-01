@@ -16,12 +16,13 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
     {
         try
         {
+            var transactionName = await GetTransactionNameAsync(context) ?? context.FunctionDefinition.Name;
+
             _hub.ConfigureScope(scope =>
             {
-                var transaction = _hub.StartTransaction(context.FunctionDefinition.Name, "function");
+                var transaction = _hub.StartTransaction(transactionName, "function");
                 scope.Transaction = transaction;
 
-                // TODO: how to indicate transaction was aborted
                 context.CancellationToken.Register(() => scope.SetExtra("aborted", true));
 
                 scope.UnsetTag("AzureFunctions_FunctionName");
@@ -46,6 +47,35 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
             throw;
         }
+    }
 
+    private static async Task<string?> GetTransactionNameAsync(FunctionContext context)
+    {
+        // Get the HTTP request data
+        var requestData = await context.GetHttpRequestDataAsync().ConfigureAwait(false);
+        if (requestData is null)
+        {
+            // not an HTTP trigger
+            return null;
+        }
+
+        // Find the HTTP Trigger attribute via reflection
+        var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);
+        var entryPointName = context.FunctionDefinition.EntryPoint;
+        var typeName = entryPointName[..entryPointName.LastIndexOf('.')];
+        var methodName = entryPointName[(typeName.Length + 1)..];
+        var attribute = assembly.GetType(typeName)?.GetMethod(methodName)?.GetParameters()
+            .Select(p => p.GetCustomAttribute<HttpTriggerAttribute>())
+            .FirstOrDefault(a => a is not null);
+
+        // Compose the transaction name from the method and route
+        var method = requestData.Method.ToUpperInvariant();
+        if (attribute?.Route is {} route)
+        {
+            return $"{method} /{route.TrimStart('/')}";
+        }
+
+        // There's no route provided, so use the absolute path of the URL
+        return $"{method} {requestData.Url.AbsolutePath}";
     }
 }

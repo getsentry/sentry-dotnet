@@ -11,8 +11,6 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
     {
         builder.UseMiddleware<SentryFunctionsWorkerMiddleware>();
 
-        // TODO: do we need to abstract/hide ILoggingBuilder.AddSentry(options => ...) and implement it here or not?
-
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddSentry(optionsConfiguration));
 
         return builder;

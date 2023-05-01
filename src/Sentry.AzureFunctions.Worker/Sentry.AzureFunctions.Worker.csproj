@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.13.0" />
+      <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.12" />
       <PackageReference Include="Sentry.Extensions.Logging" Version="3.30.0" />
     </ItemGroup>
 

@@ -6,7 +6,7 @@ namespace Sentry.Samples.AzureFunctions.Worker;
 public class SampleTimerTrigger
 {
     [Function(nameof(SampleTimerTrigger))]
-    public void Run([TimerTrigger("0 */5 * * * *", RunOnStartup = true)] MyInfo myTimer, FunctionContext context)
+    public void Run([TimerTrigger("0 */5 * * * *"/*, RunOnStartup = true*/)] MyInfo myTimer, FunctionContext context)
     {
         var logger = context.GetLogger("SampleTimerTrigger");
 
