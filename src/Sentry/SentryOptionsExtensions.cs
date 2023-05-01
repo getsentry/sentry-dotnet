@@ -30,8 +30,7 @@ public static class SentryOptionsExtensions
     /// </remarks>
     /// <param name="options">The SentryOptions to remove the processor from.</param>
     public static void DisableDuplicateEventDetection(this SentryOptions options)
-        => options.EventProcessors =
-            options.EventProcessors?.Where(p => p.GetType() != typeof(DuplicateEventDetectionEventProcessor)).ToList();
+        => options.RemoveEventProcessor<DuplicateEventDetectionEventProcessor>();
 
     /// <summary>
     /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>.
@@ -46,8 +45,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
-        => options.Integrations =
-            options.Integrations?.Where(p => p.GetType() != typeof(SentryDiagnosticListenerIntegration)).ToList();
+        => options.RemoveIntegration<SentryDiagnosticListenerIntegration>();
 #endif
 
     /// <summary>
@@ -72,8 +70,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableNetFxInstallationsIntegration(this SentryOptions options)
     {
-        options.EventProcessors =
-            options.EventProcessors?.Where(p => p.GetType() != typeof(NetFxInstallationsEventProcessor)).ToList();
+        options.RemoveEventProcessor<NetFxInstallationsEventProcessor>();
         options.RemoveIntegration<NetFxInstallationsIntegration>();
     }
 #endif
@@ -108,8 +105,9 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
     /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
-    public static void RemoveIntegration<TIntegration>(this SentryOptions options) where TIntegration : ISdkIntegration
-        => options.Integrations = options.Integrations?.Where(p => p.GetType() != typeof(TIntegration)).ToList();
+    public static void RemoveIntegration<TIntegration>(this SentryOptions options)
+        where TIntegration : ISdkIntegration
+        => options.Integrations?.RemoveAll(integration => integration is TIntegration);
 
     /// <summary>
     /// Add an exception filter.
@@ -129,11 +127,21 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
+    /// Removes all filters of type <typeparamref name="TFilter"/>
+    /// </summary>
+    /// <typeparam name="TFilter">The type of filter(s) to remove.</typeparam>
+    /// <param name="options">The SentryOptions to remove the filter(s) from.</param>
+    public static void RemoveExceptionFilter<TFilter>(this SentryOptions options)
+        where TFilter : IExceptionFilter
+        => options.ExceptionFilters?.RemoveAll(filter => filter is TFilter);
+
+    /// <summary>
     /// Ignore exception of type <typeparamref name="TException"/> or derived.
     /// </summary>
     /// <typeparam name="TException">The type of the exception to ignore.</typeparam>
     /// <param name="options">The SentryOptions to store the exceptions type ignore.</param>
-    public static void AddExceptionFilterForType<TException>(this SentryOptions options) where TException : Exception
+    public static void AddExceptionFilterForType<TException>(this SentryOptions options)
+        where TException : Exception
         => options.AddExceptionFilter(new ExceptionTypeFilter<TException>());
 
     /// <summary>
@@ -255,6 +263,15 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
+    /// Removes all event processors of type <typeparamref name="TProcessor"/>
+    /// </summary>
+    /// <typeparam name="TProcessor">The type of processor(s) to remove.</typeparam>
+    /// <param name="options">The SentryOptions to remove the processor(s) from.</param>
+    public static void RemoveEventProcessor<TProcessor>(this SentryOptions options)
+        where TProcessor : ISentryEventProcessor
+        => options.EventProcessors?.RemoveAll(processor => processor is TProcessor);
+
+    /// <summary>
     /// Adds an event processor provider which is invoked when creating a <see cref="SentryEvent"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor provider.</param>
@@ -304,6 +321,15 @@ public static class SentryOptionsExtensions
             options.TransactionProcessors.AddRange(processors);
         }
     }
+
+    /// <summary>
+    /// Removes all transaction processors of type <typeparamref name="TProcessor"/>
+    /// </summary>
+    /// <typeparam name="TProcessor">The type of processor(s) to remove.</typeparam>
+    /// <param name="options">The SentryOptions to remove the processor(s) from.</param>
+    public static void RemoveTransactionProcessor<TProcessor>(this SentryOptions options)
+        where TProcessor : ISentryTransactionProcessor
+        => options.TransactionProcessors?.RemoveAll(processor => processor is TProcessor);
 
     /// <summary>
     /// Adds an transaction processor provider which is invoked when creating a <see cref="Transaction"/>.

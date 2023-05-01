@@ -523,6 +523,34 @@ public class SentryOptions
     public string? CacheDirectoryPath { get; set; }
 
     /// <summary>
+    /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
+    /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
+    /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
+    /// <para>Defaults to false due to PII reasons.</para>
+    /// </summary>
+    public bool CaptureFailedRequests { get; set; }
+
+    /// <summary>
+    /// <para>The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.</para>
+    /// <para>Defaults to 500-599 (Server error responses only).</para>
+    /// </summary>
+    public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange> { (500, 599) };
+
+    // The default failed request target list will match anything, but adding to the list should clear that.
+    private IList<SubstringOrRegexPattern> _failedRequestTargets = new AutoClearingList<SubstringOrRegexPattern>(
+        new[] {new SubstringOrRegexPattern(".*")}, clearOnNextAdd: true);
+
+    /// <summary>
+    /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
+    /// <para>Targets may be URLs or Regular expressions.</para>
+    /// <para>Matches "*." by default.</para>
+    /// </summary>
+    public IList<SubstringOrRegexPattern> FailedRequestTargets {
+        get => _failedRequestTargets;
+        set => _failedRequestTargets = value.SetWithConfigBinding();
+    }
+
+    /// <summary>
     /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
     /// Used for testing.
     /// </summary>
@@ -646,29 +674,8 @@ public class SentryOptions
         // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
-
         get => _tracePropagationTargets;
-        set
-        {
-            switch (value.Count)
-            {
-                case 1 when value[0].ToString() == ".*":
-                    // There's only one item in the list, and it's the wildcard, so reset to the initial state.
-                    _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>(value, clearOnNextAdd: true);
-                    break;
-
-                case > 1:
-                    // There's more than one item in the list.  Remove the wildcard.
-                    var targets = value.ToList();
-                    targets.RemoveAll(t => t.ToString() == ".*");
-                    _tracePropagationTargets = targets;
-                    break;
-
-                default:
-                    _tracePropagationTargets = value;
-                    break;
-            }
-        }
+        set => _tracePropagationTargets = value.SetWithConfigBinding();
     }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }

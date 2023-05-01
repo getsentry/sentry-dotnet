@@ -100,6 +100,25 @@ public class ContextsTests
     }
 
     [Fact]
+    public void SerializeObject_SingleResponsePropertySet_SerializeSingleProperty()
+    {
+        var sut = new Contexts
+        {
+            Response =
+            {
+                StatusCode = 200
+            }
+        };
+
+        var actualString = sut.ToJsonString(_testOutputLogger);
+
+        var actual = Json.Parse(actualString, Contexts.FromJson);
+        actual.Should().BeEquivalentTo(sut);
+
+        Assert.Equal("""{"response":{"type":"response","status_code":200}}""", actualString);
+    }
+
+    [Fact]
     public void SerializeObject_SingleRuntimePropertySet_SerializeSingleProperty()
     {
         var sut = new Contexts

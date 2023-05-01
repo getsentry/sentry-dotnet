@@ -6,22 +6,32 @@
 
 - Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
 - .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
+- Create a Sentry event for failed HTTP requests ([#2320](https://github.com/getsentry/sentry-dotnet/pull/2320))
 - Improve `WithScope` and add `WithScopeAsync` ([#2303](https://github.com/getsentry/sentry-dotnet/pull/2303)) ([#2309](https://github.com/getsentry/sentry-dotnet/pull/2309))
+- Build .NET Standard 2.1 for Unity ([#2328](https://github.com/getsentry/sentry-dotnet/pull/2328))
+- Add `RemoveExceptionFilter`, `RemoveEventProcessor` and `RemoveTransactionProcessor` extension methods on `SentryOptions` ([#2331](https://github.com/getsentry/sentry-dotnet/pull/2331))
+- Include Dynamic Sampling Context with error events, when there's a transaction ([#2332](https://github.com/getsentry/sentry-dotnet/pull/2332))
 
 ### Fixes
 
 - Buffer payloads asynchronously when appropriate ([#2297](https://github.com/getsentry/sentry-dotnet/pull/2297))
 - Restore `System.Reflection.Metadata` dependency for .NET Core 3 ([#2302](https://github.com/getsentry/sentry-dotnet/pull/2302))
 - Capture open transactions on disabled hubs ([#2319](https://github.com/getsentry/sentry-dotnet/pull/2319))
+- Remove session breadcrumbs ([#2333](https://github.com/getsentry/sentry-dotnet/pull/2333))
+- Support synchronous `HttpClient.Send` in `SentryHttpMessageHandler` ([#2336](https://github.com/getsentry/sentry-dotnet/pull/2336))
+- Fix ASP.NET Core issue with missing context when using capture methods that configure scope ([#2339](https://github.com/getsentry/sentry-dotnet/pull/2339))
 
 ### Dependencies
 
-- Bump CLI from v2.17.0 to v2.17.4 ([#2298](https://github.com/getsentry/sentry-dotnet/pull/2298), [#2318](https://github.com/getsentry/sentry-dotnet/pull/2318), [#2321](https://github.com/getsentry/sentry-dotnet/pull/2321))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2174)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.0...2.17.4)
-- Bump Cocoa SDK from v8.4.0 to v8.5.0 ([#2310](https://github.com/getsentry/sentry-dotnet/pull/2310))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#850)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.4.0...8.5.0)
+- Bump CLI from v2.17.0 to v2.17.5 ([#2298](https://github.com/getsentry/sentry-dotnet/pull/2298), [#2318](https://github.com/getsentry/sentry-dotnet/pull/2318), [#2321](https://github.com/getsentry/sentry-dotnet/pull/2321), [#2345](https://github.com/getsentry/sentry-dotnet/pull/2345))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2175)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.0...2.17.5)
+- Bump Cocoa SDK from v8.4.0 to v8.6.0 ([#2310](https://github.com/getsentry/sentry-dotnet/pull/2310), [#2344](https://github.com/getsentry/sentry-dotnet/pull/2344))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#860)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.4.0...8.6.0)
+- Bump Java SDK from v6.17.0 to v6.18.1 ([#2338](https://github.com/getsentry/sentry-dotnet/pull/2338), [#2343](https://github.com/getsentry/sentry-dotnet/pull/2343))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6181)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.17.0...6.18.1)
 
 ## 3.30.0
 

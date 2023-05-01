@@ -910,6 +910,10 @@ interface SentrySpanContext : SentrySerializable
     [NullAllowed, Export ("spanDescription")]
     string SpanDescription { get; }
 
+    // @property (copy, nonatomic) NSString * _Nonnull origin;
+    [Export ("origin")]
+    string Origin { get; set; }
+
     // -(instancetype _Nonnull)initWithOperation:(NSString * _Nonnull)operation;
     [Export ("initWithOperation:")]
     NativeHandle Constructor (string operation);
@@ -958,6 +962,11 @@ interface SentrySpan : SentrySerializable
     [Abstract]
     [Export ("operation")]
     string Operation { get; set; }
+
+    // @required @property (copy, nonatomic) NSString * _Nonnull origin;
+    [Abstract]
+    [Export ("origin")]
+    string Origin { get; set; }
 
     // @required @property (copy, nonatomic) NSString * _Nullable spanDescription;
     [Abstract]
@@ -2408,4 +2417,14 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("captureViewHierarchy")]
     NSData CaptureViewHierarchy();
+
+    // +(SentryUser * _Nonnull)userWithDictionary:(NSDictionary * _Nonnull)dictionary;
+    [Static]
+    [Export ("userWithDictionary:")]
+    SentryUser UserWithDictionary (NSDictionary dictionary);
+
+    // +(SentryBreadcrumb * _Nonnull)breadcrumbWithDictionary:(NSDictionary * _Nonnull)dictionary;
+    [Static]
+    [Export ("breadcrumbWithDictionary:")]
+    SentryBreadcrumb BreadcrumbWithDictionary (NSDictionary dictionary);
 }

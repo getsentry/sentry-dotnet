@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.*" />
+    <PackageReference Include="NSubstitute" Version="5.*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
   </ItemGroup>
 
 </Project>

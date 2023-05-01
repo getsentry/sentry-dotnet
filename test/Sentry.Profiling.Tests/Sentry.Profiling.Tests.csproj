@@ -7,9 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
-    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.410101" />
-    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.1" />
-
   </ItemGroup>
 
 </Project>

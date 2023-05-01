@@ -26,6 +26,14 @@
       event_id: Guid_2,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: release,
+        sample_rate: 1,
+        trace_id: Guid_3,
+        transaction: my transaction
       }
     },
     Items: [
@@ -127,7 +135,7 @@
   },
   {
     Header: {
-      event_id: Guid_3,
+      event_id: Guid_4,
       sdk: {
         name: sentry.dotnet
       },
@@ -136,7 +144,7 @@
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
         sample_rate: 1,
-        trace_id: Guid_4,
+        trace_id: Guid_3,
         transaction: my transaction
       }
     },
