@@ -50,11 +50,10 @@ BeforeAll {
     }
 }
 
-$exe = ([RuntimeInformation]::IsOSPlatform([OSPlatform]::Windows) ? '.exe' : '')
-
 Describe 'CLI-integration' {
 
     It "uploads symbols and sources for a console app build" {
+        $exe = [RuntimeInformation]::IsOSPlatform([OSPlatform]::Windows) ? '.exe' : ''
         $result = DotnetBuild 'Sentry.Samples.Console.Basic' $True $True
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
@@ -66,6 +65,7 @@ Describe 'CLI-integration' {
     }
 
     It "uploads symbols for a console app build" {
+        $exe = [RuntimeInformation]::IsOSPlatform([OSPlatform]::Windows) ? '.exe' : ''
         $result = DotnetBuild 'Sentry.Samples.Console.Basic' $True $False
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
