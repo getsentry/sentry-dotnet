@@ -3,11 +3,12 @@ namespace Sentry.Tests;
 public class HintTests
 {
     private Attachment FakeAttachment(string name = "test.txt")
-        => new Attachment(
+        => new(
             AttachmentType.Default,
             new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
             name,
-            null);
+            null
+            );
 
     [Fact]
     public void AddAttachments_WithNullAttachments_DoesNothing()
@@ -172,27 +173,27 @@ public class HintTests
     }
 
     [Fact]
-    public void GetAs_WithNonExistingName_ReturnsNull()
+    public void GetValue_WithNonExistingKey_ReturnsNull()
     {
         // Arrange
         var hint = new Hint();
 
         // Act
-        var result = hint.GetAs<string>("non-existing");
+        var result = hint.GetValue<string>("non-existing");
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetAs_WithExistingName_ReturnsValue()
+    public void GetValue_WithExistingKey_ReturnsValue()
     {
         // Arrange
         var hint = new Hint();
         hint["key"] = "value";
 
         // Act
-        var result = hint.GetAs<string>("key");
+        var result = hint.GetValue<string>("key");
 
         // Assert
         Assert.Equal("value", result);
@@ -219,7 +220,7 @@ public class HintTests
     }
 
     [Fact]
-    public void Remove_WithExistingName_RemovesEntry()
+    public void Remove_WithExistingKey_RemovesEntry()
     {
         // Arrange
         var hint = new Hint();

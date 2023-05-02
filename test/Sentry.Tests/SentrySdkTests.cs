@@ -114,10 +114,7 @@ public class SentrySdkTests : IDisposable
     {
         // If the variable was set, to non empty string but value is broken, better crash than silently disable
         var ex = Assert.Throws<ArgumentException>(() =>
-            SentrySdk.Init(o =>
-            {
-                o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = InvalidDsn;
-            }));
+            SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = InvalidDsn));
 
         Assert.Equal("Invalid DSN: A Project Id is required.", ex.Message);
     }
@@ -125,10 +122,7 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
     {
-        using var _ = SentrySdk.Init(o =>
-        {
-            o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = Constants.DisableSdkDsnValue;
-        });
+        using var _ = SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = Constants.DisableSdkDsnValue);
 
         Assert.False(SentrySdk.IsEnabled);
     }

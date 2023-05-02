@@ -6,18 +6,23 @@ using Sentry.Internal.Extensions;
 namespace Sentry;
 
 /// <summary>
-/// A hint for the <see cref="SentryClient"/> to decide whether an event should be sent or cached. It also
-/// holds data that should be injected into the event.
+/// A hint that can be provided when capturing a <see cref="SentryEvent"/> or adding a <see cref="Breadcrumb"/>.
+/// Hints can be used to filter or modify events or breadcrumbs before they are sent to Sentry.
 /// </summary>
 public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
 {
     private readonly Dictionary<string, object?> _internalStorage = new();
     private readonly List<Attachment> _attachments = new();
 
-    public object? this[string name]
+    /// <summary>
+    /// Gets or sets additional values to be provided with the hint
+    /// </summary>
+    /// <param name="key">The key</param>
+    /// <returns>The value with the specified key or null if none exist.</returns>
+    public object? this[string key]
     {
-        get => _internalStorage.GetValueOrDefault(name);
-        set => _internalStorage[name] = value;
+        get => _internalStorage.GetValueOrDefault(key);
+        set => _internalStorage[key] = value;
     }
 
     internal void AddAttachmentsInternal(IEnumerable<Attachment> attachments)
@@ -28,35 +33,75 @@ public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
         }
     }
 
+    /// <summary>
+    /// Adds one or more attachments to the Hint.
+    /// </summary>
+    /// <param name="attachments"></param>
     public void AddAttachments(params Attachment[] attachments) => AddAttachmentsInternal(attachments);
 
-    public void AddAttachments(ICollection<Attachment> attachments) => AddAttachmentsInternal(attachments);
+    /// <summary>
+    /// Adds multiple attachments to the Hint.
+    /// </summary>
+    /// <param name="attachments"></param>
+    public void AddAttachments(IEnumerable<Attachment> attachments) => AddAttachmentsInternal(attachments);
 
+    /// <summary>
+    /// Attachments added to the Hint.
+    /// </summary>
     public ICollection<Attachment> Attachments => _attachments;
 
+    /// <summary>
+    /// Clears any values stored in <see cref="this[string]"/>
+    /// </summary>
     public void Clear() => _internalStorage.Clear();
 
+    /// <summary>
+    /// Checks if the specified key exists
+    /// </summary>
+    /// <param name="key">The key</param>
+    /// <returns>True if the key exists. False otherwise.</returns>
     public bool ContainsKey(string key) => _internalStorage.ContainsKey(key);
 
+    /// <inheritdoc />
     public void CopyTo(Array array, int index) => ((ICollection)_internalStorage).CopyTo(array, index);
 
+    /// <inheritdoc />
     public int Count => _internalStorage.Count;
 
     IEnumerator IEnumerable.GetEnumerator() => _internalStorage.GetEnumerator();
 
+    /// <inheritdoc />
     public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
         => ((IEnumerable<KeyValuePair<string, object?>>)_internalStorage).GetEnumerator();
 
-    public T? GetAs<T>(string name) where T : class? => (this[name] is T typedHintValue) ? typedHintValue : null;
+    /// <summary>
+    /// Gets the value with the specified key as type <typeparamref name="T"/>
+    /// </summary>
+    /// <typeparam name="T">They expected value type</typeparam>
+    /// <param name="key">The key</param>
+    /// <returns>A value of type <typeparamref name="T"/> if one exists with the specified key or null otherwise.</returns>
+    public T? GetValue<T>(string key) where T : class? => (this[key] is T typedHintValue) ? typedHintValue : null;
 
+    /// <inheritdoc />
     public bool IsSynchronized => ((ICollection)_internalStorage).IsSynchronized;
 
-    public void Remove(string name) => _internalStorage.Remove(name);
+    /// <summary>
+    /// Remves the value with the specified key
+    /// </summary>
+    /// <param name="key"></param>
+    public void Remove(string key) => _internalStorage.Remove(key);
 
+    /// <summary>
+    /// Gets or sets a Screenshot for the Hint
+    /// </summary>
     public Attachment? Screenshot { get; set; }
 
+    /// <inheritdoc />
     public object SyncRoot => ((ICollection)_internalStorage).SyncRoot;
 
+    /// <summary>
+    /// Gets or sets a ViewHierarchy for the Hint
+    /// </summary>
     public Attachment? ViewHierarchy { get; set; }
 
     /// <summary>

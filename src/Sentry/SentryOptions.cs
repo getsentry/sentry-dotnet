@@ -306,7 +306,7 @@ public class SentryOptions
 
     private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
 
-    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal { get => _beforeSend; }
+    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
     /// A callback to invoke before sending an event to Sentry

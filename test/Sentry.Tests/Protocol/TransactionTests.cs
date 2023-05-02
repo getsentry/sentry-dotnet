@@ -296,11 +296,15 @@ public class TransactionTests
         // Assert
         transaction.Status.Should().Be(SpanStatus.InternalError);
 
-        client.Received(1).CaptureEvent(Arg.Is<SentryEvent>(e =>
-            e.Contexts.Trace.TraceId == transaction.TraceId &&
-            e.Contexts.Trace.SpanId == transaction.SpanId &&
-            e.Contexts.Trace.ParentSpanId == transaction.ParentSpanId
-        ), Arg.Any<Scope>());
+        client.Received(1).CaptureEvent(
+            Arg.Is<SentryEvent>(e =>
+                e.Contexts.Trace.TraceId == transaction.TraceId &&
+                e.Contexts.Trace.SpanId == transaction.SpanId &&
+                e.Contexts.Trace.ParentSpanId == transaction.ParentSpanId
+            ),
+            Arg.Any<Hint>(),
+            Arg.Any<Scope>()
+            );
     }
 
     [Fact]
