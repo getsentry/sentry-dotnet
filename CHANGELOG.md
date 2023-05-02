@@ -1,11 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
+
 ## 3.31.0
 
 ### Features
 
 - Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
-- .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
 - Create a Sentry event for failed HTTP requests ([#2320](https://github.com/getsentry/sentry-dotnet/pull/2320))
 - Improve `WithScope` and add `WithScopeAsync` ([#2303](https://github.com/getsentry/sentry-dotnet/pull/2303)) ([#2309](https://github.com/getsentry/sentry-dotnet/pull/2309))
 - Build .NET Standard 2.1 for Unity ([#2328](https://github.com/getsentry/sentry-dotnet/pull/2328))
