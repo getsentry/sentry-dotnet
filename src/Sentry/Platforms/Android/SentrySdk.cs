@@ -118,7 +118,7 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Android.EnableAndroidSdkBeforeSend && options.BeforeSend is { } beforeSend)
+            if (options.Android.EnableAndroidSdkBeforeSend && options.BeforeSendInternal is { } beforeSend)
             {
                 o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
             }

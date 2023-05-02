@@ -304,6 +304,10 @@ public class SentryOptions
     /// </summary>
     public string? Dsn { get; set; }
 
+    private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
+
+    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal { get => _beforeSend; }
+
     /// <summary>
     /// A callback to invoke before sending an event to Sentry
     /// </summary>
@@ -312,7 +316,22 @@ public class SentryOptions
     /// a chance to inspect and/or modify the event before it's sent. If the event
     /// should not be sent at all, return null from the callback.
     /// </remarks>
-    public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
+    [Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
+    public Func<SentryEvent, SentryEvent?>? BeforeSend
+    {
+        get => null;
+        set => _beforeSend = value is null ? null : (e, _) => value(e);
+    }
+
+    public void SetBeforeSend(Func<SentryEvent, SentryEvent?> beforeSend)
+    {
+        _beforeSend = (e, _) => beforeSend(e);
+    }
+
+    public void SetBeforeSend(Func<SentryEvent, Hint, SentryEvent?> beforeSend)
+    {
+        _beforeSend = beforeSend;
+    }
 
     /// <summary>
     /// A callback to invoke before sending a transaction to Sentry

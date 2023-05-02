@@ -65,6 +65,10 @@ public class SentryClient : ISentryClient, IDisposable
 
     /// <inheritdoc />
     public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
+        => CaptureEvent(@event, null, scope);
+
+    /// <inheritdoc />
+    public SentryId CaptureEvent(SentryEvent? @event, Hint? hint, Scope? scope = null)
     {
         if (@event == null)
         {
@@ -73,7 +77,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return DoSendEvent(@event, scope);
+            return DoSendEvent(@event, hint, scope);
         }
         catch (Exception e)
         {
@@ -197,7 +201,7 @@ public class SentryClient : ISentryClient, IDisposable
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
     // TODO: this method needs to be refactored, it's really hard to analyze nullability
-    private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
+    private SentryId DoSendEvent(SentryEvent @event, Hint? hint, Scope? scope)
     {
         if (_options.SampleRate != null)
         {
@@ -258,7 +262,7 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        processedEvent = BeforeSend(processedEvent);
+        processedEvent = BeforeSend(processedEvent, hint);
         if (processedEvent == null) // Rejected event
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
@@ -319,9 +323,9 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
-    private SentryEvent? BeforeSend(SentryEvent? @event)
+    private SentryEvent? BeforeSend(SentryEvent? @event, Hint? hint)
     {
-        if (_options.BeforeSend == null)
+        if (_options.BeforeSendInternal == null)
         {
             return @event;
         }
@@ -329,7 +333,8 @@ public class SentryClient : ISentryClient, IDisposable
         _options.LogDebug("Calling the BeforeSend callback");
         try
         {
-            @event = _options.BeforeSend?.Invoke(@event!);
+            hint ??= new Hint();
+            @event = _options.BeforeSendInternal?.Invoke(@event!, hint);
         }
         catch (Exception e)
         {

@@ -409,10 +409,22 @@ public static partial class SentrySdk
     public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
         => CurrentHub.CaptureEvent(evt, scope);
 
-    internal static SentryId CaptureEventInternal(SentryEvent evt, Scope? scope)
+    /// <summary>
+    /// Captures the event, passing a hint, using the specified scope.
+    /// </summary>
+    /// <param name="evt">The event.</param>
+    /// <param name="hint">a hint for the event.</param>
+    /// <param name="scope">The scope.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
+        => CurrentHub.CaptureEvent(evt, hint, scope);
+
+    internal static SentryId CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
         => CurrentHub is IHubEx hub
-            ? hub.CaptureEventInternal(evt, scope)
-            : CurrentHub.CaptureEvent(evt, scope);
+            ? hub.CaptureEventInternal(evt, hint, scope)
+            : CurrentHub.CaptureEvent(evt, hint, scope);
 
     /// <summary>
     /// Captures an event with a configurable scope.

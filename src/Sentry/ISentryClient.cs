@@ -19,6 +19,15 @@ public interface ISentryClient
     SentryId CaptureEvent(SentryEvent evt, Scope? scope = null);
 
     /// <summary>
+    /// Capture the event
+    /// </summary>
+    /// <param name="evt">The event to be captured.</param>
+    /// <param name="hint">An optional hint providing high level context for the source of the event</param>
+    /// <param name="scope">An optional scope to be applied to the event.</param>
+    /// <returns>The Id of the event.</returns>
+    SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null);
+
+    /// <summary>
     /// Captures a user feedback.
     /// </summary>
     /// <param name="userFeedback">The user feedback to send to Sentry.</param>

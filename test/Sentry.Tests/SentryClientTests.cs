@@ -249,7 +249,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent()
     {
-        _fixture.SentryOptions.BeforeSend = _ => null;
+        _fixture.SentryOptions.SetBeforeSend(_ => null);
         var expectedEvent = new SentryEvent();
 
         var sut = _fixture.GetSut();
@@ -262,7 +262,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent_RecordsDiscard()
     {
-        _fixture.SentryOptions.BeforeSend = _ => null;
+        _fixture.SentryOptions.SetBeforeSend(_ => null);
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
@@ -305,7 +305,7 @@ public partial class SentryClientTests
     public void CaptureEvent_BeforeEvent_ModifyEvent()
     {
         SentryEvent received = null;
-        _fixture.SentryOptions.BeforeSend = e => received = e;
+        _fixture.SentryOptions.SetBeforeSend(e => received = e);
 
         var @event = new SentryEvent();
 
@@ -366,7 +366,7 @@ public partial class SentryClientTests
         // Largest value allowed. Should always send
         _fixture.SentryOptions.SampleRate = 1;
         SentryEvent received = null;
-        _fixture.SentryOptions.BeforeSend = e => received = e;
+        _fixture.SentryOptions.SetBeforeSend(e => received = e);
 
         var @event = new SentryEvent();
 
@@ -382,7 +382,7 @@ public partial class SentryClientTests
     {
         _fixture.SentryOptions.SampleRate = null;
         SentryEvent received = null;
-        _fixture.SentryOptions.BeforeSend = e => received = e;
+        _fixture.SentryOptions.SetBeforeSend(e => received = e);
 
         var @event = new SentryEvent();
 

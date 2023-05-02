@@ -148,14 +148,15 @@ public partial class SentryMauiAppBuilderExtensionsTests
             .UseSentry(options =>
             {
                 options.Dsn = ValidDsn;
-                options.BeforeSend = e =>
-                {
-                    // capture the event
-                    @event = e;
+                options.SetBeforeSend(e =>
+                    {
+                        // capture the event
+                        @event = e;
 
-                    // but don't actually send it
-                    return null;
-                };
+                        // but don't actually send it
+                        return null;
+                    }
+                );
             });
 
         // Act

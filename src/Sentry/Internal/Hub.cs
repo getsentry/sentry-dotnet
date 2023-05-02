@@ -316,9 +316,12 @@ internal class Hub : IHubEx, IDisposable
     }
 
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
-        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, scope) : SentryId.Empty;
+        CaptureEvent(evt, null, scope);
 
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Scope? scope)
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) =>
+        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, hint, scope) : SentryId.Empty;
+
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
     {
         try
         {
@@ -353,7 +356,7 @@ internal class Hub : IHubEx, IDisposable
 
             // Now capture the event with the Sentry client on the current scope.
             var sentryClient = currentScope.Value;
-            var id = sentryClient.CaptureEvent(evt, actualScope);
+            var id = sentryClient.CaptureEvent(evt, hint, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 

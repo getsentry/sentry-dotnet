@@ -43,16 +43,17 @@ internal static class Program
             // o.SampleRate = 0.5f; // Randomly drop (don't send to Sentry) half of events
 
             // Modifications to event before it goes out. Could replace the event altogether
-            o.BeforeSend = @event =>
-            {
-                // Drop an event altogether:
-                if (@event.Tags.ContainsKey("SomeTag"))
+            o.SetBeforeSend(@event =>
                 {
-                    return null;
-                }
+                    // Drop an event altogether:
+                    if (@event.Tags.ContainsKey("SomeTag"))
+                    {
+                        return null;
+                    }
 
-                return @event;
-            };
+                    return @event;
+                }
+            );
 
             // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
             o.BeforeBreadcrumb = crumb =>

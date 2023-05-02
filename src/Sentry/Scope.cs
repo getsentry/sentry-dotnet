@@ -359,7 +359,6 @@ public class Scope : IEventLike, IHasDistribution
 #endif
     }
 
-
     /// <summary>
     /// Applies the data from this scope to another event-like object.
     /// </summary>
