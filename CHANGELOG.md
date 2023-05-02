@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.31.0
 
 ### Features
 
@@ -20,6 +20,7 @@
 - Remove session breadcrumbs ([#2333](https://github.com/getsentry/sentry-dotnet/pull/2333))
 - Support synchronous `HttpClient.Send` in `SentryHttpMessageHandler` ([#2336](https://github.com/getsentry/sentry-dotnet/pull/2336))
 - Fix ASP.NET Core issue with missing context when using capture methods that configure scope ([#2339](https://github.com/getsentry/sentry-dotnet/pull/2339))
+- Improve debug file upload handling ([#2349](https://github.com/getsentry/sentry-dotnet/pull/2349))
 
 ### Dependencies
 
