@@ -20,7 +20,7 @@ public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
         set => _internalStorage[name] = value;
     }
 
-    public void AddAttachments(params Attachment[] attachments)
+    internal void AddAttachmentsInternal(IEnumerable<Attachment> attachments)
     {
         if (attachments is not null)
         {
@@ -28,13 +28,9 @@ public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
         }
     }
 
-    public void AddAttachments(ICollection<Attachment> attachments)
-    {
-        if (attachments is not null)
-        {
-            _attachments.AddRange(attachments);
-        }
-    }
+    public void AddAttachments(params Attachment[] attachments) => AddAttachmentsInternal(attachments);
+
+    public void AddAttachments(ICollection<Attachment> attachments) => AddAttachmentsInternal(attachments);
 
     public ICollection<Attachment> Attachments => _attachments;
 
@@ -51,10 +47,7 @@ public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
     public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
         => ((IEnumerable<KeyValuePair<string, object?>>)_internalStorage).GetEnumerator();
 
-    public T? GetAs<T>(string name) where T : class?
-        => (this[name] is T typedHintValue)
-            ? typedHintValue
-            : null;
+    public T? GetAs<T>(string name) where T : class? => (this[name] is T typedHintValue) ? typedHintValue : null;
 
     public bool IsSynchronized => ((ICollection)_internalStorage).IsSynchronized;
 
@@ -71,8 +64,7 @@ public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
     /// </summary>
     /// <param name="attachment"></param>
     /// <returns></returns>
-    public static Hint WithAttachments(params Attachment[] attachment)
-        => Hint.WithAttachments(attachment.ToList());
+    public static Hint WithAttachments(params Attachment[] attachment) => Hint.WithAttachments(attachment.ToList());
 
     /// <summary>
     /// Creates a new Hint with attachments.

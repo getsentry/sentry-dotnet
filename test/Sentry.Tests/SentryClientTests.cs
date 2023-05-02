@@ -302,6 +302,24 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_BeforeSend_GetsHint()
+    {
+        Hint received = null;
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            received = h;
+            return e;
+        });
+
+        var @event = new SentryEvent();
+        var hint = new Hint();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event, hint);
+
+        Assert.Same(hint, received);
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeEvent_ModifyEvent()
     {
         SentryEvent received = null;

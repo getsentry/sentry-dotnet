@@ -404,6 +404,25 @@ public partial class HubTests
     }
 
     [Fact]
+    public void CaptureEvent_Client_GetsHint()
+    {
+        // Arrange
+        var @event = new SentryEvent();
+        var hint = new Hint();
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.CaptureEvent(@event, hint);
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEvent(
+            Arg.Any<SentryEvent>(),
+            Arg.Is<Hint>(h => h == hint),
+            Arg.Any<Scope>()
+            );
+    }
+
+    [Fact]
     public void AppDomainUnhandledExceptionIntegration_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
     {
         // Arrange
