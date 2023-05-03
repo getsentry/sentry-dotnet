@@ -62,6 +62,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         // Find the HTTP Trigger attribute via reflection
         var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);
         var entryPointName = context.FunctionDefinition.EntryPoint;
+
         var typeName = entryPointName[..entryPointName.LastIndexOf('.')];
         var methodName = entryPointName[(typeName.Length + 1)..];
         var attribute = assembly.GetType(typeName)?.GetMethod(methodName)?.GetParameters()
