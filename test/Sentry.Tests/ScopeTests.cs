@@ -309,6 +309,27 @@ public class ScopeTests
         Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
     }
 
+    [Fact]
+    public void AddBreadcrumb_BeforeAddBreadcrumb_ReceivesHint()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        Hint receivedHint = null;
+        options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+        {
+            receivedHint = hint;
+            return breadcrumb;
+        });
+        var scope = new Scope(options);
+
+        // Act
+        var expectedHint = new Hint();
+        scope.AddBreadcrumb(new Breadcrumb(), expectedHint);
+
+        // Assert
+        receivedHint.Should().Equal(expectedHint);
+    }
+
     [Theory]
     [InlineData("123@123.com", null, null, true)]
     [InlineData("123@123.com", null, null, false)]

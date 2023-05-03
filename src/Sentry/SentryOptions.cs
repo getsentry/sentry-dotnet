@@ -343,13 +343,28 @@ public class SentryOptions
     /// </remarks>
     public Func<Transaction, Transaction?>? BeforeSendTransaction { get; set; }
 
+    private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
+
+    internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
+
     /// <summary>
     /// A callback invoked when a breadcrumb is about to be stored.
     /// </summary>
     /// <remarks>
     /// Gives a chance to inspect and modify/reject a breadcrumb.
     /// </remarks>
+    [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
     public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
+
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
+    {
+        _beforeBreadcrumb = (e, _) => beforeBreadcrumb(e);
+    }
+
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
+    {
+        _beforeBreadcrumb = beforeBreadcrumb;
+    }
 
     private int _maxQueueItems = 30;
 

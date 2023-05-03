@@ -244,11 +244,18 @@ public class Scope : IEventLike, IHasDistribution
     }
 
     /// <inheritdoc />
-    public void AddBreadcrumb(Breadcrumb breadcrumb)
+    public void AddBreadcrumb(Breadcrumb breadcrumb) => AddBreadcrumb(breadcrumb, new Hint());
+
+    /// <summary>
+    /// Adds a breadcrumb with a hint.
+    /// </summary>
+    /// <param name="breadcrumb">The breadcrumb</param>
+    /// <param name="hint">A hint for use in the BeforeBreadcrumb callback</param>
+    public void AddBreadcrumb(Breadcrumb breadcrumb, Hint hint)
     {
-        if (Options.BeforeBreadcrumb is { } beforeBreadcrumb)
+        if (Options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
-            if (beforeBreadcrumb(breadcrumb) is { } processedBreadcrumb)
+            if (beforeBreadcrumb(breadcrumb, hint) is { } processedBreadcrumb)
             {
                 breadcrumb = processedBreadcrumb;
             }

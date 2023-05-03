@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add Hint support ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
+
 ### Features
 
 - Initial work to support profiling in a future release. ([#2206](https://github.com/getsentry/sentry-dotnet/pull/2206))
