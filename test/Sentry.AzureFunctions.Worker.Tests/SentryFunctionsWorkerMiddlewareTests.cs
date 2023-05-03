@@ -5,18 +5,42 @@ namespace Sentry.AzureFunctions.Worker.Tests;
 
 public class SentryFunctionsWorkerMiddlewareTests
 {
-    [Fact]
-    public async Task X()
+    private class Fixture
     {
-        // TODO: is there a testing IHub?
+        //public RequestDelegate RequestDelegate { get; set; } = _ => Task.CompletedTask;
+        public IHub Hub { get; set; } = Substitute.For<IHub>();
+        public Scope Scope { get; set; }
 
+        public Fixture()
+        {
+            Scope = new();
+            Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(Scope));
+
+            // Hub.When(hub => hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
+            //     .Do(_ => Scope.Evaluate());
+
+            _ = Hub.IsEnabled.Returns(true);
+        }
+
+        public SentryFunctionsWorkerMiddleware GetSut() => new(Hub);
+    }
+
+    private readonly Fixture _fixture = new();
+
+    [Fact]
+    public async Task Original_exception_rethrown()
+    {
         var hub = Substitute.For<IHub>();
         var functionContext = Substitute.For<FunctionContext>();
 
-        FunctionExecutionDelegate functionExecutionDelegate = context => Task.CompletedTask;
+        var expected = new Exception("Kaboom, Riko!");
+        FunctionExecutionDelegate functionExecutionDelegate = context => Task.FromException(expected);
 
-        var sut = new SentryFunctionsWorkerMiddleware(hub);
+        var sut = _fixture.GetSut();
 
-        await sut.Invoke(functionContext, functionExecutionDelegate);
+        var actual = await Assert.ThrowsAsync<Exception>(async () => await sut.Invoke(functionContext, functionExecutionDelegate));
+
+        actual.Should().BeSameAs(expected);
     }
 }
