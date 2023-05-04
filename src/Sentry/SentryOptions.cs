@@ -309,13 +309,9 @@ public class SentryOptions
     internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
-    /// A callback to invoke before sending an event to Sentry
+    /// Configures a callback to invoke before sending an event to Sentry
     /// </summary>
-    /// <remarks>
-    /// The return of this event will be sent to Sentry. This allows the application
-    /// a chance to inspect and/or modify the event before it's sent. If the event
-    /// should not be sent at all, return null from the callback.
-    /// </remarks>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
     [Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
     public Func<SentryEvent, SentryEvent?>? BeforeSend
     {
@@ -323,11 +319,23 @@ public class SentryOptions
         set => _beforeSend = value is null ? null : (e, _) => value(e);
     }
 
+    /// <summary>
+    /// Configures a callback to invoke before sending an event to Sentry
+    /// </summary>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
     public void SetBeforeSend(Func<SentryEvent, SentryEvent?> beforeSend)
     {
         _beforeSend = (e, _) => beforeSend(e);
     }
 
+    /// <summary>
+    /// Configures a callback function to be invoked before sending an event to Sentry
+    /// </summary>
+    /// <remarks>
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the event before it's sent. If the
+    /// event should not be sent at all, return null from the callback.
+    /// </remarks>
     public void SetBeforeSend(Func<SentryEvent, Hint, SentryEvent?> beforeSend)
     {
         _beforeSend = beforeSend;
@@ -348,19 +356,28 @@ public class SentryOptions
     internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
 
     /// <summary>
-    /// A callback invoked when a breadcrumb is about to be stored.
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
     /// </summary>
-    /// <remarks>
-    /// Gives a chance to inspect and modify/reject a breadcrumb.
-    /// </remarks>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
     [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
     public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
 
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
+    /// </summary>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
     public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = (e, _) => beforeBreadcrumb(e);
     }
 
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
+    /// </summary>
+    /// <remarks>
+    /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
+    /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
+    /// </remarks>
     public void SetBeforeBreadcrumb(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = beforeBreadcrumb;
