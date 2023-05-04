@@ -102,7 +102,7 @@ public static partial class SentrySdk
                 });
             }
 
-            if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
+            if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
             {
                 o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb);
             }
