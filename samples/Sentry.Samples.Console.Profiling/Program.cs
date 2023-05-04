@@ -56,7 +56,7 @@ internal static class Program
             );
 
             // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
-            o.BeforeBreadcrumb = crumb =>
+            o.SetBeforeBreadcrumb(crumb =>
             {
                 // Don't add breadcrumbs with message containing:
                 if (crumb.Message?.Contains("bad breadcrumb") == true)
@@ -65,7 +65,7 @@ internal static class Program
                 }
 
                 return crumb;
-            };
+            });
 
             // Ignore exception by its type:
             o.AddExceptionFilterForType<XsltCompileException>();

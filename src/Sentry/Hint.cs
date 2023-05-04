@@ -14,6 +14,16 @@ public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
     private readonly Dictionary<string, object?> _internalStorage = new();
     private readonly List<Attachment> _attachments = new();
 
+    public Hint()
+    {
+    }
+
+    public Hint(string key, object? value)
+        : this()
+    {
+        _internalStorage[key] = value;
+    }
+
     /// <summary>
     /// Gets or sets additional values to be provided with the hint
     /// </summary>

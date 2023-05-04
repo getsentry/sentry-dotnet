@@ -55,7 +55,7 @@ internal static class Program
             );
 
             // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
-            o.BeforeBreadcrumb = crumb =>
+            o.SetBeforeBreadcrumb((crumb, hint) =>
             {
                 // Don't add breadcrumbs with message containing:
                 if (crumb.Message?.Contains("bad breadcrumb") == true)
@@ -63,8 +63,15 @@ internal static class Program
                     return null;
                 }
 
+                // Replace breadcrumbs entirely incase of a drastic hint
+                const string replaceBreadcrumb = "don't trust this breadcrumb";
+                if (hint.ContainsKey(replaceBreadcrumb))
+                {
+                    return new Breadcrumb(hint.GetValue<string>(replaceBreadcrumb), null, null, null, BreadcrumbLevel.Critical);
+                }
+
                 return crumb;
-            };
+            });
 
             // Ignore exception by its type:
             o.AddExceptionFilterForType<XsltCompileException>();
@@ -102,6 +109,11 @@ internal static class Program
 
             SentrySdk.AddBreadcrumb(
                 "A 'bad breadcrumb' that will be rejected because of 'BeforeBreadcrumb callback above.'");
+
+            SentrySdk.AddBreadcrumb(
+                new Breadcrumb("A breadcrumb that will be replaced by the 'BeforeBreadcrumb callback because of the hint", null),
+                new Hint("don't trust this breadcrumb", "trust this instead")
+                );
 
             // Data added to the root scope (no PushScope called up to this point)
             // The modifications done here will affect all events sent and will propagate to child scopes.

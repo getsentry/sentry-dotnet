@@ -312,6 +312,16 @@ public static partial class SentrySdk
         => CurrentHub.AddBreadcrumb(clock, message, category, type, data, level);
 
     /// <summary>
+    /// Adds a breadcrumb to the current Scope.
+    /// </summary>
+    /// <param name="breadcrumb">The breadcrumb to be added</param>
+    /// <param name="hint">A hint providing additional context that can be used in the BeforeBreadcrumb callback</param>
+    /// <see cref="AddBreadcrumb(string, string?, string?, IDictionary{string, string}?, BreadcrumbLevel)"/>
+    [DebuggerStepThrough]
+    public static void AddBreadcrumb(Breadcrumb breadcrumb, Hint? hint = null)
+        => CurrentHub.AddBreadcrumb(breadcrumb, hint);
+
+    /// <summary>
     /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>

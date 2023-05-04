@@ -24,7 +24,7 @@ internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBef
         {
             // The result is the same object as was input, and all properties are immutable,
             // so we can return the original Java object for better performance.
-            return b;
+            return b!;
         }
 
         return result?.ToJavaBreadcrumb();
