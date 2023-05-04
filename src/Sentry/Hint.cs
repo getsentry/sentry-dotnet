@@ -14,10 +14,18 @@ public class Hint : ICollection, IEnumerable<KeyValuePair<string, object?>>
     private readonly Dictionary<string, object?> _internalStorage = new();
     private readonly List<Attachment> _attachments = new();
 
+    /// <summary>
+    /// Creates a new instance of <see cref="Hint"/>.
+    /// </summary>
     public Hint()
     {
     }
 
+    /// <summary>
+    /// Creates a new hint with a single key/value pair.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
     public Hint(string key, object? value)
         : this()
     {
