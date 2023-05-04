@@ -51,7 +51,7 @@ internal class TraceLogProcessor
     private readonly Dictionary<SentryProfileStackTrace, int> _stackIndexes = new(100);
 
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
-    private readonly SparseScalarArray<int> _threadIndexes;
+    private readonly SparseScalarArray<int> _threadIndexes = new(-1, 10);
 
     // A sparse array mapping from an ActivityIndex to an index in Profile.Threads.
     private readonly SparseScalarArray<int> _activityIndexes = new(-1, 100);
@@ -95,12 +95,11 @@ internal class TraceLogProcessor
 
     public double MaxTimestampMs { get; set; } = double.MaxValue;
 
-    public TraceLogProcessor(SentryOptions options, TraceLog traceLog)
+    public TraceLogProcessor(SentryOptions options, TraceLogEventSource eventSource)
     {
-        _threadIndexes = new(-1, traceLog.Threads.Count);
         _options = options;
-        _traceLog = traceLog;
-        _eventSource = _traceLog.Events.GetSource();
+        _traceLog = eventSource.TraceLog;
+        _eventSource = eventSource;
         _stackSource = new MutableTraceEventStackSource(_traceLog)
         {
             //_stackSource = new TraceEventStackSource(_eventLog.Events) {
