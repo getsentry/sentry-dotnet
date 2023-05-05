@@ -32,9 +32,9 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
                     { "entryPoint", context.FunctionDefinition.EntryPoint },
                     { "invocationId", context.InvocationId }
                 };
-
-                context.CancellationToken.ThrowIfCancellationRequested();
             });
+
+            context.CancellationToken.ThrowIfCancellationRequested();
 
             await next(context).ConfigureAwait(false);
         }
