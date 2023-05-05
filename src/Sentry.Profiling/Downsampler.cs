@@ -1,6 +1,7 @@
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.EventPipe;
 
+// TODO remove
 /// <summary>
 /// Reduce sampling rate from 1 Hz that is the default for the provider to the configured SamplingRateMs.
 /// </summary>
@@ -11,7 +12,7 @@ internal class Downsampler
     private double NextSampleLow = 0;
     private double NextSampleHigh = -1;
 
-    public void AttachTo(EventPipeEventSource source)
+    public void AttachTo(TraceEventDispatcher source)
     {
         source.AddDispatchHook(DispatchHook);
     }

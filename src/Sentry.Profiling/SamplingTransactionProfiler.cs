@@ -96,6 +96,9 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         using var eventPipeEventSource = new EventPipeEventSource(nettraceStream);
         using var traceLogEventSource = TraceLog.CreateFromEventPipeEventSource(eventPipeEventSource);
 
+        // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
+        new Downsampler().AttachTo(traceLogEventSource);
+
         _options.LogDebug("Converting profile to Sentry format.");
 
         _cancellationToken.ThrowIfCancellationRequested();
