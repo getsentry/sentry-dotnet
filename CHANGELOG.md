@@ -1,8 +1,12 @@
 # Changelog
 
-## 3.31.0
+## Unreleased
 
-- Add Hint support ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
+### Features
+
+- Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
+
+## 3.31.0
 
 ### Features
 
