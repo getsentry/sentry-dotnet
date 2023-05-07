@@ -14,15 +14,18 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
+        var transactionName = await GetTransactionNameAsync(context) ?? context.FunctionDefinition.Name;
+        var transaction = _hub.StartTransaction(transactionName, "function");
+        Exception? unhandledException = null;
+
         try
         {
-            var transactionName = await GetTransactionNameAsync(context) ?? context.FunctionDefinition.Name;
-
             _hub.ConfigureScope(scope =>
             {
-                var transaction = _hub.StartTransaction(transactionName, "function");
                 scope.Transaction = transaction;
 
+                // AzureFunctions_FunctionName and AzureFunctions_InvocationId are already set by the time we get here.
+                // Clear those and replace with "function" scope context.
                 scope.UnsetTag("AzureFunctions_FunctionName");
                 scope.UnsetTag("AzureFunctions_InvocationId");
 
@@ -45,7 +48,20 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
                 "The Function has thrown an exception that was not handled by the user code.",
                 handled: false);
 
+            unhandledException = exception;
+
             throw;
+        }
+        finally
+        {
+            if (unhandledException is not null)
+            {
+                transaction.Finish(unhandledException);
+            }
+            else
+            {
+                transaction.Finish();
+            }
         }
     }
 

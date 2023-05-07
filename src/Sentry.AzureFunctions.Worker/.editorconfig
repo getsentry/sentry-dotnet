@@ -1,5 +1,5 @@
 # https: //docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference
 [*.cs]
 
-# Justification: Azure Functions (single thread) project
+# Justification: Azure Functions project doesn't utilize synchronization context
 dotnet_diagnostic.CA2007.severity = none
