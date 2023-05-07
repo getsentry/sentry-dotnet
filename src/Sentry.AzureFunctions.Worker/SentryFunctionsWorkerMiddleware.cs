@@ -14,7 +14,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        var transactionName = await GetTransactionNameAsync(context) ?? context.FunctionDefinition.Name;
+        var transactionName = await GetTransactionNameAsync(context).ConfigureAwait(false) ?? context.FunctionDefinition.Name;
         var transaction = _hub.StartTransaction(transactionName, "function");
         Exception? unhandledException = null;
 
