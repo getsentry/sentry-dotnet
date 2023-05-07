@@ -52,6 +52,9 @@ public class Hint
     /// </summary>
     public ICollection<Attachment> Attachments => _attachments;
 
+    /// <summary>
+    /// Data provided with the Hint.
+    /// </summary>
     public IDictionary<string, object?> Items => _items;
 
     /// <summary>
