@@ -243,7 +243,7 @@ public class SentryFailedRequestHandlerTests
             hint.Should().NotBeNull();
 
             // Response should be captured
-            hint[HintTypes.HttpResponseMessage].Should().Be(response);
+            hint.Items[HintTypes.HttpResponseMessage].Should().Be(response);
         }
     }
 }

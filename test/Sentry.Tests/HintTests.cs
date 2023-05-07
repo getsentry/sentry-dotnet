@@ -42,14 +42,13 @@ public class HintTests
     public void Clear_WithEntries_ClearsHintEntries()
     {
         // Arrange
-        var hint = new Hint();
-        hint["key"] = "value";
+        var hint = new Hint("key", "value");
 
         // Act
-        hint.Clear();
+        hint.Items.Clear();
 
         // Assert
-        hint.Count.Should().Be(0);
+        hint.Items.Count.Should().Be(0);
     }
 
     [Fact]
@@ -71,11 +70,10 @@ public class HintTests
     public void ContainsKey_ExistingKey_ReturnsTrue()
     {
         // Arrange
-        var hint = new Hint();
-        hint["key"] = "value";
+        var hint = new Hint("key", "value");
 
         // Act
-        var containsKey = hint.ContainsKey("key");
+        var containsKey = hint.Items.ContainsKey("key");
 
         // Assert
         containsKey.Should().BeTrue();
@@ -85,63 +83,13 @@ public class HintTests
     public void ContainsKey_NonExistingKey_ReturnsFalse()
     {
         // Arrange
-        var hint = new Hint();
-        hint["key"] = "value";
+        var hint = new Hint("key", "value");
 
         // Act
-        var containsKey = hint.ContainsKey("nonExistingKey");
+        var containsKey = hint.Items.ContainsKey("nonExistingKey");
 
         // Assert
         containsKey.Should().BeFalse();
-    }
-
-    [Fact]
-    public void CopyTo_EmptyHint_CopyToArray()
-    {
-        // Arrange
-        var hint = new Hint();
-        var array = new object[3];
-
-        // Act
-        hint.CopyTo(array, 0);
-
-        // Assert
-        array.Should().BeEquivalentTo(new object[] { null, null, null });
-    }
-
-    [Fact]
-    public void CopyTo_NonEmptyHint_CopyToArray()
-    {
-        // Arrange
-        var hint = new Hint();
-        hint["key1"] = "value1";
-        hint["key2"] = "value2";
-        hint["key3"] = "value3";
-        var array = new object[3];
-
-        // Act
-        hint.CopyTo(array, 0);
-
-        // Assert
-        array.Should().BeEquivalentTo(new [] {
-            new KeyValuePair<string, object>("key1", "value1"),
-            new KeyValuePair<string, object>("key2", "value2"),
-            new KeyValuePair<string, object>("key3", "value3"),
-        });
-    }
-
-    [Fact]
-    public void CopyTo_ArrayTooSmall_ThrowsException()
-    {
-        // Arrange
-        var hint = new Hint();
-        hint["key1"] = "value1";
-        hint["key2"] = "value2";
-        hint["key3"] = "value3";
-        var array = new object[2];
-
-        // Act and Assert
-        Assert.Throws<System.ArgumentException>(() => hint.CopyTo(array, 0));
     }
 
     [Fact]
@@ -151,7 +99,7 @@ public class HintTests
         var hint = new Hint();
 
         // Act
-        var count = hint.Count;
+        var count = hint.Items.Count;
 
         // Assert
         count.Should().Be(0);
@@ -162,75 +110,27 @@ public class HintTests
     {
         // Arrange
         var hint = new Hint();
-        hint["key1"] = "value1";
-        hint["key2"] = "value2";
+        hint.Items["key1"] = "value1";
+        hint.Items["key2"] = "value2";
 
         // Act
-        var count = hint.Count;
+        var count = hint.Items.Count;
 
         // Assert
         count.Should().Be(2);
     }
 
     [Fact]
-    public void GetValue_WithNonExistingKey_ReturnsNull()
-    {
-        // Arrange
-        var hint = new Hint();
-
-        // Act
-        var result = hint.GetValue<string>("non-existing");
-
-        // Assert
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void GetValue_WithExistingKey_ReturnsValue()
-    {
-        // Arrange
-        var hint = new Hint();
-        hint["key"] = "value";
-
-        // Act
-        var result = hint.GetValue<string>("key");
-
-        // Assert
-        Assert.Equal("value", result);
-    }
-
-    [Fact]
-    public void GetEnumerator_ReturnsValidEnumreator()
-    {
-        // Arrange
-        var hint = new Hint();
-        hint["key1"] = "value1";
-        hint["key2"] = "value2";
-
-        // Act + Assert
-        var enumerator = hint.GetEnumerator();
-
-        // Assert
-        enumerator.Should().BeAssignableTo<IEnumerator<KeyValuePair<string, object>>>();
-        while (enumerator.MoveNext())
-        {
-            enumerator.Current.Key.Should().BeOneOf("key1", "key2");
-            enumerator.Current.Value.Should().BeOneOf("value1", "value2");
-        }
-    }
-
-    [Fact]
     public void Remove_WithExistingKey_RemovesEntry()
     {
         // Arrange
-        var hint = new Hint();
-        hint["key"] = "value";
+        var hint = new Hint("key", "value");
 
         // Act
-        hint.Remove("key");
+        hint.Items.Remove("key");
 
         // Assert
-        Assert.Null(hint["key"]);
+        hint.Items.ContainsKey("key").Should().BeFalse();
     }
 
     [Fact]

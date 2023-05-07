@@ -327,7 +327,7 @@ public class ScopeTests
         scope.AddBreadcrumb(new Breadcrumb(), expectedHint);
 
         // Assert
-        receivedHint.Should().Equal(expectedHint);
+        receivedHint.Should().BeSameAs(expectedHint);
     }
 
     [Theory]

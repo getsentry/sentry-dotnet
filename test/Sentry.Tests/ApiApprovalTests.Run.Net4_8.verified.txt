@@ -137,26 +137,16 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
-    public class Hint : System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object?>>, System.Collections.ICollection, System.Collections.IEnumerable
+    public class Hint
     {
         public Hint() { }
         public Hint(string key, object? value) { }
         public System.Collections.Generic.ICollection<Sentry.Attachment> Attachments { get; }
-        public int Count { get; }
-        public bool IsSynchronized { get; }
-        public object? this[string key] { get; set; }
+        public System.Collections.Generic.IDictionary<string, object?> Items { get; }
         public Sentry.Attachment? Screenshot { get; set; }
-        public object SyncRoot { get; }
         public Sentry.Attachment? ViewHierarchy { get; set; }
         public void AddAttachments(params Sentry.Attachment[] attachments) { }
         public void AddAttachments(System.Collections.Generic.IEnumerable<Sentry.Attachment> attachments) { }
-        public void Clear() { }
-        public bool ContainsKey(string key) { }
-        public void CopyTo(System.Array array, int index) { }
-        public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator() { }
-        public T? GetValue<T>(string key)
-            where T :  class? { }
-        public void Remove(string key) { }
         public static Sentry.Hint WithAttachments(params Sentry.Attachment[] attachment) { }
         public static Sentry.Hint WithAttachments(System.Collections.Generic.ICollection<Sentry.Attachment> attachments) { }
     }
