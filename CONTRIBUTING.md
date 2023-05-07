@@ -29,6 +29,20 @@ For big feature it's advised to raise an issue to discuss it first.
 To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, you'll need to have .NET SDK 6.0.400 or greater installed, and have installed the MAUI workloads installed, either through Visual Studio setup, or by running `dotnet workload restore` (or `dotnet workload install maui`) from the Sentry source code root directory.
 You may also need other platform dependencies.  See https://docs.microsoft.com/dotnet/maui/ for details.  Basically, if you can build and run the "MyMauiApp" example you should also be able to build and run the Sentry MAUI sample app.
 
+### Targeting Android, iOS and macCatalyst
+
+Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project, they are [conditionally targeted](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/src/Sentry/Sentry.csproj#L19-L21) when the platform is Android, iOS or macCatalyst.  We build for Android on all platforms, but currently compile iOS and macCatalyst _only when building on a Mac_.
+
+```xml
+<!-- Platform-specific props included here -->
+  <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
+  <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+```
+
+These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK (which provide .NET wrappers around native Android or Cocoa functions).
+
+Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution. 
+
 ## API changes approval process
 
 This repository uses [Verify](https://github.com/VerifyTests/Verify) to store the public API diffs in snapshot files.
