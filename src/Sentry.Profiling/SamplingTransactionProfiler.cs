@@ -15,14 +15,12 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private TimeSpan? _duration;
     private Task<MemoryStream>? _data;
-    private readonly string _tempDirectoryPath;
     private Transaction? _transaction;
     private readonly SentryOptions _options;
 
-    public SamplingTransactionProfiler(string tempDirectoryPath, SentryOptions options, CancellationToken cancellationToken)
+    public SamplingTransactionProfiler(SentryOptions options, CancellationToken cancellationToken)
     {
         _options = options;
-        _tempDirectoryPath = tempDirectoryPath;
         _cancellationToken = cancellationToken;
     }
 

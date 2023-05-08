@@ -11,7 +11,7 @@ namespace Sentry.Benchmarks;
 public class ProfilingBenchmarks
 {
     private IHub _hub = Substitute.For<IHub>();
-    private ITransactionProfilerFactory _factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new());
+    private ITransactionProfilerFactory _factory = new SamplingTransactionProfilerFactory(new());
 
     #region full transaction profiling
     public IEnumerable<object[]> ProfilerArguments()

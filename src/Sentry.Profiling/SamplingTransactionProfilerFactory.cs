@@ -14,13 +14,10 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
-    private readonly string _tempDirectoryPath;
-
     private readonly SentryOptions _options;
 
-    public SamplingTransactionProfilerFactory(string tempDirectoryPath, SentryOptions options)
+    public SamplingTransactionProfilerFactory(SentryOptions options)
     {
-        _tempDirectoryPath = tempDirectoryPath;
         _options = options;
     }
 
@@ -33,7 +30,7 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
             _options.LogDebug("Starting a sampling profiler session.");
             try
             {
-                var profiler = new SamplingTransactionProfiler(_tempDirectoryPath, _options, cancellationToken)
+                var profiler = new SamplingTransactionProfiler(_options, cancellationToken)
                 {
                     OnFinish = () => _inProgress = FALSE
                 };
