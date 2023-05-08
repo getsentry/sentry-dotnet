@@ -11,7 +11,7 @@ namespace Sentry.Benchmarks;
 public class ProfilingBenchmarks
 {
     private IHub _hub = Substitute.For<IHub>();
-    private ITransactionProfilerFactory _factory = new SamplingTransactionProfilerFactory(new());
+    private ITransactionProfilerFactory _factory = SamplingTransactionProfilerFactory.Create(new());
 
     #region full transaction profiling
     public IEnumerable<object[]> ProfilerArguments()
@@ -139,19 +139,10 @@ public class ProfilingBenchmarks
         session.Dispose();
     }
 
-    // Same as DiagnosticsSessionStartCopyStop(rundown: true, provider: 'all')
-    [Benchmark]
-    public void SampleProfilerSessionStartStopFinishWait()
-    {
-        var session = SampleProfilerSession.StartNew(CancellationToken.None);
-        session.Stop();
-        session.FinishAsync().Wait();
-    }
-
     [Benchmark]
     public void SampleProfilerSessionStartStop()
     {
-        var session = SampleProfilerSession.StartNew(CancellationToken.None);
+        var session = SampleProfilerSession.StartNew();
         session.Stop();
     }
     #endregion

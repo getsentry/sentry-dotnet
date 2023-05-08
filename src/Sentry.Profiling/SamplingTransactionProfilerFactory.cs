@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry.Profiling;
 
-internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
+internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionProfilerFactory
 {
     // We only allow a single profile so let's keep track of the current status.
     internal int _inProgress = FALSE;
@@ -15,10 +15,23 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     private const int TIME_LIMIT_MS = 30_000;
 
     private readonly SentryOptions _options;
+    private SampleProfilerSession _session;
 
-    public SamplingTransactionProfilerFactory(SentryOptions options)
+    public static SamplingTransactionProfilerFactory Create(SentryOptions options)
+    {
+        return new SamplingTransactionProfilerFactory(options, SampleProfilerSession.StartNew());
+    }
+
+    public static async Task<SamplingTransactionProfilerFactory> CreateAsync(SentryOptions options)
+    {
+        var session = await Task.Run(() => SampleProfilerSession.StartNew()).ConfigureAwait(false);
+        return new SamplingTransactionProfilerFactory(options, session);
+    }
+
+    private SamplingTransactionProfilerFactory(SentryOptions options, SampleProfilerSession session)
     {
         _options = options;
+        _session = session;
     }
 
     /// <inheritdoc />
@@ -27,15 +40,13 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
-            _options.LogDebug("Starting a sampling profiler session.");
+            _options.LogDebug("Starting a sampling profiler.");
             try
             {
-                var profiler = new SamplingTransactionProfiler(_options, cancellationToken)
+                return new SamplingTransactionProfiler(_options, _session, TIME_LIMIT_MS, cancellationToken)
                 {
                     OnFinish = () => _inProgress = FALSE
                 };
-                profiler.Start(TIME_LIMIT_MS);
-                return profiler;
             }
             catch (Exception e)
             {
@@ -44,5 +55,10 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
             }
         }
         return null;
+    }
+
+    public void Dispose()
+    {
+        _session.Stop();
     }
 }

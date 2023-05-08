@@ -62,7 +62,7 @@ public class SamplingTransactionProfilerTests
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
 
-        var factory = new SamplingTransactionProfilerFactory(new SentryOptions { DiagnosticLogger = _testOutputLogger });
+        using var factory = SamplingTransactionProfilerFactory.Create(new SentryOptions { DiagnosticLogger = _testOutputLogger });
         var clock = SentryStopwatch.StartNew();
         var sut = factory.Start(transactionTracer, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
@@ -83,9 +83,9 @@ public class SamplingTransactionProfilerTests
     {
         var hub = Substitute.For<IHub>();
         var options = new SentryOptions { DiagnosticLogger = _testOutputLogger };
-        var sut = new SamplingTransactionProfiler(options, CancellationToken.None);
+        using var session = SampleProfilerSession.StartNew();
         var limitMs = 50;
-        sut.Start(limitMs);
+        var sut = new SamplingTransactionProfiler(options, session, limitMs, CancellationToken.None);
         RunForMs(limitMs * 4);
         sut.Finish();
 

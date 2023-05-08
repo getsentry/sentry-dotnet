@@ -17,10 +17,9 @@ internal class TraceLogProcessor
 {
     private readonly SentryOptions _options;
     private readonly TraceLog _traceLog;
-    private readonly TraceLogEventSource _eventSource;
 
     // Output profile being built.
-    private readonly SampleProfile _profile = new();
+    public readonly SampleProfile Profile = new();
 
     // A sparse array that maps from StackSourceFrameIndex to an index in the output Profile.frames.
     private readonly SparseScalarArray<int> _frameIndexes = new(-1, 1000);
@@ -31,26 +30,16 @@ internal class TraceLogProcessor
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
     private readonly SparseScalarArray<int> _threadIndexes = new(-1, 10);
 
-    public double MaxTimestampMs { get; set; } = double.MaxValue;
+    private readonly double _timeShiftMs;
 
-    public TraceLogProcessor(SentryOptions options, TraceLogEventSource eventSource)
+    public TraceLogProcessor(SentryOptions options, TraceLog traceLog, double TimeShiftMs)
     {
         _options = options;
-        _traceLog = eventSource.TraceLog;
-        _eventSource = eventSource;
-        var sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
-        sampleEventParser.ThreadSample += AddSample;
+        _traceLog = traceLog;
+        _timeShiftMs = TimeShiftMs;
     }
 
-    public SampleProfile Process(CancellationToken cancellationToken)
-    {
-        var registration = cancellationToken.Register(_eventSource.StopProcessing);
-        _eventSource.Process();
-        registration.Unregister();
-        return _profile;
-    }
-
-    private void AddSample(TraceEvent data)
+    internal void AddSample(TraceEvent data)
     {
         var thread = data.Thread();
         if (thread.ThreadIndex == ThreadIndex.Invalid)
@@ -66,15 +55,7 @@ internal class TraceLogProcessor
             return;
         }
 
-        // Trim samples coming after the profiling has been stopped (i.e. after the Stop() IPC request has been sent).
-        var timestampMs = data.TimeStampRelativeMSec;
-        if (timestampMs > MaxTimestampMs)
-        {
-            // We can completely stop processing after the first sample that is after the timeout. Samples are
-            // ordered (I've checked this manually so I hope that assumption holds...) so no need to go through the rest.
-            _eventSource.StopProcessing();
-            return;
-        }
+        var timestampMs = data.TimeStampRelativeMSec + _timeShiftMs;
 
         var stackIndex = AddStackTrace(callStackIndex);
         if (stackIndex < 0)
@@ -88,7 +69,7 @@ internal class TraceLogProcessor
             return;
         }
 
-        _profile.Samples.Add(new()
+        Profile.Samples.Add(new()
         {
             Timestamp = (ulong)(timestampMs * 1_000_000),
             StackId = stackIndex,
@@ -125,8 +106,8 @@ internal class TraceLogProcessor
             if (!_stackIndexes.TryGetValue(stackTrace, out result))
             {
                 stackTrace.Trim(10);
-                _profile.Stacks.Add(stackTrace);
-                result = _profile.Stacks.Count - 1;
+                Profile.Stacks.Add(stackTrace);
+                result = Profile.Stacks.Count - 1;
                 _stackIndexes[stackTrace] = result;
             }
         }
@@ -144,8 +125,8 @@ internal class TraceLogProcessor
 
         if (!_frameIndexes.ContainsKey(key))
         {
-            _profile.Frames.Add(CreateStackFrame(codeAddressIndex));
-            _frameIndexes[key] = _profile.Frames.Count - 1;
+            Profile.Frames.Add(CreateStackFrame(codeAddressIndex));
+            _frameIndexes[key] = Profile.Frames.Count - 1;
         }
 
         return _frameIndexes[key];
@@ -161,11 +142,11 @@ internal class TraceLogProcessor
 
         if (!_threadIndexes.ContainsKey(key))
         {
-            _profile.Threads.Add(new()
+            Profile.Threads.Add(new()
             {
                 Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
             });
-            _threadIndexes[key] = _profile.Threads.Count - 1;
+            _threadIndexes[key] = Profile.Threads.Count - 1;
         }
 
         return _threadIndexes[key];

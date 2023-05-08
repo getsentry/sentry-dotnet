@@ -1,4 +1,3 @@
-using Sentry.Extensibility;
 using Sentry.Integrations;
 
 namespace Sentry.Profiling;
@@ -21,6 +20,6 @@ public class ProfilingIntegration : ISdkIntegration
     /// <inheritdoc/>
     public void Register(IHub hub, SentryOptions options)
     {
-        options.TransactionProfilerFactory = new SamplingTransactionProfilerFactory(options);
+        options.TransactionProfilerFactory = SamplingTransactionProfilerFactory.Create(options);
     }
 }
