@@ -394,7 +394,9 @@ internal class Hub : IHubEx, IDisposable
         }
     }
 
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,
@@ -431,7 +433,7 @@ internal class Hub : IHubEx, IDisposable
                 }
             }
 
-            currentScope.Value.CaptureTransaction(processedTransaction);
+            currentScope.Value.CaptureTransaction(processedTransaction, hint);
         }
         catch (Exception e)
         {

@@ -1126,7 +1126,21 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled));
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Hint>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_Provides_Hint_To_Client()
+    {
+        // Arrange        
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
+
+        // Assert
+        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
     }
 
 #if ANDROID && CI_BUILD

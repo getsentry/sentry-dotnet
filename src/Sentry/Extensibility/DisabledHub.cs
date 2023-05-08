@@ -134,6 +134,13 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
     }

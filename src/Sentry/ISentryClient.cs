@@ -45,6 +45,21 @@ public interface ISentryClient
     void CaptureTransaction(Transaction transaction);
 
     /// <summary>
+    /// Captures a transaction.
+    /// </summary>
+    /// <remarks>
+    /// Note: this method is NOT meant to be called from user code!
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// </remarks>
+    /// <param name="transaction">The transaction.</param>
+    /// <param name="hint">
+    /// A hint providing extra context.
+    /// This will be available in callbacks prior to processing the transaction.
+    /// </param>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    void CaptureTransaction(Transaction transaction, Hint? hint);
+
+    /// <summary>
     /// Captures a session update.
     /// </summary>
     /// <remarks>

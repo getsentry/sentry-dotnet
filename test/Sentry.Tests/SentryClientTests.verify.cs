@@ -21,7 +21,7 @@ public partial class SentryClientTests
     public Task CaptureTransaction_BeforeSendTransactionThrows_ErrorToEventBreadcrumb()
     {
         var error = new Exception("Exception message!");
-        _fixture.SentryOptions.BeforeSendTransaction = _ => throw error;
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => throw error);
 
         var transaction = new Transaction("name", "operation")
         {

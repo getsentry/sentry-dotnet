@@ -341,6 +341,10 @@ public class SentryOptions
         _beforeSend = beforeSend;
     }
 
+    private Func<Transaction, Hint, Transaction?>? _beforeSendTransaction;
+
+    internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
+
     /// <summary>
     /// A callback to invoke before sending a transaction to Sentry
     /// </summary>
@@ -349,7 +353,29 @@ public class SentryOptions
     /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
     /// should not be sent at all, return null from the callback.
     /// </remarks>
-    public Func<Transaction, Transaction?>? BeforeSendTransaction { get; set; }
+    [Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction instead.")]
+    public Func<Transaction, Transaction?>? BeforeSendTransaction {
+        get => null;
+        set => _beforeSendTransaction = value is null ? null : (e, _) => value(e);
+    }
+
+    /// <summary>
+    /// Configures a callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <param name="beforeSendTransaction">The callback</param>
+    public void SetBeforeSendTransaction(Func<Transaction, Transaction?> beforeSendTransaction)
+    {
+        _beforeSendTransaction = (e, _) => beforeSendTransaction(e);
+    }
+
+    /// <summary>
+    /// Configures a callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <param name="beforeSendTransaction">The callback</param>
+    public void SetBeforeSendTransaction(Func<Transaction, Hint, Transaction?> beforeSendTransaction)
+    {
+        _beforeSendTransaction = beforeSendTransaction;
+    }
 
     private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
 

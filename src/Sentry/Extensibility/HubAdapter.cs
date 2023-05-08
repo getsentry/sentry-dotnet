@@ -220,6 +220,14 @@ public sealed class HubAdapter : IHub, IHubEx
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
+        => SentrySdk.CaptureTransaction(transaction, hint);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureSession(SessionUpdate sessionUpdate)
         => SentrySdk.CaptureSession(sessionUpdate);
 

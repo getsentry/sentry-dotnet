@@ -100,7 +100,10 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+
+    /// <inheritdoc />
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -136,7 +139,7 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        var processedTransaction = BeforeSendTransaction(transaction);
+        var processedTransaction = BeforeSendTransaction(transaction, hint ?? new Hint());
         if (processedTransaction is null) // Rejected transaction
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
@@ -147,9 +150,9 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
-    private Transaction? BeforeSendTransaction(Transaction transaction)
+    private Transaction? BeforeSendTransaction(Transaction transaction, Hint hint)
     {
-        if (_options.BeforeSendTransaction is null)
+        if (_options.BeforeSendTransactionInternal is null)
         {
             return transaction;
         }
@@ -158,7 +161,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return _options.BeforeSendTransaction?.Invoke(transaction);
+            return _options.BeforeSendTransactionInternal?.Invoke(transaction, hint);
         }
         catch (Exception e)
         {

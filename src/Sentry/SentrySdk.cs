@@ -528,6 +528,18 @@ public static partial class SentrySdk
         => CurrentHub.CaptureTransaction(transaction);
 
     /// <summary>
+    /// Captures a transaction.
+    /// </summary>
+    /// <remarks>
+    /// Note: this method is NOT meant to be called from user code!
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// </remarks>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static void CaptureTransaction(Transaction transaction, Hint? hint)
+        => CurrentHub.CaptureTransaction(transaction, hint);
+
+    /// <summary>
     /// Captures a session update.
     /// </summary>
     [DebuggerStepThrough]

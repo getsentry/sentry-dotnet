@@ -688,7 +688,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent()
     {
-        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+        _fixture.SentryOptions.SetBeforeSendTransaction(_ => null);
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction(
@@ -702,10 +702,33 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_GetsHint()
+    {
+        Hint received = null;
+        _fixture.SentryOptions.SetBeforeSendTransaction((tx, h) =>
+        {
+            received = h;
+            return tx;
+        });
+
+        var transaction = new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        var sut = _fixture.GetSut();
+        var hint = new Hint();
+        sut.CaptureTransaction(transaction, hint);
+
+        Assert.Same(hint, received);
+    }
+
+    [Fact]
     public void CaptureTransaction_BeforeSendTransaction_ModifyEvent()
     {
         Transaction received = null;
-        _fixture.SentryOptions.BeforeSendTransaction = tx => received = tx;
+        _fixture.SentryOptions.SetBeforeSendTransaction(tx => received = tx);
 
         var transaction = new Transaction("test name", "test operation")
         {
@@ -723,7 +746,7 @@ public partial class SentryClientTests
     public void CaptureTransaction_BeforeSendTransaction_replaced_transaction_captured()
     {
         Transaction received = null;
-        _fixture.SentryOptions.BeforeSendTransaction = tx =>
+        _fixture.SentryOptions.SetBeforeSendTransaction(tx =>
         {
             received = new Transaction("name2", "operation2")
             {
@@ -733,7 +756,7 @@ public partial class SentryClientTests
             };
 
             return received;
-        };
+        });
 
         var transaction = new Transaction("name", "operation")
         {
@@ -759,7 +782,7 @@ public partial class SentryClientTests
         _fixture.SentryOptions.SampleRate = null;
 
         Transaction received = null;
-        _fixture.SentryOptions.BeforeSendTransaction = e => received = e;
+        _fixture.SentryOptions.SetBeforeSendTransaction(e => received = e);
 
         var transaction = new Transaction("test name", "test operation")
         {
@@ -777,7 +800,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
     {
-        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+        _fixture.SentryOptions.SetBeforeSendTransaction(_ => null);
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction( new Transaction("test name", "test operation")
