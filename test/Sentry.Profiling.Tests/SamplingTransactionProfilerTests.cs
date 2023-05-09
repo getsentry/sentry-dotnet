@@ -49,10 +49,11 @@ public class SamplingTransactionProfilerTests
 
     private void RunForMs(int milliseconds)
     {
-        for (int i = 0; i < milliseconds / 20; i++)
+        var clock = Stopwatch.StartNew();
+        while (clock.ElapsedMilliseconds < milliseconds)
         {
-            _testOutputLogger.LogDebug("sleeping...");
-            Thread.Sleep(20);
+            _testOutputLogger.LogDebug("Sleeping... time remaining: {0} ms", milliseconds - clock.ElapsedMilliseconds);
+            Thread.Sleep((int)Math.Min(milliseconds / 5, milliseconds - clock.ElapsedMilliseconds));
         }
     }
 
@@ -83,7 +84,7 @@ public class SamplingTransactionProfilerTests
     {
         var hub = Substitute.For<IHub>();
         var options = new SentryOptions { DiagnosticLogger = _testOutputLogger };
-        using var session = SampleProfilerSession.StartNew();
+        using var session = SampleProfilerSession.StartNew(_testOutputLogger);
         var limitMs = 50;
         var sut = new SamplingTransactionProfiler(options, session, limitMs, CancellationToken.None);
         RunForMs(limitMs * 4);

@@ -1,3 +1,4 @@
+using Microsoft.Diagnostics.Tracing;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -8,18 +9,23 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
 {
     public Action? OnFinish;
     private readonly CancellationToken _cancellationToken;
-    private TimeSpan? _duration;
+    private bool _stopped = false;
     private readonly SentryOptions _options;
-    private TraceLogProcessor _processor;
+    private SampleProfileBuilder _processor;
     private SampleProfilerSession _session;
+    private readonly double _startTimeMs;
+    private double _endTimeMs;
+    private TaskCompletionSource _completionSource = new();
 
     public SamplingTransactionProfiler(SentryOptions options, SampleProfilerSession session, int timeoutMs, CancellationToken cancellationToken)
     {
         _options = options;
         _session = session;
         _cancellationToken = cancellationToken;
-        _processor = new TraceLogProcessor(options, session.TraceLog, -session.Elapsed.TotalMilliseconds);
-        session.SampleEventParser.ThreadSample += _processor.AddSample;
+        _startTimeMs = session.Elapsed.TotalMilliseconds;
+        _endTimeMs = Double.MaxValue;
+        _processor = new SampleProfileBuilder(options, session.TraceLog);
+        session.SampleEventParser.ThreadSample += OnThreadSample;
         cancellationToken.Register(() =>
         {
             if (Stop())
@@ -29,28 +35,47 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         });
         Task.Delay(timeoutMs, cancellationToken).ContinueWith(_ =>
         {
-            if (Stop(TimeSpan.FromMilliseconds(timeoutMs)))
+            if (Stop(_startTimeMs + timeoutMs))
             {
                 options.LogDebug("Profiling is being cut-of after {0} ms because the transaction takes longer than that.", timeoutMs);
             }
         }, CancellationToken.None);
     }
 
-    private bool Stop(TimeSpan? duration = null)
+    private bool Stop(double? endTimeMs = null)
     {
-        if (_duration is null)
+        endTimeMs ??= _session.Elapsed.TotalMilliseconds;
+        if (!_stopped)
         {
             lock (_session)
             {
-                if (_duration is null)
+                if (!_stopped)
                 {
-                    _duration = duration ?? _session.Elapsed;
-                    _session.SampleEventParser.ThreadSample -= _processor.AddSample;
+                    _stopped = true;
+                    _endTimeMs = endTimeMs.Value;
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    // We need custom sampling because the TraceLog dispatches events from a queue with a delay of about 2 seconds.
+    private void OnThreadSample(TraceEvent data)
+    {
+        var timestampMs = data.TimeStampRelativeMSec;
+        if (timestampMs >= _startTimeMs)
+        {
+            if (timestampMs <= _endTimeMs)
+            {
+                _processor.AddSample(data, timestampMs - _startTimeMs);
+            }
+            else
+            {
+                _session.SampleEventParser.ThreadSample -= OnThreadSample;
+                _completionSource.TrySetResult();
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -62,16 +87,19 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         }
     }
 
-    // TODO doesn't need to be async anymore...
     /// <inheritdoc />
     public async Task<ProfileInfo> CollectAsync(Transaction transaction)
     {
-        if (_duration is null)
+        if (!_stopped)
         {
             throw new InvalidOperationException("Profiler.CollectAsync() called before Finish()");
         }
-        _cancellationToken.ThrowIfCancellationRequested();
-        return await Task.FromResult(CreateProfileInfo(transaction, _processor.Profile)).ConfigureAwait(false);
+
+        // Wait for the last sample (<= _endTimeMs), or at most 10 seconds. The timeout shouldn't happen because
+        // TraceLog.realTimeQueue should dispatch events after ~2 seconds, but if it does, send what we have.
+        await Task.WhenAny(_completionSource.Task, Task.Delay(10_000, _cancellationToken)).ConfigureAwait(false);
+
+        return CreateProfileInfo(transaction, _processor.Profile);
     }
 
     internal static ProfileInfo CreateProfileInfo(Transaction transaction, SampleProfile profile)

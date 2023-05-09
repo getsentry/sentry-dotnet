@@ -19,12 +19,13 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public static SamplingTransactionProfilerFactory Create(SentryOptions options)
     {
-        return new SamplingTransactionProfilerFactory(options, SampleProfilerSession.StartNew());
+        var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+        return new SamplingTransactionProfilerFactory(options, session);
     }
 
     public static async Task<SamplingTransactionProfilerFactory> CreateAsync(SentryOptions options)
     {
-        var session = await Task.Run(() => SampleProfilerSession.StartNew()).ConfigureAwait(false);
+        var session = await Task.Run(() => SampleProfilerSession.StartNew(options.DiagnosticLogger)).ConfigureAwait(false);
         return new SamplingTransactionProfilerFactory(options, session);
     }
 
@@ -59,6 +60,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public void Dispose()
     {
-        _session.Stop();
+        _session.Dispose();
     }
 }

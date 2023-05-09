@@ -1,6 +1,5 @@
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
-using Microsoft.Diagnostics.Tracing.EventPipe;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -13,7 +12,7 @@ using SentryProfileStackTrace = HashableGrowableArray<int>;
 /// <summary>
 /// Processes TraceLog to produce a SampleProfile.
 /// </summary>
-internal class TraceLogProcessor
+internal class SampleProfileBuilder
 {
     private readonly SentryOptions _options;
     private readonly TraceLog _traceLog;
@@ -30,16 +29,13 @@ internal class TraceLogProcessor
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
     private readonly SparseScalarArray<int> _threadIndexes = new(-1, 10);
 
-    private readonly double _timeShiftMs;
-
-    public TraceLogProcessor(SentryOptions options, TraceLog traceLog, double TimeShiftMs)
+    public SampleProfileBuilder(SentryOptions options, TraceLog traceLog)
     {
         _options = options;
         _traceLog = traceLog;
-        _timeShiftMs = TimeShiftMs;
     }
 
-    internal void AddSample(TraceEvent data)
+    internal void AddSample(TraceEvent data, double timestampMs)
     {
         var thread = data.Thread();
         if (thread.ThreadIndex == ThreadIndex.Invalid)
@@ -54,8 +50,6 @@ internal class TraceLogProcessor
             _options.DiagnosticLogger?.LogDebug("Encountered a Profiler Sample without an associated call stack. Skipping.");
             return;
         }
-
-        var timestampMs = data.TimeStampRelativeMSec + _timeShiftMs;
 
         var stackIndex = AddStackTrace(callStackIndex);
         if (stackIndex < 0)

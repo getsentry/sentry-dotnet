@@ -142,7 +142,7 @@ public class ProfilingBenchmarks
     [Benchmark]
     public void SampleProfilerSessionStartStop()
     {
-        var session = SampleProfilerSession.StartNew();
+        using var session = SampleProfilerSession.StartNew();
         session.Stop();
     }
     #endregion
