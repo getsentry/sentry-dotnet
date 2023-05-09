@@ -10,7 +10,7 @@ namespace Sentry.Profiling;
 using SentryProfileStackTrace = HashableGrowableArray<int>;
 
 /// <summary>
-/// Processes TraceLog to produce a SampleProfile.
+/// Build a SampleProfile from TraceEvent data.
 /// </summary>
 internal class SampleProfileBuilder
 {
@@ -20,6 +20,7 @@ internal class SampleProfileBuilder
     // Output profile being built.
     public readonly SampleProfile Profile = new();
 
+    // TODO reevaluate the use of SparseArray after setting up continous profiling. Dictionary might be better.
     // A sparse array that maps from StackSourceFrameIndex to an index in the output Profile.frames.
     private readonly SparseScalarArray<int> _frameIndexes = new(-1, 1000);
 
@@ -28,6 +29,9 @@ internal class SampleProfileBuilder
 
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
     private readonly SparseScalarArray<int> _threadIndexes = new(-1, 10);
+
+    // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
+    private readonly Downsampler _downsampler = new();
 
     public SampleProfileBuilder(SentryOptions options, TraceLog traceLog)
     {
@@ -51,14 +55,19 @@ internal class SampleProfileBuilder
             return;
         }
 
-        var stackIndex = AddStackTrace(callStackIndex);
-        if (stackIndex < 0)
+        var threadIndex = AddThread(thread);
+        if (threadIndex < 0)
         {
             return;
         }
 
-        var threadIndex = AddThread(thread);
-        if (threadIndex < 0)
+        if (!_downsampler.ShouldSample(threadIndex, timestampMs))
+        {
+            return;
+        }
+
+        var stackIndex = AddStackTrace(callStackIndex);
+        if (stackIndex < 0)
         {
             return;
         }
@@ -141,22 +150,10 @@ internal class SampleProfileBuilder
                 Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
             });
             _threadIndexes[key] = Profile.Threads.Count - 1;
+            _downsampler.NewThreadAdded(_threadIndexes[key]);
         }
 
         return _threadIndexes[key];
-    }
-
-    private static string ActivityPath(TraceActivity activity)
-    {
-        var creator = activity.Creator;
-        if (creator is null || creator.IsThreadActivity)
-        {
-            return activity.Index.ToString();
-        }
-        else
-        {
-            return $"{ActivityPath(creator)}/{activity.Index.ToString()}";
-        }
     }
 
     private SentryStackFrame CreateStackFrame(CodeAddressIndex codeAddressIndex)

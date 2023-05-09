@@ -1,5 +1,6 @@
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
+using Microsoft.Diagnostics.Tracing.EventPipe;
 
 namespace Sentry.Profiling.Tests;
 
@@ -40,7 +41,6 @@ public class TraceLogProcessorTests
         {
             var etlFilePath = Path.ChangeExtension(etlxFilePath, "nettrace");
             var source = new EventPipeEventSource(etlFilePath);
-            new Downsampler().AttachTo(source);
             typeof(TraceLog)
             .GetMethod(
                 "CreateFromEventPipeEventSources",
@@ -49,11 +49,15 @@ public class TraceLogProcessorTests
             .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
         }
 
-        using var eventLog = new TraceLog(etlxFilePath);
-        // FIXME
-        // var processor = new TraceLogProcessor(new(), eventLog);
-        // return processor.Process(CancellationToken.None);
-        return new();
+        using var traceLog = new TraceLog(etlxFilePath);
+        var builder = new SampleProfileBuilder(new() { DiagnosticLogger = _testOutputLogger }, traceLog);
+        var eventSource = traceLog.Events.GetSource();
+        new SampleProfilerTraceEventParser(eventSource).ThreadSample += delegate (ClrThreadSampleTraceData data)
+        {
+            builder.AddSample(data, data.TimeStampRelativeMSec);
+        };
+        eventSource.Process();
+        return builder.Profile;
     }
 
     [Fact]

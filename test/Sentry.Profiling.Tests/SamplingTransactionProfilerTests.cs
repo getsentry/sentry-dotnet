@@ -195,4 +195,17 @@ public class SamplingTransactionProfilerTests
             }
         }
     }
+
+    [Fact]
+    public void Downsampler_ShouldSample_Works()
+    {
+        var sut = new Downsampler();
+        sut.NewThreadAdded(0);
+        Assert.True(sut.ShouldSample(0, 5));
+        Assert.False(sut.ShouldSample(0, 3));
+        Assert.False(sut.ShouldSample(0, 6));
+        Assert.True(sut.ShouldSample(0, 15));
+        Assert.False(sut.ShouldSample(0, 6));
+        Assert.False(sut.ShouldSample(0, 16));
+    }
 }
