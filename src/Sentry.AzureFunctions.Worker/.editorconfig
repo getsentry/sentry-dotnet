@@ -2,4 +2,5 @@
 [*.cs]
 
 # Justification: Azure Functions project doesn't utilize synchronization context
-dotnet_diagnostic.CA2007.severity = none
+#Disabled for now until https://github.com/Azure/azure-functions-dotnet-worker/issues/1520 is answered
+#dotnet_diagnostic.CA2007.severity = none
