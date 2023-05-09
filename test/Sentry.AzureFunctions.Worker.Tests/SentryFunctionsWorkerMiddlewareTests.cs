@@ -9,6 +9,7 @@ public class SentryFunctionsWorkerMiddlewareTests
     {
         public IHub Hub { get; set; }
         public IInternalScopeManager ScopeManager { get; }
+        public Transaction Transaction { get; set; }
 
         public Fixture()
         {
@@ -20,6 +21,9 @@ public class SentryFunctionsWorkerMiddlewareTests
 
             var client = Substitute.For<ISentryClient>();
             var sessionManager = Substitute.For<ISessionManager>();
+
+            client.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
+                .Do(callback => Transaction = callback.Arg<Transaction>());
 
             ScopeManager = new SentryScopeManager(options, client);
             Hub = new Hub(options, client, sessionManager, new MockClock(), ScopeManager);
@@ -70,7 +74,7 @@ public class SentryFunctionsWorkerMiddlewareTests
 
         await sut.Invoke(functionContext, context => HttpFunction(null, context));
 
-        var transaction = _fixture.ScopeManager.GetCurrent().Key.Transaction!;
+        var transaction = _fixture.Transaction;
 
         transaction.Should().NotBeNull();
         transaction.Name.Should().Be(functionDefinition.Name);
