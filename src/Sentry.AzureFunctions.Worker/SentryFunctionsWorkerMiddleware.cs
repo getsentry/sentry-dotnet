@@ -6,6 +6,7 @@ namespace Sentry.AzureFunctions.Worker;
 internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
     private readonly IHub _hub;
+    private static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
 
     public SentryFunctionsWorkerMiddleware(IHub hub)
     {
@@ -75,6 +76,14 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
             return null;
         }
 
+        var httpMethod = requestData.Method.ToUpperInvariant();
+
+        var transactionNameKey = $"{context.FunctionDefinition.EntryPoint}-{httpMethod}";
+        if (TransactionNameCache.TryGetValue(transactionNameKey, out var value))
+        {
+            return value;
+        }
+
         // Find the HTTP Trigger attribute via reflection
         var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);
         var entryPointName = context.FunctionDefinition.EntryPoint;
@@ -85,14 +94,14 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
             .Select(p => p.GetCustomAttribute<HttpTriggerAttribute>())
             .FirstOrDefault(a => a is not null);
 
-        // Compose the transaction name from the method and route
-        var method = requestData.Method.ToUpperInvariant();
-        if (attribute?.Route is {} route)
-        {
-            return $"{method} /{route.TrimStart('/')}";
-        }
+        var transactionName = attribute?.Route is { } route
+            // Compose the transaction name from the method and route
+            ? $"{httpMethod} /{route.TrimStart('/')}"
+            // There's no route provided, so use the absolute path of the URL
+            : $"{httpMethod} {requestData.Url.AbsolutePath}";
 
-        // There's no route provided, so use the absolute path of the URL
-        return $"{method} {requestData.Url.AbsolutePath}";
+        TransactionNameCache.TryAdd(transactionNameKey, transactionName);
+
+        return transactionName;
     }
 }
