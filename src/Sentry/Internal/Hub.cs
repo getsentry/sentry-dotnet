@@ -427,7 +427,7 @@ internal class Hub : IHubEx, IDisposable
             {
                 foreach (var processor in scope.GetAllTransactionProcessors())
                 {
-                    processedTransaction = processor.Process(transaction);
+                    processedTransaction = processor.DoProcessTransaction(transaction, hint);
                     if (processedTransaction == null)
                     {
                         _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);

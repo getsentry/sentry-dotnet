@@ -17,3 +17,13 @@ public interface ISentryEventProcessor
     /// </remarks>
     SentryEvent? Process(SentryEvent @event);
 }
+
+internal static class ISentryEventProcessorExtensions
+{
+    internal static SentryEvent? DoProcessEvent(this ISentryEventProcessor processor, SentryEvent @event, Hint hint)
+    {
+        return (processor is IContextualSentryEventProcessor contextualProcessor)
+            ? contextualProcessor.Process(@event, hint)
+            : processor.Process(@event);
+    }
+}

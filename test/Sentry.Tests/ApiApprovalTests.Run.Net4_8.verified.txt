@@ -1254,13 +1254,13 @@ namespace Sentry.Extensibility
         bool EnqueueEnvelope(Sentry.Protocol.Envelopes.Envelope envelope);
         System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
     }
-    public interface IContextualSentryEventProcessor
+    public interface IContextualSentryEventProcessor : Sentry.Extensibility.ISentryEventProcessor
     {
-        Sentry.SentryEvent? Process(Sentry.SentryEvent @event, Sentry.Hint? hint);
+        Sentry.SentryEvent? Process(Sentry.SentryEvent @event, Sentry.Hint hint);
     }
-    public interface IContextualSentryTransactionProcessor
+    public interface IContextualSentryTransactionProcessor : Sentry.Extensibility.ISentryTransactionProcessor
     {
-        Sentry.Transaction? Process(Sentry.Transaction transaction, Sentry.Hint? hint);
+        Sentry.Transaction? Process(Sentry.Transaction transaction, Sentry.Hint hint);
     }
     public interface IDiagnosticLogger
     {

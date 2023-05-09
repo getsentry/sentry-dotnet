@@ -258,7 +258,8 @@ public class SentryClient : ISentryClient, IDisposable
 
         foreach (var processor in scope.GetAllEventProcessors())
         {
-            processedEvent = processor.Process(processedEvent);
+            processedEvent = processor.DoProcessEvent(processedEvent, hint);
+
             if (processedEvent == null)
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);

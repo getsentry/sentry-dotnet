@@ -1,3 +1,4 @@
+using FluentAssertions.Execution;
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
@@ -320,7 +321,7 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void CaptureEvent_Add_ScopeAttachments_To_Hint()
+    public void CaptureEvent_BeforeSend_Gets_ScopeAttachments()
     {
         // Arrange
         Hint hint = null;
@@ -343,7 +344,44 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void CaptureEvent_BeforeEvent_ModifyEvent()
+    public void CaptureEvent_EventProcessor_Gets_Hint()
+    {
+        // Arrange
+        var processor = Substitute.For<IContextualSentryEventProcessor>();
+        processor.Process(Arg.Any<SentryEvent>(), Arg.Any<Hint>()).Returns(new SentryEvent());
+        _fixture.SentryOptions.AddEventProcessor(processor);
+
+        // Act
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+
+        // Assert
+        processor.Received(1).Process(Arg.Any<SentryEvent>(), Arg.Any<Hint>());
+    }
+
+    [Fact]
+    public void CaptureEvent_EventProcessor_Gets_ScopeAttachments()
+    {
+        // Arrange
+        var processor = Substitute.For<IContextualSentryEventProcessor>();
+        Hint hint = null;
+        processor.Process(Arg.Any<SentryEvent>(), Arg.Do<Hint>(h => hint = h)).Returns(new SentryEvent());
+        _fixture.SentryOptions.AddEventProcessor(processor);
+
+        Scope scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+
+        // Act
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(scope.Attachments);
+    }
+
+    [Fact]
+    public void CaptureEvent_BeforeSend_ModifyEvent()
     {
         SentryEvent received = null;
         _fixture.SentryOptions.SetBeforeSend((e, _) => received = e);
