@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.0.0" />
+      <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.9.0" />
       <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.12" />
     </ItemGroup>
 
