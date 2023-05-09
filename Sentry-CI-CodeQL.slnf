@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "SentryFull.sln",
+    "path": "Sentry.Full.sln",
     "projects": [
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
