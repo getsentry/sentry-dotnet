@@ -1,4 +1,5 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 
 namespace Sentry.AzureFunctions.Worker;
@@ -15,7 +16,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        var transactionName = await GetTransactionNameAsync(context).ConfigureAwait(false) ?? context.FunctionDefinition.Name;
+        var transactionName = await GetHttpTransactionNameAsync(context).ConfigureAwait(false) ?? context.FunctionDefinition.Name;
         var transaction = _hub.StartTransaction(transactionName, "function");
         Exception? unhandledException = null;
 
@@ -61,12 +62,24 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
             }
             else
             {
-                transaction.Finish();
+                var statusCode = context.GetHttpResponseData()?.StatusCode;
+
+                // For HTTP triggered function, finish transaction with the returned HTTP status code
+                if (statusCode != null)
+                {
+                    var status = SpanStatusConverter.FromHttpStatusCode((int)statusCode);
+
+                    transaction.Finish(status);
+                }
+                else
+                {
+                    transaction.Finish();
+                }
             }
         }
     }
 
-    private static async Task<string?> GetTransactionNameAsync(FunctionContext context)
+    private static async Task<string?> GetHttpTransactionNameAsync(FunctionContext context)
     {
         // Get the HTTP request data
         var requestData = await context.GetHttpRequestDataAsync().ConfigureAwait(false);
