@@ -21,7 +21,7 @@ internal static class ISentryTransactionProcessorExtensions
 {
     internal static Transaction? DoProcessTransaction(this ISentryTransactionProcessor processor, Transaction transaction, Hint hint)
     {
-        return (processor is IContextualSentryTransactionProcessor contextualProcessor)
+        return (processor is ISentryTransactionProcessorWithHint contextualProcessor)
             ? contextualProcessor.Process(transaction, hint)
             : processor.Process(transaction);
     }

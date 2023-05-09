@@ -3,7 +3,7 @@ namespace Sentry.Extensibility;
 /// <summary>
 /// Process a <see cref="Transaction"/> during the prepare phase.
 /// </summary>
-public interface IContextualSentryTransactionProcessor: ISentryTransactionProcessor
+public interface ISentryTransactionProcessorWithHint: ISentryTransactionProcessor
 {
     /// <summary>
     /// Process the <see cref="Transaction"/>

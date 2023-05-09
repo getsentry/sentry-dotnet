@@ -294,7 +294,10 @@ internal class Hub : IHubEx, IDisposable
         return null;
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
+        CaptureEvent(evt, null, configureScope);
+
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
     {
         if (!IsEnabled)
         {
@@ -306,7 +309,7 @@ internal class Hub : IHubEx, IDisposable
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, clonedScope);
+            return CaptureEvent(evt, hint, clonedScope);
         }
         catch (Exception e)
         {

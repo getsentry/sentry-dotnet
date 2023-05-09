@@ -1175,7 +1175,7 @@ public partial class HubTests
     public void CaptureTransaction_EventProcessor_Gets_Hint()
     {
         // Arrange
-        var processor = Substitute.For<IContextualSentryTransactionProcessor>();
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
         processor.Process(Arg.Any<Transaction>(), Arg.Any<Hint>()).Returns(new Transaction("name", "operation"));
         _fixture.Options.AddTransactionProcessor(processor);
 
@@ -1192,7 +1192,7 @@ public partial class HubTests
     public void CaptureTransaction_EventProcessor_Gets_ScopeAttachments()
     {
         // Arrange
-        var processor = Substitute.For<IContextualSentryTransactionProcessor>();
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
         Hint hint = null;
         processor.Process(Arg.Any<Transaction>(), Arg.Do<Hint>(h => hint = h)).Returns(new Transaction("name", "operation"));
         _fixture.Options.AddTransactionProcessor(processor);

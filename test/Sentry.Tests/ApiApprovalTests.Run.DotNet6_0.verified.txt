@@ -1256,14 +1256,6 @@ namespace Sentry.Extensibility
         bool EnqueueEnvelope(Sentry.Protocol.Envelopes.Envelope envelope);
         System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
     }
-    public interface IContextualSentryEventProcessor : Sentry.Extensibility.ISentryEventProcessor
-    {
-        Sentry.SentryEvent? Process(Sentry.SentryEvent @event, Sentry.Hint hint);
-    }
-    public interface IContextualSentryTransactionProcessor : Sentry.Extensibility.ISentryTransactionProcessor
-    {
-        Sentry.Transaction? Process(Sentry.Transaction transaction, Sentry.Hint hint);
-    }
     public interface IDiagnosticLogger
     {
         bool IsEnabled(Sentry.SentryLevel level);
@@ -1297,6 +1289,10 @@ namespace Sentry.Extensibility
     {
         Sentry.SentryEvent? Process(Sentry.SentryEvent @event);
     }
+    public interface ISentryEventProcessorWithHint : Sentry.Extensibility.ISentryEventProcessor
+    {
+        Sentry.SentryEvent? Process(Sentry.SentryEvent @event, Sentry.Hint hint);
+    }
     public interface ISentryStackTraceFactory
     {
         Sentry.SentryStackTrace? Create(System.Exception? exception = null);
@@ -1304,6 +1300,10 @@ namespace Sentry.Extensibility
     public interface ISentryTransactionProcessor
     {
         Sentry.Transaction? Process(Sentry.Transaction transaction);
+    }
+    public interface ISentryTransactionProcessorWithHint : Sentry.Extensibility.ISentryTransactionProcessor
+    {
+        Sentry.Transaction? Process(Sentry.Transaction transaction, Sentry.Hint hint);
     }
     public interface ITransport
     {

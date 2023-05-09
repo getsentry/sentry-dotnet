@@ -347,7 +347,7 @@ public partial class SentryClientTests
     public void CaptureEvent_EventProcessor_Gets_Hint()
     {
         // Arrange
-        var processor = Substitute.For<IContextualSentryEventProcessor>();
+        var processor = Substitute.For<ISentryEventProcessorWithHint>();
         processor.Process(Arg.Any<SentryEvent>(), Arg.Any<Hint>()).Returns(new SentryEvent());
         _fixture.SentryOptions.AddEventProcessor(processor);
 
@@ -363,7 +363,7 @@ public partial class SentryClientTests
     public void CaptureEvent_EventProcessor_Gets_ScopeAttachments()
     {
         // Arrange
-        var processor = Substitute.For<IContextualSentryEventProcessor>();
+        var processor = Substitute.For<ISentryEventProcessorWithHint>();
         Hint hint = null;
         processor.Process(Arg.Any<SentryEvent>(), Arg.Do<Hint>(h => hint = h)).Returns(new SentryEvent());
         _fixture.SentryOptions.AddEventProcessor(processor);
