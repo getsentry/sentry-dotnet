@@ -48,6 +48,13 @@ public class Hint
     public void AddAttachments(IEnumerable<Attachment> attachments) => AddAttachmentsInternal(attachments);
 
     /// <summary>
+    /// The Java SDK has some logic so that certain Hint types do not copy attachments from the Scope. This
+    /// allows us to do the same in the .NET SDK in the future.
+    /// </summary>
+    /// <param name="scope">The <see cref="Scope"/> that the attachments should be copied from</param>
+    internal void AddScopeAttachments(Scope scope) => AddAttachmentsInternal(scope.Attachments);
+
+    /// <summary>
     /// Attachments added to the Hint.
     /// </summary>
     public ICollection<Attachment> Attachments => _attachments;
@@ -56,16 +63,6 @@ public class Hint
     /// Data provided with the Hint.
     /// </summary>
     public IDictionary<string, object?> Items => _items;
-
-    /// <summary>
-    /// Gets or sets a Screenshot for the Hint
-    /// </summary>
-    public Attachment? Screenshot { get; set; }
-
-    /// <summary>
-    /// Gets or sets a ViewHierarchy for the Hint
-    /// </summary>
-    public Attachment? ViewHierarchy { get; set; }
 
     /// <summary>
     /// Creates a new Hint with one or more attachments.

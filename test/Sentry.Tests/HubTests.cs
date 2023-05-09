@@ -1143,6 +1143,34 @@ public partial class HubTests
         _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
     }
 
+    [Fact]
+    public void CaptureTransaction_Hint_Gets_Attachments()
+    {
+        // Arrange        
+        var hub = _fixture.GetSut();
+        List<Attachment> attachments = new List<Attachment> {
+            AttachmentHelper.FakeAttachment("foo"),
+            AttachmentHelper.FakeAttachment("bar")
+        };
+        hub.ConfigureScope(s => {
+            s.AddAttachment(attachments[0]);
+            s.AddAttachment(attachments[1]);
+            });
+
+        // Act
+        Hint hint = null;
+        _fixture.Client.CaptureTransaction(
+            Arg.Any<Transaction>(),
+            Arg.Do<Hint>(h => hint = h)
+            );
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(attachments);
+    }
+
 #if ANDROID && CI_BUILD
     // TODO: Test is flaky in CI
     [SkippableTheory(typeof(NSubstitute.Exceptions.ReceivedCallsException))]

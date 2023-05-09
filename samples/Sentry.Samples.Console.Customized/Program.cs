@@ -42,7 +42,7 @@ internal static class Program
             // o.SampleRate = 0.5f; // Randomly drop (don't send to Sentry) half of events
 
             // Modifications to event before it goes out. Could replace the event altogether
-            o.SetBeforeSend(@event =>
+            o.SetBeforeSend((@event, _) =>
                 {
                     // Drop an event altogether:
                     if (@event.Tags.ContainsKey("SomeTag"))

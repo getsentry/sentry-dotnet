@@ -255,6 +255,8 @@ public class Scope : IEventLike, IHasDistribution
     {
         if (Options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
+            hint.AddScopeAttachments(this);
+
             if (beforeBreadcrumb(breadcrumb, hint) is { } processedBreadcrumb)
             {
                 breadcrumb = processedBreadcrumb;
@@ -469,8 +471,10 @@ public class Scope : IEventLike, IHasDistribution
     /// </summary>
     public Scope Clone()
     {
-        var clone = new Scope(Options);
-        clone.OnEvaluating = OnEvaluating;
+        var clone = new Scope(Options)
+        {
+            OnEvaluating = OnEvaluating
+        };
 
         Apply(clone);
 

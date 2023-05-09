@@ -226,6 +226,8 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         scope ??= new Scope(_options);
+        hint ??= new Hint();
+        hint.AddScopeAttachments(scope);
 
         _options.LogInfo("Capturing event.");
 
@@ -326,7 +328,7 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
-    private SentryEvent? BeforeSend(SentryEvent? @event, Hint? hint)
+    private SentryEvent? BeforeSend(SentryEvent? @event, Hint hint)
     {
         if (_options.BeforeSendInternal == null)
         {
@@ -336,7 +338,6 @@ public class SentryClient : ISentryClient, IDisposable
         _options.LogDebug("Calling the BeforeSend callback");
         try
         {
-            hint ??= new Hint();
             @event = _options.BeforeSendInternal?.Invoke(@event!, hint);
         }
         catch (Exception e)

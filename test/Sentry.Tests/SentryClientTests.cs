@@ -249,7 +249,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent()
     {
-        _fixture.SentryOptions.SetBeforeSend(_ => null);
+        _fixture.SentryOptions.SetBeforeSend((_, _) => null);
         var expectedEvent = new SentryEvent();
 
         var sut = _fixture.GetSut();
@@ -262,7 +262,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent_RecordsDiscard()
     {
-        _fixture.SentryOptions.SetBeforeSend(_ => null);
+        _fixture.SentryOptions.SetBeforeSend((_, _) => null);
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
@@ -320,10 +320,33 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_Add_ScopeAttachments_To_Hint()
+    {
+        // Arrange
+        Hint hint = null;
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            hint = h;
+            return e;
+        });
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        _ = sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(scope.Attachments);
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeEvent_ModifyEvent()
     {
         SentryEvent received = null;
-        _fixture.SentryOptions.SetBeforeSend(e => received = e);
+        _fixture.SentryOptions.SetBeforeSend((e, _) => received = e);
 
         var @event = new SentryEvent();
 
@@ -384,7 +407,7 @@ public partial class SentryClientTests
         // Largest value allowed. Should always send
         _fixture.SentryOptions.SampleRate = 1;
         SentryEvent received = null;
-        _fixture.SentryOptions.SetBeforeSend(e => received = e);
+        _fixture.SentryOptions.SetBeforeSend((e, _) => received = e);
 
         var @event = new SentryEvent();
 
@@ -400,7 +423,7 @@ public partial class SentryClientTests
     {
         _fixture.SentryOptions.SampleRate = null;
         SentryEvent received = null;
-        _fixture.SentryOptions.SetBeforeSend(e => received = e);
+        _fixture.SentryOptions.SetBeforeSend((e, _) => received = e);
 
         var @event = new SentryEvent();
 
@@ -688,7 +711,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent()
     {
-        _fixture.SentryOptions.SetBeforeSendTransaction(_ => null);
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => null);
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction(
@@ -728,7 +751,7 @@ public partial class SentryClientTests
     public void CaptureTransaction_BeforeSendTransaction_ModifyEvent()
     {
         Transaction received = null;
-        _fixture.SentryOptions.SetBeforeSendTransaction(tx => received = tx);
+        _fixture.SentryOptions.SetBeforeSendTransaction((tx, _) => received = tx);
 
         var transaction = new Transaction("test name", "test operation")
         {
@@ -746,7 +769,7 @@ public partial class SentryClientTests
     public void CaptureTransaction_BeforeSendTransaction_replaced_transaction_captured()
     {
         Transaction received = null;
-        _fixture.SentryOptions.SetBeforeSendTransaction(tx =>
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) =>
         {
             received = new Transaction("name2", "operation2")
             {
@@ -782,7 +805,7 @@ public partial class SentryClientTests
         _fixture.SentryOptions.SampleRate = null;
 
         Transaction received = null;
-        _fixture.SentryOptions.SetBeforeSendTransaction(e => received = e);
+        _fixture.SentryOptions.SetBeforeSendTransaction((e, _) => received = e);
 
         var transaction = new Transaction("test name", "test operation")
         {
@@ -800,7 +823,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
     {
-        _fixture.SentryOptions.SetBeforeSendTransaction(_ => null);
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => null);
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction( new Transaction("test name", "test operation")

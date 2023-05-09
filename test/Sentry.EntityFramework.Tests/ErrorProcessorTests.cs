@@ -61,7 +61,7 @@ public class ErrorProcessorTests
         {
             Exception assertError = null;
             // SaveChanges will throw an exception
-            options.SetBeforeSend(evt =>
+            options.SetBeforeSend((evt, _) =>
                 {
                     // We use a try-catch here as we cannot assert directly since SentryClient itself would catch the thrown assertion errors
                     try

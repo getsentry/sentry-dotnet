@@ -320,15 +320,6 @@ public class SentryOptions
     }
 
     /// <summary>
-    /// Configures a callback to invoke before sending an event to Sentry
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    public void SetBeforeSend(Func<SentryEvent, SentryEvent?> beforeSend)
-    {
-        _beforeSend = (e, _) => beforeSend(e);
-    }
-
-    /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
     /// </summary>
     /// <remarks>
@@ -363,15 +354,6 @@ public class SentryOptions
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<Transaction, Transaction?> beforeSendTransaction)
-    {
-        _beforeSendTransaction = (e, _) => beforeSendTransaction(e);
-    }
-
-    /// <summary>
-    /// Configures a callback to invoke before sending a transaction to Sentry
-    /// </summary>
-    /// <param name="beforeSendTransaction">The callback</param>
     public void SetBeforeSendTransaction(Func<Transaction, Hint, Transaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = beforeSendTransaction;
@@ -386,15 +368,9 @@ public class SentryOptions
     /// </summary>
     /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
     [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
-    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
-
-    /// <summary>
-    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
-    {
-        _beforeBreadcrumb = (e, _) => beforeBreadcrumb(e);
+    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb {
+        get => null;
+        set => _beforeBreadcrumb = value is null ? null : (e, _) => value(e);
     }
 
     /// <summary>

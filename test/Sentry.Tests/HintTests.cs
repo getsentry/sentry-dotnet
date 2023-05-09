@@ -2,14 +2,6 @@ namespace Sentry.Tests;
 
 public class HintTests
 {
-    private Attachment FakeAttachment(string name = "test.txt")
-        => new(
-            AttachmentType.Default,
-            new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
-            name,
-            null
-            );
-
     [Fact]
     public void AddAttachments_WithNullAttachments_DoesNothing()
     {
@@ -28,8 +20,8 @@ public class HintTests
     {
         // Arrange
         var hint = new Hint();
-        var attachment1 = FakeAttachment("attachment1");
-        var attachment2 = FakeAttachment("attachment2");
+        var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
+        var attachment2 = AttachmentHelper.FakeAttachment("attachment2");
 
         // Act
         hint.AddAttachments(attachment1, attachment2);
@@ -56,7 +48,7 @@ public class HintTests
     {
         // Arrange
         var hint = new Hint();
-        var attachment1 = FakeAttachment("attachment1");
+        var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
         hint.AddAttachments(attachment1);
 
         // Act
@@ -134,41 +126,11 @@ public class HintTests
     }
 
     [Fact]
-    public void Screenshot_PropertyCanBeSetAndRetrieved()
-    {
-        // Arrange
-        var hint = new Hint();
-        var screenshot = FakeAttachment("screenshot.png");
-
-        // Act
-        hint.Screenshot = screenshot;
-        var retrievedScreenshot = hint.Screenshot;
-
-        // Assert
-        retrievedScreenshot.Should().Be(screenshot);
-    }
-
-    [Fact]
-    public void ViewHierarchy_PropertyCanBeSetAndRetrieved()
-    {
-        // Arrange
-        var hint = new Hint();
-        var viewHierarchy = FakeAttachment("view_hierarchy.xml");
-
-        // Act
-        hint.ViewHierarchy = viewHierarchy;
-        var retrievedViewHierarchy = hint.ViewHierarchy;
-
-        // Assert
-        retrievedViewHierarchy.Should().Be(viewHierarchy);
-    }
-
-    [Fact]
     public void WithAttachments_ReturnsHintWithAttachments()
     {
         // Arrange
-        var attachment1 = FakeAttachment("attachment1");
-        var attachment2 = FakeAttachment("attachment2");
+        var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
+        var attachment2 = AttachmentHelper.FakeAttachment("attachment2");
 
         // Act
         var hint = Hint.WithAttachments(attachment1, attachment2);
@@ -183,8 +145,8 @@ public class HintTests
     public void WithAttachments_WithICollection_ReturnsHintWithAttachments()
     {
         // Arrange
-        var attachment1 = FakeAttachment("attachment1");
-        var attachment2 = FakeAttachment("attachment2");
+        var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
+        var attachment2 = AttachmentHelper.FakeAttachment("attachment2");
         var attachments = new List<Attachment> { attachment1, attachment2 };
 
         // Act

@@ -410,13 +410,17 @@ internal class Hub : IHubEx, IDisposable
         try
         {
             // Apply scope data
-            var currentScope = ScopeManager.GetCurrent();
-            var scope = currentScope.Key;
+            var currentScopeAndClient = ScopeManager.GetCurrent();
+            var scope = currentScopeAndClient.Key;
             scope.Evaluate();
             scope.Apply(transaction);
 
             // Apply enricher
             _enricher.Apply(transaction);
+
+            // Add attachments to the hint for processors and callbacks
+            hint ??= new Hint();
+            hint.AddScopeAttachments(scope);
 
             var processedTransaction = transaction;
             if (transaction.IsSampled != false)
@@ -433,7 +437,8 @@ internal class Hub : IHubEx, IDisposable
                 }
             }
 
-            currentScope.Value.CaptureTransaction(processedTransaction, hint);
+            var client = currentScopeAndClient.Value;
+            client.CaptureTransaction(processedTransaction, hint);
         }
         catch (Exception e)
         {
