@@ -1,5 +1,6 @@
 #if !__MOBILE__
 using Argon;
+using Sentry.PlatformAbstractions;
 
 namespace Sentry.Testing;
 
@@ -105,6 +106,19 @@ public static class VerifyExtensions
             obj.FunctionId = ScrubAlphaNum(obj.FunctionId);
             obj.InstructionAddress = ScrubAlphaNum(obj.InstructionAddress);
             obj.Package = obj.Package.Replace(PackageRegex, "=SCRUBBED");
+
+            if (RuntimeInfo.GetRuntime().IsMono())
+            {
+                // On Mono, these items only come through from the stack trace when the `--debug` flag is passed,
+                // either to mono.exe or set in the MONO_ENV_OPTIONS environment variable.
+                // Rider sets the `--debug` flag, but `dotnet test` does not.
+                // Thus we can't reliably include them and have tests pass in both.
+                obj.FileName = string.Empty;
+                obj.LineNumber = null;
+                obj.ColumnNumber = null;
+                obj.AbsolutePath = null;
+            }
+
             writer.Serialize(JToken.FromObject(obj));
         }
     }
