@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add tag filters to SentryLoggingOptions ([#2360](https://github.com/getsentry/sentry-dotnet/pull/2360))
+
 ## 3.31.0
 
 ### Features
