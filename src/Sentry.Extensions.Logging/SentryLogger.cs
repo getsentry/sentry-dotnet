@@ -106,7 +106,6 @@ internal sealed class SentryLogger : ILogger
                     continue;
                 }
 
-                // TODO: should the code ensure "{OriginalFormat}" is not specified by user and removed?
                 if (tagFilters.Any(x => x.IsMatch(property.Key)))
                 {
                     continue;
