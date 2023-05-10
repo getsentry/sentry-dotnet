@@ -1,5 +1,4 @@
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 
 namespace Sentry.AzureFunctions.Worker;
@@ -26,6 +25,8 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
             {
                 scope.Transaction = transaction;
 
+                // TODO: remove when SentryLogger supports filtering out tags option
+                // https://github.com/getsentry/sentry-dotnet/pull/2346#discussion_r1188143329
                 // AzureFunctions_FunctionName and AzureFunctions_InvocationId are already set by the time we get here.
                 // Clear those and replace with "function" scope context.
                 scope.UnsetTag("AzureFunctions_FunctionName");
@@ -65,9 +66,9 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
                 var statusCode = context.GetHttpResponseData()?.StatusCode;
 
                 // For HTTP triggered function, finish transaction with the returned HTTP status code
-                if (statusCode != null)
+                if (statusCode is not null)
                 {
-                    var status = SpanStatusConverter.FromHttpStatusCode((int)statusCode);
+                    var status = SpanStatusConverter.FromHttpStatusCode(statusCode.Value);
 
                     transaction.Finish(status);
                 }
