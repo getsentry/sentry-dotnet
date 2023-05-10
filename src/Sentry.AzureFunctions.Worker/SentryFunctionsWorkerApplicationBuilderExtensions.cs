@@ -13,7 +13,7 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
     /// <summary>
     /// Configure Azure Functions to use Sentry
     /// </summary>
-    public static IFunctionsWorkerApplicationBuilder UseSentry(this IFunctionsWorkerApplicationBuilder builder, Action<SentryOptions>? optionsConfiguration)
+    public static IFunctionsWorkerApplicationBuilder UseSentry(this IFunctionsWorkerApplicationBuilder builder, Action<SentryLoggingOptions>? optionsConfiguration)
     {
         builder.UseMiddleware<SentryFunctionsWorkerMiddleware>();
 
