@@ -33,6 +33,18 @@ public class TraceLogProcessorTests
     //     var json = profile.ToJsonString(_testOutputLogger);
     // }
 
+
+    private SampleProfile BuilProfile(TraceLogEventSource eventSource)
+    {
+        var builder = new SampleProfileBuilder(new() { DiagnosticLogger = _testOutputLogger }, eventSource.TraceLog);
+        new SampleProfilerTraceEventParser(eventSource).ThreadSample += delegate (ClrThreadSampleTraceData data)
+                {
+                    builder.AddSample(data, data.TimeStampRelativeMSec);
+                };
+        eventSource.Process();
+        return builder.Profile;
+    }
+
     private SampleProfile GetProfile()
     {
         var etlxFilePath = Path.Combine(_resourcesPath, "sample.etlx");
@@ -50,22 +62,27 @@ public class TraceLogProcessorTests
         }
 
         using var traceLog = new TraceLog(etlxFilePath);
-        var builder = new SampleProfileBuilder(new() { DiagnosticLogger = _testOutputLogger }, traceLog);
-        var eventSource = traceLog.Events.GetSource();
-        new SampleProfilerTraceEventParser(eventSource).ThreadSample += delegate (ClrThreadSampleTraceData data)
-        {
-            builder.AddSample(data, data.TimeStampRelativeMSec);
-        };
-        eventSource.Process();
-        return builder.Profile;
+        using var eventSource = traceLog.Events.GetSource();
+        return BuilProfile(eventSource);
     }
 
-    [Fact]
-    public Task Profile_Serialization_Works()
+    private SampleProfile GetStreamedProfile()
     {
-        var profile = GetProfile();
+        var etlFilePath = Path.Combine(_resourcesPath, "sample.nettrace");
+        using var fileStream = File.Open(etlFilePath, FileMode.Open);
+        using var eventPipeEventSource = new EventPipeEventSource(fileStream);
+        using var eventSource = TraceLog.CreateFromEventPipeEventSource(eventPipeEventSource);
+        return BuilProfile(eventSource);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public Task Profile_Serialization_Works(bool streaming)
+    {
+        var profile = streaming ? GetStreamedProfile() : GetProfile();
         var json = profile.ToJsonString(_testOutputLogger);
-        return VerifyJson(json);
+        return VerifyJson(json).DisableRequireUniquePrefix();
     }
 
     [Fact]

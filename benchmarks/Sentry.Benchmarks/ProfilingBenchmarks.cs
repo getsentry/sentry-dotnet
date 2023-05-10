@@ -11,10 +11,28 @@ namespace Sentry.Benchmarks;
 public class ProfilingBenchmarks
 {
     private IHub _hub = Substitute.For<IHub>();
-    private ITransactionProfilerFactory _factory = SamplingTransactionProfilerFactory.Create(new());
+    private SamplingTransactionProfilerFactory _factory;
+    private ITransactionProfiler _profiler;
+
+    [GlobalSetup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
+    public void StartProfiler()
+    {
+        _factory = SamplingTransactionProfilerFactory.Create(new());
+        _profiler = _factory.Start(new TransactionTracer(_hub, "", ""), CancellationToken.None);
+    }
+
+    [GlobalCleanup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
+    public void StopProfiler()
+    {
+        _profiler?.Finish();
+        _profiler?.CollectAsync(new Transaction("", "")).Wait();
+        _profiler = null;
+        _factory.Dispose();
+        _factory = null;
+    }
 
     #region full transaction profiling
-    public IEnumerable<object[]> ProfilerArguments()
+    public IEnumerable<object[]> TransactionBenchmarkArguments()
     {
         foreach (var runtimeMs in new[] { 25, 100, 1000, 10000 })
         {
@@ -27,7 +45,7 @@ public class ProfilingBenchmarks
 
     // Run a profiled transaction. Profiler starts and stops for each transaction separately.
     [Benchmark]
-    [ArgumentsSource(nameof(ProfilerArguments))]
+    [ArgumentsSource(nameof(TransactionBenchmarkArguments))]
     public long Transaction(int runtimeMs, bool processing)
     {
         var tt = new TransactionTracer(_hub, "test", "");
@@ -154,30 +172,14 @@ public class ProfilingBenchmarks
     [ArgumentsSource(nameof(OverheadRunArguments))]
     public long DoHardWork(int n)
     {
-        return ProfilingBenchmarks.FindPrimeNumber(n);
+        return FindPrimeNumber(n);
     }
 
     [BenchmarkCategory("overhead"), Benchmark]
     [ArgumentsSource(nameof(OverheadRunArguments))]
     public long DoHardWorkWhileProfiling(int n)
     {
-        return ProfilingBenchmarks.FindPrimeNumber(n);
-    }
-
-    private ITransactionProfiler _profiler;
-
-    [GlobalSetup(Target = nameof(DoHardWorkWhileProfiling))]
-    public void StartProfiler()
-    {
-        _profiler = _factory.Start(new TransactionTracer(_hub, "", ""), CancellationToken.None);
-    }
-
-    [GlobalCleanup(Target = nameof(DoHardWorkWhileProfiling))]
-    public void StopProfiler()
-    {
-        _profiler?.Finish();
-        _profiler?.CollectAsync(new Transaction("", "")).Wait();
-        _profiler = null;
+        return FindPrimeNumber(n);
     }
     #endregion
 }

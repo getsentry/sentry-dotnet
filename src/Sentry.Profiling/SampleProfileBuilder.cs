@@ -6,9 +6,6 @@ using Sentry.Protocol;
 
 namespace Sentry.Profiling;
 
-// A list of frame indexes.
-using SentryProfileStackTrace = HashableGrowableArray<int>;
-
 /// <summary>
 /// Build a SampleProfile from TraceEvent data.
 /// </summary>
@@ -24,8 +21,8 @@ internal class SampleProfileBuilder
     // A sparse array that maps from StackSourceFrameIndex to an index in the output Profile.frames.
     private readonly SparseScalarArray<int> _frameIndexes = new(-1, 1000);
 
-    // A dictionary from a StackTrace sealed array to an index in the output Profile.stacks.
-    private readonly Dictionary<SentryProfileStackTrace, int> _stackIndexes = new(100);
+    // A dictionary from a CallStackIndex to an index in the output Profile.stacks.
+    private readonly SparseScalarArray<int> _stackIndexes = new(100);
 
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
     private readonly SparseScalarArray<int> _threadIndexes = new(-1, 10);
@@ -86,7 +83,20 @@ internal class SampleProfileBuilder
     /// <returns>The index into the Profile's stacks list</returns>
     private int AddStackTrace(CallStackIndex callstackIndex)
     {
-        SentryProfileStackTrace stackTrace = new(10);
+        var key = (int)callstackIndex;
+
+        if (!_stackIndexes.ContainsKey(key))
+        {
+            Profile.Stacks.Add(CreateStackTrace(callstackIndex));
+            _stackIndexes[key] = Profile.Stacks.Count - 1;
+        }
+
+        return _stackIndexes[key];
+    }
+
+    private Internal.GrowableArray<int> CreateStackTrace(CallStackIndex callstackIndex)
+    {
+        var stackTrace = new Internal.GrowableArray<int>(10);
         while (callstackIndex != CallStackIndex.Invalid)
         {
             var codeAddressIndex = _traceLog.CallStacks.CodeAddressIndex(callstackIndex);
@@ -102,20 +112,8 @@ internal class SampleProfileBuilder
             }
         }
 
-        int result = -1;
-        if (stackTrace.Count > 0)
-        {
-            stackTrace.Seal();
-            if (!_stackIndexes.TryGetValue(stackTrace, out result))
-            {
-                stackTrace.Trim(10);
-                Profile.Stacks.Add(stackTrace);
-                result = Profile.Stacks.Count - 1;
-                _stackIndexes[stackTrace] = result;
-            }
-        }
-
-        return result;
+        stackTrace.Trim(10);
+        return stackTrace;
     }
 
     /// <summary>
