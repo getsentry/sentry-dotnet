@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Sentry.Extensions.Logging;
 
 namespace Sentry.AzureFunctions.Worker;
 
