@@ -82,7 +82,7 @@ internal sealed class SentryLogger : ILogger
         Exception? exception,
         string? message,
         string category,
-        SubstringOrRegexPattern[] tagFilters)
+        ICollection<SubstringOrRegexPattern> tagFilters)
     {
         var @event = new SentryEvent(exception)
         {
