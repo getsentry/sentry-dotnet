@@ -48,4 +48,9 @@ public class SentryLoggingOptions : SentryOptions
     /// List of callbacks to be invoked when initializing the SDK
     /// </summary>
     internal Action<Scope>[] ConfigureScopeCallbacks { get; set; } = Array.Empty<Action<Scope>>();
+
+    /// <summary>
+    /// List of substrings or regular expression patterns to filter out tags
+    /// </summary>
+    public SubstringOrRegexPattern[] TagFilters { get; set; } = Array.Empty<SubstringOrRegexPattern>();
 }
