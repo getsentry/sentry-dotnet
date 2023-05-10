@@ -52,5 +52,5 @@ public class SentryLoggingOptions : SentryOptions
     /// <summary>
     /// List of substrings or regular expression patterns to filter out tags
     /// </summary>
-    public SubstringOrRegexPattern[] TagFilters { get; set; } = Array.Empty<SubstringOrRegexPattern>();
+    public ICollection<SubstringOrRegexPattern> TagFilters { get; set; } = new List<SubstringOrRegexPattern>();
 }
