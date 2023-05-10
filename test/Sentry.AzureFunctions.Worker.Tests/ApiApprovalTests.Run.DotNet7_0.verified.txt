@@ -1,0 +1,7 @@
+﻿namespace Sentry.AzureFunctions.Worker
+{
+    public static class SentryFunctionsWorkerApplicationBuilderExtensions
+    {
+        public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, System.Action<Sentry.Extensions.Logging.SentryLoggingOptions>? optionsConfiguration) { }
+    }
+}
