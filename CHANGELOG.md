@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add tag filters to SentryLoggingOptions ([#2360](https://github.com/getsentry/sentry-dotnet/pull/2360))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.6.0 to v8.7.0 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359))
