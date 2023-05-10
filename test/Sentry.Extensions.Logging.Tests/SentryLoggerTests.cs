@@ -112,7 +112,7 @@ public class SentryLoggerTests
         try
         {
             Thread.CurrentThread.CurrentCulture = new("da-DK");
-            sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category");
+            sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category", Array.Empty<SubstringOrRegexPattern>());
         }
         finally
         {
@@ -530,5 +530,22 @@ public class SentryLoggerTests
         var actual = sut.BeginScope("state");
 
         Assert.Same(actual, expected);
+    }
+
+    [Fact]
+    public void Filtered_tags_are_not_on_event()
+    {
+        var props = new List<KeyValuePair<string, object>>
+        {
+            new("AzFunctions", "rule"),
+            new("AzureFunctions_FunctionName", "Func"),
+            new("AzureFunctions_InvocationId", "20a09c3b-e9dd-43fe-9a73-ebae1f90cab6"),
+        };
+
+        var tagFilters = new[] { new SubstringOrRegexPattern("AzureFunctions_") };
+
+        var sentryEvent = SentryLogger.CreateEvent(LogLevel.Debug, default, props, null, null, "category", tagFilters);
+
+        sentryEvent.Tags.Should().OnlyContain(pair => pair.Key == "AzFunctions" && pair.Value == "rule");
     }
 }

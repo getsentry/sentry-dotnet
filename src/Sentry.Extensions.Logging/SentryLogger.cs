@@ -47,7 +47,7 @@ internal sealed class SentryLogger : ILogger
 
         if (ShouldCaptureEvent(logLevel, eventId, exception))
         {
-            var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName);
+            var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName, _options.TagFilters);
 
             _ = _hub.CaptureEvent(@event);
         }
@@ -75,7 +75,14 @@ internal sealed class SentryLogger : ILogger
         }
     }
 
-    internal static SentryEvent CreateEvent<TState>(LogLevel logLevel, EventId id, TState state, Exception? exception, string? message, string category)
+    internal static SentryEvent CreateEvent<TState>(
+        LogLevel logLevel,
+        EventId id,
+        TState state,
+        Exception? exception,
+        string? message,
+        string category,
+        SubstringOrRegexPattern[] tagFilters)
     {
         var @event = new SentryEvent(exception)
         {
@@ -96,6 +103,12 @@ internal sealed class SentryLogger : ILogger
                         Formatted = message,
                         Message = template
                     };
+                    continue;
+                }
+
+                // TODO: should the code ensure "{OriginalFormat}" is not specified by user and removed?
+                if (tagFilters.Any(x => x.IsMatch(property.Key)))
+                {
                     continue;
                 }
 
