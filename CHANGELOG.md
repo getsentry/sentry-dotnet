@@ -11,6 +11,7 @@
 - Bump Cocoa SDK from v8.6.0 to v8.7.0 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#870)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.6.0...8.7.0)
+- Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
 
 ## 3.31.0
 
@@ -22,7 +23,6 @@
 - Build .NET Standard 2.1 for Unity ([#2328](https://github.com/getsentry/sentry-dotnet/pull/2328))
 - Add `RemoveExceptionFilter`, `RemoveEventProcessor` and `RemoveTransactionProcessor` extension methods on `SentryOptions` ([#2331](https://github.com/getsentry/sentry-dotnet/pull/2331))
 - Include Dynamic Sampling Context with error events, when there's a transaction ([#2332](https://github.com/getsentry/sentry-dotnet/pull/2332))
-- Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
 
 ### Fixes
 
