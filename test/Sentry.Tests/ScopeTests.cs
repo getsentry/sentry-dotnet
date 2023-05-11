@@ -164,7 +164,7 @@ public class ScopeTests
     }
 
     [Fact]
-    public void GetSpan_NoSpans_ReturnsTransaction()
+    public void Span_NoSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -179,7 +179,7 @@ public class ScopeTests
     }
 
     [Fact]
-    public void GetSpan_FinishedSpans_ReturnsTransaction()
+    public void Span_FinishedSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -198,7 +198,7 @@ public class ScopeTests
     }
 
     [Fact]
-    public void GetSpan_ActiveSpans_ReturnsSpan()
+    public void Span_ActiveSpans_ReturnsSpan()
     {
         // Arrange
         var scope = new Scope();
