@@ -172,7 +172,7 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
@@ -191,7 +191,7 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
@@ -210,7 +210,7 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(activeSpan);

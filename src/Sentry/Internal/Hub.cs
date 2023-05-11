@@ -182,11 +182,7 @@ internal class Hub : IHubEx, IDisposable
         _ = ExceptionToSpanMap.GetValue(exception, _ => span);
     }
 
-    public ISpan? GetSpan()
-    {
-        var (currentScope, _) = ScopeManager.GetCurrent();
-        return currentScope.GetSpan();
-    }
+    public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
     public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
@@ -286,7 +282,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         // Otherwise just get the currently active span on the scope (unless it's sampled out)
-        if (scope.GetSpan() is { IsSampled: not false } span)
+        if (scope.Span is { IsSampled: not false } span)
         {
             return span;
         }
