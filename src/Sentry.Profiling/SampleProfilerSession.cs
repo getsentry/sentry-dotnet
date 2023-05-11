@@ -15,16 +15,14 @@ internal class SampleProfilerSession : IDisposable
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
-    private bool _stopped;
+    private bool _stopped = false;
 
-    private SampleProfilerSession(EventPipeSession session, IDiagnosticLogger? logger)
+    private SampleProfilerSession(EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
     {
         _session = session;
         _logger = logger;
-        _eventSource = TraceLog.CreateFromEventPipeSession(_session);
+        _eventSource = eventSource;
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
-        // Process() blocks until the session is stopped so we need to run it on a separate thread.
-        Task.Factory.StartNew(_eventSource.Process, TaskCreationOptions.LongRunning);
     }
 
     // Exposed only for benchmarks.
@@ -32,13 +30,14 @@ internal class SampleProfilerSession : IDisposable
     {
         // Note: all events we need issued by "DotNETRuntime" provider are at "EventLevel.Informational"
         // see https://learn.microsoft.com/en-us/dotnet/fundamentals/diagnostics/runtime-events
+        // TODO replace Keywords.Default with a subset. Currently it is:
+        //   Default = GC | Type | GCHeapSurvivalAndMovement | Binder | Loader | Jit | NGen | SupressNGen
+        //                | StopEnumeration | Security | AppDomainResourceManagement | Exception | Threading | Contention | Stack | JittedMethodILToNativeMap
+        //                | ThreadTransfer | GCHeapAndTypeNames | Codesymbols | Compilation,
         new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Informational, (long) ClrTraceEventParser.Keywords.Default),
         new EventPipeProvider(SampleProfilerTraceEventParser.ProviderName, EventLevel.Informational),
         // new EventPipeProvider(TplEtwProviderTraceEventParser.ProviderName, EventLevel.Informational, (long) TplEtwProviderTraceEventParser.Keywords.Default)
     };
-
-    // Exposed only for benchmarks.
-    internal static bool RequestRundown = true;
 
     // Exposed only for benchmarks.
     // The size of the runtime's buffer for collecting events in MB, same as the current default in StartEventPipeSession().
@@ -53,8 +52,18 @@ internal class SampleProfilerSession : IDisposable
     public static SampleProfilerSession StartNew(IDiagnosticLogger? logger = null)
     {
         var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
-        var session = client.StartEventPipeSession(Providers, RequestRundown, CircularBufferMB);
-        return new SampleProfilerSession(session, logger);
+
+        // Rundown events only come in after the session is stopped but we need them right from the start so that
+        // TraceLog has all the info about loaded moodules and methods at the time a sample is handled.
+        // As is, we can just disable the rundown and rely on the currently loaded modules.
+        var session = client.StartEventPipeSession(Providers, false, CircularBufferMB);
+
+        var eventSource = TraceLog.CreateFromEventPipeSession(session);
+
+        // Process() blocks until the session is stopped so we need to run it on a separate thread.
+        Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning);
+
+        return new SampleProfilerSession(session, eventSource, logger);
     }
 
     public void Stop()

@@ -8,10 +8,12 @@ namespace Sentry.Profiling.Tests;
 public class SamplingTransactionProfilerTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
+    private readonly SentryOptions _testSentryOptions;
 
     public SamplingTransactionProfilerTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
+        _testSentryOptions = new SentryOptions { Debug = true, DiagnosticLogger = _testOutputLogger };
     }
 
     private void ValidateProfile(SampleProfile profile, ulong maxTimestampNs)
@@ -63,7 +65,7 @@ public class SamplingTransactionProfilerTests
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
 
-        using var factory = SamplingTransactionProfilerFactory.Create(new SentryOptions { DiagnosticLogger = _testOutputLogger });
+        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
         var clock = SentryStopwatch.StartNew();
         var sut = factory.Start(transactionTracer, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
@@ -83,10 +85,9 @@ public class SamplingTransactionProfilerTests
     public void Profiler_AfterTimeout_Stops()
     {
         var hub = Substitute.For<IHub>();
-        var options = new SentryOptions { DiagnosticLogger = _testOutputLogger };
         using var session = SampleProfilerSession.StartNew(_testOutputLogger);
         var limitMs = 50;
-        var sut = new SamplingTransactionProfiler(options, session, limitMs, CancellationToken.None);
+        var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);
         RunForMs(limitMs * 4);
         sut.Finish();
 

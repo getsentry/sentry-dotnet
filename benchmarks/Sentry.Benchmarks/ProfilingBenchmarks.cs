@@ -115,11 +115,7 @@ public class ProfilingBenchmarks
     [Benchmark]
     public void DiagnosticsSessionStartStop()
     {
-        var session = DiagnosticsClientNew().StartEventPipeSession(
-            SampleProfilerSession.Providers,
-            SampleProfilerSession.RequestRundown,
-            SampleProfilerSession.CircularBufferMB
-        );
+        var session = DiagnosticsClientNew().StartEventPipeSession(SampleProfilerSession.Providers, true, SampleProfilerSession.CircularBufferMB);
         session.EventStream.Dispose();
         session.Dispose();
     }
