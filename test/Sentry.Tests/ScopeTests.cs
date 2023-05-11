@@ -217,6 +217,67 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Span_SetSpan_ReturnsValue()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Assert Default
+        scope.Span.Should().Be(secondSpan);
+
+        // Act
+        scope.Span = firstSpan;
+
+        // Assert
+        scope.Span.Should().Be(firstSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanNull_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = null;
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanThenCloseIt_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = firstSpan;
+        firstSpan.Finish();
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
+    }
+
+    [Fact]
     public void AddAttachment_AddAttachments()
     {
         // Arrange
