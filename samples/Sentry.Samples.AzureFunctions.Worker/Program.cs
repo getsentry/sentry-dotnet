@@ -2,9 +2,9 @@ using Microsoft.Extensions.Hosting;
 using Sentry.AzureFunctions.Worker;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults(builder =>
+    .ConfigureFunctionsWorkerDefaults((host, builder) =>
     {
-        builder.UseSentry(options =>
+        builder.UseSentry(host, options =>
         {
             options.EnableTracing = true;
             // options.Debug = true;
@@ -12,4 +12,4 @@ var host = new HostBuilder()
     })
     .Build();
 
-host.Run();
+await host.RunAsync();

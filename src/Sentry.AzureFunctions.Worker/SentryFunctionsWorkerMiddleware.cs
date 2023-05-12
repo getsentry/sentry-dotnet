@@ -29,8 +29,11 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
                 // https://github.com/getsentry/sentry-dotnet/pull/2346#discussion_r1188143329
                 // AzureFunctions_FunctionName and AzureFunctions_InvocationId are already set by the time we get here.
                 // Clear those and replace with "function" scope context.
-                scope.UnsetTag("AzureFunctions_FunctionName");
-                scope.UnsetTag("AzureFunctions_InvocationId");
+                // scope.UnsetTag("AzureFunctions_FunctionName");
+                // scope.UnsetTag("AzureFunctions_InvocationId");
+
+                // TODO: consider adding "functionName" single tag
+                // scope.SetTag("functionName", context.FunctionDefinition.Name);
 
                 scope.Contexts["function"] = new Dictionary<string, string>
                 {
