@@ -580,7 +580,12 @@ public class SentryOptions
     /// Indicates whether tracing is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
-    internal bool IsTracingEnabled => EnableTracing ?? (_tracesSampleRate > 0.0 || TracesSampler is not null);
+    internal bool IsTracingEnabled => EnableTracing switch
+    {
+        false => false,
+        null => TracesSampler is not null || TracesSampleRate is > 0.0,
+        true => TracesSampler is not null || TracesSampleRate is > 0.0 or null
+    };
 
     /// <summary>
     /// Simplified option for enabling or disabling tracing.
@@ -617,25 +622,43 @@ public class SentryOptions
 
     /// <summary>
     /// Indicates the percentage of the tracing data that is collected.
-    /// Setting this to <c>0.0</c> discards all trace data.
-    /// Setting this to <c>1.0</c> collects all trace data.
-    /// Values outside of this range are invalid.
-    /// The default value is either <c>0.0</c> or <c>1.0</c>, depending on the <see cref="EnableTracing"/> property.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>&gt;= 0.0 and &lt;=1.0</c></term>
+    ///     <description>
+    ///       A custom sample rate is used unless <see cref="EnableTracing"/> is <c>false</c>,
+    ///       or unless overriden by a <see cref="TracesSampler"/> function.
+    ///       Values outside of this range are invalid.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       The tracing sample rate is determined by the <see cref="EnableTracing"/> property,
+    ///       unless overriden by a <see cref="TracesSampler"/> function.
+    ///     </description>
+    ///   </item>
+    /// </list>
     /// </summary>
     /// <remarks>
     /// Random sampling rate is only applied to transactions that don't already
     /// have a sampling decision set by other means, such as through <see cref="TracesSampler"/>,
     /// by inheriting it from an incoming trace header, or by copying it from <see cref="TransactionContext"/>.
     /// </remarks>
-    public double TracesSampleRate
+    public double? TracesSampleRate
     {
-        get => _tracesSampleRate ?? (EnableTracing is true ? 1.0 : 0.0);
+        get => _tracesSampleRate;
         set
         {
             if (value is < 0.0 or > 1.0)
             {
-                throw new InvalidOperationException(
-                    $"The value {value} is not a valid tracing sample rate. Use values between 0.0 and 1.0.");
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "The traces sample rate must be between 0.0 and 1.0, inclusive.");
             }
 
             _tracesSampleRate = value;
