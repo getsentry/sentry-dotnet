@@ -132,6 +132,11 @@ public class SentryOptions
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
     /// <summary>
+    /// List of substrings or regular expression patterns to filter out tags
+    /// </summary>
+    public ICollection<SubstringOrRegexPattern> TagFilters { get; set; } = new List<SubstringOrRegexPattern>();
+
+    /// <summary>
     /// The worker used by the client to pass envelopes.
     /// </summary>
     public IBackgroundWorker? BackgroundWorker { get; set; }
