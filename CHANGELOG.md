@@ -4,7 +4,7 @@
 
 ### Features
 
-- Add tag filters to SentryLoggingOptions ([#2360](https://github.com/getsentry/sentry-dotnet/pull/2360))
+- Add tag filters to `SentryOptions` ([#2367](https://github.com/getsentry/sentry-dotnet/pull/2367))
 
 ### Dependencies
 
