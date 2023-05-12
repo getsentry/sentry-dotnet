@@ -38,11 +38,7 @@ public class SentryDiagnosticListenerTests
         }
         public ItemsContext NewContext() => new(_database.ContextOptions);
 
-        public ISpan GetSpan()
-        {
-            var (currentScope, _) = ScopeManager.GetCurrent();
-            return currentScope.GetSpan();
-        }
+        public ISpan GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
         public ITransaction StartTransaction(IHub hub, ITransactionContext context)
         {

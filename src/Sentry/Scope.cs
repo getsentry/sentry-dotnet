@@ -521,10 +521,34 @@ public class Scope : IEventLike, IHasDistribution
     }
 
     /// <summary>
-    /// Gets the currently ongoing (not finished) span or <c>null</c> if none available.
-    /// This relies on the transactions being manually set on the scope via <see cref="Transaction"/>.
+    /// Obsolete.  Use the <see cref="Span"/> property instead.
     /// </summary>
-    public ISpan? GetSpan() => Transaction?.GetLastActiveSpan() ?? Transaction;
+    [Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
+    public ISpan? GetSpan() => Span;
+
+    private ISpan? _span;
+
+    /// <summary>
+    /// Gets or sets the active span, or <c>null</c> if none available.
+    /// </summary>
+    /// <remarks>
+    /// If a span has been set on this property, it will become the active span until it is finished.
+    /// Otherwise, the active span is the latest unfinished span on the transaction, presuming a transaction
+    /// was set on the scope via the <see cref="Transaction"/> property.
+    /// </remarks>
+    public ISpan? Span
+    {
+        get
+        {
+            if (_span?.IsFinished is false)
+            {
+                return _span;
+            }
+
+            return Transaction?.GetLastActiveSpan() ?? Transaction;
+        }
+        set => _span = value;
+    }
 
     internal void ResetTransaction(ITransaction? expectedCurrentTransaction) =>
         Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
