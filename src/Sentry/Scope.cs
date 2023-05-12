@@ -272,7 +272,7 @@ public class Scope : IEventLike, IHasDistribution
 
         if (!Options.SendDefaultPii)
         {
-            breadcrumb = BreadcrumbPiiSanitizer.Sanitize(breadcrumb);
+            breadcrumb = breadcrumb.Sanitize();
         }
 
         _breadcrumbs.Enqueue(breadcrumb);

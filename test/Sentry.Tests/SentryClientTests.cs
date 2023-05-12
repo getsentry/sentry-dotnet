@@ -668,6 +668,36 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureTransaction_Sanitize_Description()
+    {
+        // Arrange
+        _fixture.SentryOptions.SendDefaultPii = false;
+        var client = _fixture.GetSut();
+        var original = new Transaction(
+            "test name",
+            "test operation"
+        )
+        {
+            IsSampled = true,
+            Description = "The URL: https://user@sentry.io has PII data in it",
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        // Act
+        Envelope envelope = null;
+        client.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+        client.CaptureTransaction(original);
+
+        // Assert
+        envelope.Should().NotBeNull();
+        envelope.Items.Count.Should().Be(1);
+        var actual = (envelope.Items[0].Payload as JsonSerializable)?.Source as Transaction;
+        actual?.Name.Should().Be(original.Name);
+        actual?.Operation.Should().Be(original.Operation);
+        actual?.Description.Should().Be(original.Description.Sanitize()); // Should be sanitized
+    }
+
+    [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent()
     {
         _fixture.SentryOptions.BeforeSendTransaction = _ => null;

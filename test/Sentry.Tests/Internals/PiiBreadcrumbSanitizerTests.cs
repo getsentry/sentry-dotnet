@@ -2,7 +2,7 @@ using FluentAssertions.Execution;
 
 namespace Sentry.Tests.Internals;
 
-public class BreadcrumbPiiSanitizerTests
+public class PiiBreadcrumbSanitizerTests
 {
     [Fact]
     public void Sanitize_Urls()
@@ -24,16 +24,16 @@ public class BreadcrumbPiiSanitizerTests
             );
 
         // Act
-        var actual = BreadcrumbPiiSanitizer.Sanitize(breadcrumb);
+        var actual = breadcrumb.Sanitize();
 
         // Assert
         using (new AssertionScope())
         {
             actual.Should().NotBeNull();
             actual.Timestamp.Should().Be(breadcrumb.Timestamp);
-            actual.Message.Should().Be(UrlPiiSanitizer.Sanitize(breadcrumb.Message)); // should be sanitized
+            actual.Message.Should().Be(PiiUrlSanitizer.Sanitize(breadcrumb.Message)); // should be sanitized
             actual.Type.Should().Be(breadcrumb.Type);
-            actual.Data?["url"].Should().Be(UrlPiiSanitizer.Sanitize(breadcrumb.Data?["url"])); // should be sanitized
+            actual.Data?["url"].Should().Be(PiiUrlSanitizer.Sanitize(breadcrumb.Data?["url"])); // should be sanitized
             actual.Data?["method"].Should().Be(breadcrumb.Data?["method"]);
             actual.Data?["status_code"].Should().Be(breadcrumb.Data?["status_code"]);
             actual.Category.Should().Be(breadcrumb.Category);

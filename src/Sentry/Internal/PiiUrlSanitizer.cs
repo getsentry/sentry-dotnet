@@ -3,7 +3,7 @@ namespace Sentry.Internal;
 /// <summary>
 /// Sanitizes data that potentially contains Personally Identifiable Information (PII) before sending it to Sentry.
 /// </summary>
-internal static class UrlPiiSanitizer
+internal static class PiiUrlSanitizer
 {
     /// <summary>
     /// Searches for URLs in text data and redacts any PII
@@ -14,7 +14,7 @@ internal static class UrlPiiSanitizer
     /// The data if SendDefaultPii is enabled or if the data does not contain any PII.
     /// A redacted copy of the data otherwise.
     /// </returns>
-    public static string? Sanitize(string? data)
+    public static string? Sanitize(this string? data)
     {
         // If the data is empty then we don't need to sanitize anything
         if (string.IsNullOrWhiteSpace(data))

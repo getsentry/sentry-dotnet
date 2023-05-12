@@ -140,6 +140,11 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
+        if (!_options.SendDefaultPii)
+        {
+            processedTransaction = processedTransaction.Sanitize();
+        }
+
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 

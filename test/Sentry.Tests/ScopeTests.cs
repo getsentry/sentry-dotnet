@@ -470,7 +470,7 @@ public class ScopeTests
         // Arrange
         var scope = new Scope();
         var original = "Goto https://user@sentry.io";
-        var expected = UrlPiiSanitizer.Sanitize(original);
+        var expected = original.Sanitize();
 
         // Act
         scope.AddBreadcrumb(original);
@@ -485,7 +485,7 @@ public class ScopeTests
         // Arrange
         var scope = new Scope();
         var originalUrl = "https://user@sentry.io";
-        var expectedUrl = UrlPiiSanitizer.Sanitize(originalUrl);
+        var expectedUrl = originalUrl.Sanitize();
 
         var breadcrumbData = new Dictionary<string, string>
         {
