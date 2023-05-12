@@ -523,6 +523,29 @@ public class ScopeTests
         // Assert
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
     }
+
+    [Fact]
+    public void Filtered_tags_are_not_set()
+    {
+        var tags = new List<KeyValuePair<string, string>>
+        {
+            new("AzFunctions", "rule"),
+            new("AzureFunctions_FunctionName", "Func"),
+            new("AzureFunctions_InvocationId", "20a09c3b-e9dd-43fe-9a73-ebae1f90cab6"),
+        };
+
+        var scope = new Scope(new SentryOptions
+        {
+            TagFilters = new[] { new SubstringOrRegexPattern("AzureFunctions_") }
+        });
+
+        foreach (var (key, value) in tags)
+        {
+            scope.SetTag(key, value);
+        }
+
+        scope.Tags.Should().OnlyContain(pair => pair.Key == "AzFunctions" && pair.Value == "rule");
+    }
 }
 
 public static class ScopeTestExtensions

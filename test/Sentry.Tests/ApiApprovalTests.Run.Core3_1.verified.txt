@@ -615,6 +615,7 @@ namespace Sentry
         public string? ServerName { get; set; }
         public System.TimeSpan ShutdownTimeout { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
+        public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
         public double TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }

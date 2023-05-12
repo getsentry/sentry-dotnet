@@ -4,9 +4,10 @@
 
 ### Features
 
-- Add tag filters to SentryLoggingOptions ([#2360](https://github.com/getsentry/sentry-dotnet/pull/2360))
 - Allow setting the active span on the scope ([#2364](https://github.com/getsentry/sentry-dotnet/pull/2364))
   - Note: Obsoletes the `Scope.GetSpan` method in favor of a `Scope.Span` property (which now has a setter as well).
+
+- Add tag filters to `SentryOptions` ([#2367](https://github.com/getsentry/sentry-dotnet/pull/2367))
 
 ### Dependencies
 

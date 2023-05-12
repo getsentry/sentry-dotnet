@@ -290,6 +290,11 @@ public class Scope : IEventLike, IHasDistribution
     /// <inheritdoc />
     public void SetTag(string key, string value)
     {
+        if (Options.TagFilters.Any(x => x.IsMatch(key)))
+        {
+            return;
+        }
+
         _tags[key] = value;
         if (Options.EnableScopeSync)
         {

@@ -47,7 +47,7 @@ internal sealed class SentryLogger : ILogger
 
         if (ShouldCaptureEvent(logLevel, eventId, exception))
         {
-            var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName, _options.TagFilters);
+            var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName);
 
             _ = _hub.CaptureEvent(@event);
         }
@@ -81,8 +81,7 @@ internal sealed class SentryLogger : ILogger
         TState state,
         Exception? exception,
         string? message,
-        string category,
-        ICollection<SubstringOrRegexPattern> tagFilters)
+        string category)
     {
         var @event = new SentryEvent(exception)
         {
@@ -103,11 +102,6 @@ internal sealed class SentryLogger : ILogger
                         Formatted = message,
                         Message = template
                     };
-                    continue;
-                }
-
-                if (tagFilters.Any(x => x.IsMatch(property.Key)))
-                {
                     continue;
                 }
 
