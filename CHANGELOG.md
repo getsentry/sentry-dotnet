@@ -9,6 +9,13 @@
 
 - Add tag filters to `SentryOptions` ([#2367](https://github.com/getsentry/sentry-dotnet/pull/2367))
 
+### Fixes
+
+- Fix `EnableTracing` option conflict with `TracesSampleRate` ([#2368](https://github.com/getsentry/sentry-dotnet/pull/2368))
+ - NOTE: This is a potentially breaking change, as the `TracesSampleRate` property has been made nullable.
+   Though extremely uncommon, if you are _retrieving_ the `TracesSampleRate` property for some reason, you will need to account for nulls.
+   However, there is no change to the behavior or _typical_ usage of either of these properties.
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.6.0 to v8.7.0 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359))

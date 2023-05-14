@@ -618,7 +618,7 @@ namespace Sentry
         public Sentry.StackTraceMode StackTraceMode { get; set; }
         public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
-        public double TracesSampleRate { get; set; }
+        public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
         public bool UseAsyncFileIO { get; set; }

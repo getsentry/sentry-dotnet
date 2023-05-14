@@ -148,7 +148,7 @@ internal class Hub : IHubEx, IDisposable
             // Random sampling runs only if the sampling decision hasn't been made already.
             if (transaction.IsSampled == null)
             {
-                var sampleRate = _options.TracesSampleRate;
+                var sampleRate = _options.TracesSampleRate ?? (_options.EnableTracing is true ? 1.0 : 0.0);
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }

@@ -66,8 +66,13 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options.IsTracingEnabled && options.iOS.EnableCocoaSdkTracing)
+        if (options is {IsTracingEnabled: true, iOS.EnableCocoaSdkTracing: true})
         {
+            if (options.EnableTracing != null)
+            {
+                cocoaOptions.EnableTracing = options.EnableTracing.Value;
+            }
+
             cocoaOptions.TracesSampleRate = options.TracesSampleRate;
 
             if (options.TracesSampler is { } tracesSampler)
