@@ -1,20 +1,21 @@
 namespace Sentry.Internal;
 
 /// <summary>
-/// Sanitizes data that potentially contains Personally Identifiable Information (PII) before sending it to Sentry.
+/// Extensions to help redact data that might contain Personally Identifiable Information (PII) before sending it to
+/// Sentry.
 /// </summary>
-internal static class PiiUrlSanitizer
+internal static class PiiExtensions
 {
+    internal const string RedactedText = "[Filtered]";
+
     /// <summary>
-    /// Searches for URLs in text data and redacts any PII
-    /// data from these, as required.
+    /// Searches for URLs in text data and redacts any PII data from these, as required.
     /// </summary>
     /// <param name="data">The data to be searched</param>
     /// <returns>
-    /// The data if SendDefaultPii is enabled or if the data does not contain any PII.
-    /// A redacted copy of the data otherwise.
+    /// The data, if no PII data is present or a copy of the data with PII data redacted otherwise
     /// </returns>
-    public static string? Sanitize(this string? data)
+    public static string? RedactUrl(this string? data)
     {
         // If the data is empty then we don't need to sanitize anything
         if (string.IsNullOrWhiteSpace(data))
@@ -29,13 +30,13 @@ internal static class PiiUrlSanitizer
         var result = authRegex.Replace(data, match =>
         {
             var matchedUrl = match.Groups[1].Value;
-            return SanitizeUrl(matchedUrl);
+            return RedactAuth(matchedUrl);
         });
 
         return result;
     }
 
-    private static string SanitizeUrl(string data)
+    private static string RedactAuth(string data)
     {
         // ^ matches the start of the string. (?i)(https?://) gives a case-insensitive matching of the protocol.
         // (.*@) matches the username and password (authentication information). (.*)$ matches the rest of the URL.

@@ -5,7 +5,7 @@
 ### Features
 
 - Add tag filters to SentryLoggingOptions ([#2360](https://github.com/getsentry/sentry-dotnet/pull/2360))
-- Remove authority from URLs sent to Sentry ([#2366](https://github.com/getsentry/sentry-java/pull/2366))
+- Remove authority from URLs sent to Sentry ([#2365](https://github.com/getsentry/sentry-dotnet/pull/2365))
 
 ## 3.31.0
 

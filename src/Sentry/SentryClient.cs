@@ -142,7 +142,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (!_options.SendDefaultPii)
         {
-            processedTransaction = processedTransaction.Sanitize();
+            processedTransaction.Redact();
         }
 
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
@@ -269,6 +269,11 @@ public class SentryClient : ISentryClient, IDisposable
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
             _options.LogInfo("Event dropped by BeforeSend callback.");
             return SentryId.Empty;
+        }
+
+        if (!Options.SendDefaultPii)
+        {
+            processedEvent.Redact();
         }
 
         return CaptureEnvelope(Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, scope.Attachments, scope.SessionUpdate))

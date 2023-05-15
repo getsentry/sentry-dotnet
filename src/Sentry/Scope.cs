@@ -270,11 +270,6 @@ public class Scope : IEventLike, IHasDistribution
             _breadcrumbs.TryDequeue(out _);
         }
 
-        if (!Options.SendDefaultPii)
-        {
-            breadcrumb = breadcrumb.Sanitize();
-        }
-
         _breadcrumbs.Enqueue(breadcrumb);
         if (Options.EnableScopeSync)
         {

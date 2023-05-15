@@ -1,11 +1,11 @@
 namespace Sentry.Tests.Internals;
 
-public class PiiUrlSanitizerTests
+public class PiiExtensionsTests
 {
     [Fact]
     public void Sanitize_Null()
     {
-        var actual = PiiUrlSanitizer.Sanitize(null);
+        var actual = PiiExtensions.RedactUrl(null);
 
         Assert.Null(actual);
     }
@@ -16,7 +16,7 @@ public class PiiUrlSanitizerTests
     [InlineData("htp://user:password@sentry.io?q=1&s=2&token=secret#top", "doesn't affect malformed http urls")]
     public void Sanitize_Data_IsNotNull_WithoutPii(string original, string reason)
     {
-        var actual = PiiUrlSanitizer.Sanitize(original);
+        var actual = original.RedactUrl();
 
         actual.Should().Be(original, reason);
     }
@@ -31,7 +31,7 @@ public class PiiUrlSanitizerTests
     [InlineData("GET https://user@sentry.io for goodness", "GET https://[Filtered]@sentry.io for goodness", "strips user info from URL embedded in text")]
     public void Sanitize_Data_IsNotNull_WithPii(string original, string expected, string reason)
     {
-        var actual = PiiUrlSanitizer.Sanitize(original);
+        var actual = original.RedactUrl();
 
         actual.Should().Be(expected, reason);
     }

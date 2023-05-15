@@ -1,10 +1,10 @@
 namespace Sentry.Tests.Protocol;
 
-public class TransactionTests
+public class TransactionTracerTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
-    public TransactionTests(ITestOutputHelper output)
+    public TransactionTracerTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }

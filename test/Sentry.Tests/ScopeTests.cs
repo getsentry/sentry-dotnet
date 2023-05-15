@@ -462,53 +462,6 @@ public class ScopeTests
         // Assert
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
     }
-
-    // AddBreadcrumb sanitizes any URL data in the breadcrumb message
-    [Fact]
-    public void AddBreadcrumb_Sanitize_Message()
-    {
-        // Arrange
-        var scope = new Scope();
-        var original = "Goto https://user@sentry.io";
-        var expected = original.Sanitize();
-
-        // Act
-        scope.AddBreadcrumb(original);
-
-        // Assert
-        scope.Breadcrumbs.First().Message.Should().Be(expected);
-    }
-
-    [Fact]
-    public void AddBreadcrumb_Sanitize_Data()
-    {
-        // Arrange
-        var scope = new Scope();
-        var originalUrl = "https://user@sentry.io";
-        var expectedUrl = originalUrl.Sanitize();
-
-        var breadcrumbData = new Dictionary<string, string>
-        {
-            {"url", originalUrl},
-            {"method", "GET"},
-            {"status_code", "403"}
-        };
-        var breadcrumb = new Breadcrumb(message: "message", data: breadcrumbData);
-
-        // Act
-        scope.AddBreadcrumb(breadcrumb);
-
-        // Assert
-        var actual = scope.Breadcrumbs.First();
-        using (new AssertionScope())
-        {
-            actual.Should().NotBeNull();
-            actual.Message.Should().Be(breadcrumb.Message);
-            actual.Data?["url"].Should().Be(expectedUrl);
-            actual.Data?["method"].Should().Be(breadcrumb.Data?["method"]);
-            actual.Data?["status_code"].Should().Be(breadcrumb.Data?["status_code"]);
-        }
-    }
 }
 
 public static class ScopeTestExtensions

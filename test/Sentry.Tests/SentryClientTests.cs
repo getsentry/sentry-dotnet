@@ -694,7 +694,7 @@ public partial class SentryClientTests
         var actual = (envelope.Items[0].Payload as JsonSerializable)?.Source as Transaction;
         actual?.Name.Should().Be(original.Name);
         actual?.Operation.Should().Be(original.Operation);
-        actual?.Description.Should().Be(original.Description.Sanitize()); // Should be sanitized
+        actual?.Description.Should().Be(original.Description.RedactUrl()); // Should be sanitized
     }
 
     [Fact]

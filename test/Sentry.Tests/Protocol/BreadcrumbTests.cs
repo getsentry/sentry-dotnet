@@ -1,12 +1,58 @@
+using FluentAssertions.Execution;
+
 namespace Sentry.Tests.Protocol;
 
-public class BreadcrumbTests : ImmutableTests<Breadcrumb>
+public class BreadcrumbTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
     public BreadcrumbTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
+    [Fact]
+    public void Redact_Redacts_Urls()
+    {
+        // Arrange
+        var breadcrumbData = new Dictionary<string, string>
+        {
+            {"url", "https://user@sentry.io"},
+            {"method", "GET"},
+            {"status_code", "403"}
+        };
+        var timestamp = DateTimeOffset.UtcNow;
+        var message = "message https://user@sentry.io";
+        var type = "fake_type";
+        var data = breadcrumbData;
+        var category = "fake_category";
+        var level = BreadcrumbLevel.Error;
+
+        var breadcrumb = new Breadcrumb(
+            timestamp : timestamp,
+            message : message,
+            type : type,
+            data : breadcrumbData,
+            category : category,
+            level : level
+        );
+
+        // Act
+        breadcrumb.Redact();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            breadcrumb.Should().NotBeNull();
+            breadcrumb.Timestamp.Should().Be(timestamp);
+            breadcrumb.Message.Should().Be("message https://[Filtered]@sentry.io"); // should be sanitized
+            breadcrumb.Type.Should().Be(type);
+            breadcrumb.Data?["url"].Should().Be("https://[Filtered]@sentry.io"); // should be sanitized
+            breadcrumb.Data?["method"].Should().Be(breadcrumb.Data?["method"]);
+            breadcrumb.Data?["status_code"].Should().Be(breadcrumb.Data?["status_code"]);
+            breadcrumb.Category.Should().Be(category);
+            breadcrumb.Level.Should().Be(level);
+        }
     }
 
     [Fact]

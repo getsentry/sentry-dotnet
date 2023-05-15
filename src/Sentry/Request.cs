@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -175,5 +176,10 @@ public sealed class Request : IJsonSerializable
             QueryString = query,
             Cookies = cookies
         };
+    }
+
+    internal void Redact()
+    {
+        Url = Url.RedactUrl();
     }
 }
