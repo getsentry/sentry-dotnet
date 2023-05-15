@@ -227,7 +227,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         scope ??= new Scope(_options);
         hint ??= new Hint();
-        hint.AddScopeAttachments(scope);
+        hint.AddAttachmentsFromScope(scope);
 
         _options.LogInfo("Capturing event.");
 

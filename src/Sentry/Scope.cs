@@ -255,7 +255,7 @@ public class Scope : IEventLike, IHasDistribution
     {
         if (Options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
-            hint.AddScopeAttachments(this);
+            hint.AddAttachmentsFromScope(this);
 
             if (beforeBreadcrumb(breadcrumb, hint) is { } processedBreadcrumb)
             {

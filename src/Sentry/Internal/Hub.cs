@@ -419,7 +419,7 @@ internal class Hub : IHubEx, IDisposable
 
             // Add attachments to the hint for processors and callbacks
             hint ??= new Hint();
-            hint.AddScopeAttachments(scope);
+            hint.AddAttachmentsFromScope(scope);
 
             var processedTransaction = transaction;
             if (transaction.IsSampled != false)

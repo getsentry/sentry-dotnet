@@ -3,19 +3,6 @@ namespace Sentry.Tests;
 public class HintTests
 {
     [Fact]
-    public void AddAttachments_WithNullAttachments_DoesNothing()
-    {
-        // Arrange
-        var hint = new Hint();
-
-        // Act
-        hint.AddAttachments(null);
-
-        // Assert
-        Assert.Empty(hint.Attachments);
-    }
-
-    [Fact]
     public void AddAttachments_WithAttachments_AddsToHint()
     {
         // Arrange
@@ -24,7 +11,8 @@ public class HintTests
         var attachment2 = AttachmentHelper.FakeAttachment("attachment2");
 
         // Act
-        hint.AddAttachments(attachment1, attachment2);
+        hint.Attachments.Add(attachment1);
+        hint.Attachments.Add(attachment2);
 
         // Assert
         Assert.Equal(2, hint.Attachments.Count);
@@ -49,7 +37,7 @@ public class HintTests
         // Arrange
         var hint = new Hint();
         var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
-        hint.AddAttachments(attachment1);
+        hint.Attachments.Add(attachment1);
 
         // Act
         hint.Attachments.Clear();
