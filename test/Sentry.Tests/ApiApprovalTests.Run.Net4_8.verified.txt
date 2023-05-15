@@ -403,6 +403,7 @@ namespace Sentry
         public string? Release { get; set; }
         public Sentry.Request Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
+        public Sentry.ISpan? Span { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
         public Sentry.ITransaction? Transaction { get; set; }
         public string? TransactionName { get; set; }
@@ -416,6 +417,7 @@ namespace Sentry
         public void ClearAttachments() { }
         public void ClearBreadcrumbs() { }
         public Sentry.Scope Clone() { }
+        [System.Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
         public Sentry.ISpan? GetSpan() { }
         public void SetExtra(string key, object? value) { }
         public void SetTag(string key, string value) { }
@@ -612,8 +614,9 @@ namespace Sentry
         public string? ServerName { get; set; }
         public System.TimeSpan ShutdownTimeout { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
+        public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
-        public double TracesSampleRate { get; set; }
+        public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
         public bool UseAsyncFileIO { get; set; }
