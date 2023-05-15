@@ -668,7 +668,7 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void CaptureTransaction_Sanitize_Description()
+    public void CaptureTransaction_Redact_Description()
     {
         // Arrange
         _fixture.SentryOptions.SendDefaultPii = false;
@@ -694,7 +694,7 @@ public partial class SentryClientTests
         var actual = (envelope.Items[0].Payload as JsonSerializable)?.Source as Transaction;
         actual?.Name.Should().Be(original.Name);
         actual?.Operation.Should().Be(original.Operation);
-        actual?.Description.Should().Be(original.Description.RedactUrl()); // Should be sanitized
+        actual?.Description.Should().Be(original.Description.RedactUrl()); // Should be redacted
     }
 
     [Fact]

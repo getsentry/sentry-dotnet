@@ -45,9 +45,9 @@ public class BreadcrumbTests
         {
             breadcrumb.Should().NotBeNull();
             breadcrumb.Timestamp.Should().Be(timestamp);
-            breadcrumb.Message.Should().Be("message https://[Filtered]@sentry.io"); // should be sanitized
+            breadcrumb.Message.Should().Be("message https://[Filtered]@sentry.io"); // should be redacted
             breadcrumb.Type.Should().Be(type);
-            breadcrumb.Data?["url"].Should().Be("https://[Filtered]@sentry.io"); // should be sanitized
+            breadcrumb.Data?["url"].Should().Be("https://[Filtered]@sentry.io"); // should be redacted
             breadcrumb.Data?["method"].Should().Be(breadcrumb.Data?["method"]);
             breadcrumb.Data?["status_code"].Should().Be(breadcrumb.Data?["status_code"]);
             breadcrumb.Category.Should().Be(category);

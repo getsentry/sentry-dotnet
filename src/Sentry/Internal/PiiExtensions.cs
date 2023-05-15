@@ -17,7 +17,7 @@ internal static class PiiExtensions
     /// </returns>
     public static string? RedactUrl(this string? data)
     {
-        // If the data is empty then we don't need to sanitize anything
+        // If the data is empty then we don't need to redact anything
         if (string.IsNullOrWhiteSpace(data))
         {
             return data;

@@ -3,7 +3,7 @@ namespace Sentry.Tests.Internals;
 public class PiiExtensionsTests
 {
     [Fact]
-    public void Sanitize_Null()
+    public void RedactUrl_Null()
     {
         var actual = PiiExtensions.RedactUrl(null);
 
@@ -14,7 +14,7 @@ public class PiiExtensionsTests
     [InlineData("I'm a harmless string.", "doesn't affect ordinary strings")]
     [InlineData("htps://user:password@sentry.io?q=1&s=2&token=secret#top", "doesn't affect malformed https urls")]
     [InlineData("htp://user:password@sentry.io?q=1&s=2&token=secret#top", "doesn't affect malformed http urls")]
-    public void Sanitize_Data_IsNotNull_WithoutPii(string original, string reason)
+    public void RedactUrl_Data_IsNotNull_WithoutPii(string original, string reason)
     {
         var actual = original.RedactUrl();
 
@@ -29,7 +29,7 @@ public class PiiExtensionsTests
     [InlineData("http://user:password@sentry.io", "http://[Filtered]:[Filtered]@sentry.io", "strips user info with user and password from http without query")]
     [InlineData("http://user@sentry.io", "http://[Filtered]@sentry.io", "strips user info with user only from http without query")]
     [InlineData("GET https://user@sentry.io for goodness", "GET https://[Filtered]@sentry.io for goodness", "strips user info from URL embedded in text")]
-    public void Sanitize_Data_IsNotNull_WithPii(string original, string expected, string reason)
+    public void RedactUrl_Data_IsNotNull_WithPii(string original, string expected, string reason)
     {
         var actual = original.RedactUrl();
 
