@@ -247,6 +247,29 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_Redact_Breadcrumbs()
+    {
+        // Act
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddBreadcrumb("Visited https://user@sentry.io in session");
+        var @event = new SentryEvent();
+
+        // Act
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+        _ = sut.CaptureEvent(@event, scope);
+
+        // Assert
+        envelope.Should().NotBeNull();
+        envelope.Items.Count.Should().Be(1);
+        var actual = (SentryEvent)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        actual.Should().NotBeNull();
+        actual?.Breadcrumbs.Count.Should().Be(1);
+        actual?.Breadcrumbs.ToArray()[0].Message.Should().Be($"Visited https://{PiiExtensions.RedactedText}@sentry.io in session");
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent()
     {
         _fixture.SentryOptions.BeforeSend = _ => null;

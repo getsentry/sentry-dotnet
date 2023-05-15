@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -144,5 +145,10 @@ public class Span : ISpanData, IJsonSerializable
             _tags = tags!,
             _extra = data!
         };
+    }
+
+    internal void Redact()
+    {
+        Description = Description.RedactUrl();
     }
 }

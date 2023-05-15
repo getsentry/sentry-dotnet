@@ -1,4 +1,3 @@
-using FluentAssertions.Execution;
 using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Tests.Internals;

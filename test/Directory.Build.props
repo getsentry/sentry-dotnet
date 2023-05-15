@@ -39,6 +39,7 @@
     <Using Include="Sentry.Testing" />
 
     <Using Include="FluentAssertions" />
+    <Using Include="FluentAssertions.Execution" />
     <Using Include="NSubstitute" />
     <Using Include="NSubstitute.Core" />
     <Using Include="NSubstitute.ExceptionExtensions" />

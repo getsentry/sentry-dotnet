@@ -177,9 +177,4 @@ public sealed class Request : IJsonSerializable
             Cookies = cookies
         };
     }
-
-    internal void Redact()
-    {
-        Url = Url.RedactUrl();
-    }
 }

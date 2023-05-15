@@ -1,12 +1,119 @@
 namespace Sentry.Tests.Protocol;
 
-public class TransactionTracerTests
+public class TransactionTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
-    public TransactionTracerTests(ITestOutputHelper output)
+    public TransactionTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
+    }
+
+    [Fact]
+    public void Redact_Redacts_Urls()
+    {
+        // Arrange
+        var timestamp = DateTimeOffset.MaxValue;
+        var name = "name123 https://user@not.redacted";
+        var operation = "op123 https://user@not.redacted";
+        var description = "desc123 https://user@sentry.io"; // should be redacted
+        var platform = "platform123 https://user@not.redacted";
+        var release = "release123 https://user@not.redacted";
+        var distribution = "distribution123 https://user@not.redacted";
+        var environment = "environment123 https://user@not.redacted";
+        var breadcrumbMessage = "message https://user@sentry.io"; // should be redacted
+        var breadcrumbDataValue = "data-value https://user@sentry.io"; // should be redacted
+        var tagValue = "tag_value https://user@not.redacted";
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            name,
+            operation,
+            description,
+            SpanStatus.AlreadyExists,
+            null,
+            true,
+            TransactionNameSource.Component
+            );
+
+        var txTracer = new TransactionTracer(DisabledHub.Instance, context)
+        {
+            Name = name,
+            Operation = operation,
+            Description = description,
+            Platform = platform,
+            Release = release,
+            Distribution = distribution,
+            Status = SpanStatus.Aborted,
+            // We don't redact the User or the Request since, if SendDefaultPii is false, we don't add these to the
+            // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
+            // behavior if they need)
+            User = new User { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
+            Request = new Request { Method = "POST", Url = "https://user@not.redacted"},
+            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
+            Environment = environment,
+            Level = SentryLevel.Fatal,
+            Contexts =
+            {
+                ["context_key"] = "context_value",
+                [".NET Framework"] = new Dictionary<string, string>
+                {
+                    [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",
+                    [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
+                    [".NET Framework Full"] = "\"v4.8\""
+                }
+            }
+        };
+
+        txTracer.Sdk.AddPackage(new Package("name", "version"));
+        txTracer.AddBreadcrumb(new Breadcrumb(timestamp, breadcrumbMessage));
+        txTracer.AddBreadcrumb(new Breadcrumb(
+            timestamp,
+            "message",
+            "type",
+            new Dictionary<string, string> { { "data-key", breadcrumbDataValue } },
+            "category",
+            BreadcrumbLevel.Warning));
+        txTracer.SetTag("tag_key", tagValue);
+
+        var child1 = txTracer.StartChild("child_op123", "child_desc123 https://user@sentry.io");
+        child1.Status = SpanStatus.Unimplemented;
+        child1.SetTag("q", "v");
+        child1.SetExtra("f", "p");
+        child1.Finish(SpanStatus.Unimplemented);
+
+        var child2 = txTracer.StartChild("child_op999", "child_desc999 https://user:password@sentry.io");
+        child2.Status = SpanStatus.OutOfRange;
+        child2.SetTag("xxx", "zzz");
+        child2.SetExtra("f222", "p111");
+        child2.Finish(SpanStatus.OutOfRange);
+
+        txTracer.Finish(SpanStatus.Aborted);
+
+        // Act
+        var transaction = new Transaction(txTracer);
+        transaction.Redact();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            transaction.Name.Should().Be(name);
+            transaction.Operation.Should().Be(operation);
+            transaction.Description.Should().Be($"desc123 https://{PiiExtensions.RedactedText}@sentry.io");
+            transaction.Platform.Should().Be(platform);
+            transaction.Release.Should().Be(release);
+            transaction.Distribution.Should().Be(distribution);
+            transaction.Environment.Should().Be(environment);
+            var breadcrumbs = transaction.Breadcrumbs.ToArray();
+            breadcrumbs.Length.Should().Be(2);
+            breadcrumbs.Should().Contain(b => b.Message == $"message https://{PiiExtensions.RedactedText}@sentry.io");
+            breadcrumbs.Should().Contain(b => b.Data != null && b.Data["data-key"] == $"data-value https://{PiiExtensions.RedactedText}@sentry.io");
+            var spans = transaction.Spans.ToArray();
+            spans.Should().Contain(s => s.Operation == "child_op123" && s.Description == $"child_desc123 https://{PiiExtensions.RedactedText}@sentry.io");
+            spans.Should().Contain(s => s.Operation == "child_op999" && s.Description == $"child_desc999 https://{PiiExtensions.RedactedText}:{PiiExtensions.RedactedText}@sentry.io");
+            transaction.Tags["tag_key"].Should().Be(tagValue);
+        }
     }
 
     [Fact]

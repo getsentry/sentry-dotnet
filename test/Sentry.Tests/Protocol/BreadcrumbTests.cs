@@ -1,5 +1,3 @@
-using FluentAssertions.Execution;
-
 namespace Sentry.Tests.Protocol;
 
 public class BreadcrumbTests

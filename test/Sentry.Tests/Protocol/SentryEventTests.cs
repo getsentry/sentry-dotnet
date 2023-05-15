@@ -1,5 +1,3 @@
-using FluentAssertions.Execution;
-
 namespace Sentry.Tests.Protocol;
 
 public partial class SentryEventTests
@@ -95,9 +93,9 @@ public partial class SentryEventTests
         var distribution = "distribution123 https://user@not.redacted";
         var moduleValue = "module123 https://user@not.redacted";
         var transactionName = "transactionName123 https://user@sentry.io";
-        var requestUrl = "https://user@sentry.io";
-        var username = "bob";
-        var email = "bob@127.0.0.1";
+        var requestUrl = "https://user@not.redacted";
+        var username = "username";
+        var email = "bob@foo.com";
         var ipAddress = "127.0.0.1";
         var environment = "environment123 https://user@not.redacted";
 
@@ -154,7 +152,10 @@ public partial class SentryEventTests
             evt.Distribution.Should().Be(distribution);
             evt.Modules["module"].Should().Be(moduleValue);
             evt.TransactionName.Should().Be(transactionName);
-            evt.Request.Url.Should().Be($"https://{PiiExtensions.RedactedText}@sentry.io");
+            // We don't redact the User or the Request since, if SendDefaultPii is false, we don't add these to the
+            // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
+            // behavior if they need)
+            evt.Request.Url.Should().Be(requestUrl);
             evt.User.Username.Should().Be(username);
             evt.User.Email.Should().Be(email);
             evt.User.IpAddress.Should().Be(ipAddress);

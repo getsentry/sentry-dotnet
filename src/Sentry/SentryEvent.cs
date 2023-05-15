@@ -244,7 +244,6 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
 
     internal void Redact()
     {
-        _request?.Redact();
         foreach (var breadcrumb in Breadcrumbs)
         {
             breadcrumb.Redact();

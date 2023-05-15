@@ -308,6 +308,11 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         {
             breadcrumb.Redact();
         }
+
+        foreach (var span in Spans)
+        {
+            span.Redact();
+        }
     }
 
     /// <inheritdoc />
