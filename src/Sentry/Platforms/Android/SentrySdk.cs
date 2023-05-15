@@ -4,7 +4,6 @@ using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
 using Sentry.JavaSdk.Android.Core;
-using Sentry.Protocol;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -108,8 +107,9 @@ public static partial class SentrySdk
             }
 
             // These options we have behind feature flags
-            if (options.IsTracingEnabled && options.Android.EnableAndroidSdkTracing)
+            if (options is {IsTracingEnabled: true, Android.EnableAndroidSdkTracing: true})
             {
+                o.EnableTracing = (JavaBoolean?)options.EnableTracing;
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
 
                 if (options.TracesSampler is { } tracesSampler)

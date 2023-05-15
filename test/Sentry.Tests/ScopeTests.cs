@@ -164,7 +164,7 @@ public class ScopeTests
     }
 
     [Fact]
-    public void GetSpan_NoSpans_ReturnsTransaction()
+    public void Span_NoSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -172,14 +172,14 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
     }
 
     [Fact]
-    public void GetSpan_FinishedSpans_ReturnsTransaction()
+    public void Span_FinishedSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -191,14 +191,14 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
     }
 
     [Fact]
-    public void GetSpan_ActiveSpans_ReturnsSpan()
+    public void Span_ActiveSpans_ReturnsSpan()
     {
         // Arrange
         var scope = new Scope();
@@ -210,10 +210,71 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(activeSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpan_ReturnsValue()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Assert Default
+        scope.Span.Should().Be(secondSpan);
+
+        // Act
+        scope.Span = firstSpan;
+
+        // Assert
+        scope.Span.Should().Be(firstSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanNull_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = null;
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanThenCloseIt_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = firstSpan;
+        firstSpan.Finish();
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
     }
 
     [Fact]
@@ -505,6 +566,29 @@ public class ScopeTests
 
         // Assert
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
+    }
+
+    [Fact]
+    public void Filtered_tags_are_not_set()
+    {
+        var tags = new List<KeyValuePair<string, string>>
+        {
+            new("AzFunctions", "rule"),
+            new("AzureFunctions_FunctionName", "Func"),
+            new("AzureFunctions_InvocationId", "20a09c3b-e9dd-43fe-9a73-ebae1f90cab6"),
+        };
+
+        var scope = new Scope(new SentryOptions
+        {
+            TagFilters = new[] { new SubstringOrRegexPattern("AzureFunctions_") }
+        });
+
+        foreach (var (key, value) in tags)
+        {
+            scope.SetTag(key, value);
+        }
+
+        scope.Tags.Should().OnlyContain(pair => pair.Key == "AzFunctions" && pair.Value == "rule");
     }
 }
 

@@ -253,16 +253,12 @@ public partial class SentryOptions
         public bool EnableUserInteractionTracing { get; set; } = false;
 
         /// <summary>
-        /// This feature is experimental.
-        /// Turning this feature on can have an impact on the grouping of your issues.
-        /// When enabled, the Cocoa SDK stitches stack traces of asynchronous code together.
-        /// This feature affects stack traces from native crashes only.
-        /// The default value is <c>false</c> (disabled).
+        /// This feature is no longer available.  This option does nothing and will be removed in a future release.
         /// </summary>
         /// <remarks>
-        /// Official docs TBD.
-        /// See https://github.com/getsentry/sentry-docs/issues/5215
+        /// This was removed from the Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
         /// </remarks>
+        [Obsolete("This feature is no longer available.  This option does nothing and will be removed in a future release.")]
         public bool StitchAsyncCode { get; set; } = false;
 
         // /// <summary>
