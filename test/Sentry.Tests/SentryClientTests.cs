@@ -1,4 +1,3 @@
-using FluentAssertions.Execution;
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
@@ -368,7 +367,7 @@ public partial class SentryClientTests
         processor.Process(Arg.Any<SentryEvent>(), Arg.Do<Hint>(h => hint = h)).Returns(new SentryEvent());
         _fixture.SentryOptions.AddEventProcessor(processor);
 
-        Scope scope = new Scope(_fixture.SentryOptions);
+        var scope = new Scope(_fixture.SentryOptions);
         scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
 
         // Act
@@ -378,6 +377,91 @@ public partial class SentryClientTests
         // Assert
         hint.Should().NotBeNull();
         hint.Attachments.Should().Contain(scope.Attachments);
+    }
+
+    [Fact]
+    public void CaptureEvent_Gets_ScopeAttachments()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 2));
+    }
+
+    [Fact]
+    public void CaptureEvent_Gets_HintAttachments()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            h.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
+            h.Attachments.Add(AttachmentHelper.FakeAttachment("bar.txt"));
+            return e;
+        });
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 2));
+    }
+
+    [Fact]
+    public void CaptureEvent_Gets_ScopeAndHintAttachments()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            h.Attachments.Add(AttachmentHelper.FakeAttachment("bar.txt"));
+            return e;
+        });
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 2));
+    }
+
+    [Fact]
+    public void CaptureEvent_CanRemove_ScopetAttachment()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+        _fixture.SentryOptions.SetBeforeSend((e, h) =>
+        {
+            var attachment = h.Attachments.FirstOrDefault(a => a.FileName == "bar.txt");
+            h.Attachments.Remove(attachment);
+
+            return e;
+        });
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
     }
 
     [Fact]

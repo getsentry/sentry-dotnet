@@ -276,9 +276,9 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty;
         }
 
-        return CaptureEnvelope(Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, scope.Attachments, scope.SessionUpdate))
-            ? processedEvent.EventId
-            : SentryId.Empty;
+        var attachments = hint.Attachments.ToList();
+        var envelope = Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        return CaptureEnvelope(envelope) ? processedEvent.EventId : SentryId.Empty;
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
