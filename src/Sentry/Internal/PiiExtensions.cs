@@ -15,7 +15,7 @@ internal static class PiiExtensions
     /// <returns>
     /// The data, if no PII data is present or a copy of the data with PII data redacted otherwise
     /// </returns>
-    public static string? RedactUrl(this string? data)
+    public static string RedactUrl(this string data)
     {
         // If the data is empty then we don't need to redact anything
         if (string.IsNullOrWhiteSpace(data))
