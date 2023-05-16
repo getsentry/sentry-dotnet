@@ -7,6 +7,8 @@ namespace Sentry.Internal;
 internal static class PiiExtensions
 {
     internal const string RedactedText = "[Filtered]";
+    private static readonly Regex AuthRegex = new (@"(?i)\b(https?://.*@.*)\b", RegexOptions.Compiled);
+    private static readonly Regex UserInfoMatcher = new (@"^(?i)(https?://)(.*@)(.*)$", RegexOptions.Compiled);
 
     /// <summary>
     /// Searches for URLs in text data and redacts any PII data from these, as required.
@@ -26,8 +28,7 @@ internal static class PiiExtensions
         // The pattern @"(?i)\b(https?://.*@.*)\b" uses the \b word boundary anchors to ensure that the match occurs at
         // a word boundary. This allows the URL to be matched even if it is part of a larger text. The (?i) flag ensures
         // case-insensitive matching for "https" or "http".
-        var authRegex = new Regex(@"(?i)\b(https?://.*@.*)\b");
-        var result = authRegex.Replace(data, match =>
+        var result = AuthRegex.Replace(data, match =>
         {
             var matchedUrl = match.Groups[1].Value;
             return RedactAuth(matchedUrl);
@@ -40,16 +41,13 @@ internal static class PiiExtensions
     {
         // ^ matches the start of the string. (?i)(https?://) gives a case-insensitive matching of the protocol.
         // (.*@) matches the username and password (authentication information). (.*)$ matches the rest of the URL.
-        var userInfoMatcher = new Regex(@"^(?i)(https?://)(.*@)(.*)$").Match(data);
-        if (userInfoMatcher.Success && userInfoMatcher.Groups.Count == 4)
-        {
-            var userInfoString = userInfoMatcher.Groups[2].Value;
-            var replacementString = userInfoString.Contains(":") ? "[Filtered]:[Filtered]@" : "[Filtered]@";
-            return userInfoMatcher.Groups[1].Value + replacementString + userInfoMatcher.Groups[3].Value;
-        }
-        else
+        var match = UserInfoMatcher.Match(data);
+        if (match is not { Success: true, Groups.Count: 4 })
         {
             return data;
         }
+        var userInfoString = match.Groups[2].Value;
+        var replacementString = userInfoString.Contains(":") ? "[Filtered]:[Filtered]@" : "[Filtered]@";
+        return match.Groups[1].Value + replacementString + match.Groups[3].Value;
     }
 }
