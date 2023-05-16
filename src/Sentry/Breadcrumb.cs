@@ -56,8 +56,8 @@ public sealed class Breadcrumb : IJsonSerializable
             ? _data
             : _data?.ToDictionary(
                 x => x.Key,
-                x => x.Value?.RedactUrl()
-                )!
+                x => x.Value.RedactUrl()
+                )
             ;
         private init => _data = value;
     }
