@@ -20,6 +20,7 @@
  - NOTE: This is a potentially breaking change, as the `TracesSampleRate` property has been made nullable.
    Though extremely uncommon, if you are _retrieving_ the `TracesSampleRate` property for some reason, you will need to account for nulls.
    However, there is no change to the behavior or _typical_ usage of either of these properties.
+- CachedTransport gracefully handles malformed envelopes during processing  ([#2371](https://github.com/getsentry/sentry-dotnet/pull/2371))
 
 ### Dependencies
 
