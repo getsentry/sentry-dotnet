@@ -2188,6 +2188,10 @@ interface SentryEnvelopeHeader
     // @property (readonly, copy, nonatomic) SentryTraceContext * _Nullable traceContext;
     [NullAllowed, Export ("traceContext", ArgumentSemantic.Copy)]
     SentryTraceContext TraceContext { get; }
+
+    // @property (copy, nonatomic) NSDate * _Nullable sentAt;
+    [NullAllowed, Export ("sentAt", ArgumentSemantic.Copy)]
+    NSDate SentAt { get; set; }
 }
 
 // @interface SentryEnvelopeItem : NSObject
