@@ -312,6 +312,16 @@ public static partial class SentrySdk
         => CurrentHub.AddBreadcrumb(clock, message, category, type, data, level);
 
     /// <summary>
+    /// Adds a breadcrumb to the current Scope.
+    /// </summary>
+    /// <param name="breadcrumb">The breadcrumb to be added</param>
+    /// <param name="hint">A hint providing additional context that can be used in the BeforeBreadcrumb callback</param>
+    /// <see cref="AddBreadcrumb(string, string?, string?, IDictionary{string, string}?, BreadcrumbLevel)"/>
+    [DebuggerStepThrough]
+    public static void AddBreadcrumb(Breadcrumb breadcrumb, Hint? hint = null)
+        => CurrentHub.AddBreadcrumb(breadcrumb, hint);
+
+    /// <summary>
     /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
@@ -409,10 +419,22 @@ public static partial class SentrySdk
     public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
         => CurrentHub.CaptureEvent(evt, scope);
 
-    internal static SentryId CaptureEventInternal(SentryEvent evt, Scope? scope)
+    /// <summary>
+    /// Captures the event, passing a hint, using the specified scope.
+    /// </summary>
+    /// <param name="evt">The event.</param>
+    /// <param name="hint">a hint for the event.</param>
+    /// <param name="scope">The scope.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
+        => CurrentHub.CaptureEvent(evt, hint, scope);
+
+    internal static SentryId CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
         => CurrentHub is IHubEx hub
-            ? hub.CaptureEventInternal(evt, scope)
-            : CurrentHub.CaptureEvent(evt, scope);
+            ? hub.CaptureEventInternal(evt, hint, scope)
+            : CurrentHub.CaptureEvent(evt, hint, scope);
 
     /// <summary>
     /// Captures an event with a configurable scope.
@@ -504,6 +526,18 @@ public static partial class SentrySdk
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static void CaptureTransaction(Transaction transaction)
         => CurrentHub.CaptureTransaction(transaction);
+
+    /// <summary>
+    /// Captures a transaction.
+    /// </summary>
+    /// <remarks>
+    /// Note: this method is NOT meant to be called from user code!
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// </remarks>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static void CaptureTransaction(Transaction transaction, Hint? hint)
+        => CurrentHub.CaptureTransaction(transaction, hint);
 
     /// <summary>
     /// Captures a session update.

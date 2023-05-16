@@ -370,6 +370,50 @@ public class ScopeTests
         Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
     }
 
+    [Fact]
+    public void AddBreadcrumb_BeforeAddBreadcrumb_ReceivesHint()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        Hint receivedHint = null;
+        options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+        {
+            receivedHint = hint;
+            return breadcrumb;
+        });
+        var scope = new Scope(options);
+
+        // Act
+        var expectedHint = new Hint();
+        scope.AddBreadcrumb(new Breadcrumb(), expectedHint);
+
+        // Assert
+        receivedHint.Should().BeSameAs(expectedHint);
+    }
+
+    [Fact]
+    public void AddBreadcrumb_ScopeAttachments_Copied_To_Hint()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        Hint hint = null;
+        options.SetBeforeBreadcrumb((b, h) =>
+        {
+            hint = h;
+            return b;
+        });
+        var scope = new Scope(options);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+
+        // Act
+        scope.AddBreadcrumb(new Breadcrumb());
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(scope.Attachments);
+    }
+
     [Theory]
     [InlineData("123@123.com", null, null, true)]
     [InlineData("123@123.com", null, null, false)]

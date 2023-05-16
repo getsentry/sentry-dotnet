@@ -16,4 +16,27 @@
     <ProjectReference Include="..\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.Core3_1.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>HintTests.cs</DependentUpon>
+    </None>
+    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.DotNet6_0.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>HintTests.cs</DependentUpon>
+    </None>
+    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.DotNet7_0.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>HintTests.cs</DependentUpon>
+    </None>
+    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.Mono4_0.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>HintTests.cs</DependentUpon>
+    </None>
+    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.Net4_8.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>HintTests.cs</DependentUpon>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -101,7 +101,7 @@ public static partial class SentrySdk
                 });
             }
 
-            if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
+            if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
             {
                 o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb);
             }
@@ -118,7 +118,7 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Android.EnableAndroidSdkBeforeSend && options.BeforeSend is { } beforeSend)
+            if (options.Android.EnableAndroidSdkBeforeSend && options.BeforeSendInternal is { } beforeSend)
             {
                 o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
             }
