@@ -271,7 +271,7 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty;
         }
 
-        if (!Options.SendDefaultPii)
+        if (!_options.SendDefaultPii)
         {
             processedEvent.Redact();
         }
