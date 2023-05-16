@@ -149,6 +149,6 @@ public class Span : ISpanData, IJsonSerializable
 
     internal void Redact()
     {
-        Description = Description.RedactUrl();
+        Description = Description?.RedactUrl();
     }
 }

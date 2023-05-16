@@ -114,12 +114,12 @@ public partial class SentryEventTests
             Release = release,
             Distribution = distribution,
             TransactionName = transactionName,
-            Request = new Request()
+            Request = new Request
             {
-                Method   = "GET",
+                Method = "GET",
                 Url = requestUrl
             },
-            User = new User()
+            User = new User
             {
                 Username = username,
                 Email = email,

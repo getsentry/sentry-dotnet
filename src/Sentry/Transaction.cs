@@ -303,7 +303,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
     /// </summary>
     internal void Redact()
     {
-        Description = Description.RedactUrl();
+        Description = Description?.RedactUrl();
         foreach (var breadcrumb in Breadcrumbs)
         {
             breadcrumb.Redact();

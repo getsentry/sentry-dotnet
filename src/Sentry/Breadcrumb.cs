@@ -30,7 +30,7 @@ public sealed class Breadcrumb : IJsonSerializable
     /// </summary>
     public string? Message
     {
-        get => _sendDefaultPii ? _message : _message.RedactUrl();
+        get => _sendDefaultPii ? _message : _message?.RedactUrl();
         private init => _message = value;
     }
 
