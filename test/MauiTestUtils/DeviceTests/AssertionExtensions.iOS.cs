@@ -380,7 +380,7 @@ public static partial class AssertionExtensions
 
     static UIWindow? GetKeyWindow(UIApplication application)
     {
-        if (OperatingSystem.IsIOSVersionAtLeast(13) || OperatingSystem.IsMacOSVersionAtLeast(13,1))
+        if (OperatingSystem.IsIOSVersionAtLeast(13) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 1))
         {
 #pragma warning disable CA1416
             foreach (var scene in application.ConnectedScenes)
