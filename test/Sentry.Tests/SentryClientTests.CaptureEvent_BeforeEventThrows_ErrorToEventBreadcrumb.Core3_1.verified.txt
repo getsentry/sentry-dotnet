@@ -6,6 +6,7 @@
       message: Exception message!,
       stackTrace:
 at Task Sentry.Tests.SentryClientTests.CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
+at void Sentry.SentryOptions.SetBeforeSend(...)
 at SentryEvent Sentry.SentryClient.BeforeSend(...)
     },
     Category: SentryClient,

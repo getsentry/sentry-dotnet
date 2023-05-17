@@ -41,7 +41,7 @@ public class MiddlewareLoggerIntegration : IDisposable
             };
             loggingOptions.InitializeSdk = false;
 
-            Client.When(client => client.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
+            Client.When(client => client.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Hint>(), Arg.Any<Scope>()))
                 .Do(callback => callback.Arg<Scope>().Evaluate());
 
             var hub = new Hub(new SentryOptions { Dsn = ValidDsn });
@@ -83,6 +83,7 @@ public class MiddlewareLoggerIntegration : IDisposable
 
         _ = _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
+            Arg.Any<Hint>(),
             Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
     }
 
@@ -104,6 +105,7 @@ public class MiddlewareLoggerIntegration : IDisposable
 
         _ = _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
+            Arg.Any<Hint>(),
             Arg.Is<Scope>(e => e.Breadcrumbs.Any(b => b.Message == expectedCrumb)));
     }
 
@@ -119,6 +121,7 @@ public class MiddlewareLoggerIntegration : IDisposable
 
         _ = _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
+            Arg.Any<Hint>(),
             Arg.Is<Scope>(e => e.Level == expected));
     }
 

@@ -272,7 +272,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent()
     {
-        _fixture.SentryOptions.BeforeSend = _ => null;
+        _fixture.SentryOptions.SetBeforeSend((_, _) => null);
         var expectedEvent = new SentryEvent();
 
         var sut = _fixture.GetSut();
@@ -285,7 +285,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent_RecordsDiscard()
     {
-        _fixture.SentryOptions.BeforeSend = _ => null;
+        _fixture.SentryOptions.SetBeforeSend((_, _) => null);
 
         var sut = _fixture.GetSut();
         _ = sut.CaptureEvent(new SentryEvent());
@@ -325,10 +325,173 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void CaptureEvent_BeforeEvent_ModifyEvent()
+    public void CaptureEvent_BeforeSend_GetsHint()
+    {
+        Hint received = null;
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            received = h;
+            return e;
+        });
+
+        var @event = new SentryEvent();
+        var hint = new Hint();
+
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(@event, hint);
+
+        Assert.Same(hint, received);
+    }
+
+    [Fact]
+    public void CaptureEvent_BeforeSend_Gets_ScopeAttachments()
+    {
+        // Arrange
+        Hint hint = null;
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            hint = h;
+            return e;
+        });
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        _ = sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(scope.Attachments);
+    }
+
+    [Fact]
+    public void CaptureEvent_EventProcessor_Gets_Hint()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryEventProcessorWithHint>();
+        processor.Process(Arg.Any<SentryEvent>(), Arg.Any<Hint>()).Returns(new SentryEvent());
+        _fixture.SentryOptions.AddEventProcessor(processor);
+
+        // Act
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent());
+
+        // Assert
+        processor.Received(1).Process(Arg.Any<SentryEvent>(), Arg.Any<Hint>());
+    }
+
+    [Fact]
+    public void CaptureEvent_EventProcessor_Gets_ScopeAttachments()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryEventProcessorWithHint>();
+        Hint hint = null;
+        processor.Process(Arg.Any<SentryEvent>(), Arg.Do<Hint>(h => hint = h)).Returns(new SentryEvent());
+        _fixture.SentryOptions.AddEventProcessor(processor);
+
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+
+        // Act
+        var sut = _fixture.GetSut();
+        _ = sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(scope.Attachments);
+    }
+
+    [Fact]
+    public void CaptureEvent_Gets_ScopeAttachments()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 2));
+    }
+
+    [Fact]
+    public void CaptureEvent_Gets_HintAttachments()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            h.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
+            h.Attachments.Add(AttachmentHelper.FakeAttachment("bar.txt"));
+            return e;
+        });
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 2));
+    }
+
+    [Fact]
+    public void CaptureEvent_Gets_ScopeAndHintAttachments()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+            h.Attachments.Add(AttachmentHelper.FakeAttachment("bar.txt"));
+            return e;
+        });
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 2));
+    }
+
+    [Fact]
+    public void CaptureEvent_CanRemove_ScopetAttachment()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+        _fixture.SentryOptions.SetBeforeSend((e, h) =>
+        {
+            var attachment = h.Attachments.FirstOrDefault(a => a.FileName == "bar.txt");
+            h.Attachments.Remove(attachment);
+
+            return e;
+        });
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureEvent(new SentryEvent(), scope);
+
+        // Assert
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
+    }
+
+    [Fact]
+    public void CaptureEvent_BeforeSend_ModifyEvent()
     {
         SentryEvent received = null;
-        _fixture.SentryOptions.BeforeSend = e => received = e;
+        _fixture.SentryOptions.SetBeforeSend((e, _) => received = e);
 
         var @event = new SentryEvent();
 
@@ -389,7 +552,7 @@ public partial class SentryClientTests
         // Largest value allowed. Should always send
         _fixture.SentryOptions.SampleRate = 1;
         SentryEvent received = null;
-        _fixture.SentryOptions.BeforeSend = e => received = e;
+        _fixture.SentryOptions.SetBeforeSend((e, _) => received = e);
 
         var @event = new SentryEvent();
 
@@ -405,7 +568,7 @@ public partial class SentryClientTests
     {
         _fixture.SentryOptions.SampleRate = null;
         SentryEvent received = null;
-        _fixture.SentryOptions.BeforeSend = e => received = e;
+        _fixture.SentryOptions.SetBeforeSend((e, _) => received = e);
 
         var @event = new SentryEvent();
 
@@ -723,7 +886,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent()
     {
-        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => null);
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction(
@@ -737,10 +900,33 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureTransaction_BeforeSendTransaction_GetsHint()
+    {
+        Hint received = null;
+        _fixture.SentryOptions.SetBeforeSendTransaction((tx, h) =>
+        {
+            received = h;
+            return tx;
+        });
+
+        var transaction = new Transaction("test name", "test operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        var sut = _fixture.GetSut();
+        var hint = new Hint();
+        sut.CaptureTransaction(transaction, hint);
+
+        Assert.Same(hint, received);
+    }
+
+    [Fact]
     public void CaptureTransaction_BeforeSendTransaction_ModifyEvent()
     {
         Transaction received = null;
-        _fixture.SentryOptions.BeforeSendTransaction = tx => received = tx;
+        _fixture.SentryOptions.SetBeforeSendTransaction((tx, _) => received = tx);
 
         var transaction = new Transaction("test name", "test operation")
         {
@@ -758,7 +944,7 @@ public partial class SentryClientTests
     public void CaptureTransaction_BeforeSendTransaction_replaced_transaction_captured()
     {
         Transaction received = null;
-        _fixture.SentryOptions.BeforeSendTransaction = tx =>
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) =>
         {
             received = new Transaction("name2", "operation2")
             {
@@ -768,7 +954,7 @@ public partial class SentryClientTests
             };
 
             return received;
-        };
+        });
 
         var transaction = new Transaction("name", "operation")
         {
@@ -794,7 +980,7 @@ public partial class SentryClientTests
         _fixture.SentryOptions.SampleRate = null;
 
         Transaction received = null;
-        _fixture.SentryOptions.BeforeSendTransaction = e => received = e;
+        _fixture.SentryOptions.SetBeforeSendTransaction((e, _) => received = e);
 
         var transaction = new Transaction("test name", "test operation")
         {
@@ -812,7 +998,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
     {
-        _fixture.SentryOptions.BeforeSendTransaction = _ => null;
+        _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => null);
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction( new Transaction("test name", "test operation")

@@ -446,4 +446,3 @@ public static class SentryOptionsExtensions
         return options.TryGetDsnSpecificCacheDirectoryPath();
     }
 }
-

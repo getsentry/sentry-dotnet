@@ -311,7 +311,7 @@ public class ScopeExtensionsTests
     [Fact]
     public void AddBreadcrumb_BeforeBreadcrumbDropsCrumb_NoBreadcrumbInEvent()
     {
-        _fixture.ScopeOptions.BeforeBreadcrumb = _ => null;
+        _fixture.ScopeOptions.SetBeforeBreadcrumb((_, _) => null);
         var sut = _fixture.GetSut();
 
         sut.AddBreadcrumb("no expected");
@@ -323,7 +323,7 @@ public class ScopeExtensionsTests
     public void AddBreadcrumb_BeforeBreadcrumbNewCrumb_NewCrumbUsed()
     {
         var expected = new Breadcrumb();
-        _fixture.ScopeOptions.BeforeBreadcrumb = _ => expected;
+        _fixture.ScopeOptions.SetBeforeBreadcrumb((_, _) => expected);
         var sut = _fixture.GetSut();
 
         sut.AddBreadcrumb("no expected");
@@ -335,7 +335,7 @@ public class ScopeExtensionsTests
     public void AddBreadcrumb_BeforeBreadcrumbReturns_SameCrumb()
     {
         var expected = new Breadcrumb();
-        _fixture.ScopeOptions.BeforeBreadcrumb = c => c;
+        _fixture.ScopeOptions.SetBeforeBreadcrumb((c, _) => c);
         var sut = _fixture.GetSut();
 
         sut.AddBreadcrumb(expected);

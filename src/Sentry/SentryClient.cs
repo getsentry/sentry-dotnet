@@ -65,6 +65,10 @@ public class SentryClient : ISentryClient, IDisposable
 
     /// <inheritdoc />
     public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
+        => CaptureEvent(@event, null, scope);
+
+    /// <inheritdoc />
+    public SentryId CaptureEvent(SentryEvent? @event, Hint? hint, Scope? scope = null)
     {
         if (@event == null)
         {
@@ -73,7 +77,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return DoSendEvent(@event, scope);
+            return DoSendEvent(@event, hint, scope);
         }
         catch (Exception e)
         {
@@ -96,7 +100,10 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+
+    /// <inheritdoc />
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -132,7 +139,7 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        var processedTransaction = BeforeSendTransaction(transaction);
+        var processedTransaction = BeforeSendTransaction(transaction, hint ?? new Hint());
         if (processedTransaction is null) // Rejected transaction
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
@@ -148,9 +155,9 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
-    private Transaction? BeforeSendTransaction(Transaction transaction)
+    private Transaction? BeforeSendTransaction(Transaction transaction, Hint hint)
     {
-        if (_options.BeforeSendTransaction is null)
+        if (_options.BeforeSendTransactionInternal is null)
         {
             return transaction;
         }
@@ -159,7 +166,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return _options.BeforeSendTransaction?.Invoke(transaction);
+            return _options.BeforeSendTransactionInternal?.Invoke(transaction, hint);
         }
         catch (Exception e)
         {
@@ -202,7 +209,7 @@ public class SentryClient : ISentryClient, IDisposable
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
     // TODO: this method needs to be refactored, it's really hard to analyze nullability
-    private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
+    private SentryId DoSendEvent(SentryEvent @event, Hint? hint, Scope? scope)
     {
         if (_options.SampleRate != null)
         {
@@ -224,6 +231,8 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         scope ??= new Scope(_options);
+        hint ??= new Hint();
+        hint.AddAttachmentsFromScope(scope);
 
         _options.LogInfo("Capturing event.");
 
@@ -254,7 +263,8 @@ public class SentryClient : ISentryClient, IDisposable
 
         foreach (var processor in scope.GetAllEventProcessors())
         {
-            processedEvent = processor.Process(processedEvent);
+            processedEvent = processor.DoProcessEvent(processedEvent, hint);
+
             if (processedEvent == null)
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -263,7 +273,7 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        processedEvent = BeforeSend(processedEvent);
+        processedEvent = BeforeSend(processedEvent, hint);
         if (processedEvent == null) // Rejected event
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
@@ -276,9 +286,9 @@ public class SentryClient : ISentryClient, IDisposable
             processedEvent.Redact();
         }
 
-        return CaptureEnvelope(Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, scope.Attachments, scope.SessionUpdate))
-            ? processedEvent.EventId
-            : SentryId.Empty;
+        var attachments = hint.Attachments.ToList();
+        var envelope = Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        return CaptureEnvelope(envelope) ? processedEvent.EventId : SentryId.Empty;
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
@@ -329,9 +339,9 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
-    private SentryEvent? BeforeSend(SentryEvent? @event)
+    private SentryEvent? BeforeSend(SentryEvent? @event, Hint hint)
     {
-        if (_options.BeforeSend == null)
+        if (_options.BeforeSendInternal == null)
         {
             return @event;
         }
@@ -339,7 +349,7 @@ public class SentryClient : ISentryClient, IDisposable
         _options.LogDebug("Calling the BeforeSend callback");
         try
         {
-            @event = _options.BeforeSend?.Invoke(@event!);
+            @event = _options.BeforeSendInternal?.Invoke(@event!, hint);
         }
         catch (Exception e)
         {
