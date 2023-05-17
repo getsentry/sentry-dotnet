@@ -140,7 +140,7 @@ public class SentryFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e));
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), Arg.Any<Hint>());
         sut.HandleResponse(response);
 
         // Assert
