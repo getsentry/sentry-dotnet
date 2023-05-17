@@ -131,7 +131,7 @@ public class SentryFailedRequestHandlerTests
         var sut = GetSut(options);
 
         var response = InternalServerErrorResponse();
-        var requestUri = new Uri("http://admin:1234@localhost");
+        var requestUri = new Uri("http://admin:1234@localhost/test/path?query=string#fragment");
         response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
         // Act
@@ -140,7 +140,7 @@ public class SentryFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
-        @event.Request.Url.Should().StartWith("http://localhost"); // No admin:1234
+        @event.Request.Url.Should().Be("http://localhost/test/path?query=string"); // No admin:1234
     }
 
     [Fact]

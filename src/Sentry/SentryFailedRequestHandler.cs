@@ -89,7 +89,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
 
             if (!_options.SendDefaultPii)
             {
-                sentryRequest.Url = $"{uri?.Scheme}://{uri?.Authority}{uri?.AbsolutePath}";
+                sentryRequest.Url = uri?.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             else
             {
