@@ -4,9 +4,9 @@ namespace Sentry.Android.Callbacks;
 
 internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBeforeBreadcrumbCallback
 {
-    private readonly Func<Breadcrumb, Breadcrumb?> _beforeBreadcrumb;
+    private readonly Func<Breadcrumb, Hint, Breadcrumb?> _beforeBreadcrumb;
 
-    public BeforeBreadcrumbCallback(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
+    public BeforeBreadcrumbCallback(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = beforeBreadcrumb;
     }
@@ -17,13 +17,14 @@ internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBef
         // https://github.com/getsentry/sentry-dotnet/issues/1469
 
         var breadcrumb = b.ToBreadcrumb();
-        var result = _beforeBreadcrumb.Invoke(breadcrumb);
+        var hint = h.ToHint();
+        var result = _beforeBreadcrumb.Invoke(breadcrumb, hint);
 
         if (result == breadcrumb)
         {
             // The result is the same object as was input, and all properties are immutable,
             // so we can return the original Java object for better performance.
-            return b;
+            return b!;
         }
 
         return result?.ToJavaBreadcrumb();

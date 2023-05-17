@@ -43,19 +43,20 @@ internal static class Program
             // o.SampleRate = 0.5f; // Randomly drop (don't send to Sentry) half of events
 
             // Modifications to event before it goes out. Could replace the event altogether
-            o.BeforeSend = @event =>
-            {
-                // Drop an event altogether:
-                if (@event.Tags.ContainsKey("SomeTag"))
+            o.SetBeforeSend((@event, _) =>
                 {
-                    return null;
-                }
+                    // Drop an event altogether:
+                    if (@event.Tags.ContainsKey("SomeTag"))
+                    {
+                        return null;
+                    }
 
-                return @event;
-            };
+                    return @event;
+                }
+            );
 
             // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
-            o.BeforeBreadcrumb = crumb =>
+            o.SetBeforeBreadcrumb((crumb, _) =>
             {
                 // Don't add breadcrumbs with message containing:
                 if (crumb.Message?.Contains("bad breadcrumb") == true)
@@ -64,7 +65,7 @@ internal static class Program
                 }
 
                 return crumb;
-            };
+            });
 
             // Ignore exception by its type:
             o.AddExceptionFilterForType<XsltCompileException>();

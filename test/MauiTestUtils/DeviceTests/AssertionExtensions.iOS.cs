@@ -380,22 +380,25 @@ public static partial class AssertionExtensions
 
     static UIWindow? GetKeyWindow(UIApplication application)
     {
-        if (OperatingSystem.IsIOSVersionAtLeast(15))
+        if (OperatingSystem.IsIOSVersionAtLeast(13) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 1))
         {
+#pragma warning disable CA1416
             foreach (var scene in application.ConnectedScenes)
             {
-                if (scene is UIWindowScene windowScene
-                    && windowScene.ActivationState == UISceneActivationState.ForegroundActive)
+                if (scene is not UIWindowScene {ActivationState: UISceneActivationState.ForegroundActive} windowScene)
                 {
-                    foreach (var window in windowScene.Windows)
+                    continue;
+                }
+
+                foreach (var window in windowScene.Windows)
+                {
+                    if (window.IsKeyWindow)
                     {
-                        if (window.IsKeyWindow)
-                        {
-                            return window;
-                        }
+                        return window;
                     }
                 }
             }
+#pragma warning restore CA1416
 
             return null;
         }
