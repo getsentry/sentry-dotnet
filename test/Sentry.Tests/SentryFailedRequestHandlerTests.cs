@@ -121,6 +121,29 @@ public class SentryFailedRequestHandlerTests
     }
 
     [Fact]
+    public void HandleResponse_Capture_FailedRequest_No_Pii()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = GetSut(options);
+
+        var response = InternalServerErrorResponse();
+        var requestUri = new Uri("http://admin:1234@localhost");
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e));
+        sut.HandleResponse(response);
+
+        // Assert
+        @event.Request.Url.Should().StartWith("http://localhost"); // No admin:1234
+    }
+
+    [Fact]
     public void HandleResponse_Capture_RequestAndResponse()
     {
         // Arrange
