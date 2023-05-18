@@ -75,27 +75,28 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
             exception.SetSentryMechanism(MechanismType);
 
             var @event = new SentryEvent(exception);
+            var hint = new Hint(HintTypes.HttpResponseMessage, response);
 
             var sentryRequest = new Request
             {
-                Url = uri?.AbsoluteUri,
                 QueryString = uri?.Query,
                 Method = response.RequestMessage.Method.Method,
             };
-
-            if (_options.SendDefaultPii)
-            {
-                sentryRequest.Cookies = response.RequestMessage.Headers.GetCookies();
-                sentryRequest.AddHeaders(response.RequestMessage.Headers);
-            }
 
             var responseContext = new Response {
                 StatusCode = (short)response.StatusCode,
                 BodySize = bodySize
             };
 
-            if (_options.SendDefaultPii)
+            if (!_options.SendDefaultPii)
             {
+                sentryRequest.Url = uri?.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+            }
+            else
+            {
+                sentryRequest.Url = uri?.AbsoluteUri;
+                sentryRequest.Cookies = response.RequestMessage.Headers.GetCookies();
+                sentryRequest.AddHeaders(response.RequestMessage.Headers);
                 responseContext.Cookies = response.Headers.GetCookies();
                 responseContext.AddHeaders(response.Headers);
             }
@@ -103,7 +104,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
             @event.Request = sentryRequest;
             @event.Contexts[Response.Type] = responseContext;
 
-            _hub.CaptureEvent(@event);
+            _hub.CaptureEvent(@event, hint);
         }
     }
 }

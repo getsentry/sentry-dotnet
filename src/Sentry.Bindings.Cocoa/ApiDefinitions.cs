@@ -712,10 +712,6 @@ interface SentryOptions
     [Export ("attachStacktrace")]
     bool AttachStacktrace { get; set; }
 
-    // @property (assign, nonatomic) BOOL stitchAsyncCode;
-    [Export ("stitchAsyncCode")]
-    bool StitchAsyncCode { get; set; }
-
     // @property (assign, nonatomic) NSUInteger maxAttachmentSize;
     [Export ("maxAttachmentSize")]
     nuint MaxAttachmentSize { get; set; }
@@ -727,6 +723,10 @@ interface SentryOptions
     // @property (assign, nonatomic) BOOL enableAutoPerformanceTracing;
     [Export ("enableAutoPerformanceTracing")]
     bool EnableAutoPerformanceTracing { get; set; }
+
+    // @property (nonatomic) SentryScope * _Nonnull (^ _Nonnull)(SentryScope * _Nonnull) initialScope;
+    [Export ("initialScope", ArgumentSemantic.Assign)]
+    Func<SentryScope, SentryScope> InitialScope { get; set; }
 
     // @property (assign, nonatomic) BOOL enableUIViewControllerTracing;
     [Export ("enableUIViewControllerTracing")]
@@ -2188,6 +2188,10 @@ interface SentryEnvelopeHeader
     // @property (readonly, copy, nonatomic) SentryTraceContext * _Nullable traceContext;
     [NullAllowed, Export ("traceContext", ArgumentSemantic.Copy)]
     SentryTraceContext TraceContext { get; }
+
+    // @property (copy, nonatomic) NSDate * _Nullable sentAt;
+    [NullAllowed, Export ("sentAt", ArgumentSemantic.Copy)]
+    NSDate SentAt { get; set; }
 }
 
 // @interface SentryEnvelopeItem : NSObject

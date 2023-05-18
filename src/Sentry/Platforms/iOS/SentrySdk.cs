@@ -52,12 +52,15 @@ public static partial class SentrySdk
         // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
         //       one when sending events, which is relayed through the scope observer.
 
-        if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
+        if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
             cocoaOptions.BeforeBreadcrumb = b =>
             {
+                // Note: The Cocoa SDK doesn't yet support hints.
+                // See https://github.com/getsentry/sentry-cocoa/issues/2325
+                var hint = new Hint();
                 var breadcrumb = b.ToBreadcrumb(options.DiagnosticLogger);
-                var result = beforeBreadcrumb(breadcrumb)?.ToCocoaBreadcrumb();
+                var result = beforeBreadcrumb(breadcrumb, hint)?.ToCocoaBreadcrumb();
 
                 // Note: Nullable result is allowed but delegate is generated incorrectly
                 // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
@@ -66,8 +69,13 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options.IsTracingEnabled && options.iOS.EnableCocoaSdkTracing)
+        if (options is {IsTracingEnabled: true, iOS.EnableCocoaSdkTracing: true})
         {
+            if (options.EnableTracing != null)
+            {
+                cocoaOptions.EnableTracing = options.EnableTracing.Value;
+            }
+
             cocoaOptions.TracesSampleRate = options.TracesSampleRate;
 
             if (options.TracesSampler is { } tracesSampler)
@@ -124,8 +132,10 @@ public static partial class SentrySdk
         cocoaOptions.EnableSwizzling = options.iOS.EnableSwizzling;
         cocoaOptions.EnableUIViewControllerTracing = options.iOS.EnableUIViewControllerTracing;
         cocoaOptions.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
-        cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
         cocoaOptions.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
+
+        // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
+        // cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
 
         // In-App Excludes and Includes to be passed to the Cocoa SDK
         options.iOS.InAppExcludes?.ForEach(x => cocoaOptions.AddInAppExclude(x));

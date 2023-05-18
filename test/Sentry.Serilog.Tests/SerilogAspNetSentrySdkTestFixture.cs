@@ -11,11 +11,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         Events = new List<SentryEvent>();
         Configure = options =>
         {
-            options.BeforeSend = @event =>
-            {
-                Events.Add(@event);
-                return @event;
-            };
+            options.SetBeforeSend((@event, _) => { Events.Add(@event); return @event; });
         };
 
         ConfigureApp = app =>

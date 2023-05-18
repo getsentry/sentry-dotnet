@@ -132,6 +132,11 @@ public class SentryOptions
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
     /// <summary>
+    /// List of substrings or regular expression patterns to filter out tags
+    /// </summary>
+    public ICollection<SubstringOrRegexPattern> TagFilters { get; set; } = new List<SubstringOrRegexPattern>();
+
+    /// <summary>
     /// The worker used by the client to pass envelopes.
     /// </summary>
     public IBackgroundWorker? BackgroundWorker { get; set; }
@@ -304,15 +309,50 @@ public class SentryOptions
     /// </summary>
     public string? Dsn { get; set; }
 
+    private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
+
+    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
+
     /// <summary>
-    /// A callback to invoke before sending an event to Sentry
+    /// Configures a callback to invoke before sending an event to Sentry
+    /// </summary>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
+    [Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
+    public Func<SentryEvent, SentryEvent?>? BeforeSend
+    {
+        get => null;
+        set => _beforeSend = value is null ? null : (e, _) => value(e);
+    }
+
+    /// <summary>
+    /// Configures a callback function to be invoked before sending an event to Sentry
     /// </summary>
     /// <remarks>
-    /// The return of this event will be sent to Sentry. This allows the application
-    /// a chance to inspect and/or modify the event before it's sent. If the event
-    /// should not be sent at all, return null from the callback.
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the event before it's sent. If the
+    /// event should not be sent at all, return null from the callback.
     /// </remarks>
-    public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
+    public void SetBeforeSend(Func<SentryEvent, Hint, SentryEvent?> beforeSend)
+    {
+        _beforeSend = beforeSend;
+    }
+
+    /// <summary>
+    /// Configures a callback function to be invoked before sending an event to Sentry
+    /// </summary>
+    /// <remarks>
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the event before it's sent. If the
+    /// event should not be sent at all, return null from the callback.
+    /// </remarks>
+    public void SetBeforeSend(Func<SentryEvent, SentryEvent?> beforeSend)
+    {
+        _beforeSend = (@event, _) => beforeSend(@event);
+    }
+
+    private Func<Transaction, Hint, Transaction?>? _beforeSendTransaction;
+
+    internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
     /// A callback to invoke before sending a transaction to Sentry
@@ -322,15 +362,67 @@ public class SentryOptions
     /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
     /// should not be sent at all, return null from the callback.
     /// </remarks>
-    public Func<Transaction, Transaction?>? BeforeSendTransaction { get; set; }
+    [Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction instead.")]
+    public Func<Transaction, Transaction?>? BeforeSendTransaction {
+        get => null;
+        set => _beforeSendTransaction = value is null ? null : (e, _) => value(e);
+    }
 
     /// <summary>
-    /// A callback invoked when a breadcrumb is about to be stored.
+    /// Configures a callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <param name="beforeSendTransaction">The callback</param>
+    public void SetBeforeSendTransaction(Func<Transaction, Hint, Transaction?> beforeSendTransaction)
+    {
+        _beforeSendTransaction = beforeSendTransaction;
+    }
+
+    /// <summary>
+    /// Configures a callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <param name="beforeSendTransaction">The callback</param>
+    public void SetBeforeSendTransaction(Func<Transaction, Transaction?> beforeSendTransaction)
+    {
+        _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
+    }
+
+    private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
+
+    internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
+
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
+    /// </summary>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
+    [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
+    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb {
+        get => null;
+        set => _beforeBreadcrumb = value is null ? null : (e, _) => value(e);
+    }
+
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
     /// </summary>
     /// <remarks>
-    /// Gives a chance to inspect and modify/reject a breadcrumb.
+    /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
+    /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
     /// </remarks>
-    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
+    {
+        _beforeBreadcrumb = beforeBreadcrumb;
+    }
+
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
+    /// </summary>
+    /// <remarks>
+    /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
+    /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
+    /// </remarks>
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
+    {
+        _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
+    }
 
     private int _maxQueueItems = 30;
 
@@ -580,7 +672,12 @@ public class SentryOptions
     /// Indicates whether tracing is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
-    internal bool IsTracingEnabled => EnableTracing ?? (_tracesSampleRate > 0.0 || TracesSampler is not null);
+    internal bool IsTracingEnabled => EnableTracing switch
+    {
+        false => false,
+        null => TracesSampler is not null || TracesSampleRate is > 0.0,
+        true => TracesSampler is not null || TracesSampleRate is > 0.0 or null
+    };
 
     /// <summary>
     /// Simplified option for enabling or disabling tracing.
@@ -617,25 +714,43 @@ public class SentryOptions
 
     /// <summary>
     /// Indicates the percentage of the tracing data that is collected.
-    /// Setting this to <c>0.0</c> discards all trace data.
-    /// Setting this to <c>1.0</c> collects all trace data.
-    /// Values outside of this range are invalid.
-    /// The default value is either <c>0.0</c> or <c>1.0</c>, depending on the <see cref="EnableTracing"/> property.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>&gt;= 0.0 and &lt;=1.0</c></term>
+    ///     <description>
+    ///       A custom sample rate is used unless <see cref="EnableTracing"/> is <c>false</c>,
+    ///       or unless overriden by a <see cref="TracesSampler"/> function.
+    ///       Values outside of this range are invalid.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       The tracing sample rate is determined by the <see cref="EnableTracing"/> property,
+    ///       unless overriden by a <see cref="TracesSampler"/> function.
+    ///     </description>
+    ///   </item>
+    /// </list>
     /// </summary>
     /// <remarks>
     /// Random sampling rate is only applied to transactions that don't already
     /// have a sampling decision set by other means, such as through <see cref="TracesSampler"/>,
     /// by inheriting it from an incoming trace header, or by copying it from <see cref="TransactionContext"/>.
     /// </remarks>
-    public double TracesSampleRate
+    public double? TracesSampleRate
     {
-        get => _tracesSampleRate ?? (EnableTracing is true ? 1.0 : 0.0);
+        get => _tracesSampleRate;
         set
         {
             if (value is < 0.0 or > 1.0)
             {
-                throw new InvalidOperationException(
-                    $"The value {value} is not a valid tracing sample rate. Use values between 0.0 and 1.0.");
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "The traces sample rate must be between 0.0 and 1.0, inclusive.");
             }
 
             _tracesSampleRate = value;

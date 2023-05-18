@@ -290,46 +290,58 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
         _options.LogDebug("Reading cached envelope: {0}", file);
 
-        var stream = _fileSystem.OpenFileForReading(file);
-#if NETFRAMEWORK || NETSTANDARD2_0
-        using (stream)
-#else
-        await using (stream.ConfigureAwait(false))
-#endif
-        using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
+        try
         {
-            // Don't even try to send it if we are requesting cancellation.
-            cancellation.ThrowIfCancellationRequested();
+            var stream = _fileSystem.OpenFileForReading(file);
+#if NETFRAMEWORK || NETSTANDARD2_0
+            using (stream)
+#else
+            await using (stream.ConfigureAwait(false))
+#endif
+            {
+                using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
+                {
+                    // Don't even try to send it if we are requesting cancellation.
+                    cancellation.ThrowIfCancellationRequested();
 
-            try
-            {
-                _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId(_options.DiagnosticLogger));
+                    try
+                    {
+                        _options.LogDebug("Sending cached envelope: {0}",
+                            envelope.TryGetEventId(_options.DiagnosticLogger));
 
-                await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
+                        await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
+                    }
+                    // OperationCancel should not log an error
+                    catch (OperationCanceledException ex)
+                    {
+                        _options.LogDebug("Canceled sending cached envelope: {0}, retrying after a delay.", ex, file);
+                        // Let the worker catch, log, wait a bit and retry.
+                        throw;
+                    }
+                    catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException
+                                                   or IOException)
+                    {
+                        _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
+                        // Let the worker catch, log, wait a bit and retry.
+                        throw;
+                    }
+                    catch (Exception ex) when (ex.Source == "FakeFailingTransport")
+                    {
+                        // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
+                        LogFailureWithDiscard(file, ex);
+                    }
+                }
             }
-            // OperationCancel should not log an error
-            catch (OperationCanceledException ex)
-            {
-                _options.LogDebug("Canceled sending cached envelope: {0}, retrying after a delay.", ex, file);
-                // Let the worker catch, log, wait a bit and retry.
-                throw;
-            }
-            catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException or IOException)
-            {
-                _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
-                // Let the worker catch, log, wait a bit and retry.
-                throw;
-            }
-            catch (Exception ex) when (ex.Source == "FakeFailingTransport")
-            {
-                // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
-                return;
-            }
-            catch (Exception ex)
-            {
-                _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
-                LogFailureWithDiscard(file, ex);
-            }
+        }
+        catch (JsonException ex)
+        {
+            // Log deserialization errors
+            LogFailureWithDiscard(file, ex);
         }
 
         // Envelope & file stream must be disposed prior to reaching this point

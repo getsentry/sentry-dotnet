@@ -164,24 +164,17 @@ public sealed class HubAdapter : IHub, IHubEx
             level);
 
     /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
+        => SentrySdk.CaptureEventInternal(evt, hint, scope);
+
+    /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
     public SentryId CaptureEvent(SentryEvent evt)
         => SentrySdk.CaptureEvent(evt);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Scope? scope)
-        => SentrySdk.CaptureEventInternal(evt, scope);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>.
-    /// </summary>
-    [DebuggerStepThrough]
-    public SentryId CaptureException(Exception exception)
-        => SentrySdk.CaptureException(exception);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -196,8 +189,23 @@ public sealed class HubAdapter : IHub, IHubEx
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
+        => SentrySdk.CaptureEvent(evt, hint, scope);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => SentrySdk.CaptureEvent(evt, configureScope);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public SentryId CaptureException(Exception exception)
+        => SentrySdk.CaptureException(exception);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -206,6 +214,14 @@ public sealed class HubAdapter : IHub, IHubEx
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureTransaction(Transaction transaction)
         => SentrySdk.CaptureTransaction(transaction);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
+        => SentrySdk.CaptureTransaction(transaction, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

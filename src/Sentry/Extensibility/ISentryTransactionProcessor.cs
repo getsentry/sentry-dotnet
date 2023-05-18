@@ -1,4 +1,4 @@
-﻿namespace Sentry.Extensibility;
+namespace Sentry.Extensibility;
 
 /// <summary>
 /// Process a <see cref="Transaction"/> during the prepare phase.
@@ -15,4 +15,14 @@ public interface ISentryTransactionProcessor
     /// Meaning the transaction should no longer be processed nor send.
     /// </remarks>
     Transaction? Process(Transaction transaction);
+}
+
+internal static class ISentryTransactionProcessorExtensions
+{
+    internal static Transaction? DoProcessTransaction(this ISentryTransactionProcessor processor, Transaction transaction, Hint hint)
+    {
+        return (processor is ISentryTransactionProcessorWithHint contextualProcessor)
+            ? contextualProcessor.Process(transaction, hint)
+            : processor.Process(transaction);
+    }
 }

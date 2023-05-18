@@ -127,6 +127,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
+            Arg.Any<Hint>(),
             Arg.Any<Scope>());
     }
 
@@ -149,6 +150,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
+            Arg.Any<Hint>(),
             Arg.Any<Scope>());
     }
 
@@ -171,6 +173,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
+            Arg.Any<Hint>(),
             Arg.Any<Scope>());
     }
 
@@ -189,6 +192,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
+            Arg.Any<Hint>(),
             Arg.Any<Scope>());
     }
 
@@ -401,6 +405,25 @@ public partial class HubTests
                     .Single()
                     .EndStatus == SessionEndStatus.Crashed
             ));
+    }
+
+    [Fact]
+    public void CaptureEvent_Client_GetsHint()
+    {
+        // Arrange
+        var @event = new SentryEvent();
+        var hint = new Hint();
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.CaptureEvent(@event, hint);
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEvent(
+            Arg.Any<SentryEvent>(),
+            Arg.Is<Hint>(h => h == hint),
+            Arg.Any<Scope>()
+            );
     }
 
     [Fact]
@@ -1042,7 +1065,7 @@ public partial class HubTests
         hub.CaptureEvent(evt);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>());
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Hint>(), Arg.Any<Scope>());
     }
 
     [Theory]
@@ -1103,7 +1126,88 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled));
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Hint>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_Client_Gets_Hint()
+    {
+        // Arrange        
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
+
+        // Assert
+        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_Client_Gets_ScopeAttachments()
+    {
+        // Arrange        
+        var hub = _fixture.GetSut();
+        List<Attachment> attachments = new List<Attachment> {
+            AttachmentHelper.FakeAttachment("foo"),
+            AttachmentHelper.FakeAttachment("bar")
+        };
+        hub.ConfigureScope(s => {
+            s.AddAttachment(attachments[0]);
+            s.AddAttachment(attachments[1]);
+            });
+
+        // Act
+        Hint hint = null;
+        _fixture.Client.CaptureTransaction(
+            Arg.Any<Transaction>(),
+            Arg.Do<Hint>(h => hint = h)
+            );
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(attachments);
+    }
+
+    [Fact]
+    public void CaptureTransaction_EventProcessor_Gets_Hint()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
+        processor.Process(Arg.Any<Transaction>(), Arg.Any<Hint>()).Returns(new Transaction("name", "operation"));
+        _fixture.Options.AddTransactionProcessor(processor);
+
+        // Act
+        var hub = _fixture.GetSut();
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
+
+        // Assert
+        processor.Received(1).Process(Arg.Any<Transaction>(), Arg.Any<Hint>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_EventProcessor_Gets_ScopeAttachments()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
+        Hint hint = null;
+        processor.Process(Arg.Any<Transaction>(), Arg.Do<Hint>(h => hint = h)).Returns(new Transaction("name", "operation"));
+        _fixture.Options.AddTransactionProcessor(processor);
+
+        List<Attachment> attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
+        var hub = _fixture.GetSut();
+        hub.ConfigureScope(s => s.AddAttachment(attachments[0]));
+
+        // Act
+        var transaction = hub.StartTransaction("test", "test");
+        transaction.Finish();
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(attachments);
     }
 
 #if ANDROID && CI_BUILD
