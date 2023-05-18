@@ -1,5 +1,3 @@
-using FluentAssertions.Execution;
-
 namespace Sentry.Tests;
 
 public class SentryFailedRequestHandlerTests
@@ -124,6 +122,29 @@ public class SentryFailedRequestHandlerTests
             Arg.Any<Hint>(),
             Arg.Any<Scope>()
             );
+    }
+
+    [Fact]
+    public void HandleResponse_Capture_FailedRequest_No_Pii()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = GetSut(options);
+
+        var response = InternalServerErrorResponse();
+        var requestUri = new Uri("http://admin:1234@localhost/test/path?query=string#fragment");
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), Arg.Any<Hint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        @event.Request.Url.Should().Be("http://localhost/test/path?query=string"); // No admin:1234
     }
 
     [Fact]
