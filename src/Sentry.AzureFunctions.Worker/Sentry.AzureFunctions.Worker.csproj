@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+      <PackageTags>$(PackageTags);Azure;Functions;Worker</PackageTags>
+      <Description>Official Azure Functions Worker SDK integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+      <Version>$(Version)-beta.1</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.9.0" />
+      <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.12" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="Sentry.AzureFunctions.Worker.Tests" PublicKey="002400000480000094000000060200000024000052534131000400000100010059964a931488bcdbd14657f1ee0df32df61b57b3d14d7290c262c2cc9ddaad6ec984044f761f778e1823049d2cb996a4f58c8ea5b46c37891414cb34b4036b1c178d7b582289d2eef3c0f1e9b692c229a306831ee3d371d9e883f0eb0f74aeac6c6ab8c85fd1ec04b267e15a31532c4b4e2191f5980459db4dce0081f1050fb8" />
+    </ItemGroup>
+
+</Project>
