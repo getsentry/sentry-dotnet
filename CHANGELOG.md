@@ -4,6 +4,8 @@
 
 ### Features
 
+- Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
+
 - Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
   - Currently, this allows you to manipulate attachments in the various "before" event delegates.
   - Hints can also be used in event and transaction processors by implementing `ISentryEventProcessorWithHint` or `ISentryTransactionProcessorWithHint`, instead of `ISentryEventProcessor` or `ISentryTransactionProcessor`.
@@ -27,7 +29,6 @@
 - Bump Cocoa SDK from v8.6.0 to v8.7.0 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#870)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.6.0...8.7.0)
-- Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
 - Bump Cocoa SDK from v8.6.0 to v8.7.1 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359), [#2370](https://github.com/getsentry/sentry-dotnet/pull/2370))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#871)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.6.0...8.7.1)
