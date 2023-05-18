@@ -6,6 +6,7 @@
 
 - Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
 
+- Remove authority from URLs sent to Sentry ([#2365](https://github.com/getsentry/sentry-dotnet/pull/2365))
 - Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
   - Currently, this allows you to manipulate attachments in the various "before" event delegates.
   - Hints can also be used in event and transaction processors by implementing `ISentryEventProcessorWithHint` or `ISentryTransactionProcessorWithHint`, instead of `ISentryEventProcessor` or `ISentryTransactionProcessor`.

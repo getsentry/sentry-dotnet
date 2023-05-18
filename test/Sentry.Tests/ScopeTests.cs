@@ -1,4 +1,3 @@
-using FluentAssertions.Execution;
 namespace Sentry.Tests;
 
 public class ScopeTests

@@ -147,6 +147,11 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
+        if (!_options.SendDefaultPii)
+        {
+            processedTransaction.Redact();
+        }
+
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
@@ -274,6 +279,11 @@ public class SentryClient : ISentryClient, IDisposable
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
             _options.LogInfo("Event dropped by BeforeSend callback.");
             return SentryId.Empty;
+        }
+
+        if (!_options.SendDefaultPii)
+        {
+            processedEvent.Redact();
         }
 
         var attachments = hint.Attachments.ToList();

@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -9,6 +10,12 @@ namespace Sentry;
 [DebuggerDisplay("Message: {" + nameof(Message) + "}, Type: {" + nameof(Type) + "}")]
 public sealed class Breadcrumb : IJsonSerializable
 {
+    private readonly IReadOnlyDictionary<string, string>? _data;
+    private readonly string? _message;
+
+    private bool _sendDefaultPii = true;
+    internal void Redact() => _sendDefaultPii = false;
+
     /// <summary>
     /// A timestamp representing when the breadcrumb occurred.
     /// </summary>
@@ -21,7 +28,11 @@ public sealed class Breadcrumb : IJsonSerializable
     /// If a message is provided, it’s rendered as text and the whitespace is preserved.
     /// Very long text might be abbreviated in the UI.
     /// </summary>
-    public string? Message { get; }
+    public string? Message
+    {
+        get => _sendDefaultPii ? _message : _message?.RedactUrl();
+        private init => _message = value;
+    }
 
     /// <summary>
     /// The type of breadcrumb.
@@ -39,7 +50,17 @@ public sealed class Breadcrumb : IJsonSerializable
     /// Contains a sub-object whose contents depend on the breadcrumb type.
     /// Additional parameters that are unsupported by the type are rendered as a key/value table.
     /// </remarks>
-    public IReadOnlyDictionary<string, string>? Data { get; }
+    public IReadOnlyDictionary<string, string>? Data
+    {
+        get => _sendDefaultPii
+            ? _data
+            : _data?.ToDictionary(
+                x => x.Key,
+                x => x.Value.RedactUrl()
+                )
+            ;
+        private init => _data = value;
+    }
 
     /// <summary>
     /// Dotted strings that indicate what the crumb is or where it comes from.

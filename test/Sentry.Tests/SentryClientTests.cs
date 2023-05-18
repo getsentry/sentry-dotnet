@@ -247,6 +247,29 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_Redact_Breadcrumbs()
+    {
+        // Act
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddBreadcrumb("Visited https://user@sentry.io in session");
+        var @event = new SentryEvent();
+
+        // Act
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+        _ = sut.CaptureEvent(@event, scope);
+
+        // Assert
+        envelope.Should().NotBeNull();
+        envelope.Items.Count.Should().Be(1);
+        var actual = (SentryEvent)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        actual.Should().NotBeNull();
+        actual?.Breadcrumbs.Count.Should().Be(1);
+        actual?.Breadcrumbs.ToArray()[0].Message.Should().Be($"Visited https://{PiiExtensions.RedactedText}@sentry.io in session");
+    }
+
+    [Fact]
     public void CaptureEvent_BeforeEvent_RejectEvent()
     {
         _fixture.SentryOptions.SetBeforeSend((_, _) => null);
@@ -828,6 +851,36 @@ public partial class SentryClientTests
                 IsSampled = true,
                 EndTimestamp = null // not finished
             });
+    }
+
+    [Fact]
+    public void CaptureTransaction_Redact_Description()
+    {
+        // Arrange
+        _fixture.SentryOptions.SendDefaultPii = false;
+        var client = _fixture.GetSut();
+        var original = new Transaction(
+            "test name",
+            "test operation"
+        )
+        {
+            IsSampled = true,
+            Description = "The URL: https://user@sentry.io has PII data in it",
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        // Act
+        Envelope envelope = null;
+        client.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+        client.CaptureTransaction(original);
+
+        // Assert
+        envelope.Should().NotBeNull();
+        envelope.Items.Count.Should().Be(1);
+        var actual = (envelope.Items[0].Payload as JsonSerializable)?.Source as Transaction;
+        actual?.Name.Should().Be(original.Name);
+        actual?.Operation.Should().Be(original.Operation);
+        actual?.Description.Should().Be(original.Description.RedactUrl()); // Should be redacted
     }
 
     [Fact]
