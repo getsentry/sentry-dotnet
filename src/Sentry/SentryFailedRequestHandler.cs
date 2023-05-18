@@ -75,6 +75,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
             exception.SetSentryMechanism(MechanismType);
 
             var @event = new SentryEvent(exception);
+            var hint = new Hint(HintTypes.HttpResponseMessage, response);
 
             var sentryRequest = new Request
             {
@@ -103,7 +104,7 @@ internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
             @event.Request = sentryRequest;
             @event.Contexts[Response.Type] = responseContext;
 
-            _hub.CaptureEvent(@event);
+            _hub.CaptureEvent(@event, hint);
         }
     }
 }

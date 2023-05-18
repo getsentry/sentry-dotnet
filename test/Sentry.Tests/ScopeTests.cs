@@ -164,7 +164,7 @@ public class ScopeTests
     }
 
     [Fact]
-    public void GetSpan_NoSpans_ReturnsTransaction()
+    public void Span_NoSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -172,14 +172,14 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
     }
 
     [Fact]
-    public void GetSpan_FinishedSpans_ReturnsTransaction()
+    public void Span_FinishedSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -191,14 +191,14 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
     }
 
     [Fact]
-    public void GetSpan_ActiveSpans_ReturnsSpan()
+    public void Span_ActiveSpans_ReturnsSpan()
     {
         // Arrange
         var scope = new Scope();
@@ -210,10 +210,71 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(activeSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpan_ReturnsValue()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Assert Default
+        scope.Span.Should().Be(secondSpan);
+
+        // Act
+        scope.Span = firstSpan;
+
+        // Assert
+        scope.Span.Should().Be(firstSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanNull_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = null;
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanThenCloseIt_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = firstSpan;
+        firstSpan.Finish();
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
     }
 
     [Fact]
@@ -307,6 +368,50 @@ public class ScopeTests
 
         // Assert
         Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
+    }
+
+    [Fact]
+    public void AddBreadcrumb_BeforeAddBreadcrumb_ReceivesHint()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        Hint receivedHint = null;
+        options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+        {
+            receivedHint = hint;
+            return breadcrumb;
+        });
+        var scope = new Scope(options);
+
+        // Act
+        var expectedHint = new Hint();
+        scope.AddBreadcrumb(new Breadcrumb(), expectedHint);
+
+        // Assert
+        receivedHint.Should().BeSameAs(expectedHint);
+    }
+
+    [Fact]
+    public void AddBreadcrumb_ScopeAttachments_Copied_To_Hint()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        Hint hint = null;
+        options.SetBeforeBreadcrumb((b, h) =>
+        {
+            hint = h;
+            return b;
+        });
+        var scope = new Scope(options);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+
+        // Act
+        scope.AddBreadcrumb(new Breadcrumb());
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(scope.Attachments);
     }
 
     [Theory]

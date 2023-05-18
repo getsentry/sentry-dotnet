@@ -55,7 +55,9 @@ public class SentryTracingMiddlewareTests
         sentryClient.Received(2).CaptureTransaction(
             Arg.Is<Transaction>(transaction =>
                 transaction.Name == "GET /person/{id}" &&
-                transaction.NameSource == TransactionNameSource.Route));
+                transaction.NameSource == TransactionNameSource.Route),
+            Arg.Any<Hint>()
+            );
     }
 
     [Fact]
@@ -150,7 +152,9 @@ public class SentryTracingMiddlewareTests
             t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
             t.ParentSpanId == SpanId.Parse("1000000000000000") &&
             t.IsSampled == false
-        ));
+        ),
+        Arg.Any<Hint>()
+        );
     }
 
     [Theory]
@@ -554,7 +558,7 @@ public class SentryTracingMiddlewareTests
         var expectedName = "My custom name";
 
         var sentryClient = Substitute.For<ISentryClient>();
-        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>()))
             .Do(callback => transaction = callback.Arg<Transaction>());
         var options = new SentryAspNetCoreOptions
         {
@@ -596,7 +600,7 @@ public class SentryTracingMiddlewareTests
         Transaction transaction = null;
 
         var sentryClient = Substitute.For<ISentryClient>();
-        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>()))
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>()))
             .Do(callback => transaction = callback.Arg<Transaction>());
         var options = new SentryAspNetCoreOptions
         {

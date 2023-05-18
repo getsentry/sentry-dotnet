@@ -114,10 +114,7 @@ public class SentrySdkTests : IDisposable
     {
         // If the variable was set, to non empty string but value is broken, better crash than silently disable
         var ex = Assert.Throws<ArgumentException>(() =>
-            SentrySdk.Init(o =>
-            {
-                o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = InvalidDsn;
-            }));
+            SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = InvalidDsn));
 
         Assert.Equal("Invalid DSN: A Project Id is required.", ex.Message);
     }
@@ -125,10 +122,7 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
     {
-        using var _ = SentrySdk.Init(o =>
-        {
-            o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = Constants.DisableSdkDsnValue;
-        });
+        using var _ = SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = Constants.DisableSdkDsnValue);
 
         Assert.False(SentrySdk.IsEnabled);
     }
@@ -434,7 +428,7 @@ public class SentrySdkTests : IDisposable
     public void PushScope_MultiCallParameterless_SameDisposableInstance() => Assert.Same(SentrySdk.PushScope(), SentrySdk.PushScope());
 
     [Fact]
-    public void AddBreadcrumb_NoClock_NoOp() => SentrySdk.AddBreadcrumb(null!);
+    public void AddBreadcrumb_NoClock_NoOp() => SentrySdk.AddBreadcrumb(message: null!);
 
     [Fact]
     public void AddBreadcrumb_WithClock_NoOp() => SentrySdk.AddBreadcrumb(clock: null, null!);
