@@ -178,6 +178,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Profiling.Tests", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.Profiling", "samples\Sentry.Samples.Console.Profiling\Sentry.Samples.Console.Profiling.csproj", "{0F84C0BB-FDD4-43A9-B594-923EB10C8E3F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker", "src\Sentry.AzureFunctions.Worker\Sentry.AzureFunctions.Worker.csproj", "{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AzureFunctions.Worker", "samples\Sentry.Samples.AzureFunctions.Worker\Sentry.Samples.AzureFunctions.Worker.csproj", "{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -433,6 +439,18 @@ Global
 		{0F84C0BB-FDD4-43A9-B594-923EB10C8E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F84C0BB-FDD4-43A9-B594-923EB10C8E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F84C0BB-FDD4-43A9-B594-923EB10C8E3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -502,6 +520,9 @@ Global
 		{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{2E750A7C-561D-4959-B967-042755139D84} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{0F84C0BB-FDD4-43A9-B594-923EB10C8E3F} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
