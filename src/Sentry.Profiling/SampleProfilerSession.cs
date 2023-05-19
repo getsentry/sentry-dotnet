@@ -53,12 +53,16 @@ internal class SampleProfilerSession : IDisposable
     {
         var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
 
-        // Rundown events only come in after the session is stopped but we need them right from the start so that
-        // TraceLog has all the info about loaded moodules and methods at the time a sample is handled.
-        // As is, we can just disable the rundown and rely on the currently loaded modules.
-        var session = client.StartEventPipeSession(Providers, false, CircularBufferMB);
-
-        var eventSource = TraceLog.CreateFromEventPipeSession(session);
+        // Rundown events only come in after the session is stopped but we need them right from the start so that we
+        // can recognize loaded moodules and methods. Therefore, we start an additional session which will only collect
+        // rundown events and shut down immediately and feed this as an additional session to the TraceLog.
+        // Note: it doesn't matter what the actual provider is, just that we request rundown in the constructor.
+        using var rundownSession = client.StartEventPipeSession(
+            new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Informational, (long)ClrTraceEventParser.Keywords.Default),
+            requestRundown: true
+        );
+        var session = client.StartEventPipeSession(Providers, requestRundown: false, CircularBufferMB);
+        var eventSource = TraceLog.CreateFromEventPipeSession(session, rundownSession);
 
         // Process() blocks until the session is stopped so we need to run it on a separate thread.
         Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning);
