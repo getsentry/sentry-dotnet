@@ -53,6 +53,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 {
                     _stopped = true;
                     _endTimeMs = endTimeMs.Value;
+                    OnFinish?.Invoke();
                     return true;
                 }
             }
@@ -68,7 +69,14 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         {
             if (timestampMs <= _endTimeMs)
             {
-                _processor.AddSample(data, timestampMs - _startTimeMs);
+                try
+                {
+                    _processor.AddSample(data, timestampMs - _startTimeMs);
+                }
+                catch (Exception e)
+                {
+                    _options.LogWarning("Failed to process a profile sample.", e);
+                }
             }
             else
             {

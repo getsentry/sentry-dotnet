@@ -18,7 +18,6 @@ public class ProfilingBenchmarks
     public void StartProfiler()
     {
         _factory = SamplingTransactionProfilerFactory.Create(new());
-        _profiler = _factory.Start(new TransactionTracer(_hub, "", ""), CancellationToken.None);
     }
 
     [GlobalCleanup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
@@ -36,9 +35,9 @@ public class ProfilingBenchmarks
     {
         foreach (var runtimeMs in new[] { 25, 100, 1000, 10000 })
         {
-            foreach (var processing in new[] { true, false })
+            foreach (var collect in new[] { true, false })
             {
-                yield return new object[] { runtimeMs, processing };
+                yield return new object[] { runtimeMs, collect };
             }
         }
     }
@@ -46,14 +45,14 @@ public class ProfilingBenchmarks
     // Run a profiled transaction. Profiler starts and stops for each transaction separately.
     [Benchmark]
     [ArgumentsSource(nameof(TransactionBenchmarkArguments))]
-    public long Transaction(int runtimeMs, bool processing)
+    public long Transaction(int runtimeMs, bool collect)
     {
         var tt = new TransactionTracer(_hub, "test", "");
         tt.TransactionProfiler = _factory.Start(tt, CancellationToken.None);
         var result = RunForMs(runtimeMs);
-        tt.TransactionProfiler?.Finish();
+        tt.TransactionProfiler.Finish();
         var transaction = new Transaction(tt);
-        if (processing)
+        if (collect)
         {
             var collectTask = tt.TransactionProfiler.CollectAsync(transaction);
             collectTask.Wait();
@@ -175,6 +174,7 @@ public class ProfilingBenchmarks
     [ArgumentsSource(nameof(OverheadRunArguments))]
     public long DoHardWorkWhileProfiling(int n)
     {
+        _profiler ??= _factory.Start(new TransactionTracer(_hub, "", ""), CancellationToken.None);
         return FindPrimeNumber(n);
     }
     #endregion

@@ -59,14 +59,11 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    [Fact]
-    public void Profiler_StartedNormally_Works()
+    private void CaptureAndValidate(ITransactionProfilerFactory factory)
     {
+        var clock = SentryStopwatch.StartNew();
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
-
-        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
-        var clock = SentryStopwatch.StartNew();
         var sut = factory.Start(transactionTracer, CancellationToken.None);
         transactionTracer.TransactionProfiler = sut;
         RunForMs(100);
@@ -79,6 +76,25 @@ public class SamplingTransactionProfilerTests
         var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
         ValidateProfile(profileInfo.Profile, elapsedNanoseconds);
+    }
+
+
+    [Fact]
+    public void Profiler_SingleProfile_Works()
+    {
+        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
+        CaptureAndValidate(factory);
+    }
+
+    [Fact]
+    public void Profiler_MultipleProfiles_Works()
+    {
+        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
+        CaptureAndValidate(factory);
+        Thread.Sleep(100);
+        CaptureAndValidate(factory);
+        Thread.Sleep(300);
+        CaptureAndValidate(factory);
     }
 
     [Fact]
@@ -144,7 +160,7 @@ public class SamplingTransactionProfilerTests
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
 
-        options.AddIntegration(new ProfilingIntegration(tempDir.Path));
+        options.AddIntegration(new ProfilingIntegration());
 
         try
         {
