@@ -9,13 +9,21 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.12" />
-    
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="log4net.Appender" />
     <Using Include="log4net.Core" />
     <Using Include="Sentry.Extensibility" />
     <Using Include="Sentry.Reflection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Log4Net.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>

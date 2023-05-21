@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.5.11" />
+  </ItemGroup>
 
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+  </ItemGroup>
 
+  <ItemGroup>
     <Using Include="NLog" />
     <Using Include="NLog.Common" />
     <Using Include="NLog.Config" />
@@ -21,6 +25,10 @@
     <Using Include="Sentry.Extensibility" />
     <Using Include="Sentry.Infrastructure" />
     <Using Include="Sentry.Reflection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.NLog.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>

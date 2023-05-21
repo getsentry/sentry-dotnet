@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.AspNet.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
 </Project>
