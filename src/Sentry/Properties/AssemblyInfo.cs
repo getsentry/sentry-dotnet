@@ -45,8 +45,3 @@
 
 #endif
 
-
-// The targets for these platforms are not CLS Compliant
-#if !__MOBILE__
-[assembly: CLSCompliant(true)]
-#endif
