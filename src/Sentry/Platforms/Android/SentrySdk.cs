@@ -5,6 +5,14 @@ using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
 using Sentry.JavaSdk.Android.Core;
 
+// Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
+// See https://docs.sentry.io/platforms/android/configuration/manual-init/
+// This attribute automatically adds the metadata to the final AndroidManifest.xml
+[assembly: MetaData("io.sentry.auto-init", Value = "false")]
+
+// Set the hybrid SDK name
+[assembly: MetaData("io.sentry.sdk.name", Value = "sentry.java.android.dotnet")]
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 

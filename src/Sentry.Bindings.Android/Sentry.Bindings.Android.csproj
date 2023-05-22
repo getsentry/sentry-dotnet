@@ -16,6 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Sentry" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Testing" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Extensions.Logging.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
