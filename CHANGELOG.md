@@ -27,6 +27,8 @@
     However, there is no change to the behavior or _typical_ usage of either of these properties.
 
 - CachedTransport gracefully handles malformed envelopes during processing  ([#2371](https://github.com/getsentry/sentry-dotnet/pull/2371))
+- Remove extraneous iOS simulator resources when building MAUI apps using Visual Studio "Hot Restart" mode, to avoid hitting Windows max path  ([#2384](https://github.com/getsentry/sentry-dotnet/pull/2384))
+
 
 ### Dependencies
 
