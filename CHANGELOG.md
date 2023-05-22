@@ -10,6 +10,12 @@
     improving the accuracy of the issue detail page.
   - Accordingly, the `KeepAggregateException` option is now obsolete and does nothing.  Please remove any usages of `KeepAggregateException`.
 
+### Dependencies
+
+- Bump CLI from v2.18.0 to v2.18.1 ([#2386](https://github.com/getsentry/sentry-dotnet/pull/2386))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2181)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.0...2.18.1)
+
 ## 3.32.0
 
 ### Features
