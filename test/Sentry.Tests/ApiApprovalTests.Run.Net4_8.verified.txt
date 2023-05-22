@@ -137,6 +137,19 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
+    public class Hint
+    {
+        public Hint() { }
+        public Hint(string key, object? value) { }
+        public System.Collections.Generic.ICollection<Sentry.Attachment> Attachments { get; }
+        public System.Collections.Generic.IDictionary<string, object?> Items { get; }
+        public static Sentry.Hint WithAttachments(params Sentry.Attachment[] attachments) { }
+        public static Sentry.Hint WithAttachments(System.Collections.Generic.IEnumerable<Sentry.Attachment> attachments) { }
+    }
+    public static class HintTypes
+    {
+        public const string HttpResponseMessage = "http-response-message";
+    }
     public readonly struct HttpStatusCodeRange : System.IEquatable<Sentry.HttpStatusCodeRange>
     {
         public HttpStatusCodeRange(int statusCode) { }
@@ -156,6 +169,7 @@ namespace Sentry
     }
     public static class HubExtensions
     {
+        public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Breadcrumb breadcrumb, Sentry.Hint? hint = null) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, System.Action<Sentry.Scope> configureScope) { }
@@ -234,8 +248,10 @@ namespace Sentry
     {
         bool IsEnabled { get; }
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null);
+        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.Transaction transaction);
+        void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint);
         void CaptureUserFeedback(Sentry.UserFeedback userFeedback);
         System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
     }
@@ -410,6 +426,7 @@ namespace Sentry
         public Sentry.User User { get; set; }
         public void AddAttachment(Sentry.Attachment attachment) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
+        public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.Hint hint) { }
         public void Apply(Sentry.IEventLike other) { }
         public void Apply(Sentry.Scope other) { }
         public void Apply(object state) { }
@@ -456,8 +473,10 @@ namespace Sentry
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Hint? hint, Sentry.Scope? scope = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
+        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         [System.Obsolete("Sentry client should not be explicitly disposed of. This method will be removed i" +
             "n version 4.")]
@@ -566,8 +585,13 @@ namespace Sentry
         public bool AutoSessionTracking { get; set; }
         public System.TimeSpan AutoSessionTrackingInterval { get; set; }
         public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
+        [System.Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instea" +
+            "d.")]
         public System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?>? BeforeBreadcrumb { get; set; }
+        [System.Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
         public System.Func<Sentry.SentryEvent, Sentry.SentryEvent?>? BeforeSend { get; set; }
+        [System.Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction i" +
+            "nstead.")]
         public System.Func<Sentry.Transaction, Sentry.Transaction?>? BeforeSendTransaction { get; set; }
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }
@@ -617,11 +641,17 @@ namespace Sentry
         public Sentry.StackTraceMode StackTraceMode { get; set; }
         public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
-        public double TracesSampleRate { get; set; }
+        public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
         public bool UseAsyncFileIO { get; set; }
         public void AddJsonConverter(System.Text.Json.Serialization.JsonConverter converter) { }
+        public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?> beforeBreadcrumb) { }
+        public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.Hint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
+        public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }
+        public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.Hint, Sentry.SentryEvent?> beforeSend) { }
+        public void SetBeforeSendTransaction(System.Func<Sentry.Transaction, Sentry.Transaction?> beforeSendTransaction) { }
+        public void SetBeforeSendTransaction(System.Func<Sentry.Transaction, Sentry.Hint, Sentry.Transaction?> beforeSendTransaction) { }
     }
     public static class SentryOptionsExtensions
     {
@@ -672,6 +702,7 @@ namespace Sentry
     {
         public static bool IsEnabled { get; }
         public static Sentry.SentryId LastEventId { get; }
+        public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.Hint? hint = null) { }
         public static void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void BindClient(Sentry.ISentryClient client) { }
@@ -679,12 +710,14 @@ namespace Sentry
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
+        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope) { }
         public static Sentry.SentryId CaptureException(System.Exception exception) { }
         public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureMessage(string message, Sentry.SentryLevel level = 1) { }
         public static Sentry.SentryId CaptureMessage(string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public static void CaptureTransaction(Sentry.Transaction transaction) { }
+        public static void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
         public static void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public static void CaptureUserFeedback(Sentry.SentryId eventId, string email, string comments, string? name = null) { }
         [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
@@ -1159,8 +1192,10 @@ namespace Sentry.Extensibility
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
+        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
@@ -1195,9 +1230,11 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope) { }
         public Sentry.SentryId CaptureException(System.Exception exception) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
+        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
@@ -1255,6 +1292,10 @@ namespace Sentry.Extensibility
     {
         Sentry.SentryEvent? Process(Sentry.SentryEvent @event);
     }
+    public interface ISentryEventProcessorWithHint : Sentry.Extensibility.ISentryEventProcessor
+    {
+        Sentry.SentryEvent? Process(Sentry.SentryEvent @event, Sentry.Hint hint);
+    }
     public interface ISentryStackTraceFactory
     {
         Sentry.SentryStackTrace? Create(System.Exception? exception = null);
@@ -1262,6 +1303,10 @@ namespace Sentry.Extensibility
     public interface ISentryTransactionProcessor
     {
         Sentry.Transaction? Process(Sentry.Transaction transaction);
+    }
+    public interface ISentryTransactionProcessorWithHint : Sentry.Extensibility.ISentryTransactionProcessor
+    {
+        Sentry.Transaction? Process(Sentry.Transaction transaction, Sentry.Hint hint);
     }
     public interface ITransport
     {

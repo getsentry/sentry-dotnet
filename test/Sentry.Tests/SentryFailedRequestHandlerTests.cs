@@ -1,5 +1,3 @@
-using FluentAssertions.Execution;
-
 namespace Sentry.Tests;
 
 public class SentryFailedRequestHandlerTests
@@ -119,7 +117,34 @@ public class SentryFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
-        _hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>());
+        _hub.Received(1).CaptureEvent(
+            Arg.Any<SentryEvent>(),
+            Arg.Any<Hint>(),
+            Arg.Any<Scope>()
+            );
+    }
+
+    [Fact]
+    public void HandleResponse_Capture_FailedRequest_No_Pii()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = GetSut(options);
+
+        var response = InternalServerErrorResponse();
+        var requestUri = new Uri("http://admin:1234@localhost/test/path?query=string#fragment");
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), Arg.Any<Hint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        @event.Request.Url.Should().Be("http://localhost/test/path?query=string"); // No admin:1234
     }
 
     [Fact]
@@ -145,7 +170,10 @@ public class SentryFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e));
+        _hub.CaptureEvent(
+            Arg.Do<SentryEvent>(e => @event = e),
+            Arg.Any<Hint>()
+            );
         sut.HandleResponse(response);
 
         // Assert
@@ -192,7 +220,10 @@ public class SentryFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e));
+        _hub.CaptureEvent(
+            Arg.Do<SentryEvent>(e => @event = e),
+            Arg.Any<Hint>()
+            );
         sut.HandleResponse(response);
 
         // Assert
@@ -203,6 +234,37 @@ public class SentryFailedRequestHandlerTests
             // Cookies and headers are not captured
             @event.Contexts.Response.Headers.Should().BeNullOrEmpty();
             @event.Contexts.Response.Cookies.Should().BeNullOrEmpty();
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_Hint_Response()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = GetSut(options);
+
+        var response = InternalServerErrorResponse(); // This is in the range
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Post, "http://foo/bar");
+
+        // Act
+        Hint hint = null;
+        _hub.CaptureEvent(
+            Arg.Any<SentryEvent>(),
+            Arg.Do<Hint>(h => hint = h)
+            );
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            hint.Should().NotBeNull();
+
+            // Response should be captured
+            hint.Items[HintTypes.HttpResponseMessage].Should().Be(response);
         }
     }
 }

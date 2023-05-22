@@ -298,6 +298,23 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         SpanId,
         IsSampled);
 
+    /// <summary>
+    /// Redacts PII from the transaction
+    /// </summary>
+    internal void Redact()
+    {
+        Description = Description?.RedactUrl();
+        foreach (var breadcrumb in Breadcrumbs)
+        {
+            breadcrumb.Redact();
+        }
+
+        foreach (var span in Spans)
+        {
+            span.Redact();
+        }
+    }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {

@@ -148,7 +148,7 @@ internal class Hub : IHubEx, IDisposable
             // Random sampling runs only if the sampling decision hasn't been made already.
             if (transaction.IsSampled == null)
             {
-                var sampleRate = _options.TracesSampleRate;
+                var sampleRate = _options.TracesSampleRate ?? (_options.EnableTracing is true ? 1.0 : 0.0);
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
@@ -290,7 +290,10 @@ internal class Hub : IHubEx, IDisposable
         return null;
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
+        CaptureEvent(evt, null, configureScope);
+
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
     {
         if (!IsEnabled)
         {
@@ -302,7 +305,7 @@ internal class Hub : IHubEx, IDisposable
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, clonedScope);
+            return CaptureEvent(evt, hint, clonedScope);
         }
         catch (Exception e)
         {
@@ -312,9 +315,12 @@ internal class Hub : IHubEx, IDisposable
     }
 
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
-        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, scope) : SentryId.Empty;
+        CaptureEvent(evt, null, scope);
 
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Scope? scope)
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) =>
+        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, hint, scope) : SentryId.Empty;
+
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
     {
         try
         {
@@ -349,7 +355,7 @@ internal class Hub : IHubEx, IDisposable
 
             // Now capture the event with the Sentry client on the current scope.
             var sentryClient = currentScope.Value;
-            var id = sentryClient.CaptureEvent(evt, actualScope);
+            var id = sentryClient.CaptureEvent(evt, hint, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
@@ -387,7 +393,9 @@ internal class Hub : IHubEx, IDisposable
         }
     }
 
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,
@@ -401,20 +409,24 @@ internal class Hub : IHubEx, IDisposable
         try
         {
             // Apply scope data
-            var currentScope = ScopeManager.GetCurrent();
-            var scope = currentScope.Key;
+            var currentScopeAndClient = ScopeManager.GetCurrent();
+            var scope = currentScopeAndClient.Key;
             scope.Evaluate();
             scope.Apply(transaction);
 
             // Apply enricher
             _enricher.Apply(transaction);
 
+            // Add attachments to the hint for processors and callbacks
+            hint ??= new Hint();
+            hint.AddAttachmentsFromScope(scope);
+
             var processedTransaction = transaction;
             if (transaction.IsSampled != false)
             {
                 foreach (var processor in scope.GetAllTransactionProcessors())
                 {
-                    processedTransaction = processor.Process(transaction);
+                    processedTransaction = processor.DoProcessTransaction(transaction, hint);
                     if (processedTransaction == null)
                     {
                         _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
@@ -424,7 +436,8 @@ internal class Hub : IHubEx, IDisposable
                 }
             }
 
-            currentScope.Value.CaptureTransaction(processedTransaction);
+            var client = currentScopeAndClient.Value;
+            client.CaptureTransaction(processedTransaction, hint);
         }
         catch (Exception e)
         {

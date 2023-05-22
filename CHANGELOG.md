@@ -1,20 +1,50 @@
 # Changelog
 
-## Unreleased
+## 3.32.0
 
 ### Features
 
 - .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
+- Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
+  - Initial `beta.1` release.  Please give it a try and let us know how it goes!
+  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.AzureFunctions.Worker`.
+
+- Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
+  - Currently, this allows you to manipulate attachments in the various "before" event delegates.
+  - Hints can also be used in event and transaction processors by implementing `ISentryEventProcessorWithHint` or `ISentryTransactionProcessorWithHint`, instead of `ISentryEventProcessor` or `ISentryTransactionProcessor`.
+  - Note: Obsoletes the `BeforeSend`, `BeforeSendTransaction`, and `BeforeBreadcrumb` properties on the `SentryOptions` class.  They have been replaced with `SetBeforeSend`, `SetBeforeSendTransaction`, and `SetBeforeBreadcrumb` respectively.  Each one provides overloads both with and without a `Hint` object.
+
 - Allow setting the active span on the scope ([#2364](https://github.com/getsentry/sentry-dotnet/pull/2364))
   - Note: Obsoletes the `Scope.GetSpan` method in favor of a `Scope.Span` property (which now has a setter as well).
 
+- Remove authority from URLs sent to Sentry ([#2365](https://github.com/getsentry/sentry-dotnet/pull/2365))
 - Add tag filters to `SentryOptions` ([#2367](https://github.com/getsentry/sentry-dotnet/pull/2367))
+
+### Fixes
+
+- Fix `EnableTracing` option conflict with `TracesSampleRate` ([#2368](https://github.com/getsentry/sentry-dotnet/pull/2368))
+  - NOTE: This is a potentially breaking change, as the `TracesSampleRate` property has been made nullable.
+    Though extremely uncommon, if you are _retrieving_ the `TracesSampleRate` property for some reason, you will need to account for nulls.
+    However, there is no change to the behavior or _typical_ usage of either of these properties.
+
+- CachedTransport gracefully handles malformed envelopes during processing  ([#2371](https://github.com/getsentry/sentry-dotnet/pull/2371))
+- Remove extraneous iOS simulator resources when building MAUI apps using Visual Studio "Hot Restart" mode, to avoid hitting Windows max path  ([#2384](https://github.com/getsentry/sentry-dotnet/pull/2384))
+
 
 ### Dependencies
 
-- Bump Cocoa SDK from v8.6.0 to v8.7.0 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#870)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.6.0...8.7.0)
+- Bump Cocoa SDK from v8.6.0 to v8.7.1 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359), [#2370](https://github.com/getsentry/sentry-dotnet/pull/2370))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#871)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.6.0...8.7.1)
+- Bump Java SDK from v6.18.1 to v6.19.1 ([#2374](https://github.com/getsentry/sentry-dotnet/pull/2374), [#2381](https://github.com/getsentry/sentry-dotnet/pull/2381))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6191)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.18.1...6.19.1)
+- Bump Cocoa SDK from v8.6.0 to v8.7.2 ([#2359](https://github.com/getsentry/sentry-dotnet/pull/2359), [#2370](https://github.com/getsentry/sentry-dotnet/pull/2370), [#2375](https://github.com/getsentry/sentry-dotnet/pull/2375))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#872)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.6.0...8.7.2)
+- Bump CLI from v2.17.5 to v2.18.0 ([#2380](https://github.com/getsentry/sentry-dotnet/pull/2380))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2180)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.5...2.18.0)
 
 ## 3.31.0
 

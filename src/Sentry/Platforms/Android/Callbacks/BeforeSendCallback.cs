@@ -4,12 +4,12 @@ namespace Sentry.Android.Callbacks;
 
 internal class BeforeSendCallback : JavaObject, JavaSdk.SentryOptions.IBeforeSendCallback
 {
-    private readonly Func<SentryEvent, SentryEvent?> _beforeSend;
+    private readonly Func<SentryEvent, Hint, SentryEvent?> _beforeSend;
     private readonly SentryOptions _options;
     private readonly JavaSdk.SentryOptions _javaOptions;
 
     public BeforeSendCallback(
-        Func<SentryEvent, SentryEvent?> beforeSend,
+        Func<SentryEvent, Hint, SentryEvent?> beforeSend,
         SentryOptions options,
         JavaSdk.SentryOptions javaOptions)
     {
@@ -24,7 +24,8 @@ internal class BeforeSendCallback : JavaObject, JavaSdk.SentryOptions.IBeforeSen
         // https://github.com/getsentry/sentry-dotnet/issues/1469
 
         var evnt = e.ToSentryEvent(_javaOptions);
-        var result = _beforeSend.Invoke(evnt);
+        var hint = h.ToHint();
+        var result = _beforeSend?.Invoke(evnt, hint);
         return result?.ToJavaSentryEvent(_options, _javaOptions);
     }
 }

@@ -39,4 +39,14 @@
 
   </Target>
 
+  <!--
+    Remove simulator resources when building for Hot Restart.
+    Effectively works around https://github.com/getsentry/sentry-dotnet/issues/2363
+  -->
+  <Target Name="_SentryRemoveSimulatorResourcesForHotRestartBuilds" AfterTargets="_CopyLocalBindingResources" Condition="'$(IsHotRestartBuild)' == 'true'">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(Identity)').Contains('Sentry.xcframework\ios-arm64_x86_64-simulator'))" />
+    </ItemGroup>
+  </Target>
+
 </Project>

@@ -61,23 +61,24 @@ public class ErrorProcessorTests
         {
             Exception assertError = null;
             // SaveChanges will throw an exception
-            options.BeforeSend = evt =>
-            {
-                // We use a try-catch here as we cannot assert directly since SentryClient itself would catch the thrown assertion errors
-                try
+            options.SetBeforeSend((evt, _) =>
                 {
-                    Assert.True(evt.Extra.TryGetValue("EntityValidationErrors", out var errors));
-                    var entityValidationErrors = errors as Dictionary<string, List<string>>;
-                    Assert.NotNull(entityValidationErrors);
-                    Assert.NotEmpty(entityValidationErrors);
-                }
-                catch (Exception ex)
-                {
-                    assertError = ex;
-                }
+                    // We use a try-catch here as we cannot assert directly since SentryClient itself would catch the thrown assertion errors
+                    try
+                    {
+                        Assert.True(evt.Extra.TryGetValue("EntityValidationErrors", out var errors));
+                        var entityValidationErrors = errors as Dictionary<string, List<string>>;
+                        Assert.NotNull(entityValidationErrors);
+                        Assert.NotEmpty(entityValidationErrors);
+                    }
+                    catch (Exception ex)
+                    {
+                        assertError = ex;
+                    }
 
-                return null;
-            };
+                    return null;
+                }
+            );
             client.CaptureException(e);
             Assert.Null(assertError);
         }

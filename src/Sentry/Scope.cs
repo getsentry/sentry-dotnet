@@ -244,11 +244,20 @@ public class Scope : IEventLike, IHasDistribution
     }
 
     /// <inheritdoc />
-    public void AddBreadcrumb(Breadcrumb breadcrumb)
+    public void AddBreadcrumb(Breadcrumb breadcrumb) => AddBreadcrumb(breadcrumb, new Hint());
+
+    /// <summary>
+    /// Adds a breadcrumb with a hint.
+    /// </summary>
+    /// <param name="breadcrumb">The breadcrumb</param>
+    /// <param name="hint">A hint for use in the BeforeBreadcrumb callback</param>
+    public void AddBreadcrumb(Breadcrumb breadcrumb, Hint hint)
     {
-        if (Options.BeforeBreadcrumb is { } beforeBreadcrumb)
+        if (Options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
-            if (beforeBreadcrumb(breadcrumb) is { } processedBreadcrumb)
+            hint.AddAttachmentsFromScope(this);
+
+            if (beforeBreadcrumb(breadcrumb, hint) is { } processedBreadcrumb)
             {
                 breadcrumb = processedBreadcrumb;
             }
@@ -364,7 +373,6 @@ public class Scope : IEventLike, IHasDistribution
 #endif
     }
 
-
     /// <summary>
     /// Applies the data from this scope to another event-like object.
     /// </summary>
@@ -468,8 +476,10 @@ public class Scope : IEventLike, IHasDistribution
     /// </summary>
     public Scope Clone()
     {
-        var clone = new Scope(Options);
-        clone.OnEvaluating = OnEvaluating;
+        var clone = new Scope(Options)
+        {
+            OnEvaluating = OnEvaluating
+        };
 
         Apply(clone);
 
