@@ -34,6 +34,13 @@
     <Compile Remove="**\Tizen\**\*.cs" />
   </ItemGroup>
 
+  <!-- Allow setting CLSCompliant via property in any csproj -->
+  <ItemGroup>
+    <AssemblyAttribute Include="CLSCompliantAttribute" Condition="'$(CLSCompliant)' == 'true'">
+      <_Parameter1>true</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
   <Target Name="_SetPublishFolderTypeNoneOnDocFileItems"
     BeforeTargets="_ComputePublishLocation"

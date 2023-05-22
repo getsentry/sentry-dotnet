@@ -15,4 +15,9 @@
     <ProjectReference Include="/dev/perfview/src/TraceEvent/TraceEvent.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Benchmarks" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Profiling.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
 </Project>

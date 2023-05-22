@@ -3,6 +3,7 @@
     "path": "Sentry.Full.sln",
     "projects": [
       "test\\Sentry.Android.AssemblyReader.Tests\\Sentry.Android.AssemblyReader.Tests.csproj",
+      "test\\Sentry.AzureFunctions.Worker.Tests\\Sentry.AzureFunctions.Worker.Tests.csproj",
       "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",

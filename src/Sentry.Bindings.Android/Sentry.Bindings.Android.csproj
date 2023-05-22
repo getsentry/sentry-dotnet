@@ -3,7 +3,7 @@
     <TargetFramework>net6.0-android</TargetFramework>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>6.19.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>6.19.1</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
   </PropertyGroup>
@@ -13,6 +13,14 @@
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
     <PackageReference Remove="SIL.ReleaseTasks" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Testing" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Extensions.Logging.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
   <ItemGroup>
