@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
+  - This changes how `AggregateException` is handled.  Instead of filtering them out client-side, the SDK marks them as an "exception group",
+    and adds includes data that represents the hierarchical structure of inner exceptions. Sentry now recognizes this server-side,
+    improving the accuracy of the issue detail page.
+  - Accordingly, the `KeepAggregateException` option is now obsolete and does nothing.  Please remove any usages of `KeepAggregateException`.
+
 ## 3.32.0
 
 ### Features
