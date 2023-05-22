@@ -9,6 +9,12 @@
     and adds includes data that represents the hierarchical structure of inner exceptions. Sentry now recognizes this server-side,
     improving the accuracy of the issue detail page.
   - Accordingly, the `KeepAggregateException` option is now obsolete and does nothing.  Please remove any usages of `KeepAggregateException`.
+  - NOTE: If running Self-Hosted Sentry, you should wait to adopt this SDK update until after updating to the 23.6.0 (est. June 2023) release of Sentry.
+    The effect of updating the SDK early will be as if `KeepAggregateException = true` was set.  That will not break anything, but may affect issue grouping and alerts.
+
+### Fixes
+
+  - Status messages when uploading symbols or sources are improved. ([#2307](https://github.com/getsentry/sentry-dotnet/issues/2307))
 
 ### Dependencies
 
