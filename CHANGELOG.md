@@ -1,5 +1,33 @@
 # Changelog
 
+## Unreleased
+
+## Fixes
+
+- Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
+
+## 3.33.0
+
+### Features
+
+- .NET SDK changes for exception groups ([#2287](https://github.com/getsentry/sentry-dotnet/pull/2287))
+  - This changes how `AggregateException` is handled.  Instead of filtering them out client-side, the SDK marks them as an "exception group",
+    and adds includes data that represents the hierarchical structure of inner exceptions. Sentry now recognizes this server-side,
+    improving the accuracy of the issue detail page.
+  - Accordingly, the `KeepAggregateException` option is now obsolete and does nothing.  Please remove any usages of `KeepAggregateException`.
+  - NOTE: If running Self-Hosted Sentry, you should wait to adopt this SDK update until after updating to the 23.6.0 (est. June 2023) release of Sentry.
+    The effect of updating the SDK early will be as if `KeepAggregateException = true` was set.  That will not break anything, but may affect issue grouping and alerts.
+
+### Fixes
+
+  - Status messages when uploading symbols or sources are improved. ([#2307](https://github.com/getsentry/sentry-dotnet/issues/2307))
+
+### Dependencies
+
+- Bump CLI from v2.18.0 to v2.18.1 ([#2386](https://github.com/getsentry/sentry-dotnet/pull/2386))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2181)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.0...2.18.1)
+
 ## 3.32.0
 
 ### Features

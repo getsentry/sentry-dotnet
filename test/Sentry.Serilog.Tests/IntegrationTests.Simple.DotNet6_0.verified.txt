@@ -184,6 +184,7 @@
                   Type: generic,
                   Handled: true,
                   Synthetic: false,
+                  IsExceptionGroup: false,
                   Data: {
                     details: Do work always throws.
                   }

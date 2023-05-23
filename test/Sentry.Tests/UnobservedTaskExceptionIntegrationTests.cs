@@ -79,11 +79,32 @@ public class UnobservedTaskExceptionIntegrationTests
             processor.Process(capturedException, capturedEvent);
         }
 
-        // We should have a stack trace and mechanism on the final reported exception
-        var reportedException = capturedEvent.SentryExceptions?.LastOrDefault();
-        Assert.NotNull(reportedException);
-        Assert.NotNull(reportedException.Stacktrace);
-        Assert.NotNull(reportedException.Mechanism);
+        // There should be two reported exceptions
+        var exceptions = capturedEvent.SentryExceptions?.ToList();
+        Assert.NotNull(exceptions);
+        Assert.Equal(2, exceptions.Count);
+
+        // The first should be the actual exception that was unobserved.
+        var actualException = exceptions[0];
+        Assert.NotNull(actualException.Stacktrace);
+        Assert.NotNull(actualException.Mechanism);
+        Assert.Equal("chained", actualException.Mechanism.Type);
+        Assert.Equal("InnerExceptions[0]", actualException.Mechanism.Source);
+        Assert.Equal(1, actualException.Mechanism.ExceptionId);
+        Assert.Equal(0, actualException.Mechanism.ParentId);
+        Assert.False(actualException.Mechanism.IsExceptionGroup);
+        Assert.False(actualException.Mechanism.Synthetic);
+
+        // The last should be the aggregate exception that raised the UnobservedTaskException event.
+        var aggregateException = exceptions[1];
+        Assert.Null(aggregateException.Stacktrace);
+        Assert.NotNull(aggregateException.Mechanism);
+        Assert.Equal("UnobservedTaskException", aggregateException.Mechanism.Type);
+        Assert.Null(aggregateException.Mechanism.Source);
+        Assert.Equal(0, aggregateException.Mechanism.ExceptionId);
+        Assert.Null(aggregateException.Mechanism.ParentId);
+        Assert.True(aggregateException.Mechanism.IsExceptionGroup);
+        Assert.False(aggregateException.Mechanism.Synthetic);
     }
 #endif
 

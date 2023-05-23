@@ -30,6 +30,68 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         sentryEvent.SentryExceptions = sentryExceptions;
     }
 
+    // Sentry exceptions are sorted oldest to newest.
+    // See https://develop.sentry.dev/sdk/event-payloads/exception
+    internal IReadOnlyList<SentryException> CreateSentryExceptions(Exception exception)
+    {
+        var exceptions = WalkExceptions(exception).Reverse().ToList();
+
+        // In the case of only one exception, ExceptionId and ParentId are useless.
+        if (exceptions.Count == 1 && exceptions[0].Mechanism is { } mechanism)
+        {
+            mechanism.ExceptionId = null;
+            mechanism.ParentId = null;
+            if (mechanism.IsDefaultOrEmpty())
+            {
+                // No need to convey an empty mechanism.
+                exceptions[0].Mechanism = null;
+            }
+        }
+
+        return exceptions;
+    }
+
+    private class Counter
+    {
+        private int _value;
+
+        public int GetNextValue() => _value++;
+    }
+
+    private IEnumerable<SentryException> WalkExceptions(Exception exception) =>
+        WalkExceptions(exception, new Counter(), null, null);
+
+    private IEnumerable<SentryException> WalkExceptions(Exception exception, Counter counter, int? parentId, string? source)
+    {
+        var ex = exception;
+        while (ex is not null)
+        {
+            var id = counter.GetNextValue();
+
+            yield return BuildSentryException(ex, id, parentId, source);
+
+            if (ex is AggregateException aex)
+            {
+                for (var i = 0; i < aex.InnerExceptions.Count; i++)
+                {
+                    ex = aex.InnerExceptions[i];
+                    source = $"{nameof(AggregateException.InnerExceptions)}[{i}]";
+                    var sentryExceptions = WalkExceptions(ex, counter, id, source);
+                    foreach (var sentryException in sentryExceptions)
+                    {
+                        yield return sentryException;
+                    }
+                }
+
+                break;
+            }
+
+            ex = ex.InnerException;
+            parentId = id;
+            source = nameof(AggregateException.InnerException);
+        }
+    }
+
     private static void MoveExceptionDataToEvent(SentryEvent sentryEvent, IEnumerable<SentryException> sentryExceptions)
     {
         var keysToRemove = new List<string>();
@@ -77,41 +139,17 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         }
     }
 
-    internal List<SentryException> CreateSentryExceptions(Exception exception)
-    {
-        var exceptions = exception
-            .EnumerateChainedExceptions(_options)
-            .Select(BuildSentryException)
-            .ToList();
-
-        // If we've filtered out the aggregate exception, we'll need to copy over details from it.
-        if (exception is AggregateException && !_options.KeepAggregateException)
-        {
-            var original = BuildSentryException(exception);
-
-            // Exceptions are sent from oldest to newest, so the details belong on the LAST exception.
-            var last = exceptions.Last();
-            last.Mechanism = original.Mechanism;
-
-            // In some cases the stack trace is already positioned on the inner exception.
-            // Only copy it over when it is missing.
-            last.Stacktrace ??= original.Stacktrace;
-        }
-
-        return exceptions;
-    }
-
-    private SentryException BuildSentryException(Exception exception)
+    private SentryException BuildSentryException(Exception exception, int id, int? parentId, string? source)
     {
         var sentryEx = new SentryException
         {
             Type = exception.GetType().FullName,
             Module = exception.GetType().Assembly.FullName,
-            Value = exception.Message,
+            Value = exception is AggregateException agg ? agg.GetRawMessage() : exception.Message,
             ThreadId = Environment.CurrentManagedThreadId
         };
 
-        var mechanism = GetMechanism(exception);
+        var mechanism = GetMechanism(exception, id, parentId, source);
         if (!mechanism.IsDefaultOrEmpty())
         {
             sentryEx.Mechanism = mechanism;
@@ -121,7 +159,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         return sentryEx;
     }
 
-    private static Mechanism GetMechanism(Exception exception)
+    private static Mechanism GetMechanism(Exception exception, int id, int? parentId, string? source)
     {
         var mechanism = new Mechanism();
 
@@ -165,6 +203,16 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
         foreach (var key in exception.Data.Keys.OfType<string>())
         {
             mechanism.Data[key] = exception.Data[key]!;
+        }
+
+        mechanism.ExceptionId = id;
+        mechanism.ParentId = parentId;
+        mechanism.Source = source;
+        mechanism.IsExceptionGroup = exception is AggregateException;
+
+        if (source != null)
+        {
+            mechanism.Type = "chained";
         }
 
         return mechanism;

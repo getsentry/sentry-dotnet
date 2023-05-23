@@ -82,4 +82,19 @@ internal static class MiscExtensions
         TKey key,
         TValue value) =>
         collection.Add(new KeyValuePair<TKey, TValue>(key, value));
+
+    internal static string GetRawMessage(this AggregateException exception)
+    {
+        var message = exception.Message;
+        if (exception.InnerException is { } inner)
+        {
+            var i = message.IndexOf($" ({inner.Message})", StringComparison.Ordinal);
+            if (i > 0)
+            {
+                return message[..i];
+            }
+        }
+
+        return message;
+    }
 }

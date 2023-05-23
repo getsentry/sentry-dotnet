@@ -1,4 +1,3 @@
-using Sentry;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -55,41 +54,5 @@ public static class SentryExceptionExtensions
         {
             ex.Data[Mechanism.HandledKey] = handled;
         }
-    }
-
-    /// <summary>
-    /// Recursively enumerates all <see cref="AggregateException.InnerExceptions"/> and <see cref="Exception.InnerException"/>
-    /// Not for public use.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static IEnumerable<Exception> EnumerateChainedExceptions(this Exception exception, SentryOptions options)
-    {
-        if (exception is AggregateException aggregateException)
-        {
-            foreach (var inner in EnumerateInner(options, aggregateException))
-            {
-                yield return inner;
-            }
-
-            if (!options.KeepAggregateException)
-            {
-                yield break;
-            }
-        }
-        else if (exception.InnerException != null)
-        {
-            foreach (var inner in exception.InnerException.EnumerateChainedExceptions(options))
-            {
-                yield return inner;
-            }
-        }
-
-        yield return exception;
-    }
-
-    private static IEnumerable<Exception> EnumerateInner(SentryOptions options, AggregateException aggregateException)
-    {
-        return aggregateException.InnerExceptions
-            .SelectMany(exception => exception.EnumerateChainedExceptions(options));
     }
 }
