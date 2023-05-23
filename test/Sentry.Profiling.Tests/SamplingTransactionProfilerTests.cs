@@ -90,16 +90,13 @@ public class SamplingTransactionProfilerTests
         var profileToVerify = new SampleProfile
         {
         };
-        for (var i = 0; i < 2; i++)
-        {
-            profileToVerify.Stacks.Add(profile.Stacks[i]);
-        }
-        for (var i = 0; i < 109; i++)
+        profileToVerify.Stacks.Add(profile.Stacks[0]);
+        for (var i = 0; i < profile.Stacks[0].Count; i++)
         {
             profileToVerify.Frames.Add(profile.Frames[i]);
         }
         var json = profileToVerify.ToJsonString(_testOutputLogger);
-        return VerifyJson(json).DisableRequireUniquePrefix();
+        return VerifyJson(json);
     }
 
     [Fact]
