@@ -5,6 +5,7 @@ namespace Sentry.Profiling.Tests;
 // Note: we must not run tests in parallel because we only support profiling one transaction at a time.
 // That means setting up a test-collection with parallelization disabled and NOT using any async test functions.
 [CollectionDefinition("SamplingProfiler tests", DisableParallelization = true)]
+[UsesVerify]
 public class SamplingTransactionProfilerTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
@@ -59,7 +60,7 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    private void CaptureAndValidate(ITransactionProfilerFactory factory)
+    private SampleProfile CaptureAndValidate(ITransactionProfilerFactory factory)
     {
         var clock = SentryStopwatch.StartNew();
         var hub = Substitute.For<IHub>();
@@ -76,14 +77,29 @@ public class SamplingTransactionProfilerTests
         var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
         ValidateProfile(profileInfo.Profile, elapsedNanoseconds);
+        return profileInfo.Profile;
     }
 
-
     [Fact]
-    public void Profiler_SingleProfile_Works()
+    public Task Profiler_SingleProfile_Works()
     {
         using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
-        CaptureAndValidate(factory);
+        var profile = CaptureAndValidate(factory);
+
+        // We "Verify" part of a profile that seems to be stable.
+        var profileToVerify = new SampleProfile
+        {
+        };
+        for (var i = 0; i < 2; i++)
+        {
+            profileToVerify.Stacks.Add(profile.Stacks[i]);
+        }
+        for (var i = 0; i < 109; i++)
+        {
+            profileToVerify.Frames.Add(profile.Frames[i]);
+        }
+        var json = profileToVerify.ToJsonString(_testOutputLogger);
+        return VerifyJson(json).DisableRequireUniquePrefix();
     }
 
     [Fact]

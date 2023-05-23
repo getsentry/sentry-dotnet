@@ -5,7 +5,7 @@ using Sentry.Profiling;
 
 internal static class Program
 {
-    private static async Task Main()
+    private static void Main()
     {
         // Enable the SDK
         using (SentrySdk.Init(options =>
