@@ -5,6 +5,7 @@
 ### Fixes
 
 - SentryHttpMessageHandler added when AddHttpClient is before UseSentry ([#2390](https://github.com/getsentry/sentry-dotnet/pull/2390))
+- Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
 
 ## 3.33.0
 
