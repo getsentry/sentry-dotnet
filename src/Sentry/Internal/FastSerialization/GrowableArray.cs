@@ -358,11 +358,6 @@ internal struct GrowableArray<T> : IReadOnlyList<T>
     // Implementation of IEnumerable<T>.
     public IEnumerator<T> GetEnumerator() => new GrowableArrayEnumerator(this);
 
-    internal void Add(object value)
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     /// IEnumerator implementation.
     /// </summary>

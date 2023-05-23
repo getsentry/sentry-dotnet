@@ -87,9 +87,7 @@ public class SamplingTransactionProfilerTests
         var profile = CaptureAndValidate(factory);
 
         // We "Verify" part of a profile that seems to be stable.
-        var profileToVerify = new SampleProfile
-        {
-        };
+        var profileToVerify = new SampleProfile();
         profileToVerify.Stacks.Add(profile.Stacks[0]);
         for (var i = 0; i < profile.Stacks[0].Count; i++)
         {

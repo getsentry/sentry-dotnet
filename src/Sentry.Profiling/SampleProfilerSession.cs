@@ -14,15 +14,16 @@ internal class SampleProfilerSession : IDisposable
     private readonly TraceLogEventSource _eventSource;
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
     private readonly IDiagnosticLogger? _logger;
-    private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
 
-    private SampleProfilerSession(EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
+    private SampleProfilerSession(SentryStopwatch stopatch, EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
     {
         _session = session;
         _logger = logger;
         _eventSource = eventSource;
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
+        _stopwatch = stopatch;
     }
 
     // Exposed only for benchmarks.
@@ -62,12 +63,13 @@ internal class SampleProfilerSession : IDisposable
             requestRundown: true
         );
         var session = client.StartEventPipeSession(Providers, requestRundown: false, CircularBufferMB);
+        var stopWatch = SentryStopwatch.StartNew();
         var eventSource = TraceLog.CreateFromEventPipeSession(session, rundownSession);
 
         // Process() blocks until the session is stopped so we need to run it on a separate thread.
         Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning);
 
-        return new SampleProfilerSession(session, eventSource, logger);
+        return new SampleProfilerSession(stopWatch, session, eventSource, logger);
     }
 
     public void Stop()
