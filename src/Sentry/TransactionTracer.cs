@@ -308,3 +308,24 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         SpanId,
         IsSampled);
 }
+
+internal static class TransactionTracerExtensions
+{
+    internal static ISpan? SpanFromTraceData(this ITransaction transaction, Func<SpanTracer, bool> match)
+    {
+        return transaction.TryGetSpanFromTraceData(match, out var span)
+            ? span
+            : null;
+    }
+
+    internal static bool TryGetSpanFromTraceData(this ITransaction transaction, Func<SpanTracer, bool> match, out ISpan? span)
+    {
+        if (transaction is TransactionTracer transactionTracer)
+        {
+            span = transactionTracer.Spans.SingleOrDefault(s => s is SpanTracer spanTracer && match(spanTracer));
+            return span is not null;
+        }
+        span = null;
+        return false;
+    }
+}

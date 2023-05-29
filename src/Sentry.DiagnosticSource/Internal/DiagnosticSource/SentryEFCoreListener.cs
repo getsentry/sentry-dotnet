@@ -7,13 +7,6 @@ namespace Sentry.Internal.DiagnosticSource;
 /// </summary>
 internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 {
-    private enum SentryEFSpanType
-    {
-        Connection,
-        QueryExecution,
-        QueryCompiler
-    }
-
     internal const string EFConnectionOpening = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionOpening";
     internal const string EFConnectionClosed = "Microsoft.EntityFrameworkCore.Database.Connection.ConnectionClosed";
     internal const string EFCommandExecuting = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting";
@@ -52,85 +45,54 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 
     internal void DisableQuerySpan() => _logQueryEnabled = false;
 
-    private void AddSpan(SentryEFSpanType type, string operation, string? description)
-    {
-        var transaction = _hub.GetTransactionIfSampled();
-        if (transaction == null)
-        {
-            return;
-        }
-
-        var parent = type == SentryEFSpanType.QueryExecution
-            ? transaction.GetLastActiveSpan() ?? transaction.GetDbParentSpan()
-            : transaction.GetDbParentSpan();
-
-        var child = parent.StartChild(operation, description);
-
-        var asyncLocalSpan = GetSpanBucket(type);
-        asyncLocalSpan.Value = new WeakReference<ISpan>(child);
-    }
-
-    private ISpan? TakeSpan(SentryEFSpanType type)
-    {
-        var transaction = _hub.GetTransactionIfSampled();
-        if (transaction == null)
-        {
-            return null;
-        }
-
-        if (GetSpanBucket(type).Value is { } reference && reference.TryGetTarget(out var startedSpan))
-        {
-            return startedSpan;
-        }
-
-        _options.LogWarning("Trying to close a span that was already garbage collected. {0}", type);
-        return null;
-    }
-
-    private AsyncLocal<WeakReference<ISpan>> GetSpanBucket(SentryEFSpanType type)
-        => type switch
-        {
-            SentryEFSpanType.QueryCompiler => _spansCompilerLocal,
-            SentryEFSpanType.QueryExecution => _spansQueryLocal,
-            SentryEFSpanType.Connection => _spansConnectionLocal,
-            _ => throw new($"Unknown SentryEFSpanType: {type}")
-        };
-
     public void OnCompleted() { }
 
     public void OnError(Exception error) { }
+
+    private QueryCompilerDiagnosticSourceHelper QueryCompilerDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
+        new(_hub, _options, _spansCompilerLocal, diagnosticsSourceValue);
+
+    private ConnectionDiagnosticSourceHelper ConnectionDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
+        new(_hub, _options, _spansConnectionLocal, diagnosticsSourceValue);
+
+    private CommandDiagnosticSourceHelper CommandDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
+        new(_hub, _options, _spansQueryLocal, diagnosticsSourceValue);
 
     public void OnNext(KeyValuePair<string, object?> value)
     {
         try
         {
+            // Because we have to support the .NET framework, we can't get at strongly typed diagnostic source events.
+            // We do know they're objects, that can be converted to strings though... and we can get the correlation
+            // data we need from there by parsing the string. Not as reliable, but works against all frameworks.
+            var diagnosticSourceValue = value.Value?.ToString();
             switch (value.Key)
             {
                 // Query compiler span
                 case EFQueryStartCompiling or EFQueryCompiling:
-                    AddSpan(SentryEFSpanType.QueryCompiler, "db.query.compile", FilterNewLineValue(value.Value));
+                    QueryCompilerDiagnosticSourceHelper(value.Value).AddSpan();
                     break;
                 case EFQueryCompiled:
-                    TakeSpan(SentryEFSpanType.QueryCompiler)?.Finish(SpanStatus.Ok);
+                    QueryCompilerDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.Ok);
                     break;
 
                 // Connection span (A transaction may or may not show a connection with it.)
                 case EFConnectionOpening when _logConnectionEnabled:
-                    AddSpan(SentryEFSpanType.Connection, "db.connection", null);
+                    ConnectionDiagnosticSourceHelper(value.Value).AddSpan();
                     break;
                 case EFConnectionClosed when _logConnectionEnabled:
-                    TakeSpan(SentryEFSpanType.Connection)?.Finish(SpanStatus.Ok);
+                    ConnectionDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.Ok);
                     break;
 
                 // Query Execution span
                 case EFCommandExecuting when _logQueryEnabled:
-                    AddSpan(SentryEFSpanType.QueryExecution, "db.query", FilterNewLineValue(value.Value));
+                    CommandDiagnosticSourceHelper(value.Value).AddSpan();
                     break;
                 case EFCommandFailed when _logQueryEnabled:
-                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.InternalError);
+                    CommandDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.InternalError);
                     break;
                 case EFCommandExecuted when _logQueryEnabled:
-                    TakeSpan(SentryEFSpanType.QueryExecution)?.Finish(SpanStatus.Ok);
+                    CommandDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.Ok);
                     break;
             }
         }
@@ -138,22 +100,5 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
         {
             _options.LogError("Failed to intercept EF Core event.", ex);
         }
-    }
-
-    /// <summary>
-    /// Get the Query with error message and remove the unneeded values.
-    /// </summary>
-    /// <example>
-    /// Compiling query model:
-    /// EF initialize...\r\nEF Query...
-    /// becomes:
-    /// EF Query...
-    /// </example>
-    /// <param name="value">the query to be parsed value</param>
-    /// <returns>the filtered query</returns>
-    internal static string? FilterNewLineValue(object? value)
-    {
-        var str = value?.ToString();
-        return str?[(str.IndexOf('\n') + 1)..];
     }
 }
