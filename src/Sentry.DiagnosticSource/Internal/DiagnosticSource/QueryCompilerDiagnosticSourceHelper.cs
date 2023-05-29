@@ -1,3 +1,7 @@
+#if NETSTANDARD2_1_OR_GREATER
+using Microsoft.EntityFrameworkCore.Diagnostics;
+#endif
+
 namespace Sentry.Internal.DiagnosticSource;
 
 internal class QueryCompilerDiagnosticSourceHelper : DiagnosticSourceHelper
@@ -11,12 +15,4 @@ internal class QueryCompilerDiagnosticSourceHelper : DiagnosticSourceHelper
     protected override string Description => FilterNewLineValue(DiagnosticSourceValue) ?? string.Empty;
 
     protected override ISpan GetParentSpan(ITransaction transaction) => transaction.GetDbParentSpan();
-
-    // protected override void SetSpanReference(ISpan span)
-    // {
-    //     if (span is SpanTracer spanTracer)
-    //     {
-    //         spanTracer.TraceData["Query"] = Description;
-    //     }
-    // }
 }

@@ -44,7 +44,7 @@ internal abstract class DiagnosticSourceHelper
         Options.LogDebug($"(Sentry finish span {Operation})");
         LogTransactionSpans();
 
-        var sourceSpan = GetSpanReference();
+        var sourceSpan = GetSpanReference(Transaction);
         if (sourceSpan == null)
         {
             Options.LogWarning("Trying to close a span that was already garbage collected. {0}", Operation);
@@ -94,7 +94,7 @@ internal abstract class DiagnosticSourceHelper
         SpanLocal.Value = new WeakReference<ISpan>(span);
     }
 
-    protected virtual ISpan? GetSpanReference()
+    protected virtual ISpan? GetSpanReference(ITransaction transaction)
     {
         return (SpanLocal.Value is { } reference && reference.TryGetTarget(out var startedSpan))
             ? startedSpan

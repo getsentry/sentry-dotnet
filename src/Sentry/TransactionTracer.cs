@@ -309,6 +309,8 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         IsSampled);
 }
 
+#if NETSTANDARD2_1_OR_GREATER
+
 internal static class TransactionTracerExtensions
 {
     internal static ISpan? SpanFromTraceData(this ITransaction transaction, Func<SpanTracer, bool> match)
@@ -320,12 +322,13 @@ internal static class TransactionTracerExtensions
 
     internal static bool TryGetSpanFromTraceData(this ITransaction transaction, Func<SpanTracer, bool> match, out ISpan? span)
     {
+        span = null;
         if (transaction is TransactionTracer transactionTracer)
         {
             span = transactionTracer.Spans.SingleOrDefault(s => s is SpanTracer spanTracer && match(spanTracer));
-            return span is not null;
         }
-        span = null;
-        return false;
+        return span is not null;
     }
 }
+
+#endif
