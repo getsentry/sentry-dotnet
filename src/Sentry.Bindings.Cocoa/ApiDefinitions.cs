@@ -237,17 +237,29 @@ interface SentryCrashExceptionApplication
 [Internal]
 interface SentryDebugImageProvider
 {
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads __attribute__((deprecated("Use -[getDebugImagesForThreads:isCrash:] instead.")));
     [Export ("getDebugImagesForThreads:")]
     SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads isCrash:(BOOL)isCrash;
+    [Export ("getDebugImagesForThreads:isCrash:")]
+    SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads, bool isCrash);
+
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames __attribute__((deprecated("Use -[getDebugImagesForFrames:isCrash:] instead.")));
     [Export ("getDebugImagesForFrames:")]
     SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames isCrash:(BOOL)isCrash;
+    [Export ("getDebugImagesForFrames:isCrash:")]
+    SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames, bool isCrash);
+
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages __attribute__((deprecated("Use -[getDebugImagesCrashed:] instead.")));
     [Export ("getDebugImages")]
     SentryDebugMeta[] DebugImages { get; }
+
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash;
+    [Export ("getDebugImagesCrashed:")]
+    SentryDebugMeta[] GetDebugImagesCrashed (bool isCrash);
 }
 
 // @interface SentryDebugMeta : NSObject <SentrySerializable>
@@ -2346,6 +2358,11 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("getDebugImages")]
     SentryDebugMeta[] DebugImages { get; }
+
+    // +(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash;
+    [Static]
+    [Export ("getDebugImagesCrashed:")]
+    SentryDebugMeta[] GetDebugImagesCrashed (bool isCrash);
 
     // +(void)setSdkName:(NSString * _Nonnull)sdkName andVersionString:(NSString * _Nonnull)versionString;
     [Static]
