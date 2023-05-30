@@ -69,8 +69,8 @@ public class TraceLogProcessorTests
     private SampleProfile GetStreamedProfile()
     {
         var etlFilePath = Path.Combine(_resourcesPath, "sample.nettrace");
-        using var fileStream = File.Open(etlFilePath, FileMode.Open);
-        using var eventPipeEventSource = new EventPipeEventSource(fileStream);
+        using var eventPipeEventSource = new EventPipeEventSource(new MemoryStream(File.ReadAllBytes(etlFilePath)));
+        using var rundownSource = new EventPipeEventSource(new MemoryStream(File.ReadAllBytes(etlFilePath)));
         using var eventSource = TraceLog.CreateFromEventPipeEventSource(eventPipeEventSource);
         return BuilProfile(eventSource);
     }
