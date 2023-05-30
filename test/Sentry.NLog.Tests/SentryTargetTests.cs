@@ -140,7 +140,7 @@ public class SentryTargetTests
     {
         _fixture.Options.InitializeSdk = false;
         var target = _fixture.GetTarget();
-        SimpleConfigurator.ConfigureForTargetLogging(target);
+        LogManager.Setup().LoadConfiguration(c => c.ForLogger().WriteTo(target));
 
         var sut = LogManager.GetCurrentClassLogger();
 
