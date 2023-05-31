@@ -91,7 +91,7 @@ Describe 'CLI-integration' {
     }
 
     It "uploads symbols and sources for a MAUI Android app build" {
-        $result = DotnetBuild 'Sentry.Samples.Maui' $True $True 'net6.0-android'
+        $result = DotnetBuild 'Sentry.Samples.Maui' $True $True 'net7.0-android'
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
@@ -111,7 +111,7 @@ Describe 'CLI-integration' {
     }
 
     It "uploads symbols and sources for a MAUI iOS app build" {
-        $result = DotnetBuild 'Sentry.Samples.Maui' $True $True 'net6.0-ios'
+        $result = DotnetBuild 'Sentry.Samples.Maui' $True $True 'net7.0-ios'
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
