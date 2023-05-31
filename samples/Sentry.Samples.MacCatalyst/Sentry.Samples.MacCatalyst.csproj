@@ -18,12 +18,13 @@
   </ItemGroup>
 
   <!--
-    Use the arm64 runtime when building on arm64 Macs.
+    Use the arm64 runtime when building on arm64, and the x64 runtime when building on x64 Macs.
     See https://github.com/xamarin/xamarin-macios/issues/17841
   -->
   <PropertyGroup>
     <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
     <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64' And ('$(_MacCatalystRuntimeIdentifier)' == 'maccatalyst-x64' Or ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">maccatalyst-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'x64' And ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == '')">maccatalyst-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <!--
