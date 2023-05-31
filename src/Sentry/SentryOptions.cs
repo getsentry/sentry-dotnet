@@ -1056,6 +1056,7 @@ public class SentryOptions
                 "MS", // MS.Win32, MS.Internal, etc: Desktop apps
                 "ABI.Microsoft", // MAUI
                 "WinRT", // WinRT, UWP, WinUI
+                "UIKit", // iOS / MacCatalyst
                 "Newtonsoft.Json",
                 "FSharp",
                 "Serilog",
