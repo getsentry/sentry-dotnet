@@ -32,7 +32,7 @@ internal static class MauiDeviceData
             // device.Brand ??= ?
             // device.Family ??= ?
             // device.ModelId ??= ?
-            // device.Architecture ??= ?
+            device.Architecture ??= RuntimeInformation.OSArchitecture.ToString();
             // ? = deviceInfo.Platform;
             // ? = deviceInfo.VersionString;
 
