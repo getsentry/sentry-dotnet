@@ -141,6 +141,7 @@ public static partial class SentrySdk
             o.EnableActivityLifecycleTracingAutoFinish = options.Android.EnableActivityLifecycleTracingAutoFinish;
             o.EnableAppComponentBreadcrumbs = options.Android.EnableAppComponentBreadcrumbs;
             o.EnableAppLifecycleBreadcrumbs = options.Android.EnableAppLifecycleBreadcrumbs;
+            o.EnableRootCheck = options.Android.EnableRootCheck;
             o.EnableSystemEventBreadcrumbs = options.Android.EnableSystemEventBreadcrumbs;
             o.EnableUserInteractionBreadcrumbs = options.Android.EnableUserInteractionBreadcrumbs;
             o.EnableUserInteractionTracing = options.Android.EnableUserInteractionTracing;
