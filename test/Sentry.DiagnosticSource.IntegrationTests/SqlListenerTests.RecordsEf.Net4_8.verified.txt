@@ -55,7 +55,10 @@ SELECT [Id]
 FROM [TestEntities]
 WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           Status: Ok,
-          IsSampled: true
+          IsSampled: true,
+          Extra: {
+            db.command_id: Guid_1
+          }
         },
         {
           IsFinished: true,
@@ -64,7 +67,10 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
 SELECT [t].[Id], [t].[Property]
 FROM [TestEntities] AS [t],
           Status: Ok,
-          IsSampled: true
+          IsSampled: true,
+          Extra: {
+            db.command_id: Guid_2
+          }
         }
       ],
       IsFinished: true
