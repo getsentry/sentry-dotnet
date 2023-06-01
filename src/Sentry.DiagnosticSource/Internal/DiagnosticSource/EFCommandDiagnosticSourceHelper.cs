@@ -12,33 +12,35 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string Operation => "db.query";
     protected override string Description => FilterNewLineValue(DiagnosticSourceValue) ?? string.Empty;
-
+    private Guid? ConnectionId => DiagnosticSourceValue?.GetGuidProperty("ConnectionId");
     private Guid? CommandId => DiagnosticSourceValue?.GetGuidProperty("CommandId");
-        // The following would be more restrictive but harder to mock/test
-        // DiagnosticSourceValue?.GetType().FullName == "Microsoft.EntityFrameworkCore.Diagnostics.CommandEventData"
-        //     ? DiagnosticSourceValue?.GetGuidProperty("CommandId") :
-        //     null;
 
-    private bool CorrelatedSpan(SpanTracer span) =>
-        span.TraceData.ContainsKey(nameof(CommandId)) &&
-        span.TraceData[nameof(CommandId)] is Guid traceCommandId &&
-        CommandId == traceCommandId;
-
-    protected override ISpan? GetSpanReference(ITransaction transaction)
+    private static void SetCommandId(ISpan span, Guid? commandId)
     {
-        // Try to return a correlated span if we can find one.
-        if (TryGetSpanFromTraceData(transaction, CorrelatedSpan, out var correlatedSpan))
-        {
-            return correlatedSpan;
-        }
-        return base.GetSpanReference(transaction);
+        Debug.Assert(commandId != Guid.Empty);
+
+        span.SetExtra(CommandExtraKey, commandId);
     }
+
+    private static Guid? TryGetCommandId(ISpan span) =>
+        span.Extra.TryGetValue(CommandExtraKey, out var key) && key is Guid guid
+            ? guid
+            : null;
+
+    protected override ISpan? GetSpanReference(ITransaction transaction) =>
+        CommandId is { } commandId
+            ? transaction.Spans
+                .FirstOrDefault(span =>
+                    !span.IsFinished &&
+                    span.Operation == Operation &&
+                    TryGetCommandId(span) == commandId)
+            : base.GetSpanReference(transaction);
 
     protected override void SetSpanReference(ISpan span)
     {
-        if (span is SpanTracer spanTracer)
+        if (CommandId is { })
         {
-            spanTracer.TraceData[nameof(CommandId)] = CommandId;
+            SetCommandId(span, CommandId);
             return;
         }
         base.SetSpanReference(span);

@@ -12,33 +12,34 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string Operation => "db.connection";
     protected override string Description => null!;
-
     private Guid? ConnectionId => DiagnosticSourceValue?.GetGuidProperty("ConnectionId");
-        // The following would be more restrictive but harder to mock/test
-        // DiagnosticSourceValue?.GetType().FullName == "Microsoft.EntityFrameworkCore.Diagnostics.ConnectionEventData"
-        //     ? DiagnosticSourceValue?.GetGuidProperty("ConnectionId") :
-        //     null;
 
-    private bool CorrelatedSpan(SpanTracer span) =>
-        span.TraceData.ContainsKey(nameof(ConnectionId)) &&
-        span.TraceData[nameof(ConnectionId)] is Guid traceConnectionId &&
-        ConnectionId == traceConnectionId;
-
-    protected override ISpan? GetSpanReference(ITransaction transaction)
+    private static void SetConnectionId(ISpan span, Guid? connectionId)
     {
-        // Try to return a correlated span if we can find one.
-        if (TryGetSpanFromTraceData(transaction, CorrelatedSpan, out var correlatedSpan))
-        {
-            return correlatedSpan;
-        }
-        return base.GetSpanReference(transaction);
+        Debug.Assert(connectionId != Guid.Empty);
+
+        span.SetExtra(ConnectionExtraKey, connectionId);
     }
+
+    private static Guid? TryGetConnectionId(ISpan span) =>
+        span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid
+            ? guid
+            : null;
+
+    protected override ISpan? GetSpanReference(ITransaction transaction) =>
+        ConnectionId is { } connectionId
+            ? transaction.Spans
+                .FirstOrDefault(span =>
+                    !span.IsFinished &&
+                    span.Operation == Operation &&
+                    TryGetConnectionId(span) == connectionId)
+            : base.GetSpanReference(transaction);
 
     protected override void SetSpanReference(ISpan span)
     {
-        if (span is SpanTracer spanTracer)
+        if (ConnectionId is { } connectionId)
         {
-            spanTracer.TraceData[nameof(ConnectionId)] = ConnectionId;
+            SetConnectionId(span, connectionId);
             return;
         }
         base.SetSpanReference(span);

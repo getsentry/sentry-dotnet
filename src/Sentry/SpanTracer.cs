@@ -64,14 +64,6 @@ public class SpanTracer : ISpan
     public void SetExtra(string key, object? value) => _data[key] = value;
 
     /// <summary>
-    /// Can be used to store data for the duration of the Trace. This data is not sent to Sentry.
-    ///
-    /// For example, information from a DiagnosticSource event can be stored here and used to correlate
-    /// with subsequent DiagnosticSource events in order to construct an accurate Span hierarchy.
-    /// </summary>
-    internal ConcurrentDictionary<string, object?> TraceData = new();
-
-    /// <summary>
     /// Initializes an instance of <see cref="SpanTracer"/>.
     /// </summary>
     public SpanTracer(

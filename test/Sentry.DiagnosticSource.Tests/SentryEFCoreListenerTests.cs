@@ -317,14 +317,19 @@ public class SentryEFCoreListenerTests
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
+        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
 
         // Act
-        interceptor.OnNext(new(EFQueryCompiling, efSql));
-        interceptor.OnNext(new(EFQueryCompiled, efSql));
-        interceptor.OnNext(new(EFConnectionOpening, null));
-        interceptor.OnNext(new(EFCommandExecuting, efSql));
-        interceptor.OnNext(new(EFCommandFailed, efSql));
-        interceptor.OnNext(new(EFConnectionClosed, efSql));
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandFailed, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));

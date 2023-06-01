@@ -5,6 +5,10 @@ namespace Sentry.Internal.DiagnosticSource;
 // ReSharper disable once InconsistentNaming
 internal abstract class EFDiagnosticSourceHelper
 {
+    internal const string ConnectionExtraKey = "db.connection_id";
+    internal const string CommandExtraKey = "db.command_id";
+    internal const string CompiledQueryExtraKey = "db.compiled_query";
+
     private SentryOptions Options { get; }
     protected object? DiagnosticSourceValue { get; }
     private ITransaction? Transaction { get; set; }
@@ -107,39 +111,7 @@ internal abstract class EFDiagnosticSourceHelper
 
     protected virtual ISpan? GetSpanReference(ITransaction transaction)
     {
-        Options.LogDebug($"No Span reference found when getting {Operation}. Taking the first unfinished span instead.");
-        return transaction.Spans
-            .OrderByDescending(x => x.StartTimestamp)
-            .FirstOrDefault(s => !s.IsFinished && s.Operation.Equals(Operation));
-    }
-
-    protected static bool TryGetSpanFromTraceData(ITransaction transaction, Func<SpanTracer, bool> match, out ISpan? span)
-    {
-        span = null;
-        if (transaction is TransactionTracer transactionTracer)
-        {
-            try
-            {
-                span = transactionTracer.Spans.SingleOrDefault(s => s is SpanTracer spanTracer && match(spanTracer));
-            }
-            catch (InvalidOperationException)
-            {
-                // If SingleOrDefault matches no element or more than one element
-                return false;
-            }
-        }
-        return span is not null;
-    }
-
-    protected static bool TryGetFirstSpanFromTraceData(ITransaction transaction, Func<SpanTracer, bool> match, out ISpan? span)
-    {
-        span = null;
-        if (transaction is TransactionTracer transactionTracer)
-        {
-            span = transactionTracer.Spans
-                .OrderBy(s => s.StartTimestamp)
-                .FirstOrDefault(s => s is SpanTracer spanTracer && match(spanTracer));
-        }
-        return span is not null;
+        Options.LogDebug($"No Span reference found when getting {Operation}.");
+        return null;
     }
 }

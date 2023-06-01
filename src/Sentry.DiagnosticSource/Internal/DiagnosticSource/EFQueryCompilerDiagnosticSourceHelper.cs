@@ -13,31 +13,16 @@ internal class EFQueryCompilerDiagnosticSourceHelper : EFDiagnosticSourceHelper
     protected override string Operation => "db.query.compile";
     protected override string Description => FilterNewLineValue(DiagnosticSourceValue) ?? string.Empty;
 
-    private string QueryExpression => Description;
+    /// <summary>
+    /// Unfortunately there's nothing we can use as the the corelation id for compiled query events, so we just return
+    /// the first unfinished span for this operation.
+    /// </summary>
+    protected override ISpan? GetSpanReference(ITransaction transaction) =>
+        transaction.Spans .FirstOrDefault(span => !span.IsFinished && span.Operation == Operation);
 
-    private bool SameExpression(SpanTracer span) =>
-        span.TraceData.ContainsKey(nameof(QueryExpression)) &&
-        span.TraceData[nameof(QueryExpression)] is string traceQueryExpression &&
-        QueryExpression == traceQueryExpression;
-
-    protected override ISpan? GetSpanReference(ITransaction transaction)
-    {
-        // In the case of Query Compilation events, we don't get any correlation id from the diagnostic data. The best
-        // we can do is to use the query expression. This isn't guaranteed to be unique so we grab the first match.
-        if (TryGetFirstSpanFromTraceData(transaction, SameExpression, out var looselyCorrelatedSpan))
-        {
-            return looselyCorrelatedSpan;
-        }
-        return base.GetSpanReference(transaction);
-    }
-
-    protected override void SetSpanReference(ISpan span)
-    {
-        if (span is SpanTracer spanTracer)
-        {
-            spanTracer.TraceData[nameof(QueryExpression)] = QueryExpression;
-            return;
-        }
-        base.SetSpanReference(span);
-    }
+    /// <summary>
+    /// We don't have a correlation id for compiled query events. This overload just prevents the base class from
+    /// logging a debug message.
+    /// </summary>
+    protected override void SetSpanReference(ISpan span) { }
 }
