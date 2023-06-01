@@ -125,7 +125,14 @@
     <Message Importance="High"
       Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
 
-    <Exec Command="$(SentryCLIUploadCommand) $(OutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+    <ItemGroup>
+      <SentryCLIUploadSymbolType Include="pdb" />
+      <SentryCLIUploadSymbolType Include="portablepdb" />
+      <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
+      <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
+    </ItemGroup>
+
+    <Exec Command="$(SentryCLIUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(OutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
 
