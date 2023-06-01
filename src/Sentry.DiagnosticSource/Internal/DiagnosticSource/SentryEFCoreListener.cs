@@ -28,10 +28,6 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
     private readonly IHub _hub;
     private readonly SentryOptions _options;
 
-    private readonly AsyncLocal<WeakReference<ISpan>> _spansCompilerLocal = new();
-    private readonly AsyncLocal<WeakReference<ISpan>> _spansQueryLocal = new();
-    private readonly AsyncLocal<WeakReference<ISpan>> _spansConnectionLocal = new();
-
     private bool _logConnectionEnabled = true;
     private bool _logQueryEnabled = true;
 
@@ -49,50 +45,43 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 
     public void OnError(Exception error) { }
 
-    private EFQueryCompilerDiagnosticSourceHelper QueryCompilerDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
-        new(_hub, _options, _spansCompilerLocal, diagnosticsSourceValue);
+    private EFQueryCompilerDiagnosticSourceHelper QueryCompilerDiagnosticSourceHelper => new(_hub, _options);
 
-    private EFConnectionDiagnosticSourceHelper ConnectionDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
-        new(_hub, _options, _spansConnectionLocal, diagnosticsSourceValue);
+    private EFConnectionDiagnosticSourceHelper ConnectionDiagnosticSourceHelper => new(_hub, _options);
 
-    private EFCommandDiagnosticSourceHelper CommandDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
-        new(_hub, _options, _spansQueryLocal, diagnosticsSourceValue);
+    private EFCommandDiagnosticSourceHelper CommandDiagnosticSourceHelper => new(_hub, _options);
 
     public void OnNext(KeyValuePair<string, object?> value)
     {
         try
         {
-            // Because we have to support the .NET framework, we can't get at strongly typed diagnostic source events.
-            // We do know they're objects, that can be converted to strings though... and we can get the correlation
-            // data we need from there by parsing the string. Not as reliable, but works against all frameworks.
-            var diagnosticSourceValue = value.Value?.ToString();
             switch (value.Key)
             {
                 // Query compiler span
                 case EFQueryStartCompiling or EFQueryCompiling:
-                    QueryCompilerDiagnosticSourceHelper(value.Value).AddSpan();
+                    QueryCompilerDiagnosticSourceHelper.AddSpan(value.Value);
                     break;
                 case EFQueryCompiled:
-                    QueryCompilerDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.Ok);
+                    QueryCompilerDiagnosticSourceHelper.FinishSpan(value.Value, SpanStatus.Ok);
                     break;
 
                 // Connection span (A transaction may or may not show a connection with it.)
                 case EFConnectionOpening when _logConnectionEnabled:
-                    ConnectionDiagnosticSourceHelper(value.Value).AddSpan();
+                    ConnectionDiagnosticSourceHelper.AddSpan(value.Value);
                     break;
                 case EFConnectionClosed when _logConnectionEnabled:
-                    ConnectionDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.Ok);
+                    ConnectionDiagnosticSourceHelper.FinishSpan(value.Value, SpanStatus.Ok);
                     break;
 
                 // Query Execution span
                 case EFCommandExecuting when _logQueryEnabled:
-                    CommandDiagnosticSourceHelper(value.Value).AddSpan();
+                    CommandDiagnosticSourceHelper.AddSpan(value.Value);
                     break;
                 case EFCommandFailed when _logQueryEnabled:
-                    CommandDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.InternalError);
+                    CommandDiagnosticSourceHelper.FinishSpan(value.Value, SpanStatus.InternalError);
                     break;
                 case EFCommandExecuted when _logQueryEnabled:
-                    CommandDiagnosticSourceHelper(value.Value).FinishSpan(SpanStatus.Ok);
+                    CommandDiagnosticSourceHelper.FinishSpan(value.Value, SpanStatus.Ok);
                     break;
             }
         }

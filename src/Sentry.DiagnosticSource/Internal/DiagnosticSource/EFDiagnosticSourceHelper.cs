@@ -2,27 +2,24 @@ using Sentry.Extensibility;
 
 namespace Sentry.Internal.DiagnosticSource;
 
-// ReSharper disable once InconsistentNaming
 internal abstract class EFDiagnosticSourceHelper
 {
     internal const string ConnectionExtraKey = "db.connection_id";
     internal const string CommandExtraKey = "db.command_id";
-    internal const string CompiledQueryExtraKey = "db.compiled_query";
 
-    private SentryOptions Options { get; }
-    protected object? DiagnosticSourceValue { get; }
-    private ITransaction? Transaction { get; set; }
+    protected SentryOptions Options { get; }
+    //protected object? DiagnosticSourceValue { get; }
+    private ITransaction? Transaction { get; }
     protected abstract string Operation { get; }
-    protected abstract string Description { get; }
+    protected abstract string Description(object? diagnosticSourceValue);
 
-    internal EFDiagnosticSourceHelper(IHub hub, SentryOptions options, object? diagnosticSourceValue)
+    internal EFDiagnosticSourceHelper(IHub hub, SentryOptions options)
     {
         Options = options;
-        DiagnosticSourceValue = diagnosticSourceValue;
         Transaction = hub.GetTransactionIfSampled();
     }
 
-    internal void AddSpan()
+    internal void AddSpan(object? diagnosticSourceValue)
     {
         Options.LogDebug($"(Sentry add span {Operation})");
         LogTransactionSpans();
@@ -31,13 +28,16 @@ internal abstract class EFDiagnosticSourceHelper
             return;
         }
 
-        var parent = GetParentSpan(Transaction);
-        var child = parent.StartChild(Operation, Description);
+        // We "flatten" the EF spans so that they all have the same parent span, for two reasons:
+        // 1. Each command typically gets it's own connection, which makes the resulting waterfall diagram hard to read.
+        // 2. Sentry's performance errors functionality only works when all queries have the same parent span.
+        var parent = Transaction.GetDbParentSpan();
+        var child = parent.StartChild(Operation, Description(diagnosticSourceValue));
 
-        SetSpanReference(child);
+        SetSpanReference(child, diagnosticSourceValue);
     }
 
-    internal void FinishSpan(SpanStatus status)
+    internal void FinishSpan(object? diagnosticSourceValue, SpanStatus status)
     {
         if (Transaction == null)
         {
@@ -47,14 +47,13 @@ internal abstract class EFDiagnosticSourceHelper
         Options.LogDebug($"(Sentry finish span {Operation})");
         LogTransactionSpans();
 
-        var sourceSpan = GetSpanReference(Transaction);
+        var sourceSpan = GetSpanReference(Transaction, diagnosticSourceValue);
         if (sourceSpan == null)
         {
-            Options.LogWarning("Trying to close a span that was already garbage collected. {0}", Operation);
+            Options.LogWarning("Tried to close {0} span but no matching span could be found.", Operation);
             return;
         }
-
-        sourceSpan.Finish(status);
+        sourceSpan?.Finish(status);
     }
 
     private void LogTransactionSpans()
@@ -90,28 +89,7 @@ internal abstract class EFDiagnosticSourceHelper
         return str?[(str.IndexOf('\n') + 1)..];
     }
 
-    /// <summary>
-    /// Finds an appropriate parent for EF diagnostic spans. Note that in our implementaion we're "flattening" these.
-    /// Spans from <see cref="EFQueryCompilerDiagnosticSourceHelper"/> and <see cref="EFCommandDiagnosticSourceHelper"/>
-    /// will both have the same parent as those of <see cref="EFConnectionDiagnosticSourceHelper"/>.
-    ///
-    /// We've done this for two reasons:
-    /// 1. We could show these underneath the relevant connection, but each command often gets it's own connection which
-    ///    makes the resulting waterfall diagram hard to read.
-    /// 2. Sentry has a performance to errors feature which detects n + 1 problems on OM frameworks... but this only
-    ///    works if all of the "n" queries have the same parent span in the transaction. Again, since queries ofen run
-    ///    on their own connection, if we wrap each query in a connection span, it breaks the performance error handling
-    /// </summary>
-    private ISpan GetParentSpan(ITransaction transaction) => transaction.GetDbParentSpan();
+    protected abstract void SetSpanReference(ISpan span, object? diagnosticSourceValue);
 
-    protected virtual void SetSpanReference(ISpan span)
-    {
-        Options.LogDebug($"No Span reference found when adding {Operation} Span.");
-    }
-
-    protected virtual ISpan? GetSpanReference(ITransaction transaction)
-    {
-        Options.LogDebug($"No Span reference found when getting {Operation}.");
-        return null;
-    }
+    protected abstract ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue);
 }

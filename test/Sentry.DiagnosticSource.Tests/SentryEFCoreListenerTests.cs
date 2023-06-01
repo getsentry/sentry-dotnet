@@ -415,7 +415,7 @@ public class SentryEFCoreListenerTests
 
         // Assert
         _fixture.Options.DiagnosticLogger.Received(1)?
-            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Tried to close {0} span but no matching span could be found."),
                 null, Arg.Any<object[]>());
     }
 }

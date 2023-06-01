@@ -1,19 +1,17 @@
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.DiagnosticSource;
 
-// ReSharper disable once InconsistentNaming
 internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 {
-    internal EFCommandDiagnosticSourceHelper(IHub hub, SentryOptions options, AsyncLocal<WeakReference<ISpan>> spanLocal, object? diagnosticSourceValue)
-        : base(hub, options, diagnosticSourceValue)
+    internal EFCommandDiagnosticSourceHelper(IHub hub, SentryOptions options) : base(hub, options)
     {
     }
 
     protected override string Operation => "db.query";
-    protected override string Description => FilterNewLineValue(DiagnosticSourceValue) ?? string.Empty;
-    private Guid? ConnectionId => DiagnosticSourceValue?.GetGuidProperty("ConnectionId");
-    private Guid? CommandId => DiagnosticSourceValue?.GetGuidProperty("CommandId");
+    protected override string Description(object? diagnosticSourceValue) => FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+    private static Guid? GetCommandId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("CommandId");
 
     private static void SetCommandId(ISpan span, Guid? commandId)
     {
@@ -27,22 +25,27 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
             ? guid
             : null;
 
-    protected override ISpan? GetSpanReference(ITransaction transaction) =>
-        CommandId is { } commandId
-            ? transaction.Spans
+    protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
+    {
+        if (GetCommandId(diagnosticSourceValue) is { } commandId)
+        {
+            return transaction.Spans
                 .FirstOrDefault(span =>
                     !span.IsFinished &&
                     span.Operation == Operation &&
-                    TryGetCommandId(span) == commandId)
-            : base.GetSpanReference(transaction);
+                    TryGetCommandId(span) == commandId);
+        }
+        Options.LogWarning("No correlation id found for {1}.", Operation);
+        return null;
+    }
 
-    protected override void SetSpanReference(ISpan span)
+    protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
-        if (CommandId is { })
+        if (GetCommandId(diagnosticSourceValue) is { } commandId)
         {
-            SetCommandId(span, CommandId);
+            SetCommandId(span, commandId);
             return;
         }
-        base.SetSpanReference(span);
+        Options.LogWarning("No correlation id can be set for {1}.", Operation);
     }
 }

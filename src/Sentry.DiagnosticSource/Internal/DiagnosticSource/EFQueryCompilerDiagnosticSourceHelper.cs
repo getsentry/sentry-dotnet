@@ -1,28 +1,22 @@
-using Sentry.Internal.Extensions;
-
 namespace Sentry.Internal.DiagnosticSource;
 
-// ReSharper disable once InconsistentNaming
 internal class EFQueryCompilerDiagnosticSourceHelper : EFDiagnosticSourceHelper
 {
-    internal EFQueryCompilerDiagnosticSourceHelper(IHub hub, SentryOptions options, AsyncLocal<WeakReference<ISpan>> spanLocal, object? diagnosticSourceValue)
-        : base(hub, options, diagnosticSourceValue)
+    internal EFQueryCompilerDiagnosticSourceHelper(IHub hub, SentryOptions options) : base(hub, options)
     {
     }
 
     protected override string Operation => "db.query.compile";
-    protected override string Description => FilterNewLineValue(DiagnosticSourceValue) ?? string.Empty;
+    protected override string Description(object? diagnosticSourceValue) => FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
 
     /// <summary>
-    /// Unfortunately there's nothing we can use as the the corelation id for compiled query events, so we just return
-    /// the first unfinished span for this operation.
+    /// We don't have a correlation id for compiled query events. We just return the first unfinished query compile span.
     /// </summary>
-    protected override ISpan? GetSpanReference(ITransaction transaction) =>
+    protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue) =>
         transaction.Spans .FirstOrDefault(span => !span.IsFinished && span.Operation == Operation);
 
-    /// <summary>
-    /// We don't have a correlation id for compiled query events. This overload just prevents the base class from
-    /// logging a debug message.
-    /// </summary>
-    protected override void SetSpanReference(ISpan span) { }
+    protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
+    {
+        // We don't have a correlation id for compiled query events.
+    }
 }
