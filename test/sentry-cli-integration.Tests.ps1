@@ -126,6 +126,7 @@ Describe 'CLI-integration' {
             'Sentry.Extensions.Logging.pdb',
             'Sentry.Maui.pdb',
             'Sentry.pdb',
+            'Sentry.Samples.Maui',
             'Sentry.Samples.Maui.pdb',
             'Sentry.Samples.Maui.src.zip'
         )
