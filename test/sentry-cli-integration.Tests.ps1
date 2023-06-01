@@ -111,6 +111,17 @@ Describe 'CLI-integration' {
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'libmono-component-debugger.dylib',
+            'libmono-component-diagnostics_tracing.dylib',
+            'libmono-component-hot_reload.dylib',
+            'libmonosgen-2.0.dylib',
+            'libSystem.IO.Compression.Native.dylib',
+            'libSystem.Native.dylib',
+            'libSystem.Net.Security.Native.dylib',
+            'libSystem.Security.Cryptography.Native.Apple.dylib',
+            'libxamarin-dotnet-debug.dylib',
+            'libxamarin-dotnet.dylib',
+            'Sentry',
             'Sentry.Bindings.Cocoa.pdb',
             'Sentry.Extensions.Logging.pdb',
             'Sentry.Maui.pdb',
