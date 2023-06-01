@@ -38,9 +38,9 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override void SetSpanReference(ISpan span)
     {
-        if (CommandId is { })
+        if (CommandId is { } commandId)
         {
-            SetCommandId(span, CommandId);
+            SetCommandId(span, commandId);
             return;
         }
         base.SetSpanReference(span);

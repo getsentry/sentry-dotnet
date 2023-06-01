@@ -91,15 +91,15 @@ internal abstract class EFDiagnosticSourceHelper
     }
 
     /// <summary>
-    /// Finds an appropriate parent for EF diagnostic spans. Note that in our implementaion we're "flattening" these.
+    /// Finds an appropriate parent for EF diagnostic spans. Note that in our implementation we're "flattening" these.
     /// Spans from <see cref="EFQueryCompilerDiagnosticSourceHelper"/> and <see cref="EFCommandDiagnosticSourceHelper"/>
     /// will both have the same parent as those of <see cref="EFConnectionDiagnosticSourceHelper"/>.
     ///
     /// We've done this for two reasons:
     /// 1. We could show these underneath the relevant connection, but each command often gets it's own connection which
     ///    makes the resulting waterfall diagram hard to read.
-    /// 2. Sentry has a performance to errors feature which detects n + 1 problems on OM frameworks... but this only
-    ///    works if all of the "n" queries have the same parent span in the transaction. Again, since queries ofen run
+    /// 2. Sentry has a performance to errors feature which detects n + 1 problems on ORM frameworks... but this only
+    ///    works if all of the "n" queries have the same parent span in the transaction. Again, since queries often run
     ///    on their own connection, if we wrap each query in a connection span, it breaks the performance error handling
     /// </summary>
     private ISpan GetParentSpan(ITransaction transaction) => transaction.GetDbParentSpan();

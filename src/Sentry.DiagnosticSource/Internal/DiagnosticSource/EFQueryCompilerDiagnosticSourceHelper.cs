@@ -14,7 +14,7 @@ internal class EFQueryCompilerDiagnosticSourceHelper : EFDiagnosticSourceHelper
     protected override string Description => FilterNewLineValue(DiagnosticSourceValue) ?? string.Empty;
 
     /// <summary>
-    /// Unfortunately there's nothing we can use as the the corelation id for compiled query events, so we just return
+    /// Unfortunately there's nothing we can use as the correlation id for compiled query events, so we just return
     /// the first unfinished span for this operation.
     /// </summary>
     protected override ISpan? GetSpanReference(ITransaction transaction) =>
