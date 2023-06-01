@@ -12,7 +12,7 @@ public class DiagnosticSourceHelperTests
         var expectedText = "SELECT *...\n FROM ...";
 
         // Act
-        var value = DiagnosticSourceHelper.FilterNewLineValue(text);
+        var value = EFDiagnosticSourceHelper.FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);
@@ -22,7 +22,7 @@ public class DiagnosticSourceHelperTests
     public void FilterNewLineValue_NullObject_NullString()
     {
         // Act
-        var value = DiagnosticSourceHelper.FilterNewLineValue(null);
+        var value = EFDiagnosticSourceHelper.FilterNewLineValue(null);
 
         // Assert
         Assert.Null(value);
@@ -36,7 +36,7 @@ public class DiagnosticSourceHelperTests
         var expectedText = "1234";
 
         // Act
-        var value = DiagnosticSourceHelper.FilterNewLineValue(text);
+        var value = EFDiagnosticSourceHelper.FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);
@@ -50,7 +50,7 @@ public class DiagnosticSourceHelperTests
         var expectedText = "";
 
         // Act
-        var value = DiagnosticSourceHelper.FilterNewLineValue(text);
+        var value = EFDiagnosticSourceHelper.FilterNewLineValue(text);
 
         // Assert
         Assert.Equal(expectedText, value);

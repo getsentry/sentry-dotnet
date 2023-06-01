@@ -5,7 +5,8 @@
 ## Fixes
 
 - Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
-
+- Fix/db spans not finishing ([#2398](https://github.com/getsentry/sentry-dotnet/pull/2398))
+- 
 ## 3.33.0
 
 ### Features

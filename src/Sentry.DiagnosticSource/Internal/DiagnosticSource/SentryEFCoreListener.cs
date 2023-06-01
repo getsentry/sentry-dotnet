@@ -49,13 +49,13 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 
     public void OnError(Exception error) { }
 
-    private QueryCompilerDiagnosticSourceHelper QueryCompilerDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
+    private EFQueryCompilerDiagnosticSourceHelper QueryCompilerDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
         new(_hub, _options, _spansCompilerLocal, diagnosticsSourceValue);
 
-    private ConnectionDiagnosticSourceHelper ConnectionDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
+    private EFConnectionDiagnosticSourceHelper ConnectionDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
         new(_hub, _options, _spansConnectionLocal, diagnosticsSourceValue);
 
-    private CommandDiagnosticSourceHelper CommandDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
+    private EFCommandDiagnosticSourceHelper CommandDiagnosticSourceHelper(object? diagnosticsSourceValue) =>
         new(_hub, _options, _spansQueryLocal, diagnosticsSourceValue);
 
     public void OnNext(KeyValuePair<string, object?> value)
