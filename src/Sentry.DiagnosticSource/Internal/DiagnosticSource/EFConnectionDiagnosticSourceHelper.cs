@@ -48,4 +48,35 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
         }
         Options.LogWarning("No {0} found when adding {1} Span.", "ConnectionId", Operation);
     }
+
+    /// <summary>
+    /// EF Connections are often pooled. If we see the same connection multiple times, we reuse the span so that it
+    /// shows as a single connection in the resulting waterfall chart on Sentry.
+    /// </summary>
+    /// <param name="diagnosticSourceValue"></param>
+    internal void AddOrReuseSpan(object? diagnosticSourceValue)
+    {
+        if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
+        {
+            Options.LogDebug($"Checking for span to reuse for {Operation} with connection id {connectionId}");
+            LogTransactionSpans();
+            if (Transaction is { } transaction)
+            {
+                var spanWithConnectionId = transaction.Spans
+                    .FirstOrDefault(span =>
+                        span.Operation == Operation &&
+                        TryGetConnectionId(span) == connectionId);
+                if (spanWithConnectionId is SpanTracer existingSpan)
+                {
+                    // OK we've seen this connection before... let's reuse it
+                    Options.LogDebug($"Reusing span for {Operation} with connection id {connectionId}");
+                    existingSpan.Unfinish();
+                    return;
+                }
+            }
+        }
+
+        // If we can't find a span to reuse then we'll add a new one instead
+        base.AddSpan(diagnosticSourceValue);
+    }
 }

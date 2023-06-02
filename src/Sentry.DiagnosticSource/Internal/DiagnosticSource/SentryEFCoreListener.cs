@@ -67,7 +67,7 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 
                 // Connection span (A transaction may or may not show a connection with it.)
                 case EFConnectionOpening when _logConnectionEnabled:
-                    ConnectionDiagnosticSourceHelper.AddSpan(value.Value);
+                    ConnectionDiagnosticSourceHelper.AddOrReuseSpan(value.Value);
                     break;
                 case EFConnectionClosed when _logConnectionEnabled:
                     ConnectionDiagnosticSourceHelper.FinishSpan(value.Value, SpanStatus.Ok);

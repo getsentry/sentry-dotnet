@@ -379,6 +379,94 @@ public class SentryEFCoreListenerTests
     }
 
     [Fact]
+    public void OnNext_Same_Connections_Consolidated()
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+        var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        // Fake a connection pool with two connections
+        var connectionA = new FakeDiagnosticConnectionEventData(efConn);
+        var connectionB = new FakeDiagnosticConnectionEventData(efConn);
+        var commandA = new FakeDiagnosticCommandEventData(efSql);
+        var commandB = new FakeDiagnosticCommandEventData(efSql);
+        var commandC = new FakeDiagnosticCommandEventData(efSql);
+
+        void Pause() => Thread.Sleep(100);
+
+        // Act
+        interceptor.OnNext(new(EFConnectionOpening, connectionA));
+        Pause();
+        interceptor.OnNext(new(EFCommandExecuting, commandA));
+        interceptor.OnNext(new(EFCommandExecuted, commandA));
+        interceptor.OnNext(new(EFConnectionClosed, connectionA));
+
+        interceptor.OnNext(new(EFConnectionOpening, connectionA));
+
+            // These are for Connection B... interleaved somewhat
+            interceptor.OnNext(new(EFConnectionOpening, connectionB));
+            Pause();
+            interceptor.OnNext(new(EFCommandExecuting, commandB));
+            interceptor.OnNext(new(EFCommandExecuted, commandB));
+
+        interceptor.OnNext(new(EFCommandExecuting, commandC));
+            // These are for Connection B... interleaved somewhat
+            interceptor.OnNext(new(EFConnectionClosed, connectionB));
+
+        Pause(); // To make sure we can distinguish between when the two connections finish
+        interceptor.OnNext(new(EFCommandExecuted, commandC));
+        interceptor.OnNext(new(EFConnectionClosed, connectionA));
+
+        // Assert
+        bool IsDbSpan(ISpan s) => s.Operation == "db.connection";
+        bool IsCommandSpan(ISpan s) => s.Operation == "db.query";
+        Func<ISpan, FakeDiagnosticConnectionEventData, bool> forConnection = (s, e) =>
+            s.Extra.ContainsKey(EFDiagnosticSourceHelper.ConnectionExtraKey)
+            && s.Extra[EFDiagnosticSourceHelper.ConnectionExtraKey] is Guid connectionId
+            && connectionId == e.ConnectionId;
+        Func<ISpan, FakeDiagnosticCommandEventData, bool> forCommand = (s, e) =>
+            s.Extra.ContainsKey(EFDiagnosticSourceHelper.CommandExtraKey)
+            && s.Extra[EFDiagnosticSourceHelper.CommandExtraKey] is Guid commandId
+            && commandId == e.CommandId;
+
+        using (new AssertionScope())
+        {
+            var dbSpans = _fixture.Spans.Where(IsDbSpan).ToArray();
+            dbSpans.Count().Should().Be(2);
+            dbSpans.Should().Contain(s => forConnection(s, connectionA));
+            dbSpans.Should().Contain(s => forConnection(s, connectionB));
+
+            var commandSpans = _fixture.Spans.Where(IsCommandSpan).ToArray();
+            commandSpans.Count().Should().Be(3);
+            commandSpans.Should().Contain(s => forCommand(s, commandA));
+            commandSpans.Should().Contain(s => forCommand(s, commandB));
+            commandSpans.Should().Contain(s => forCommand(s, commandC));
+
+            var connectionASpan = dbSpans.Single(s => forConnection(s, connectionA));
+            var connectionBSpan = dbSpans.Single(s => forConnection(s, connectionB));
+            var commandASpan = commandSpans.Single(s => forCommand(s, commandA));
+            var commandBSpan = commandSpans.Single(s => forCommand(s, commandB));
+            var commandCSpan = commandSpans.Single(s => forCommand(s, commandC));
+
+            // Commands for connectionA should take place after it starts and before it finishes
+            connectionASpan.StartTimestamp.Should().BeBefore(commandASpan.StartTimestamp);
+            connectionASpan.StartTimestamp.Should().BeBefore(commandCSpan.StartTimestamp);
+            connectionASpan.EndTimestamp.Should().BeAfter(commandASpan.EndTimestamp ?? DateTimeOffset.MinValue);
+            connectionASpan.EndTimestamp.Should().BeAfter(commandCSpan.EndTimestamp ?? DateTimeOffset.MinValue);
+
+            // Commands for connectionB should take place after it starts and before it finishes
+            connectionBSpan.StartTimestamp.Should().BeBefore(commandBSpan.StartTimestamp);
+            connectionBSpan.EndTimestamp.Should().BeAfter(commandBSpan.EndTimestamp ?? DateTimeOffset.MinValue);
+
+            // Connection B starts after Connection A and finishes before Connection A
+            connectionBSpan.StartTimestamp.Should().BeAfter(connectionASpan.StartTimestamp);
+            connectionBSpan.EndTimestamp.Should().BeBefore(connectionASpan.EndTimestamp ?? DateTimeOffset.MinValue);
+        }
+    }
+
+    [Fact]
     public void OnNext_ThrowsException_ExceptionIsolated()
     {
         // Arrange

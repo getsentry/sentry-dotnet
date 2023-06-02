@@ -8,8 +8,7 @@ internal abstract class EFDiagnosticSourceHelper
     internal const string CommandExtraKey = "db.command_id";
 
     protected SentryOptions Options { get; }
-    //protected object? DiagnosticSourceValue { get; }
-    private ITransaction? Transaction { get; }
+    protected ITransaction? Transaction { get; }
     protected abstract string Operation { get; }
     protected abstract string Description(object? diagnosticSourceValue);
 
@@ -56,7 +55,7 @@ internal abstract class EFDiagnosticSourceHelper
         sourceSpan?.Finish(status);
     }
 
-    private void LogTransactionSpans()
+    protected void LogTransactionSpans()
     {
         if (Transaction == null)
         {
