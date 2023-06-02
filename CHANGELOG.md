@@ -12,6 +12,9 @@
   - The device architecture (x64, arm64, etc.) is now reported
   - On Windows, the OS type is now reported as "Windows" instead of "WinUI".  Additionally, the OS display version (ex, "22H2") is now included.
   - `UIKit`, `ABI.Microsoft` and `WinRT`  frames are now marked "system" instead of "in app".
+- Reduce debug files uploaded ([#2404](https://github.com/getsentry/sentry-dotnet/pull/2404))
+- Fix system frames being marked as "in-app" ([#2408](https://github.com/getsentry/sentry-dotnet/pull/2408))
+  - NOTE: This important fix corrects a value that is used during issue grouping, so you may receive new alerts for existing issues after deploying this update.
 
 ### Dependencies
 

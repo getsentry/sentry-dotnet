@@ -36,6 +36,28 @@ public class DebugStackTraceTests
         Assert.False(actual.InApp);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CreateSentryStackFrame_SystemType_NotInAppFrame(bool useEnhancedStackTrace)
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        var exception = Assert.ThrowsAny<Exception>(() => _ = Convert.FromBase64String("This will throw."));
+        var stackTrace = new StackTrace(exception);
+        var frame = useEnhancedStackTrace ? EnhancedStackTrace.GetFrames(stackTrace)[0] : stackTrace.GetFrame(0);
+
+        // Sanity Check
+        Assert.NotNull(frame);
+        Assert.Equal(typeof(Convert), frame.GetMethod()?.DeclaringType);
+
+        // Act
+        var actual = sut.CreateFrame(frame);
+
+        // Assert
+        Assert.False(actual.InApp);
+    }
+
     [Fact]
     public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
     {

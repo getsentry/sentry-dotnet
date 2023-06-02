@@ -53,25 +53,21 @@ BeforeAll {
 Describe 'CLI-integration' {
 
     It "uploads symbols and sources for a console app build" {
-        $exe = [RuntimeInformation]::IsOSPlatform([OSPlatform]::Windows) ? '.exe' : ''
         $result = DotnetBuild 'Sentry.Samples.Console.Basic' $True $True
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'Sentry.pdb',
-            "Sentry.Samples.Console.Basic$exe",
             'Sentry.Samples.Console.Basic.pdb',
             'Sentry.Samples.Console.Basic.src.zip')
     }
 
     It "uploads symbols for a console app build" {
-        $exe = [RuntimeInformation]::IsOSPlatform([OSPlatform]::Windows) ? '.exe' : ''
         $result = DotnetBuild 'Sentry.Samples.Console.Basic' $True $False
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'Sentry.pdb',
-            "Sentry.Samples.Console.Basic$exe",
             'Sentry.Samples.Console.Basic.pdb')
     }
 
