@@ -6,7 +6,8 @@
 
 - SentryHttpMessageHandler added when AddHttpClient is before UseSentry ([#2390](https://github.com/getsentry/sentry-dotnet/pull/2390))
 - Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
-- Fix db connection spans not finishing ([#2398](https://github.com/getsentry/sentry-dotnet/pull/2398))
+- DB connection spans not finishing ([#2398](https://github.com/getsentry/sentry-dotnet/pull/2398))
+- DB Connection spans presented poorly ([#2409](https://github.com/getsentry/sentry-dotnet/pull/2409))
 - Various .NET MAUI fixes / improvements ([#2403](https://github.com/getsentry/sentry-dotnet/pull/2403))
   - The battery level was being reported incorrectly due to percentage multiplier.
   - The device architecture (x64, arm64, etc.) is now reported
