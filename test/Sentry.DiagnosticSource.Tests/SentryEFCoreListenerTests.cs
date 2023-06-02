@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Sentry.Internal.DiagnosticSource;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using static Sentry.Internal.DiagnosticSource.SentryEFCoreListener;
 
 namespace Sentry.DiagnosticSource.Tests;
@@ -394,7 +394,7 @@ public class SentryEFCoreListenerTests
         var commandB = new FakeDiagnosticCommandEventData(efSql);
         var commandC = new FakeDiagnosticCommandEventData(efSql);
 
-        void Pause() => Thread.Sleep(100);
+        void Pause() => Thread.Sleep(200);
 
         // Act
         interceptor.OnNext(new(EFConnectionOpening, connectionA));
@@ -412,11 +412,13 @@ public class SentryEFCoreListenerTests
             interceptor.OnNext(new(EFCommandExecuted, commandB));
 
         interceptor.OnNext(new(EFCommandExecuting, commandC));
+
             // These are for Connection B... interleaved somewhat
+            Pause();
             interceptor.OnNext(new(EFConnectionClosed, connectionB));
 
-        Pause(); // To make sure we can distinguish between when the two connections finish
         interceptor.OnNext(new(EFCommandExecuted, commandC));
+        Pause();
         interceptor.OnNext(new(EFConnectionClosed, connectionA));
 
         // Assert
