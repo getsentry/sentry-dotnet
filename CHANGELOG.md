@@ -6,12 +6,23 @@
 
 - SentryHttpMessageHandler added when AddHttpClient is before UseSentry ([#2390](https://github.com/getsentry/sentry-dotnet/pull/2390))
 - Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
+- Various .NET MAUI fixes / improvements ([#2403](https://github.com/getsentry/sentry-dotnet/pull/2403))
+  - The battery level was being reported incorrectly due to percentage multiplier.
+  - The device architecture (x64, arm64, etc.) is now reported
+  - On Windows, the OS type is now reported as "Windows" instead of "WinUI".  Additionally, the OS display version (ex, "22H2") is now included.
+  - `UIKit`, `ABI.Microsoft` and `WinRT`  frames are now marked "system" instead of "in app".
+- Reduce debug files uploaded ([#2404](https://github.com/getsentry/sentry-dotnet/pull/2404))
+- Fix system frames being marked as "in-app" ([#2408](https://github.com/getsentry/sentry-dotnet/pull/2408))
+  - NOTE: This important fix corrects a value that is used during issue grouping, so you may receive new alerts for existing issues after deploying this update.
 
 ### Dependencies
 
 - Bump Cocoa SDK from v8.7.2 to v8.7.3 ([#2394](https://github.com/getsentry/sentry-dotnet/pull/2394))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#873)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.7.2...8.7.3)
+- Bump Java SDK from v6.19.1 to v6.21.0 ([#2395](https://github.com/getsentry/sentry-dotnet/pull/2395), [#2405](https://github.com/getsentry/sentry-dotnet/pull/2405))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6210)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.19.1...6.21.0)
 
 ## 3.33.0
 

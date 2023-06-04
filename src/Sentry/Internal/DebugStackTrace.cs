@@ -195,7 +195,14 @@ internal class DebugStackTrace : SentryStackTrace
                 {
                     stringBuilder.Clear();
                     stringBuilder.AppendTypeDisplayName(declaringType);
-                    frame.Module = stringBuilder.ToString();
+
+                    // Ben.Demystifier doesn't always include the namespace, even when fullName==true.
+                    // It's important that the module name always be fully qualified, so that in-app frame
+                    // detection works correctly.
+                    var module = stringBuilder.ToString();
+                    frame.Module = declaringType.Namespace is { } ns && !module.StartsWith(ns)
+                        ? $"{ns}.{module}"
+                        : module;
                 }
             }
             else
