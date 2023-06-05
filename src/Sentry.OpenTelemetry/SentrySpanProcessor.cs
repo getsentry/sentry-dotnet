@@ -16,7 +16,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     private readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
     private readonly SentryOptions? _options;
     private readonly string? _sentryBaseUrl;
-    private readonly Lazy<Dictionary<string, object>> _resourceAttributes;
+    private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -32,7 +32,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // Resource attributes are consistent between spans, but not available during construction.
         // Thus, get a single instance lazily.
-        _resourceAttributes = new Lazy<Dictionary<string, object>>(() =>
+        _resourceAttributes = new Lazy<IDictionary<string, object>>(() =>
             ParentProvider?.GetResource().Attributes.ToDictionary() ?? new Dictionary<string, object>(0));
 
         hub.ConfigureScope(scope =>
@@ -126,19 +126,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             transaction.EndTimestamp = data.StartTimeUtc + data.Duration;
 
             // Transactions set otel attributes (and resource attributes) as context.
-            var otelContext = new Dictionary<string, object?>();
-            if (attributes.Count > 0)
-            {
-                otelContext.Add("attributes", attributes);
-            }
-
-            var resourceAttributes = _resourceAttributes.Value;
-            if (resourceAttributes.Count > 0)
-            {
-                otelContext.Add("resource", resourceAttributes);
-            }
-
-            transaction.Contexts["otel"] = otelContext;
+            transaction.Contexts["otel"] = GetOtelContext(attributes);
         }
         else
         {
@@ -275,7 +263,24 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         return (activity.OperationName, activity.DisplayName, TransactionNameSource.Custom);
     }
 
-    private void GenerateSentryErrorsFromOtelSpan(Activity activity)
+    private Dictionary<string, object?> GetOtelContext(IDictionary<string, object?> attributes)
+    {
+        var otelContext = new Dictionary<string, object?>();
+        if (attributes.Count > 0)
+        {
+            otelContext.Add("attributes", attributes);
+        }
+
+        var resourceAttributes = _resourceAttributes.Value;
+        if (resourceAttributes.Count > 0)
+        {
+            otelContext.Add("resource", resourceAttributes);
+        }
+
+        return otelContext;
+    }
+
+    private void GenerateSentryErrorsFromOtelSpan(Activity activity, Dictionary<string, object?> spanAttributes)
     {
         // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
 
