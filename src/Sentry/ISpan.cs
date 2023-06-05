@@ -66,6 +66,16 @@ public static class SpanExtensions
         return child;
     }
 
+    internal static ISpan StartChild(this ISpan span, SpanId spanId, string operation, string? description)
+    {
+        var transaction = (TransactionTracer) span.GetTransaction();
+        var parentSpanId = span.SpanId;
+        var child = transaction.StartChild(spanId, parentSpanId, operation);
+        child.Description = description;
+
+        return child;
+    }
+
     /// <summary>
     /// Gets the transaction that this span belongs to.
     /// </summary>

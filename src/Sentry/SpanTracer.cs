@@ -22,10 +22,10 @@ public class SpanTracer : ISpan
     public SentryId TraceId { get; }
 
     /// <inheritdoc />
-    public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
+    public DateTimeOffset StartTimestamp { get; internal set; }
 
     /// <inheritdoc />
-    public DateTimeOffset? EndTimestamp { get; private set; }
+    public DateTimeOffset? EndTimestamp { get; internal set; }
 
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
@@ -79,6 +79,24 @@ public class SpanTracer : ISpan
         ParentSpanId = parentSpanId;
         TraceId = traceId;
         Operation = operation;
+        StartTimestamp = _stopwatch.StartDateTimeOffset;
+    }
+
+    internal SpanTracer(
+        IHub hub,
+        TransactionTracer transaction,
+        SpanId spanId,
+        SpanId? parentSpanId,
+        SentryId traceId,
+        string operation)
+    {
+        _hub = hub;
+        Transaction = transaction;
+        SpanId = spanId;
+        ParentSpanId = parentSpanId;
+        TraceId = traceId;
+        Operation = operation;
+        StartTimestamp = _stopwatch.StartDateTimeOffset;
     }
 
     /// <inheritdoc />
@@ -98,7 +116,7 @@ public class SpanTracer : ISpan
     public void Finish()
     {
         Status ??= SpanStatus.Ok;
-        EndTimestamp = _stopwatch.CurrentDateTimeOffset;
+        EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
     }
 
     /// <inheritdoc />

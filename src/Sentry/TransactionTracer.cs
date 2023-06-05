@@ -54,7 +54,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public string? Distribution { get; set; }
 
     /// <inheritdoc />
-    public DateTimeOffset StartTimestamp => _stopwatch.StartDateTimeOffset;
+    public DateTimeOffset StartTimestamp { get; internal set; }
 
     /// <inheritdoc />
     public DateTimeOffset? EndTimestamp { get; internal set; }
@@ -193,6 +193,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         SpanId = SpanId.Create();
         TraceId = SentryId.Create();
         Operation = operation;
+        StartTimestamp = _stopwatch.StartDateTimeOffset;
     }
 
     /// <summary>
@@ -210,59 +211,60 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Description = context.Description;
         Status = context.Status;
         IsSampled = context.IsSampled;
+        StartTimestamp = _stopwatch.StartDateTimeOffset;
     }
 
     /// <inheritdoc />
-    public void AddBreadcrumb(Breadcrumb breadcrumb) =>
-        _breadcrumbs.Add(breadcrumb);
+    public void AddBreadcrumb(Breadcrumb breadcrumb) => _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) =>
-        _extra[key] = value;
+    public void SetExtra(string key, object? value) => _extra[key] = value;
 
     /// <inheritdoc />
-    public void SetTag(string key, string value) =>
-        _tags[key] = value;
+    public void SetTag(string key, string value) => _tags[key] = value;
 
     /// <inheritdoc />
-    public void UnsetTag(string key) =>
-        _tags.TryRemove(key, out _);
+    public void UnsetTag(string key) => _tags.TryRemove(key, out _);
 
     /// <inheritdoc />
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void SetMeasurement(string name, Measurement measurement) =>
-        _measurements[name] = measurement;
+    public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
+
+    /// <inheritdoc />
+    public ISpan StartChild(string operation) => StartChild(SpanId, operation);
 
     internal ISpan StartChild(SpanId parentSpanId, string operation)
     {
+        var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation);
+        AddChildSpan(span);
+        return span;
+    }
+
+    internal ISpan StartChild(SpanId spanId, SpanId parentSpanId, string operation)
+    {
+        var span = new SpanTracer(_hub, this, spanId, parentSpanId, TraceId, operation);
+        AddChildSpan(span);
+        return span;
+    }
+
+    private void AddChildSpan(SpanTracer span)
+    {
         // Limit spans to 1000
         var isOutOfLimit = _spans.Count >= 1000;
-
-        var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation)
-        {
-            IsSampled = !isOutOfLimit
-                ? IsSampled
-                : false // sample out out-of-limit spans
-        };
+        span.IsSampled = isOutOfLimit ? false : IsSampled;
 
         if (!isOutOfLimit)
         {
             _spans.Add(span);
         }
-
-        return span;
     }
-
-    /// <inheritdoc />
-    public ISpan StartChild(string operation) =>
-        StartChild(SpanId, operation);
 
     /// <inheritdoc />
     public void Finish()
     {
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
-        EndTimestamp = _stopwatch.CurrentDateTimeOffset;
+        EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
 
         foreach (var span in _spans)
         {

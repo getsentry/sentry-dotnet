@@ -160,6 +160,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AzureFunctio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{8639DB06-1F74-4890-8974-613305C1B6C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry", "src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj", "{D4B29F85-5029-462E-A67E-8B7183A0406D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.OpenTelemetry", "samples\Sentry.Samples.AspNetCore.OpenTelemetry\Sentry.Samples.AspNetCore.OpenTelemetry.csproj", "{6E24B870-5109-4FDD-AC96-DCD8F2185F81}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -374,6 +378,14 @@ Global
 		{8639DB06-1F74-4890-8974-613305C1B6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8639DB06-1F74-4890-8974-613305C1B6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8639DB06-1F74-4890-8974-613305C1B6C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4B29F85-5029-462E-A67E-8B7183A0406D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4B29F85-5029-462E-A67E-8B7183A0406D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4B29F85-5029-462E-A67E-8B7183A0406D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4B29F85-5029-462E-A67E-8B7183A0406D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E24B870-5109-4FDD-AC96-DCD8F2185F81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E24B870-5109-4FDD-AC96-DCD8F2185F81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E24B870-5109-4FDD-AC96-DCD8F2185F81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E24B870-5109-4FDD-AC96-DCD8F2185F81}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -434,6 +446,8 @@ Global
 		{203C4556-16DE-46CE-9FAF-C93D8B30D04A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{243B75FF-1501-4DB7-B933-EE43D960EB90} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{8639DB06-1F74-4890-8974-613305C1B6C5} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{6E24B870-5109-4FDD-AC96-DCD8F2185F81} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{D4B29F85-5029-462E-A67E-8B7183A0406D} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

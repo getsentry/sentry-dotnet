@@ -77,22 +77,45 @@ internal static class SpanStatusConverter
     public static SpanStatus FromHttpStatusCode(int code) => code switch
     {
         < 400 => SpanStatus.Ok,
-        400 => SpanStatus.InvalidArgument,
+
+        400 => SpanStatus.FailedPrecondition,
         401 => SpanStatus.Unauthenticated,
         403 => SpanStatus.PermissionDenied,
         404 => SpanStatus.NotFound,
         409 => SpanStatus.AlreadyExists,
         429 => SpanStatus.ResourceExhausted,
         499 => SpanStatus.Cancelled,
-        < 500 => SpanStatus.InvalidArgument,
+        < 500 => SpanStatus.FailedPrecondition,
+
         500 => SpanStatus.InternalError,
         501 => SpanStatus.Unimplemented,
         503 => SpanStatus.Unavailable,
         504 => SpanStatus.DeadlineExceeded,
         < 600 => SpanStatus.InternalError,
+
         _ => SpanStatus.UnknownError
     };
 
-    public static SpanStatus FromHttpStatusCode(HttpStatusCode code) =>
-        FromHttpStatusCode((int)code);
+    public static SpanStatus FromHttpStatusCode(HttpStatusCode code) => FromHttpStatusCode((int)code);
+
+    public static SpanStatus FromGrpcStatusCode(int code) => code switch
+    {
+        1 => SpanStatus.Cancelled,
+        2 => SpanStatus.UnknownError,
+        3 => SpanStatus.InvalidArgument,
+        4 => SpanStatus.DeadlineExceeded,
+        5 => SpanStatus.NotFound,
+        6 => SpanStatus.AlreadyExists,
+        7 => SpanStatus.PermissionDenied,
+        8 => SpanStatus.ResourceExhausted,
+        9 => SpanStatus.FailedPrecondition,
+        10 => SpanStatus.Aborted,
+        11 => SpanStatus.OutOfRange,
+        12 => SpanStatus.Unimplemented,
+        13 => SpanStatus.InternalError,
+        14 => SpanStatus.Unavailable,
+        15 => SpanStatus.DataLoss,
+        16 => SpanStatus.Unauthenticated,
+        _ => SpanStatus.UnknownError
+    };
 }
