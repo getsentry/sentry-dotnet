@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.DiagnosticSource;
 
@@ -18,6 +19,20 @@ internal abstract class EFDiagnosticSourceHelper
         Transaction = hub.GetTransactionIfSampled();
     }
 
+    protected static Guid? TryGetConnectionId(ISpan span) =>
+        span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid
+            ? guid
+            : null;
+
+    protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
+
+    protected static void SetConnectionId(ISpan span, Guid? connectionId)
+    {
+        Debug.Assert(connectionId != Guid.Empty);
+
+        span.SetExtra(ConnectionExtraKey, connectionId);
+    }
+
     internal void AddSpan(object? diagnosticSourceValue)
     {
         Options.LogDebug($"(Sentry add span {Operation})");
@@ -30,11 +45,13 @@ internal abstract class EFDiagnosticSourceHelper
         // We "flatten" the EF spans so that they all have the same parent span, for two reasons:
         // 1. Each command typically gets it's own connection, which makes the resulting waterfall diagram hard to read.
         // 2. Sentry's performance errors functionality only works when all queries have the same parent span.
-        var parent = Transaction.GetDbParentSpan();
+        var parent = GetParentSpan(Transaction, diagnosticSourceValue);
         var child = parent.StartChild(Operation, Description(diagnosticSourceValue));
 
         SetSpanReference(child, diagnosticSourceValue);
     }
+
+    protected virtual ISpan GetParentSpan(ITransaction transaction, object? diagnosticSourceValue) => transaction.GetDbParentSpan();
 
     internal void FinishSpan(object? diagnosticSourceValue, SpanStatus status)
     {

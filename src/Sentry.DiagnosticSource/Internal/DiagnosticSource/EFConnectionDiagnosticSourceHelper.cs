@@ -11,19 +11,6 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string Operation => "db.connection";
     protected override string Description(object? diagnosticSourceValue) => null!;
-    private static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
-
-    private static void SetConnectionId(ISpan span, Guid? connectionId)
-    {
-        Debug.Assert(connectionId != Guid.Empty);
-
-        span.SetExtra(ConnectionExtraKey, connectionId);
-    }
-
-    private static Guid? TryGetConnectionId(ISpan span) =>
-        span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid
-            ? guid
-            : null;
 
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
     {

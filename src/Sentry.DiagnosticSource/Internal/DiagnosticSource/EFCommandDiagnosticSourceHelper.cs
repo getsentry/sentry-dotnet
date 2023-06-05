@@ -25,6 +25,31 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
             ? guid
             : null;
 
+    protected override ISpan GetParentSpan(ITransaction transaction, object? diagnosticSourceValue)
+    {
+        ISpan? parentSpan = null;
+        if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
+        {
+            parentSpan = transaction.Spans
+                .FirstOrDefault(span =>
+                    !span.IsFinished &&
+                    span.Operation == "db.connection" &&
+                    TryGetConnectionId(span) == connectionId);
+            if (parentSpan is { })
+            {
+                return parentSpan;
+            }
+            Options.LogWarning("Unable to locate query parent span. No Span found with db connection id {1}.", connectionId);
+            return base.GetParentSpan(transaction, diagnosticSourceValue);
+        }
+        else
+        {
+            Options.LogWarning("Unable to locate query parent span. diagnostic source did not contain a db connection id.");
+            return base.GetParentSpan(transaction, diagnosticSourceValue);
+        }
+    }
+
+
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
     {
         if (GetCommandId(diagnosticSourceValue) is { } commandId)

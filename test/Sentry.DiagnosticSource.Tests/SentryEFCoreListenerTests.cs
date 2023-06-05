@@ -204,8 +204,17 @@ public class SentryEFCoreListenerTests
 
     private class FakeDiagnosticCommandEventData : FakeDiagnosticEventData
     {
-        public FakeDiagnosticCommandEventData(string value) : base(value) { }
-        public Guid ConnectionId { get; set; } = Guid.NewGuid();
+        public FakeDiagnosticCommandEventData(string value) : base(value)
+        {
+            ConnectionId = new Guid();
+        }
+
+        public FakeDiagnosticCommandEventData(Guid connectionId, string value) : base(value)
+        {
+            ConnectionId = connectionId;
+        }
+
+        public Guid ConnectionId { get; set; }
         public Guid CommandId { get; set; } = Guid.NewGuid();
     }
 
@@ -221,7 +230,7 @@ public class SentryEFCoreListenerTests
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData.ConnectionId, efSql);
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, queryEventData));
@@ -252,7 +261,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -270,7 +279,7 @@ public class SentryEFCoreListenerTests
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData.ConnectionId, efSql);
 
         // Act
         var childSpan = _fixture.Tracer.StartChild("Child Span");
@@ -303,7 +312,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(childSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -321,7 +330,7 @@ public class SentryEFCoreListenerTests
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData.ConnectionId, efSql);
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, queryEventData));
@@ -349,7 +358,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(expectedSql, commandSpan.Description);
     }
