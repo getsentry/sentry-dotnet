@@ -100,7 +100,7 @@ public static class HttpContextExtensions
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;
 
-        if (options?.SendDefaultPii is not null)
+        if (options?.SendDefaultPii == true)
         {
             transaction.Request.Cookies = string.Join("; ", httpContext.Request.Cookies.AllKeys.Select(x => $"{x}={httpContext.Request.Cookies[x]?.Value}"));
         }
