@@ -57,7 +57,8 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           Status: Ok,
           IsSampled: true,
           Extra: {
-            db.command_id: Guid_1
+            db.command_id: Guid_1,
+            db.connection_id: Guid_2
           }
         },
         {
@@ -69,7 +70,8 @@ FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
           Extra: {
-            db.command_id: Guid_2
+            db.command_id: Guid_3,
+            db.connection_id: Guid_4
           }
         }
       ],

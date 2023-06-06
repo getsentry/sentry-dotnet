@@ -204,11 +204,6 @@ public class SentryEFCoreListenerTests
 
     private class FakeDiagnosticCommandEventData : FakeDiagnosticEventData
     {
-        public FakeDiagnosticCommandEventData(string value) : base(value)
-        {
-            ConnectionId = new Guid();
-        }
-
         public FakeDiagnosticCommandEventData(Guid connectionId, string value) : base(value)
         {
             ConnectionId = connectionId;
@@ -399,9 +394,9 @@ public class SentryEFCoreListenerTests
         // Fake a connection pool with two connections
         var connectionA = new FakeDiagnosticConnectionEventData(efConn);
         var connectionB = new FakeDiagnosticConnectionEventData(efConn);
-        var commandA = new FakeDiagnosticCommandEventData(efSql);
-        var commandB = new FakeDiagnosticCommandEventData(efSql);
-        var commandC = new FakeDiagnosticCommandEventData(efSql);
+        var commandA = new FakeDiagnosticCommandEventData(connectionA.ConnectionId, efSql);
+        var commandB = new FakeDiagnosticCommandEventData(connectionB.ConnectionId, efSql);
+        var commandC = new FakeDiagnosticCommandEventData(connectionA.ConnectionId, efSql);
 
         void Pause() => Thread.Sleep(200);
 

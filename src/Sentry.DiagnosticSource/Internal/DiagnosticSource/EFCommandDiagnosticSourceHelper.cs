@@ -39,7 +39,7 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
             {
                 return parentSpan;
             }
-            Options.LogWarning("Unable to locate query parent span. No Span found with db connection id {1}.", connectionId);
+            Options.LogWarning("Unable to locate query parent span. No Span found with db connection id {0}.", connectionId);
             return base.GetParentSpan(transaction, diagnosticSourceValue);
         }
         else
@@ -69,6 +69,10 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
         if (GetCommandId(diagnosticSourceValue) is { } commandId)
         {
             SetCommandId(span, commandId);
+            if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
+            {
+                SetConnectionId(span, connectionId);
+            }
             return;
         }
         Options.LogWarning("No correlation id can be set for {1}.", Operation);
