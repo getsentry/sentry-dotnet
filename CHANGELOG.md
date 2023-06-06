@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Populate scope's Cookies property ([#2411](https://github.com/getsentry/sentry-dotnet/pull/2411))
+
 ### Fixes
 
 - SentryHttpMessageHandler added when AddHttpClient is before UseSentry ([#2390](https://github.com/getsentry/sentry-dotnet/pull/2390))
