@@ -141,6 +141,11 @@ public static class ScopeExtensions
             }
 
             scope.Request.Headers[requestHeader.Key] = requestHeader.Value;
+
+            if (requestHeader.Key == HeaderNames.Cookie)
+            {
+                scope.Request.Cookies = requestHeader.Value;
+            }
         }
 
         // TODO: Hide these 'Env' behind some extension method as

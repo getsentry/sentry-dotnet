@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Sentry.Internal.DiagnosticSource;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using static Sentry.Internal.DiagnosticSource.SentryEFCoreListener;
@@ -256,7 +257,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -307,7 +308,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(childSpan.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -353,7 +354,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(expectedSql, commandSpan.Description);
     }
