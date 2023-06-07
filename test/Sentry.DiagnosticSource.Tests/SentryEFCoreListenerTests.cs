@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Sentry.Internal.DiagnosticSource;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using static Sentry.Internal.DiagnosticSource.SentryEFCoreListener;
 
 namespace Sentry.DiagnosticSource.Tests;
