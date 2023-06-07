@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Sentry.Internal.DiagnosticSource;
 using static Sentry.Internal.DiagnosticSource.SentryEFCoreListener;
 
@@ -188,6 +189,26 @@ public class SentryEFCoreListenerTests
         hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
     }
 
+    private class FakeDiagnosticEventData
+    {
+        public FakeDiagnosticEventData(string value) { _value = value; }
+        private readonly string _value;
+        public override string ToString()=> _value;
+    }
+
+    private class FakeDiagnosticConnectionEventData : FakeDiagnosticEventData
+    {
+        public FakeDiagnosticConnectionEventData(string value) : base(value) { }
+        public Guid ConnectionId { get; set; } = Guid.NewGuid();
+    }
+
+    private class FakeDiagnosticCommandEventData : FakeDiagnosticEventData
+    {
+        public FakeDiagnosticCommandEventData(string value) : base(value) { }
+        public Guid ConnectionId { get; set; } = Guid.NewGuid();
+        public Guid CommandId { get; set; } = Guid.NewGuid();
+    }
+
     [Fact]
     public void OnNext_HappyPath_IsValid()
     {
@@ -196,14 +217,19 @@ public class SentryEFCoreListenerTests
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
+        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
 
         // Act
-        interceptor.OnNext(new(EFQueryCompiling, efSql));
-        interceptor.OnNext(new(EFQueryCompiled, efSql));
-        interceptor.OnNext(new(EFConnectionOpening, null));
-        interceptor.OnNext(new(EFCommandExecuting, efSql));
-        interceptor.OnNext(new(EFCommandExecuted, efSql));
-        interceptor.OnNext(new(EFConnectionClosed, efSql));
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandExecuted, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
@@ -226,7 +252,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -240,15 +266,20 @@ public class SentryEFCoreListenerTests
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
+        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
 
         // Act
         var childSpan = _fixture.Tracer.StartChild("Child Span");
-        interceptor.OnNext(new(EFQueryCompiling, efSql));
-        interceptor.OnNext(new(EFQueryCompiled, efSql));
-        interceptor.OnNext(new(EFConnectionOpening, null));
-        interceptor.OnNext(new(EFCommandExecuting, efSql));
-        interceptor.OnNext(new(EFCommandExecuted, efSql));
-        interceptor.OnNext(new(EFConnectionClosed, efSql));
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandExecuted, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
         childSpan.Finish();
 
         // Assert
@@ -272,7 +303,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(childSpan.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -286,14 +317,19 @@ public class SentryEFCoreListenerTests
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
+        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
 
         // Act
-        interceptor.OnNext(new(EFQueryCompiling, efSql));
-        interceptor.OnNext(new(EFQueryCompiled, efSql));
-        interceptor.OnNext(new(EFConnectionOpening, null));
-        interceptor.OnNext(new(EFCommandExecuting, efSql));
-        interceptor.OnNext(new(EFCommandFailed, efSql));
-        interceptor.OnNext(new(EFConnectionClosed, efSql));
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandFailed, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
@@ -313,7 +349,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(expectedSql, commandSpan.Description);
     }
@@ -379,59 +415,7 @@ public class SentryEFCoreListenerTests
 
         // Assert
         _fixture.Options.DiagnosticLogger.Received(1)?
-            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Tried to close {0} span but no matching span could be found."),
                 null, Arg.Any<object[]>());
-    }
-
-    [Fact]
-    public void FilterNewLineValue_StringWithNewLine_SubStringAfterNewLine()
-    {
-        // Arrange
-        var text = "1234\r\nSELECT *...\n FROM ...";
-        var expectedText = "SELECT *...\n FROM ...";
-
-        // Act
-        var value = FilterNewLineValue(text);
-
-        // Assert
-        Assert.Equal(expectedText, value);
-    }
-
-    [Fact]
-    public void FilterNewLineValue_NullObject_NullString()
-    {
-        // Act
-        var value = FilterNewLineValue(null);
-
-        // Assert
-        Assert.Null(value);
-    }
-
-    [Fact]
-    public void FilterNewLineValue_OneLineString_OneLineString()
-    {
-        // Arrange
-        var text = "1234";
-        var expectedText = "1234";
-
-        // Act
-        var value = FilterNewLineValue(text);
-
-        // Assert
-        Assert.Equal(expectedText, value);
-    }
-
-    [Fact]
-    public void FilterNewLineValue_EmptyString_EmptyString()
-    {
-        // Arrange
-        var text = "";
-        var expectedText = "";
-
-        // Act
-        var value = FilterNewLineValue(text);
-
-        // Assert
-        Assert.Equal(expectedText, value);
     }
 }
