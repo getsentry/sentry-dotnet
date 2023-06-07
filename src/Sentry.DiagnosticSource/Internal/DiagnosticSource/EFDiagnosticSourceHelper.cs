@@ -53,7 +53,8 @@ internal abstract class EFDiagnosticSourceHelper
             Options.LogWarning("Tried to close {0} span but no matching span could be found.", Operation);
             return;
         }
-        sourceSpan?.Finish(status);
+
+        sourceSpan.Finish(status);
     }
 
     private void LogTransactionSpans()
