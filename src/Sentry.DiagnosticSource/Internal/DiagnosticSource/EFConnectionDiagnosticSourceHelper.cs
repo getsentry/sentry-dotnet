@@ -65,6 +65,6 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
         }
 
         // If we can't find a span to reuse then we'll add a new one instead
-        base.AddSpan(diagnosticSourceValue);
+        AddSpan(diagnosticSourceValue);
     }
 }
