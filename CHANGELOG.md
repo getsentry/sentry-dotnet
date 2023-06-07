@@ -6,8 +6,6 @@
 
 - SentryHttpMessageHandler added when AddHttpClient is before UseSentry ([#2390](https://github.com/getsentry/sentry-dotnet/pull/2390))
 - Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
-- DB connection spans not finishing ([#2398](https://github.com/getsentry/sentry-dotnet/pull/2398))
-- DB Connection spans presented poorly ([#2409](https://github.com/getsentry/sentry-dotnet/pull/2409))
 - Fix db connection spans not finishing ([#2398](https://github.com/getsentry/sentry-dotnet/pull/2398))
 - Various .NET MAUI fixes / improvements ([#2403](https://github.com/getsentry/sentry-dotnet/pull/2403))
   - The battery level was being reported incorrectly due to percentage multiplier.
@@ -17,6 +15,7 @@
 - Reduce debug files uploaded ([#2404](https://github.com/getsentry/sentry-dotnet/pull/2404))
 - Fix system frames being marked as "in-app" ([#2408](https://github.com/getsentry/sentry-dotnet/pull/2408))
   - NOTE: This important fix corrects a value that is used during issue grouping, so you may receive new alerts for existing issues after deploying this update.
+- DB Connection spans presented poorly ([#2409](https://github.com/getsentry/sentry-dotnet/pull/2409))
 - Populate scope's Cookies property ([#2411](https://github.com/getsentry/sentry-dotnet/pull/2411))
 
 ### Dependencies
