@@ -1,3 +1,5 @@
+using HttpCookie = System.Web.HttpCookie;
+
 namespace Sentry.AspNet.Tests;
 
 public class HttpContextExtensionsTests
@@ -60,5 +62,72 @@ public class HttpContextExtensionsTests
         // Assert
         transaction.IsFinished.Should().BeTrue();
         transaction.Status.Should().Be(SpanStatus.NotFound);
+    }
+
+    [Fact]
+    public void StartSentryTransaction_SendDefaultPii_set_to_true_sets_cookies()
+    {
+        // Arrange
+        var context = HttpContextBuilder.BuildWithCookies(new []{ new HttpCookie("foo", "bar") });
+
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
+        {
+            SendDefaultPii = true
+        };
+
+        // Act
+        var transaction = context.StartSentryTransaction();
+
+        // Assert
+        transaction.Request.Cookies.Should().Be("foo=bar");
+    }
+
+    [Fact]
+    public void StartSentryTransaction_SendDefaultPii_set_to_true_does_not_set_cookies_if_none_found()
+    {
+        // Arrange
+        var context = HttpContextBuilder.BuildWithCookies(new HttpCookie[] { });
+
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
+        {
+            SendDefaultPii = true
+        };
+
+        // Act
+        var transaction = context.StartSentryTransaction();
+
+        // Assert
+        transaction.Request.Cookies.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void StartSentryTransaction_SendDefaultPii_set_to_false_does_not_set_cookies()
+    {
+        // Arrange
+        var context = HttpContextBuilder.BuildWithCookies(new []{ new HttpCookie("foo", "bar") });
+
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
+        {
+            SendDefaultPii = false
+        };
+
+        // Act
+        var transaction = context.StartSentryTransaction();
+
+        // Assert
+        transaction.Request.Cookies.Should().BeNull();
+    }
+
+    [Fact]
+    public void StartSentryTransaction_missing_options_does_not_set_cookies()
+    {
+        // Arrange
+        var context = HttpContextBuilder.BuildWithCookies(new []{ new HttpCookie("foo", "bar") });
+
+        // Act
+        var transaction = context.StartSentryTransaction();
+
+        // Assert
+        transaction.Request.Cookies.Should().BeNull();
     }
 }
