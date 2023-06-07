@@ -14,6 +14,7 @@
 - Reduce debug files uploaded ([#2404](https://github.com/getsentry/sentry-dotnet/pull/2404))
 - Fix system frames being marked as "in-app" ([#2408](https://github.com/getsentry/sentry-dotnet/pull/2408))
   - NOTE: This important fix corrects a value that is used during issue grouping, so you may receive new alerts for existing issues after deploying this update.
+- Fix UWP GateKeeper errors ([#2415](https://github.com/getsentry/sentry-dotnet/pull/2415))
 
 ### Dependencies
 
