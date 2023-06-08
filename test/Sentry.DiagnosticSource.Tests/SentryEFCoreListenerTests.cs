@@ -259,7 +259,7 @@ public class SentryEFCoreListenerTests
 
         // Check DB Name is stored correctly
         var dbName =
-            connectionSpan.Extra.TryGetValue<string, string>(EFConnectionDiagnosticSourceHelper.DbNameExtraKey);
+            connectionSpan.Extra.TryGetValue<string, string>(OTKeys.DbName);
         Assert.Equal(expectedDbName, dbName);
 
         // Check connections between spans.
@@ -316,7 +316,7 @@ public class SentryEFCoreListenerTests
 
         // Check DB Name is stored correctly
         var dbName =
-            connectionSpan.Extra.TryGetValue<string, string>(EFConnectionDiagnosticSourceHelper.DbNameExtraKey);
+            connectionSpan.Extra.TryGetValue<string, string>(OTKeys.DbName);
         Assert.Equal(expectedDbName, dbName);
 
         // Check connections between spans.
@@ -444,12 +444,12 @@ public class SentryEFCoreListenerTests
         bool IsDbSpan(ISpan s) => s.Operation == "db.connection";
         bool IsCommandSpan(ISpan s) => s.Operation == "db.query";
         Func<ISpan, FakeDiagnosticConnectionEventData, bool> forConnection = (s, e) =>
-            s.Extra.ContainsKey(EFDiagnosticSourceHelper.ConnectionExtraKey)
-            && s.Extra[EFDiagnosticSourceHelper.ConnectionExtraKey] is Guid connectionId
+            s.Extra.ContainsKey(EFKeys.DbConnectionId)
+            && s.Extra[EFKeys.DbConnectionId] is Guid connectionId
             && connectionId == e.ConnectionId;
         Func<ISpan, FakeDiagnosticCommandEventData, bool> forCommand = (s, e) =>
-            s.Extra.ContainsKey(EFDiagnosticSourceHelper.CommandExtraKey)
-            && s.Extra[EFDiagnosticSourceHelper.CommandExtraKey] is Guid commandId
+            s.Extra.ContainsKey(EFKeys.DbCommandId)
+            && s.Extra[EFKeys.DbCommandId] is Guid commandId
             && commandId == e.CommandId;
 
         using (new AssertionScope())

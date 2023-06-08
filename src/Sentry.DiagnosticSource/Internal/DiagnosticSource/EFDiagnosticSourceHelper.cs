@@ -5,9 +5,6 @@ namespace Sentry.Internal.DiagnosticSource;
 
 internal abstract class EFDiagnosticSourceHelper
 {
-    internal const string ConnectionExtraKey = "db.connection_id";
-    internal const string CommandExtraKey = "db.command_id";
-
     protected SentryOptions Options { get; }
     protected ITransaction? Transaction { get; }
     protected abstract string Operation { get; }
@@ -19,7 +16,7 @@ internal abstract class EFDiagnosticSourceHelper
         Transaction = hub.GetTransactionIfSampled();
     }
 
-    protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(ConnectionExtraKey);
+    protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
 
     protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
 
@@ -27,7 +24,7 @@ internal abstract class EFDiagnosticSourceHelper
     {
         Debug.Assert(connectionId != Guid.Empty);
 
-        span.SetExtra(ConnectionExtraKey, connectionId);
+        span.SetExtra(EFKeys.DbConnectionId, connectionId);
     }
 
     internal void AddSpan(object? diagnosticSourceValue)

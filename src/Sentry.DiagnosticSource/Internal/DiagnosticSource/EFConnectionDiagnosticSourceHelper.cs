@@ -5,10 +5,6 @@ namespace Sentry.Internal.DiagnosticSource;
 
 internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 {
-    // These all use the Open Telemetry naming conventions from
-    // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md
-    internal const string DbNameExtraKey = "db.name";
-
     internal EFConnectionDiagnosticSourceHelper(IHub hub, SentryOptions options) : base(hub, options)
     {
     }
@@ -37,7 +33,7 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
     {
         if (DatabaseName(diagnosticSourceValue) is { } databaseName)
         {
-            span.SetExtra(DbNameExtraKey, databaseName);
+            span.SetExtra(OTKeys.DbName, databaseName);
         }
 
         if (GetConnectionId(diagnosticSourceValue) is { } connectionId)

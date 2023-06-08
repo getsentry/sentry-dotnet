@@ -11,9 +11,6 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         Execution
     };
 
-    internal const string ConnectionExtraKey = "db.connection_id";
-    internal const string OperationExtraKey = "db.operation_id";
-
     internal const string SqlDataWriteConnectionOpenBeforeCommand = "System.Data.SqlClient.WriteConnectionOpenBefore";
     internal const string SqlMicrosoftWriteConnectionOpenBeforeCommand = "Microsoft.Data.SqlClient.WriteConnectionOpenBefore";
 
@@ -41,22 +38,29 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         _options = options;
     }
 
+    private static void SetDatabaseName(ISpan span, string databaseName)
+    {
+        Debug.Assert(databaseName != string.Empty);
+
+        span.SetExtra(OTKeys.DbName, databaseName);
+    }
+
     private static void SetConnectionId(ISpan span, Guid? connectionId)
     {
         Debug.Assert(connectionId != Guid.Empty);
 
-        span.SetExtra(ConnectionExtraKey, connectionId);
+        span.SetExtra(SqlKeys.DbConnectionId, connectionId);
     }
 
     private static void SetOperationId(ISpan span, Guid? operationId)
     {
         Debug.Assert(operationId != Guid.Empty);
 
-        span.SetExtra(OperationExtraKey, operationId);
+        span.SetExtra(SqlKeys.DbOperationId, operationId);
     }
 
-    private static Guid? TryGetOperationId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(OperationExtraKey);
-    private static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(ConnectionExtraKey);
+    private static Guid? TryGetOperationId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(SqlKeys.DbOperationId);
+    private static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
 
     private void AddSpan(SentrySqlSpanType type, string operation, object? value)
     {
@@ -143,8 +147,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
 
         var operationId = value.GetGuidProperty("OperationId");
-        var connectionId = value.GetGuidProperty("ConnectionId");
-        if (operationId == null || connectionId == null)
+        if (operationId == null)
         {
             return;
         }
@@ -152,7 +155,18 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         var spans = transaction.Spans.Where(span => span.Operation is "db.connection").ToList();
         if (spans.Find(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } connectionSpan)
         {
-            SetConnectionId(connectionSpan, connectionId);
+            var connectionId = value.GetGuidProperty("ConnectionId");
+            if (connectionId.HasValue)
+            {
+                SetConnectionId(connectionSpan, connectionId);
+            }
+
+            var database = value.GetStringProperty("Connection.Database");
+            if (database is { } dbName)
+            {
+                connectionSpan.Description = dbName;
+                SetDatabaseName(connectionSpan, dbName);
+            }
         }
     }
 
@@ -172,12 +186,12 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                     return;
                 case SqlMicrosoftAfterExecuteCommand or SqlDataAfterExecuteCommand
                     when GetSpan(SentrySqlSpanType.Execution, kvp) is { } commandSpan:
-                    commandSpan.Description = kvp.Value?.GetProperty("Command")?.GetStringProperty("CommandText");
+                    commandSpan.Description = kvp.Value?.GetStringProperty("Command.CommandText");
                     commandSpan.Finish(SpanStatus.Ok);
                     return;
                 case SqlMicrosoftWriteCommandError or SqlDataWriteCommandError
                     when GetSpan(SentrySqlSpanType.Execution, kvp) is { } errorSpan:
-                    errorSpan.Description = kvp.Value?.GetProperty("Command")?.GetStringProperty("CommandText");
+                    errorSpan.Description = kvp.Value?.GetStringProperty("Command.CommandText");
                     errorSpan.Finish(SpanStatus.InternalError);
                     return;
 
