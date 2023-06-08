@@ -47,12 +47,14 @@
         {
           IsFinished: true,
           Operation: db.connection,
+          Description: SqlListenerTests.verify_RecordsEfAsync,
           Status: Ok,
           IsSampled: true,
           Extra: {
-            bytes_received: 167,
-            bytes_sent : 536,
+            bytes_received: 304,
+            bytes_sent : 704,
             db.connection_id: Guid_1,
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.operation_id: Guid_2,
             rows_sent: 1
           }
@@ -60,7 +62,15 @@
         {
           IsFinished: true,
           Operation: db.query,
-          Description: insert into MyTable (Value) values (@value);,
+          Description:
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+VALUES (@p0);
+SELECT [Id]
+FROM [TestEntities]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+
+,
           Status: Ok,
           IsSampled: true,
           Extra: {
@@ -70,8 +80,17 @@
         },
         {
           IsFinished: true,
+          Operation: db.query.compile,
+          Description: 'DbSet<TestEntity>()',
+          Status: Ok,
+          IsSampled: true
+        },
+        {
+          IsFinished: true,
           Operation: db.query,
-          Description: select Value from MyTable where Value = @value,
+          Description:
+SELECT [t].[Id], [t].[Property]
+FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
           Extra: {
