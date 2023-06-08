@@ -9,7 +9,10 @@ internal abstract class EFDiagnosticSourceHelper
     protected ITransaction? Transaction { get; }
     protected abstract string Operation { get; }
 
-    protected abstract string GetDescription(object? diagnosticSourceValue);
+    protected abstract string? GetDescription(object? diagnosticSourceValue);
+
+    protected static string? GetDatabaseName(object? diagnosticSourceValue) =>
+        diagnosticSourceValue?.GetStringProperty("Connection.Database");
 
     internal EFDiagnosticSourceHelper(IHub hub, SentryOptions options)
     {

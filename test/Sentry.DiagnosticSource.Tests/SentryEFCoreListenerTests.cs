@@ -190,26 +190,25 @@ public class SentryEFCoreListenerTests
         public FakeDiagnosticEventData(string value) { _value = value; }
         private readonly string _value;
         public override string ToString()=> _value;
+
+        public class ConnectionInfo
+        {
+            public string Database { get; } = "rentals";
+        }
+        public ConnectionInfo Connection { get; } = new();
     }
 
     private class FakeDiagnosticConnectionEventData : FakeDiagnosticEventData
     {
         public FakeDiagnosticConnectionEventData(string value) : base(value) { }
         public Guid ConnectionId { get; } = Guid.NewGuid();
-
-        public ConnectionInfo Connection { get; } = new ConnectionInfo();
-
-        public class ConnectionInfo
-        {
-            public string Database { get; } = "rentals";
-        }
     }
 
     private class FakeDiagnosticCommandEventData : FakeDiagnosticEventData
     {
-        public FakeDiagnosticCommandEventData(Guid connectionId, string value) : base(value)
+        public FakeDiagnosticCommandEventData(FakeDiagnosticConnectionEventData connection, string value) : base(value)
         {
-            ConnectionId = connectionId;
+            ConnectionId = connection.ConnectionId;
         }
 
         public Guid ConnectionId { get; set; }
@@ -229,7 +228,7 @@ public class SentryEFCoreListenerTests
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData.ConnectionId, efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, queryEventData));
@@ -258,9 +257,12 @@ public class SentryEFCoreListenerTests
         Assert.Equal(expectedSql, commandSpan.Description);
 
         // Check DB Name is stored correctly
-        var dbName =
+        var connectionDbName =
             connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
-        Assert.Equal(expectedDbName, dbName);
+        Assert.Equal(expectedDbName, connectionDbName);
+        var commandDbName =
+            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
+        Assert.Equal(expectedDbName, commandDbName);
 
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
@@ -284,7 +286,7 @@ public class SentryEFCoreListenerTests
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData.ConnectionId, efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
         var childSpan = _fixture.Tracer.StartChild("Child Span");
@@ -340,7 +342,7 @@ public class SentryEFCoreListenerTests
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData.ConnectionId, efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, queryEventData));
@@ -409,9 +411,9 @@ public class SentryEFCoreListenerTests
         // Fake a connection pool with two connections
         var connectionA = new FakeDiagnosticConnectionEventData(efConn);
         var connectionB = new FakeDiagnosticConnectionEventData(efConn);
-        var commandA = new FakeDiagnosticCommandEventData(connectionA.ConnectionId, efSql);
-        var commandB = new FakeDiagnosticCommandEventData(connectionB.ConnectionId, efSql);
-        var commandC = new FakeDiagnosticCommandEventData(connectionA.ConnectionId, efSql);
+        var commandA = new FakeDiagnosticCommandEventData(connectionA, efSql);
+        var commandB = new FakeDiagnosticCommandEventData(connectionB, efSql);
+        var commandC = new FakeDiagnosticCommandEventData(connectionA, efSql);
 
         void Pause() => Thread.Sleep(200);
 
