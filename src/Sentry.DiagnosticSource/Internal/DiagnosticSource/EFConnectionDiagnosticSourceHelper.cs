@@ -5,12 +5,18 @@ namespace Sentry.Internal.DiagnosticSource;
 
 internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 {
+    // These all use the Open Telemetry naming conventions from
+    // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md
+    internal const string DbNameExtraKey = "db.name";
+
     internal EFConnectionDiagnosticSourceHelper(IHub hub, SentryOptions options) : base(hub, options)
     {
     }
 
     protected override string Operation => "db.connection";
-    protected override string Description(object? diagnosticSourceValue) =>
+    protected override string Description(object? diagnosticSourceValue) => DatabaseName(diagnosticSourceValue);
+
+    private string DatabaseName(object? diagnosticSourceValue) =>
         diagnosticSourceValue?.GetStringProperty("Connection.Database") ?? null!;
 
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
@@ -29,12 +35,19 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
+        if (DatabaseName(diagnosticSourceValue) is { } databaseName)
+        {
+            span.SetExtra(DbNameExtraKey, databaseName);
+        }
+
         if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
         {
             SetConnectionId(span, connectionId);
-            return;
         }
-        Options.LogWarning("No {0} found when adding {1} Span.", "ConnectionId", Operation);
+        else
+        {
+            Options.LogWarning("No {0} found when adding {1} Span.", "ConnectionId", Operation);
+        }
     }
 
     /// <summary>

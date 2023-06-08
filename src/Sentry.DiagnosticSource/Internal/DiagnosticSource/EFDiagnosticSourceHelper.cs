@@ -19,10 +19,7 @@ internal abstract class EFDiagnosticSourceHelper
         Transaction = hub.GetTransactionIfSampled();
     }
 
-    protected static Guid? TryGetConnectionId(ISpan span) =>
-        span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid
-            ? guid
-            : null;
+    protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(ConnectionExtraKey);
 
     protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
 

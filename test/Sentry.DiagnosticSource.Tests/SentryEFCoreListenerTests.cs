@@ -9,14 +9,11 @@ public class SentryEFCoreListenerTests
         => type switch
         {
             EFQueryCompiling or EFQueryCompiled =>
-                span => span.Description != null &&
-                        span.Operation == "db.query.compile",
+                span => span.Operation == "db.query.compile",
             EFConnectionOpening or EFConnectionClosed =>
-                span => span.Description == null &&
-                        span.Operation == "db.connection",
+                span => span.Operation == "db.connection",
             EFCommandExecuting or EFCommandExecuting or EFCommandFailed =>
-                span => span.Description != null &&
-                        span.Operation == "db.query",
+                span => span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
@@ -198,7 +195,14 @@ public class SentryEFCoreListenerTests
     private class FakeDiagnosticConnectionEventData : FakeDiagnosticEventData
     {
         public FakeDiagnosticConnectionEventData(string value) : base(value) { }
-        public Guid ConnectionId { get; set; } = Guid.NewGuid();
+        public Guid ConnectionId { get; } = Guid.NewGuid();
+
+        public ConnectionInfo Connection { get; } = new ConnectionInfo();
+
+        public class ConnectionInfo
+        {
+            public string Database { get; } = "rentals";
+        }
     }
 
     private class FakeDiagnosticCommandEventData : FakeDiagnosticEventData
@@ -221,6 +225,7 @@ public class SentryEFCoreListenerTests
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
         var efConn = "db username : password";
+        var expectedDbName = "rentals";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
@@ -248,14 +253,19 @@ public class SentryEFCoreListenerTests
         });
 
         // Assert span descriptions
-        Assert.Null(connectionSpan.Description);
+        Assert.Equal(expectedDbName,connectionSpan.Description);
         Assert.Equal(expectedSql, compilerSpan.Description);
         Assert.Equal(expectedSql, commandSpan.Description);
+
+        // Check DB Name is stored correctly
+        var dbName =
+            connectionSpan.Extra.TryGetValue<string, string>(EFConnectionDiagnosticSourceHelper.DbNameExtraKey);
+        Assert.Equal(expectedDbName, dbName);
 
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -270,6 +280,7 @@ public class SentryEFCoreListenerTests
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
         var efConn = "db username : password";
+        var expectedDbName = "rentals";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
@@ -299,14 +310,19 @@ public class SentryEFCoreListenerTests
         });
 
         // Assert span descriptions
-        Assert.Null(connectionSpan.Description);
+        Assert.Equal(expectedDbName, connectionSpan.Description);
         Assert.Equal(expectedSql, compilerSpan.Description);
         Assert.Equal(expectedSql, commandSpan.Description);
+
+        // Check DB Name is stored correctly
+        var dbName =
+            connectionSpan.Extra.TryGetValue<string, string>(EFConnectionDiagnosticSourceHelper.DbNameExtraKey);
+        Assert.Equal(expectedDbName, dbName);
 
         // Check connections between spans.
         Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(childSpan.SpanId, commandSpan.ParentSpanId);
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
@@ -352,7 +368,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(expectedSql, commandSpan.Description);
     }

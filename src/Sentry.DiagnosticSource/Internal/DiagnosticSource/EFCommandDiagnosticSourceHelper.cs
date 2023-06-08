@@ -20,32 +20,7 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
         span.SetExtra(CommandExtraKey, commandId);
     }
 
-    private static Guid? TryGetCommandId(ISpan span) =>
-        span.Extra.TryGetValue(CommandExtraKey, out var key) && key is Guid guid
-            ? guid
-            : null;
-
-    protected override ISpan GetParentSpan(ITransaction transaction, object? diagnosticSourceValue)
-    {
-        if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
-        {
-            var parentSpan = transaction.Spans
-                .FirstOrDefault(span =>
-                    !span.IsFinished &&
-                    span.Operation == "db.connection" &&
-                    TryGetConnectionId(span) == connectionId);
-            if (parentSpan is { })
-            {
-                return parentSpan;
-            }
-            Options.LogWarning("Unable to locate query parent span. No Span found with db connection id {0}.", connectionId);
-            return base.GetParentSpan(transaction, diagnosticSourceValue);
-        }
-
-        Options.LogWarning("Unable to locate query parent span. diagnostic source did not contain a db connection id.");
-        return base.GetParentSpan(transaction, diagnosticSourceValue);
-    }
-
+    private static Guid? TryGetCommandId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(CommandExtraKey);
 
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
     {

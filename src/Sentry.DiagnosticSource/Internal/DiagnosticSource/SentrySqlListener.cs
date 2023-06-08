@@ -55,15 +55,8 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         span.SetExtra(OperationExtraKey, operationId);
     }
 
-    private static Guid? TryGetOperationId(ISpan span) =>
-        span.Extra.TryGetValue(OperationExtraKey, out var key) && key is Guid guid
-            ? guid
-            : null;
-
-    private static Guid? TryGetConnectionId(ISpan span) =>
-        span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid
-            ? guid
-            : null;
+    private static Guid? TryGetOperationId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(OperationExtraKey);
+    private static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(ConnectionExtraKey);
 
     private void AddSpan(SentrySqlSpanType type, string operation, object? value)
     {
@@ -74,25 +67,11 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
 
         var operationId = value?.GetGuidProperty("OperationId");
-
-        switch (type)
-        {
-            case SentrySqlSpanType.Connection when transaction.GetDbParentSpan().StartChild(operation) is
-                { } connectionSpan:
-                SetOperationId(connectionSpan, operationId);
-                break;
-
-            case SentrySqlSpanType.Execution when value?.GetGuidProperty("ConnectionId") is { } connectionId:
-                var parent = TryGetConnectionSpan(transaction, connectionId) ?? transaction.GetDbParentSpan();
-                var span = TryStartChild(parent, operation, null);
-                if (span != null)
-                {
-                    SetOperationId(span, operationId);
-                    SetConnectionId(span, connectionId);
-                }
-
-                break;
-        }
+        var connectionId = value?.GetGuidProperty("ConnectionId");
+        var parent = transaction.GetDbParentSpan();
+        var span = parent.StartChild(operation);
+        SetOperationId(span, operationId);
+        SetConnectionId(span, connectionId);
     }
 
     private ISpan? GetSpan(SentrySqlSpanType type, KeyValuePair<string, object?> kvp)
@@ -107,24 +86,15 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         {
             case SentrySqlSpanType.Execution:
                 var operationId = kvp.Value?.GetGuidProperty("OperationId");
-                if (TryGetQuerySpan(transaction, operationId) is not { } querySpan)
+                if (TryGetQuerySpan(transaction, operationId) is { } querySpan)
                 {
-                    _options.LogWarning(
-                        "Trying to get an execution span with operation id {0}, but it was not found.",
-                        operationId);
-                    return null;
+                    return querySpan;
                 }
 
-                if (querySpan.ParentSpanId == transaction.SpanId &&
-                    TryGetConnectionId(querySpan) is { } spanConnectionId &&
-                    querySpan is SpanTracer executionTracer &&
-                    TryGetConnectionSpan(transaction, spanConnectionId) is { } spanConnectionRef)
-                {
-                    // Connection Span exist but wasn't set as the parent of the current Span.
-                    executionTracer.ParentSpanId = spanConnectionRef.SpanId;
-                }
-
-                return querySpan;
+                _options.LogWarning(
+                    "Trying to get an execution span with operation id {0}, but it was not found.",
+                    operationId);
+                return null;
 
             case SentrySqlSpanType.Connection:
                 var connectionId = kvp.Value?.GetGuidProperty("ConnectionId");
