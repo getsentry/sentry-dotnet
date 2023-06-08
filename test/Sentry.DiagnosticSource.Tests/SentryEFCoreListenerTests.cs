@@ -259,7 +259,7 @@ public class SentryEFCoreListenerTests
 
         // Check DB Name is stored correctly
         var dbName =
-            connectionSpan.Extra.TryGetValue<string, string>(OTKeys.DbName);
+            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
         Assert.Equal(expectedDbName, dbName);
 
         // Check connections between spans.
@@ -316,7 +316,7 @@ public class SentryEFCoreListenerTests
 
         // Check DB Name is stored correctly
         var dbName =
-            connectionSpan.Extra.TryGetValue<string, string>(OTKeys.DbName);
+            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
         Assert.Equal(expectedDbName, dbName);
 
         // Check connections between spans.

@@ -249,7 +249,7 @@ public class SentrySqlListenerTests
         Assert.Equal(dbName, connectionSpan.Description);
         Assert.Equal(connectionOperationId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
         Assert.Equal(connectionId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
-        Assert.Equal(dbName, connectionSpan.Extra.TryGetValue<string, string>(OTKeys.DbName));
+        Assert.Equal(dbName, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
     }
 
     [Theory]
