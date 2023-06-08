@@ -42,7 +42,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
     {
         Debug.Assert(databaseName != string.Empty);
 
-        span.SetExtra(OTKeys.DbName, databaseName);
+        span.SetExtra(OTelKeys.DbName, databaseName);
     }
 
     private static void SetConnectionId(ISpan span, Guid? connectionId)
@@ -60,9 +60,10 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
     }
 
     private static Guid? TryGetOperationId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(SqlKeys.DbOperationId);
+
     private static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
 
-    private void AddSpan(SentrySqlSpanType type, string operation, object? value)
+    private void AddSpan(string operation, object? value)
     {
         var transaction = _hub.GetTransactionIfSampled();
         if (transaction == null)
@@ -117,9 +118,6 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
     }
 
-    private static ISpan? TryStartChild(ISpan? parent, string operation, string? description) =>
-        parent?.StartChild(operation, description);
-
     private static ISpan? TryGetConnectionSpan(ITransaction transaction, Guid? connectionId) =>
         connectionId == null
             ? null
@@ -155,14 +153,12 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         var spans = transaction.Spans.Where(span => span.Operation is "db.connection").ToList();
         if (spans.Find(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } connectionSpan)
         {
-            var connectionId = value.GetGuidProperty("ConnectionId");
-            if (connectionId.HasValue)
+            if (value.GetGuidProperty("ConnectionId") is { } connectionId)
             {
                 SetConnectionId(connectionSpan, connectionId);
             }
 
-            var database = value.GetStringProperty("Connection.Database");
-            if (database is { } dbName)
+            if (value.GetStringProperty("Connection.Database") is { } dbName)
             {
                 connectionSpan.Description = dbName;
                 SetDatabaseName(connectionSpan, dbName);
@@ -182,7 +178,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             {
                 // Query
                 case SqlMicrosoftBeforeExecuteCommand or SqlDataBeforeExecuteCommand:
-                    AddSpan(SentrySqlSpanType.Execution, "db.query", kvp.Value);
+                    AddSpan("db.query", kvp.Value);
                     return;
                 case SqlMicrosoftAfterExecuteCommand or SqlDataAfterExecuteCommand
                     when GetSpan(SentrySqlSpanType.Execution, kvp) is { } commandSpan:
@@ -197,7 +193,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
                 // Connection
                 case SqlMicrosoftWriteConnectionOpenBeforeCommand or SqlDataWriteConnectionOpenBeforeCommand:
-                    AddSpan(SentrySqlSpanType.Connection, "db.connection", kvp.Value);
+                    AddSpan("db.connection", kvp.Value);
                     return;
                 case SqlMicrosoftWriteConnectionOpenAfterCommand or SqlDataWriteConnectionOpenAfterCommand:
                     UpdateConnectionSpan(kvp.Value);

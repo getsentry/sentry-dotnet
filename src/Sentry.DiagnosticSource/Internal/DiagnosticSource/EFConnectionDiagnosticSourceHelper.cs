@@ -10,9 +10,10 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
     }
 
     protected override string Operation => "db.connection";
-    protected override string Description(object? diagnosticSourceValue) => DatabaseName(diagnosticSourceValue);
 
-    private string DatabaseName(object? diagnosticSourceValue) =>
+    protected override string GetDescription(object? diagnosticSourceValue) => GetDatabaseName(diagnosticSourceValue);
+
+    private static string GetDatabaseName(object? diagnosticSourceValue) =>
         diagnosticSourceValue?.GetStringProperty("Connection.Database") ?? null!;
 
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
@@ -31,9 +32,9 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
-        if (DatabaseName(diagnosticSourceValue) is { } databaseName)
+        if (GetDatabaseName(diagnosticSourceValue) is { } databaseName)
         {
-            span.SetExtra(OTKeys.DbName, databaseName);
+            span.SetExtra(OTelKeys.DbName, databaseName);
         }
 
         if (GetConnectionId(diagnosticSourceValue) is { } connectionId)

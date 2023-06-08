@@ -8,7 +8,8 @@ internal abstract class EFDiagnosticSourceHelper
     protected SentryOptions Options { get; }
     protected ITransaction? Transaction { get; }
     protected abstract string Operation { get; }
-    protected abstract string Description(object? diagnosticSourceValue);
+
+    protected abstract string GetDescription(object? diagnosticSourceValue);
 
     internal EFDiagnosticSourceHelper(IHub hub, SentryOptions options)
     {
@@ -39,13 +40,11 @@ internal abstract class EFDiagnosticSourceHelper
         // We "flatten" the EF spans so that they all have the same parent span, for two reasons:
         // 1. Each command typically gets it's own connection, which makes the resulting waterfall diagram hard to read.
         // 2. Sentry's performance errors functionality only works when all queries have the same parent span.
-        var parent = GetParentSpan(Transaction, diagnosticSourceValue);
-        var child = parent.StartChild(Operation, Description(diagnosticSourceValue));
+        var parent = Transaction.GetDbParentSpan();
+        var child = parent.StartChild(Operation, GetDescription(diagnosticSourceValue));
 
         SetSpanReference(child, diagnosticSourceValue);
     }
-
-    protected virtual ISpan GetParentSpan(ITransaction transaction, object? diagnosticSourceValue) => transaction.GetDbParentSpan();
 
     internal void FinishSpan(object? diagnosticSourceValue, SpanStatus status)
     {
