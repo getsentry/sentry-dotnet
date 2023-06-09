@@ -84,6 +84,16 @@ public class SpanTracer : ISpan
     /// <inheritdoc />
     public ISpan StartChild(string operation) => Transaction.StartChild(SpanId, operation);
 
+    /// <summary>
+    /// Used to mark a span as unfinished when it was previously marked as finished. This allows us to reuse spans for
+    /// DB Connections that get reused by the underlying connection pool
+    /// </summary>
+    internal void Unfinish()
+    {
+        Status = null;
+        EndTimestamp = null;
+    }
+
     /// <inheritdoc />
     public void Finish()
     {

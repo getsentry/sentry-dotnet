@@ -14,7 +14,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
 #if !NETFRAMEWORK
     [SkippableFact]
-    public async Task RecordsSql()
+    public async Task RecordsSqlAsync()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
@@ -57,7 +57,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
 #if NET6_0_OR_GREATER
     [SkippableFact]
-    public async Task Logging()
+    public async Task LoggingAsync()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();
@@ -170,7 +170,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
     }
 
     [SkippableFact]
-    public async Task RecordsEf()
+    public async Task RecordsEfAsync()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
         var transport = new RecordingTransport();

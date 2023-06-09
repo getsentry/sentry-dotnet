@@ -1,22 +1,34 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.DiagnosticSource;
 
 internal abstract class EFDiagnosticSourceHelper
 {
-    internal const string ConnectionExtraKey = "db.connection_id";
-    internal const string CommandExtraKey = "db.command_id";
-
     protected SentryOptions Options { get; }
-    //protected object? DiagnosticSourceValue { get; }
-    private ITransaction? Transaction { get; }
+    protected ITransaction? Transaction { get; }
     protected abstract string Operation { get; }
-    protected abstract string Description(object? diagnosticSourceValue);
+
+    protected abstract string? GetDescription(object? diagnosticSourceValue);
+
+    protected static string? GetDatabaseName(object? diagnosticSourceValue) =>
+        diagnosticSourceValue?.GetStringProperty("Connection.Database");
 
     internal EFDiagnosticSourceHelper(IHub hub, SentryOptions options)
     {
         Options = options;
         Transaction = hub.GetTransactionIfSampled();
+    }
+
+    protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
+
+    protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
+
+    protected static void SetConnectionId(ISpan span, Guid? connectionId)
+    {
+        Debug.Assert(connectionId != Guid.Empty);
+
+        span.SetExtra(EFKeys.DbConnectionId, connectionId);
     }
 
     internal void AddSpan(object? diagnosticSourceValue)
@@ -32,7 +44,7 @@ internal abstract class EFDiagnosticSourceHelper
         // 1. Each command typically gets it's own connection, which makes the resulting waterfall diagram hard to read.
         // 2. Sentry's performance errors functionality only works when all queries have the same parent span.
         var parent = Transaction.GetDbParentSpan();
-        var child = parent.StartChild(Operation, Description(diagnosticSourceValue));
+        var child = parent.StartChild(Operation, GetDescription(diagnosticSourceValue));
 
         SetSpanReference(child, diagnosticSourceValue);
     }
@@ -57,7 +69,7 @@ internal abstract class EFDiagnosticSourceHelper
         sourceSpan.Finish(status);
     }
 
-    private void LogTransactionSpans()
+    protected void LogTransactionSpans()
     {
         if (Transaction == null)
         {

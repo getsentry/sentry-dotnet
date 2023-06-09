@@ -10,20 +10,19 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
     }
 
     protected override string Operation => "db.query";
-    protected override string Description(object? diagnosticSourceValue) => FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+
+    protected override string GetDescription(object? diagnosticSourceValue) => FilterNewLineValue(diagnosticSourceValue) ?? string.Empty;
+
     private static Guid? GetCommandId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("CommandId");
 
     private static void SetCommandId(ISpan span, Guid? commandId)
     {
         Debug.Assert(commandId != Guid.Empty);
 
-        span.SetExtra(CommandExtraKey, commandId);
+        span.SetExtra(EFKeys.DbCommandId, commandId);
     }
 
-    private static Guid? TryGetCommandId(ISpan span) =>
-        span.Extra.TryGetValue(CommandExtraKey, out var key) && key is Guid guid
-            ? guid
-            : null;
+    private static Guid? TryGetCommandId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbCommandId);
 
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
     {
@@ -41,9 +40,18 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
+        if (GetDatabaseName(diagnosticSourceValue) is { } databaseName)
+        {
+            span.SetExtra(OTelKeys.DbName, databaseName);
+        }
+
         if (GetCommandId(diagnosticSourceValue) is { } commandId)
         {
             SetCommandId(span, commandId);
+            if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
+            {
+                SetConnectionId(span, connectionId);
+            }
             return;
         }
         Options.LogWarning("No correlation id can be set for {1}.", Operation);

@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Sentry.Internal.DiagnosticSource;
 using static Sentry.Internal.DiagnosticSource.SentryEFCoreListener;
 
@@ -10,14 +9,11 @@ public class SentryEFCoreListenerTests
         => type switch
         {
             EFQueryCompiling or EFQueryCompiled =>
-                span => span.Description != null &&
-                        span.Operation == "db.query.compile",
+                span => span.Operation == "db.query.compile",
             EFConnectionOpening or EFConnectionClosed =>
-                span => span.Description == null &&
-                        span.Operation == "db.connection",
+                span => span.Operation == "db.connection",
             EFCommandExecuting or EFCommandExecuting or EFCommandFailed =>
-                span => span.Description != null &&
-                        span.Operation == "db.query",
+                span => span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
@@ -194,18 +190,28 @@ public class SentryEFCoreListenerTests
         public FakeDiagnosticEventData(string value) { _value = value; }
         private readonly string _value;
         public override string ToString()=> _value;
+
+        public class ConnectionInfo
+        {
+            public string Database { get; } = "rentals";
+        }
+        public ConnectionInfo Connection { get; } = new();
     }
 
     private class FakeDiagnosticConnectionEventData : FakeDiagnosticEventData
     {
         public FakeDiagnosticConnectionEventData(string value) : base(value) { }
-        public Guid ConnectionId { get; set; } = Guid.NewGuid();
+        public Guid ConnectionId { get; } = Guid.NewGuid();
     }
 
     private class FakeDiagnosticCommandEventData : FakeDiagnosticEventData
     {
-        public FakeDiagnosticCommandEventData(string value) : base(value) { }
-        public Guid ConnectionId { get; set; } = Guid.NewGuid();
+        public FakeDiagnosticCommandEventData(FakeDiagnosticConnectionEventData connection, string value) : base(value)
+        {
+            ConnectionId = connection.ConnectionId;
+        }
+
+        public Guid ConnectionId { get; set; }
         public Guid CommandId { get; set; } = Guid.NewGuid();
     }
 
@@ -218,10 +224,11 @@ public class SentryEFCoreListenerTests
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
         var efConn = "db username : password";
+        var expectedDbName = "rentals";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, queryEventData));
@@ -245,9 +252,17 @@ public class SentryEFCoreListenerTests
         });
 
         // Assert span descriptions
-        Assert.Null(connectionSpan.Description);
+        Assert.Equal(expectedDbName,connectionSpan.Description);
         Assert.Equal(expectedSql, compilerSpan.Description);
         Assert.Equal(expectedSql, commandSpan.Description);
+
+        // Check DB Name is stored correctly
+        var connectionDbName =
+            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
+        Assert.Equal(expectedDbName, connectionDbName);
+        var commandDbName =
+            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
+        Assert.Equal(expectedDbName, commandDbName);
 
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
@@ -267,10 +282,11 @@ public class SentryEFCoreListenerTests
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
         var efConn = "db username : password";
+        var expectedDbName = "rentals";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
         var childSpan = _fixture.Tracer.StartChild("Child Span");
@@ -296,9 +312,14 @@ public class SentryEFCoreListenerTests
         });
 
         // Assert span descriptions
-        Assert.Null(connectionSpan.Description);
+        Assert.Equal(expectedDbName, connectionSpan.Description);
         Assert.Equal(expectedSql, compilerSpan.Description);
         Assert.Equal(expectedSql, commandSpan.Description);
+
+        // Check DB Name is stored correctly
+        var dbName =
+            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
+        Assert.Equal(expectedDbName, dbName);
 
         // Check connections between spans.
         Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
@@ -321,7 +342,7 @@ public class SentryEFCoreListenerTests
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
-        var commandEventData = new FakeDiagnosticCommandEventData(efSql);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
         interceptor.OnNext(new(EFQueryCompiling, queryEventData));
@@ -376,6 +397,96 @@ public class SentryEFCoreListenerTests
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
 
         Assert.Equal(expectedSql, compilerSpan.Description);
+    }
+
+    [Fact]
+    public void OnNext_Same_Connections_Consolidated()
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+        var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        // Fake a connection pool with two connections
+        var connectionA = new FakeDiagnosticConnectionEventData(efConn);
+        var connectionB = new FakeDiagnosticConnectionEventData(efConn);
+        var commandA = new FakeDiagnosticCommandEventData(connectionA, efSql);
+        var commandB = new FakeDiagnosticCommandEventData(connectionB, efSql);
+        var commandC = new FakeDiagnosticCommandEventData(connectionA, efSql);
+
+        void Pause() => Thread.Sleep(200);
+
+        // Act
+        interceptor.OnNext(new(EFConnectionOpening, connectionA));
+        Pause();
+        interceptor.OnNext(new(EFCommandExecuting, commandA));
+        interceptor.OnNext(new(EFCommandExecuted, commandA));
+        interceptor.OnNext(new(EFConnectionClosed, connectionA));
+
+        interceptor.OnNext(new(EFConnectionOpening, connectionA));
+
+            // These are for Connection B... interleaved somewhat
+            interceptor.OnNext(new(EFConnectionOpening, connectionB));
+            Pause();
+            interceptor.OnNext(new(EFCommandExecuting, commandB));
+            interceptor.OnNext(new(EFCommandExecuted, commandB));
+
+        interceptor.OnNext(new(EFCommandExecuting, commandC));
+
+            // These are for Connection B... interleaved somewhat
+            Pause();
+            interceptor.OnNext(new(EFConnectionClosed, connectionB));
+
+        interceptor.OnNext(new(EFCommandExecuted, commandC));
+        Pause();
+        interceptor.OnNext(new(EFConnectionClosed, connectionA));
+
+        // Assert
+        bool IsDbSpan(ISpan s) => s.Operation == "db.connection";
+        bool IsCommandSpan(ISpan s) => s.Operation == "db.query";
+        Func<ISpan, FakeDiagnosticConnectionEventData, bool> forConnection = (s, e) =>
+            s.Extra.ContainsKey(EFKeys.DbConnectionId)
+            && s.Extra[EFKeys.DbConnectionId] is Guid connectionId
+            && connectionId == e.ConnectionId;
+        Func<ISpan, FakeDiagnosticCommandEventData, bool> forCommand = (s, e) =>
+            s.Extra.ContainsKey(EFKeys.DbCommandId)
+            && s.Extra[EFKeys.DbCommandId] is Guid commandId
+            && commandId == e.CommandId;
+
+        using (new AssertionScope())
+        {
+            var dbSpans = _fixture.Spans.Where(IsDbSpan).ToArray();
+            dbSpans.Count().Should().Be(2);
+            dbSpans.Should().Contain(s => forConnection(s, connectionA));
+            dbSpans.Should().Contain(s => forConnection(s, connectionB));
+
+            var commandSpans = _fixture.Spans.Where(IsCommandSpan).ToArray();
+            commandSpans.Count().Should().Be(3);
+            commandSpans.Should().Contain(s => forCommand(s, commandA));
+            commandSpans.Should().Contain(s => forCommand(s, commandB));
+            commandSpans.Should().Contain(s => forCommand(s, commandC));
+
+            var connectionASpan = dbSpans.Single(s => forConnection(s, connectionA));
+            var connectionBSpan = dbSpans.Single(s => forConnection(s, connectionB));
+            var commandASpan = commandSpans.Single(s => forCommand(s, commandA));
+            var commandBSpan = commandSpans.Single(s => forCommand(s, commandB));
+            var commandCSpan = commandSpans.Single(s => forCommand(s, commandC));
+
+            // Commands for connectionA should take place after it starts and before it finishes
+            connectionASpan.StartTimestamp.Should().BeBefore(commandASpan.StartTimestamp);
+            connectionASpan.StartTimestamp.Should().BeBefore(commandCSpan.StartTimestamp);
+            connectionASpan.EndTimestamp.Should().BeAfter(commandASpan.EndTimestamp ?? DateTimeOffset.MinValue);
+            connectionASpan.EndTimestamp.Should().BeAfter(commandCSpan.EndTimestamp ?? DateTimeOffset.MinValue);
+
+            // Commands for connectionB should take place after it starts and before it finishes
+            connectionBSpan.StartTimestamp.Should().BeBefore(commandBSpan.StartTimestamp);
+            connectionBSpan.EndTimestamp.Should().BeAfter(commandBSpan.EndTimestamp ?? DateTimeOffset.MinValue);
+
+            // Connection B starts after Connection A and finishes before Connection A
+            connectionBSpan.StartTimestamp.Should().BeAfter(connectionASpan.StartTimestamp);
+            connectionBSpan.EndTimestamp.Should().BeBefore(connectionASpan.EndTimestamp ?? DateTimeOffset.MinValue);
+        }
     }
 
     [Fact]

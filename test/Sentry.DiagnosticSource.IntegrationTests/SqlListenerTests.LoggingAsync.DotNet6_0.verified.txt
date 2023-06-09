@@ -67,11 +67,13 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
         {
           IsFinished: true,
           Operation: db.connection,
+          Description: SqlListenerTests.verify_LoggingAsync,
           Status: Ok,
           IsSampled: true,
           Extra: {
             bytes_sent : 510,
             db.connection_id: Guid_1,
+            db.name: SqlListenerTests.verify_LoggingAsync,
             db.operation_id: Guid_2,
             rows_sent: 0
           }

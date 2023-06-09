@@ -18,6 +18,7 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
     /// <seealso href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1"/>
     /// </summary>
     internal const string EFQueryStartCompiling = "Microsoft.EntityFrameworkCore.Query.QueryCompilationStarting";
+
     /// <summary>
     /// Used for EF Core 2.X and 3.X.
     /// <seealso href="https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.diagnostics.coreeventid.querymodelcompiling?view=efcore-3.1"/>
@@ -67,7 +68,7 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
 
                 // Connection span (A transaction may or may not show a connection with it.)
                 case EFConnectionOpening when _logConnectionEnabled:
-                    ConnectionDiagnosticSourceHelper.AddSpan(value.Value);
+                    ConnectionDiagnosticSourceHelper.AddOrReuseSpan(value.Value);
                     break;
                 case EFConnectionClosed when _logConnectionEnabled:
                     ConnectionDiagnosticSourceHelper.FinishSpan(value.Value, SpanStatus.Ok);

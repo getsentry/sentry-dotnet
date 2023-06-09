@@ -10,20 +10,8 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
     }
 
     protected override string Operation => "db.connection";
-    protected override string Description(object? diagnosticSourceValue) => null!;
-    private static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
 
-    private static void SetConnectionId(ISpan span, Guid? connectionId)
-    {
-        Debug.Assert(connectionId != Guid.Empty);
-
-        span.SetExtra(ConnectionExtraKey, connectionId);
-    }
-
-    private static Guid? TryGetConnectionId(ISpan span) =>
-        span.Extra.TryGetValue(ConnectionExtraKey, out var key) && key is Guid guid
-            ? guid
-            : null;
+    protected override string? GetDescription(object? diagnosticSourceValue) => GetDatabaseName(diagnosticSourceValue);
 
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
     {
@@ -41,11 +29,49 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
+        if (GetDatabaseName(diagnosticSourceValue) is { } databaseName)
+        {
+            span.SetExtra(OTelKeys.DbName, databaseName);
+        }
+
         if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
         {
             SetConnectionId(span, connectionId);
-            return;
         }
-        Options.LogWarning("No {0} found when adding {1} Span.", "ConnectionId", Operation);
+        else
+        {
+            Options.LogWarning("No {0} found when adding {1} Span.", "ConnectionId", Operation);
+        }
+    }
+
+    /// <summary>
+    /// EF Connections are often pooled. If we see the same connection multiple times, we reuse the span so that it
+    /// shows as a single connection in the resulting waterfall chart on Sentry.
+    /// </summary>
+    /// <param name="diagnosticSourceValue"></param>
+    internal void AddOrReuseSpan(object? diagnosticSourceValue)
+    {
+        if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
+        {
+            Options.LogDebug($"Checking for span to reuse for {Operation} with connection id {connectionId}");
+            LogTransactionSpans();
+            if (Transaction is { } transaction)
+            {
+                var spanWithConnectionId = transaction.Spans
+                    .FirstOrDefault(span =>
+                        span.Operation == Operation &&
+                        TryGetConnectionId(span) == connectionId);
+                if (spanWithConnectionId is SpanTracer existingSpan)
+                {
+                    // OK we've seen this connection before... let's reuse it
+                    Options.LogDebug($"Reusing span for {Operation} with connection id {connectionId}");
+                    existingSpan.Unfinish();
+                    return;
+                }
+            }
+        }
+
+        // If we can't find a span to reuse then we'll add a new one instead
+        AddSpan(diagnosticSourceValue);
     }
 }
