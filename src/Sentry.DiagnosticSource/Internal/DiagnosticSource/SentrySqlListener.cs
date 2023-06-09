@@ -1,3 +1,4 @@
+using System.Xml.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -183,6 +184,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                 case SqlMicrosoftAfterExecuteCommand or SqlDataAfterExecuteCommand
                     when GetSpan(SentrySqlSpanType.Execution, kvp) is { } commandSpan:
                     commandSpan.Description = kvp.Value?.GetStringProperty("Command.CommandText");
+                    SetDatabaseName(commandSpan, kvp.Value?.GetStringProperty("Connection.Database")!);
                     commandSpan.Finish(SpanStatus.Ok);
                     return;
                 case SqlMicrosoftWriteCommandError or SqlDataWriteCommandError
