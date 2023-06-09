@@ -147,6 +147,17 @@ internal class SentryTracingMiddleware
             return;
         }
 
+        if (_options.Instrumenter == Instrumenter.OpenTelemetry)
+        {
+            _options.LogWarning(
+                "When using OpenTelemetry instrumentation mode, do not call UseSentryTracing. " +
+                "Instead, ASP.NET Core should be instrumented by following the instructions at " +
+                "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md");
+
+            await _next(context).ConfigureAwait(false);
+            return;
+        }
+
         if (_options.TransactionNameProvider is { } route)
         {
             context.Features.Set(route);

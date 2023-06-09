@@ -1,5 +1,6 @@
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Sentry;
 using Sentry.OpenTelemetry;
 using Sentry.Samples.AspNetCore.OpenTelemetry;
 
@@ -20,6 +21,7 @@ builder.Services.AddOpenTelemetry()
 builder.WebHost.UseSentry(options =>
 {
     options.EnableTracing = true;
+    options.Instrumenter = Instrumenter.OpenTelemetry;
 
     if (builder.Environment.IsDevelopment())
     {

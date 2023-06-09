@@ -13,10 +13,10 @@ public class SpanTracer : ISpan
     internal TransactionTracer Transaction { get; }
 
     /// <inheritdoc />
-    public SpanId SpanId { get; }
+    public SpanId SpanId { get; internal set; }
 
     /// <inheritdoc />
-    public SpanId? ParentSpanId { get; internal set; }
+    public SpanId? ParentSpanId { get; }
 
     /// <inheritdoc />
     public SentryId TraceId { get; }

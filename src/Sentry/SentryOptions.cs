@@ -900,6 +900,12 @@ public class SentryOptions
     public Func<bool>? CrashedLastRun { get; set; }
 
     /// <summary>
+    /// Gets or sets which instrumenter is used to create spans.
+    /// Defaults to <see cref="Instrumenter.Sentry"/>.
+    /// </summary>
+    public Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
+
+    /// <summary>
     /// This property is no longer used.  It will be removed in a future version.
     /// </summary>
     /// <remarks>

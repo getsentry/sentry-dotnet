@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -10,6 +11,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
 {
     private readonly IHub _hub;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
     /// <inheritdoc />
     public SpanId SpanId
@@ -87,7 +89,9 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// The sample rate used for this transaction.
+    /// </summary>
     public double? SampleRate { get; internal set; }
 
     /// <inheritdoc />
@@ -177,15 +181,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation)
-        : this(hub, name, operation, TransactionNameSource.Custom)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
-    /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
+    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
     {
         _hub = hub;
         Name = name;
@@ -212,6 +208,11 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Status = context.Status;
         IsSampled = context.IsSampled;
         StartTimestamp = _stopwatch.StartDateTimeOffset;
+
+        if (context is TransactionContext transactionContext)
+        {
+            _instrumenter = transactionContext.Instrumenter;
+        }
     }
 
     /// <inheritdoc />
@@ -233,16 +234,26 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public ISpan StartChild(string operation) => StartChild(SpanId, operation);
 
-    internal ISpan StartChild(SpanId parentSpanId, string operation)
-    {
-        var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation);
-        AddChildSpan(span);
-        return span;
-    }
+    internal ISpan StartChild(SpanId parentSpanId, string operation, Instrumenter instrumenter = Instrumenter.Sentry) =>
+        StartChild(null, parentSpanId, operation, instrumenter);
 
-    internal ISpan StartChild(SpanId spanId, SpanId parentSpanId, string operation)
+    internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
+        Instrumenter instrumenter = Instrumenter.Sentry)
     {
-        var span = new SpanTracer(_hub, this, spanId, parentSpanId, TraceId, operation);
+        if (instrumenter != _instrumenter)
+        {
+            SentrySdk.CurrentOptions?.LogWarning(
+                $"Attempted to create a span via {instrumenter} instrumentation to a span or transaction" +
+                $" originating from {_instrumenter} instrumentation. The span will not be created.");
+            return NoOpSpan.Instance;
+        }
+
+        var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation);
+        if (spanId is { } id)
+        {
+            span.SpanId = id;
+        }
+
         AddChildSpan(span);
         return span;
     }
@@ -305,8 +316,5 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
     /// <inheritdoc />
-    public SentryTraceHeader GetTraceHeader() => new(
-        TraceId,
-        SpanId,
-        IsSampled);
+    public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
 }

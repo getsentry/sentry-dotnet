@@ -25,6 +25,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
         _hub = hub;
         _options = hub.GetSentryOptions();
+
+        if (_options?.Instrumenter != Instrumenter.OpenTelemetry)
+        {
+            throw new InvalidOperationException(
+                $"To use the {nameof(SentrySpanProcessor)}, you must also set the " +
+                $"{nameof(SentryOptions.Instrumenter)} option to {nameof(Instrumenter.OpenTelemetry)} " +
+                "when initializing Sentry.");
+        }
+
         if (_options?.Dsn is { } dsn)
         {
             _sentryBaseUrl = new Uri(dsn).GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
@@ -55,17 +64,24 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
-        ISpan span;
         if (_map.TryGetValue(data.ParentSpanId, out var parentSpan))
         {
             // The parent span exists - start a child span.
-            span = parentSpan.StartChild(
+            var context = new SpanContext(
                 data.SpanId.AsSentrySpanId(),
+                data.ParentSpanId.AsSentrySpanId(),
+                data.TraceId.AsSentryId(),
                 data.OperationName,
-                data.DisplayName);
+                data.DisplayName,
+                null,
+                null)
+            {
+                Instrumenter = Instrumenter.OpenTelemetry
+            };
 
-            // Use the start timestamp from the activity data.
-            ((SpanTracer)span).StartTimestamp = data.StartTimeUtc;
+            var span = (SpanTracer)parentSpan.StartChild(context);
+            span.StartTimestamp = data.StartTimeUtc;
+            _map[data.SpanId] = span;
         }
         else
         {
@@ -79,19 +95,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 data.DisplayName,
                 null,
                 null,
-                null
-            );
+                null)
+            {
+                Instrumenter = Instrumenter.OpenTelemetry
+            };
 
-            span = _hub.StartTransaction(context);
-
-            // Use the start timestamp from the activity data.
-            ((TransactionTracer)span).StartTimestamp = data.StartTimeUtc;
+            var transaction = (TransactionTracer)_hub.StartTransaction(context);
+            transaction.StartTimestamp = data.StartTimeUtc;
+            _map[data.SpanId] = transaction;
         }
-
-        // span.Instrumenter = Instrumenter.Otel  // TODO - why?
-
-        // Add the span to the map
-        _map[data.SpanId] = span;
     }
 
     /// <inheritdoc />

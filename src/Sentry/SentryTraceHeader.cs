@@ -7,6 +7,8 @@ public class SentryTraceHeader
 {
     internal const string HttpHeaderName = "sentry-trace";
 
+    internal static SentryTraceHeader Empty = new(SentryId.Empty, SpanId.Empty, null);
+
     /// <summary>
     /// Trace ID.
     /// </summary>

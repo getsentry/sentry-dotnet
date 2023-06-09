@@ -318,6 +318,11 @@ namespace Sentry
         AllButFirst = 2,
         None = 3,
     }
+    public enum Instrumenter
+    {
+        Sentry = 0,
+        OpenTelemetry = 1,
+    }
     public static class MeasurementExtensions
     {
         public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, double value, Sentry.MeasurementUnit unit = default) { }
@@ -615,6 +620,7 @@ namespace Sentry
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
+        public Sentry.Instrumenter Instrumenter { get; set; }
         public bool IsEnvironmentUser { get; set; }
         public bool IsGlobalModeEnabled { get; set; }
         public bool JsonPreserveReferences { get; set; }
@@ -881,6 +887,7 @@ namespace Sentry
     {
         public SpanContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled) { }
         public string? Description { get; }
+        public Sentry.Instrumenter Instrumenter { get; }
         public bool? IsSampled { get; }
         public string Operation { get; }
         public Sentry.SpanId? ParentSpanId { get; }
@@ -1062,8 +1069,7 @@ namespace Sentry
     public class TransactionTracer : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
-        public TransactionTracer(Sentry.IHub hub, string name, string operation) { }
-        public TransactionTracer(Sentry.IHub hub, string name, string operation, Sentry.TransactionNameSource nameSource) { }
+        public TransactionTracer(Sentry.IHub hub, string name, string operation, Sentry.TransactionNameSource nameSource = 0) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
         public string? Description { get; set; }
