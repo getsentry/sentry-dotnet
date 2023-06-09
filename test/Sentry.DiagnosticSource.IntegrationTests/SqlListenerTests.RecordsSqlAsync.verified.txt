@@ -67,7 +67,7 @@
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.name: null,
+            db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_3
           }
         },
@@ -79,7 +79,7 @@
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.name: null,
+            db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_4
           }
         }

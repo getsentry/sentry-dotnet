@@ -75,7 +75,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.name: null,
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.operation_id: Guid_3
           }
         },
@@ -96,7 +96,7 @@ FROM [TestEntities] AS [t],
           IsSampled: true,
           Extra: {
             db.connection_id: Guid_1,
-            db.name: null,
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.operation_id: Guid_4
           }
         }

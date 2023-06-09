@@ -207,10 +207,6 @@ public class SentrySqlListenerTests
                 {
                     OperationId = queryOperationId,
                     ConnectionId = connectionId,
-                    Connection = new
-                    {
-                        Database = dbName
-                    },
                     Command = new
                     {
                         CommandText = query
@@ -221,11 +217,7 @@ public class SentrySqlListenerTests
                 new
                 {
                     OperationId = connectionOperationIdClosed,
-                    ConnectionId = connectionId,
-                    Connection = new
-                    {
-                        Database = dbName
-                    }
+                    ConnectionId = connectionId
                 }));
 
         // Assert
