@@ -17,15 +17,16 @@
   - NOTE: This important fix corrects a value that is used during issue grouping, so you may receive new alerts for existing issues after deploying this update.
 - DB Connection spans presented poorly ([#2409](https://github.com/getsentry/sentry-dotnet/pull/2409))
 - Populate scope's Cookies property ([#2411](https://github.com/getsentry/sentry-dotnet/pull/2411))
+- Fix UWP GateKeeper errors ([#2415](https://github.com/getsentry/sentry-dotnet/pull/2415))
 
 ### Dependencies
 
 - Bump Cocoa SDK from v8.7.2 to v8.7.3 ([#2394](https://github.com/getsentry/sentry-dotnet/pull/2394))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#873)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.7.2...8.7.3)
-- Bump Java SDK from v6.19.1 to v6.21.0 ([#2395](https://github.com/getsentry/sentry-dotnet/pull/2395), [#2405](https://github.com/getsentry/sentry-dotnet/pull/2405))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6210)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.19.1...6.21.0)
+- Bump Java SDK from v6.19.1 to v6.22.0 ([#2395](https://github.com/getsentry/sentry-dotnet/pull/2395), [#2405](https://github.com/getsentry/sentry-dotnet/pull/2405), [#2417](https://github.com/getsentry/sentry-dotnet/pull/2417))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.19.1...6.22.0)
 
 ## 3.33.0
 

@@ -10,11 +10,6 @@ internal struct HashableGrowableArray<T> : IReadOnlyList<T>, IEquatable<Hashable
     private int _hashCode = 0;
     private bool _sealed = false;
 
-    public HashableGrowableArray()
-    {
-        _items = new GrowableArray<T>();
-    }
-
     public HashableGrowableArray(int capacity)
     {
         _items = new GrowableArray<T>(capacity);
@@ -95,13 +90,7 @@ internal struct HashableGrowableArray<T> : IReadOnlyList<T>, IEquatable<Hashable
 internal struct GrowableArray<T> : IReadOnlyList<T>
 {
     /// <summary>
-    /// Create an empty growable array.
-    /// </summary>
-    public GrowableArray() : this(0) { }
-
-    /// <summary>
-    /// Create a growable array with the given initial size it will grow as needed.  There is also the
-    /// default constructor that assumes initialSize of 0 (and does not actually allocate the array.
+    /// Create a growable array with the given initial size it will grow as needed.
     /// </summary>
     /// <param name="initialSize"></param>
     public GrowableArray(int initialSize)
