@@ -14,6 +14,7 @@ internal class Hub : IHubEx, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
+    private readonly string _sentryBaseUrl;
 
     private int _isPersistedSessionRecovered;
 
@@ -41,6 +42,7 @@ internal class Hub : IHubEx, IDisposable
             options.LogFatal(msg);
             throw new InvalidOperationException(msg);
         }
+
         options.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
         _options = options;
@@ -48,6 +50,7 @@ internal class Hub : IHubEx, IDisposable
         _ownedClient = client ?? new SentryClient(options, _randomValuesFactory);
         _clock = clock ?? SystemClock.Clock;
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
+        _sentryBaseUrl = new Uri(options.Dsn).GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
 
         ScopeManager = scopeManager ?? new SentryScopeManager(options, _ownedClient);
 
@@ -505,5 +508,11 @@ internal class Hub : IHubEx, IDisposable
             var currentScope = ScopeManager.GetCurrent();
             return currentScope.Key.LastEventId;
         }
+    }
+
+    bool IHubEx.IsSentryRequest(Uri requestUri)
+    {
+        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+        return string.Equals(requestBaseUrl, _sentryBaseUrl, StringComparison.OrdinalIgnoreCase);
     }
 }

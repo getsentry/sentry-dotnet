@@ -15,7 +15,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
     private readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
     private readonly SentryOptions? _options;
-    private readonly string? _sentryBaseUrl;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
     /// <summary>
@@ -32,11 +31,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 $"To use the {nameof(SentrySpanProcessor)}, you must also set the " +
                 $"{nameof(SentryOptions.Instrumenter)} option to {nameof(Instrumenter.OpenTelemetry)} " +
                 "when initializing Sentry.");
-        }
-
-        if (_options?.Dsn is { } dsn)
-        {
-            _sentryBaseUrl = new Uri(dsn).GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
         }
 
         // Resource attributes are consistent between spans, but not available during construction.
@@ -112,7 +106,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDictionary();
 
-        if (IsSentryRequest(attributes))
+        if (attributes.TryGetTypedValue("http.url", out string url) && _hub.IsSentryRequest(url))
         {
             // TODO: will this leave the span dangling?
             _map.TryRemove(data.SpanId, out _);
@@ -158,25 +152,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
-    }
-
-    private bool IsSentryRequest(IDictionary<string, object?> attributes)
-    {
-        if (_sentryBaseUrl is null)
-        {
-            return false;
-        }
-
-        if (attributes.TryGetTypedValue("http.url", out string url))
-        {
-            var requestBaseUrl = new Uri(url).GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
-            if (string.Equals(requestBaseUrl, _sentryBaseUrl, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes) =>

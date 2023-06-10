@@ -244,4 +244,10 @@ public static class HubExtensions
         var transaction = hub.GetTransaction();
         return transaction?.IsSampled == true ? transaction : null;
     }
+
+    internal static bool IsSentryRequest(this IHub hub, string? requestUri) =>
+        requestUri is not null && hub.IsSentryRequest(new Uri(requestUri));
+
+    internal static bool IsSentryRequest(this IHub hub, Uri? requestUri) =>
+        requestUri is not null && (hub as IHubEx)?.IsSentryRequest(requestUri) is true;
 }

@@ -6,4 +6,5 @@ internal interface IHubEx : IHub
     T? WithScope<T>(Func<Scope, T?> scopeCallback);
     Task WithScopeAsync(Func<Scope, Task> scopeCallback);
     Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback);
+    internal bool IsSentryRequest(Uri requestUri);
 }
