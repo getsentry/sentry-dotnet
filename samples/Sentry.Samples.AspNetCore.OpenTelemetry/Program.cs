@@ -15,8 +15,22 @@ builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(DiagnosticsConfig.ServiceName))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
-            .AddProcessor<SentrySpanProcessor>()
-            .AddConsoleExporter());
+            .AddProcessor<SentrySpanProcessor>());
+
+// Use the Sentry propagator to ensure sentry-trace and baggage headers are propagated correctly.
+OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new SentryPropagator());
+
+// You can use other propagators via composition, if needed.
+// For example, if you need both Sentry and W3C Trace Context propagation, then you can do the following:
+
+// OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new CompositeTextMapPropagator(new TextMapPropagator[]
+// {
+//     new TraceContextPropagator(),
+//     new SentryPropagator()
+//
+//     // But don't include this.  It's already part of SentryPropagator.
+//     // new BaggagePropagator()
+// }));
 
 builder.WebHost.UseSentry(options =>
 {
@@ -31,12 +45,16 @@ builder.WebHost.UseSentry(options =>
 
 var app = builder.Build();
 
-// TODO: When instrumenting with OpenTelemetry, what do we still need from the SentryTracing middleware?
-// app.UseSentryTracing();
-
-// TODO: When instrumenting with OpenTelemetry, do we need to use the SentryHttpMessageHandler?
 var httpClient = new HttpClient();
-app.MapGet("/hello", async () => await httpClient.GetStringAsync("https://example.com/"));
+app.MapGet("/hello", async context =>
+{
+    var request = context.Request;
+    var url = $"{request.Scheme}://{request.Host}{request.PathBase}/echo";
+    var result = await httpClient.GetStringAsync(url);
+    await context.Response.WriteAsync(result);
+});
+
+app.MapGet("/echo", () => "Hi!");
 
 app.MapGet("/throw", _ => throw new Exception("test"));
 
