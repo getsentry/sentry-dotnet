@@ -177,10 +177,10 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             return;
         }
 
-        // Try to lookup the associated connection span so that we can store the db.name in 
+        // Try to lookup the associated connection span so that we can store the db.name in
         // the command span as well. This will be easier for users to read/identify than the
         // ConnectionId (which is a Guid)
-        var connectionId = value?.GetGuidProperty("ConnectionId");
+        var connectionId = value.GetGuidProperty("ConnectionId");
         var transaction = _hub.GetTransactionIfSampled();
         if (TryGetConnectionSpan(transaction!, connectionId) is { } connectionSpan)
         {
@@ -190,7 +190,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             }
         }
 
-        commandSpan.Description = value?.GetStringProperty("Command.CommandText");
+        commandSpan.Description = value.GetStringProperty("Command.CommandText");
         commandSpan.Finish(spanStatus);
     }
 
