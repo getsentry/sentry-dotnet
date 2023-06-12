@@ -18,6 +18,7 @@
 - DB Connection spans presented poorly ([#2409](https://github.com/getsentry/sentry-dotnet/pull/2409))
 - Populate scope's Cookies property ([#2411](https://github.com/getsentry/sentry-dotnet/pull/2411))
 - Fix UWP GateKeeper errors ([#2415](https://github.com/getsentry/sentry-dotnet/pull/2415))
+- Fix sql client db name ([#2418](https://github.com/getsentry/sentry-dotnet/pull/2418))
 
 ### Dependencies
 

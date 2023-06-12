@@ -217,11 +217,7 @@ public class SentrySqlListenerTests
                 new
                 {
                     OperationId = connectionOperationIdClosed,
-                    ConnectionId = connectionId,
-                    Connection = new
-                    {
-                        Database = dbName
-                    }
+                    ConnectionId = connectionId
                 }));
 
         // Assert
@@ -245,6 +241,7 @@ public class SentrySqlListenerTests
         Assert.Equal(query, commandSpan.Description);
         Assert.Equal(queryOperationId, commandSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
         Assert.Equal(connectionId, commandSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
+        Assert.Equal(dbName, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
 
         Assert.Equal(dbName, connectionSpan.Description);
         Assert.Equal(connectionOperationId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
