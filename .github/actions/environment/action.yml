@@ -33,7 +33,12 @@ runs:
     - name: Install .NET 7 SDK
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.x.x
+        dotnet-version: 7.0.203   # switch back to 7.x.x after resolving the below Tizen issue.
+
+    # Workaround for Tizen issue
+    # See https://github.com/dotnet/sdk/issues/33192
+    - name: Pin to .NET SDK 7.0.203
+      run: dotnet new globaljson --sdk-version 7.0.203 --force
 
     - name: Dependency Caching
       uses: actions/cache@v3
