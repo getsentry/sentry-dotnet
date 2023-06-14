@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Sentry.Extensions.Logging;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
 namespace Sentry.AzureFunctions.Worker;
@@ -47,7 +46,7 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
         }
 
         services.AddLogging();
-        services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
+        services.AddSingleton<ILoggerProvider, SentryAzureFunctionsLoggerProvider>();
         services.AddSingleton<IConfigureOptions<SentryAzureFunctionsOptions>, SentryAzureFunctionsOptionsSetup>();
 
         services.AddSentry<SentryAzureFunctionsOptions>();
