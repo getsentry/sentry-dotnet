@@ -18,4 +18,5 @@ internal interface IFileSystem
     string ReadAllTextFromFile(string file);
     Stream OpenFileForReading(string path);
     Stream CreateFileForWriting(string path);
+    Stream GetLeaseFile(string path);
 }

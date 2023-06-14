@@ -51,4 +51,6 @@ public class FakeFileSystem : IFileSystem
     public Stream OpenFileForReading(string path) => _mockFileSystem.File.OpenRead(path);
 
     public Stream CreateFileForWriting(string path) => _mockFileSystem.File.Create(path);
+
+    public Stream GetLeaseFile(string path) => _mockFileSystem.File.Open(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.None);
 }

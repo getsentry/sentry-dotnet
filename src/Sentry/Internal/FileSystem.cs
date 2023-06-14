@@ -50,4 +50,6 @@ internal class FileSystem : IFileSystem
     public Stream OpenFileForReading(string path) => File.OpenRead(path);
 
     public Stream CreateFileForWriting(string path) => File.Create(path);
+
+    public Stream GetLeaseFile(string path) => File.Open(path, FileMode.OpenOrCreate, FileAccess.Read, FileShare.None);
 }
