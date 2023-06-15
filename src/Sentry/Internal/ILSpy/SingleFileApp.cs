@@ -30,12 +30,12 @@ internal sealed class SingleFileApp
     }
 
     /// <summary>
-    /// Mainly for testing purposes... this allows us get info about a single file that resides on disk.
-    /// The more common scenario is to get info about the current process (which is where errors will be
-    /// surfaced and caught by Sentry).
+    /// Adapted from the LoadedPackage.FromBundle method in ILSpy:
+    /// https://github.com/icsharpcode/ILSpy/blob/311658c7109c3872e020cba2525b1b3a371d5813/ICSharpCode.ILSpyX/LoadedPackage.cs#L111
+    /// commit a929fcb5202824e3c061f4824c7fc9ba867d55af
+    ///
+    /// Load a .NET single-file bundle.
     /// </summary>
-    /// <param name="fileName"></param>
-    /// <returns></returns>
     internal static SingleFileApp? FromFile(string fileName)
     {
         try
@@ -54,12 +54,7 @@ internal sealed class SingleFileApp
                 var entries = new List<BundleEntry>();
                 foreach (var entry in manifest.Entries)
                 {
-                    using var stream = SingleFileBundle.TryOpenEntryStream(entry, view);
-                    if (stream == null)
-                    {
-                        continue;
-                    }
-
+                    using var stream = TryOpenEntryStream(entry, view);
                     using var peReader = new PEReader(stream, PEStreamOptions.PrefetchEntireImage);
                     if (peReader.TryGetPEDebugImageData() is { } debugImageData)
                     {
@@ -81,7 +76,7 @@ internal sealed class SingleFileApp
         }
     }
 
-    internal static SingleFileApp? FromMainModule()
+    private static SingleFileApp? FromMainModule()
     {
         // Get the current process
         var currentProcess = Process.GetCurrentProcess();
@@ -99,9 +94,37 @@ internal sealed class SingleFileApp
         return FromFile(fileName);
     }
 
+    /// <summary>
+    /// Adapted from BundleEntry.TryOpenStream in ILSpy:
+    /// https://github.com/icsharpcode/ILSpy/blob/311658c7109c3872e020cba2525b1b3a371d5813/ICSharpCode.ILSpyX/LoadedPackage.cs#L208
+    /// commit a929fcb5202824e3c061f4824c7fc9ba867d55af
+    /// </summary>
+    /// <exception cref="InvalidDataException"></exception>
+    private static Stream TryOpenEntryStream(SingleFileBundle.Entry entry, MemoryMappedViewAccessor view)
+    {
+        if (entry.CompressedSize == 0)
+        {
+            return new UnmanagedMemoryStream(view.SafeMemoryMappedViewHandle, entry.Offset, entry.Size);
+        }
+        else
+        {
+            Stream compressedStream = new UnmanagedMemoryStream(view.SafeMemoryMappedViewHandle, entry.Offset, entry.CompressedSize);
+            using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
+            Stream decompressedStream = new MemoryStream((int)entry.Size);
+            deflateStream.CopyTo(decompressedStream);
+            if (decompressedStream.Length != entry.Size)
+            {
+                throw new InvalidDataException($"Corrupted single-file entry '{entry.RelativePath}'. Declared decompressed size '{entry.Size}' is not the same as actual decompressed size '{decompressedStream.Length}'.");
+            }
+
+            decompressedStream.Seek(0, SeekOrigin.Begin);
+            return decompressedStream;
+        }
+    }
+
     internal sealed class BundleEntry
     {
-        internal readonly SingleFileBundle.Entry _entry;
+        private readonly SingleFileBundle.Entry _entry;
 
         public BundleEntry(string bundleFile, SingleFileBundle.Entry entry, PEDebugImageData debugImageData)
         {
@@ -113,7 +136,6 @@ internal sealed class SingleFileApp
         public string BundleFile { get; }
         public PEDebugImageData? DebugImageData { get; }
         public string Name => _entry.RelativePath;
-        public string FullName => $"bundle://{BundleFile};{Name}";
     }
 }
 

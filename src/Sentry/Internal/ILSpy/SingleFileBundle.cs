@@ -1,3 +1,9 @@
+// Adapted from the SingleFileBundle class in ILSpy:
+// https://github.com/icsharpcode/ILSpy/blob/311658c7109c3872e020cba2525b1b3a371d5813/ICSharpCode.Decompiler/SingleFileBundle.cs
+// commit a929fcb5202824e3c061f4824c7fc9ba867d55af
+//
+// The only changes are namespaces, conditional compilation directives & minor tweaks to satisfy our linters.
+
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
@@ -159,28 +165,6 @@ internal static class SingleFileBundle
 		entry.RelativePath = reader.ReadString();
 		return entry;
 	}
-
-    public static Stream TryOpenEntryStream(Entry _entry, MemoryMappedViewAccessor _view)
-    {
-        if (_entry.CompressedSize == 0)
-        {
-            return new UnmanagedMemoryStream(_view.SafeMemoryMappedViewHandle, _entry.Offset, _entry.Size);
-        }
-        else
-        {
-            Stream compressedStream = new UnmanagedMemoryStream(_view.SafeMemoryMappedViewHandle, _entry.Offset, _entry.CompressedSize);
-            using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
-            Stream decompressedStream = new MemoryStream((int)_entry.Size);
-            deflateStream.CopyTo(decompressedStream);
-            if (decompressedStream.Length != _entry.Size)
-            {
-                throw new InvalidDataException($"Corrupted single-file entry '{_entry.RelativePath}'. Declared decompressed size '{_entry.Size}' is not the same as actual decompressed size '{decompressedStream.Length}'.");
-            }
-
-            decompressedStream.Seek(0, SeekOrigin.Begin);
-            return decompressedStream;
-        }
-    }
 }
 
 #endif
