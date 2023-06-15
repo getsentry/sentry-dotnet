@@ -15,6 +15,9 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2190)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.1...2.19.0)
 
+### Features
+- Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
+
 ## 3.33.1
 
 ### Fixes
