@@ -1,6 +1,8 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
+#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
 using Sentry.Internal.ILSply;
+#endif
 using System.Reflection.PortableExecutable;
 
 namespace Sentry.Internal;
@@ -437,11 +439,12 @@ internal class DebugStackTrace : SentryStackTrace
             return debugImage;
         }
 
+#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
         // Maybe we're dealing with a single file assembly
         // https://github.com/getsentry/sentry-dotnet/issues/2362
         if (SingleFileApp.MainModule.IsBundle())
         {
-            if (SingleFileApp.MainModule?.GetDebugImage(module, options) is not { } embeddedDebugImage)
+            if (SingleFileApp.MainModule?.GetDebugImage(module) is not { } embeddedDebugImage)
             {
                 options.LogInfo("Skipping embedded debug image for module '{0}' because the Debug ID couldn't be determined", moduleName);
                 return null;
@@ -450,6 +453,7 @@ internal class DebugStackTrace : SentryStackTrace
             options.LogDebug("Got embedded debug image for '{0}' having Debug ID: {1}", moduleName, embeddedDebugImage.DebugId);
             return embeddedDebugImage;
         }
+#endif
 
         // Finally, admit defeat
         options.LogDebug("Skipping debug image for module '{0}' because assembly wasn't found: '{1}'",

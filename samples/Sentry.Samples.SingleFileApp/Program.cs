@@ -11,7 +11,7 @@ using System.Diagnostics;
 // On Windows:
 //   dotnet publish -c Debug
 //   .\bin\Debug\net7.0\win-x64\publish\Sentry.Samples.SingleFileApp.exe
-Console.WriteLine("Current process ID: " + Process.GetCurrentProcess().Id);
+Console.WriteLine("Current process ID: " + Environment.ProcessId);
 Console.WriteLine("You can take our lives, but you can never take...");
 Console.ReadKey();
 Console.WriteLine("OUR SYMBOLICATION!");

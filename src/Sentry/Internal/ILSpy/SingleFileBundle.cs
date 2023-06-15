@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System;
 using System.Collections.Immutable;
 using System.IO;
@@ -8,6 +7,8 @@ using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
+
+#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
 
 namespace Sentry.Internal.ILSply;
 
@@ -188,3 +189,5 @@ internal static class SingleFileBundle
         }
     }
 }
+
+#endif

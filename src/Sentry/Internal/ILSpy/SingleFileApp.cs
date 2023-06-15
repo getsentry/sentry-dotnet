@@ -1,14 +1,12 @@
-using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
+#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
+
 namespace Sentry.Internal.ILSply;
 
-internal class SingleFileApp
+internal sealed class SingleFileApp
 {
     private SingleFileApp(SingleFileBundle.Header manifest, List<BundleEntry> entries)
     {
@@ -16,14 +14,14 @@ internal class SingleFileApp
         Entries = entries;
     }
 
-    private static readonly Lazy<SingleFileApp?> _mainModule = new(FromMainModule, LazyThreadSafetyMode.ExecutionAndPublication);
-    public static SingleFileApp? MainModule => _mainModule.Value;
+    private static readonly Lazy<SingleFileApp?> LazyMainModule = new(FromMainModule, LazyThreadSafetyMode.ExecutionAndPublication);
+    public static SingleFileApp? MainModule => LazyMainModule.Value;
 
     public SingleFileBundle.Header BundleHeader { get; }
 
     public List<BundleEntry> Entries { get; }
 
-    public DebugImage? GetDebugImage(Module module, SentryOptions options)
+    public DebugImage? GetDebugImage(Module module)
     {
         var entry = Entries.Find(e =>
             string.Equals(module.ScopeName, e.Name, StringComparison.OrdinalIgnoreCase)
@@ -76,7 +74,6 @@ internal class SingleFileApp
             {
                 view?.Dispose();
             }
-
         }
         catch (Exception ex)
         {
@@ -125,6 +122,8 @@ internal static class SingleFileAppExtensions
 {
     internal static bool IsBundle(this SingleFileApp? singleFileApp) => singleFileApp is not null;
 }
+
+#endif
 
 internal static class ModuleExtensions
 {
