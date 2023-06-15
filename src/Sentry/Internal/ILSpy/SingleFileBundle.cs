@@ -1,20 +1,19 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-
 using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Sentry.Internal.ILSply;
 
 /// <summary>
-/// Class for dealing with .NET 5 single-file bundles.
-/// 
-/// Based on code from Microsoft.NET.HostModel.
+/// <para>Class for dealing with .NET 5 single-file bundles.</para>
+/// <para>Based on code from Microsoft.NET.HostModel.</para>
 /// </summary>
 internal static class SingleFileBundle
 {
@@ -46,8 +45,8 @@ internal static class SingleFileBundle
 			0xee, 0x3b, 0x2d, 0xce, 0x24, 0xb3, 0x6a, 0xae
 		};
 
-		byte* end = data + (size - bundleSignature.Length);
-		for (byte* ptr = data; ptr < end; ptr++)
+		var end = data + (size - bundleSignature.Length);
+		for (var ptr = data; ptr < end; ptr++)
 		{
 			if (*ptr == 0x8b && bundleSignature.SequenceEqual(new ReadOnlySpan<byte>(ptr, bundleSignature.Length)))
 			{
@@ -81,10 +80,11 @@ internal static class SingleFileBundle
 	}
 
 	/// <summary>
-	/// FileType: Identifies the type of file embedded into the bundle.
-	///
+	/// <para>FileType: Identifies the type of file embedded into the bundle.</para>
+	/// <para>
 	/// The bundler differentiates a few kinds of files via the manifest,
 	/// with respect to the way in which they'll be used by the runtime.
+	/// </para>
 	/// </summary>
 	public enum FileType : byte
 	{
@@ -107,7 +107,7 @@ internal static class SingleFileBundle
 
 	internal static UnmanagedMemoryStream AsStream(MemoryMappedViewAccessor view)
 	{
-		long size = checked((long)view.SafeMemoryMappedViewHandle.ByteLength);
+		var size = checked((long)view.SafeMemoryMappedViewHandle.ByteLength);
 		return new UnmanagedMemoryStream(view.SafeMemoryMappedViewHandle, 0, size);
 	}
 
@@ -147,7 +147,7 @@ internal static class SingleFileBundle
 			header.Flags = reader.ReadUInt64();
 		}
 		var entries = ImmutableArray.CreateBuilder<Entry>(header.FileCount);
-		for (int i = 0; i < header.FileCount; i++)
+		for (var i = 0; i < header.FileCount; i++)
 		{
 			entries.Add(ReadEntry(reader, header.MajorVersion));
 		}
@@ -165,4 +165,26 @@ internal static class SingleFileBundle
 		entry.RelativePath = reader.ReadString();
 		return entry;
 	}
+
+    public static Stream TryOpenEntryStream(Entry _entry, MemoryMappedViewAccessor _view)
+    {
+        if (_entry.CompressedSize == 0)
+        {
+            return new UnmanagedMemoryStream(_view.SafeMemoryMappedViewHandle, _entry.Offset, _entry.Size);
+        }
+        else
+        {
+            Stream compressedStream = new UnmanagedMemoryStream(_view.SafeMemoryMappedViewHandle, _entry.Offset, _entry.CompressedSize);
+            using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress);
+            Stream decompressedStream = new MemoryStream((int)_entry.Size);
+            deflateStream.CopyTo(decompressedStream);
+            if (decompressedStream.Length != _entry.Size)
+            {
+                throw new InvalidDataException($"Corrupted single-file entry '{_entry.RelativePath}'. Declared decompressed size '{_entry.Size}' is not the same as actual decompressed size '{decompressedStream.Length}'.");
+            }
+
+            decompressedStream.Seek(0, SeekOrigin.Begin);
+            return decompressedStream;
+        }
+    }
 }

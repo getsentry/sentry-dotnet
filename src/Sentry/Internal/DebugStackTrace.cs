@@ -1,6 +1,7 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal.ILSply;
+using System.Reflection.PortableExecutable;
 
 namespace Sentry.Internal;
 
@@ -378,7 +379,7 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
-    private static PEReader? TryReadAssembly(Module module, SentryOptions options, out string? assemblyName)
+    private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
         assemblyName = module.FullyQualifiedName;
         if (options.AssemblyReader is { } reader)
@@ -390,14 +391,6 @@ internal class DebugStackTrace : SentryStackTrace
         if (File.Exists(assemblyName))
         {
             return new PEReader(File.OpenRead(assemblyName));
-        }
-
-        // Maybe we're dealing with a single file assembly
-        // https://github.com/getsentry/sentry-dotnet/issues/2362
-        if (SingleFileApp.GetEmbeddedAssembly(module, out var embeddedAssemblyName) is { } peReader)
-        {
-            assemblyName = embeddedAssemblyName;
-            return peReader;
         }
 
         // We can't find an appropriate PEReader in this case
@@ -429,94 +422,38 @@ internal class DebugStackTrace : SentryStackTrace
 
     internal static DebugImage? GetDebugImage(Module module, SentryOptions options)
     {
-        var moduleName = module.ModuleNameOrScopeName();
-        using var peReader = TryReadAssembly(module, options, out var assemblyName);
-        if (peReader is null)
+        // Try to get it from disk (most common use case)
+        var moduleName = module.GetNameOrScopeName();
+        using var peDiskReader = TryReadAssemblyFromDisk(module, options, out var assemblyName);
+        if (peDiskReader is not null)
         {
-            options.LogDebug("Skipping debug image for module '{0}' because assembly wasn't found: '{1}'",
-                moduleName, assemblyName);
-            return null;
-        }
-
-        var headers = peReader.PEHeaders;
-        var codeId = headers.PEHeader is { } peHeader
-            ? $"{headers.CoffHeader.TimeDateStamp:X8}{peHeader.SizeOfImage:x}"
-            : null;
-
-        string? debugId = null;
-        string? debugFile = null;
-        string? debugChecksum = null;
-
-        var debugDirectoryEntries = peReader.ReadDebugDirectory();
-
-        foreach (var entry in debugDirectoryEntries)
-        {
-            switch (entry.Type)
+            if (peDiskReader.TryGetPEDebugImageData().ToDebugImage(assemblyName, module.ModuleVersionId) is not { } debugImage)
             {
-                case DebugDirectoryEntryType.PdbChecksum:
-                    {
-                        var checksum = peReader.ReadPdbChecksumDebugDirectoryData(entry);
-                        var checksumHex = checksum.Checksum.AsSpan().ToHexString();
-                        debugChecksum = $"{checksum.AlgorithmName}:{checksumHex}";
-                        break;
-                    }
-
-                case DebugDirectoryEntryType.CodeView:
-                    {
-                        var codeView = peReader.ReadCodeViewDebugDirectoryData(entry);
-                        debugFile = codeView.Path;
-
-                        // Specification:
-                        // https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
-                        //
-                        // See also:
-                        // https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype
-                        //
-                        // Note: Matching PDB ID is stored in the #Pdb stream of the .pdb file.
-
-                        if (entry.IsPortableCodeView)
-                        {
-                            // Portable PDB Format
-                            // Version Major=any, Minor=0x504d
-                            debugId = $"{codeView.Guid}-{entry.Stamp:x8}";
-                        }
-                        else
-                        {
-                            // Full PDB Format (Windows only)
-                            // Version Major=0, Minor=0
-                            debugId = $"{codeView.Guid}-{codeView.Age}";
-                        }
-
-                        break;
-                    }
+                options.LogInfo("Skipping debug image for module '{0}' because the Debug ID couldn't be determined", moduleName);
+                return null;
             }
 
-            if (debugId != null && debugChecksum != null)
+            options.LogDebug("Got debug image for '{0}' having Debug ID: {1}", moduleName, debugImage.DebugId);
+            return debugImage;
+        }
+
+        // Maybe we're dealing with a single file assembly
+        // https://github.com/getsentry/sentry-dotnet/issues/2362
+        if (SingleFileApp.MainModule.IsBundle())
+        {
+            if (SingleFileApp.MainModule?.GetDebugImage(module, options) is not { } embeddedDebugImage)
             {
-                // No need to keep looking, once we have both.
-                break;
+                options.LogInfo("Skipping embedded debug image for module '{0}' because the Debug ID couldn't be determined", moduleName);
+                return null;
             }
+
+            options.LogDebug("Got embedded debug image for '{0}' having Debug ID: {1}", moduleName, embeddedDebugImage.DebugId);
+            return embeddedDebugImage;
         }
 
-        if (debugId == null)
-        {
-            options.LogInfo("Skipping debug image for module '{0}' because the Debug ID couldn't be determined", moduleName);
-            return null;
-        }
-
-        var debugImage = new DebugImage
-        {
-            Type = "pe_dotnet",
-            CodeId = codeId,
-            CodeFile = assemblyName,
-            DebugId = debugId,
-            DebugChecksum = debugChecksum,
-            DebugFile = debugFile,
-            ModuleVersionId = module.ModuleVersionId,
-        };
-
-        options.LogDebug("Got debug image for '{0}' having Debug ID: {1}", module.Name, debugId);
-
-        return debugImage;
+        // Finally, admit defeat
+        options.LogDebug("Skipping debug image for module '{0}' because assembly wasn't found: '{1}'",
+            moduleName, assemblyName);
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
@@ -53,9 +53,8 @@
   -->
   <ItemGroup>
     <PackageReference Include="Polyfill" Version="1.23.0" PrivateAssets="all" />
-    <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
   </ItemGroup>
-
+ 
   <!--
     On .NET Framework, we need a package reference to System.Runtime.InteropServices.RuntimeInformation.
     This is used in Sentry.PlatformAbstractions.RuntimeInfo.  It's already built-in for all other targets.

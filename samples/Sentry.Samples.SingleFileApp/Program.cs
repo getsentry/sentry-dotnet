@@ -14,6 +14,7 @@ using System.Diagnostics;
 Console.WriteLine("Current process ID: " + Process.GetCurrentProcess().Id);
 Console.WriteLine("You can take our lives, but you can never take...");
 Console.ReadKey();
+Console.WriteLine("OUR SYMBOLICATION!");
 
 SentrySdk.Init(options =>
 {
@@ -36,7 +37,6 @@ SentrySdk.Init(options =>
 
 try
 {
-    Console.WriteLine("OUR SYMBOLICATION!");
     throw new Exception("Sample exception.");
 }
 catch (Exception ex)
