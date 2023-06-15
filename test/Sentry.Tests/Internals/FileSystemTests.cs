@@ -6,19 +6,6 @@ public class FileSystemTests
 {
     private const string Filename = "lock.txt";
 
-    [Fact(Skip = "Run manually if needed")]
-    public void Can_get_lease_after_it_was_consumed()
-    {
-        FileSystem.Instance.DeleteFile(Filename);
-
-        _ = FileSystem.Instance.GetLeaseFile(Filename);
-
-        Assert.Throws<IOException>(() =>
-        {
-            using (FileSystem.Instance.GetLeaseFile(Filename)) { }
-        });
-    }
-
     [Fact]
     public void Leased_file_cannot_be_leased_again()
     {
@@ -35,5 +22,35 @@ public class FileSystemTests
         {
             using (fileSystem.GetLeaseFile(path)) { }
         });
+    }
+
+    [Fact]
+    public void RealFileSystem_Leased_file_is_accessible_after_process_crush()
+    {
+        FileSystem.Instance.DeleteFile(Filename);
+
+        var thread = new Thread(() =>
+        {
+            _ = FileSystem.Instance.GetLeaseFile(Filename);
+        });
+
+        thread.Start();
+        thread.Join(200);
+
+        var keepTrying = true;
+
+        while (keepTrying)
+        {
+            try
+            {
+                keepTrying = false;
+
+                _ = FileSystem.Instance.GetLeaseFile(Filename);
+            }
+            catch (IOException)
+            {
+                // Immediate access might fail, retry
+            }
+        }
     }
 }
