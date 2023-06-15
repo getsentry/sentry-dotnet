@@ -9,13 +9,18 @@
   
     <PropertyGroup>
       <PublishSingleFile>true</PublishSingleFile>
-      <DebugType>embedded</DebugType>
+      <DebugSymbols>True</DebugSymbols>
     </PropertyGroup>
   
     <PropertyGroup>
-      <NoWarn>;CS8002;IL3000;IL3002;IL2121</NoWarn>
+      <NoWarn>;CS8002;IL2121</NoWarn>
+      <IncludeSymbols>False</IncludeSymbols>
     </PropertyGroup>
-
+  
+    <PropertyGroup>
+      <WarningsNotAsErrors>IL3000;IL3002</WarningsNotAsErrors>
+    </PropertyGroup>
+  
     <ItemGroup>
       <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     </ItemGroup>
