@@ -6,6 +6,12 @@
 
 - Fix Sentry logger options for MAUI and Azure Functions ([#2423](https://github.com/getsentry/sentry-dotnet/pull/2423))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.7.3 to v8.7.4 ([#2427](https://github.com/getsentry/sentry-dotnet/pull/2427))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#874)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.7.3...8.7.4)
+
 ## 3.33.1
 
 ### Fixes
