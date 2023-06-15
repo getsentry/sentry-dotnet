@@ -1,14 +1,39 @@
+using System.IO.Abstractions.TestingHelpers;
+
 namespace Sentry.Tests.Internals;
 
 public class FileSystemTests
 {
-    [Fact]
-    public async Task Can_get_lease_after_it_was_consumed()
+    private const string Filename = "lock.txt";
+
+    [Fact(Skip = "Run manually if needed")]
+    public void Can_get_lease_after_it_was_consumed()
     {
-        FileSystem.Instance.DeleteFile("lock.txt");
+        FileSystem.Instance.DeleteFile(Filename);
 
-        await Task.Run(() => _ = FileSystem.Instance.GetLeaseFile("lock.txt"));
+        _ = FileSystem.Instance.GetLeaseFile(Filename);
 
-        using (FileSystem.Instance.GetLeaseFile("lock.txt")) { }
+        Assert.Throws<IOException>(() =>
+        {
+            using (FileSystem.Instance.GetLeaseFile(Filename)) { }
+        });
+    }
+
+    [Fact]
+    public void Leased_file_cannot_be_leased_again()
+    {
+        const string path = @$"C:\test\{Filename}";
+
+        IDictionary<string, MockFileData> files  = new Dictionary<string, MockFileData>
+        {
+            { path, new MockFileData(Filename) { AllowedFileShare = FileShare.None } }
+        };
+
+        IFileSystem fileSystem = new FakeFileSystem(files);
+
+        Assert.Throws<IOException>(() =>
+        {
+            using (fileSystem.GetLeaseFile(path)) { }
+        });
     }
 }
