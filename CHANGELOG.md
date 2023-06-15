@@ -4,6 +4,21 @@
 
 ### Fixes
 
+- Fix Sentry logger options for MAUI and Azure Functions ([#2423](https://github.com/getsentry/sentry-dotnet/pull/2423))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.7.3 to v8.7.4 ([#2427](https://github.com/getsentry/sentry-dotnet/pull/2427))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#874)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.7.3...8.7.4)
+- Bump CLI from v2.18.1 to v2.19.0 ([#2428](https://github.com/getsentry/sentry-dotnet/pull/2428))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2190)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.1...2.19.0)
+
+## 3.33.1
+
+### Fixes
+
 - SentryHttpMessageHandler added when AddHttpClient is before UseSentry ([#2390](https://github.com/getsentry/sentry-dotnet/pull/2390))
 - Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
 - Fix db connection spans not finishing ([#2398](https://github.com/getsentry/sentry-dotnet/pull/2398))
