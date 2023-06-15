@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using MockFileSystem = System.IO.Abstractions.TestingHelpers.MockFileSystem;
 
 namespace Sentry.Testing;
@@ -5,7 +6,9 @@ namespace Sentry.Testing;
 public class FakeFileSystem : IFileSystem
 {
     // This is an in-memory implementation provided by https://github.com/TestableIO/System.IO.Abstractions
-    private readonly MockFileSystem _mockFileSystem = new();
+    private readonly MockFileSystem _mockFileSystem;
+
+    public FakeFileSystem(IDictionary<string, MockFileData> files = default) => _mockFileSystem = new MockFileSystem(files);
 
     public IEnumerable<string> EnumerateFiles(string path) => _mockFileSystem.Directory.EnumerateFiles(path);
 
