@@ -2,9 +2,9 @@ using System.IO.MemoryMappedFiles;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
-
 namespace Sentry.Internal.ILSply;
+
+#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
 
 internal sealed class SingleFileApp
 {

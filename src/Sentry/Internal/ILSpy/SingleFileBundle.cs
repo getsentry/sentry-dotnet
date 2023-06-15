@@ -8,9 +8,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
 
-#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
-
 namespace Sentry.Internal.ILSply;
+
+#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
 
 /// <summary>
 /// <para>Class for dealing with .NET 5 single-file bundles.</para>

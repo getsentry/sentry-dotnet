@@ -1,8 +1,6 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
-#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
 using Sentry.Internal.ILSply;
-#endif
 using System.Reflection.PortableExecutable;
 
 namespace Sentry.Internal;
