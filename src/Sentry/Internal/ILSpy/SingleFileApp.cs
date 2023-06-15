@@ -1,8 +1,7 @@
-using System.IO.MemoryMappedFiles;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.Internal.ILSply;
+namespace Sentry.Internal.ILSpy;
 
 #if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
 

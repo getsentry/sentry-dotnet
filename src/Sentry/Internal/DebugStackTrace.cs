@@ -1,7 +1,6 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
-using Sentry.Internal.ILSply;
-using System.Reflection.PortableExecutable;
+using Sentry.Internal.ILSpy;
 
 namespace Sentry.Internal;
 

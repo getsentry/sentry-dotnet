@@ -1,13 +1,10 @@
-using System.Diagnostics;
-using System.Xml.Linq;
 using Sentry.Extensibility;
-using Sentry.Internal.ILSply;
 
 namespace Sentry.Internal.Extensions;
 
 internal static class PEReaderExtensions
 {
-    internal static PEDebugImageData? TryGetPEDebugImageData(this PEReader peReader)
+    public static PEDebugImageData? TryGetPEDebugImageData(this PEReader peReader)
     {
         try
         {
