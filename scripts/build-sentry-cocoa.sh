@@ -34,6 +34,12 @@ then
         echo "---------- Building Sentry Cocoa SDK $VERSION ---------- "
         rm -rf Carthage
 
+        # Delete SentryPrivate and SentrySwiftUI schemes
+        # we dont want to build them
+
+        rm Sentry.xcodeproj/xcshareddata/xcschemes/SentryPrivate.xcscheme
+        rm Sentry.xcodeproj/xcshareddata/xcschemes/SentrySwiftUI.xcscheme
+
         # Note - We keep the build output in separate directories so that .NET
         # bundles iOS with net6.0-ios and Mac Catalyst with net6.0-maccatalyst.
         # The lack of symlinks in the ios builds, means we should also be able
