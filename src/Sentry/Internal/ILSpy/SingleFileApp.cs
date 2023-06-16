@@ -7,10 +7,13 @@ namespace Sentry.Internal.ILSpy;
 
 internal sealed class SingleFileApp
 {
-    private SingleFileApp(SingleFileBundle.Header manifest, List<BundleEntry> entries)
+    private SingleFileApp(SingleFileBundle.Header manifest, BundleEntries entries)
     {
         BundleHeader = manifest;
-        Entries = entries;
+        _entries = new ConcurrentDictionary<string, PEDebugImageData>(entries.ToDictionary(
+            e => e.Key,
+            e => e.Value
+        ), StringComparer.OrdinalIgnoreCase);
     }
 
     private static readonly Lazy<SingleFileApp?> LazyMainModule = new(FromMainModule, LazyThreadSafetyMode.ExecutionAndPublication);
@@ -18,15 +21,13 @@ internal sealed class SingleFileApp
 
     public SingleFileBundle.Header BundleHeader { get; }
 
-    public List<BundleEntry> Entries { get; }
+    private readonly ConcurrentDictionary<string, PEDebugImageData> _entries;
 
     public DebugImage? GetDebugImage(Module module)
     {
-        var entry = Entries.Find(e =>
-            string.Equals(module.ScopeName, e.Name, StringComparison.OrdinalIgnoreCase)
-            );
-
-        return entry?.DebugImageData?.ToDebugImage(module.ScopeName, module.ModuleVersionId);
+        return (_entries.TryGetValue(module.ScopeName, out var debugImageData))
+            ? debugImageData?.ToDebugImage(module.ScopeName, module.ModuleVersionId)
+            : null;
     }
 
     /// <summary>
@@ -51,14 +52,14 @@ internal sealed class SingleFileApp
                 }
 
                 var manifest = SingleFileBundle.ReadManifest(view, bundleHeaderOffset);
-                var entries = new List<BundleEntry>();
+                var entries = new BundleEntries();
                 foreach (var entry in manifest.Entries)
                 {
                     using var stream = TryOpenEntryStream(entry, view);
                     using var peReader = new PEReader(stream, PEStreamOptions.PrefetchEntireImage);
                     if (peReader.TryGetPEDebugImageData() is { } debugImageData)
                     {
-                        entries.Add(new BundleEntry(fileName, entry, debugImageData));
+                        entries.Add(entry.RelativePath, debugImageData);
                     }
                 }
                 var result = new SingleFileApp(manifest, entries);
@@ -95,7 +96,7 @@ internal sealed class SingleFileApp
     }
 
     /// <summary>
-    /// Adapted from BundleEntry.TryOpenStream in ILSpy:
+    /// Adapted from BundleEntryDebugData.TryOpenStream in ILSpy:
     /// https://github.com/icsharpcode/ILSpy/blob/311658c7109c3872e020cba2525b1b3a371d5813/ICSharpCode.ILSpyX/LoadedPackage.cs#L208
     /// commit a929fcb5202824e3c061f4824c7fc9ba867d55af
     /// </summary>
@@ -122,20 +123,8 @@ internal sealed class SingleFileApp
         }
     }
 
-    internal sealed class BundleEntry
+    private sealed class BundleEntries: List<KeyValuePair<string,PEDebugImageData>>
     {
-        private readonly SingleFileBundle.Entry _entry;
-
-        public BundleEntry(string bundleFile, SingleFileBundle.Entry entry, PEDebugImageData debugImageData)
-        {
-            BundleFile = bundleFile;
-            DebugImageData = debugImageData;
-            _entry = entry;
-        }
-
-        public string BundleFile { get; }
-        public PEDebugImageData? DebugImageData { get; }
-        public string Name => _entry.RelativePath;
     }
 }
 

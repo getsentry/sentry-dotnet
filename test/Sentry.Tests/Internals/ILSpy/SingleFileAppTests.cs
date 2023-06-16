@@ -35,7 +35,7 @@ public class SingleFileAppTests
     }
 
     [SkippableFact]
-    public void FromFile_ValidBundleFile_ReturnsSingleFileApp()
+    public void ValidBundleFile_KnownModule_Returns_DebugInfo()
     {
         Skip.If(!File.Exists(ValidBundleFile));
 
@@ -43,11 +43,25 @@ public class SingleFileAppTests
         var singleFileApp = SingleFileApp.FromFile(ValidBundleFile);
 
         // Assert
-        Assert.NotNull(singleFileApp);
+        singleFileApp.Should().NotBeNull();
+
+        var knownTypeModule = typeof(int).Module;
+        var debugImage = singleFileApp!.GetDebugImage(knownTypeModule);
+        debugImage.Should().NotBeNull();
+        using (new AssertionScope())
+        {
+            debugImage!.CodeFile.Should().NotBeNull();
+            debugImage.CodeId.Should().NotBeNull();
+            debugImage.DebugId.Should().NotBeNull();
+            debugImage.DebugChecksum.Should().NotBeNull();
+            debugImage.DebugFile.Should().NotBeNull();
+            debugImage.Type.Should().NotBeNull();
+            debugImage.ModuleVersionId.Should().NotBeNull();
+        }
     }
 
     [SkippableFact]
-    public void FromFile_InvalidBundleFile_ReturnsNull()
+    public void InvalidBundleFile_ReturnsNull()
     {
         Skip.If(!File.Exists(InValidBundleFile));
 
