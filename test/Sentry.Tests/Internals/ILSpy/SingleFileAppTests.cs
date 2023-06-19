@@ -2,7 +2,7 @@ using Sentry.Internal.ILSpy;
 
 namespace Sentry.Tests.Internals.ILSpy;
 
-#if NET6_0_OR_GREATER && PLATFORM_NEUTRAL
+#if NET5_0_OR_GREATER && PLATFORM_NEUTRAL
 
 /// <summary>
 /// Note the tests in this class rely on the SingleFileTestApp having being built. This will be done automatically if
@@ -35,6 +35,8 @@ public class SingleFileAppTests
     private static string TargetFramework => "net7.0";
 #elif NET6_0
     private static string TargetFramework => "net6.0";
+#elif NET5_0
+    private static string TargetFramework => "net5.0";
 #else
     private static string TargetFramework => throw new Exception("Target Framework not yet supported for single file apps");
 #endif

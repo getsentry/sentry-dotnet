@@ -9,7 +9,7 @@
 
 namespace Sentry.Internal.ILSpy;
 
-#if NET6_0_OR_GREATER && PLATFORM_NEUTRAL
+#if NET5_0_OR_GREATER && PLATFORM_NEUTRAL
 
 /// <summary>
 /// <para>Class for dealing with .NET 5 single-file bundles.</para>

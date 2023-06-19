@@ -386,14 +386,7 @@ internal class DebugStackTrace : SentryStackTrace
             return reader.Invoke(assemblyName);
         }
 
-        // Check if the assembly exists on disk
-        if (File.Exists(assemblyName))
-        {
-            return new PEReader(File.OpenRead(assemblyName));
-        }
-
-        // We can't find an appropriate PEReader in this case
-        return null;
+        return (File.Exists(assemblyName)) ? new PEReader(File.OpenRead(assemblyName)) : null;
     }
 
     private int? AddDebugImage(Module module)
@@ -436,7 +429,7 @@ internal class DebugStackTrace : SentryStackTrace
             return debugImage;
         }
 
-#if NET6_0_OR_GREATER && PLATFORM_NEUTRAL
+#if NET5_0_OR_GREATER && PLATFORM_NEUTRAL
         // Maybe we're dealing with a single file assembly
         // https://github.com/getsentry/sentry-dotnet/issues/2362
         if (SingleFileApp.MainModule.IsBundle())
