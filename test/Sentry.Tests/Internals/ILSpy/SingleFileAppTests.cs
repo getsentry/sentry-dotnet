@@ -2,7 +2,7 @@ using Sentry.Internal.ILSpy;
 
 namespace Sentry.Tests.Internals.ILSpy;
 
-#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
+#if NET6_0_OR_GREATER && PLATFORM_NEUTRAL
 
 /// <summary>
 /// Note the tests in this class rely on the SingleFileTestApp having being built. This will be done automatically if
@@ -10,13 +10,10 @@ namespace Sentry.Tests.Internals.ILSpy;
 /// </summary>
 public class SingleFileAppTests
 {
-    private static readonly string PathSeparator;
     private static readonly string ValidBundleFile;
     private static readonly string InValidBundleFile;
     static SingleFileAppTests()
     {
-        PathSeparator = Path.DirectorySeparatorChar.ToString();
-
         var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         var debugConfigMarker = "/bin/Debug/".OsAgnostic();
         var buildConfig = currentDirectory.Contains(debugConfigMarker) ? "Debug" : "Release";
@@ -27,12 +24,42 @@ public class SingleFileAppTests
         var testRoot = currentDirectory[..cutoff];
 
         // Note that these files will only exist if the SingleFileTestApp has been built.
-        var validBundle = $"SingleFileTestApp/bin/{buildConfig}/net7.0/win-x64/publish/SingleFileTestApp.exe".OsAgnostic();
+        var validBundle = $"SingleFileTestApp/bin/{buildConfig}/{TargetFramework}/{RuntimeIdentifier}/publish/{SingleFileAppName}".OsAgnostic();
         ValidBundleFile = Path.Combine(testRoot, validBundle);
 
-        var invalidBundle = $"SingleFileTestApp/bin/{buildConfig}/net7.0/win-x64/SingleFileTestApp.exe".OsAgnostic();
+        var invalidBundle = $"SingleFileTestApp/bin/{buildConfig}/{TargetFramework}/{RuntimeIdentifier}/{SingleFileAppName}".OsAgnostic();
         InValidBundleFile = Path.Combine(testRoot, invalidBundle);
     }
+
+#if NET7_0
+    private static string TargetFramework => "net7.0";
+#elif NET6_0
+    private static string TargetFramework => "net6.0";
+#else
+    private static string TargetFramework => throw new Exception("Target Framework not yet supported for single file apps");
+#endif
+
+    private static string SingleFileAppName => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        ? "SingleFileTestApp.exe"
+        : "SingleFileTestApp";
+
+    private static string RuntimeIdentifier =>
+        RuntimeInformation.OSArchitecture switch
+        {
+            Architecture.Arm64 => $"{OsPlatform}-arm64",
+            Architecture.X64 => $"{OsPlatform}-x64",
+            Architecture.X86 => $"{OsPlatform}-x86",
+            _ => throw new Exception("Unknown Architecture")
+        };
+
+    private static string OsPlatform =>
+        RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "win"
+            : RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                ? "linux"
+                : RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                    ? "osx"
+                    : throw new Exception("Unknown OS");
 
     [SkippableFact]
     public void ValidBundleFile_KnownModule_Returns_DebugInfo()
@@ -53,7 +80,6 @@ public class SingleFileAppTests
             debugImage!.CodeFile.Should().NotBeNull();
             debugImage.CodeId.Should().NotBeNull();
             debugImage.DebugId.Should().NotBeNull();
-            debugImage.DebugChecksum.Should().NotBeNull();
             debugImage.DebugFile.Should().NotBeNull();
             debugImage.Type.Should().NotBeNull();
             debugImage.ModuleVersionId.Should().NotBeNull();

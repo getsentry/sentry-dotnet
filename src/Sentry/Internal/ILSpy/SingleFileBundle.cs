@@ -9,7 +9,7 @@
 
 namespace Sentry.Internal.ILSpy;
 
-#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
+#if NET6_0_OR_GREATER && PLATFORM_NEUTRAL
 
 /// <summary>
 /// <para>Class for dealing with .NET 5 single-file bundles.</para>
@@ -35,7 +35,7 @@ internal static class SingleFileBundle
 		}
 	}
 
-	public static unsafe bool IsBundle(byte* data, long size, out long bundleHeaderOffset)
+    private static unsafe bool IsBundle(byte* data, long size, out long bundleHeaderOffset)
 	{
 		ReadOnlySpan<byte> bundleSignature = new byte[] {
 			// 32 bytes represent the bundle signature: SHA-256 for ".net core bundle"
@@ -105,7 +105,7 @@ internal static class SingleFileBundle
 		public string RelativePath; // Path of an embedded file, relative to the Bundle source-directory.
 	}
 
-	internal static UnmanagedMemoryStream AsStream(MemoryMappedViewAccessor view)
+    private static UnmanagedMemoryStream AsStream(MemoryMappedViewAccessor view)
 	{
 		var size = checked((long)view.SafeMemoryMappedViewHandle.ByteLength);
 		return new UnmanagedMemoryStream(view.SafeMemoryMappedViewHandle, 0, size);
@@ -124,7 +124,7 @@ internal static class SingleFileBundle
 	/// <summary>
 	/// Reads the manifest header from the stream.
 	/// </summary>
-	public static Header ReadManifest(Stream stream)
+    private static Header ReadManifest(Stream stream)
 	{
 		var header = new Header();
 		using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);

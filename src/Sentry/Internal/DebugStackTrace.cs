@@ -436,7 +436,7 @@ internal class DebugStackTrace : SentryStackTrace
             return debugImage;
         }
 
-#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
+#if NET6_0_OR_GREATER && PLATFORM_NEUTRAL
         // Maybe we're dealing with a single file assembly
         // https://github.com/getsentry/sentry-dotnet/issues/2362
         if (SingleFileApp.MainModule.IsBundle())

@@ -3,7 +3,7 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.ILSpy;
 
-#if NETCOREAPP3_0_OR_GREATER && PLATFORM_NEUTRAL
+#if NET6_0_OR_GREATER && PLATFORM_NEUTRAL
 
 internal sealed class SingleFileApp
 {
