@@ -38,6 +38,7 @@ public class SingleFileAppTests
 #elif NET5_0
     private static string TargetFramework => "net5.0";
 #else
+    // Adding a new TFM to the project? Include it above
     private static string TargetFramework => throw new Exception("Target Framework not yet supported for single file apps");
 #endif
 
