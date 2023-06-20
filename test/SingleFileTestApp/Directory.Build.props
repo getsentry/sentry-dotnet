@@ -1,0 +1,3 @@
+<Project DefaultTargets="Build;Publish">
+  <!-- Ignore Directory.Build.props from parent -->
+</Project>

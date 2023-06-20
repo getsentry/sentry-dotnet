@@ -18,6 +18,10 @@
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6230)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.22.0...6.23.0)
 
+### Features
+
+- Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
+
 ## 3.33.1
 
 ### Fixes
