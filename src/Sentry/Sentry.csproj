@@ -118,7 +118,11 @@
     </ItemGroup>
 
     <!-- Download the files -->
-    <DownloadFile SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)" DestinationFolder="$(SentryCLIDirectory)" Condition="!Exists('$(SentryCLIDirectory)%(Identity)')" Retries="3">
+    <DownloadFile
+      SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)"
+      DestinationFolder="$(SentryCLIDirectory)"
+      Condition="!Exists('$(SentryCLIDirectory)%(Identity)')"
+      Retries="3">
       <Output TaskParameter="DownloadedFile" ItemName="SentryCLIDownloadedFile" />
     </DownloadFile>
 

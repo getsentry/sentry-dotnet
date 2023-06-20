@@ -386,7 +386,15 @@ internal class DebugStackTrace : SentryStackTrace
             return reader.Invoke(assemblyName);
         }
 
-        return (File.Exists(assemblyName)) ? new PEReader(File.OpenRead(assemblyName)) : null;
+        try
+        {
+            var assembly = File.OpenRead(assemblyName);
+            return new PEReader(assembly);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private int? AddDebugImage(Module module)
