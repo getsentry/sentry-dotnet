@@ -13,7 +13,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
 
-    private readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
+    internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> Map = new();
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
@@ -38,27 +38,26 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         _resourceAttributes = new Lazy<IDictionary<string, object>>(() =>
             ParentProvider?.GetResource().Attributes.ToDictionary() ?? new Dictionary<string, object>(0));
 
-        hub.ConfigureScope(scope =>
-        {
-            scope.AddTransactionProcessor(transaction =>
-            {
-                var activity = Activity.Current;
-                if (activity != null)
-                {
-                    var trace = transaction.Contexts.Trace;
-                    trace.TraceId = activity.TraceId.AsSentryId();
-                    trace.SpanId = activity.SpanId.AsSentrySpanId();
-                }
+        hub.ConfigureScope(scope => scope.AddTransactionProcessor(TransactionProcessor));
+    }
 
-                return transaction;
-            });
-        });
+    internal static Transaction TransactionProcessor(Transaction transaction)
+    {
+        var activity = Activity.Current;
+        if (activity != null)
+        {
+            var trace = transaction.Contexts.Trace;
+            trace.TraceId = activity.TraceId.AsSentryId();
+            trace.SpanId = activity.SpanId.AsSentrySpanId();
+        }
+
+        return transaction;
     }
 
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
-        if (_map.TryGetValue(data.ParentSpanId, out var parentSpan))
+        if (Map.TryGetValue(data.ParentSpanId, out var parentSpan))
         {
             // The parent span exists - start a child span.
             var context = new SpanContext(
@@ -75,14 +74,14 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             var span = (SpanTracer)parentSpan.StartChild(context);
             span.StartTimestamp = data.StartTimeUtc;
-            _map[data.SpanId] = span;
+            Map[data.SpanId] = span;
         }
         else
         {
             // The parent span doesn't exist - start a new transaction.
             var context = new TransactionContext(
                 data.SpanId.AsSentrySpanId(),
-                data.ParentSpanId.AsSentrySpanId(),
+                null,
                 data.TraceId.AsSentryId(),
                 data.DisplayName,
                 data.OperationName,
@@ -96,7 +95,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             var transaction = (TransactionTracer)_hub.StartTransaction(context);
             transaction.StartTimestamp = data.StartTimeUtc;
-            _map[data.SpanId] = transaction;
+            Map[data.SpanId] = transaction;
         }
     }
 
@@ -109,11 +108,11 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         if (attributes.TryGetTypedValue("http.url", out string url) && _hub.IsSentryRequest(url))
         {
             // TODO: will this leave the span dangling?
-            _map.TryRemove(data.SpanId, out _);
+            Map.TryRemove(data.SpanId, out _);
             return;
         }
 
-        if (!_map.TryGetValue(data.SpanId, out var span))
+        if (!Map.TryGetValue(data.SpanId, out var span))
         {
             _options?.DiagnosticLogger?.LogDebug("Span not found for SpanId: {0}", data.SpanId);
             return;
@@ -151,10 +150,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         var status = GetSpanStatus(data.Status, attributes);
         span.Finish(status);
 
-        _map.TryRemove(data.SpanId, out _);
+        Map.TryRemove(data.SpanId, out _);
     }
 
-    private static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes) =>
+    internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes) =>
         status switch
         {
             ActivityStatusCode.Unset => SpanStatus.Ok,

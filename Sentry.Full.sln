@@ -184,6 +184,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AzureFunctio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.Tests", "test\Sentry.OpenTelemetry.Tests\Sentry.OpenTelemetry.Tests.csproj", "{5464782D-AC7B-4784-ACC9-FB626114656D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -451,6 +453,10 @@ Global
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5464782D-AC7B-4784-ACC9-FB626114656D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5464782D-AC7B-4784-ACC9-FB626114656D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5464782D-AC7B-4784-ACC9-FB626114656D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5464782D-AC7B-4784-ACC9-FB626114656D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -523,6 +529,7 @@ Global
 		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{5464782D-AC7B-4784-ACC9-FB626114656D} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

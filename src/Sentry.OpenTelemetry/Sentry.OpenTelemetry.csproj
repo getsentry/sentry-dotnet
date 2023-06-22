@@ -14,4 +14,8 @@
       <ProjectReference Include="..\Sentry\Sentry.csproj" />
     </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.OpenTelemetry.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
 </Project>
