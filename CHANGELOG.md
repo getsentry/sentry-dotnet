@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- OpenTelemetry span processor ([#2434](https://github.com/getsentry/sentry-dotnet/pull/2434))
+- Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
+
 ### Fixes
 
 - Fix Sentry logger options for MAUI and Azure Functions ([#2423](https://github.com/getsentry/sentry-dotnet/pull/2423))
@@ -17,10 +22,6 @@
 - Bump Java SDK from v6.22.0 to v6.23.0 ([#2429](https://github.com/getsentry/sentry-dotnet/pull/2429))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6230)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.22.0...6.23.0)
-
-### Features
-
-- Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 
 ## 3.33.1
 
