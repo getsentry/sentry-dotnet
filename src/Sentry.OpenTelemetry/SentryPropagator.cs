@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 
@@ -28,23 +28,15 @@ public class SentryPropagator : BaggagePropagator
     {
         var result = base.Extract(context, carrier, getter);
 
-        if (carrier is not HttpRequest request)
-        {
-            return result;
-        }
-
         var modifiedContext = result.Baggage;
 
-        if (TryGetSentryTraceHeader(request.HttpContext) is not {} sentryTraceHeader)
+        if (TryGetSentryTraceHeader(carrier, getter) is not {} sentryTraceHeader)
         {
             return result;
         }
         modifiedContext.SetBaggage(OTelKeys.SentryTraceKey, sentryTraceHeader.ToString());
 
-        // Sentry uses the word Baggage (https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#baggage)
-        // to mean something a bit different to OTEL (https://opentelemetry.io/docs/concepts/signals/baggage/)... so
-        // the names here are a bit confusing.
-        var baggageHeader = TryGetBaggageHeader(request.HttpContext)
+        var baggageHeader = TryGetBaggageHeader(carrier, getter)
                             ?? BaggageHeader.Create(new List<KeyValuePair<string, string>>());
         modifiedContext.SetBaggage(OTelKeys.SentryBaggageKey, baggageHeader.ToString());
 
@@ -56,7 +48,9 @@ public class SentryPropagator : BaggagePropagator
             true
             );
 
-        // TODO: Understand why this is needed in the Java implementation
+        // TODO: Understand why this is needed in the Java implementation. Maybe we don't need in .NET as we can pass
+        // this directly into the constructor of the PropagationContext
+
         // Span wrappedSpan = Span.wrap(otelSpanContext);
         // modifiedContext = modifiedContext.with(wrappedSpan);
         // return modifiedContext;
@@ -102,14 +96,10 @@ public class SentryPropagator : BaggagePropagator
         base.Inject(context, carrier, setter);
     }
 
-    private static SentryTraceHeader? TryGetSentryTraceHeader(HttpContext context)
+    private static SentryTraceHeader? TryGetSentryTraceHeader<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
     {
-        context.Request.Headers.TryGetValue(SentryTraceHeader.HttpHeaderName, out var value);
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
+        var headerValue = getter(carrier, SentryTraceHeader.HttpHeaderName);
+        var value = new StringValues(headerValue.ToArray());
         try
         {
             return SentryTraceHeader.Parse(value);
@@ -120,9 +110,10 @@ public class SentryPropagator : BaggagePropagator
         }
     }
 
-    private static BaggageHeader? TryGetBaggageHeader(HttpContext context)
+    private static BaggageHeader? TryGetBaggageHeader<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
     {
-        context.Request.Headers.TryGetValue(BaggageHeader.HttpHeaderName, out var value);
+        var headerValue = getter(carrier, BaggageHeader.HttpHeaderName);
+        var value = new StringValues(headerValue.ToArray());
         if (string.IsNullOrWhiteSpace(value))
         {
             return null;
