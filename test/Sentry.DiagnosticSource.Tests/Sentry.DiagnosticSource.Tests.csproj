@@ -7,22 +7,22 @@
   <!-- Test EF Core 7 on .NET 7 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.8" />
   </ItemGroup>
 
   <!-- Test EF Core 6 on .NET 6 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.19" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.19" />
   </ItemGroup>
 
   <!-- Test EF Core 5 on .NET Core 3.1 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.17" />
 
     <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
     <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
@@ -32,8 +32,8 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.32" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.32" />
   </ItemGroup>
 
   <ItemGroup>
