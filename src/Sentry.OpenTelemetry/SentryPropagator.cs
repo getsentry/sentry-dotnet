@@ -27,71 +27,44 @@ public class SentryPropagator : BaggagePropagator
     public override PropagationContext Extract<T>(PropagationContext context, T carrier, Func<T, string, IEnumerable<string>> getter)
     {
         var result = base.Extract(context, carrier, getter);
-
-        var modifiedContext = result.Baggage;
+        var baggage = result.Baggage; // The Otel .NET SDK takes care of baggage headers alread
 
         if (TryGetSentryTraceHeader(carrier, getter) is not {} sentryTraceHeader)
         {
             return result;
         }
-        modifiedContext.SetBaggage(OTelKeys.SentryTraceKey, sentryTraceHeader.ToString());
-
-        var baggageHeader = TryGetBaggageHeader(carrier, getter)
-                            ?? BaggageHeader.Create(new List<KeyValuePair<string, string>>());
-        modifiedContext.SetBaggage(OTelKeys.SentryBaggageKey, baggageHeader.ToString());
-
-        var otelSpanContext = new ActivityContext(
+        var activityContext = new ActivityContext(
             sentryTraceHeader.TraceId.AsActivityTraceId(),
             sentryTraceHeader.SpanId.AsActivitySpanId(),
             sentryTraceHeader.IsSampled is true ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None,
             null,
             true
             );
-
-        // TODO: Understand why this is needed in the Java implementation. Maybe we don't need in .NET as we can pass
-        // this directly into the constructor of the PropagationContext
-
-        // Span wrappedSpan = Span.wrap(otelSpanContext);
-        // modifiedContext = modifiedContext.with(wrappedSpan);
-        // return modifiedContext;
-
-        return new PropagationContext(otelSpanContext, modifiedContext);
+        return new PropagationContext(activityContext, baggage);
     }
 
     /// <inheritdoc />
     public override void Inject<T>(PropagationContext context, T carrier, Action<T, string, string> setter)
     {
 
-        // Don't inject baggage if instrumentation is suppressed, or when the activity context is invalid.
+        // Don't inject if instrumentation is suppressed, or when the activity context is invalid.
         if (Sdk.SuppressInstrumentation || !context.ActivityContext.IsValid())
         {
             return;
         }
 
-        // Don't inject baggage if this is a request to the Sentry ingest endpoint.
+        // Don't inject if this is a request to the Sentry ingest endpoint.
         if (carrier is HttpRequestMessage request && SentrySdk.CurrentHub.IsSentryRequest(request.RequestUri))
         {
             return;
         }
 
-        var baggage = context.Baggage;
-
-        // TODO: Finish
-
-        // Java implementation
-        // ===================
-        // Span otelSpan = Span.fromContext(context);
-        // SpanContext otelSpanContext = otelSpan.getSpanContext();
-        //
-        // ISpan sentrySpan = spanStorage.get(otelSpanContext.getSpanId());
-        // if (sentrySpan == null || sentrySpan.isNoOp())
-        //     return;
-        //
-        // SentryTraceHeader sentryTraceHeader = sentrySpan.toSentryTrace();
-        // setter.set(carrier, sentryTraceHeader.getName(), sentryTraceHeader.getValue());
-        // BaggageHeader baggageHeader = sentrySpan.toBaggageHeader(Collections.emptyList());
-        // if (baggageHeader != null)
-        //     setter.set(carrier, baggageHeader.getName(), baggageHeader.getValue());
+        // Set the sentry trace header for downstream requests
+        var traceId = context.ActivityContext.TraceId.AsSentryId();
+        var spanSpanId = context.ActivityContext.SpanId.AsSentrySpanId();
+        var isSampled = context.ActivityContext.TraceFlags.HasFlag(ActivityTraceFlags.Recorded);
+        var traceHeader = new SentryTraceHeader(traceId, spanSpanId, isSampled);
+        setter(carrier, SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
 
         base.Inject(context, carrier, setter);
     }
@@ -103,27 +76,6 @@ public class SentryPropagator : BaggagePropagator
         try
         {
             return SentryTraceHeader.Parse(value);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    private static BaggageHeader? TryGetBaggageHeader<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
-    {
-        var headerValue = getter(carrier, BaggageHeader.HttpHeaderName);
-        var value = new StringValues(headerValue.ToArray());
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        // Note: If there are multiple baggage headers, they will be joined with comma delimiters,
-        // and can thus be treated as a single baggage header.
-        try
-        {
-            return BaggageHeader.TryParse(value, onlySentry: true);
         }
         catch (Exception)
         {
