@@ -41,11 +41,13 @@ public class FileSystemTests
 
         while (keepTrying)
         {
+            Thread.Sleep(200);
+
             try
             {
-                keepTrying = false;
-
                 _ = FileSystem.Instance.GetLeaseFile(Filename);
+
+                keepTrying = false;
             }
             catch (IOException)
             {
