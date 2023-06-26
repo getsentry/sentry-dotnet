@@ -874,6 +874,10 @@ interface SentryOptions
     // @property (nonatomic) BOOL enableTimeToFullDisplay;
     [Export ("enableTimeToFullDisplay")]
     bool EnableTimeToFullDisplay { get; set; }
+
+    // @property (assign, nonatomic) BOOL swiftAsyncStacktraces;
+    [Export ("swiftAsyncStacktraces")]
+    bool SwiftAsyncStacktraces { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>

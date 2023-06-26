@@ -18,6 +18,11 @@ if [ ! -f $CARTHAGE ]; then
     cd ..
 fi
 
+rollbackSchemes() {
+    mv Sentry.xcodeproj/xcshareddata/xcschemes/SentryPrivate.xcscheme.bak Sentry.xcodeproj/xcshareddata/xcschemes/SentryPrivate.xcscheme
+    mv Sentry.xcodeproj/xcshareddata/xcschemes/SentrySwiftUI.xcscheme.bak Sentry.xcodeproj/xcshareddata/xcschemes/SentrySwiftUI.xcscheme
+}
+
 if [ $? -eq 0 ]
 then
     cd sentry-cocoa
@@ -37,8 +42,10 @@ then
         # Delete SentryPrivate and SentrySwiftUI schemes
         # we dont want to build them
 
-        rm Sentry.xcodeproj/xcshareddata/xcschemes/SentryPrivate.xcscheme
-        rm Sentry.xcodeproj/xcshareddata/xcschemes/SentrySwiftUI.xcscheme
+        mv Sentry.xcodeproj/xcshareddata/xcschemes/SentryPrivate.xcscheme Sentry.xcodeproj/xcshareddata/xcschemes/SentryPrivate.xcscheme.bak
+        mv Sentry.xcodeproj/xcshareddata/xcschemes/SentrySwiftUI.xcscheme Sentry.xcodeproj/xcshareddata/xcschemes/SentrySwiftUI.xcscheme.bak
+
+        trap 'rollbackSchemes; exit 1' SIGINT
 
         # Note - We keep the build output in separate directories so that .NET
         # bundles iOS with net6.0-ios and Mac Catalyst with net6.0-maccatalyst.
@@ -63,6 +70,8 @@ then
 
     # Remove anything we don't want to bundle in the nuget package.
     find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
+
+    rollbackSchemes
 fi
 
 popd > /dev/null
