@@ -1,10 +1,13 @@
-using System.IO.Abstractions.TestingHelpers;
-
 namespace Sentry.Tests.Internals;
 
-public class FileSystemTests
+public class FileSystemTests : IDisposable
 {
-    private const string Filename = "lock.txt";
+    private readonly string _filename;
+
+    public FileSystemTests()
+    {
+        _filename = Guid.NewGuid().ToString();
+    }
 
     // [Fact]
     // public void Leased_file_cannot_be_leased_again()
@@ -27,11 +30,11 @@ public class FileSystemTests
     [Fact]
     public void RealFileSystem_Leased_file_is_accessible_after_process_crush()
     {
-        FileSystem.Instance.DeleteFile(Filename);
+        FileSystem.Instance.DeleteFile(_filename);
 
         var thread = new Thread(() =>
         {
-            _ = FileSystem.Instance.GetLeaseFile(Filename);
+            _ = FileSystem.Instance.GetLeaseFile(_filename);
         });
 
         thread.Start();
@@ -45,7 +48,7 @@ public class FileSystemTests
 
             try
             {
-                _ = FileSystem.Instance.GetLeaseFile(Filename);
+                _ = FileSystem.Instance.GetLeaseFile(_filename);
 
                 keepTrying = false;
             }
@@ -53,6 +56,18 @@ public class FileSystemTests
             {
                 // Immediate access might fail, retry
             }
+        }
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            FileSystem.Instance.DeleteFile(_filename);
+        }
+        catch
+        {
+            //
         }
     }
 }
