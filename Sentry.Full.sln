@@ -184,17 +184,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AzureFunctio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{A0DD88B0-EF80-4A79-876F-2EAB98D78DE5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry", "src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj", "{94C5E990-50EE-462F-B83F-B4357F549500}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{C78EF1CF-5FD0-434B-976D-4C0C5F33A328}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{9D164B12-DEF9-4179-86EB-B1ED3ADE2E09}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{F2C064AD-32FA-488A-8A70-159B99226FE4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.Tests", "test\Sentry.OpenTelemetry.Tests\Sentry.OpenTelemetry.Tests.csproj", "{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{2502D3A0-7628-4768-A430-0854BEB1E7A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -463,30 +457,18 @@ Global
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A0DD88B0-EF80-4A79-876F-2EAB98D78DE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A0DD88B0-EF80-4A79-876F-2EAB98D78DE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0DD88B0-EF80-4A79-876F-2EAB98D78DE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A0DD88B0-EF80-4A79-876F-2EAB98D78DE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{94C5E990-50EE-462F-B83F-B4357F549500}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{94C5E990-50EE-462F-B83F-B4357F549500}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94C5E990-50EE-462F-B83F-B4357F549500}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94C5E990-50EE-462F-B83F-B4357F549500}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C78EF1CF-5FD0-434B-976D-4C0C5F33A328}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C78EF1CF-5FD0-434B-976D-4C0C5F33A328}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C78EF1CF-5FD0-434B-976D-4C0C5F33A328}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C78EF1CF-5FD0-434B-976D-4C0C5F33A328}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9D164B12-DEF9-4179-86EB-B1ED3ADE2E09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9D164B12-DEF9-4179-86EB-B1ED3ADE2E09}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9D164B12-DEF9-4179-86EB-B1ED3ADE2E09}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9D164B12-DEF9-4179-86EB-B1ED3ADE2E09}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F2C064AD-32FA-488A-8A70-159B99226FE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2C064AD-32FA-488A-8A70-159B99226FE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F2C064AD-32FA-488A-8A70-159B99226FE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F2C064AD-32FA-488A-8A70-159B99226FE4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -559,12 +541,9 @@ Global
 		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
-		{A0DD88B0-EF80-4A79-876F-2EAB98D78DE5} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{94C5E990-50EE-462F-B83F-B4357F549500} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
-		{C78EF1CF-5FD0-434B-976D-4C0C5F33A328} = {77454495-55EE-4B40-A089-71B9E8F82E89}
-		{9D164B12-DEF9-4179-86EB-B1ED3ADE2E09} = {77454495-55EE-4B40-A089-71B9E8F82E89}
-		{F2C064AD-32FA-488A-8A70-159B99226FE4} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
