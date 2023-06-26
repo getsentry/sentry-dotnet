@@ -41,7 +41,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         hub.ConfigureScope(scope => scope.AddTransactionProcessor(TransactionProcessor));
     }
 
-    internal static Transaction TransactionProcessor(Transaction transaction)
+    private static Transaction TransactionProcessor(Transaction transaction)
     {
         var activity = Activity.Current;
         if (activity != null)

@@ -61,7 +61,7 @@ public class SentrySpanProcessorTests : IDisposable
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void Ctor_OpenTelemetryInstrumenterOption_DoesNotThrowException()
+    public void Ctor_Instrumenter_OpenTelemetry_DoesNotThrowException()
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
@@ -74,7 +74,7 @@ public class SentrySpanProcessorTests : IDisposable
     }
 
     [Fact]
-    public void Ctor_NotOpenTelemetryInstrumenterOption_ThrowsInvalidOperationException()
+    public void Ctor_Instrumenter_Not_OpenTelemetry_Throws()
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.Sentry;
@@ -230,6 +230,97 @@ public class SentrySpanProcessorTests : IDisposable
             var grpcAttributes = new Dictionary<string, object> { ["rpc.grpc.status_code"] = 7 };
             SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, grpcAttributes)
                 .Should().Be(SpanStatus.PermissionDenied);
+        }
+    }
+
+    [Fact]
+    public void OnEnd_FinishesSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity(name: "transaction")!;
+        sut.OnStart(parent);
+
+        var tags = new Dictionary<string, object> {
+            { "foo", "bar" }
+        };
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut.Map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not SpanTracer spanTracer)
+        {
+            Assert.Fail("Span is not a span tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            using (new AssertionScope())
+            {
+                spanTracer.ParentSpanId.Should().Be(parent.SpanId.AsSentrySpanId());
+                spanTracer.Operation.Should().Be(data.OperationName);
+                spanTracer.Description.Should().Be(data.DisplayName);
+                spanTracer.EndTimestamp.Should().NotBeNull();
+                spanTracer.Extra["otel.kind"].Should().Be(data.Kind);
+                foreach (var keyValuePair in tags)
+                {
+                    span.Extra[keyValuePair.Key].Should().Be(keyValuePair.Value);
+                }
+                spanTracer.Status.Should().Be(SpanStatus.Ok);
+            }
+        }
+    }
+
+    [Fact]
+    public void OnEnd_FinishesTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var tags = new Dictionary<string, object> {
+            { "foo", "bar" }
+        };
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut.Map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            using (new AssertionScope())
+            {
+                transaction.ParentSpanId.Should().BeNull();
+                transaction.Operation.Should().Be(data.OperationName);
+                transaction.Description.Should().Be(data.DisplayName);
+                transaction.Name.Should().Be(data.DisplayName);
+                transaction.NameSource.Should().Be(TransactionNameSource.Custom);
+                transaction.EndTimestamp.Should().NotBeNull();
+                transaction.Contexts["otel"].Should().BeEquivalentTo(new Dictionary<string, object>{
+                    { "attributes", tags }
+                });
+                transaction.Status.Should().Be(SpanStatus.Ok);
+            }
         }
     }
 }
