@@ -8,7 +8,6 @@
       "samples\\Sentry.Samples.AspNetCore.Blazor.Wasm\\Sentry.Samples.AspNetCore.Blazor.Wasm.csproj",
       "samples\\Sentry.Samples.AspNetCore.Grpc\\Sentry.Samples.AspNetCore.Grpc.csproj",
       "samples\\Sentry.Samples.AspNetCore.Mvc\\Sentry.Samples.AspNetCore.Mvc.csproj",
-      "samples\\Sentry.Samples.AspNetCore.OpenTelemetry\\Sentry.Samples.AspNetCore.OpenTelemetry.csproj",
       "samples\\Sentry.Samples.AspNetCore.Serilog\\Sentry.Samples.AspNetCore.Serilog.csproj",
       "samples\\Sentry.Samples.Aws.Lambda.AspNetCoreServer\\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj",
       "samples\\Sentry.Samples.AzureFunctions.Worker\\Sentry.Samples.AzureFunctions.Worker.csproj",
