@@ -28,5 +28,5 @@
     <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
   </PropertyGroup>
-  
+
 </Project>
