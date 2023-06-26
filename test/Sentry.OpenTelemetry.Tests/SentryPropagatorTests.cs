@@ -7,34 +7,39 @@ namespace Sentry.OpenTelemetry.Tests;
 
 public class SentryPropagatorTests
 {
-    private ActivityContext _invalidContext = default;
+    private static Baggage EmptyBaggage => new Baggage();
 
-    private static ActivityContext _validContext()
+    private static ActivityContext InvalidContext => default;
+
+    private static ActivityContext ValidContext
     {
-        var sentryTraceHeader = new SentryTraceHeader(
-            SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
-            SpanId.Parse("b0d83d6cfec87606"),
-            true
-        );
-        return new ActivityContext(
-            sentryTraceHeader.TraceId.AsActivityTraceId(),
-            sentryTraceHeader.SpanId.AsActivitySpanId(),
-            sentryTraceHeader.IsSampled is true ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None,
-            null,
-            true
-        );
+        get {
+            var sentryTraceHeader = new SentryTraceHeader(
+                SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
+                SpanId.Parse("b0d83d6cfec87606"),
+                true
+            );
+            return new ActivityContext(
+                sentryTraceHeader.TraceId.AsActivityTraceId(),
+                sentryTraceHeader.SpanId.AsActivitySpanId(),
+                sentryTraceHeader.IsSampled is true ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None,
+                null,
+                true
+            );
+        }
     }
 
     private static IEnumerable<string> _getter(Dictionary<string, string> request, string key)
         => request.TryGetValue(key, out var value) ? new StringValues(value) : Enumerable.Empty<string>();
 
+    private static void Setter(Dictionary<string, string> carrier, string key, string value) => carrier[key] = value;
+
+
     [Fact]
     public void Inject_PropagationContext_To_Carrier()
     {
         // Arrange
-        var activityContext = _validContext();
-        var baggageIn = Baggage.Create(new Dictionary<string, string>());
-        var contextIn = new PropagationContext(activityContext, baggageIn);
+        var contextIn = new PropagationContext(ValidContext, EmptyBaggage);
         var carrier = new Dictionary<string, string>();
         var sut = new SentryPropagator();
 
@@ -55,12 +60,11 @@ public class SentryPropagatorTests
     public void Inject_PropagationContext_To_Baggage()
     {
         // Arrange
-        var activityContext = _validContext();
         var baggageIn = Baggage.Create(new Dictionary<string, string>()
             {
                 { "foo", "bar" }, // simulate some non-sentry baggage... this shouldn't be altered
             });
-        var contextIn = new PropagationContext(activityContext, baggageIn);
+        var contextIn = new PropagationContext(ValidContext, baggageIn);
         var carrier = new Dictionary<string, string>();
         var sut = new SentryPropagator();
 
@@ -86,18 +90,37 @@ public class SentryPropagatorTests
     public void Inject_Invalid_Context_DoesNothing()
     {
         // Arrange
-        var activityContext = _invalidContext;
-        var baggageIn = new Baggage();
-        var contextIn = new PropagationContext(activityContext, baggageIn);
+        var contextIn = new PropagationContext(InvalidContext, EmptyBaggage);
         var carrier = new Dictionary<string, string>();
         var sut = new SentryPropagator();
 
+        var setter = Substitute.For<Action<Dictionary<string,string>, string, string>>();
+
         // Act
-        sut.Inject(contextIn, carrier, (c, k, v) => c[k] = v);
+        sut.Inject(contextIn, carrier, setter);
 
         // Assert
-        carrier.Should().NotBeNull();
-        carrier.Should().BeEmpty();
+        setter.DidNotReceive();
+    }
+
+    [Fact]
+    public void Inject_SentryRequest_DoesNothing()
+    {
+        // Arrange
+        var contextIn = new PropagationContext(ValidContext, EmptyBaggage);
+        var carrier = new HttpRequestMessage();
+
+        var hub = Substitute.For<IHubEx>();
+        hub.IsSentryRequest(Arg.Any<Uri>()).Returns(true);
+        var sut = new SentryPropagator(hub);
+
+        var setter = Substitute.For<Action<HttpRequestMessage, string, string>>();
+
+        // Act
+        sut.Inject(contextIn, carrier, setter);
+
+        // Assert
+        setter.DidNotReceive();
     }
 
     [Fact]

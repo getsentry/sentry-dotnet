@@ -10,6 +10,27 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public class SentryPropagator : BaggagePropagator
 {
+    private readonly IHub _hub = SentrySdk.CurrentHub;
+
+    /// <summary>
+    /// <para>
+    ///     Creates a new SentryPropagator.
+    /// </para>
+    /// <para>
+    ///     You should register the propagator with the OpenTelemetry SDK when initializing your application.
+    /// </para>
+    /// <example>
+    ///     OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new SentryPropagator());
+    /// </example>
+    /// </summary>
+    public SentryPropagator() : base()
+    {
+    }
+
+    internal SentryPropagator(IHub hub) : this()
+    {
+        _hub = hub;
+    }
     /// <inheritdoc />
     public override ISet<string> Fields => new HashSet<string>
     {
@@ -68,7 +89,7 @@ public class SentryPropagator : BaggagePropagator
         }
 
         // Don't inject if this is a request to the Sentry ingest endpoint.
-        if (carrier is HttpRequestMessage request && SentrySdk.CurrentHub.IsSentryRequest(request.RequestUri))
+        if (carrier is HttpRequestMessage request && _hub.IsSentryRequest(request.RequestUri))
         {
             Debug.WriteLine("Injection skipped for Sentry ingest.");
             return;
