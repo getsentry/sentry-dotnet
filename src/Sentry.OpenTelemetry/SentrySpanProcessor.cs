@@ -78,8 +78,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         }
         else
         {
-            // The parent span doesn't exist - start a new transaction.
-            var context = new TransactionContext(
+            // The parent span doesn't exist - start a new transaction
+            var transactionContext = new TransactionContext(
                 data.SpanId.AsSentrySpanId(),
                 null,
                 data.TraceId.AsSentryId(),
@@ -93,7 +93,11 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 Instrumenter = Instrumenter.OpenTelemetry
             };
 
-            var transaction = (TransactionTracer)_hub.StartTransaction(context);
+            var baggageHeader = BaggageHeader.Create(data.Baggage.WithValues());
+            var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
+            var transaction = (TransactionTracer)_hub.StartTransaction(
+                transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
+                );
             transaction.StartTimestamp = data.StartTimeUtc;
             Map[data.SpanId] = transaction;
         }

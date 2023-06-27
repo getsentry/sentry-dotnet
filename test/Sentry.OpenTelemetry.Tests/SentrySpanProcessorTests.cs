@@ -1,3 +1,5 @@
+using OpenTelemetry;
+
 namespace Sentry.OpenTelemetry.Tests;
 
 public class SentrySpanProcessorTests : IDisposable
@@ -197,6 +199,47 @@ public class SentrySpanProcessorTests : IDisposable
             transaction.Description.Should().Be(data.DisplayName);
             transaction.Status.Should().BeNull();
             transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
+        }
+    }
+
+    [Fact]
+    public void OnStart_Transaction_With_DynamicSamplingContext()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var expected = new Dictionary<string, string>()
+        {
+            { "trace_id", SentryId.Create().ToString() },
+            { "public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
+            { "sample_rate", "0.5" },
+        };
+        var data = Tracer.StartActivity("test op")!;
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}trace_id", expected["trace_id"]);
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}public_key", expected["public_key"]);
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}sample_rate", expected["sample_rate"]);
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        Assert.True(sut.Map.TryGetValue(data.SpanId, out var span));
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+        if (transaction.DynamicSamplingContext is not {} actual)
+        {
+            Assert.Fail("Transaction does not have a dynamic sampling context");
+            return;
+        }
+        using (new AssertionScope())
+        {
+            actual.Items["trace_id"].Should().Be(expected["trace_id"]);
+            actual.Items["public_key"].Should().Be(expected["public_key"]);
+            actual.Items["sample_rate"].Should().Be(expected["sample_rate"]);
         }
     }
 

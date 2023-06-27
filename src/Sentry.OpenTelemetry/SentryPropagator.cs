@@ -96,6 +96,7 @@ public class SentryPropagator : BaggagePropagator
         }
 
         // Reconstruct SentryTraceHeader from the OpenTelemetry activity/span context
+        // TODO: Check if this is correct. Although the TraceId will be retained, the SpanId may change. Is that how it's supposed to work?
         var traceHeader = new SentryTraceHeader(
             context.ActivityContext.TraceId.AsSentryId(),
             context.ActivityContext.SpanId.AsSentrySpanId(),
