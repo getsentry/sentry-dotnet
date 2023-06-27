@@ -194,4 +194,11 @@ public class SentryOptionsTests
         var sut = new SentryOptions();
         Assert.Contains(".*", sut.FailedRequestTargets);
     }
+
+    [Fact]
+    public void IdleTimeout_ByDefault_IsNull()
+    {
+        var sut = new SentryOptions();
+        sut.IdleTimeout.IsNull();
+    }
 }

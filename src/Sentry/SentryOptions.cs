@@ -983,6 +983,11 @@ public class SentryOptions
     internal bool InitNativeSdks { get; set; } = true;
 
     /// <summary>
+    /// Idling transaction timeout after which transaction will be finished automatically.
+    /// </summary>
+    public TimeSpan? IdleTimeout { get; set; }
+
+    /// <summary>
     /// Creates a new instance of <see cref="SentryOptions"/>
     /// </summary>
     public SentryOptions()
