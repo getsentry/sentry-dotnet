@@ -1132,7 +1132,7 @@ public partial class HubTests
     [Fact]
     public void CaptureTransaction_Client_Gets_Hint()
     {
-        // Arrange        
+        // Arrange
         var hub = _fixture.GetSut();
 
         // Act
@@ -1146,7 +1146,7 @@ public partial class HubTests
     [Fact]
     public void CaptureTransaction_Client_Gets_ScopeAttachments()
     {
-        // Arrange        
+        // Arrange
         var hub = _fixture.GetSut();
         List<Attachment> attachments = new List<Attachment> {
             AttachmentHelper.FakeAttachment("foo"),
@@ -1336,4 +1336,32 @@ public partial class HubTests
     }
 
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
+
+    [Fact]
+    public async Task IdleTimeout_auto_finishes_transaction()
+    {
+        // Arrange
+        _fixture.Options.IdleTimeout = TimeSpan.FromMilliseconds(2);
+        var hub = _fixture.GetSut();
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            "name",
+            "operation",
+            "description",
+            SpanStatus.Ok,
+            null,
+            true,
+            TransactionNameSource.Component
+        );
+
+        // Act
+        var transaction = hub.StartTransaction(context);
+
+        await Task.Delay(TimeSpan.FromMilliseconds(5));
+
+        // Assert
+        transaction.IsFinished.Should().BeTrue();
+    }
 }

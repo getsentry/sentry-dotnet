@@ -116,7 +116,7 @@ internal class Hub : IHubEx, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var transaction = new TransactionTracer(this, context);
+        var transaction = new TransactionTracer(this, context, _options.IdleTimeout);
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.
