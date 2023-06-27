@@ -614,6 +614,7 @@ namespace Sentry
         public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
+        public System.TimeSpan? IdleTimeout { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
         public bool IsEnvironmentUser { get; set; }
         public bool IsGlobalModeEnabled { get; set; }
@@ -1062,8 +1063,9 @@ namespace Sentry
     public class TransactionTracer : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext, System.IDisposable
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
+        public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context, System.TimeSpan? idleTimeout) { }
         public TransactionTracer(Sentry.IHub hub, string name, string operation) { }
-        public TransactionTracer(Sentry.IHub hub, string name, string operation, Sentry.TransactionNameSource nameSource, System.TimeSpan? idleTimeout) { }
+        public TransactionTracer(Sentry.IHub hub, string name, string operation, Sentry.TransactionNameSource nameSource) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
         public string? Description { get; set; }
