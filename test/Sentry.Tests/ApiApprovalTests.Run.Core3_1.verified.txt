@@ -1095,6 +1095,8 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; }
         public Sentry.User User { get; set; }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
+        public void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
         public void Finish() { }
         public void Finish(Sentry.SpanStatus status) { }
         public void Finish(System.Exception exception) { }
