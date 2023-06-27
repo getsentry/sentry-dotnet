@@ -180,22 +180,44 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
     public TransactionTracer(IHub hub, string name, string operation)
-        : this(hub, name, operation, TransactionNameSource.Custom, null)
+        : this(hub, name, operation, TransactionNameSource.Custom)
     {
     }
 
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource, TimeSpan? idleTimeout)
+    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
     {
         _hub = hub;
-        _idleTimeout = idleTimeout;
         Name = name;
         NameSource = nameSource;
         SpanId = SpanId.Create();
         TraceId = SentryId.Create();
         Operation = operation;
+    }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="TransactionTracer"/>.
+    /// </summary>
+    public TransactionTracer(IHub hub, ITransactionContext context) : this (hub, context, null) {}
+
+    /// <summary>
+    /// Initializes an instance of <see cref="TransactionTracer"/>.
+    /// </summary>
+    public TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout)
+    {
+        _hub = hub;
+        _idleTimeout = idleTimeout;
+        Name = context.Name;
+        NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
+        Operation = context.Operation;
+        SpanId = context.SpanId;
+        ParentSpanId = context.ParentSpanId;
+        TraceId = context.TraceId;
+        Description = context.Description;
+        Status = context.Status;
+        IsSampled = context.IsSampled;
 
         if (idleTimeout != null)
         {
@@ -209,23 +231,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
                 transactionTracer.Finish(Status ?? SpanStatus.Ok);
             }, this, TimeSpan.Zero, idleTimeout.Value);
         }
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionTracer"/>.
-    /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context)
-    {
-        _hub = hub;
-        Name = context.Name;
-        NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
-        Operation = context.Operation;
-        SpanId = context.SpanId;
-        ParentSpanId = context.ParentSpanId;
-        TraceId = context.TraceId;
-        Description = context.Description;
-        Status = context.Status;
-        IsSampled = context.IsSampled;
     }
 
     /// <inheritdoc />

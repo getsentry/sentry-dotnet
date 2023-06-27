@@ -509,10 +509,22 @@ public class TransactionTests
     public async Task Idle_transaction_should_finish_with_idle_timeout_specified()
     {
         // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op", TransactionNameSource.Custom, TimeSpan.FromMilliseconds(10));
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            "my name",
+            "my operation",
+            "description",
+            SpanStatus.Ok,
+            null,
+            true,
+            TransactionNameSource.Component
+        );
+        var transaction = new TransactionTracer(DisabledHub.Instance, context, TimeSpan.FromMilliseconds(2));
 
         // Act
-        await Task.Delay(15);
+        await Task.Delay(5);
 
         // Assert
         transaction.IsFinished.Should().BeTrue();
