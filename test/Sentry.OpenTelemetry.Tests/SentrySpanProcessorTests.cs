@@ -192,7 +192,7 @@ public class SentrySpanProcessorTests : IDisposable
         using (new AssertionScope())
         {
             transaction.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
-            transaction.ParentSpanId.Should().BeNull();
+            transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
             transaction.TraceId.Should().Be(data.TraceId.AsSentryId());
             transaction.Name.Should().Be(data.DisplayName);
             transaction.Operation.Should().Be(data.OperationName);
@@ -353,7 +353,7 @@ public class SentrySpanProcessorTests : IDisposable
         {
             using (new AssertionScope())
             {
-                transaction.ParentSpanId.Should().BeNull();
+                transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
                 transaction.Operation.Should().Be(data.OperationName);
                 transaction.Description.Should().Be(data.DisplayName);
                 transaction.Name.Should().Be(data.DisplayName);

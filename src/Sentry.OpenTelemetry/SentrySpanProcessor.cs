@@ -81,7 +81,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // The parent span doesn't exist - start a new transaction
             var transactionContext = new TransactionContext(
                 data.SpanId.AsSentrySpanId(),
-                null,
+                data.ParentSpanId.AsSentrySpanId(),
                 data.TraceId.AsSentryId(),
                 data.DisplayName,
                 data.OperationName,
