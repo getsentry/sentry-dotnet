@@ -6,9 +6,11 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
+public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements, IDisposable
 {
     private readonly IHub _hub;
+    private readonly TimeSpan? _idleTimeout;
+    private readonly Timer? _idleTimer;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
     /// <inheritdoc />
@@ -178,21 +180,36 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
     public TransactionTracer(IHub hub, string name, string operation)
-        : this(hub, name, operation, TransactionNameSource.Custom)
+        : this(hub, name, operation, TransactionNameSource.Custom, null)
     {
     }
 
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
+    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource, TimeSpan? idleTimeout)
     {
         _hub = hub;
+        _idleTimeout = idleTimeout;
         Name = name;
         NameSource = nameSource;
         SpanId = SpanId.Create();
         TraceId = SentryId.Create();
         Operation = operation;
+
+        if (idleTimeout != null)
+        {
+            _idleTimer = new Timer(state =>
+            {
+                if (state is not TransactionTracer transactionTracer)
+                {
+                    return;
+                }
+
+                transactionTracer._idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                transactionTracer.Finish(Status ?? SpanStatus.Ok);
+            }, this, TimeSpan.Zero, idleTimeout.Value);
+        }
     }
 
     /// <summary>
@@ -307,4 +324,25 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         TraceId,
         SpanId,
         IsSampled);
+
+    /// <summary>Releases the unmanaged resources.</summary>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _idleTimer?.Dispose();
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    ~TransactionTracer()
+    {
+        Dispose(false);
+    }
 }
