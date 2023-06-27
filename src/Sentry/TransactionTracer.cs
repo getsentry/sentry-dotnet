@@ -341,9 +341,4 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Dispose(true);
         GC.SuppressFinalize(this);
     }
-
-    ~TransactionTracer()
-    {
-        Dispose(false);
-    }
 }
