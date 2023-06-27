@@ -206,7 +206,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
                     return;
                 }
 
-                transactionTracer._idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
                 transactionTracer.Finish(Status ?? SpanStatus.Ok);
             }, this, TimeSpan.Zero, idleTimeout.Value);
         }
@@ -277,6 +276,8 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
+        _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
         EndTimestamp = _stopwatch.CurrentDateTimeOffset;
