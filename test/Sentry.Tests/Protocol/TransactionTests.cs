@@ -504,4 +504,17 @@ public class TransactionTests
         // Assert
         Assert.Same(transaction, result);
     }
+
+    [Fact]
+    public async Task Idle_transaction_should_finish_with_idle_timeout_specified()
+    {
+        // Arrange
+        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op", TransactionNameSource.Custom, TimeSpan.FromMilliseconds(10));
+
+        // Act
+        await Task.Delay(15);
+
+        // Assert
+        transaction.IsFinished.Should().BeTrue();
+    }
 }
