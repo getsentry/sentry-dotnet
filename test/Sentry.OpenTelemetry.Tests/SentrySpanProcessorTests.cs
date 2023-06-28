@@ -202,10 +202,12 @@ public class SentrySpanProcessorTests : IDisposable
         }
     }
 
-#if !NETFRAMEWORK
+#if NET5_0_OR_GREATER
     /*
      * Don't run on .NET Framework until we get a resolution to:
      *   https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623
+     *
+     * netcoreapp3.1 on macOS 12 fails for the same reason so we've just gone with NET5_0_OR_GREATER
      */
 
 
