@@ -4,7 +4,7 @@
 
 ### Features
 
-- OpenTelemetry span processor ([#2434](https://github.com/getsentry/sentry-dotnet/pull/2434))
+- Open Telemetry Support ([#2453](https://github.com/getsentry/sentry-dotnet/pull/2453))
 - Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 - Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
 
