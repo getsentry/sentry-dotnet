@@ -1,5 +1,3 @@
-using OpenTelemetry;
-
 namespace Sentry.OpenTelemetry.Tests;
 
 public class SentrySpanProcessorTests : IDisposable
@@ -131,6 +129,87 @@ public class SentrySpanProcessorTests : IDisposable
     }
 
     [Fact]
+    public void GetSpanStatus()
+    {
+        using (new AssertionScope())
+        {
+            var noAttributes = new Dictionary<string, object>();
+
+            // Unset and OK -> OK
+            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Unset, noAttributes).Should().Be(SpanStatus.Ok);
+            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Ok, noAttributes).Should().Be(SpanStatus.Ok);
+
+            // Error (no attributes) -> UnknownError
+            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, noAttributes)
+                .Should().Be(SpanStatus.UnknownError);
+
+            // Unknown status code -> UnknownError
+            SentrySpanProcessor.GetSpanStatus((ActivityStatusCode)42, noAttributes)
+                .Should().Be(SpanStatus.UnknownError);
+
+            // We only test one http scenario, just to make sure the SpanStatusConverter is called for these headers.
+            // Tests for SpanStatusConverter ensure other http status codes would also work though
+            var notFoundAttributes = new Dictionary<string, object> { ["http.status_code"] = 404 };
+            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, notFoundAttributes)
+                .Should().Be(SpanStatus.NotFound);
+
+            // We only test one grpc scenario, just to make sure the SpanStatusConverter is called for these headers.
+            // Tests for SpanStatusConverter ensure other grpc status codes would also work though
+            var grpcAttributes = new Dictionary<string, object> { ["rpc.grpc.status_code"] = 7 };
+            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, grpcAttributes)
+                .Should().Be(SpanStatus.PermissionDenied);
+        }
+    }
+
+    [Fact]
+    public void OnStart_Transaction_With_DynamicSamplingContext()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var expected = new Dictionary<string, string>()
+        {
+            { "trace_id", SentryId.Create().ToString() },
+            { "public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
+            { "sample_rate", "0.5" },
+        };
+        var data = Tracer.StartActivity("test op")!;
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}trace_id", expected["trace_id"]);
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}public_key", expected["public_key"]);
+        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}sample_rate", expected["sample_rate"]);
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+        if (transaction.DynamicSamplingContext is not {} actual)
+        {
+            Assert.Fail("Transaction does not have a dynamic sampling context");
+            return;
+        }
+        using (new AssertionScope())
+        {
+            actual.Items["trace_id"].Should().Be(expected["trace_id"]);
+            actual.Items["public_key"].Should().Be(expected["public_key"]);
+            actual.Items["sample_rate"].Should().Be(expected["sample_rate"]);
+        }
+    }
+
+#if !NETFRAMEWORK
+    /*
+     * Don't run on .NET Framework until we get a resolution to:
+     *   https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623
+     */
+
+
+    [Fact]
     public void OnStart_WithParentSpanId_StartsChildSpan()
     {
         // Arrange
@@ -199,80 +278,6 @@ public class SentrySpanProcessorTests : IDisposable
             transaction.Description.Should().Be(data.DisplayName);
             transaction.Status.Should().BeNull();
             transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
-        }
-    }
-
-    [Fact]
-    public void OnStart_Transaction_With_DynamicSamplingContext()
-    {
-        // Arrange
-        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var sut = _fixture.GetSut();
-
-        var expected = new Dictionary<string, string>()
-        {
-            { "trace_id", SentryId.Create().ToString() },
-            { "public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
-            { "sample_rate", "0.5" },
-        };
-        var data = Tracer.StartActivity("test op")!;
-        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}trace_id", expected["trace_id"]);
-        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}public_key", expected["public_key"]);
-        data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}sample_rate", expected["sample_rate"]);
-
-        // Act
-        sut.OnStart(data!);
-
-        // Assert
-        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
-        if (span is not TransactionTracer transaction)
-        {
-            Assert.Fail("Span is not a transaction tracer");
-            return;
-        }
-        if (transaction.DynamicSamplingContext is not {} actual)
-        {
-            Assert.Fail("Transaction does not have a dynamic sampling context");
-            return;
-        }
-        using (new AssertionScope())
-        {
-            actual.Items["trace_id"].Should().Be(expected["trace_id"]);
-            actual.Items["public_key"].Should().Be(expected["public_key"]);
-            actual.Items["sample_rate"].Should().Be(expected["sample_rate"]);
-        }
-    }
-
-    [Fact]
-    public void GetSpanStatus()
-    {
-        using (new AssertionScope())
-        {
-            var noAttributes = new Dictionary<string, object>();
-
-            // Unset and OK -> OK
-            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Unset, noAttributes).Should().Be(SpanStatus.Ok);
-            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Ok, noAttributes).Should().Be(SpanStatus.Ok);
-
-            // Error (no attributes) -> UnknownError
-            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, noAttributes)
-                .Should().Be(SpanStatus.UnknownError);
-
-            // Unknown status code -> UnknownError
-            SentrySpanProcessor.GetSpanStatus((ActivityStatusCode)42, noAttributes)
-                .Should().Be(SpanStatus.UnknownError);
-
-            // We only test one http scenario, just to make sure the SpanStatusConverter is called for these headers.
-            // Tests for SpanStatusConverter ensure other http status codes would also work though
-            var notFoundAttributes = new Dictionary<string, object> { ["http.status_code"] = 404 };
-            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, notFoundAttributes)
-                .Should().Be(SpanStatus.NotFound);
-
-            // We only test one grpc scenario, just to make sure the SpanStatusConverter is called for these headers.
-            // Tests for SpanStatusConverter ensure other grpc status codes would also work though
-            var grpcAttributes = new Dictionary<string, object> { ["rpc.grpc.status_code"] = 7 };
-            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, grpcAttributes)
-                .Should().Be(SpanStatus.PermissionDenied);
         }
     }
 
@@ -366,4 +371,5 @@ public class SentrySpanProcessorTests : IDisposable
             }
         }
     }
+#endif
 }
