@@ -146,7 +146,7 @@ public class SentrySpanProcessorTests : IDisposable
         sut.OnStart(data!);
 
         // Assert
-        Assert.True(sut.Map.TryGetValue(data.SpanId, out var span));
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
         using (new AssertionScope())
         {
             span.Should().BeOfType<SpanTracer>();
@@ -183,7 +183,7 @@ public class SentrySpanProcessorTests : IDisposable
         sut.OnStart(data!);
 
         // Assert
-        Assert.True(sut.Map.TryGetValue(data.SpanId, out var span));
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
         if (span is not TransactionTracer transaction)
         {
             Assert.Fail("Span is not a transaction tracer");
@@ -224,7 +224,7 @@ public class SentrySpanProcessorTests : IDisposable
         sut.OnStart(data!);
 
         // Assert
-        Assert.True(sut.Map.TryGetValue(data.SpanId, out var span));
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
         if (span is not TransactionTracer transaction)
         {
             Assert.Fail("Span is not a transaction tracer");
@@ -293,7 +293,7 @@ public class SentrySpanProcessorTests : IDisposable
         data.DisplayName = "test display name";
         sut.OnStart(data);
 
-        sut.Map.TryGetValue(data.SpanId, out var span);
+        sut._map.TryGetValue(data.SpanId, out var span);
 
         // Act
         sut.OnEnd(data);
@@ -337,7 +337,7 @@ public class SentrySpanProcessorTests : IDisposable
         data.DisplayName = "test display name";
         sut.OnStart(data);
 
-        sut.Map.TryGetValue(data.SpanId, out var span);
+        sut._map.TryGetValue(data.SpanId, out var span);
 
         // Act
         sut.OnEnd(data);

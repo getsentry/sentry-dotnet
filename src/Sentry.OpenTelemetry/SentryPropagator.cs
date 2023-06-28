@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
+using Sentry.Extensibility;
 
 namespace Sentry.OpenTelemetry;
 
@@ -10,7 +11,9 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public class SentryPropagator : BaggagePropagator
 {
-    private readonly IHub _hub = SentrySdk.CurrentHub;
+    private readonly IHub? _hub;
+    private IHub Hub => _hub ?? SentrySdk.CurrentHub;
+    private SentryOptions? Options => Hub.GetSentryOptions();
 
     /// <summary>
     /// <para>
@@ -31,6 +34,7 @@ public class SentryPropagator : BaggagePropagator
     {
         _hub = hub;
     }
+
     /// <inheritdoc />
     public override ISet<string> Fields => new HashSet<string>
     {
@@ -47,31 +51,32 @@ public class SentryPropagator : BaggagePropagator
     /// <inheritdoc />
     public override PropagationContext Extract<T>(PropagationContext context, T carrier, Func<T, string, IEnumerable<string>> getter)
     {
-        Debug.WriteLine("SentryPropagator.Extract");
+        Options?.LogDebug("SentryPropagator.Extract");
 
         var result = base.Extract(context, carrier, getter);
         var baggage = result.Baggage; // The Otel .NET SDK takes care of baggage headers alread
 
-        Debug.WriteLine("Baggage");
+        Options?.LogDebug("Baggage");
         foreach (var entry in baggage)
         {
-            Debug.WriteLine(entry.ToString());
+            Options?.LogDebug(entry.ToString());
         }
 
         if (TryGetSentryTraceHeader(carrier, getter) is not {} sentryTraceHeader)
         {
-            Debug.WriteLine("No SentryTraceHeader present in carrier");
+            Options?.LogDebug("No SentryTraceHeader present in carrier");
             return result;
         }
 
-        Debug.WriteLine($"Extracted SentryTraceHeader from carrier: {sentryTraceHeader}");
+        Options?.LogDebug($"Extracted SentryTraceHeader from carrier: {sentryTraceHeader}");
 
         var activityContext = new ActivityContext(
             sentryTraceHeader.TraceId.AsActivityTraceId(),
             sentryTraceHeader.SpanId.AsActivitySpanId(),
+            // NOTE: Our Java and JavaScript SDKs set sentryTraceHeader.IsSampled = true if any trace header is present.
             sentryTraceHeader.IsSampled is true ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None,
-            null, // See https://www.w3.org/TR/trace-context/#design-overview
-            true
+            traceState:null, // See https://www.w3.org/TR/trace-context/#design-overview
+            isRemote: true
             );
         return new PropagationContext(activityContext, baggage);
     }
@@ -79,19 +84,25 @@ public class SentryPropagator : BaggagePropagator
     /// <inheritdoc />
     public override void Inject<T>(PropagationContext context, T carrier, Action<T, string, string> setter)
     {
-        Debug.WriteLine("SentryPropagator.Inject");
+        Options?.LogDebug("SentryPropagator.Inject");
 
-        // Don't inject if instrumentation is suppressed, or when the activity context is invalid.
-        if (Sdk.SuppressInstrumentation || !context.ActivityContext.IsValid())
+        // Don't inject if instrumentation is suppressed
+        if (Sdk.SuppressInstrumentation)
         {
-            Debug.WriteLine("Injection skipped (suppressed or invalid context).");
+            return;
+        }
+
+        // Don't inject if instrumentation when the activity context is invalid.
+        if (!context.ActivityContext.IsValid())
+        {
+            Options?.LogDebug("Not injecting Sentry tracing information for invalid activity context.");
             return;
         }
 
         // Don't inject if this is a request to the Sentry ingest endpoint.
-        if (carrier is HttpRequestMessage request && _hub.IsSentryRequest(request.RequestUri))
+        if (carrier is HttpRequestMessage request && Hub.IsSentryRequest(request.RequestUri))
         {
-            Debug.WriteLine("Injection skipped for Sentry ingest.");
+            Options?.LogDebug("Injection skipped for Sentry ingest.");
             return;
         }
 
@@ -104,7 +115,7 @@ public class SentryPropagator : BaggagePropagator
             );
 
         // Set the sentry trace header for downstream requests
-        Debug.WriteLine($"SentryTraceHeader: {traceHeader}");
+        Options?.LogDebug($"SentryTraceHeader: {traceHeader}");
         setter(carrier, SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
 
         base.Inject(context, carrier, setter);

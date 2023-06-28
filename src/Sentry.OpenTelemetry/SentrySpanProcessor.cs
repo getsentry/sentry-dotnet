@@ -13,7 +13,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
 
-    internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> Map = new();
+    // ReSharper disable once MemberCanBePrivate.Global - Used by tests
+    internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
@@ -57,9 +58,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
-        if (Map.TryGetValue(data.ParentSpanId, out var parentSpan))
+        if (data.ParentSpanId != default && _map.TryGetValue(data.ParentSpanId, out var parentSpan))
         {
-            // The parent span exists - start a child span.
+            // We can find the parent span - start a child span.
             var context = new SpanContext(
                 data.SpanId.AsSentrySpanId(),
                 data.ParentSpanId.AsSentrySpanId(),
@@ -74,11 +75,14 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             var span = (SpanTracer)parentSpan.StartChild(context);
             span.StartTimestamp = data.StartTimeUtc;
-            Map[data.SpanId] = span;
+            _map[data.SpanId] = span;
         }
         else
         {
-            // The parent span doesn't exist - start a new transaction
+            // If a parent exists at all, then copy its sampling decision.
+            bool? isSampled = data.HasRemoteParent ? data.Recorded : null;
+
+            // No parent span found - start a new transaction
             var transactionContext = new TransactionContext(
                 data.SpanId.AsSentrySpanId(),
                 data.ParentSpanId.AsSentrySpanId(),
@@ -87,8 +91,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 data.OperationName,
                 data.DisplayName,
                 null,
-                null,
-                null)
+                isSampled,
+                isSampled)
             {
                 Instrumenter = Instrumenter.OpenTelemetry
             };
@@ -99,7 +103,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
                 );
             transaction.StartTimestamp = data.StartTimeUtc;
-            Map[data.SpanId] = transaction;
+            _map[data.SpanId] = transaction;
         }
     }
 
@@ -112,11 +116,11 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         if (attributes.TryGetTypedValue("http.url", out string url) && _hub.IsSentryRequest(url))
         {
             // TODO: will this leave the span dangling?
-            Map.TryRemove(data.SpanId, out _);
+            _map.TryRemove(data.SpanId, out _);
             return;
         }
 
-        if (!Map.TryGetValue(data.SpanId, out var span))
+        if (!_map.TryGetValue(data.SpanId, out var span))
         {
             _options?.DiagnosticLogger?.LogDebug("Span not found for SpanId: {0}", data.SpanId);
             return;
@@ -148,13 +152,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             span.SetExtra("otel.kind", data.Kind);
         }
 
-        // We can't get errors yet, because we don't have a real exception in the span data. See function comments.
-        // GenerateSentryErrorsFromOtelSpan(data, attributes);
+        GenerateSentryErrorsFromOtelSpan(data, attributes);
 
         var status = GetSpanStatus(data.Status, attributes);
         span.Finish(status);
 
-        Map.TryRemove(data.SpanId, out _);
+        _map.TryRemove(data.SpanId, out _);
     }
 
     internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes) =>
@@ -271,8 +274,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         return otelContext;
     }
 
-    // private void GenerateSentryErrorsFromOtelSpan(Activity activity, IDictionary<string, object?> spanAttributes)
-    // {
+    private void GenerateSentryErrorsFromOtelSpan(Activity activity, IDictionary<string, object?> spanAttributes)
+    {
     //     // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
     //     // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
     //
@@ -304,5 +307,5 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     //             trace.ParentSpanId = activity.ParentSpanId.AsSentrySpanId();
     //         });
     //     }
-    // }
+    }
 }
