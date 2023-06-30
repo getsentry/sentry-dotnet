@@ -1,29 +1,7 @@
 namespace Sentry.OpenTelemetry.Tests;
 
-public class SentrySpanProcessorTests : IDisposable
+public class SentrySpanProcessorTests : ActivitySourceTests
 {
-    private static readonly ActivitySource Tracer = new("SentrySpanProcessorTests", "1.0.0");
-    private readonly ActivityListener _listener;
-
-    public SentrySpanProcessorTests()
-    {
-        // Without a listener, activity source will not create activities
-        _listener = new ActivityListener
-        {
-            ActivityStarted = _ => { },
-            ActivityStopped = _ => { },
-            ShouldListenTo = _ => true,
-            SampleUsingParentId = (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
-            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded
-        };
-        ActivitySource.AddActivityListener(_listener);
-    }
-
-    public void Dispose()
-    {
-        _listener?.Dispose();
-    }
-
     private class Fixture
     {
         public SentryOptions Options { get; }
@@ -81,51 +59,6 @@ public class SentrySpanProcessorTests : IDisposable
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => _fixture.GetSut());
-    }
-
-    [Fact]
-    public void Ctor_AddsTransactionProcessorToScope()
-    {
-        // Arrange
-        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-
-        // Act
-        var processor = _fixture.GetSut();
-
-        // Assert
-        var scope = _fixture.Hub.ScopeManager.GetCurrent().Key;
-        scope.TransactionProcessors.Should().NotBeEmpty();
-    }
-
-    [Fact]
-    public void TransactionProcessor_WithActivity_SetsTraceAndSpanIds()
-    {
-        // Arrange
-        using var activity = Tracer.StartActivity("Parent");
-        var transaction = new Transaction("name", "operation");
-
-        // Act
-        var processedTransaction = SentrySpanProcessor.TransactionProcessor(transaction);
-
-        // Assert
-        processedTransaction.Contexts.Trace.TraceId.Should().Be(activity?.TraceId.AsSentryId());
-        processedTransaction.Contexts.Trace.SpanId.Should().Be(activity?.SpanId.AsSentrySpanId());
-    }
-
-    [Fact]
-    public void TransactionProcessor_WithoutActivity_DoesNotModifyTransaction()
-    {
-        // Arrange
-        var transaction = new Transaction("name", "operation");
-        var previousTraceId = transaction.Contexts.Trace.TraceId;
-        var previousSpanId = transaction.Contexts.Trace.SpanId;
-
-        // Act
-        var processedTransaction = SentrySpanProcessor.TransactionProcessor(transaction);
-
-        // Assert
-        Assert.Equal(previousTraceId, processedTransaction.Contexts.Trace.TraceId);
-        Assert.Equal(previousSpanId, processedTransaction.Contexts.Trace.SpanId);
     }
 
     [Fact]
