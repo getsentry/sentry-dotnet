@@ -242,7 +242,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     {
         if (instrumenter != _instrumenter)
         {
-            _hub.GetOptions?.LogWarning(
+            _hub.GetSentryOptions()?.LogWarning(
                 $"Attempted to create a span via {instrumenter} instrumentation to a span or transaction" +
                 $" originating from {_instrumenter} instrumentation. The span will not be created.");
             return NoOpSpan.Instance;
