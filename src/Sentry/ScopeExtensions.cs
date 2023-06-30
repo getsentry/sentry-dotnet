@@ -42,6 +42,11 @@ public static class ScopeExtensions
         {
             yield return processor;
         }
+
+        foreach (var processor in scope.Options.ImplicitTransactionProcessors)
+        {
+            yield return processor;
+        }
     }
 
     /// <summary>

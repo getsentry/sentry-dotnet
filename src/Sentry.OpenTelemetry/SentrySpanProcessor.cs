@@ -38,21 +38,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Thus, get a single instance lazily.
         _resourceAttributes = new Lazy<IDictionary<string, object>>(() =>
             ParentProvider?.GetResource().Attributes.ToDictionary() ?? new Dictionary<string, object>(0));
-
-        hub.ConfigureScope(scope => scope.AddTransactionProcessor(TransactionProcessor));
-    }
-
-    internal static Transaction TransactionProcessor(Transaction transaction)
-    {
-        var activity = Activity.Current;
-        if (activity != null)
-        {
-            var trace = transaction.Contexts.Trace;
-            trace.TraceId = activity.TraceId.AsSentryId();
-            trace.SpanId = activity.SpanId.AsSentrySpanId();
-        }
-
-        return transaction;
     }
 
     /// <inheritdoc />
