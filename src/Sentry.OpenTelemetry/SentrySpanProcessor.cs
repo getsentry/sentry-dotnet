@@ -113,7 +113,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         if (!_map.TryGetValue(data.SpanId, out var span))
         {
-            _options?.DiagnosticLogger?.LogDebug("Span not found for SpanId: {0}", data.SpanId);
+            _options?.DiagnosticLogger?.LogError("Span not found for SpanId: {0}. Did OnStart run? We might have a bug in the SDK.", data.SpanId);
             return;
         }
 
