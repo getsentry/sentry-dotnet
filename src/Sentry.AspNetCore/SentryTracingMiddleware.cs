@@ -104,9 +104,9 @@ internal class SentryTracingMiddleware
 
         if (_options.Instrumenter == Instrumenter.OpenTelemetry)
         {
-            _options.LogWarning(
-                "When using OpenTelemetry instrumentation mode, do not call UseSentryTracing. " +
-                "Instead, ASP.NET Core should be instrumented by following the instructions at " +
+            _options.LogInfo(
+                "When using OpenTelemetry instrumentation mode, the call to UseSentryTracing can be safely removed. " +
+                "ASP.NET Core should be instrumented by following the instructions at " +
                 "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md");
 
             await _next(context).ConfigureAwait(false);

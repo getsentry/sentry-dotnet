@@ -89,10 +89,11 @@ public class SentryPropagator : BaggagePropagator
         // Don't inject if instrumentation is suppressed
         if (Sdk.SuppressInstrumentation)
         {
+            Options?.LogDebug("Not injecting Sentry tracing information. Instrumentation is suppressed.");
             return;
         }
 
-        // Don't inject if instrumentation when the activity context is invalid.
+        // Don't inject when the activity context is invalid.
         if (!context.ActivityContext.IsValid())
         {
             Options?.LogDebug("Not injecting Sentry tracing information for invalid activity context.");
@@ -102,7 +103,6 @@ public class SentryPropagator : BaggagePropagator
         // Don't inject if this is a request to the Sentry ingest endpoint.
         if (carrier is HttpRequestMessage request && Hub.IsSentryRequest(request.RequestUri))
         {
-            Options?.LogDebug("Injection skipped for Sentry ingest.");
             return;
         }
 

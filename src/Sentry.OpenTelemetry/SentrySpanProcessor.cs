@@ -169,8 +169,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         return SpanStatus.UnknownError;
     }
 
-    private static (string operation, string description, TransactionNameSource source) ParseOtelSpanDescription (
-         Activity activity, IDictionary<string, object?> attributes)
+    private static (string operation, string description, TransactionNameSource source) ParseOtelSpanDescription(
+         Activity activity,
+         IDictionary<string, object?> attributes)
     {
         // This function should loosely match the JavaScript implementation at:
         // https://github.com/getsentry/sentry-javascript/blob/develop/packages/opentelemetry-node/src/utils/parse-otel-span-description.ts
