@@ -26,12 +26,18 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         _hub = hub;
         _options = hub.GetSentryOptions();
 
-        if (_options?.Instrumenter != Instrumenter.OpenTelemetry)
+        if (_options is not { })
         {
             throw new InvalidOperationException(
-                $"To use the {nameof(SentrySpanProcessor)}, you must also set the " +
-                $"{nameof(SentryOptions.Instrumenter)} option to {nameof(Instrumenter.OpenTelemetry)} " +
-                "when initializing Sentry.");
+                $"The Sentry SDK has not been initialised. To use Sentry with OpenTelemetry tracing you need to " +
+                "initialize the Sentry SDK.");
+        }
+
+        if (_options.Instrumenter != Instrumenter.OpenTelemetry)
+        {
+            throw new InvalidOperationException(
+                "OpenTelemetry has not been configured on the Sentry SDK. To use OpenTelemetry tracing you need " +
+                "to initialize the Sentry SDK with options.UseOpenTelemetry()");
         }
 
         // Resource attributes are consistent between spans, but not available during construction.
