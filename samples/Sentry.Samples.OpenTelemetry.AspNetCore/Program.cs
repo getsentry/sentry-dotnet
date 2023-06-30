@@ -22,7 +22,7 @@ builder.Services.AddOpenTelemetry()
 
 builder.WebHost.UseSentry(options =>
 {
-    options.EnableTracing = true;
+    options.TracesSampleRate = 1.0;
     options.Instrumenter = Instrumenter.OpenTelemetry;
     options.Debug = builder.Environment.IsDevelopment();
 });
