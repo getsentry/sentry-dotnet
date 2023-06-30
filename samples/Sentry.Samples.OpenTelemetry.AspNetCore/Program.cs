@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry;
@@ -15,22 +17,8 @@ builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(DiagnosticsConfig.ServiceName))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
-            .AddProcessor<SentrySpanProcessor>());
-
-// Use the Sentry propagator to ensure sentry-trace and baggage headers are propagated correctly.
-OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new SentryPropagator());
-
-// You can use other propagators via composition, if needed.
-// For example, if you need both Sentry and W3C Trace Context propagation, then you can do the following:
-
-// OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new CompositeTextMapPropagator(new TextMapPropagator[]
-// {
-//     new TraceContextPropagator(),
-//     new SentryPropagator()
-//
-//     // But don't include this.  It's already part of SentryPropagator.
-//     // new BaggagePropagator()
-// }));
+            .AddSentry()
+        );
 
 builder.WebHost.UseSentry(options =>
 {
@@ -44,7 +32,18 @@ var app = builder.Build();
 var httpClient = new HttpClient();
 app.MapGet("/hello", async context =>
 {
+    // Make an HTTP request to the /echo endpoint, to demonstrate that Baggage and TraceHeaders get propagated
+    // correctly... in a real world situation, we might have received a request to this endpoint from an upstream
+    // service that is instrumented with Sentry (passing in a SentryTraceHeader), and we might make an downstream
+    // request to another service that's also instrumented with Sentry. Having a single TraceId that gets propagated
+    // across all services by Sentry and OpenTelemetry ensures all of these events show as part of the same trace in
+    // the performance dashboard in Sentry.
     var request = context.Request;
+    if (request.Query.TryGetValue("topping", out var topping))
+    {
+        Activity.Current?.AddTag("topping", topping);
+    }
+
     var url = $"{request.Scheme}://{request.Host}{request.PathBase}/echo";
     var result = await httpClient.GetStringAsync(url);
     await context.Response.WriteAsync(result);
