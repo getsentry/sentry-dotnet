@@ -181,7 +181,15 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
+    public TransactionTracer(IHub hub, string name, string operation)
+        : this(hub, name, operation, TransactionNameSource.Custom)
+    {
+    }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="Transaction"/>.
+    /// </summary>
+    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
     {
         _hub = hub;
         Name = name;

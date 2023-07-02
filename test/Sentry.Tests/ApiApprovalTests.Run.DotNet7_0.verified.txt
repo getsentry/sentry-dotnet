@@ -1071,7 +1071,8 @@ namespace Sentry
     public class TransactionTracer : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
-        public TransactionTracer(Sentry.IHub hub, string name, string operation, Sentry.TransactionNameSource nameSource = 0) { }
+        public TransactionTracer(Sentry.IHub hub, string name, string operation) { }
+        public TransactionTracer(Sentry.IHub hub, string name, string operation, Sentry.TransactionNameSource nameSource) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
         public string? Description { get; set; }
