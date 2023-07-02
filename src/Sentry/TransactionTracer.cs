@@ -240,10 +240,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />
-    public ISpan StartChild(string operation) => StartChild(SpanId, operation);
-
-    internal ISpan StartChild(SpanId parentSpanId, string operation, Instrumenter instrumenter = Instrumenter.Sentry) =>
-        StartChild(null, parentSpanId, operation, instrumenter);
+    public ISpan StartChild(string operation) => StartChild(spanId: null, parentSpanId: SpanId, operation);
 
     internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
         Instrumenter instrumenter = Instrumenter.Sentry)
