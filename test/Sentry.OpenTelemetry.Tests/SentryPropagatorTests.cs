@@ -107,13 +107,16 @@ public class SentryPropagatorTests
     {
         // Arrange
         var contextIn = new PropagationContext(ValidContext, EmptyBaggage);
-        var carrier = new HttpRequestMessage();
+        var carrier = new HttpRequestMessage(HttpMethod.Get, "https://123@o456.ingest.sentry.io/789/foo");
+
+        var options = new SentryOptions(){Dsn = "https://123@o456.ingest.sentry.io/789"};
+        SentryClientExtensions.SentryOptionsForTestingOnly = options;
 
         var hub = Substitute.For<IHubEx>();
-        hub.IsSentryRequest(Arg.Any<Uri>()).Returns(true);
-        var sut = new SentryPropagator(hub);
 
         var setter = Substitute.For<Action<HttpRequestMessage, string, string>>();
+
+        var sut = new SentryPropagator(hub);
 
         // Act
         sut.Inject(contextIn, carrier, setter);

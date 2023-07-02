@@ -101,7 +101,7 @@ public class SentryPropagator : BaggagePropagator
         }
 
         // Don't inject if this is a request to the Sentry ingest endpoint.
-        if (carrier is HttpRequestMessage request && Hub.IsSentryRequest(request.RequestUri))
+        if (carrier is HttpRequestMessage request && (Options?.IsSentryRequest(request.RequestUri) ?? false))
         {
             return;
         }

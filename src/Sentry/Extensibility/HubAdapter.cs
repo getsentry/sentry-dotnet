@@ -264,6 +264,4 @@ public sealed class HubAdapter : IHub, IHubEx
     /// </summary>
     public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
         => SentrySdk.WithScopeAsync(scopeCallback);
-
-    bool IHubEx.IsSentryRequest(Uri requestUri) => (SentrySdk.CurrentHub as Hub)?.IsSentryRequest(requestUri) is true;
 }

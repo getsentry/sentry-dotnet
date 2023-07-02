@@ -509,10 +509,4 @@ internal class Hub : IHubEx, IDisposable
             return currentScope.Key.LastEventId;
         }
     }
-
-    bool IHubEx.IsSentryRequest(Uri requestUri)
-    {
-        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
-        return string.Equals(requestBaseUrl, _sentryBaseUrl, StringComparison.OrdinalIgnoreCase);
-    }
 }

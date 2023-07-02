@@ -1,5 +1,3 @@
-using Sentry.Internal;
-
 namespace Sentry.OpenTelemetry;
 
 /// <summary>
@@ -18,4 +16,10 @@ public static class SentryOptionsExtensions
             new OpenTelemetryTransactionProcessor()
             );
     }
+
+    internal static bool IsSentryRequest(this SentryOptions options, string requestUri)
+        => !string.IsNullOrEmpty(options.Dsn) && requestUri.StartsWith(options.Dsn!, StringComparison.OrdinalIgnoreCase);
+
+    internal static bool IsSentryRequest(this SentryOptions options, Uri? requestUri)
+        => IsSentryRequest(options, requestUri?.ToString() ?? string.Empty);
 }
