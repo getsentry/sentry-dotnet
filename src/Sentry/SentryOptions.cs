@@ -923,7 +923,7 @@ public class SentryOptions
     ///     Defaults to <see cref="Instrumenter.Sentry"/>
     /// </para>
     /// </summary>
-    public Instrumenter Instrumenter { get; internal set; } = Instrumenter.Sentry;
+    internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
 
     /// <summary>
     /// This property is no longer used.  It will be removed in a future version.

@@ -233,10 +233,10 @@ public class SentryOptionsTests
     {
         var sut = new SentryOptions
         {
-            Dsn = "https://b887218a80114d26a9b1a51c5f88e0b4@o447951.ingest.sentry.io/6601807"
+            Dsn = "https://123@456.ingest.sentry.io/789"
         };
 
-        var actual = sut.IsSentryRequest(new Uri("https://o447951.ingest.sentry.io/api/6601807/envelope/"));
+        var actual = sut.IsSentryRequest(new Uri("https://456.ingest.sentry.io/api/789/envelope/"));
 
         Assert.True(actual);
     }

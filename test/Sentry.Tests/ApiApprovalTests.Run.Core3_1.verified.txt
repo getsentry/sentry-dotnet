@@ -621,7 +621,6 @@ namespace Sentry
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
-        public Sentry.Instrumenter Instrumenter { get; }
         public bool IsEnvironmentUser { get; set; }
         public bool IsGlobalModeEnabled { get; set; }
         public bool JsonPreserveReferences { get; set; }
