@@ -9,7 +9,7 @@ For big feature it's advised to raise an issue to discuss it first.
 * Install PowerShell
 * Restore workloads with `dotnet workload restore` (needs `sudo` on a Mac)
 * To quickly get up and running, you can just run `dotnet build Sentry.sln`
-* To run a full build in Release mode and test, before pushing, run `./build.sh` or `./buld.cmd`
+* To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
 
 ## Dependencies
 
