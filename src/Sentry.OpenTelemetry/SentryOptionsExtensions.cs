@@ -12,7 +12,7 @@ public static class SentryOptionsExtensions
     public static void UseOpenTelemetry(this SentryOptions options)
     {
         options.Instrumenter = Instrumenter.OpenTelemetry;
-        options.ImplicitTransactionProcessors.Add(
+        options.AddTransactionProcessor(
             new OpenTelemetryTransactionProcessor()
             );
     }

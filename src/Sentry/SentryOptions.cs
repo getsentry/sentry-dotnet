@@ -105,11 +105,6 @@ public class SentryOptions
     internal List<ISentryTransactionProcessor>? TransactionProcessors { get; set; }
 
     /// <summary>
-    /// A list of transaction processors
-    /// </summary>
-    internal List<ISentryTransactionProcessor> ImplicitTransactionProcessors { get; } = new ();
-
-    /// <summary>
     /// A list of event processors
     /// </summary>
     internal List<ISentryEventProcessor>? EventProcessors { get; set; }
