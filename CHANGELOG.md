@@ -5,11 +5,13 @@
 ### Features
 
 - Open Telemetry Support ([#2453](https://github.com/getsentry/sentry-dotnet/pull/2453))
+- Added a MSBuild property `SentryUploadAndroidProguardMapping` to automatically upload the Proguard mapping file when targeting Android ([#2455](https://github.com/getsentry/sentry-dotnet/pull/2455))
 - Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 - Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
 
 ### Fixes
 
+- Builds targeting Android with `r8` enabled no longer crash during SDK init. The package now contains the required proguard rules ([#2450]https://github.com/getsentry/sentry-dotnet/pull/2450)
 - Fix Sentry logger options for MAUI and Azure Functions ([#2423](https://github.com/getsentry/sentry-dotnet/pull/2423))
 
 ### Dependencies
@@ -17,9 +19,9 @@
 - Bump Cocoa SDK from v8.7.3 to v8.8.0 ([#2427](https://github.com/getsentry/sentry-dotnet/pull/2427), [#2430](https://github.com/getsentry/sentry-dotnet/pull/2430))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#880)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.7.3...8.8.0)
-- Bump CLI from v2.18.1 to v2.19.1 ([#2428](https://github.com/getsentry/sentry-dotnet/pull/2428), [#2431](https://github.com/getsentry/sentry-dotnet/pull/2431))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2191)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.1...2.19.1)
+- Bump CLI from v2.18.1 to v2.19.4 ([#2428](https://github.com/getsentry/sentry-dotnet/pull/2428), [#2431](https://github.com/getsentry/sentry-dotnet/pull/2431), [#2451](https://github.com/getsentry/sentry-dotnet/pull/2451), [#2454](https://github.com/getsentry/sentry-dotnet/pull/2454))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2194)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.1...2.19.4)
 - Bump Java SDK from v6.22.0 to v6.24.0 ([#2429](https://github.com/getsentry/sentry-dotnet/pull/2429), [#2440](https://github.com/getsentry/sentry-dotnet/pull/2440))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6240)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.22.0...6.24.0)
