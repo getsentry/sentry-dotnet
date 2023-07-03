@@ -104,10 +104,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDictionary();
 
-        if (attributes.TryGetTypedValue("http.url", out string url) && (_options?.IsSentryRequest(url) ?? false))
+        if (attributes.TryGetTypedValue("http.url", out string? url) && (_options?.IsSentryRequest(url) ?? false))
         {
-            // TODO: will this leave the span dangling?
-            _map.TryRemove(data.SpanId, out _);
+            _options?.DiagnosticLogger?.LogDebug($"Ignoring Activity {data.SpanId} for Sentry request.");
+            if (_map.TryRemove(data.SpanId, out var removed) && (removed is SpanTracer spanTracerToRemove))
+            {
+                spanTracerToRemove.IsSentryRequest = true;
+            }
             return;
         }
 

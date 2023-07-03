@@ -314,6 +314,9 @@ public class SentryOptions
     /// </summary>
     public string? Dsn { get; set; }
 
+    private readonly Lazy<string> _sentryBaseUrl;
+    internal string SentryBaseUrl => _sentryBaseUrl.Value;
+
     private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
 
     internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
@@ -1112,5 +1115,10 @@ public class SentryOptions
             "Sentry.Samples"
         };
 #endif
+        _sentryBaseUrl = new Lazy<string>(() =>
+            new Uri(Dsn ?? string.Empty).GetComponents(
+                UriComponents.SchemeAndServer,
+                UriFormat.Unescaped)
+        );
     }
 }

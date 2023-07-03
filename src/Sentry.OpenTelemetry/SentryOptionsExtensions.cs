@@ -17,9 +17,17 @@ public static class SentryOptionsExtensions
             );
     }
 
-    internal static bool IsSentryRequest(this SentryOptions options, string requestUri)
-        => !string.IsNullOrEmpty(options.Dsn) && requestUri.StartsWith(options.Dsn!, StringComparison.OrdinalIgnoreCase);
+    internal static bool IsSentryRequest(this SentryOptions options, string? requestUri)=>
+        !string.IsNullOrEmpty(requestUri) && options.IsSentryRequest(new Uri(requestUri));
 
     internal static bool IsSentryRequest(this SentryOptions options, Uri? requestUri)
-        => IsSentryRequest(options, requestUri?.ToString() ?? string.Empty);
+    {
+        if (string.IsNullOrEmpty(options.Dsn) || requestUri is null)
+        {
+            return false;
+        }
+
+        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+        return string.Equals(requestBaseUrl, options.SentryBaseUrl, StringComparison.OrdinalIgnoreCase);
+    }
 }

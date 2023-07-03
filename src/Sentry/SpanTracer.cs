@@ -39,6 +39,14 @@ public class SpanTracer : ISpan
     /// <inheritdoc cref="ISpan.Status" />
     public SpanStatus? Status { get; set; }
 
+    /// <summary>
+    /// Used by the Sentry.OpenTelemetry.SentrySpanProcessor to mark a span as a Sentry request. Ideally we wouldn't
+    /// create these spans but since we can't avoid doing that, once we detect that it's a Sentry request we mark it
+    /// as such so that we can filter it when the transaction finishes and the TransactionTracer gets converted into
+    /// a Transaction.
+    /// </summary>
+    internal bool IsSentryRequest { get; set; }
+
     /// <inheritdoc />
     public bool? IsSampled { get; internal set; }
 
