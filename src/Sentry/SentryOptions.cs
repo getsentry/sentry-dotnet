@@ -315,7 +315,20 @@ public class SentryOptions
     public string? Dsn { get; set; }
 
     private readonly Lazy<string> _sentryBaseUrl;
-    internal string SentryBaseUrl => _sentryBaseUrl.Value;
+
+    internal bool IsSentryRequest(string? requestUri)=>
+        !string.IsNullOrEmpty(requestUri) && IsSentryRequest(new Uri(requestUri));
+
+    internal bool IsSentryRequest(Uri? requestUri)
+    {
+        if (string.IsNullOrEmpty(Dsn) || requestUri is null)
+        {
+            return false;
+        }
+
+        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+        return string.Equals(requestBaseUrl, _sentryBaseUrl.Value, StringComparison.OrdinalIgnoreCase);
+    }
 
     private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
 

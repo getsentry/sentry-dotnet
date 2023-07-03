@@ -16,18 +16,4 @@ public static class SentryOptionsExtensions
             new OpenTelemetryTransactionProcessor()
             );
     }
-
-    internal static bool IsSentryRequest(this SentryOptions options, string? requestUri)=>
-        !string.IsNullOrEmpty(requestUri) && options.IsSentryRequest(new Uri(requestUri));
-
-    internal static bool IsSentryRequest(this SentryOptions options, Uri? requestUri)
-    {
-        if (string.IsNullOrEmpty(options.Dsn) || requestUri is null)
-        {
-            return false;
-        }
-
-        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
-        return string.Equals(requestBaseUrl, options.SentryBaseUrl, StringComparison.OrdinalIgnoreCase);
-    }
 }
