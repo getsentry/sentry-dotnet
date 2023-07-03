@@ -88,7 +88,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 Instrumenter = Instrumenter.OpenTelemetry
             };
 
-            var baggageHeader = BaggageHeader.Create(data.Baggage.WithValues());
+            var baggageHeader = BaggageHeader.CreateWithValues(data.Baggage);
             var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
             var transaction = (TransactionTracer)_hub.StartTransaction(
                 transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext

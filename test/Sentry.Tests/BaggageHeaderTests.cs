@@ -28,6 +28,23 @@ public partial class BaggageHeaderTests
     }
 
     [Fact]
+    public void BaggageHeader_CreateWithValues_Filters_NullValue_Members()
+    {
+        var result = BaggageHeader.CreateWithValues(new Dictionary<string, string>
+        {
+            ["a"] = "1",
+            ["b"] = null,
+            ["c"] = "3"
+        });
+
+        result.Members.Should().Equal(new Dictionary<string, string>
+        {
+            ["a"] = "1",
+            ["c"] = "3"
+        });
+    }
+
+    [Fact]
     public void BaggageHeader_Create_WithSentryPrefix()
     {
         var header = BaggageHeader.Create(new List<KeyValuePair<string, string>>
