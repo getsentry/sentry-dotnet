@@ -5,6 +5,5 @@
   "// TODO:": "Re-enable parallelization (disabled due to test flakiness)",
   "parallelizeAssembly": false,
   "parallelizeTestCollections": false,
-  "maxParallelThreads": 1,
-  "shadowCopy": false
+  "maxParallelThreads": 1
 }
