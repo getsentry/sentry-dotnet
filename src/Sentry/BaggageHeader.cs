@@ -107,13 +107,6 @@ internal class BaggageHeader
         return members.Count == 0 ? null : new BaggageHeader(members);
     }
 
-    public static BaggageHeader CreateWithValues(IEnumerable<KeyValuePair<string, string?>> items, bool useSentryPrefix = false)
-        => Create(
-            items.Where(member => member.Value != null)
-                 .Select(kvp => (KeyValuePair<string, string>)kvp!),
-            useSentryPrefix
-            );
-
     public static BaggageHeader Create(
         IEnumerable<KeyValuePair<string, string>> items,
         bool useSentryPrefix = false)
