@@ -10,6 +10,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
 {
     private readonly IHub _hub;
     private readonly Timer? _idleTimer;
+    private long _idleTimerStopped;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
     /// <inheritdoc />
@@ -277,7 +278,10 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
-        _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        if (Interlocked.Exchange(ref _idleTimerStopped, 1) == 0)
+        {
+            _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        }
 
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
