@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sentry.Internal.DiagnosticSource;
+using Sentry.PlatformAbstractions;
 
 namespace Sentry.DiagnosticSource.Tests.Integration.SQLite;
 
@@ -54,9 +55,11 @@ public class SentryDiagnosticListenerTests
 
     private readonly Fixture _fixture = new();
 
-    [Fact]
+    [SkippableFact]
     public void EfCoreIntegration_RunSynchronousQueryWithIssue_TransactionWithSpans()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
@@ -86,9 +89,11 @@ public class SentryDiagnosticListenerTests
         Assert.All(spans, span => Assert.True(span.IsFinished));
     }
 
-    [Fact]
+    [SkippableFact]
     public void EfCoreIntegration_RunSynchronousQuery_TransactionWithSpans()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
@@ -108,9 +113,11 @@ public class SentryDiagnosticListenerTests
         Assert.All(spans, span => Assert.True(span.IsFinished));
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpansWithOneCompiler()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var context = _fixture.NewContext();
         var commands = new List<int>();
@@ -157,9 +164,11 @@ public class SentryDiagnosticListenerTests
         });
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpans()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var context = _fixture.NewContext();
         var hub = _fixture.Hub;
