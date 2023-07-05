@@ -176,6 +176,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
 
     internal ITransactionProfiler? TransactionProfiler { get; set; }
 
+    // TODO: mark as internal in version 4
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
@@ -184,6 +185,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     {
     }
 
+    // TODO: mark as internal in version 4
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
@@ -200,15 +202,10 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <summary>
     /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context) : this (hub, context, null) {}
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionTracer"/>.
-    /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout)
+    public TransactionTracer(IHub hub, ITransactionContext context)
     {
         _hub = hub;
-        _idleTimeout = idleTimeout;
+        _idleTimeout = ((Hub)hub)?.Options.IdleTimeout;
         Name = context.Name;
         NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
         Operation = context.Operation;
@@ -219,7 +216,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Status = context.Status;
         IsSampled = context.IsSampled;
 
-        if (idleTimeout != null)
+        if (_idleTimeout != null)
         {
             _idleTimer = new Timer(state =>
             {
@@ -229,7 +226,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
                 }
 
                 transactionTracer.Finish(Status ?? SpanStatus.Ok);
-            }, this, TimeSpan.Zero, idleTimeout.Value);
+            }, this, TimeSpan.Zero, _idleTimeout.Value);
         }
     }
 

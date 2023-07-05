@@ -509,6 +509,13 @@ public class TransactionTests
     public async Task Idle_transaction_should_finish_with_idle_timeout_specified()
     {
         // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            IdleTimeout = TimeSpan.FromMilliseconds(2)
+        };
+        var hub = new Hub(options, client);
         var context = new TransactionContext(
             SpanId.Create(),
             SpanId.Create(),
@@ -521,7 +528,8 @@ public class TransactionTests
             true,
             TransactionNameSource.Component
         );
-        var transaction = new TransactionTracer(DisabledHub.Instance, context, TimeSpan.FromMilliseconds(2));
+
+        var transaction = new TransactionTracer(hub, context);
 
         // Act
         await Task.Delay(5);
