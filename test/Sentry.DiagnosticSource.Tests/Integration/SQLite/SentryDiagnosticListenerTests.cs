@@ -17,6 +17,12 @@ public class SentryDiagnosticListenerTests
         internal SentryScopeManager ScopeManager { get; }
         public Fixture()
         {
+            // Ugly but: Fixture creation breaks on Mono. So we're skipping not just the tests but here too.
+            if (RuntimeInfo.GetRuntime().IsMono())
+            {
+                return;
+            }
+
             var options = new SentryOptions
             {
                 TracesSampleRate = 1.0,
@@ -174,8 +180,6 @@ public class SentryDiagnosticListenerTests
     [SkippableFact]
     public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpans()
     {
-        _testOutputHelper.WriteLine(RuntimeInfo.GetRuntime().ToString());
-
         Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
         // Arrange
