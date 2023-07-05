@@ -6,8 +6,6 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite;
 
 public class SentryDiagnosticListenerTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
     private class Fixture
     {
         private readonly Database _database;
@@ -17,7 +15,8 @@ public class SentryDiagnosticListenerTests
         internal SentryScopeManager ScopeManager { get; }
         public Fixture()
         {
-            // Ugly but: Fixture creation breaks on Mono. So we're skipping not just the tests but here too.
+            // We're skipping not just the tests but here too.
+            // Fixture creation breaks on Mono due to `Library e_sqlite3 not found`.
             if (RuntimeInfo.GetRuntime().IsMono())
             {
                 return;
@@ -62,11 +61,6 @@ public class SentryDiagnosticListenerTests
     }
 
     private readonly Fixture _fixture = new();
-
-    public SentryDiagnosticListenerTests(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
 
     [SkippableFact]
     public void EfCoreIntegration_RunSynchronousQueryWithIssue_TransactionWithSpans()
