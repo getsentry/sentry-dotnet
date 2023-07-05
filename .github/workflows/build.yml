@@ -15,8 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Using ubuntu-20.04 because ubuntu-latest is 22.04, which is fails Sentry.DiagnosticSource.Tests due to a SQLite on Mono issue.
-        os: [ubuntu-20.04, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Cancel Previous Runs
@@ -58,13 +57,6 @@ jobs:
 
       - name: Test
         run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
-
-      - name: Upload broken test project
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: broken-tests
-          path: '/home/runner/work/sentry-dotnet/sentry-dotnet/test/Sentry.DiagnosticSource.Tests/'
 
       - name: Test symbol upload
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
