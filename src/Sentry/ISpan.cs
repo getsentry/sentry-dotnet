@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry;
 
 /// <summary>
@@ -64,6 +66,19 @@ public static class SpanExtensions
         child.Description = description;
 
         return child;
+    }
+
+    internal static ISpan StartChild(this ISpan span, SpanContext context)
+    {
+        var transaction = span.GetTransaction() as TransactionTracer;
+        if (transaction?.StartChild(context.SpanId, span.SpanId, context.Operation, context.Instrumenter)
+            is not SpanTracer childSpan)
+        {
+            return NoOpSpan.Instance;
+        }
+
+        childSpan.Description = context.Description;
+        return childSpan;
     }
 
     /// <summary>

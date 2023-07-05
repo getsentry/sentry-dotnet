@@ -318,6 +318,11 @@ namespace Sentry
         AllButFirst = 2,
         None = 3,
     }
+    public enum Instrumenter
+    {
+        Sentry = 0,
+        OpenTelemetry = 1,
+    }
     public static class MeasurementExtensions
     {
         public static void SetMeasurement(this Sentry.ITransactionData transaction, string name, double value, Sentry.MeasurementUnit unit = default) { }
@@ -881,6 +886,7 @@ namespace Sentry
     {
         public SpanContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled) { }
         public string? Description { get; }
+        public Sentry.Instrumenter Instrumenter { get; }
         public bool? IsSampled { get; }
         public string Operation { get; }
         public Sentry.SpanId? ParentSpanId { get; }

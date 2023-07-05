@@ -58,4 +58,17 @@ internal static class CollectionsExtensions
 
     public static IEnumerable<T> ExceptNulls<T>(this IEnumerable<T?> source) =>
         source.Where(x => x != null).Select(x => x!);
+
+    public static bool TryGetTypedValue<T>(this IDictionary<string, object?> source, string key,
+        [NotNullWhen(true)] out T value)
+    {
+        if (source.TryGetValue(key, out var obj) && obj is T typedValue)
+        {
+            value = typedValue;
+            return true;
+        }
+
+        value = default!;
+        return false;
+    }
 }

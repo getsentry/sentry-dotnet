@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Primitives;
+using Sentry.Extensibility;
 
 #if !NETSTANDARD2_0
 using Microsoft.AspNetCore.Http.Features;
@@ -163,5 +165,50 @@ internal static class HttpContextExtensions
 
         // e.g. "GET /pets/{id}"
         return $"{method} {route}";
+    }
+
+    public static SentryTraceHeader? TryGetSentryTraceHeader(this HttpContext context, SentryOptions? options)
+    {
+        var value = context.Request.Headers.GetValueOrDefault(SentryTraceHeader.HttpHeaderName);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        options?.LogDebug("Received Sentry trace header '{0}'.", value);
+
+        try
+        {
+            return SentryTraceHeader.Parse(value);
+        }
+        catch (Exception ex)
+        {
+            options?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+            return null;
+        }
+    }
+
+    public static BaggageHeader? TryGetBaggageHeader(this HttpContext context, SentryOptions? options)
+    {
+        var value = context.Request.Headers.GetValueOrDefault(BaggageHeader.HttpHeaderName);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        // Note: If there are multiple baggage headers, they will be joined with comma delimiters,
+        // and can thus be treated as a single baggage header.
+
+        options?.LogDebug("Received baggage header '{0}'.", value);
+
+        try
+        {
+            return BaggageHeader.TryParse(value, onlySentry: true);
+        }
+        catch (Exception ex)
+        {
+            options?.LogError("Invalid baggage header '{0}'.", ex, value);
+            return null;
+        }
     }
 }

@@ -309,6 +309,22 @@ public class SentryOptions
     /// </summary>
     public string? Dsn { get; set; }
 
+    private readonly Lazy<string> _sentryBaseUrl;
+
+    internal bool IsSentryRequest(string? requestUri)=>
+        !string.IsNullOrEmpty(requestUri) && IsSentryRequest(new Uri(requestUri));
+
+    internal bool IsSentryRequest(Uri? requestUri)
+    {
+        if (string.IsNullOrEmpty(Dsn) || requestUri is null)
+        {
+            return false;
+        }
+
+        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+        return string.Equals(requestBaseUrl, _sentryBaseUrl.Value, StringComparison.OrdinalIgnoreCase);
+    }
+
     private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
 
     internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
@@ -900,6 +916,16 @@ public class SentryOptions
     public Func<bool>? CrashedLastRun { get; set; }
 
     /// <summary>
+    /// <para>
+    ///     Gets the <see cref="Instrumenter"/> used to create spans.
+    /// </para>
+    /// <para>
+    ///     Defaults to <see cref="Instrumenter.Sentry"/>
+    /// </para>
+    /// </summary>
+    internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
+
+    /// <summary>
     /// This property is no longer used.  It will be removed in a future version.
     /// </summary>
     /// <remarks>
@@ -1097,5 +1123,10 @@ public class SentryOptions
             "Sentry.Samples"
         };
 #endif
+        _sentryBaseUrl = new Lazy<string>(() =>
+            new Uri(Dsn ?? string.Empty).GetComponents(
+                UriComponents.SchemeAndServer,
+                UriFormat.Unescaped)
+        );
     }
 }

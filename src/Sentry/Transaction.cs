@@ -259,7 +259,9 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         _breadcrumbs = tracer.Breadcrumbs.ToList();
         _extra = tracer.Extra.ToDictionary();
         _tags = tracer.Tags.ToDictionary();
-        _spans = tracer.Spans.Select(s => new Span(s)).ToArray();
+        _spans = tracer.Spans
+            .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
+            .Select(s => new Span(s)).ToArray();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
         if (tracer is TransactionTracer transactionTracer)

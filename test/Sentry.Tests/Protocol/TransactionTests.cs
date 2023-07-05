@@ -367,6 +367,28 @@ public class TransactionTests
     }
 
     [Fact]
+    public void Finish_SentryRequestSpansGetIgnored()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transactionTracer = new TransactionTracer(hub, "my name", "my op");
+        transactionTracer.StartChild("normalRequest").Finish(SpanStatus.Ok);
+        var sentryRequest = (SpanTracer)transactionTracer.StartChild("sentryRequest");
+        sentryRequest.IsSentryRequest = true;
+
+        Transaction transaction = null;
+        hub.CaptureTransaction(Arg.Do<Sentry.Transaction>(t => transaction = t));
+
+        // Act
+        transactionTracer.Finish();
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction.Spans.Should().Contain(s => s.Operation == "normalRequest");
+        transaction.Spans.Should().NotContain(s => s.Operation == "sentryRequest");
+    }
+
+    [Fact]
     public void Finish_CapturesTransaction()
     {
         // Arrange

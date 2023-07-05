@@ -194,4 +194,50 @@ public class SentryOptionsTests
         var sut = new SentryOptions();
         Assert.Contains(".*", sut.FailedRequestTargets);
     }
+
+    [Fact]
+    public void IsSentryRequest_WithNullUri_ReturnsFalse()
+    {
+        var sut = new SentryOptions();
+
+        var actual = sut.IsSentryRequest((Uri)null);
+
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void IsSentryRequest_WithEmptyUri_ReturnsFalse()
+    {
+        var sut = new SentryOptions();
+
+        var actual = sut.IsSentryRequest(string.Empty);
+
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void IsSentryRequest_WithInvalidUri_ReturnsFalse()
+    {
+        var sut = new SentryOptions
+        {
+            Dsn = "https://foo.com"
+        };
+
+        var actual = sut.IsSentryRequest(new Uri("https://bar.com"));
+
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void IsSentryRequest_WithValidUri_ReturnsTrue()
+    {
+        var sut = new SentryOptions
+        {
+            Dsn = "https://123@456.ingest.sentry.io/789"
+        };
+
+        var actual = sut.IsSentryRequest(new Uri("https://456.ingest.sentry.io/api/789/envelope/"));
+
+        Assert.True(actual);
+    }
 }
