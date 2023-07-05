@@ -1062,7 +1062,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> CustomSamplingContext { get; }
         public Sentry.ITransactionContext TransactionContext { get; }
     }
-    public class TransactionTracer : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext, System.IDisposable
+    public class TransactionTracer : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
         public TransactionTracer(Sentry.IHub hub, string name, string operation) { }
@@ -1097,8 +1097,6 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; }
         public Sentry.User User { get; set; }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
-        public void Dispose() { }
-        protected virtual void Dispose(bool disposing) { }
         public void Finish() { }
         public void Finish(Sentry.SpanStatus status) { }
         public void Finish(System.Exception exception) { }

@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements, IDisposable
+public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
 {
     private readonly IHub _hub;
     private readonly Timer? _idleTimer;
@@ -281,6 +281,8 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (Interlocked.Exchange(ref _idleTimerStopped, 1) == 0)
         {
             _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+
+            _idleTimer?.Dispose();
         }
 
         TransactionProfiler?.Finish();
@@ -330,20 +332,4 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         TraceId,
         SpanId,
         IsSampled);
-
-    /// <summary>Releases the unmanaged resources.</summary>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _idleTimer?.Dispose();
-        }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
 }
