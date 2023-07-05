@@ -9,7 +9,6 @@ namespace Sentry;
 public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements, IDisposable
 {
     private readonly IHub _hub;
-    private readonly TimeSpan? _idleTimeout;
     private readonly Timer? _idleTimer;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
@@ -205,7 +204,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public TransactionTracer(IHub hub, ITransactionContext context)
     {
         _hub = hub;
-        _idleTimeout = (hub as Hub)?.Options.IdleTimeout;
+        var idleTimeout = (hub as Hub)?.Options.IdleTimeout;
         Name = context.Name;
         NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
         Operation = context.Operation;
@@ -216,7 +215,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Status = context.Status;
         IsSampled = context.IsSampled;
 
-        if (_idleTimeout != null)
+        if (idleTimeout != null)
         {
             _idleTimer = new Timer(state =>
             {
@@ -226,7 +225,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
                 }
 
                 transactionTracer.Finish(Status ?? SpanStatus.Ok);
-            }, this, TimeSpan.Zero, _idleTimeout.Value);
+            }, this, TimeSpan.Zero, idleTimeout.Value);
         }
     }
 
