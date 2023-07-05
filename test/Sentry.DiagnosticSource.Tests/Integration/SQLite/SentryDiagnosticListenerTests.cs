@@ -6,6 +6,8 @@ namespace Sentry.DiagnosticSource.Tests.Integration.SQLite;
 
 public class SentryDiagnosticListenerTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
     private class Fixture
     {
         private readonly Database _database;
@@ -54,6 +56,11 @@ public class SentryDiagnosticListenerTests
     }
 
     private readonly Fixture _fixture = new();
+
+    public SentryDiagnosticListenerTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
 
     [SkippableFact]
     public void EfCoreIntegration_RunSynchronousQueryWithIssue_TransactionWithSpans()
@@ -167,6 +174,8 @@ public class SentryDiagnosticListenerTests
     [SkippableFact]
     public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpans()
     {
+        _testOutputHelper.WriteLine(RuntimeInfo.GetRuntime().ToString());
+
         Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
         // Arrange
