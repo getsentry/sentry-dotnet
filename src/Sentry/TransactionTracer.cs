@@ -205,7 +205,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public TransactionTracer(IHub hub, ITransactionContext context)
     {
         _hub = hub;
-        _idleTimeout = ((Hub)hub)?.Options.IdleTimeout;
+        _idleTimeout = (hub as Hub)?.Options.IdleTimeout;
         Name = context.Name;
         NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
         Operation = context.Operation;
