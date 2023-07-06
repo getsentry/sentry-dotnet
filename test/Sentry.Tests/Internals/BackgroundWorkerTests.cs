@@ -1,8 +1,5 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
-using Sentry.Testing;
+using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Tests.Internals;
 

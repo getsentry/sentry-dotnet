@@ -1,6 +1,5 @@
-using System.Diagnostics;
-using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
@@ -99,7 +98,17 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
     /// The Sentry Debug Meta Images interface.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta#debug-images"/>
-    public List<DebugImage>? DebugImages { get; set; }
+    public List<DebugImage>? DebugImages
+    {
+        get => _debugMeta?.Images;
+        set
+        {
+            _debugMeta ??= new();
+            _debugMeta.Images = value;
+        }
+    }
+
+    private DebugMeta? _debugMeta;
 
     /// <summary>
     /// A list of relevant modules and their versions.
@@ -172,11 +181,23 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
 
     internal bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
 
-    internal bool HasUnhandledException() =>
-        (SentryExceptions?.Any(e => !(e.Mechanism?.Handled ?? true)) ?? false)
-        // Before event is processed by the client and SentryExceptions created.
-        // See: AppDomainUnhandledExceptionIntegration
-        || Exception?.Data[Mechanism.HandledKey] is false;
+    internal bool HasTerminalException()
+    {
+        // The exception is considered terminal if it is marked unhandled,
+        // UNLESS it comes from the UnobservedTaskExceptionIntegration
+
+        if (Exception?.Data[Mechanism.HandledKey] is false)
+        {
+            return Exception.Data[Mechanism.MechanismKey] as string != UnobservedTaskExceptionIntegration.MechanismKey;
+        }
+
+        return SentryExceptions?.Any(e =>
+            e.Mechanism is { Handled: false } mechanism &&
+            mechanism.Type != UnobservedTaskExceptionIntegration.MechanismKey
+        ) ?? false;
+    }
+
+    internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
     /// <summary>
     /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
@@ -221,6 +242,14 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
     public void UnsetTag(string key) =>
         (_tags ??= new Dictionary<string, string>()).Remove(key);
 
+    internal void Redact()
+    {
+        foreach (var breadcrumb in Breadcrumbs)
+        {
+            breadcrumb.Redact();
+        }
+    }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
@@ -248,16 +277,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
         writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
         writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
-
-        if (DebugImages?.Count > 0)
-        {
-            writer.WritePropertyName("debug_meta");
-            writer.WriteStartObject();
-
-            writer.WriteArray("images", DebugImages.ToArray(), logger);
-
-            writer.WriteEndObject();
-        }
+        writer.WriteSerializableIfNotNull("debug_meta", _debugMeta, logger);
 
         writer.WriteEndObject();
     }
@@ -292,8 +312,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
         var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
         var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
 
-        var debugMeta = json.GetPropertyOrNull("debug_meta");
-        var images = debugMeta?.GetPropertyOrNull("images")?.EnumerateArray().Select(DebugImage.FromJson).ToList();
+        var debugMeta = json.GetPropertyOrNull("debug_meta")?.Pipe(DebugMeta.FromJson);
 
         return new SentryEvent(exception, timestamp, eventId)
         {
@@ -306,7 +325,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
             Distribution = distribution,
             SentryExceptionValues = exceptionValues,
             SentryThreadValues = threadValues,
-            DebugImages = images,
+            _debugMeta = debugMeta,
             Level = level,
             TransactionName = transaction,
             _request = request,

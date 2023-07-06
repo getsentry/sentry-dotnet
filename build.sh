@@ -1,12 +1,3 @@
-#!/bin/bash
-set -e
-
-if [ "$GITHUB_ACTIONS" == "true" ]
-    then
-        testLogger="GitHubActions;report-warnings=false"
-    else
-        testLogger="console"
-fi
-
-dotnet test -c Release -l $testLogger \
-    /p:CopyLocalLockFileAssemblies=true
+export UseSentryCLI=false
+dotnet build Sentry.sln -c Release
+dotnet test Sentry.sln -c Release --no-build

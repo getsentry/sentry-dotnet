@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests;
 
 public class ScopeTests
@@ -165,7 +163,7 @@ public class ScopeTests
     }
 
     [Fact]
-    public void GetSpan_NoSpans_ReturnsTransaction()
+    public void Span_NoSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -173,14 +171,14 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
     }
 
     [Fact]
-    public void GetSpan_FinishedSpans_ReturnsTransaction()
+    public void Span_FinishedSpans_ReturnsTransaction()
     {
         // Arrange
         var scope = new Scope();
@@ -192,14 +190,14 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(transaction);
     }
 
     [Fact]
-    public void GetSpan_ActiveSpans_ReturnsSpan()
+    public void Span_ActiveSpans_ReturnsSpan()
     {
         // Arrange
         var scope = new Scope();
@@ -211,10 +209,71 @@ public class ScopeTests
         scope.Transaction = transaction;
 
         // Act
-        var span = scope.GetSpan();
+        var span = scope.Span;
 
         // Assert
         span.Should().Be(activeSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpan_ReturnsValue()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Assert Default
+        scope.Span.Should().Be(secondSpan);
+
+        // Act
+        scope.Span = firstSpan;
+
+        // Assert
+        scope.Span.Should().Be(firstSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanNull_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = null;
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
+    }
+
+    [Fact]
+    public void Span_SetSpanThenCloseIt_ReturnsLatestOpen()
+    {
+        // Arrange
+        var scope = new Scope();
+
+        var transaction = new TransactionTracer(DisabledHub.Instance, "foo", "_");
+        var firstSpan = transaction.StartChild("123");
+        var secondSpan = firstSpan.StartChild("456");
+
+        scope.Transaction = transaction;
+
+        // Act
+        scope.Span = firstSpan;
+        firstSpan.Finish();
+
+        // Assert
+        scope.Span.Should().Be(secondSpan);
     }
 
     [Fact]
@@ -235,6 +294,22 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clear_SetsPropertiesToDefaultValues()
+    {
+        // Arrange
+        _sut.ApplyFakeValues();
+
+        // Act
+        _sut.Clear();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            _sut.ShouldBeEquivalentTo(new Scope());
+        }
+    }
+
+    [Fact]
     public void ClearAttachments_HasAttachments_EmptyList()
     {
         // Arrange
@@ -250,6 +325,23 @@ public class ScopeTests
 
         // Assert
         scope.Attachments.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ClearBreadcrumbs_Breadcrumbs_EmptyList()
+    {
+        // Arrange
+        for (var i = 0; i < 5; i++)
+        {
+            _sut.AddBreadcrumb(new Breadcrumb());
+        }
+        _sut.Breadcrumbs.Should().NotBeEmpty("Sanity check: Arrange failed to configure Breadcrumbs");
+
+        // Act
+        _sut.ClearBreadcrumbs();
+
+        // Assert
+        _sut.Breadcrumbs.Should().BeEmpty();
     }
 
     [Theory]
@@ -275,6 +367,50 @@ public class ScopeTests
 
         // Assert
         Assert.Equal(expectedCount, scope.Breadcrumbs.Count);
+    }
+
+    [Fact]
+    public void AddBreadcrumb_BeforeAddBreadcrumb_ReceivesHint()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        Hint receivedHint = null;
+        options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+        {
+            receivedHint = hint;
+            return breadcrumb;
+        });
+        var scope = new Scope(options);
+
+        // Act
+        var expectedHint = new Hint();
+        scope.AddBreadcrumb(new Breadcrumb(), expectedHint);
+
+        // Assert
+        receivedHint.Should().BeSameAs(expectedHint);
+    }
+
+    [Fact]
+    public void AddBreadcrumb_ScopeAttachments_Copied_To_Hint()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        Hint hint = null;
+        options.SetBeforeBreadcrumb((b, h) =>
+        {
+            hint = h;
+            return b;
+        });
+        var scope = new Scope(options);
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
+        scope.AddAttachment(AttachmentHelper.FakeAttachment("bar.txt"));
+
+        // Act
+        scope.AddBreadcrumb(new Breadcrumb());
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(scope.Attachments);
     }
 
     [Theory]
@@ -429,5 +565,68 @@ public class ScopeTests
 
         // Assert
         observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
+    }
+
+    [Fact]
+    public void Filtered_tags_are_not_set()
+    {
+        var tags = new List<KeyValuePair<string, string>>
+        {
+            new("AzFunctions", "rule"),
+            new("AzureFunctions_FunctionName", "Func"),
+            new("AzureFunctions_InvocationId", "20a09c3b-e9dd-43fe-9a73-ebae1f90cab6"),
+        };
+
+        var scope = new Scope(new SentryOptions
+        {
+            TagFilters = new[] { new SubstringOrRegexPattern("AzureFunctions_") }
+        });
+
+        foreach (var (key, value) in tags)
+        {
+            scope.SetTag(key, value);
+        }
+
+        scope.Tags.Should().OnlyContain(pair => pair.Key == "AzFunctions" && pair.Value == "rule");
+    }
+}
+
+public static class ScopeTestExtensions
+{
+    public static void ApplyFakeValues(this Scope scope, string salt = "fake")
+    {
+        scope.Request = new() { Data = $"{salt} request" };
+        scope.Contexts.Add($"{salt} context", "{}");
+        scope.User = new User() { Username = $"{salt} username" };
+        scope.Platform = $"{salt} platform";
+        scope.Release = $"{salt} release";
+        scope.Distribution = $"{salt} distribution";
+        scope.Environment = $"{salt} environment";
+        scope.TransactionName = $"{salt} transaction";
+        scope.Transaction = Substitute.For<ITransaction>();
+        scope.Fingerprint = new[] { $"{salt} fingerprint" };
+        scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
+        scope.SetExtra("extra", $"{salt} extra");
+        scope.SetTag("tag", $"{salt} tag");
+        scope.AddAttachment(new Attachment(default, default, default, $"{salt} attachment"));
+    }
+
+    public static void ShouldBeEquivalentTo(this Scope source, Scope target)
+    {
+        source.Level.Should().Be(target.Level);
+        source.Request.Should().BeEquivalentTo(target.Request);
+        source.Contexts.Should().BeEquivalentTo(target.Contexts);
+        source.User.Should().BeEquivalentTo(target.User);
+        source.Platform.Should().Be(target.Platform);
+        source.Release.Should().Be(target.Release);
+        source.Distribution.Should().Be(target.Distribution);
+        source.Environment.Should().Be(target.Environment);
+        source.TransactionName.Should().Be(target.TransactionName);
+        source.Transaction.Should().Be(target.Transaction);
+        source.Fingerprint.Should().BeEquivalentTo(target.Fingerprint);
+        source.Breadcrumbs.Should().BeEquivalentTo(target.Breadcrumbs);
+        source.Extra.Should().BeEquivalentTo(target.Extra);
+        source.Tags.Should().BeEquivalentTo(target.Tags);
+        source.Attachments.Should().BeEquivalentTo(target.Attachments);
     }
 }

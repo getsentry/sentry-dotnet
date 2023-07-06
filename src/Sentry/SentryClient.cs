@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
@@ -66,6 +65,10 @@ public class SentryClient : ISentryClient, IDisposable
 
     /// <inheritdoc />
     public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
+        => CaptureEvent(@event, null, scope);
+
+    /// <inheritdoc />
+    public SentryId CaptureEvent(SentryEvent? @event, Hint? hint, Scope? scope = null)
     {
         if (@event == null)
         {
@@ -74,7 +77,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            return DoSendEvent(@event, scope);
+            return DoSendEvent(@event, hint, scope);
         }
         catch (Exception e)
         {
@@ -97,7 +100,10 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+
+    /// <inheritdoc />
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -122,20 +128,71 @@ public class SentryClient : ISentryClient, IDisposable
                                 "to properly finalize the transaction and send it to Sentry.");
         }
 
-
         // Sampling decision MUST have been made at this point
-        Debug.Assert(transaction.IsSampled != null,
+        Debug.Assert(transaction.IsSampled is not null,
             "Attempt to capture transaction without sampling decision.");
 
-
-        if (transaction.IsSampled != true)
+        if (transaction.IsSampled is false)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
             _options.LogDebug("Transaction dropped by sampling.");
             return;
         }
 
-        CaptureEnvelope(Envelope.FromTransaction(transaction));
+        var processedTransaction = BeforeSendTransaction(transaction, hint ?? new Hint());
+        if (processedTransaction is null) // Rejected transaction
+        {
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+            _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
+            return;
+        }
+
+        if (!_options.SendDefaultPii)
+        {
+            processedTransaction.Redact();
+        }
+
+        CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+    }
+
+    private Transaction? BeforeSendTransaction(Transaction transaction, Hint hint)
+    {
+        if (_options.BeforeSendTransactionInternal is null)
+        {
+            return transaction;
+        }
+
+        _options.LogDebug("Calling the BeforeSendTransaction callback");
+
+        try
+        {
+            return _options.BeforeSendTransactionInternal?.Invoke(transaction, hint);
+        }
+        catch (Exception e)
+        {
+            // Attempt to demystify exceptions before adding them as breadcrumbs.
+            e.Demystify();
+
+            _options.LogError("The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.", e);
+
+            var data = new Dictionary<string, string>
+            {
+                {"message", e.Message}
+            };
+
+            if (e.StackTrace is not null)
+            {
+                data.Add("stackTrace", e.StackTrace);
+            }
+
+            transaction.AddBreadcrumb(
+                message: "BeforeSendTransaction callback failed.",
+                category: "SentryClient",
+                data: data,
+                level: BreadcrumbLevel.Error);
+        }
+
+        return transaction;
     }
 
     /// <inheritdoc />
@@ -152,7 +209,7 @@ public class SentryClient : ISentryClient, IDisposable
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
     // TODO: this method needs to be refactored, it's really hard to analyze nullability
-    private SentryId DoSendEvent(SentryEvent @event, Scope? scope)
+    private SentryId DoSendEvent(SentryEvent @event, Hint? hint, Scope? scope)
     {
         if (_options.SampleRate != null)
         {
@@ -174,6 +231,8 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         scope ??= new Scope(_options);
+        hint ??= new Hint();
+        hint.AddAttachmentsFromScope(scope);
 
         _options.LogInfo("Capturing event.");
 
@@ -204,7 +263,8 @@ public class SentryClient : ISentryClient, IDisposable
 
         foreach (var processor in scope.GetAllEventProcessors())
         {
-            processedEvent = processor.Process(processedEvent);
+            processedEvent = processor.DoProcessEvent(processedEvent, hint);
+
             if (processedEvent == null)
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -213,7 +273,7 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        processedEvent = BeforeSend(processedEvent);
+        processedEvent = BeforeSend(processedEvent, hint);
         if (processedEvent == null) // Rejected event
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
@@ -221,9 +281,14 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty;
         }
 
-        return CaptureEnvelope(Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, scope.Attachments, scope.SessionUpdate))
-            ? processedEvent.EventId
-            : SentryId.Empty;
+        if (!_options.SendDefaultPii)
+        {
+            processedEvent.Redact();
+        }
+
+        var attachments = hint.Attachments.ToList();
+        var envelope = Envelope.FromEvent(processedEvent, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        return CaptureEnvelope(envelope) ? processedEvent.EventId : SentryId.Empty;
     }
 
     private IReadOnlyCollection<Exception>? ApplyExceptionFilters(Exception? exception)
@@ -238,16 +303,18 @@ public class SentryClient : ISentryClient, IDisposable
         if (filters.Any(f => f.Filter(exception)))
         {
             // The event should be filtered based on the given exception
-            return new[] {exception};
+            return new[] { exception };
         }
 
-        if (exception is AggregateException aggregate &&
-            aggregate.InnerExceptions.All(e => ApplyExceptionFilters(e) != null))
+        if (exception is AggregateException aggregate)
         {
-            // All inner exceptions of the aggregate matched a filter, so the event should be filtered.
-            // Note that _options.KeepAggregateException is not relevant here.  Even if we want to keep aggregate
-            // exceptions, we would still never send one if all of its children are supposed to be filtered.
-            return aggregate.InnerExceptions;
+            // Flatten the tree of aggregates such that all the inner exceptions are non-aggregates.
+            var innerExceptions = aggregate.Flatten().InnerExceptions;
+            if (innerExceptions.All(e => ApplyExceptionFilters(e) != null))
+            {
+                // All inner exceptions matched a filter, so the event should be filtered.
+                return innerExceptions;
+            }
         }
 
         // The event should not be filtered.
@@ -274,9 +341,9 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
-    private SentryEvent? BeforeSend(SentryEvent? @event)
+    private SentryEvent? BeforeSend(SentryEvent? @event, Hint hint)
     {
-        if (_options.BeforeSend == null)
+        if (_options.BeforeSendInternal == null)
         {
             return @event;
         }
@@ -284,7 +351,7 @@ public class SentryClient : ISentryClient, IDisposable
         _options.LogDebug("Calling the BeforeSend callback");
         try
         {
-            @event = _options.BeforeSend?.Invoke(@event!);
+            @event = _options.BeforeSendInternal?.Invoke(@event!, hint);
         }
         catch (Exception e)
         {

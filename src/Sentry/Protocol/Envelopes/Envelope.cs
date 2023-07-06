@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
@@ -28,10 +27,7 @@ public sealed class Envelope : ISerializable, IDisposable
     /// Initializes an instance of <see cref="Envelope"/>.
     /// </summary>
     public Envelope(IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
-    {
-        Header = header;
-        Items = items;
-    }
+        : this(null, header, items) { }
 
     private Envelope(SentryId? eventId, IReadOnlyDictionary<string, object?> header, IReadOnlyList<EnvelopeItem> items)
     {
@@ -108,7 +104,7 @@ public sealed class Envelope : ISerializable, IDisposable
         var writer = new Utf8JsonWriter(stream);
 
 #if NETFRAMEWORK || NETSTANDARD2_0
-            await using (writer)
+        await using (writer)
 #else
         await using (writer.ConfigureAwait(false))
 #endif
@@ -150,8 +146,15 @@ public sealed class Envelope : ISerializable, IDisposable
         // Items
         foreach (var item in Items)
         {
-            await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
-            await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await item.SerializeAsync(stream, logger, cancellationToken).ConfigureAwait(false);
+                await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                logger?.LogWarning("Failed to serialize envelope item", e);
+            }
         }
     }
 
@@ -168,8 +171,15 @@ public sealed class Envelope : ISerializable, IDisposable
         // Items
         foreach (var item in Items)
         {
-            item.Serialize(stream, logger);
-            stream.WriteNewline();
+            try
+            {
+                item.Serialize(stream, logger);
+                stream.WriteNewline();
+            }
+            catch (Exception e)
+            {
+                logger?.LogWarning("Failed to serialize envelope item", e);
+            }
         }
     }
 
@@ -197,6 +207,18 @@ public sealed class Envelope : ISerializable, IDisposable
             ["event_id"] = eventId.ToString()
         };
 
+    private static Dictionary<string, object?> CreateHeader(SentryId eventId, DynamicSamplingContext? dsc)
+    {
+        if (dsc == null)
+        {
+            return CreateHeader(eventId);
+        }
+
+        var header = CreateHeader(eventId, extraCapacity: 1);
+        header["trace"] = dsc.Items;
+        return header;
+    }
+
     /// <summary>
     /// Creates an envelope that contains a single event.
     /// </summary>
@@ -207,7 +229,7 @@ public sealed class Envelope : ISerializable, IDisposable
         SessionUpdate? sessionUpdate = null)
     {
         var eventId = @event.EventId;
-        var header = CreateHeader(eventId);
+        var header = CreateHeader(eventId, @event.DynamicSamplingContext);
 
         var items = new List<EnvelopeItem>
         {
@@ -218,6 +240,13 @@ public sealed class Envelope : ISerializable, IDisposable
         {
             foreach (var attachment in attachments)
             {
+                // Safety check, in case the user forcefully added a null attachment.
+                if (attachment.IsNull())
+                {
+                    logger?.LogWarning("Encountered a null attachment.  Skipping.");
+                    continue;
+                }
+
                 try
                 {
                     // We pull the stream out here so we can length check
@@ -275,21 +304,18 @@ public sealed class Envelope : ISerializable, IDisposable
     public static Envelope FromTransaction(Transaction transaction)
     {
         var eventId = transaction.EventId;
-        Dictionary<string, object?> header;
-        if (transaction.DynamicSamplingContext is { } dsc)
-        {
-            header = CreateHeader(eventId, extraCapacity: 1);
-            header["trace"] = dsc.Items;
-        }
-        else
-        {
-            header = CreateHeader(eventId);
-        }
+        var header = CreateHeader(eventId, transaction.DynamicSamplingContext);
 
-        var items = new[]
+        var items = new List<EnvelopeItem>
         {
             EnvelopeItem.FromTransaction(transaction)
         };
+
+        if (transaction.TransactionProfiler is { } profiler)
+        {
+            // Profiler.CollectAsync() may throw in which case the EnvelopeItem won't serialize.
+            items.Add(EnvelopeItem.FromProfileInfo(profiler.CollectAsync(transaction)));
+        }
 
         return new Envelope(eventId, header, items);
     }

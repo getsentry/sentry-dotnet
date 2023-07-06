@@ -20,6 +20,8 @@
   <attr path="/api/package[@name='io.sentry']" name="managedName">Sentry.JavaSdk</attr>
   <attr path="/api/package[@name='io.sentry.android.core']" name="managedName">Sentry.JavaSdk.Android.Core</attr>
   <attr path="/api/package[@name='io.sentry.android.core.internal.gestures']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Gestures</attr>
+  <attr path="/api/package[@name='io.sentry.android.core.internal.modules']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Modules</attr>
+  <attr path="/api/package[@name='io.sentry.android.core.internal.threaddump']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.ThreadDump</attr>
   <attr path="/api/package[@name='io.sentry.android.core.internal.util']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Util</attr>
   <attr path="/api/package[@name='io.sentry.android.ndk']" name="managedName">Sentry.JavaSdk.Android.Ndk</attr>
   <attr path="/api/package[@name='io.sentry.android.supplemental']" name="managedName">Sentry.JavaSdk.Android.Supplemental</attr>
@@ -29,12 +31,16 @@
   <attr path="/api/package[@name='io.sentry.exception']" name="managedName">Sentry.JavaSdk.Exception</attr>
   <attr path="/api/package[@name='io.sentry.hints']" name="managedName">Sentry.JavaSdk.Hints</attr>
   <attr path="/api/package[@name='io.sentry.instrumentation.file']" name="managedName">Sentry.JavaSdk.Instrumentation.File</attr>
+  <attr path="/api/package[@name='io.sentry.internal.gestures']" name="managedName">Sentry.JavaSdk.Internal.Gestures</attr>
+  <attr path="/api/package[@name='io.sentry.internal.modules']" name="managedName">Sentry.JavaSdk.Internal.Modules</attr>
   <attr path="/api/package[@name='io.sentry.transport']" name="managedName">Sentry.JavaSdk.Transport</attr>
+  <attr path="/api/package[@name='io.sentry.profilemeasurements']" name="managedName">Sentry.JavaSdk.ProfileMeasurements</attr>
   <attr path="/api/package[@name='io.sentry.protocol']" name="managedName">Sentry.JavaSdk.Protocol</attr>
   <attr path="/api/package[@name='io.sentry.util']" name="managedName">Sentry.JavaSdk.Util</attr>
+  <attr path="/api/package[@name='io.sentry.util.thread']" name="managedName">Sentry.JavaSdk.Util.Thread</attr>
   <attr path="/api/package[@name='io.sentry.vendor']" name="managedName">Sentry.JavaSdk.Vendor</attr>
-  <attr path="/api/package[@name='io.sentry.vendor.gson.stream']" name="managedName">Sentry.JavaSdk.Vendor.Gson.Stream</attr>
   <attr path="/api/package[@name='io.sentry.vendor.gson.internal.bind.util']" name="managedName">Sentry.JavaSdk.Vendor.Gson.Internal.Bind.Util</attr>
+  <attr path="/api/package[@name='io.sentry.vendor.gson.stream']" name="managedName">Sentry.JavaSdk.Vendor.Gson.Stream</attr>
 
   <!--
     These properties have conflicts that create BG8401 warnings ("Skipping '...' due to a duplicate field or property name.")
@@ -50,8 +56,37 @@
   <attr path="/api/package[@name='io.sentry']/class[@name='SentryTraceHeader']/field[@name='SENTRY_TRACE_HEADER']" name="managedName">SentryTraceHeaderName</attr>
   <attr path="/api/package[@name='io.sentry']/class[@name='BaggageHeader']/field[@name='BAGGAGE_HEADER']" name="managedName">BaggageHeaderName</attr>
 
-  <!-- Fix visibility of this type, for use in AndroidEventProcessor.cs -->
+  <!-- Fix visibility of some specific types as necessary. -->
   <attr path="/api/package[@name='io.sentry.android.core']/class[@name='DefaultAndroidEventProcessor']" name="visibility">internal</attr>
+  <attr path="/api/package[@name='io.sentry.android.core']/class[@name='EmptySecureContentProvider']" name="visibility">internal</attr>
+
+  <!-- Fix missing compareTo(Object) methods on classes extending SentryDate. -->
+  <add-node path="/api/package[@name='io.sentry']/class[@extends='io.sentry.SentryDate']">
+    <method name="compareTo" return="int" abstract="false" native="false" synchronized="false" static="false" final="false" deprecated="not deprecated" visibility="public">
+        <parameter name="p0" type="java.lang.Object" />
+    </method>
+  </add-node>
+
+  <!--
+    This API uses FrameMetrics, which requires Android >= 24.0.  We currently target Android >= 21.0 which is the minimum supported by MAUI.
+    TODO: If we need this, figure out how to multi-target or late bind.
+  -->
+  <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
+
+  <!--
+    This is very strange, but this API causes the dotnet process to crash during the BindingsGenerator task when the interface containing it is marked internal.
+    Either removing this method or switching the interface back to public fixes the issue.  Since we don't need it in .NET, we can remove the method.
+  -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IntegrationName']/method[@name='addIntegrationToSdkVersion']" />
+
+  <!--
+    The BackfillingEventProcessor interface creates a stack overflow during code generation, which appears as:
+      error MSB6006: "dotnet" exited with code 134
+    AnrV2EventProcessor is dependenant on BackfillingEventProcessor
+    We currently don't need to use either of these via C# bindings.
+  -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
 
   <!--
     The remaining APIS are removed to prevent various errors/warnings.
@@ -61,6 +96,7 @@
   <remove-node path="/api/package[@name='io.sentry']/class[@name='EnvelopeSender']" />
   <remove-node path="/api/package[@name='io.sentry']/class[@name='OutboxSender']" />
   <remove-node path="/api/package[@name='io.sentry.cache']/class[@name='EnvelopeCache']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core.cache']/class[@name='AndroidEnvelopeCache']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.gestures']" />
 
@@ -71,5 +107,6 @@
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='ExceptionMechanismException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='InvalidSentryTraceHeaderException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryEnvelopeException']" />
+  <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryHttpClientException']" />
   <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='MalformedJsonException']" />
 </metadata>

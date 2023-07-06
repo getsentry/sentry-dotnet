@@ -17,11 +17,16 @@ public static class TestDbBuilder
         await command.ExecuteNonQueryAsync();
     }
 
-    private static TestDbContext GetDbContext(SqlConnection connection)
+    public static TestDbContext GetDbContext(SqlConnection connection, ILoggerFactory loggerFactory = null)
     {
         var builder = new DbContextOptionsBuilder<TestDbContext>();
         builder.UseSqlServer(connection);
         builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        if (loggerFactory != null)
+        {
+            builder.UseLoggerFactory(loggerFactory);
+        }
+
         return new TestDbContext(builder.Options);
     }
 
@@ -51,9 +56,7 @@ public static class TestDbBuilder
 #endif
 
         command.Parameters.AddWithValue("value", "SHOULD NOT APPEAR IN PAYLOAD");
-        command.CommandText = @"
-insert into MyTable (Value)
-values (@value);";
+        command.CommandText = "insert into MyTable (Value) values (@value);";
         await command.ExecuteNonQueryAsync();
     }
 

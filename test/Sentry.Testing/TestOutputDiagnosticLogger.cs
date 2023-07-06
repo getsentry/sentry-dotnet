@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Reflection;
 using Xunit.Sdk;
 
 namespace Sentry.Testing;

@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -194,6 +192,8 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
+    internal ITransactionProfiler? TransactionProfiler { get; set; }
+
     // This constructor is used for deserialization purposes.
     // It's required because some of the fields are mapped on 'contexts.trace'.
     // When deserializing, we don't parse those fields explicitly, but
@@ -259,13 +259,16 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         _breadcrumbs = tracer.Breadcrumbs.ToList();
         _extra = tracer.Extra.ToDictionary();
         _tags = tracer.Tags.ToDictionary();
-        _spans = tracer.Spans.Select(s => new Span(s)).ToArray();
+        _spans = tracer.Spans
+            .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
+            .Select(s => new Span(s)).ToArray();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
         if (tracer is TransactionTracer transactionTracer)
         {
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+            TransactionProfiler = transactionTracer.TransactionProfiler;
             _measurements = transactionTracer.Measurements.ToDictionary();
         }
     }
@@ -296,6 +299,23 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         TraceId,
         SpanId,
         IsSampled);
+
+    /// <summary>
+    /// Redacts PII from the transaction
+    /// </summary>
+    internal void Redact()
+    {
+        Description = Description?.RedactUrl();
+        foreach (var breadcrumb in Breadcrumbs)
+        {
+            breadcrumb.Redact();
+        }
+
+        foreach (var span in Spans)
+        {
+            span.Redact();
+        }
+    }
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)

@@ -28,7 +28,7 @@ internal static class Extensions
 
         addExtraData?.Invoke(data);
 
-        var message = sender != null ? $"{sender.GetType().Name}.{eventName}" : eventName;
+        var message = sender != null ? $"{sender.ToStringOrTypeName()}.{eventName}" : eventName;
         hub.AddBreadcrumb(message, category, type, data, level);
     }
 
@@ -42,7 +42,7 @@ internal static class Extensions
             return;
         }
 
-        var typeName = element.GetType().Name;
+        var typeName = element.ToStringOrTypeName();
         var prefix = (property ?? typeName) + ".";
 
         if (property != null)
@@ -69,5 +69,12 @@ internal static class Extensions
         {
             data.Add(prefix + nameof(textElement.Text), textElement.Text);
         }
+    }
+
+    public static string ToStringOrTypeName(this object o)
+    {
+        var t = o.GetType();
+        var s = o.ToString();
+        return s == null || s == t.FullName ? t.Name : s;
     }
 }

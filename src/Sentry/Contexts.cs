@@ -1,10 +1,9 @@
-using System.Collections.Concurrent;
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
+using Trace = Sentry.Protocol.Trace;
 
 namespace Sentry;
 
@@ -36,6 +35,11 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
     /// In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
     /// </remarks>
     public OperatingSystem OperatingSystem => this.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
+
+    /// <summary>
+    /// Response interface that contains information on any HTTP response related to the event.
+    /// </summary>
+    public Response Response => this.GetOrCreate<Response>(Response.Type);
 
     /// <summary>
     /// This describes a runtime in more detail.
@@ -144,6 +148,10 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
             else if (string.Equals(type, OperatingSystem.Type, StringComparison.OrdinalIgnoreCase))
             {
                 result[name] = OperatingSystem.FromJson(value);
+            }
+            else if (string.Equals(type, Response.Type, StringComparison.OrdinalIgnoreCase))
+            {
+                result[name] = Response.FromJson(value);
             }
             else if (string.Equals(type, Runtime.Type, StringComparison.OrdinalIgnoreCase))
             {

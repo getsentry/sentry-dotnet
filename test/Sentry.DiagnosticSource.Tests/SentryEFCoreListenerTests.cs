@@ -9,14 +9,11 @@ public class SentryEFCoreListenerTests
         => type switch
         {
             EFQueryCompiling or EFQueryCompiled =>
-                span => span.Description != null &&
-                        span.Operation == "db.query.compile",
+                span => span.Operation == "db.query.compile",
             EFConnectionOpening or EFConnectionClosed =>
-                span => span.Description == null &&
-                        span.Operation == "db.connection",
+                span => span.Operation == "db.connection",
             EFCommandExecuting or EFCommandExecuting or EFCommandFailed =>
-                span => span.Description != null &&
-                        span.Operation == "db.query",
+                span => span.Operation == "db.query",
             _ => throw new NotSupportedException()
         };
 
@@ -28,10 +25,13 @@ public class SentryEFCoreListenerTests
     private class Fixture
     {
         internal TransactionTracer Tracer { get; }
+
         public SentryOptions Options { get; }
+
         public IReadOnlyCollection<ISpan> Spans => Tracer?.Spans;
-        public IHub Hub { get; set; }
-        private Scope _scope { get; }
+
+        public IHub Hub { get; }
+
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
@@ -39,7 +39,8 @@ public class SentryEFCoreListenerTests
             {
                 IsSampled = true
             };
-            _scope = new Scope
+
+            var scope = new Scope
             {
                 Transaction = Tracer
             };
@@ -53,14 +54,16 @@ public class SentryEFCoreListenerTests
                 Debug = true,
                 DiagnosticLogger = logger
             };
+
             Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
             Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
             {
                 Spans.LastOrDefault(s => !s.IsFinished)?.Finish(SpanStatus.InternalError);
                 return SentryId.Empty;
             });
+
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(callback => callback.Arg<Action<Scope>>().Invoke(_scope));
+                .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
         }
     }
 
@@ -93,7 +96,8 @@ public class SentryEFCoreListenerTests
         interceptor.OnNext(new(key, value));
 
         // Assert
-        var child = _fixture.Spans.First(s => GetValidator(key)(s));
+        var child = _fixture.Spans.FirstOrDefault(s => GetValidator(key)(s));
+        Assert.NotNull(child);
     }
 
     [Theory]
@@ -104,6 +108,7 @@ public class SentryEFCoreListenerTests
         // Arrange
         var hub = _fixture.Hub;
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+
         if (key == EFCommandExecuting)
         {
             interceptor.DisableQuerySpan();
@@ -155,12 +160,9 @@ public class SentryEFCoreListenerTests
 
         // Assert
         hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
-        _fixture.Options.DiagnosticLogger.DidNotReceive().Log(
-            Arg.Any<SentryLevel>(),
-            Arg.Any<string>(),
-            Arg.Any<Exception>(),
-            Arg.Any<object[]>());
+        _fixture.Options.DiagnosticLogger.DidNotReceiveWithAnyArgs()?.Log(default, default!);
     }
+
     [Theory]
     [InlineData(EFQueryStartCompiling)]
     [InlineData(EFQueryCompiling)]
@@ -183,6 +185,36 @@ public class SentryEFCoreListenerTests
         hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
     }
 
+    private class FakeDiagnosticEventData
+    {
+        public FakeDiagnosticEventData(string value) { _value = value; }
+        private readonly string _value;
+        public override string ToString()=> _value;
+
+        public class ConnectionInfo
+        {
+            public string Database { get; } = "rentals";
+        }
+        public ConnectionInfo Connection { get; } = new();
+    }
+
+    private class FakeDiagnosticConnectionEventData : FakeDiagnosticEventData
+    {
+        public FakeDiagnosticConnectionEventData(string value) : base(value) { }
+        public Guid ConnectionId { get; } = Guid.NewGuid();
+    }
+
+    private class FakeDiagnosticCommandEventData : FakeDiagnosticEventData
+    {
+        public FakeDiagnosticCommandEventData(FakeDiagnosticConnectionEventData connection, string value) : base(value)
+        {
+            ConnectionId = connection.ConnectionId;
+        }
+
+        public Guid ConnectionId { get; set; }
+        public Guid CommandId { get; set; } = Guid.NewGuid();
+    }
+
     [Fact]
     public void OnNext_HappyPath_IsValid()
     {
@@ -191,38 +223,111 @@ public class SentryEFCoreListenerTests
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+        var expectedDbName = "rentals";
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
-        interceptor.OnNext(new(EFQueryCompiling, efSql));
-        interceptor.OnNext(new(EFQueryCompiled, efSql));
-        interceptor.OnNext(new(EFConnectionOpening, null));
-        interceptor.OnNext(new(EFCommandExecuting, efSql));
-        interceptor.OnNext(new(EFCommandExecuted, efSql));
-        interceptor.OnNext(new(EFConnectionClosed, efSql));
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandExecuted, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
         var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
         var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
+
         // Validate if all spans were finished.
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.All(_fixture.Spans, span =>
         {
             Assert.True(span.IsFinished);
-            if (span.Operation == "db.connection")
-            {
-                Assert.Null(span.Description);
-            }
-            else
-            {
-                Assert.Equal(expectedSql, span.Description);
-            }
             Assert.Equal(SpanStatus.Ok, span.Status);
         });
+
+        // Assert span descriptions
+        Assert.Equal(expectedDbName,connectionSpan.Description);
+        Assert.Equal(expectedSql, compilerSpan.Description);
+        Assert.Equal(expectedSql, commandSpan.Description);
+
+        // Check DB Name is stored correctly
+        var connectionDbName =
+            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
+        Assert.Equal(expectedDbName, connectionDbName);
+        var commandDbName =
+            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
+        Assert.Equal(expectedDbName, commandDbName);
+
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
-        _fixture.Options.DiagnosticLogger.Received(0).Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"), null, Arg.Any<object[]>());
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
+        _fixture.Options.DiagnosticLogger.DidNotReceive()?
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
+                null, Arg.Any<object[]>());
+    }
+
+    [Fact]
+    public void OnNext_HappyPathInsideChildSpan_IsValid()
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+        var expectedSql = "SELECT * FROM ...";
+        var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+        var expectedDbName = "rentals";
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
+
+        // Act
+        var childSpan = _fixture.Tracer.StartChild("Child Span");
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandExecuted, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
+        childSpan.Finish();
+
+        // Assert
+        var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
+        var connectionSpan = _fixture.Spans.First(s => GetValidator(EFConnectionOpening)(s));
+        var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandExecuting)(s));
+
+        // Validate if all spans were finished.
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        Assert.All(_fixture.Spans, span =>
+        {
+            Assert.True(span.IsFinished);
+            Assert.Equal(SpanStatus.Ok, span.Status);
+        });
+
+        // Assert span descriptions
+        Assert.Equal(expectedDbName, connectionSpan.Description);
+        Assert.Equal(expectedSql, compilerSpan.Description);
+        Assert.Equal(expectedSql, commandSpan.Description);
+
+        // Check DB Name is stored correctly
+        var dbName =
+            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
+        Assert.Equal(expectedDbName, dbName);
+
+        // Check connections between spans.
+        Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
+        Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
+        Assert.Equal(childSpan.SpanId, commandSpan.ParentSpanId);
+        _fixture.Options.DiagnosticLogger.DidNotReceive()?
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
+                null, Arg.Any<object[]>());
     }
 
     [Fact]
@@ -233,14 +338,19 @@ public class SentryEFCoreListenerTests
         var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
         var expectedSql = "SELECT * FROM ...";
         var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        var queryEventData = new FakeDiagnosticEventData(efSql);
+        var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
+        var commandEventData = new FakeDiagnosticCommandEventData(connectionEventData, efSql);
 
         // Act
-        interceptor.OnNext(new(EFQueryCompiling, efSql));
-        interceptor.OnNext(new(EFQueryCompiled, efSql));
-        interceptor.OnNext(new(EFConnectionOpening, null));
-        interceptor.OnNext(new(EFCommandExecuting, efSql));
-        interceptor.OnNext(new(EFCommandFailed, efSql));
-        interceptor.OnNext(new(EFConnectionClosed, efSql));
+        interceptor.OnNext(new(EFQueryCompiling, queryEventData));
+        interceptor.OnNext(new(EFQueryCompiled, queryEventData));
+        interceptor.OnNext(new(EFConnectionOpening, connectionEventData));
+        interceptor.OnNext(new(EFCommandExecuting, commandEventData));
+        interceptor.OnNext(new(EFCommandFailed, commandEventData));
+        interceptor.OnNext(new(EFConnectionClosed, connectionEventData));
 
         // Assert
         var compilerSpan = _fixture.Spans.First(s => GetValidator(EFQueryCompiling)(s));
@@ -248,12 +358,10 @@ public class SentryEFCoreListenerTests
         var commandSpan = _fixture.Spans.First(s => GetValidator(EFCommandFailed)(s));
 
         // Validate if all spans were finished.
-        Assert.All(new[] { compilerSpan, connectionSpan },
-            span =>
-            {
-                Assert.True(span.IsFinished);
-                Assert.Equal(SpanStatus.Ok, span.Status);
-            });
+        Assert.True(compilerSpan.IsFinished);
+        Assert.True(connectionSpan.IsFinished);
+        Assert.Equal(SpanStatus.Ok, compilerSpan.Status);
+        Assert.Equal(SpanStatus.Ok, connectionSpan.Status);
 
         // Assert the failed command.
         Assert.True(commandSpan.IsFinished);
@@ -262,7 +370,7 @@ public class SentryEFCoreListenerTests
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(expectedSql, commandSpan.Description);
     }
@@ -289,6 +397,96 @@ public class SentryEFCoreListenerTests
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
 
         Assert.Equal(expectedSql, compilerSpan.Description);
+    }
+
+    [Fact]
+    public void OnNext_Same_Connections_Consolidated()
+    {
+        // Arrange
+        var hub = _fixture.Hub;
+        var interceptor = new SentryEFCoreListener(hub, _fixture.Options);
+        var efSql = "ef Junk\r\nSELECT * FROM ...";
+        var efConn = "db username : password";
+
+        // Fake a connection pool with two connections
+        var connectionA = new FakeDiagnosticConnectionEventData(efConn);
+        var connectionB = new FakeDiagnosticConnectionEventData(efConn);
+        var commandA = new FakeDiagnosticCommandEventData(connectionA, efSql);
+        var commandB = new FakeDiagnosticCommandEventData(connectionB, efSql);
+        var commandC = new FakeDiagnosticCommandEventData(connectionA, efSql);
+
+        void Pause() => Thread.Sleep(200);
+
+        // Act
+        interceptor.OnNext(new(EFConnectionOpening, connectionA));
+        Pause();
+        interceptor.OnNext(new(EFCommandExecuting, commandA));
+        interceptor.OnNext(new(EFCommandExecuted, commandA));
+        interceptor.OnNext(new(EFConnectionClosed, connectionA));
+
+        interceptor.OnNext(new(EFConnectionOpening, connectionA));
+
+            // These are for Connection B... interleaved somewhat
+            interceptor.OnNext(new(EFConnectionOpening, connectionB));
+            Pause();
+            interceptor.OnNext(new(EFCommandExecuting, commandB));
+            interceptor.OnNext(new(EFCommandExecuted, commandB));
+
+        interceptor.OnNext(new(EFCommandExecuting, commandC));
+
+            // These are for Connection B... interleaved somewhat
+            Pause();
+            interceptor.OnNext(new(EFConnectionClosed, connectionB));
+
+        interceptor.OnNext(new(EFCommandExecuted, commandC));
+        Pause();
+        interceptor.OnNext(new(EFConnectionClosed, connectionA));
+
+        // Assert
+        bool IsDbSpan(ISpan s) => s.Operation == "db.connection";
+        bool IsCommandSpan(ISpan s) => s.Operation == "db.query";
+        Func<ISpan, FakeDiagnosticConnectionEventData, bool> forConnection = (s, e) =>
+            s.Extra.ContainsKey(EFKeys.DbConnectionId)
+            && s.Extra[EFKeys.DbConnectionId] is Guid connectionId
+            && connectionId == e.ConnectionId;
+        Func<ISpan, FakeDiagnosticCommandEventData, bool> forCommand = (s, e) =>
+            s.Extra.ContainsKey(EFKeys.DbCommandId)
+            && s.Extra[EFKeys.DbCommandId] is Guid commandId
+            && commandId == e.CommandId;
+
+        using (new AssertionScope())
+        {
+            var dbSpans = _fixture.Spans.Where(IsDbSpan).ToArray();
+            dbSpans.Count().Should().Be(2);
+            dbSpans.Should().Contain(s => forConnection(s, connectionA));
+            dbSpans.Should().Contain(s => forConnection(s, connectionB));
+
+            var commandSpans = _fixture.Spans.Where(IsCommandSpan).ToArray();
+            commandSpans.Count().Should().Be(3);
+            commandSpans.Should().Contain(s => forCommand(s, commandA));
+            commandSpans.Should().Contain(s => forCommand(s, commandB));
+            commandSpans.Should().Contain(s => forCommand(s, commandC));
+
+            var connectionASpan = dbSpans.Single(s => forConnection(s, connectionA));
+            var connectionBSpan = dbSpans.Single(s => forConnection(s, connectionB));
+            var commandASpan = commandSpans.Single(s => forCommand(s, commandA));
+            var commandBSpan = commandSpans.Single(s => forCommand(s, commandB));
+            var commandCSpan = commandSpans.Single(s => forCommand(s, commandC));
+
+            // Commands for connectionA should take place after it starts and before it finishes
+            connectionASpan.StartTimestamp.Should().BeBefore(commandASpan.StartTimestamp);
+            connectionASpan.StartTimestamp.Should().BeBefore(commandCSpan.StartTimestamp);
+            connectionASpan.EndTimestamp.Should().BeAfter(commandASpan.EndTimestamp ?? DateTimeOffset.MinValue);
+            connectionASpan.EndTimestamp.Should().BeAfter(commandCSpan.EndTimestamp ?? DateTimeOffset.MinValue);
+
+            // Commands for connectionB should take place after it starts and before it finishes
+            connectionBSpan.StartTimestamp.Should().BeBefore(commandBSpan.StartTimestamp);
+            connectionBSpan.EndTimestamp.Should().BeAfter(commandBSpan.EndTimestamp ?? DateTimeOffset.MinValue);
+
+            // Connection B starts after Connection A and finishes before Connection A
+            connectionBSpan.StartTimestamp.Should().BeAfter(connectionASpan.StartTimestamp);
+            connectionBSpan.EndTimestamp.Should().BeBefore(connectionASpan.EndTimestamp ?? DateTimeOffset.MinValue);
+        }
     }
 
     [Fact]
@@ -327,58 +525,8 @@ public class SentryEFCoreListenerTests
         interceptor.OnNext(new(operation, "ef Junk\r\nSELECT * FROM ..."));
 
         // Assert
-        _fixture.Options.DiagnosticLogger.Received(1).Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"), null, Arg.Any<object[]>());
-    }
-
-    [Fact]
-    public void FilterNewLineValue_StringWithNewLine_SubStringAfterNewLine()
-    {
-        // Arrange
-        var text = "1234\r\nSELECT *...\n FROM ...";
-        var expectedText = "SELECT *...\n FROM ...";
-
-        // Act
-        var value = FilterNewLineValue(text);
-
-        // Assert
-        Assert.Equal(expectedText, value);
-    }
-
-    [Fact]
-    public void FilterNewLineValue_NullObject_NullString()
-    {
-        // Act
-        var value = FilterNewLineValue(null);
-
-        // Assert
-        Assert.Null(value);
-    }
-
-    [Fact]
-    public void FilterNewLineValue_OneLineString_OneLineString()
-    {
-        // Arrange
-        var text = "1234";
-        var expectedText = "1234";
-
-        // Act
-        var value = FilterNewLineValue(text);
-
-        // Assert
-        Assert.Equal(expectedText, value);
-    }
-
-    [Fact]
-    public void FilterNewLineValue_EmptyString_EmptyString()
-    {
-        // Arrange
-        var text = "";
-        var expectedText = "";
-
-        // Act
-        var value = FilterNewLineValue(text);
-
-        // Assert
-        Assert.Equal(expectedText, value);
+        _fixture.Options.DiagnosticLogger.Received(1)?
+            .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Tried to close {0} span but no matching span could be found."),
+                null, Arg.Any<object[]>());
     }
 }

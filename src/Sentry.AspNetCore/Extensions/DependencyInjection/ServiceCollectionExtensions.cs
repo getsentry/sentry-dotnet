@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;

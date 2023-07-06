@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.JsonConverters;
 
@@ -7,24 +5,72 @@ namespace Sentry.Internal.Extensions;
 
 internal static class JsonExtensions
 {
-    // The Json options with a preset of rules that will remove dangerous and problematic
-    // data from the serialized object.
-    internal static JsonSerializerOptions SerializerOptions { get; private set; } = GetSerializerOptions();
-
-    // For testing, we need a way to reset the options instance when we add custom converters.
-    internal static void ResetSerializerOptions() => SerializerOptions = GetSerializerOptions();
-
-    private static JsonSerializerOptions GetSerializerOptions() => new()
+    private static readonly JsonConverter[] DefaultConverters =
     {
-        Converters =
-        {
-            new SentryJsonConverter(),
-            new IntPtrJsonConverter(),
-            new IntPtrNullableJsonConverter(),
-            new UIntPtrJsonConverter(),
-            new UIntPtrNullableJsonConverter()
-        }
+        new SentryJsonConverter(),
+        new IntPtrJsonConverter(),
+        new IntPtrNullableJsonConverter(),
+        new UIntPtrJsonConverter(),
+        new UIntPtrNullableJsonConverter()
     };
+
+    internal static bool JsonPreserveReferences { get; set; } = true;
+    private static JsonSerializerOptions SerializerOptions = null!;
+    private static JsonSerializerOptions AltSerializerOptions = null!;
+
+    static JsonExtensions()
+    {
+        ResetSerializerOptions();
+    }
+
+    internal static void ResetSerializerOptions()
+    {
+        SerializerOptions = new JsonSerializerOptions()
+            .AddDefaultConverters();
+
+        AltSerializerOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve
+            }
+            .AddDefaultConverters();
+    }
+
+    internal static void AddJsonConverter(JsonConverter converter)
+    {
+        // only add if we don't have this instance already
+        var converters = SerializerOptions.Converters;
+        if (converters.Contains(converter))
+        {
+            return;
+        }
+
+        try
+        {
+            SerializerOptions.Converters.Add(converter);
+            AltSerializerOptions.Converters.Add(converter);
+        }
+        catch (InvalidOperationException)
+        {
+            // If we've already started using the serializer, then it's too late to add more converters.
+            // The following exception message may occur (depending on STJ version):
+            // "Serializer options cannot be changed once serialization or deserialization has occurred."
+            // We'll swallow this, because it's likely to only have occurred in our own unit tests,
+            // or in a scenario where the Sentry SDK has been initialized multiple times,
+            // in which case we have the converter from the first initialization already.
+            // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
+            // See https://github.com/dotnet/runtime/pull/74431
+        }
+    }
+
+    private static JsonSerializerOptions AddDefaultConverters(this JsonSerializerOptions options)
+    {
+        foreach (var converter in DefaultConverters)
+        {
+            options.Converters.Add(converter);
+        }
+
+        return options;
+    }
 
     public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
     {
@@ -134,7 +180,7 @@ internal static class JsonExtensions
 
         // Otherwise, let's get the value as a string and parse it ourselves.
         // Note that we already know this will succeed due to JsonValueKind.Number
-        return double.Parse(json.ToString()!);
+        return double.Parse(json.ToString()!, CultureInfo.InvariantCulture);
     }
 
     public static long? GetAddressAsLong(this JsonElement json)
@@ -153,11 +199,7 @@ internal static class JsonExtensions
         }
 
         // It should be in hex format, such as "0x7fff5bf346c0"
-#if NETCOREAPP || NETSTANDARD2_1_OR_GREATER
         var substring = s[2..];
-#else
-        var substring = s.Substring(2);
-#endif
         if (s.StartsWith("0x") &&
             long.TryParse(substring, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
         {
@@ -288,9 +330,9 @@ internal static class JsonExtensions
         writer.WriteStringDictionaryValue(dic);
     }
 
-    public static void WriteArrayValue(
+    public static void WriteArrayValue<T>(
         this Utf8JsonWriter writer,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         if (arr is not null)
@@ -310,10 +352,10 @@ internal static class JsonExtensions
         }
     }
 
-    public static void WriteArray(
+    public static void WriteArray<T>(
         this Utf8JsonWriter writer,
         string propertyName,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
         writer.WritePropertyName(propertyName);
@@ -417,13 +459,46 @@ internal static class JsonExtensions
         {
             writer.WriteStringValue(dto);
         }
+        else if (value is TimeSpan timeSpan)
+        {
+            writer.WriteStringValue(timeSpan.ToString("g", CultureInfo.InvariantCulture));
+        }
+#if NET6_0_OR_GREATER
+        else if (value is DateOnly date)
+        {
+            writer.WriteStringValue(date.ToString("O", CultureInfo.InvariantCulture));
+        }
+        else if (value is TimeOnly time)
+        {
+            writer.WriteStringValue(time.ToString("HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture));
+        }
+#endif
         else if (value is IFormattable formattable)
         {
             writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
         }
         else
         {
-            JsonSerializer.Serialize(writer, value, SerializerOptions);
+            if (!JsonPreserveReferences)
+            {
+                JsonSerializer.Serialize(writer, value, SerializerOptions);
+                return;
+            }
+
+            try
+            {
+                // Use an intermediate temporary stream, so we can retry if serialization fails.
+                using var tempStream = new MemoryStream();
+                using var tempWriter = new Utf8JsonWriter(tempStream, writer.Options);
+                JsonSerializer.Serialize(tempWriter, value, SerializerOptions);
+                tempWriter.Flush();
+                writer.WriteRawValue(tempStream.ToArray());
+            }
+            catch (JsonException)
+            {
+                // Retry, preserving references to avoid cyclical dependency.
+                JsonSerializer.Serialize(writer, value, AltSerializerOptions);
+            }
         }
     }
 
@@ -450,10 +525,19 @@ internal static class JsonExtensions
             // Render an empty JSON object instead of null. This allows a round trip where this property name is the
             // key to a map which would otherwise not be set and result in a different object.
             // This affects envelope size which isn't recomputed after a roundtrip.
-            if (originalPropertyDepth == writer.CurrentDepth)
+
+            // If the last token written was ":", then we must write a property value.
+            // If the last token written was "{", then we can't write a property value.
+            // Since either could happen, we will *try* to write a "{" and ignore any failure.
+            try
             {
                 writer.WriteStartObject();
             }
+            catch (InvalidOperationException)
+            {
+            }
+
+            // Now we can close each open object until we get back to the original depth.
             while (originalPropertyDepth < writer.CurrentDepth)
             {
                 writer.WriteEndObject();
@@ -467,6 +551,17 @@ internal static class JsonExtensions
         bool? value)
     {
         if (value is not null)
+        {
+            writer.WriteBoolean(propertyName, value.Value);
+        }
+    }
+
+    public static void WriteBooleanIfTrue(
+        this Utf8JsonWriter writer,
+        string propertyName,
+        bool? value)
+    {
+        if (value is true)
         {
             writer.WriteBoolean(propertyName, value.Value);
         }
@@ -644,13 +739,13 @@ internal static class JsonExtensions
         }
     }
 
-    public static void WriteArrayIfNotEmpty(
+    public static void WriteArrayIfNotEmpty<T>(
         this Utf8JsonWriter writer,
         string propertyName,
-        IEnumerable<object?>? arr,
+        IEnumerable<T>? arr,
         IDiagnosticLogger? logger)
     {
-        var list = arr as IReadOnlyList<object?> ?? arr?.ToArray();
+        var list = arr as IReadOnlyList<T> ?? arr?.ToArray();
         if (list is not null && list.Count > 0)
         {
             writer.WriteArray(propertyName, list, logger);

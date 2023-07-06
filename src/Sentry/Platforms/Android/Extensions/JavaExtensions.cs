@@ -1,4 +1,3 @@
-using System.Collections;
 using Android.OS;
 
 namespace Sentry.Android.Extensions;

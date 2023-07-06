@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 namespace Sentry.AspNetCore.Tests;
 
 internal static class ClaimsExtensions

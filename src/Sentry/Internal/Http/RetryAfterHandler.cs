@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Http;
 using Sentry.Infrastructure;
 
 namespace Sentry.Internal.Http;
@@ -87,7 +85,7 @@ internal class RetryAfterHandler : DelegatingHandler
         // Sentry was sending floating point numbers which are not handled by RetryConditionHeaderValue
         // To be compatible with older versions of sentry on premise: https://github.com/getsentry/sentry/issues/7919
         if (response.Headers.TryGetValues("Retry-After", out var values)
-            && double.TryParse(values.FirstOrDefault(), out var retryAfterSeconds))
+            && double.TryParse(values.FirstOrDefault(), NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var retryAfterSeconds))
         {
             return _clock.GetUtcNow().AddTicks((long)(retryAfterSeconds * TimeSpan.TicksPerSecond));
         }

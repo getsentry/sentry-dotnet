@@ -1,8 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <LangVersion>10</LangVersion>
-    <SignAssembly>false</SignAssembly>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
 
   <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->

@@ -1,5 +1,4 @@
 #if !__MOBILE__
-using System.Diagnostics;
 #pragma warning disable CS0618
 
 namespace Sentry.Tests;

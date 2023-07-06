@@ -27,7 +27,6 @@ public static partial class SentrySdk
         cocoaOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
         cocoaOptions.Dsn = options.Dsn;
         cocoaOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
-        cocoaOptions.Environment = options.Environment;
         cocoaOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
         cocoaOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
         cocoaOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
@@ -36,6 +35,11 @@ public static partial class SentrySdk
         cocoaOptions.SendClientReports = options.SendClientReports;
         cocoaOptions.SendDefaultPii = options.SendDefaultPii;
         cocoaOptions.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
+
+        if (options.Environment is { } environment)
+        {
+            cocoaOptions.Environment = environment;
+        }
 
         // These options are not available in the Sentry Cocoa SDK
         // cocoaOptions.? = options.InitCacheFlushTimeout;
@@ -48,12 +52,15 @@ public static partial class SentrySdk
         // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
         //       one when sending events, which is relayed through the scope observer.
 
-        if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
+        if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
             cocoaOptions.BeforeBreadcrumb = b =>
             {
+                // Note: The Cocoa SDK doesn't yet support hints.
+                // See https://github.com/getsentry/sentry-cocoa/issues/2325
+                var hint = new Hint();
                 var breadcrumb = b.ToBreadcrumb(options.DiagnosticLogger);
-                var result = beforeBreadcrumb(breadcrumb)?.ToCocoaBreadcrumb();
+                var result = beforeBreadcrumb(breadcrumb, hint)?.ToCocoaBreadcrumb();
 
                 // Note: Nullable result is allowed but delegate is generated incorrectly
                 // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
@@ -62,8 +69,13 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options.iOS.EnableCocoaSdkTracing)
+        if (options is {IsTracingEnabled: true, iOS.EnableCocoaSdkTracing: true})
         {
+            if (options.EnableTracing != null)
+            {
+                cocoaOptions.EnableTracing = options.EnableTracing.Value;
+            }
+
             cocoaOptions.TracesSampleRate = options.TracesSampleRate;
 
             if (options.TracesSampler is { } tracesSampler)
@@ -111,17 +123,19 @@ public static partial class SentrySdk
         cocoaOptions.Dist = options.Distribution;
         cocoaOptions.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
         cocoaOptions.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
-        cocoaOptions.EnableAutoPerformanceTracking = options.iOS.EnableAutoPerformanceTracking;
-        cocoaOptions.EnableCoreDataTracking = options.iOS.EnableCoreDataTracking;
-        cocoaOptions.EnableFileIOTracking = options.iOS.EnableFileIOTracking;
+        cocoaOptions.EnableAutoPerformanceTracing = options.iOS.EnableAutoPerformanceTracing;
+        cocoaOptions.EnableCoreDataTracing = options.iOS.EnableCoreDataTracing;
+        cocoaOptions.EnableFileIOTracing = options.iOS.EnableFileIOTracing;
         cocoaOptions.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
         cocoaOptions.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
-        cocoaOptions.EnableOutOfMemoryTracking = options.iOS.EnableOutOfMemoryTracking;
+        cocoaOptions.EnableWatchdogTerminationTracking = options.iOS.EnableWatchdogTerminationTracking;
         cocoaOptions.EnableSwizzling = options.iOS.EnableSwizzling;
-        cocoaOptions.EnableUIViewControllerTracking = options.iOS.EnableUIViewControllerTracking;
+        cocoaOptions.EnableUIViewControllerTracing = options.iOS.EnableUIViewControllerTracing;
         cocoaOptions.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
-        cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
         cocoaOptions.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
+
+        // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
+        // cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
 
         // In-App Excludes and Includes to be passed to the Cocoa SDK
         options.iOS.InAppExcludes?.ForEach(x => cocoaOptions.AddInAppExclude(x));
@@ -160,8 +174,11 @@ public static partial class SentrySdk
             return evt;
         };
 
+        // Set hybrid SDK name
+        SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
+
         // Now initialize the Cocoa SDK
-        SentryCocoaSdk.StartWithOptionsObject(cocoaOptions);
+        SentryCocoaSdk.StartWithOptions(cocoaOptions);
 
         // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new IosEventProcessor(cocoaOptions));

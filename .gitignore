@@ -22,3 +22,5 @@ docs/docfx.zip
 *.received.*
 mono_crash.*.json
 test_output/
+test/**/*.apk
+/tools/

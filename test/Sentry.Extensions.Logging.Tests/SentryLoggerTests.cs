@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Sentry.Testing;
 
 namespace Sentry.Extensions.Logging.Tests;
 

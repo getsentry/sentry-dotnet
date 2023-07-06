@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol;
 
 public class UserTests
@@ -24,17 +22,20 @@ public class UserTests
             Other = new Dictionary<string, string> { { "testCustomValueKey", "testCustomValue" } }
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{" +
-            "\"id\":\"user-id\"," +
-            "\"username\":\"user-name\"," +
-            "\"email\":\"test@sentry.io\"," +
-            "\"ip_address\":\"::1\"," +
-            "\"segment\":\"A1\"," +
-            "\"other\":{\"testCustomValueKey\":\"testCustomValue\"}" +
-            "}",
+        Assert.Equal("""
+            {
+              "id": "user-id",
+              "username": "user-name",
+              "email": "test@sentry.io",
+              "ip_address": "::1",
+              "segment": "A1",
+              "other": {
+                "testCustomValueKey": "testCustomValue"
+              }
+            }
+            """,
             actual);
     }
 
@@ -75,13 +76,13 @@ public class UserTests
     public static IEnumerable<object[]> TestCases()
     {
         yield return new object[] { (new User(), "{}") };
-        yield return new object[] { (new User { Id = "some id" }, "{\"id\":\"some id\"}") };
-        yield return new object[] { (new User { Username = "some username" }, "{\"username\":\"some username\"}") };
-        yield return new object[] { (new User { Email = "some email" }, "{\"email\":\"some email\"}") };
-        yield return new object[] { (new User { IpAddress = "some ipAddress" }, "{\"ip_address\":\"some ipAddress\"}") };
-        yield return new object[] { (new User { Segment = "some segment" }, "{\"segment\":\"some segment\"}") };
+        yield return new object[] { (new User { Id = "some id" }, """{"id":"some id"}""") };
+        yield return new object[] { (new User { Username = "some username" }, """{"username":"some username"}""") };
+        yield return new object[] { (new User { Email = "some email" }, """{"email":"some email"}""") };
+        yield return new object[] { (new User { IpAddress = "some ipAddress" }, """{"ip_address":"some ipAddress"}""") };
+        yield return new object[] { (new User { Segment = "some segment" }, """{"segment":"some segment"}""") };
 
         var other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}};
-        yield return new object[] { (new User { Other = other }, "{\"other\":{\"testCustomValueKey\":\"testCustomValue\"}}")};
+        yield return new object[] { (new User { Other = other }, """{"other":{"testCustomValueKey":"testCustomValue"}}""")};
     }
 }

@@ -1,50 +1,79 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFrameworks>net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net6.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net6.0-maccatalyst</TargetFrameworks>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
+    <SentryCocoaSdkDirectory>..\..\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
+    <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
   </PropertyGroup>
 
-  <!-- Use a separate readme, and don't add the changelog to the nuget. -->
-  <ItemGroup>
-    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
-    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
-    <PackageReference Remove="SIL.ReleaseTasks" />
+  <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
+  <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('OSX'))">
+    <Compile Remove="*" />
+    <Using Remove="*" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <SentryCocoaSdkVersion>7.28.0</SentryCocoaSdkVersion>
-    <SentryCocoaSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Cocoa\$(SentryCocoaSdkVersion)\</SentryCocoaSdkDirectory>
-    <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build\Sentry.xcframework</SentryCocoaFramework>
-
-    <!-- TODO: Replace with commented line once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
-    <SentryCocoaZipFile>$(MSBuildThisFileDirectory)..\..\lib\Sentry.xcframework.$(SentryCocoaSdkVersion).custombuild.zip</SentryCocoaZipFile>
-    <!-- <SentryCocoaZipFile>$(SentryCocoaSdkDirectory)Sentry.xcframework.zip</SentryCocoaZipFile> -->
-  </PropertyGroup>
-
   <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <InternalsVisibleTo Include="Sentry" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Testing" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Extensions.Logging.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+
+    <!-- Set up the binding project. -->
+    <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
+    <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
+
+    <!-- Use a separate readme file in the nuget. -->
+    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+
+    <!-- Don't add the changelog to the nuget. -->
+    <PackageReference Remove="SIL.ReleaseTasks" />
+
+    <!-- Include our transitive build targets in the nuget. -->
+    <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
   </ItemGroup>
 
-  <Target Name="DownloadSentryCocoaSdk" BeforeTargets="CollectPackageReferences" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+  <!-- Build the Sentry Cocoa SDK -->
+  <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+    Inputs="..\..\.git\modules\modules\sentry-cocoa\HEAD" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
+  </Target>
+  <Target Name="_InnerBuildSentryCocoaSDK">
+    <Exec Command="../../scripts/build-sentry-cocoa.sh" />
+  </Target>
 
-    <!-- TODO: Uncomment to download official version from GitHub once we have fixed https://github.com/getsentry/sentry-cocoa/issues/2031 -->
-    <!-- <DownloadFile
-      SourceUrl="https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaSdkVersion)/Sentry.xcframework.zip"
-      DestinationFolder="$(SentryCocoaSdkDirectory)"
-      Condition="!Exists('$(SentryCocoaZipFile)')"
-      Retries="3"
-    /> -->
+  <!-- Generate bindings -->
+  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+    Inputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha" Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
+  </Target>
+  <Target Name="_InnerGenerateSentryCocoaBindings">
+    <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
+  </Target>
 
-    <!-- Unzip with built-in command to properly restore symlinks -->
-    <MakeDir Directories="$(SentryCocoaSdkDirectory)" Condition="!Exists('$(SentryCocoaSdkDirectory)')"/>
-    <Exec
-      Command="unzip -q &quot;$(SentryCocoaZipFile)&quot; -d &quot;$(SentryCocoaSdkDirectory)&quot;"
-      Condition="Exists('$(SentryCocoaZipFile)') And !Exists('$(SentryCocoaFramework)')"
-    />
+  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
+  <Target Name="_SetGeneratedSupportDelegatesInternal" BeforeTargets="CoreCompile" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+    Inputs="$(GeneratedSourcesDir)SupportDelegates.g.cs" Outputs="$(GeneratedSourcesDir)SupportDelegates.g.cs.stamp">
+    <PropertyGroup>
+      <GeneratedSupportDelegatesFile>$(GeneratedSourcesDir)SupportDelegates.g.cs</GeneratedSupportDelegatesFile>
+    </PropertyGroup>
+    <Message Text="Patching $(MSBuildThisFileDirectory)$(GeneratedSupportDelegatesFile)" Importance="High" />
+    <WriteLinesToFile
+      File="$(GeneratedSupportDelegatesFile)"
+      Lines="$([System.IO.File]::ReadAllText($(GeneratedSupportDelegatesFile)).Replace('public delegate','internal delegate'))"
+      Overwrite="true" />
+    <Touch Files="$(GeneratedSupportDelegatesFile).stamp" AlwaysCreate="true" />
   </Target>
 
 </Project>

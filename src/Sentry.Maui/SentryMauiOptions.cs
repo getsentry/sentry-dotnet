@@ -19,6 +19,9 @@ public class SentryMauiOptions : SentryLoggingOptions
 
         AutoSessionTracking = true;
         DetectStartupTime = StartupTimeDetectionMode.Fast;
+#if !PLATFORM_NEUTRAL
+        CacheDirectoryPath = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
+#endif
     }
 
     /// <summary>

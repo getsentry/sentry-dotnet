@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-ios</TargetFramework>
+    <TargetFramework>net7.0-ios</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
@@ -19,16 +19,21 @@
   </ItemGroup>
 
   <!--
-    Workaround for https://github.com/dotnet/maui/issues/7272 (also happens for iOS without MAUI)
-    This should not be needed in a real application.
+    Use the arm64 runtime when building on arm64 Macs.
+    See https://github.com/xamarin/xamarin-macios/issues/17841
   -->
-  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation">
-    <ItemGroup>
-      <ResolvedFileToPublish
-        Update="@(ResolvedFileToPublish)"
-        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
-        PublishFolderType="None" />
-    </ItemGroup>
-  </Target>
+  <PropertyGroup>
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <!--
+    For this demo app, let's upload sources and symbols to Sentry on every build, regardless of configuration.
+    In a real app, you probably only want to do this on Release builds.
+  -->
+  <PropertyGroup>
+    <SentryUploadSources>true</SentryUploadSources>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+  </PropertyGroup>
 
 </Project>

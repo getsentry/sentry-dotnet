@@ -32,7 +32,7 @@ internal static class MauiDeviceData
             // device.Brand ??= ?
             // device.Family ??= ?
             // device.ModelId ??= ?
-            // device.Architecture ??= ?
+            device.Architecture ??= RuntimeInformation.OSArchitecture.ToString();
             // ? = deviceInfo.Platform;
             // ? = deviceInfo.VersionString;
 
@@ -40,7 +40,7 @@ internal static class MauiDeviceData
             try
             {
                 var battery = Battery.Default;
-                device.BatteryLevel ??= battery.ChargeLevel < 0 ? null : (short)battery.ChargeLevel;
+                device.BatteryLevel ??= battery.ChargeLevel < 0 ? null : (short)(battery.ChargeLevel * 100.0);
                 device.BatteryStatus ??= battery.State.ToString();
                 device.IsCharging ??= battery.State switch
                 {

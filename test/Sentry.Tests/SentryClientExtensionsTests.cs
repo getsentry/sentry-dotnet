@@ -72,7 +72,7 @@ public class SentryClientExtensionsTests
     public void CaptureMessage_NullMessage_DoesNotCapturesEventWithMessage()
     {
         _ = _sut.IsEnabled.Returns(true);
-        var id = _sut.CaptureMessage(null);
+        var id = _sut.CaptureMessage(null!);
 
         _ = _sut.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
         Assert.Equal(default, id);

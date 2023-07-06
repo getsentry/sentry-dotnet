@@ -1,3 +1,9 @@
+#if !__MOBILE__
+using Argon;
+using Sentry.PlatformAbstractions;
+
+namespace Sentry.Testing;
+
 public static class VerifyExtensions
 {
     public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
@@ -9,6 +15,8 @@ public static class VerifyExtensions
             {
                 _.Converters.Add(new SpansConverter());
                 _.Converters.Add(new ContextsConverter());
+                _.Converters.Add(new DebugImageConverter());
+                _.Converters.Add(new StackFrameConverter());
             })
             .IgnoreMembers("version", "elapsed")
             .IgnoreMembersWithType<SdkVersion>()
@@ -30,16 +38,10 @@ public static class VerifyExtensions
                 _ => _.Module,
                 _ => _.ThreadId)
             .IgnoreMembers<SentryThread>(_ => _.Id)
-            .IgnoreMembers<SentryStackFrame>(
-                _ => _.FileName,
-                _ => _.LineNumber,
-                _ => _.ColumnNumber,
-                _ => _.InstructionOffset,
-                _ => _.Package)
             .IgnoreStackTrace();
     }
 
-    class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
+    private class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
     {
         public override void Write(VerifyJsonWriter writer, IReadOnlyCollection<Span> spans)
         {
@@ -58,7 +60,7 @@ public static class VerifyExtensions
         }
     }
 
-    class ContextsConverter : WriteOnlyJsonConverter<Contexts>
+    private class ContextsConverter : WriteOnlyJsonConverter<Contexts>
     {
         public override void Write(VerifyJsonWriter writer, Contexts contexts)
         {
@@ -78,4 +80,53 @@ public static class VerifyExtensions
             writer.Serialize(items);
         }
     }
+
+    private class DebugImageConverter : WriteOnlyJsonConverter<DebugImage>
+    {
+        private static readonly Regex PathRegex = new(@"^.*[/\\]", RegexOptions.Compiled);
+        private static string ScrubPath(string str) => str?.Replace(PathRegex, ".../");
+
+        public override void Write(VerifyJsonWriter writer, DebugImage obj)
+        {
+            obj.DebugId = ScrubAlphaNum(obj.DebugId);
+            obj.DebugChecksum = ScrubAlphaNum(obj.DebugChecksum);
+            obj.DebugFile = ScrubPath(obj.DebugFile);
+            obj.CodeFile = ScrubPath(obj.CodeFile);
+            obj.CodeId = ScrubAlphaNum(obj.CodeId);
+            writer.Serialize(JToken.FromObject(obj));
+        }
+    }
+
+    private class StackFrameConverter : WriteOnlyJsonConverter<SentryStackFrame>
+    {
+        private static readonly Regex PackageRegex = new("=[^,]+", RegexOptions.Compiled);
+
+        public override void Write(VerifyJsonWriter writer, SentryStackFrame obj)
+        {
+            obj.FunctionId = ScrubAlphaNum(obj.FunctionId);
+            obj.InstructionAddress = ScrubAlphaNum(obj.InstructionAddress);
+            obj.Package = obj.Package.Replace(PackageRegex, "=SCRUBBED");
+
+            if (RuntimeInfo.GetRuntime().IsMono())
+            {
+                // On Mono, these items only come through from the stack trace when the `--debug` flag is passed,
+                // either to mono.exe or set in the MONO_ENV_OPTIONS environment variable.
+                // Rider sets the `--debug` flag, but `dotnet test` does not.
+                // Thus we can't reliably include them and have tests pass in both.
+                obj.FileName = string.Empty;
+                obj.LineNumber = null;
+                obj.ColumnNumber = null;
+                obj.AbsolutePath = null;
+            }
+
+            writer.Serialize(JToken.FromObject(obj));
+        }
+    }
+
+    private static readonly Regex AlphaNumRegex = new("[a-zA-Z0-9]", RegexOptions.Compiled);
+
+    private static string Replace(this string str, Regex regex, string replacement) => regex.Replace(str, replacement);
+
+    private static string ScrubAlphaNum(string str) => str?.Replace(AlphaNumRegex, "_");
 }
+#endif

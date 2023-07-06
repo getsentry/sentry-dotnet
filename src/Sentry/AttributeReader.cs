@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Sentry;
+﻿namespace Sentry;
 
 internal static class AttributeReader
 {

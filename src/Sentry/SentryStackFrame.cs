@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -139,6 +138,14 @@ public sealed class SentryStackFrame : IJsonSerializable
     /// </summary>
     public string? AddressMode { get; set; }
 
+    /// <summary>
+    /// The optional Function Id.<br/>
+    /// This is derived from the `MetadataToken`, and should be the record id
+    /// of a `MethodDef`.<br/>
+    /// This should be a string with a hexadecimal number that includes a <b>0x</b> prefix.<br/>
+    /// </summary>
+    public string? FunctionId { get; set; }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
@@ -163,6 +170,7 @@ public sealed class SentryStackFrame : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
         writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
         writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
+        writer.WriteStringIfNotWhiteSpace("function_id", FunctionId);
 
         writer.WriteEndObject();
     }
@@ -174,20 +182,40 @@ public sealed class SentryStackFrame : IJsonSerializable
     /// <remarks><see cref="InApp"/> will remain with the same value if previously set.</remarks>
     public void ConfigureAppFrame(SentryOptions options)
     {
-        var parameterName = Module ?? Function;
         if (InApp != null)
         {
             return;
         }
 
-        if (string.IsNullOrEmpty(parameterName))
+        if (!string.IsNullOrEmpty(Module))
+        {
+            ConfigureAppFrame(options, Module, mustIncludeSeparator: false);
+        }
+        else if (!string.IsNullOrEmpty(Function))
+        {
+            ConfigureAppFrame(options, Function, mustIncludeSeparator: true);
+        }
+        else
         {
             InApp = true;
-            return;
         }
+    }
 
-        InApp = options.InAppInclude?.Any(include => parameterName.StartsWith(include, StringComparison.Ordinal)) == true ||
-                options.InAppExclude?.Any(exclude => parameterName.StartsWith(exclude, StringComparison.Ordinal)) != true;
+    private void ConfigureAppFrame(SentryOptions options, string parameter, bool mustIncludeSeparator)
+    {
+        var resolver = (string prefix) =>
+        {
+            if (parameter.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                if (mustIncludeSeparator)
+                {
+                    return parameter.Length > prefix.Length && parameter[prefix.Length] == '.';
+                }
+                return true;
+            }
+            return false;
+        };
+        InApp = options.InAppInclude?.Any(resolver) == true || options.InAppExclude?.Any(resolver) != true;
     }
 
     /// <summary>
@@ -214,6 +242,7 @@ public sealed class SentryStackFrame : IJsonSerializable
         var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetString();
         var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
         var addressMode = json.GetPropertyOrNull("addr_mode")?.GetString();
+        var functionId = json.GetPropertyOrNull("function_id")?.GetString();
 
         return new SentryStackFrame
         {
@@ -236,6 +265,7 @@ public sealed class SentryStackFrame : IJsonSerializable
             InstructionAddress = instructionAddress,
             InstructionOffset = instructionOffset,
             AddressMode = addressMode,
+            FunctionId = functionId,
         };
     }
 }

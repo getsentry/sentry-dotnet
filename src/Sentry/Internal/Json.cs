@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Sentry.Internal;
 
 internal static class Json

@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Sentry.Http;
 
 namespace Sentry.Benchmarks;

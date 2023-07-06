@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 
@@ -8,9 +7,9 @@ internal class SentryDiagnosticListenerIntegration : ISdkIntegration
 {
     public void Register(IHub hub, SentryOptions options)
     {
-        if (options.TracesSampleRate == 0 && options.TracesSampler == null)
+        if (!options.IsTracingEnabled)
         {
-            options.Log(SentryLevel.Info, "DiagnosticSource Integration is now disabled due to TracesSampleRate being set to zero, and no TracesSampler set.");
+            options.Log(SentryLevel.Info, "DiagnosticSource Integration is disabled because tracing is disabled.");
             options.DisableDiagnosticSourceIntegration();
             return;
         }

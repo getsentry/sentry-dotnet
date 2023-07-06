@@ -1,103 +1,12 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol;
 
-[UsesVerify]
-public class SentryEventTests
+public partial class SentryEventTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
     public SentryEventTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
-    }
-
-    [Fact]
-    [Trait("Category", "Verify")]
-    public async Task SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
-    {
-        var ex = new Exception("exception message");
-        var timestamp = DateTimeOffset.MaxValue;
-        var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
-        var sut = new SentryEvent(ex, timestamp, id)
-        {
-            User = new User { Id = "user-id" },
-            Request = new Request { Method = "POST" },
-            Contexts = new Contexts
-            {
-                ["context_key"] = "context_value",
-                [".NET Framework"] = new Dictionary<string, string>
-                {
-                    [".NET Framework"] = "\"v2.0.50727\", \"v3.0\", \"v3.5\"",
-                    [".NET Framework Client"] = "\"v4.8\", \"v4.0.0.0\"",
-                    [".NET Framework Full"] = "\"v4.8\""
-                }
-            },
-            Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
-            Environment = "environment",
-            Level = SentryLevel.Fatal,
-            Logger = "logger",
-            Message = new SentryMessage
-            {
-                Message = "message",
-                Formatted = "structured_message"
-            },
-            Modules = { { "module_key", "module_value" } },
-            Release = "release",
-            Distribution = "distribution",
-            SentryExceptions = new[] { new SentryException { Value = "exception_value" } },
-            SentryThreads = new[] { new SentryThread { Crashed = true } },
-            ServerName = "server_name",
-            TransactionName = "transaction",
-            DebugImages = new List<DebugImage>
-            {
-                new()
-                {
-                    Type = "wasm",
-                    DebugId = "900f7d1b868432939de4457478f34720"
-                }
-            },
-        };
-
-        sut.Sdk.AddPackage(new Package("name", "version"));
-        sut.Sdk.AddIntegration("integration");
-        sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
-        sut.AddBreadcrumb(new Breadcrumb(
-            timestamp,
-            "message",
-            "type",
-            new Dictionary<string, string> { { "data-key", "data-value" } },
-            "category",
-            BreadcrumbLevel.Warning));
-
-        sut.SetExtra("extra_key", "extra_value");
-        sut.Fingerprint = new[] { "fingerprint" };
-        sut.SetTag("tag_key", "tag_value");
-
-        var actualString = sut.ToJsonString(_testOutputLogger);
-
-        await VerifyJson(actualString);
-
-        actualString.Should().Contain(
-            "\"debug_meta\":{\"images\":[" +
-            "{\"type\":\"wasm\",\"debug_id\":\"900f7d1b868432939de4457478f34720\"}" +
-            "]}");
-
-        var actual = Json.Parse(actualString, SentryEvent.FromJson);
-
-        // Assert
-        actual.Should().BeEquivalentTo(sut, o =>
-        {
-            // Exceptions are not deserialized
-            o.Excluding(x => x.Exception);
-
-            // Timestamps lose some precision when writing to JSON
-            o.Using<DateTimeOffset>(ctx =>
-                ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMilliseconds(1))
-            ).WhenTypeIs<DateTimeOffset>();
-
-            return o;
-        });
     }
 
     [Fact]
@@ -170,5 +79,92 @@ public class SentryEventTests
     {
         var evt = new SentryEvent();
         Assert.NotNull(evt.Modules);
+    }
+
+    [Fact]
+    public void Redact_Redacts_Urls()
+    {
+        // Arrange
+        var message = "message123 https://user@not.redacted";
+        var logger = "logger123 https://user@not.redacted";
+        var platform = "platform123 https://user@not.redacted";
+        var serverName = "serverName123 https://user@not.redacted";
+        var release = "release123 https://user@not.redacted";
+        var distribution = "distribution123 https://user@not.redacted";
+        var moduleValue = "module123 https://user@not.redacted";
+        var transactionName = "transactionName123 https://user@sentry.io";
+        var requestUrl = "https://user@not.redacted";
+        var username = "username";
+        var email = "bob@foo.com";
+        var ipAddress = "127.0.0.1";
+        var environment = "environment123 https://user@not.redacted";
+
+        var breadcrumbMessage = "message https://user@sentry.io"; // should be redacted
+        var breadcrumbDataValue = "data-value https://user@sentry.io"; // should be redacted
+        var tagValue = "tag_value https://user@not.redacted";
+
+        var timestamp = DateTimeOffset.MaxValue;
+
+        var evt = new SentryEvent()
+        {
+            Message = message,
+            Logger = logger,
+            Platform = platform,
+            ServerName = serverName,
+            Release = release,
+            Distribution = distribution,
+            TransactionName = transactionName,
+            Request = new Request
+            {
+                Method = "GET",
+                Url = requestUrl
+            },
+            User = new User
+            {
+                Username = username,
+                Email = email,
+                IpAddress = ipAddress
+            },
+            Environment = environment,
+        };
+        evt.Modules.Add("module", moduleValue);
+        evt.AddBreadcrumb(new Breadcrumb(timestamp, breadcrumbMessage));
+        evt.AddBreadcrumb(new Breadcrumb(
+            timestamp,
+            "message",
+            "type",
+            new Dictionary<string, string> { { "data-key", breadcrumbDataValue } },
+            "category",
+            BreadcrumbLevel.Warning));
+        evt.SetTag("tag_key", tagValue);
+
+        // Act
+        evt.Redact();
+
+        // Assert
+        using (new AssertionScope())
+        {
+            evt.Message.Message.Should().Be(message);
+            evt.Logger.Should().Be(logger);
+            evt.Platform.Should().Be(platform);
+            evt.ServerName.Should().Be(serverName);
+            evt.Release.Should().Be(release);
+            evt.Distribution.Should().Be(distribution);
+            evt.Modules["module"].Should().Be(moduleValue);
+            evt.TransactionName.Should().Be(transactionName);
+            // We don't redact the User or the Request since, if SendDefaultPii is false, we don't add these to the
+            // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
+            // behavior if they need)
+            evt.Request.Url.Should().Be(requestUrl);
+            evt.User.Username.Should().Be(username);
+            evt.User.Email.Should().Be(email);
+            evt.User.IpAddress.Should().Be(ipAddress);
+            evt.Environment.Should().Be(environment);
+            var breadcrumbs = evt.Breadcrumbs.ToArray();
+            breadcrumbs.Length.Should().Be(2);
+            breadcrumbs[0].Message.Should().Be($"message https://{PiiExtensions.RedactedText}@sentry.io");
+            breadcrumbs[1].Data?["data-key"].Should().Be($"data-value https://{PiiExtensions.RedactedText}@sentry.io");
+            evt.Tags["tag_key"].Should().Be(tagValue);
+        }
     }
 }

@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Web;
 using Sentry.Extensibility;
 
 namespace Sentry.AspNet;
@@ -35,7 +33,7 @@ public static class HttpContextExtensions
 
     private static BaggageHeader? TryGetBaggageHeader(HttpContext context, SentryOptions? options)
     {
-        var value = context.Request.Headers.Get(SentryTraceHeader.HttpHeaderName);
+        var value = context.Request.Headers.Get(BaggageHeader.HttpHeaderName);
         if (string.IsNullOrWhiteSpace(value))
         {
             return null;
@@ -101,6 +99,11 @@ public static class HttpContextExtensions
 
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;
+
+        if (options?.SendDefaultPii is true)
+        {
+            transaction.Request.Cookies = string.Join("; ", httpContext.Request.Cookies.AllKeys.Select(x => $"{x}={httpContext.Request.Cookies[x]?.Value}"));
+        }
 
         return transaction;
     }

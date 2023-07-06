@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Sentry.Internal;
 
 internal class PartialStream : Stream

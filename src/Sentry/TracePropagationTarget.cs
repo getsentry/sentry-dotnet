@@ -1,8 +1,6 @@
-using System.ComponentModel;
-using System.Globalization;
-using System.Text.RegularExpressions;
-
 namespace Sentry;
+
+// TODO: Replace TracePropagationTarget with SubstringOrRegexPattern in next major version.
 
 /// <summary>
 /// Provides a pattern that can be used to identify which destinations will have <c>sentry-trace</c> and
@@ -11,12 +9,8 @@ namespace Sentry;
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/performance/#tracepropagationtargets"/>
 [TypeConverter(typeof(TracePropagationTargetTypeConverter))]
-public class TracePropagationTarget
+public class TracePropagationTarget: SubstringOrRegexPattern
 {
-    private readonly Regex? _regex;
-    private readonly string? _substring;
-    private readonly StringComparison _stringComparison;
-
     /// <summary>
     /// Constructs a <see cref="TracePropagationTarget"/> instance that will match when the provided
     /// <paramref name="substringOrRegexPattern"/> is either found as a substring within the outgoing request URL,
@@ -27,10 +21,8 @@ public class TracePropagationTarget
     public TracePropagationTarget(
         string substringOrRegexPattern,
         StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        : base(substringOrRegexPattern, comparison)
     {
-        _substring = substringOrRegexPattern;
-        _stringComparison = comparison;
-        _regex = TryParseRegex(substringOrRegexPattern, comparison);
     }
 
     /// <summary>
@@ -44,59 +36,22 @@ public class TracePropagationTarget
     /// <see cref="RegexOptions.CultureInvariant"/> (unless you have culture-specific matching needs).
     /// The <see cref="TracePropagationTarget(string, StringComparison)"/> constructor sets these by default.
     /// </remarks>
-    public TracePropagationTarget(Regex regex) => _regex = regex;
-
-    /// <inheritdoc />
-    public override string ToString() => _substring ?? _regex?.ToString() ?? "";
-
-    internal bool IsMatch(string url) =>
-        _substring == ".*" || // perf shortcut
-        (_substring != null && url.Contains(_substring, _stringComparison)) ||
-        _regex?.IsMatch(url) == true;
-
-    private static Regex? TryParseRegex(string pattern, StringComparison comparison)
+    public TracePropagationTarget(Regex regex) : base (regex)
     {
-        try
-        {
-            var regexOptions = RegexOptions.Compiled;
-
-            if (comparison is
-                StringComparison.InvariantCulture or
-                StringComparison.InvariantCultureIgnoreCase or
-                StringComparison.Ordinal or
-                StringComparison.OrdinalIgnoreCase)
-            {
-                regexOptions |= RegexOptions.CultureInvariant;
-            }
-
-            if (comparison is
-                StringComparison.CurrentCultureIgnoreCase or
-                StringComparison.InvariantCultureIgnoreCase or
-                StringComparison.OrdinalIgnoreCase)
-            {
-                regexOptions |= RegexOptions.IgnoreCase;
-            }
-
-            return new Regex(pattern, regexOptions);
-        }
-        catch
-        {
-            // not a valid regex
-            return null;
-        }
     }
 }
 
-internal static class TracePropagationTargetExtensions
-{
-    public static bool ShouldPropagateTrace(this IEnumerable<TracePropagationTarget> targets, string url) =>
-        targets.Any(t => t.IsMatch(url));
-}
+//internal static class TracePropagationTargetExtensions
+//{
+//    public static bool ShouldPropagateTrace(this IEnumerable<TracePropagationTarget> targets, string url) =>
+//        targets.Any(t => t.IsMatch(url));
+//}
 
+/// <summary>
+/// Allows the TracePropagationTargets option to be set from config, such as appSettings.json
+/// </summary>
 internal class TracePropagationTargetTypeConverter : TypeConverter
 {
-    // This class allows the TracePropagationTargets option to be set from config, such as appSettings.json
-
     public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
         sourceType == typeof(string);
 

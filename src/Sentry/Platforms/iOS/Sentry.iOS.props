@@ -5,11 +5,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="System.Globalization" />
-    <Using Include="System.Text.Json" />
     <Using Include="Foundation" />
     <Using Include="Sentry.CocoaSdk.SentryOptions" Alias="SentryCocoaOptions" />
-    <Using Include="Sentry.CocoaSdk.SentrySdk" Alias="SentryCocoaSdk" />
+    <Using Include="Sentry.CocoaSdk.SentrySDK" Alias="SentryCocoaSdk" />
+    <Using Include="Sentry.CocoaSdk.PrivateSentrySDKOnly" Alias="SentryCocoaHybridSdk" />
   </ItemGroup>
 
 </Project>

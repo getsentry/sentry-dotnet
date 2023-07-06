@@ -6,34 +6,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'net48'">
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.*" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.*" />
-
-    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
-    <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.*" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.*" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.*" />
-    <PackageReference Include="Verify.AspNetCore" Version="2.*" />
-    <PackageReference Include="Verify.Http" Version="4.*" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'net7.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.*" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.*" />
-    <PackageReference Include="Verify.AspNetCore" Version="3.*" />
-    <PackageReference Include="Verify.Http" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>

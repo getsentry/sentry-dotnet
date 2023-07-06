@@ -1,6 +1,3 @@
-using System.Net;
-using System.Security.Claims;
-using System.Security.Principal;
 using Microsoft.AspNetCore.Http;
 
 namespace Sentry.AspNetCore.Tests;

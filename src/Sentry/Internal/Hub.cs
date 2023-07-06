@@ -1,10 +1,10 @@
-using System.Runtime.CompilerServices;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IDisposable
+internal class Hub : IHubEx, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -41,6 +41,7 @@ internal class Hub : IHub, IDisposable
             options.LogFatal(msg);
             throw new InvalidOperationException(msg);
         }
+
         options.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
         _options = options;
@@ -59,14 +60,12 @@ internal class Hub : IHub, IDisposable
 
         _enricher = new Enricher(options);
 
-        var integrations = options.Integrations;
-        if (integrations?.Count > 0)
+        // An integration _can_ deregister itself, so make a copy of the list before iterating.
+        var integrations = options.Integrations?.ToList() ?? Enumerable.Empty<ISdkIntegration>();
+        foreach (var integration in integrations)
         {
-            foreach (var integration in integrations)
-            {
-                options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                integration.Register(this, options);
-            }
+            options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
+            integration.Register(this, options);
         }
     }
 
@@ -98,17 +97,13 @@ internal class Hub : IHub, IDisposable
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
-    public void WithScope(Action<Scope> scopeCallback)
-    {
-        try
-        {
-            ScopeManager.WithScope(scopeCallback);
-        }
-        catch (Exception e)
-        {
-            _options.LogError("Failure to run callback WithScope", e);
-        }
-    }
+    public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
+
+    public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
+
+    public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
+
+    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
 
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
@@ -122,28 +117,58 @@ internal class Hub : IHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
+        var instrumenter = (context as SpanContext)?.Instrumenter;
+        if (instrumenter != _options.Instrumenter)
+        {
+            _options.LogWarning(
+                $"Attempted to start a transaction via {instrumenter} instrumentation when the SDK is" +
+                $" configured for {_options.Instrumenter} instrumentation.  The transaction will not be created.");
+
+            return NoOpTransaction.Instance;
+        }
+
         var transaction = new TransactionTracer(this, context);
 
-        // Tracing sampler callback runs regardless of whether a decision
-        // has already been made, as it can be used to override it.
-        if (_options.TracesSampler is { } tracesSampler)
+        // If the hub is disabled, we will always sample out.  In other words, starting a transaction
+        // after disposing the hub will result in that transaction not being sent to Sentry.
+        // Additionally, we will always sample out if tracing is explicitly disabled.
+        // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
+        // that may have been already set (i.e.: from a sentry-trace header).
+        if (!IsEnabled || _options.EnableTracing is false)
         {
-            var samplingContext = new TransactionSamplingContext(
-                context,
-                customSamplingContext);
-
-            if (tracesSampler(samplingContext) is { } sampleRate)
+            transaction.IsSampled = false;
+            transaction.SampleRate = 0.0;
+        }
+        else
+        {
+            // Except when tracing is disabled, TracesSampler runs regardless of whether a decision
+            // has already been made, as it can be used to override it.
+            if (_options.TracesSampler is { } tracesSampler)
             {
+                var samplingContext = new TransactionSamplingContext(
+                    context,
+                    customSamplingContext);
+
+                if (tracesSampler(samplingContext) is { } sampleRate)
+                {
+                    transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                    transaction.SampleRate = sampleRate;
+                }
+            }
+
+            // Random sampling runs only if the sampling decision hasn't been made already.
+            if (transaction.IsSampled == null)
+            {
+                var sampleRate = _options.TracesSampleRate ?? (_options.EnableTracing is true ? 1.0 : 0.0);
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
-        }
 
-        // Random sampling runs only if the sampling decision hasn't been made already.
-        if (transaction.IsSampled == null)
-        {
-            transaction.IsSampled = _randomValuesFactory.NextBool(_options.TracesSampleRate);
-            transaction.SampleRate = _options.TracesSampleRate;
+            if (transaction.IsSampled is true && _options.TransactionProfilerFactory is { } profilerFactory)
+            {
+                // TODO cancellation token based on Hub being closed?
+                transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
+            }
         }
 
         // Use the provided DSC, or create one based on this transaction.
@@ -168,11 +193,7 @@ internal class Hub : IHub, IDisposable
         _ = ExceptionToSpanMap.GetValue(exception, _ => span);
     }
 
-    public ISpan? GetSpan()
-    {
-        var (currentScope, _) = ScopeManager.GetCurrent();
-        return currentScope.GetSpan();
-    }
+    public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
     public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
@@ -272,7 +293,7 @@ internal class Hub : IHub, IDisposable
         }
 
         // Otherwise just get the currently active span on the scope (unless it's sampled out)
-        if (scope.GetSpan() is { IsSampled: not false } span)
+        if (scope.Span is { IsSampled: not false } span)
         {
             return span;
         }
@@ -280,14 +301,22 @@ internal class Hub : IHub, IDisposable
         return null;
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
+        CaptureEvent(evt, null, configureScope);
+
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
     {
+        if (!IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
         try
         {
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, clonedScope);
+            return CaptureEvent(evt, hint, clonedScope);
         }
         catch (Exception e)
         {
@@ -296,7 +325,13 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null)
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
+        CaptureEvent(evt, null, scope);
+
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) =>
+        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, hint, scope) : SentryId.Empty;
+
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
     {
         try
         {
@@ -311,8 +346,8 @@ internal class Hub : IHub, IDisposable
                 evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
             }
 
-            var hasUnhandledException = evt.HasUnhandledException();
-            if (hasUnhandledException)
+            var hasTerminalException = evt.HasTerminalException();
+            if (hasTerminalException)
             {
                 // Event contains a terminal exception -> end session as crashed
                 _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
@@ -325,16 +360,22 @@ internal class Hub : IHub, IDisposable
                 actualScope.SessionUpdate = _sessionManager.ReportError();
             }
 
-            var id = currentScope.Value.CaptureEvent(evt, actualScope);
+            // When a transaction is present, copy its DSC to the event.
+            var transaction = actualScope.Transaction as TransactionTracer;
+            evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
+
+            // Now capture the event with the Sentry client on the current scope.
+            var sentryClient = currentScope.Value;
+            var id = sentryClient.CaptureEvent(evt, hint, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (hasUnhandledException)
+            if (hasTerminalException)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                actualScope.Transaction?.Finish(SpanStatus.Aborted);
+                transaction?.Finish(SpanStatus.Aborted);
             }
 
             return id;
@@ -348,6 +389,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             _ownedClient.CaptureUserFeedback(userFeedback);
@@ -358,25 +404,40 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
+        // Note: The hub should capture transactions even if it is disabled.
+        // This allows transactions to be reported as failed when they encountered an unhandled exception,
+        // in the case where the hub was disabled before the transaction was captured.
+        // For example, that can happen with a top-level async main because IDisposables are processed before
+        // the unhandled exception event fires.
+        //
+        // Any transactions started after the hub was disabled will already be sampled out and thus will
+        // not be passed along to sentry when captured here.
+
         try
         {
             // Apply scope data
-            var currentScope = ScopeManager.GetCurrent();
-            var scope = currentScope.Key;
+            var currentScopeAndClient = ScopeManager.GetCurrent();
+            var scope = currentScopeAndClient.Key;
             scope.Evaluate();
             scope.Apply(transaction);
 
             // Apply enricher
             _enricher.Apply(transaction);
 
+            // Add attachments to the hint for processors and callbacks
+            hint ??= new Hint();
+            hint.AddAttachmentsFromScope(scope);
+
             var processedTransaction = transaction;
             if (transaction.IsSampled != false)
             {
                 foreach (var processor in scope.GetAllTransactionProcessors())
                 {
-                    processedTransaction = processor.Process(transaction);
+                    processedTransaction = processor.DoProcessTransaction(transaction, hint);
                     if (processedTransaction == null)
                     {
                         _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
@@ -386,7 +447,8 @@ internal class Hub : IHub, IDisposable
                 }
             }
 
-            currentScope.Value.CaptureTransaction(processedTransaction);
+            var client = currentScopeAndClient.Value;
+            client.CaptureTransaction(processedTransaction, hint);
         }
         catch (Exception e)
         {
@@ -396,6 +458,11 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         try
         {
             _ownedClient.CaptureSession(sessionUpdate);

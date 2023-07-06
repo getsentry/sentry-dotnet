@@ -1,15 +1,10 @@
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using Sentry.Http;
 using Sentry.Internal.Http;
-using Sentry.Testing;
 using Sentry.Tests.Helpers;
 
 namespace Sentry.Tests.Internals.Http;
 
-[UsesVerify]
-public class HttpTransportTests
+public partial class HttpTransportTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
     private readonly ISystemClock _fakeClock;
@@ -142,7 +137,7 @@ public class HttpTransportTests
             e.Message == "Envelope's {0} bytes written to: {1}");
 
         Assert.NotNull(fileStoredLogEntry);
-        var expectedFile = new FileInfo(fileStoredLogEntry.Args[1].ToString());
+        var expectedFile = new FileInfo(fileStoredLogEntry.Args[1].ToString()!);
         Assert.True(expectedFile.Exists);
         try
         {
@@ -335,7 +330,7 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(envelope);
 
         var lastRequest = httpHandler.GetRequests().Last();
-        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+        var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();
 
         // Assert
         actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
@@ -416,7 +411,7 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(envelope);
 
         var lastRequest = httpHandler.GetRequests().Last();
-        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+        var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();
 
         // Assert
         actualEnvelopeSerialized.Should().BeEquivalentTo(expectedEnvelopeSerialized);
@@ -535,7 +530,7 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(envelope);
 
         var lastRequest = httpHandler.GetRequests().Last();
-        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+        var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();
 
         // Assert
         // (the envelope should have only one item)
@@ -587,15 +582,13 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(envelope);
 
         var lastRequest = httpHandler.GetRequests().Last();
-        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+        var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();
 
         // Assert
         // (the envelope should have only one item)
 
         logger.Entries.Should().Contain(e =>
-            e.Message == "Attachment '{0}' dropped because it's too large ({1} bytes)." &&
-            e.Args[0].ToString() == "test2.txt" &&
-            e.Args[1].ToString() == "5");
+            string.Format(e.Message, e.Args) == "Attachment 'test2.txt' dropped because it's too large (5 bytes).");
 
         actualEnvelopeSerialized.Should().NotContain("test2.txt");
     }
@@ -636,7 +629,7 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, session.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
-        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+        var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();
 
         // Assert
         actualEnvelopeSerialized.Should().Contain("\"init\":true");
@@ -679,7 +672,7 @@ public class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
-        var actualEnvelopeSerialized = await lastRequest.Content.ReadAsStringAsync();
+        var actualEnvelopeSerialized = await lastRequest.Content!.ReadAsStringAsync();
 
         // Assert
         actualEnvelopeSerialized.Should().NotContain("\"init\":true");
@@ -715,7 +708,7 @@ public class HttpTransportTests
 
         // Act
         using var request = httpTransport.CreateRequest(envelope);
-        var authHeader = request.Headers.GetValues("X-Sentry-Auth").FirstOrDefault();
+        var authHeader = request.Headers.GetValues("X-Sentry-Auth").First();
 
         // Assert
         var versionString = Regex.Match(authHeader, @"sentry_client=(\S+),sentry_key").Groups[1].Value;
@@ -770,55 +763,10 @@ public class HttpTransportTests
 
         // Act
         var request = httpTransport.CreateRequest(envelope);
-        var requestContent = await request.Content.ReadAsStringAsync();
+        var requestContent = await request.Content!.ReadAsStringAsync();
 
         // Assert
         requestContent.Should().Contain(envelope.TryGetEventId().ToString());
-    }
-
-    [Fact]
-    [Trait("Category", "Verify")]
-    public Task ProcessEnvelope_ShouldAttachClientReport()
-    {
-        var options = new SentryOptions();
-
-        var recorder = new ClientReportRecorder(options);
-        options.ClientReportRecorder = recorder;
-
-        var logger = Substitute.For<IDiagnosticLogger>();
-
-        var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
-
-        // add some fake discards for the report
-        recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Internal);
-        recorder.RecordDiscardedEvent(DiscardReason.NetworkError, DataCategory.Security);
-        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
-        recorder.RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
-        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
-        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
-        recorder.RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction);
-
-        var sentryEvent = new SentryEvent();
-
-        var envelope = Envelope.FromEvent(sentryEvent);
-        var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
-
-        // There should be exactly two items in the envelope
-        Assert.Equal(2, processedEnvelope.Items.Count);
-        var eventItem = processedEnvelope.Items[0];
-        var clientReportItem = processedEnvelope.Items[1];
-
-        // Make sure they have the correct types set in their headers
-        Assert.Equal("event", eventItem.TryGetType());
-        Assert.Equal("client_report", clientReportItem.TryGetType());
-
-        var eventItemJson = eventItem.Payload.SerializeToString(logger);
-        var clientReportJson = clientReportItem.Payload.SerializeToString(logger);
-        Assert.Contains("timestamp", clientReportJson);
-        Assert.Contains("timestamp", eventItemJson);
-
-        return VerifyJson($"{{eventItemJson:{eventItemJson},clientReportJson:{clientReportJson}}}")
-            .IgnoreMembers("timestamp");
     }
 
     [Fact]

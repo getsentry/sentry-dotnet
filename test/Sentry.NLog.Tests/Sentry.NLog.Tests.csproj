@@ -15,9 +15,6 @@
     <Using Include="NLog.Layouts" />
     <Using Include="NLog.Targets" />
     <Using Include="NLog.Targets.Wrappers" />
-    <Using Include="Sentry.Testing" />
-    <Using Include="Sentry.Tests" />
-    <Using Include="System.Collections" />
     <Using Include="System.Xml" />
 
   </ItemGroup>

@@ -85,9 +85,9 @@ internal sealed class Dsn
             ? keys[1]
             : null;
 
-        var path = uri.AbsolutePath.Substring(0, uri.AbsolutePath.LastIndexOf('/'));
+        var path = uri.AbsolutePath[..uri.AbsolutePath.LastIndexOf('/')];
 
-        var projectId = uri.AbsoluteUri.Substring(uri.AbsoluteUri.LastIndexOf('/') + 1);
+        var projectId = uri.AbsoluteUri[(uri.AbsoluteUri.LastIndexOf('/') + 1)..];
         if (string.IsNullOrWhiteSpace(projectId))
         {
             throw new ArgumentException("Invalid DSN: A Project Id is required.");

@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class StringExtensions

@@ -2,12 +2,36 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <!--Version is detected by default as the application release and sent to sentry-->
-    <Version>9.8.7</Version>
-    <TargetFrameworks>net6.0;net48</TargetFrameworks>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!--
+    We set the SentryOrg and SentryProject globally in our root Directory.Build.props.
+    In your own project, uncomment the following block and set the values for your Sentry configuration.
+    Also note, these options do nothing if you are not authenticated.
+    See https://docs.sentry.io/platforms/dotnet/configuration/msbuild/
+    -->
+    <!--
+    <SentryUrl>...your Sentry URL if self-hosted, or omit this line if using sentry.io...</SentryUrl>
+    <SentryOrg>...your org...</SentryOrg>
+    <SentryProject>...your project...</SentryProject>
+    -->
+
+    <!--
+    After the above properties are configured, you can use the following features.
+    Uploading sources to Sentry during the build will enable Source Context in the Sentry issue details page.
+    Uploading symbols to Sentry will enable server-side symbolication.  However, that is not necessary here
+    because the PDB file is present at runtime. Thus, .NET will symbolicate stack traces client-side.
+    -->
+    <SentryUploadSources>true</SentryUploadSources>
+    <SentryUploadSymbols>false</SentryUploadSymbols>
+  </PropertyGroup>
+
+
+  <!-- In your own project, this would be a PackageReference to the latest version of Sentry. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>

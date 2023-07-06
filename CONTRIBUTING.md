@@ -1,13 +1,15 @@
 # Contributing
 
-We love receiving PRs from the community with features and fixed. 
+We love receiving PRs from the community with features and fixed.
 For big feature it's advised to raise an issue to discuss it first.
 
-## TLDR:
+## TLDR
 
 * Install the .NET SDKs
-* To quickly get up and running, you can just run `dotnet build`
-* To run a full build and test locally before pushing, run `./build.sh` or `./buld.ps1`
+* Install PowerShell
+* Restore workloads with `dotnet workload restore` (needs `sudo` on a Mac)
+* To quickly get up and running, you can just run `dotnet build Sentry.sln`
+* To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
 
 ## Dependencies
 
@@ -29,13 +31,27 @@ For big feature it's advised to raise an issue to discuss it first.
 To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, you'll need to have .NET SDK 6.0.400 or greater installed, and have installed the MAUI workloads installed, either through Visual Studio setup, or by running `dotnet workload restore` (or `dotnet workload install maui`) from the Sentry source code root directory.
 You may also need other platform dependencies.  See https://docs.microsoft.com/dotnet/maui/ for details.  Basically, if you can build and run the "MyMauiApp" example you should also be able to build and run the Sentry MAUI sample app.
 
+### Targeting Android, iOS and Mac Catalyst
+
+Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project, they are [conditionally targeted](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/src/Sentry/Sentry.csproj#L19-L21) when the platform is Android, iOS or Mac Catalyst.  We build for Android on all platforms, but currently compile iOS and Mac Catalyst _only when building on a Mac_.
+
+```xml
+<!-- Platform-specific props included here -->
+  <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
+  <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+```
+
+These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK (which provide .NET wrappers around native Android or Cocoa functions).
+
+Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution. 
+
 ## API changes approval process
 
 This repository uses [Verify](https://github.com/VerifyTests/Verify) to store the public API diffs in snapshot files.
 When a change involves modifying the public API area (by for example adding a public method),
 that change will need to be approved, otherwise the CI process will fail.
 
-To do that, run the build locally (i.e: `./build.sh` or `pwsh .\build.ps1`)
+To do that, run the build locally (i.e: `./build.sh` or `build.cmd`)
 and commit the `verify` files that were changed.
 
 
@@ -47,7 +63,7 @@ Apple Silicon processors (such as the "M1") are arm64 processosr. While .NET 6 a
 - Always install the x64 release of .NET Core 3.1 (it is not avaialable for arm64).
   - If prompted, you will need to allow Apple's [Rosetta](https://support.apple.com/HT211861) to be installed.  If you have previously done this for another app, you won't be prompted again.
 
-If you are only running `dotnet test` on the command line, you don't need to do anything else.
+If you are only running `dotnet test Sentry.sln` on the command line, you don't need to do anything else.
 
 If you are using JetBrains Rider as your IDE, you should install the arm64 version of Rider.  Within Rider, the .NET SDK used for build and tests is selected under `Preferences` -> `Build, Execution, Deployment` -> `Toolset and Build`.
 
@@ -68,7 +84,7 @@ Note that the MSBuild version should always be `17.0` but will change paths base
 We'd love for users to update the SDK everytime and as soon as we make a new release. But in reality most users rarely update the SDK.
 To help users see value in updating the SDK, we maintain a changelog file with entries split between two headings:
 
-1. `### Features` 
+1. `### Features`
 2. `### Fixes`
 
 We add the heading in the first PR that's adding either a feature or fixes in the current release.
@@ -86,3 +102,15 @@ Below that, you'll add the heading 3 mentioned above. For example, if you're add
 ```
 
 There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
+
+## Verify tests
+
+Some tests use [Verify](https://github.com/VerifyTests/Verify) to check returned objects against snapshots that are part of the repo.
+In case you're making code changes that produce many (intended) changes in those snapshots, you can use [accept-verifier-changes.ps1](./scripts/accept-verifier-changes.ps1) like this:
+
+```shell-script
+dotnet test
+pwsh ./scripts/accept-verifier-changes.ps1
+```
+
+You may need to run this multiple times because `dotnet test` stops after a certain number of failures.

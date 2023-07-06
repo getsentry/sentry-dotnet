@@ -13,12 +13,17 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
 
     steps:
       - name: Cancel Previous Runs
+        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@b173b6ec0100793626c2d9e6b90435061f4fc3e5 # Tag: 0.11.0
 
       - name: Checkout repository
@@ -30,7 +35,7 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@c3b6fce4ee2ca25bc1066aa3bf73962fda0e8898 # pin@v2
+        uses: github/codeql-action/init@cdcdbb579706841c47f7063dda365e292e5cad7a # pin@v2
         with:
           languages: csharp
 
@@ -41,4 +46,6 @@ jobs:
         run: dotnet build Sentry-CI-CodeQL.slnf --no-restore --nologo
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@c3b6fce4ee2ca25bc1066aa3bf73962fda0e8898 # pin@v2
+        uses: github/codeql-action/analyze@cdcdbb579706841c47f7063dda365e292e5cad7a # pin@v2
+        with:
+          category: '/language:csharp'

@@ -1,6 +1,3 @@
-using System.Globalization;
-using Sentry.Testing;
-
 namespace Sentry.Tests;
 
 public class SessionTests
@@ -37,27 +34,28 @@ public class SessionTests
             SessionEndStatus.Crashed);
 
         // Act
-        var json = sessionUpdate.ToJsonString(_testOutputLogger);
+        var json = sessionUpdate.ToJsonString(_testOutputLogger, indented: true);
 
         // Assert
-        json.Should().Be(
-            "{" +
-            "\"sid\":\"75302ac48a024bde9a3b3734a82e36c8\"," +
-            "\"did\":\"bar\"," +
-            "\"init\":true," +
-            "\"started\":\"2020-01-01T00:00:00+00:00\"," +
-            "\"timestamp\":\"2020-01-02T00:00:00+00:00\"," +
-            "\"seq\":5," +
-            "\"duration\":86400," +
-            "\"errors\":3," +
-            "\"status\":\"crashed\"," +
-            "\"attrs\":{" +
-            "\"release\":\"release123\"," +
-            "\"environment\":\"env123\"," +
-            "\"ip_address\":\"192.168.0.1\"," +
-            "\"user_agent\":\"Google Chrome\"" +
-            "}" +
-            "}");
+        json.Should().Be("""
+            {
+              "sid": "75302ac48a024bde9a3b3734a82e36c8",
+              "did": "bar",
+              "init": true,
+              "started": "2020-01-01T00:00:00+00:00",
+              "timestamp": "2020-01-02T00:00:00+00:00",
+              "seq": 5,
+              "duration": 86400,
+              "errors": 3,
+              "status": "crashed",
+              "attrs": {
+                "release": "release123",
+                "environment": "env123",
+                "ip_address": "192.168.0.1",
+                "user_agent": "Google Chrome"
+              }
+            }
+            """);
     }
 
     [Fact]

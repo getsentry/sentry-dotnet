@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -112,14 +111,41 @@ public static class HubExtensions
             return;
         }
 
+        var breadcrumb = new Breadcrumb(
+            (clock ?? SystemClock.Clock).GetUtcNow(),
+            message,
+            type,
+            data != null ? new Dictionary<string, string>(data) : null,
+            category,
+            level
+        );
+
+        hub.AddBreadcrumb(
+            breadcrumb
+            );
+    }
+
+    /// <summary>
+    /// Adds a breadcrumb to the current scope.
+    /// </summary>
+    /// <param name="hub">The Hub which holds the scope stack.</param>
+    /// <param name="breadcrumb">The breadcrumb to add</param>
+    /// <param name="hint">An hint provided with the breadcrumb in the BeforeBreadcrumb callback</param>
+    public static void AddBreadcrumb(
+        this IHub hub,
+        Breadcrumb breadcrumb,
+        Hint? hint = null
+        )
+    {
+        // Not to throw on code that ignores nullability warnings.
+        if (hub.IsNull())
+        {
+            return;
+        }
+
         hub.ConfigureScope(
-            s => s.AddBreadcrumb(
-                (clock ?? SystemClock.Clock).GetUtcNow(),
-                message,
-                category,
-                type,
-                data != null ? new Dictionary<string, string>(data) : null,
-                level));
+            s => s.AddBreadcrumb(breadcrumb, hint ?? new Hint())
+            );
     }
 
     /// <summary>
@@ -156,6 +182,12 @@ public static class HubExtensions
         public void Dispose() => _scope.Dispose();
     }
 
+    internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex) =>
+        hub.CaptureEventInternal(new SentryEvent(ex));
+
+    internal static SentryId CaptureEventInternal(this IHub hub, SentryEvent evt) =>
+        hub is IHubEx hubEx ? hubEx.CaptureEventInternal(evt, null, null) : hub.CaptureEvent(evt);
+
     /// <summary>
     /// Captures the exception with a configurable scope callback.
     /// </summary>
@@ -163,10 +195,8 @@ public static class HubExtensions
     /// <param name="ex">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope)
-        => !hub.IsEnabled
-            ? new SentryId()
-            : hub.CaptureEvent(new SentryEvent(ex), configureScope);
+    public static SentryId CaptureException(this IHub hub, Exception ex, Action<Scope> configureScope) =>
+        hub.CaptureEvent(new SentryEvent(ex), configureScope);
 
     /// <summary>
     /// Captures a message with a configurable scope callback.
@@ -176,20 +206,22 @@ public static class HubExtensions
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <param name="level">The message level.</param>
     /// <returns>The Id of the event</returns>
-    public static SentryId CaptureMessage(
-        this IHub hub,
-        string message,
-        Action<Scope> configureScope,
+    public static SentryId CaptureMessage(this IHub hub, string message, Action<Scope> configureScope,
         SentryLevel level = SentryLevel.Info)
-        => !hub.IsEnabled || string.IsNullOrWhiteSpace(message)
-            ? new SentryId()
-            : hub.CaptureEvent(
-                new SentryEvent
-                {
-                    Message = message,
-                    Level = level
-                },
-                configureScope);
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return new SentryId();
+        }
+
+        var sentryEvent = new SentryEvent
+        {
+            Message = message,
+            Level = level
+        };
+
+        return hub.CaptureEvent(sentryEvent, configureScope);
+    }
 
     internal static ITransaction StartTransaction(
         this IHub hub,
@@ -199,4 +231,17 @@ public static class HubExtensions
         => hub is Hub fullHub
             ? fullHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext)
             : hub.StartTransaction(context, customSamplingContext);
+
+    internal static ITransaction? GetTransaction(this IHub hub)
+    {
+        ITransaction? transaction = null;
+        hub.ConfigureScope(scope => transaction = scope.Transaction);
+        return transaction;
+    }
+
+    internal static ITransaction? GetTransactionIfSampled(this IHub hub)
+    {
+        var transaction = hub.GetTransaction();
+        return transaction?.IsSampled == true ? transaction : null;
+    }
 }

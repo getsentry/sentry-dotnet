@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol.Context;
 
 public class AppTests
@@ -66,13 +64,13 @@ public class AppTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new App(), "{\"type\":\"app\"}") };
-        yield return new object[] { (new App { Name = "some name" }, "{\"type\":\"app\",\"app_name\":\"some name\"}") };
-        yield return new object[] { (new App { Build = "some build" }, "{\"type\":\"app\",\"app_build\":\"some build\"}") };
-        yield return new object[] { (new App { BuildType = "some build type" }, "{\"type\":\"app\",\"build_type\":\"some build type\"}") };
-        yield return new object[] { (new App { Hash = "some hash" }, "{\"type\":\"app\",\"device_app_hash\":\"some hash\"}") };
-        yield return new object[] { (new App { StartTime = DateTimeOffset.MaxValue }, "{\"type\":\"app\",\"app_start_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
-        yield return new object[] { (new App { Version = "some version" }, "{\"type\":\"app\",\"app_version\":\"some version\"}") };
-        yield return new object[] { (new App { Identifier = "some identifier" }, "{\"type\":\"app\",\"app_identifier\":\"some identifier\"}") };
+        yield return new object[] { (new App(), """{"type":"app"}""") };
+        yield return new object[] { (new App { Name = "some name" }, """{"type":"app","app_name":"some name"}""") };
+        yield return new object[] { (new App { Build = "some build" }, """{"type":"app","app_build":"some build"}""") };
+        yield return new object[] { (new App { BuildType = "some build type" }, """{"type":"app","build_type":"some build type"}""") };
+        yield return new object[] { (new App { Hash = "some hash" }, """{"type":"app","device_app_hash":"some hash"}""") };
+        yield return new object[] { (new App { StartTime = DateTimeOffset.MaxValue }, """{"type":"app","app_start_time":"9999-12-31T23:59:59.9999999+00:00"}""") };
+        yield return new object[] { (new App { Version = "some version" }, """{"type":"app","app_version":"some version"}""") };
+        yield return new object[] { (new App { Identifier = "some identifier" }, """{"type":"app","app_identifier":"some identifier"}""") };
     }
 }

@@ -16,7 +16,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
         TracesSampler = null
     };
 
-    public DiagnosticsSentryOptionsExtensionsTests(ITestOutputHelper output)
+    public DiagnosticsSentryOptionsExtensionsTests()
     {
 #if NETFRAMEWORK
         _options.AddDiagnosticSourceIntegration();

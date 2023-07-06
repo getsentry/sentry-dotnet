@@ -31,11 +31,7 @@ internal class BaggageHeader
             .Where(kvp => kvp.Key.StartsWith(SentryKeyPrefix))
             .GroupBy(kvp => kvp.Key, kvp => kvp.Value)
             .ToDictionary(
-#if NETCOREAPP || NETSTANDARD2_1
                 g => g.Key[SentryKeyPrefix.Length..],
-#else
-                    g => g.Key.Substring(SentryKeyPrefix.Length),
-#endif
                 g => g.First());
 
     /// <summary>
@@ -128,9 +124,9 @@ internal class BaggageHeader
     public static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders) =>
         new(baggageHeaders.SelectMany(x => x.Members));
 
-    private static bool IsValidKey(string key)
+    private static bool IsValidKey(string? key)
     {
-        if (key.Length == 0)
+        if (string.IsNullOrEmpty(key))
         {
             return false;
         }

@@ -8,8 +8,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
 
-    <Using Include="System.ComponentModel" />
+  <ItemGroup>
     <Using Include="System.Data" />
     <Using Include="System.Data.Common" />
     <Using Include="System.Data.Entity.Infrastructure.Interception" />
@@ -18,7 +19,6 @@
     <Using Include="Sentry.EntityFramework.ErrorProcessors" />
     <Using Include="Sentry.Extensibility" />
     <Using Include="Sentry.Integrations" />
-
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
@@ -30,6 +30,10 @@
 
     <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.EntityFramework.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>

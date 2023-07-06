@@ -15,12 +15,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
-        # Using windows-2019 because windows-latest is much slower and we don't need anything in particular from it.
-        os: [ubuntu-latest, windows-2019, macos-12]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Cancel Previous Runs
+        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@b173b6ec0100793626c2d9e6b90435061f4fc3e5 # Tag: 0.11.0
 
       - name: Checkout
@@ -28,40 +27,61 @@ jobs:
         with:
           submodules: recursive
 
+      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      - name: Set Environment Variables
+        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
       - name: Setup Environment
         uses: ./.github/actions/environment
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
+      - name: Build Cocoa SDK
+        if: runner.os == 'macOS'
+        uses: ./.github/actions/buildcocoasdk
+
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo /p:CopyLocalLockFileAssemblies=true
+      - name: Build (for non-release branch)
+        if: env.CI_PUBLISHING_BUILD != 'true'
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo
+
+      - name: Build (for release branch)
+        if: env.CI_PUBLISHING_BUILD == 'true'
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Test
         run: dotnet test Sentry-CI-Test.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+
+      - name: Test symbol upload
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        with:
+          path: test
 
       - name: Upload Verify Results
         if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: verify-test-results
-          path: "**/*.received.*"
+          path: '**/*.received.*'
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
-      # We use macOS for that so we we get all the iOS/macCatalyst targets in the packages
 
-      - name: Create Nuget Packages (release only)
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+      - name: Create Nuget Packages (release branch only)
+        if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Pack.slnf -c Release --no-build --nologo
 
-      - name: Archive Nuget Packages (release only)
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+      - name: Archive Nuget Packages (release branch only)
+        if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}
           if-no-files-found: error
           path: |
             ${{ github.workspace }}/src/**/Release/*.nupkg
+            ${{ github.workspace }}/src/**/Release/*.snupkg
