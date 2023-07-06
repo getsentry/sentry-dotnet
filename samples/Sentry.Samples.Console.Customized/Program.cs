@@ -1,23 +1,10 @@
-using System.Net.Http;
 using System.Reflection;
 using System.Xml.Xsl;
-
-// One of the ways to set your DSN is via an attribute:
-// It could be set via AssemblyInfo.cs and patched via CI.
-// Other ways are via environment variable, configuration files and explicitly via parameter to Init
-[assembly: Dsn(Program.DefaultDsn)]
-// Tracks the release which sent the event and enables more features: https://docs.sentry.io/learn/releases/
-// Much like the DSN above, this is only one of the ways to define the release.
-// If not set here, it can also be defined via appsettings.json, environment variable 'SENTRY_RELEASE' and AssemblyVersion
-// STANDARD_CI_SOURCE_REVISION_ID -> TeamCity: %build.vcs.number%, VSTS: BUILD_SOURCEVERSION, Travis-CI: TRAVIS_COMMIT, AppVeyor: APPVEYOR_REPO_COMMIT, CircleCI: CIRCLE_SHA1
-[assembly: AssemblyInformationalVersion("e386dfd")]
+using Sentry;
+using Sentry.Extensibility;
 
 internal static class Program
 {
-    public const string DefaultDsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-    // A different DSN for a section of the app (i.e: admin)
-    public const string AdminDsn = "https://f670c444cca14cf2bb4bfc403525b6a3@sentry.io/259314";
-
     private static async Task Main()
     {
         // When the SDK is disabled, no callback is executed:
@@ -32,6 +19,11 @@ internal static class Program
         // Enable the SDK
         using (SentrySdk.Init(o =>
         {
+            // A Sentry Data Source Name (DSN) is required.
+            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+            // You can set it in the SENTRY_DSN environment variable, or you can set it in code here.
+            // o.Dsn = "... Your DSN ...";
+
             // Send stack trace for events that were not created from an exception
             // e.g: CaptureMessage, log.LogDebug, log.LogInformation ...
             o.AttachStacktrace = true;
@@ -50,19 +42,20 @@ internal static class Program
             // o.SampleRate = 0.5f; // Randomly drop (don't send to Sentry) half of events
 
             // Modifications to event before it goes out. Could replace the event altogether
-            o.BeforeSend = @event =>
-            {
-                // Drop an event altogether:
-                if (@event.Tags.ContainsKey("SomeTag"))
+            o.SetBeforeSend((@event, _) =>
                 {
-                    return null;
-                }
+                    // Drop an event altogether:
+                    if (@event.Tags.ContainsKey("SomeTag"))
+                    {
+                        return null;
+                    }
 
-                return @event;
-            };
+                    return @event;
+                }
+            );
 
             // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
-            o.BeforeBreadcrumb = crumb =>
+            o.SetBeforeBreadcrumb((crumb, hint) =>
             {
                 // Don't add breadcrumbs with message containing:
                 if (crumb.Message?.Contains("bad breadcrumb") == true)
@@ -70,8 +63,15 @@ internal static class Program
                     return null;
                 }
 
+                // Replace breadcrumbs entirely incase of a drastic hint
+                const string replaceBreadcrumb = "don't trust this breadcrumb";
+                if (hint.Items.TryGetValue(replaceBreadcrumb, out var replacementMessage))
+                {
+                    return new Breadcrumb((string)replacementMessage, null, null, null, BreadcrumbLevel.Critical);
+                }
+
                 return crumb;
-            };
+            });
 
             // Ignore exception by its type:
             o.AddExceptionFilterForType<XsltCompileException>();
@@ -109,6 +109,11 @@ internal static class Program
 
             SentrySdk.AddBreadcrumb(
                 "A 'bad breadcrumb' that will be rejected because of 'BeforeBreadcrumb callback above.'");
+
+            SentrySdk.AddBreadcrumb(
+                new Breadcrumb("A breadcrumb that will be replaced by the 'BeforeBreadcrumb callback because of the hint", null),
+                new Hint("don't trust this breadcrumb", "trust this instead")
+                );
 
             // Data added to the root scope (no PushScope called up to this point)
             // The modifications done here will affect all events sent and will propagate to child scopes.
@@ -171,8 +176,8 @@ internal static class Program
                     Level = SentryLevel.Debug
                 });
             }
-            // Console output will show queue being flushed. Task completes then and timeout is never reached (you don't need to wait a day :)
-            await SentrySdk.FlushAsync(TimeSpan.FromDays(1));
+            // Console output will show queue being flushed.
+            await SentrySdk.FlushAsync();
 
             // -------------------------
 
@@ -190,7 +195,8 @@ internal static class Program
             evt.Level = SentryLevel.Debug;
             SentrySdk.CaptureEvent(evt);
 
-            // Using a different DSN:
+            // Using a different DSN for a section of the app (i.e: admin)
+            const string AdminDsn = "https://f670c444cca14cf2bb4bfc403525b6a3@sentry.io/259314";
             using (var adminClient = new SentryClient(new SentryOptions { Dsn = AdminDsn }))
             {
                 // Make believe web framework middleware

@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
@@ -24,6 +21,9 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
     // Signal that tells the worker whether there's work it can do.
     // Pre-released because the directory might already have files from previous sessions.
     private readonly Signal _workerSignal = new(true);
+
+    // Signal that ensures only one thread can process items from the cache at a time
+    private readonly Signal _processingSignal = new(true);
 
     // Lock to synchronize file system operations inside the cache directory.
     // It's required because there are multiple threads that may attempt to both read
@@ -137,7 +137,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
             try
             {
                 await _workerSignal.WaitAsync(_workerCts.Token).ConfigureAwait(false);
-                _options.LogDebug("Worker signal triggered: flushing cached envelopes.");
+                _options.LogDebug("CachingTransport worker signal triggered.");
                 await ProcessCacheAsync(_workerCts.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (_workerCts.IsCancellationRequested)
@@ -254,17 +254,29 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
     private async Task ProcessCacheAsync(CancellationToken cancellation)
     {
-        // Signal that we can start waiting for _options.InitCacheFlushTimeout
-        _preInitCacheResetEvent?.Set();
-
-        // Process the cache
-        while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
+        try
         {
-            await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
-        }
+            // Make sure we're the only thread processing items
+            await _processingSignal.WaitAsync(cancellation).ConfigureAwait(false);
 
-        // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
-        _initCacheResetEvent?.Set();
+            // Signal that we can start waiting for _options.InitCacheFlushTimeout
+            _preInitCacheResetEvent?.Set();
+
+            // Process the cache
+            _options.LogDebug("Flushing cached envelopes.");
+            while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
+            {
+                await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
+            }
+
+            // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
+            _initCacheResetEvent?.Set();
+        }
+        finally
+        {
+            // Release the signal so the next pass or another thread can enter
+            _processingSignal.Release();
+        }
     }
 
     private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
@@ -278,46 +290,58 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
         _options.LogDebug("Reading cached envelope: {0}", file);
 
-        var stream = _fileSystem.OpenFileForReading(file);
+        try
+        {
+            var stream = _fileSystem.OpenFileForReading(file);
 #if NETFRAMEWORK || NETSTANDARD2_0
             using (stream)
 #else
-        await using (stream.ConfigureAwait(false))
+            await using (stream.ConfigureAwait(false))
 #endif
-        using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
+            {
+                using (var envelope = await Envelope.DeserializeAsync(stream, cancellation).ConfigureAwait(false))
+                {
+                    // Don't even try to send it if we are requesting cancellation.
+                    cancellation.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        _options.LogDebug("Sending cached envelope: {0}",
+                            envelope.TryGetEventId(_options.DiagnosticLogger));
+
+                        await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
+                    }
+                    // OperationCancel should not log an error
+                    catch (OperationCanceledException ex)
+                    {
+                        _options.LogDebug("Canceled sending cached envelope: {0}, retrying after a delay.", ex, file);
+                        // Let the worker catch, log, wait a bit and retry.
+                        throw;
+                    }
+                    catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException
+                                                   or IOException)
+                    {
+                        _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
+                        // Let the worker catch, log, wait a bit and retry.
+                        throw;
+                    }
+                    catch (Exception ex) when (ex.Source == "FakeFailingTransport")
+                    {
+                        // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
+                        LogFailureWithDiscard(file, ex);
+                    }
+                }
+            }
+        }
+        catch (JsonException ex)
         {
-            // Don't even try to send it if we are requesting cancellation.
-            cancellation.ThrowIfCancellationRequested();
-
-            try
-            {
-                _options.LogDebug("Sending cached envelope: {0}", envelope.TryGetEventId(_options.DiagnosticLogger));
-
-                await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
-            }
-            // OperationCancel should not log an error
-            catch (OperationCanceledException ex)
-            {
-                _options.LogDebug("Canceled sending cached envelope: {0}, retrying after a delay.", ex, file);
-                // Let the worker catch, log, wait a bit and retry.
-                throw;
-            }
-            catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException or IOException)
-            {
-                _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
-                // Let the worker catch, log, wait a bit and retry.
-                throw;
-            }
-            catch (Exception ex) when (ex.Source == "FakeFailingTransport")
-            {
-                // HACK: Deliberately sent from unit tests to avoid deleting the file from processing
-                return;
-            }
-            catch (Exception ex)
-            {
-                _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.CacheOverflow, envelope);
-                LogFailureWithDiscard(file, ex);
-            }
+            // Log deserialization errors
+            LogFailureWithDiscard(file, ex);
         }
 
         // Envelope & file stream must be disposed prior to reaching this point
@@ -402,7 +426,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
         var stream = _fileSystem.CreateFileForWriting(envelopeFilePath);
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using(stream)
+        using(stream)
 #else
         await using (stream.ConfigureAwait(false))
 #endif
@@ -465,7 +489,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
     public Task FlushAsync(CancellationToken cancellationToken = default)
     {
-        _options.LogDebug("External FlushAsync invocation: flushing cached envelopes.");
+        _options.LogDebug("CachingTransport received request to flush the cache.");
         return ProcessCacheAsync(cancellationToken);
     }
 

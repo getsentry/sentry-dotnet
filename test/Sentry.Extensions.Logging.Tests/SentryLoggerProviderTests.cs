@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggerProviderTests

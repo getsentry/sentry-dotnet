@@ -1,4 +1,3 @@
-using System.Web;
 using Sentry.Extensibility;
 
 namespace Sentry.AspNet.Internal;

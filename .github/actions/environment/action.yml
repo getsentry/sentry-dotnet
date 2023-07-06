@@ -16,16 +16,23 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
-    # Note, the following is needed on the windows-2019 image only.
-    # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
-    - name: Install .NET 6 SDK
+    # .NET 3.1 has been removed from all OS due to EOL
+    # https://github.com/actions/runner-images/issues/7667
+    - name: Install .NET 3.1 SDK
       uses: actions/setup-dotnet@v3
-      if: runner.os == 'Windows'
-      env:
-        # Prevent setup-dotnet action from stepping on pre-installed dotnet SDKs
-        DOTNET_INSTALL_DIR: C:\Program Files\dotnet
       with:
-        dotnet-version: 6.x.x
+        dotnet-version: 3.1.x
+
+    - name: Install .NET 7 SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.203   # switch back to 7.x.x after resolving the below Tizen issue.
+
+    # Workaround for Tizen issue
+    # See https://github.com/dotnet/sdk/issues/33192
+    - name: Pin to .NET SDK 7.0.203
+      run: dotnet new globaljson --sdk-version 7.0.203 --force
+      shell: bash
 
     - name: Dependency Caching
       uses: actions/cache@v3
@@ -45,7 +52,7 @@ runs:
           maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows maui-tizen' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
-          --temp-dir "${{ runner.temp }}"
+          --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
 
     # We build Sentry.Maui for every supported MAUI target so we can access platform-specific features.
     # That includes Tizen. We don't need the entire Tizen SDK, but we do need the base Tizen workload.

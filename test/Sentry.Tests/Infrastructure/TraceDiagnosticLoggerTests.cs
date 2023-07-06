@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Trace = System.Diagnostics.Trace;
 
 namespace Sentry.Tests.Infrastructure;
@@ -15,8 +14,8 @@ public class TraceDiagnosticLoggerTests
             var logger = new TraceDiagnosticLogger(SentryLevel.Debug);
             logger.Log(SentryLevel.Debug, "the message {0}", new Exception("the exception"), "arg1");
             Trace.Flush();
-            Assert.Equal(@"  Debug: the message arg1
-System.Exception: the exception", listener.Messages.Single());
+            Assert.Equal($"  Debug: the message arg1{Environment.NewLine}System.Exception: the exception",
+                listener.Messages.Single());
         }
         finally
         {

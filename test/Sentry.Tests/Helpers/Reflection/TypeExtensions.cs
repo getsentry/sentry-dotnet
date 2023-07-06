@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace Sentry.Tests.Helpers.Reflection;
 
 internal static class TypeExtensions

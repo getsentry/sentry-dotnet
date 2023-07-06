@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using Sentry.Extensibility;
 
 namespace Sentry.Internal.DiagnosticSource;
@@ -7,18 +5,29 @@ namespace Sentry.Internal.DiagnosticSource;
 /// <summary>
 /// Class that subscribes to specific listeners from DiagnosticListener.
 /// </summary>
-internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>, IDisposable
+internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>
 {
-    private SentryEFCoreListener? _efInterceptor;
-    private SentrySqlListener? _sqlListener;
-    private readonly ConcurrentBag<IDisposable> _disposableListeners = new();
-    private readonly IHub _hub;
-    private readonly SentryOptions _options;
+    // We intentionally do not dispose subscriptions, so that we can get as much information as possible.
+    // Also, the <see cref="OnNext"/> method may fire more than once with the same listener name.
+    // We need to subscribe each time it does. However, we only need one instance of each of our listeners.
+    // Thus, we will create the instances lazily.
+
+    private readonly Lazy<SentryEFCoreListener> _efListener;
+    private readonly Lazy<SentrySqlListener> _sqlListener;
 
     public SentryDiagnosticSubscriber(IHub hub, SentryOptions options)
     {
-        _hub = hub;
-        _options = options;
+        _efListener = new Lazy<SentryEFCoreListener>(() =>
+        {
+            options.Log(SentryLevel.Debug, "Registering EF Core integration");
+            return new SentryEFCoreListener(hub, options);
+        });
+
+        _sqlListener = new Lazy<SentrySqlListener>(() =>
+        {
+            options.Log(SentryLevel.Debug, "Registering SQL Client integration.");
+            return new SentrySqlListener(hub, options);
+        });
     }
 
     public void OnCompleted() { }
@@ -27,34 +36,28 @@ internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>, IDisp
 
     public void OnNext(DiagnosticListener listener)
     {
-        if (listener.Name == "Microsoft.EntityFrameworkCore")
+        switch (listener.Name)
         {
-            _efInterceptor = new(_hub, _options);
-            _disposableListeners.Add(listener.Subscribe(_efInterceptor));
-            _options.Log(SentryLevel.Debug, "Registered integration with EF Core.");
-            return;
+            case "Microsoft.EntityFrameworkCore":
+            {
+                listener.Subscribe(_efListener.Value);
+                break;
+            }
+
+            case "SqlClientDiagnosticListener":
+            {
+                listener.Subscribe(_sqlListener.Value);
+                break;
+            }
         }
 
-        if (listener.Name == "SqlClientDiagnosticListener")
+        // By default, the EF listener will duplicate spans already given by the SQL Client listener.
+        // Thus, we should disable those parts of the EF listener when they are both registered.
+        if (_efListener.IsValueCreated && _sqlListener.IsValueCreated)
         {
-            _sqlListener = new(_hub, _options);
-            _disposableListeners.Add(listener.Subscribe(_sqlListener));
-            _options.LogDebug("Registered integration with SQL Client.");
-
-            // Duplicated data.
-            _efInterceptor?.DisableConnectionSpan();
-            _efInterceptor?.DisableQuerySpan();
-        }
-    }
-
-    /// <summary>
-    /// Dispose all registered integrations.
-    /// </summary>
-    public void Dispose()
-    {
-        foreach (var item in _disposableListeners)
-        {
-            item.Dispose();
+            var efListener = _efListener.Value;
+            efListener.DisableConnectionSpan();
+            efListener.DisableQuerySpan();
         }
     }
 }

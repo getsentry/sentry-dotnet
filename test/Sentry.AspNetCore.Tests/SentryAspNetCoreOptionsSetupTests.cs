@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
-using Sentry.Testing;
 
 #if NETCOREAPP3_1_OR_GREATER
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;

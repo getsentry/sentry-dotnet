@@ -1,3 +1,5 @@
+using Sentry.AspNetCore.TestUtils;
+
 namespace Sentry.Serilog.Tests;
 
 [Collection(nameof(SentrySdkCollection))]

@@ -1,5 +1,3 @@
-using System.IO.Compression;
-using System.Net.Http;
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sentry.AspNetCore;
-using Sentry.Testing;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 

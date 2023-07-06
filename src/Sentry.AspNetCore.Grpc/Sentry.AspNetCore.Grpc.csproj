@@ -15,4 +15,8 @@
     <PackageReference Include="Grpc.AspNetCore.Server" Version="2.40.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol.Exceptions;
 
 public class SentryStackFrameTests
@@ -37,30 +35,40 @@ public class SentryStackFrameTests
             AddressMode = "rel:0"
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{" +
-            "\"pre_context\":[\"pre\"]," +
-            "\"post_context\":[\"post\"]," +
-            "\"vars\":{\"var\":\"val\"}," +
-            "\"frames_omitted\":[1,2]," +
-            "\"filename\":\"FileName\"," +
-            "\"function\":\"Function\"," +
-            "\"module\":\"Module\"," +
-            "\"lineno\":1," +
-            "\"colno\":2," +
-            "\"abs_path\":\"AbsolutePath\"," +
-            "\"context_line\":\"ContextLine\"," +
-            "\"in_app\":true," +
-            "\"package\":\"Package\"," +
-            "\"platform\":\"Platform\"," +
-            "\"image_addr\":\"0x3\"," +
-            "\"symbol_addr\":\"0x4\"," +
-            "\"instruction_addr\":\"0xffffffff\"," +
-            "\"instruction_offset\":5," +
-            "\"addr_mode\":\"rel:0\"" +
-            "}",
+        Assert.Equal("""
+            {
+              "pre_context": [
+                "pre"
+              ],
+              "post_context": [
+                "post"
+              ],
+              "vars": {
+                "var": "val"
+              },
+              "frames_omitted": [
+                1,
+                2
+              ],
+              "filename": "FileName",
+              "function": "Function",
+              "module": "Module",
+              "lineno": 1,
+              "colno": 2,
+              "abs_path": "AbsolutePath",
+              "context_line": "ContextLine",
+              "in_app": true,
+              "package": "Package",
+              "platform": "Platform",
+              "image_addr": "0x3",
+              "symbol_addr": "0x4",
+              "instruction_addr": "0xffffffff",
+              "instruction_offset": 5,
+              "addr_mode": "rel:0"
+            }
+            """,
             actual);
 
         var parsed = Json.Parse(actual, SentryStackFrame.FromJson);
@@ -150,6 +158,42 @@ public class SentryStackFrameTests
 
         // Assert
         Assert.True(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_WithDefaultOptions_RecognizesInAppFrame()
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame()
+        {
+            Function = "Program.<Main>() {QuickJitted}",
+            Module = "Console.Customized"
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp);
+    }
+
+    // Sentry internal frame is marked properly with default options.
+    // This is an actual frame as captured by Sentry.Profiling.
+    [Fact]
+    public void ConfigureAppFrame_WithDefaultOptions_RecognizesSentryInternalFrame()
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame()
+        {
+            Function = "Sentry.Internal.Hub.StartTransaction(class Sentry.ITransactionContext,class System.Collections.Generic.IReadOnlyDictionary`2<class System.String,class System.Object>) {QuickJitted}",
+            Module = "Sentry"
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.False(sut.InApp);
     }
 
     [Fact]

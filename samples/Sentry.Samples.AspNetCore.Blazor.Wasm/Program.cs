@@ -1,5 +1,6 @@
-using System.Net.Http;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Sentry;
 using Sentry.Samples.AspNetCore.Blazor.Wasm;
 
 // Capture blazor bootstrapping errors
@@ -28,6 +29,6 @@ try
 catch (Exception e)
 {
     SentrySdk.CaptureException(e);
-    await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
+    await SentrySdk.FlushAsync();
     throw;
 }

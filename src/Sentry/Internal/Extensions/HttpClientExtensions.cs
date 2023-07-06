@@ -1,6 +1,3 @@
-using System.Net.Http;
-using System.Text.Json;
-
 namespace Sentry.Internal.Extensions;
 
 internal static class HttpClientExtensions
@@ -11,7 +8,7 @@ internal static class HttpClientExtensions
     {
         var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using (stream)
+        using (stream)
 #else
         await using (stream.ConfigureAwait(false))
 #endif

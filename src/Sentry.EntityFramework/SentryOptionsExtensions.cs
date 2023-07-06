@@ -15,6 +15,12 @@ public static class SentryOptionsExtensions
     /// <param name="sentryOptions">The sentry options.</param>
     public static SentryOptions AddEntityFramework(this SentryOptions sentryOptions)
     {
+        if (sentryOptions.ExceptionProcessors?.OfType<DbEntityValidationExceptionProcessor>().Any() is true)
+        {
+            sentryOptions.LogWarning($"{nameof(AddEntityFramework)} has already been called. Subsequent call will be ignored.");
+            return sentryOptions;
+        }
+
         try
         {
             _ = SentryDatabaseLogging.UseBreadcrumbs(diagnosticLogger: sentryOptions.DiagnosticLogger);

@@ -4,17 +4,14 @@ public class AppDomainUnhandledExceptionIntegrationTests
 {
     private class Fixture
     {
-        public IHub Hub { get; set; } = Substitute.For<IHub, IDisposable>();
-        public IAppDomain AppDomain { get; set; } = Substitute.For<IAppDomain>();
+        public IHubEx Hub { get; } = Substitute.For<IHubEx, IDisposable>();
+        public IAppDomain AppDomain { get; } = Substitute.For<IAppDomain>();
 
-        public Fixture() => Hub.IsEnabled.Returns(true);
-
-        public AppDomainUnhandledExceptionIntegration GetSut()
-            => new(AppDomain);
+        public AppDomainUnhandledExceptionIntegration GetSut() => new(AppDomain);
     }
 
     private readonly Fixture _fixture = new();
-    public SentryOptions SentryOptions { get; set; } = new();
+    private SentryOptions SentryOptions { get; } = new();
 
     [Fact]
     public void Handle_WithException_CaptureEvent()
@@ -24,7 +21,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
 
         sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
 
-        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.Received(1).CaptureEventInternal(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -35,7 +32,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
 
         sut.Handle(this, new UnhandledExceptionEventArgs(new object(), true));
 
-        _ = _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _fixture.Hub.DidNotReceive().CaptureEventInternal(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -57,7 +54,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
 
         var exception = new Exception();
         sut.Handle(this, new UnhandledExceptionEventArgs(exception, true));
-        Assert.False((bool)exception.Data[Mechanism.HandledKey]);
+        Assert.Equal(false, exception.Data[Mechanism.HandledKey]);
         Assert.True(exception.Data.Contains(Mechanism.MechanismKey));
 
         var stackTraceFactory = Substitute.For<ISentryStackTraceFactory>();
@@ -65,7 +62,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         var @event = new SentryEvent(exception);
 
         exceptionProcessor.Process(exception, @event);
-        Assert.NotNull(@event.SentryExceptions.ToList().Single(p => p.Mechanism.Handled == false));
+        Assert.NotNull(@event.SentryExceptions?.ToList().Single(p => p.Mechanism?.Handled == false));
     }
 
     [Fact]
@@ -74,7 +71,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
-        sut.Handle(this, new UnhandledExceptionEventArgs(null, true));
+        sut.Handle(this, new UnhandledExceptionEventArgs(null!, true));
 
         _fixture.Hub.Received(1).FlushAsync(Arg.Any<TimeSpan>());
     }

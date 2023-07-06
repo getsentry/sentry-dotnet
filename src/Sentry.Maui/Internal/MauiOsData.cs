@@ -1,3 +1,4 @@
+using Microsoft.Win32;
 using Sentry.Extensibility;
 using OperatingSystem = Sentry.Protocol.OperatingSystem;
 
@@ -17,13 +18,24 @@ internal static class MauiOsData
                 return;
             }
 
-            os.Name ??= deviceInfo.Platform.ToString();
-            os.Version ??= deviceInfo.VersionString;
+            os.Version = deviceInfo.VersionString;
 
-            // TODO: fill in these
-            // os.Build ??= ?
-            // os.KernelVersion ??= ?
-            // os.Rooted ??= ?
+#if WINDOWS
+            os.Name ??= "Windows";
+
+            using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+            if (key?.GetValue("DisplayVersion") is string displayVersion)
+            {
+                os.Build = displayVersion;
+            }
+            else if (key?.GetValue("ReleaseId") is string releaseId)
+            {
+                os.Build = releaseId;
+            }
+#else
+            os.Name = deviceInfo.Platform.ToString();
+#endif
+
         }
         catch (Exception ex)
         {

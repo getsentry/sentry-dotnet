@@ -1,27 +1,33 @@
-using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 
 namespace Sentry.AspNetCore.Tests;
-[UsesVerify]
-public class ScopeExtensionsTests
+
+public partial class ScopeExtensionsTests
 {
+    private readonly IDiagnosticLogger _logger;
     private readonly Scope _sut = new(new SentryOptions());
     private readonly HttpContext _httpContext = Substitute.For<HttpContext>();
     private readonly HttpRequest _httpRequest = Substitute.For<HttpRequest>();
     private readonly IServiceProvider _provider = Substitute.For<IServiceProvider>();
-    public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; }
-        = new()
-        {
-            MaxRequestBodySize = RequestSize.Always
-        };
 
-    public ScopeExtensionsTests()
+    public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; }
+
+    public ScopeExtensionsTests(ITestOutputHelper output)
     {
-        _ = _httpContext.RequestServices.Returns(_provider);
-        _ = _httpContext.Request.Returns(_httpRequest);
+        _httpContext.RequestServices.Returns(_provider);
+        _httpContext.Request.Returns(_httpRequest);
+
+        _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
+
+        SentryAspNetCoreOptions = new()
+        {
+            MaxRequestBodySize = RequestSize.Always,
+            Debug = true,
+            DiagnosticLogger = _logger
+        };
     }
 
     private class Fixture
@@ -84,7 +90,7 @@ public class ScopeExtensionsTests
     public void Populate_Request_Method_SetToScope()
     {
         const string expected = "method";
-        _ = _httpContext.Request.Method.Returns(expected);
+        _httpContext.Request.Method.Returns(expected);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -95,7 +101,7 @@ public class ScopeExtensionsTests
     public void Populate_Request_QueryString_SetToScope()
     {
         const string expected = "?query=bla&something=ble";
-        _ = _httpContext.Request.QueryString.Returns(new QueryString(expected));
+        _httpContext.Request.QueryString.Returns(new QueryString(expected));
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -106,13 +112,13 @@ public class ScopeExtensionsTests
     public void Populate_Request_Url_SetToScope()
     {
         const string expectedPath = "/request/path";
-        _ = _httpContext.Request.Path.Returns(new PathString(expectedPath));
+        _httpContext.Request.Path.Returns(new PathString(expectedPath));
 
         const string expectedHost = "host.com";
-        _ = _httpContext.Request.Host.Returns(new HostString(expectedHost));
+        _httpContext.Request.Host.Returns(new HostString(expectedHost));
 
         const string expectedScheme = "http";
-        _ = _httpContext.Request.Scheme.Returns(expectedScheme);
+        _httpContext.Request.Scheme.Returns(expectedScheme);
 
         const string expected = "http://host.com/request/path";
 
@@ -126,7 +132,7 @@ public class ScopeExtensionsTests
     {
         const string expected = "/request/path";
         _sut.SetTag("RequestPath", expected);
-        _ = _httpContext.Request.Path.Returns(new PathString(expected));
+        _httpContext.Request.Path.Returns(new PathString(expected));
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -137,13 +143,13 @@ public class ScopeExtensionsTests
     public void Populate_Request_Url_IncludesPortWhenOnContext()
     {
         const string expectedPath = "/request/path";
-        _ = _httpContext.Request.Path.Returns(new PathString(expectedPath));
+        _httpContext.Request.Path.Returns(new PathString(expectedPath));
 
         const string expectedHost = "host.com:9000";
-        _ = _httpContext.Request.Host.Returns(new HostString(expectedHost));
+        _httpContext.Request.Host.Returns(new HostString(expectedHost));
 
         const string expectedScheme = "http";
-        _ = _httpContext.Request.Scheme.Returns(expectedScheme);
+        _httpContext.Request.Scheme.Returns(expectedScheme);
 
         const string expected = "http://host.com:9000/request/path";
 
@@ -163,7 +169,7 @@ public class ScopeExtensionsTests
             { secondKey, new StringValues(new [] { "gzip", "deflate", "br" }) }
         };
 
-        _ = _httpRequest.Headers.Returns(headers);
+        _httpRequest.Headers.Returns(headers);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -180,7 +186,7 @@ public class ScopeExtensionsTests
             { firstKey, new StringValues("Cookies data") }
         };
 
-        _ = _httpRequest.Headers.Returns(headers);
+        _httpRequest.Headers.Returns(headers);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -196,20 +202,22 @@ public class ScopeExtensionsTests
             { firstKey, new StringValues("Cookies data") }
         };
 
-        _ = _httpRequest.Headers.Returns(headers);
+        _httpRequest.Headers.Returns(headers);
 
         SentryAspNetCoreOptions.SendDefaultPii = true;
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
         Assert.Equal(headers[firstKey], _sut.Request.Headers[firstKey]);
+
+        _sut.Request.Cookies.Should().Be(headers[firstKey]);
     }
 
     [Fact]
     public void Populate_RemoteIp_ByDefault_NotSetToEnv()
     {
         var connection = Substitute.For<ConnectionInfo>();
-        _ = connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
-        _ = _httpContext.Connection.Returns(connection);
+        connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
+        _httpContext.Connection.Returns(connection);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -221,8 +229,8 @@ public class ScopeExtensionsTests
     {
         const string expected = "::1";
         var connection = Substitute.For<ConnectionInfo>();
-        _ = connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
-        _ = _httpContext.Connection.Returns(connection);
+        connection.RemoteIpAddress.Returns(IPAddress.IPv6Loopback);
+        _httpContext.Connection.Returns(connection);
 
         SentryAspNetCoreOptions.SendDefaultPii = true;
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
@@ -235,8 +243,8 @@ public class ScopeExtensionsTests
     {
         const int expected = 1337;
         var connection = Substitute.For<ConnectionInfo>();
-        _ = connection.LocalPort.Returns(expected);
-        _ = _httpContext.Connection.Returns(connection);
+        connection.LocalPort.Returns(expected);
+        _httpContext.Connection.Returns(connection);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -250,8 +258,8 @@ public class ScopeExtensionsTests
         var response = Substitute.For<HttpResponse>();
         var header = new HeaderDictionary { { "Server", expected } };
 
-        _ = response.Headers.Returns(header);
-        _ = _httpContext.Response.Returns(response);
+        response.Headers.Returns(header);
+        _httpContext.Response.Returns(response);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -271,7 +279,7 @@ public class ScopeExtensionsTests
     {
         _sut.Populate(_httpContext, null);
 
-        _ = _httpContext.RequestServices
+        _httpContext.RequestServices
             .DidNotReceive()
             .GetService(typeof(IEnumerable<IRequestPayloadExtractor>));
     }
@@ -281,7 +289,7 @@ public class ScopeExtensionsTests
     {
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        _ = _httpContext.RequestServices
+        _httpContext.RequestServices
             .Received(1)
             .GetService(typeof(IEnumerable<IRequestPayloadExtractor>));
     }
@@ -290,67 +298,64 @@ public class ScopeExtensionsTests
     public void Populate_AspNetCoreOptionsSetTrue_PayloadExtractors_NoBodyRead()
     {
         var extractor = Substitute.For<IRequestPayloadExtractor>();
-        _ = _httpContext.RequestServices
+        _httpContext.RequestServices
             .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
             .Returns(new[] { extractor });
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        _ = extractor.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+        extractor.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
     }
 
     [Theory]
     [MemberData(nameof(InvalidRequestBodies))]
     public void Populate_PayloadExtractors_DoesNotConsiderInvalidResponse(object expected)
     {
-        var first = Substitute.For<IRequestPayloadExtractor>();
-        _ = first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
-        _ = _httpContext.RequestServices
+        var extractor = Substitute.For<IRequestPayloadExtractor>();
+        if (expected is Exception exception)
+        {
+            extractor.ExtractPayload(Arg.Any<IHttpRequest>()).Throws(exception);
+        }
+        else
+        {
+            extractor.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
+        }
+
+#if NET5_0_OR_GREATER
+        if (expected is BadHttpRequestException)
+        {
+            _httpContext.RequestAborted = new CancellationToken(canceled: true);
+        }
+#endif
+
+        _httpContext.RequestServices
             .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
-            .Returns(new[] { first });
+            .Returns(new[] { extractor });
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        _ = first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+        extractor.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+
+        if (_httpContext.RequestAborted.IsCancellationRequested)
+        {
+            _logger.Received().Log(SentryLevel.Debug, "Failed to extract body because the request was aborted.");
+        }
+        else if (expected is Exception ex)
+        {
+            _logger.Received().Log(SentryLevel.Error, "Failed to extract body.", ex);
+        }
 
         Assert.Null(_sut.Request.Data);
-    }
-
-    [Fact]
-    public Task Populate_RouteData_SetToScope()
-    {
-        // Arrange
-        const string controller = "Ctrl";
-        const string action = "Actn";
-        const string version = "1.1";
-        var routeFeature = new RoutingFeature
-        {
-            RouteData = new RouteData
-            {
-                Values =
-                {
-                    { "controller", controller },
-                    { "action", action },
-                    { "version", version },
-                }
-            }
-        };
-        var features = new FeatureCollection();
-        features.Set<IRoutingFeature>(routeFeature);
-        _ = _httpContext.Features.Returns(features);
-        _ = _httpContext.Request.Method.Returns("GET");
-
-        // Act
-        _sut.Populate(_httpContext, SentryAspNetCoreOptions);
-
-        return Verify(_sut)
-            .IgnoreStandardSentryMembers();
     }
 
     public static IEnumerable<object[]> InvalidRequestBodies()
     {
         yield return new object[] { "" };
         yield return new object[] { null };
+        yield return new object[] {new Exception()};
+#if NET5_0_OR_GREATER
+        yield return new object[] { new BadHttpRequestException("Unexpected end of request content.") };
+#endif
     }
 
     [Theory]
@@ -358,15 +363,15 @@ public class ScopeExtensionsTests
     public void Populate_PayloadExtractors_StopsOnFirstDictionary(object expected)
     {
         var first = Substitute.For<IRequestPayloadExtractor>();
-        _ = first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
+        first.ExtractPayload(Arg.Any<IHttpRequest>()).Returns(expected);
         var second = Substitute.For<IRequestPayloadExtractor>();
-        _ = _httpContext.RequestServices
+        _httpContext.RequestServices
             .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
             .Returns(new[] { first, second });
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        _ = second.DidNotReceive().ExtractPayload(Arg.Any<IHttpRequest>());
+        second.DidNotReceive().ExtractPayload(Arg.Any<IHttpRequest>());
 
         Assert.Same(expected, _sut.Request.Data);
     }
@@ -383,21 +388,21 @@ public class ScopeExtensionsTests
     {
         var first = Substitute.For<IRequestPayloadExtractor>();
         var second = Substitute.For<IRequestPayloadExtractor>();
-        _ = _httpContext.RequestServices
+        _httpContext.RequestServices
             .GetService(typeof(IEnumerable<IRequestPayloadExtractor>))
             .Returns(new[] { first, second });
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        _ = first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
-        _ = second.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+        first.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
+        second.Received(1).ExtractPayload(Arg.Any<IHttpRequest>());
     }
 
     [Fact]
     public void Populate_TraceIdentifier_SetAsTag()
     {
         const string expected = "identifier";
-        _ = _httpContext.TraceIdentifier.Returns(expected);
+        _httpContext.TraceIdentifier.Returns(expected);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -409,7 +414,7 @@ public class ScopeExtensionsTests
     {
         const string expected = "identifier";
         _sut.SetTag("RequestId", expected);
-        _ = _httpContext.TraceIdentifier.Returns(expected);
+        _httpContext.TraceIdentifier.Returns(expected);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
@@ -421,7 +426,7 @@ public class ScopeExtensionsTests
     {
         const string expected = "identifier";
         _sut.SetTag("RequestId", "different identifier");
-        _ = _httpContext.TraceIdentifier.Returns(expected);
+        _httpContext.TraceIdentifier.Returns(expected);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 

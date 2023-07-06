@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Microsoft.AspNetCore.Http;
 
 namespace Sentry.AspNetCore;

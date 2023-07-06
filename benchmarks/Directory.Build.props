@@ -1,0 +1,10 @@
+<Project>
+
+  <Import Project="..\Directory.Build.props" />
+
+  <!-- Never use Sentry CLI for benchmark projects. -->
+  <PropertyGroup>
+    <UseSentryCLI>false</UseSentryCLI>
+  </PropertyGroup>
+
+</Project>

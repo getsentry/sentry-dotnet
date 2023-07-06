@@ -34,9 +34,31 @@
     <Compile Remove="**\Tizen\**\*.cs" />
   </ItemGroup>
 
-  <!-- Workaround the fact that http doesnt exist in earlier frameworks -->
+  <!-- Allow setting CLSCompliant via property in any csproj -->
   <ItemGroup>
-    <Using Remove="System.Net.Http" />
-    <Using Remove="System.Net.Http.Json" />
+    <AssemblyAttribute Include="CLSCompliantAttribute" Condition="'$(CLSCompliant)' == 'true'">
+      <_Parameter1>true</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
+
+  <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems"
+    BeforeTargets="_ComputePublishLocation"
+    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
+    <ItemGroup>
+    <ResolvedFileToPublish
+      Update="@(ResolvedFileToPublish)"
+      Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+      PublishFolderType="None" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+  These are needed because we use project references in this solution.
+  In an app that uses our nuget packages, they will come through the nuget packages automatically.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry\buildTransitive\Sentry.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
+    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+
 </Project>

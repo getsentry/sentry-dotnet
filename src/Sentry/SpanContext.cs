@@ -27,6 +27,11 @@ public class SpanContext : ISpanContext
     public bool? IsSampled { get; }
 
     /// <summary>
+    /// Identifies which instrumentation is being used.
+    /// </summary>
+    public Instrumenter Instrumenter { get; internal set; } = Instrumenter.Sentry;
+
+    /// <summary>
     /// Initializes an instance of <see cref="SpanContext"/>.
     /// </summary>
     public SpanContext(

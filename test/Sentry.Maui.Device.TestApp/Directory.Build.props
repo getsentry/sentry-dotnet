@@ -4,13 +4,11 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
     <Using Include="Sentry"/>
     <Using Include="Sentry.Extensibility"/>
-    <Using Include="System.Diagnostics"/>
     <Using Include="Microsoft.Maui.FactAttribute" Alias="FactAttribute" />
     <Using Include="Microsoft.Maui.TheoryAttribute" Alias="TheoryAttribute" />
   </ItemGroup>

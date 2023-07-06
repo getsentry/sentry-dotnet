@@ -1,6 +1,5 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry.Extensibility;
 
@@ -13,7 +12,7 @@ namespace Sentry.Extensibility;
 /// </remarks>
 /// <inheritdoc cref="IHub" />
 [DebuggerStepThrough]
-public sealed class HubAdapter : IHub
+public sealed class HubAdapter : IHub, IHubEx
 {
     /// <summary>
     /// The single instance which forwards all calls to <see cref="SentrySdk"/>
@@ -63,8 +62,6 @@ public sealed class HubAdapter : IHub
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public void WithScope(Action<Scope> scopeCallback)
         => SentrySdk.WithScope(scopeCallback);
@@ -167,18 +164,17 @@ public sealed class HubAdapter : IHub
             level);
 
     /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
-    [DebuggerStepThrough]
-    public SentryId CaptureEvent(SentryEvent evt)
-        => SentrySdk.CaptureEvent(evt);
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
+        => SentrySdk.CaptureEventInternal(evt, hint, scope);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public SentryId CaptureException(Exception exception)
-        => SentrySdk.CaptureException(exception);
+    public SentryId CaptureEvent(SentryEvent evt)
+        => SentrySdk.CaptureEvent(evt);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -193,8 +189,23 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
+        => SentrySdk.CaptureEvent(evt, hint, scope);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => SentrySdk.CaptureEvent(evt, configureScope);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public SentryId CaptureException(Exception exception)
+        => SentrySdk.CaptureException(exception);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -203,6 +214,14 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureTransaction(Transaction transaction)
         => SentrySdk.CaptureTransaction(transaction);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
+        => SentrySdk.CaptureTransaction(transaction, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -227,4 +246,22 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
         => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    public T? WithScope<T>(Func<Scope, T?> scopeCallback)
+        => SentrySdk.WithScope(scopeCallback);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    public Task WithScopeAsync(Func<Scope, Task> scopeCallback)
+        => SentrySdk.WithScopeAsync(scopeCallback);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
+        => SentrySdk.WithScopeAsync(scopeCallback);
 }

@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Microsoft.Extensions.Options;
@@ -60,7 +59,7 @@ public class SentryGrpcInterceptor : Interceptor
         {
             hub.ConfigureScope(scope =>
             {
-                scope.OnEvaluating += (_, _) => scope.Populate(context, request, _options);
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate(context, request, _options);
             });
 
             try
@@ -103,7 +102,7 @@ public class SentryGrpcInterceptor : Interceptor
         {
             hub.ConfigureScope(scope =>
             {
-                scope.OnEvaluating += (_, _) => scope.Populate(context, request, _options);
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate(context, request, _options);
             });
 
             try
@@ -141,7 +140,7 @@ public class SentryGrpcInterceptor : Interceptor
         {
             hub.ConfigureScope(scope =>
             {
-                scope.OnEvaluating += (_, _) => scope.Populate<TRequest>(context, null, _options);
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate<TRequest>(context, null, _options);
             });
 
             try
@@ -184,7 +183,7 @@ public class SentryGrpcInterceptor : Interceptor
         {
             hub.ConfigureScope(scope =>
             {
-                scope.OnEvaluating += (_, _) => scope.Populate<TRequest>(context, null, _options);
+                scope.OnEvaluating += (_, activeScope) => activeScope.Populate<TRequest>(context, null, _options);
             });
 
             try

@@ -4,6 +4,14 @@
       event_id: Guid_1,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: release,
+        sample_rate: 1,
+        trace_id: Guid_2,
+        transaction: my transaction
       }
     },
     Items: [
@@ -17,8 +25,6 @@
               Message: TheMessage
             },
             Platform: csharp,
-            SentryExceptions: [],
-            SentryThreads: [],
             Level: info,
             TransactionName: my transaction,
             Request: {},
@@ -36,16 +42,16 @@
   },
   {
     Header: {
-      event_id: Guid_2,
+      event_id: Guid_3,
       sdk: {
         name: sentry.dotnet
       },
       trace: {
         environment: production,
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-        release: Sentry.Tests@1.0.0,
+        release: release,
         sample_rate: 1,
-        trace_id: Guid_3,
+        trace_id: Guid_2,
         transaction: my transaction
       }
     },

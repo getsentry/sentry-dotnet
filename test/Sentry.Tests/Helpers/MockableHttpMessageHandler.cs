@@ -1,5 +1,3 @@
-using System.Net.Http;
-
 namespace Sentry.Tests.Helpers;
 
 public abstract class MockableHttpMessageHandler : HttpMessageHandler

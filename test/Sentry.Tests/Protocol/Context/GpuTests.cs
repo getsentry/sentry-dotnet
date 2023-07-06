@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol.Context;
 
 public class GpuTests
@@ -33,25 +31,28 @@ public class GpuTests
             SupportsGeometryShaders = true
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{\"type\":\"gpu\"," +
-            "\"name\":\"Sentry.Test.Gpu\"," +
-            "\"id\":123," +
-            "\"vendor_id\":\"321\"," +
-            "\"vendor_name\":\"Vendor name\"," +
-            "\"memory_size\":1000," +
-            "\"api_type\":\"API Type\"," +
-            "\"multi_threaded_rendering\":true," +
-            "\"version\":\"Version 3232\"," +
-            "\"npot_support\":\"Full NPOT\"," +
-            "\"max_texture_size\":10000," +
-            "\"graphics_shader_level\":\"Shader Model 2.0\"," +
-            "\"supports_draw_call_instancing\":true," +
-            "\"supports_ray_tracing\":false," +
-            "\"supports_compute_shaders\":true," +
-            "\"supports_geometry_shaders\":true}",
+        Assert.Equal("""
+            {
+              "type": "gpu",
+              "name": "Sentry.Test.Gpu",
+              "id": 123,
+              "vendor_id": "321",
+              "vendor_name": "Vendor name",
+              "memory_size": 1000,
+              "api_type": "API Type",
+              "multi_threaded_rendering": true,
+              "version": "Version 3232",
+              "npot_support": "Full NPOT",
+              "max_texture_size": 10000,
+              "graphics_shader_level": "Shader Model 2.0",
+              "supports_draw_call_instancing": true,
+              "supports_ray_tracing": false,
+              "supports_compute_shaders": true,
+              "supports_geometry_shaders": true
+            }
+            """,
             actual);
     }
 
@@ -106,21 +107,21 @@ public class GpuTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new Gpu(), "{\"type\":\"gpu\"}") };
-        yield return new object[] { (new Gpu { Name = "some name" }, "{\"type\":\"gpu\",\"name\":\"some name\"}") };
-        yield return new object[] { (new Gpu { Id = 1 }, "{\"type\":\"gpu\",\"id\":1}") };
-        yield return new object[] { (new Gpu { VendorId = "1" }, "{\"type\":\"gpu\",\"vendor_id\":\"1\"}") };
-        yield return new object[] { (new Gpu { VendorName = "some name" }, "{\"type\":\"gpu\",\"vendor_name\":\"some name\"}") };
-        yield return new object[] { (new Gpu { MemorySize = 123 }, "{\"type\":\"gpu\",\"memory_size\":123}") };
-        yield return new object[] { (new Gpu { ApiType = "some ApiType" }, "{\"type\":\"gpu\",\"api_type\":\"some ApiType\"}") };
-        yield return new object[] { (new Gpu { MultiThreadedRendering = false }, "{\"type\":\"gpu\",\"multi_threaded_rendering\":false}") };
-        yield return new object[] { (new Gpu { Version = "some version" }, "{\"type\":\"gpu\",\"version\":\"some version\"}") };
-        yield return new object[] { (new Gpu { NpotSupport = "some npot_support" }, "{\"type\":\"gpu\",\"npot_support\":\"some npot_support\"}") };
-        yield return new object[] { (new Gpu { MaxTextureSize = 10000 }, "{\"type\":\"gpu\",\"max_texture_size\":10000}") };
-        yield return new object[] { (new Gpu { GraphicsShaderLevel = "Shader Model 2.0" }, "{\"type\":\"gpu\",\"graphics_shader_level\":\"Shader Model 2.0\"}") };
-        yield return new object[] { (new Gpu { SupportsDrawCallInstancing = true }, "{\"type\":\"gpu\",\"supports_draw_call_instancing\":true}") };
-        yield return new object[] { (new Gpu { SupportsRayTracing = false }, "{\"type\":\"gpu\",\"supports_ray_tracing\":false}") };
-        yield return new object[] { (new Gpu { SupportsComputeShaders = true }, "{\"type\":\"gpu\",\"supports_compute_shaders\":true}") };
-        yield return new object[] { (new Gpu { SupportsGeometryShaders = true }, "{\"type\":\"gpu\",\"supports_geometry_shaders\":true}") };
+        yield return new object[] { (new Gpu(), """{"type":"gpu"}""") };
+        yield return new object[] { (new Gpu { Name = "some name" }, """{"type":"gpu","name":"some name"}""") };
+        yield return new object[] { (new Gpu { Id = 1 }, """{"type":"gpu","id":1}""") };
+        yield return new object[] { (new Gpu { VendorId = "1" }, """{"type":"gpu","vendor_id":"1"}""") };
+        yield return new object[] { (new Gpu { VendorName = "some name" }, """{"type":"gpu","vendor_name":"some name"}""") };
+        yield return new object[] { (new Gpu { MemorySize = 123 }, """{"type":"gpu","memory_size":123}""") };
+        yield return new object[] { (new Gpu { ApiType = "some ApiType" }, """{"type":"gpu","api_type":"some ApiType"}""") };
+        yield return new object[] { (new Gpu { MultiThreadedRendering = false }, """{"type":"gpu","multi_threaded_rendering":false}""") };
+        yield return new object[] { (new Gpu { Version = "some version" }, """{"type":"gpu","version":"some version"}""") };
+        yield return new object[] { (new Gpu { NpotSupport = "some npot_support" }, """{"type":"gpu","npot_support":"some npot_support"}""") };
+        yield return new object[] { (new Gpu { MaxTextureSize = 10000 }, """{"type":"gpu","max_texture_size":10000}""") };
+        yield return new object[] { (new Gpu { GraphicsShaderLevel = """Shader Model 2.0""" }, """{"type":"gpu","graphics_shader_level":"Shader Model 2.0"}""") };
+        yield return new object[] { (new Gpu { SupportsDrawCallInstancing = true }, """{"type":"gpu","supports_draw_call_instancing":true}""") };
+        yield return new object[] { (new Gpu { SupportsRayTracing = false }, """{"type":"gpu","supports_ray_tracing":false}""") };
+        yield return new object[] { (new Gpu { SupportsComputeShaders = true }, """{"type":"gpu","supports_compute_shaders":true}""") };
+        yield return new object[] { (new Gpu { SupportsGeometryShaders = true }, """{"type":"gpu","supports_geometry_shaders":true}""") };
     }
 }

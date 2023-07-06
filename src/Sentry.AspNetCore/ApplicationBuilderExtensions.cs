@@ -1,4 +1,3 @@
-using System.ComponentModel;
 #if NETSTANDARD2_0
 using IHostApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 #else

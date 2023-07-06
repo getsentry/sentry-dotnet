@@ -1,25 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.*" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="3.*" />
+    <PackageReference Include="Serilog" Version="2.12.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
 
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
-    <ProjectReference Include="..\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj" />
+    <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
 
-    <Using Include="System.Collections" />
-    <Using Include="System.IO.Compression" />
-    <Using Include="System.Net" />
-    <Using Include="System.Text.Json" />
     <Using Include="Microsoft.AspNetCore.Builder" />
     <Using Include="Microsoft.AspNetCore.Hosting" />
-    <Using Include="Sentry.AspNetCore.Tests" />
-    <Using Include="Sentry.Testing" />
-    <Using Include="Sentry.Tests" />
     <Using Include="Serilog" />
     <Using Include="Serilog.Events" />
     <Using Include="Serilog.Context" />

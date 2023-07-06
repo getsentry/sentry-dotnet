@@ -1,5 +1,3 @@
-using System.Buffers;
-
 namespace Sentry.Internal;
 
 internal readonly struct PooledBuffer<T> : IDisposable

@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
@@ -20,7 +18,7 @@ public static partial class SentrySdk
     public static class SentrySdk
 #endif
 {
-    private static IHub CurrentHub = DisabledHub.Instance;
+    internal static IHub CurrentHub = DisabledHub.Instance;
 
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
 
@@ -53,11 +51,16 @@ public static partial class SentrySdk
             options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
         }
 
-        // Initialize bundled platform SDKs here
-#if ANDROID
+        // Initialize native platform SDKs here
+#if __MOBILE__
+        if (options.InitNativeSdks)
+        {
+#if __IOS__
+            InitSentryCocoaSdk(options);
+#elif ANDROID
             InitSentryAndroidSdk(options);
-#elif __IOS__
-        InitSentryCocoaSdk(options);
+#endif
+        }
 #endif
         return new Hub(options);
     }
@@ -68,7 +71,17 @@ public static partial class SentrySdk
     /// <remarks>
     /// If the DSN is not found, the SDK will not change state.
     /// </remarks>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     public static IDisposable Init() => Init((string?)null);
 
     /// <summary>
@@ -79,7 +92,17 @@ public static partial class SentrySdk
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/overview/#usage-for-end-users"/>
     /// <param name="dsn">The dsn.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     public static IDisposable Init(string? dsn) => !Dsn.IsDisabled(dsn)
         ? Init(c => c.Dsn = dsn)
         : DisabledHub.Instance;
@@ -88,7 +111,17 @@ public static partial class SentrySdk
     /// Initializes the SDK with an optional configuration options callback.
     /// </summary>
     /// <param name="configureOptions">The configuration options callback.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     public static IDisposable Init(Action<SentryOptions>? configureOptions)
     {
         var options = new SentryOptions();
@@ -104,7 +137,17 @@ public static partial class SentrySdk
     /// <remarks>
     /// Used by integrations which have their own delegates.
     /// </remarks>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
+    /// <returns>An object that can be disposed to disable the Sentry SDK, if desired.</returns>
+    /// <remarks>
+    /// Disposing the result will flush previously-captured events and disable the SDK.
+    /// In most cases there's no need to dispose the result.  There are only a few exceptions where it makes
+    /// sense to dispose:
+    /// <list type="bullet">
+    /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
+    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
+    /// </list>
+    /// </remarks>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static IDisposable Init(SentryOptions options) => UseHub(InitHub(options));
 
@@ -116,8 +159,38 @@ public static partial class SentrySdk
     }
 
     /// <summary>
-    /// Flushes events queued up.
+    /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
+    /// is reached.
     /// </summary>
+    /// <remarks>
+    /// Blocks synchronously. Prefer <see cref="FlushAsync()"/> in async code.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static void Flush() => CurrentHub.Flush();
+
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout is reached.
+    /// </summary>
+    /// <param name="timeout">The amount of time allowed for flushing.</param>
+    /// <remarks>
+    /// Blocks synchronously. Prefer <see cref="FlushAsync(TimeSpan)"/> in async code.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static void Flush(TimeSpan timeout) => CurrentHub.Flush(timeout);
+
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
+    /// is reached.
+    /// </summary>
+    /// <returns>A task to await for the flush operation.</returns>
+    [DebuggerStepThrough]
+    public static Task FlushAsync() => CurrentHub.FlushAsync();
+
+    /// <summary>
+    /// Flushes the queue of captured events until the timeout is reached.
+    /// </summary>
+    /// <param name="timeout">The amount of time allowed for flushing.</param>
+    /// <returns>A task to await for the flush operation.</returns>
     [DebuggerStepThrough]
     public static Task FlushAsync(TimeSpan timeout) => CurrentHub.FlushAsync(timeout);
 
@@ -239,18 +312,75 @@ public static partial class SentrySdk
         => CurrentHub.AddBreadcrumb(clock, message, category, type, data, level);
 
     /// <summary>
-    /// Runs the callback with a new scope which gets dropped at the end.
+    /// Adds a breadcrumb to the current Scope.
+    /// </summary>
+    /// <param name="breadcrumb">The breadcrumb to be added</param>
+    /// <param name="hint">A hint providing additional context that can be used in the BeforeBreadcrumb callback</param>
+    /// <see cref="AddBreadcrumb(string, string?, string?, IDictionary{string, string}?, BreadcrumbLevel)"/>
+    [DebuggerStepThrough]
+    public static void AddBreadcrumb(Breadcrumb breadcrumb, Hint? hint = null)
+        => CurrentHub.AddBreadcrumb(breadcrumb, hint);
+
+    /// <summary>
+    /// Runs the callback within a new scope.
     /// </summary>
     /// <remarks>
-    /// Pushes a new scope, runs the callback, pops the scope.
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
     /// </remarks>
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public static void WithScope(Action<Scope> scopeCallback)
         => CurrentHub.WithScope(scopeCallback);
+
+    /// <summary>
+    /// Runs the callback within a new scope.
+    /// </summary>
+    /// <remarks>
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
+    /// </remarks>
+    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
+    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+    /// <returns>The result from the callback.</returns>
+    [DebuggerStepThrough]
+    public static T? WithScope<T>(Func<Scope, T?> scopeCallback)
+        => CurrentHub is IHubEx hub ? hub.WithScope(scopeCallback) : default;
+
+    /// <summary>
+    /// Runs the asynchronous callback within a new scope.
+    /// </summary>
+    /// <remarks>
+    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
+    /// </remarks>
+    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
+    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+    /// <returns>An async task to await the callback.</returns>
+    [DebuggerStepThrough]
+    public static Task WithScopeAsync(Func<Scope, Task> scopeCallback)
+        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.CompletedTask;
+
+    /// <summary>
+    /// Runs the asynchronous callback within a new scope.
+    /// </summary>
+    /// <remarks>
+    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
+    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
+    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
+    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
+    /// </remarks>
+    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
+    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+    /// <returns>An async task to await the result of the callback.</returns>
+    [DebuggerStepThrough]
+    public static Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
+        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.FromResult(default(T));
 
     /// <summary>
     /// Configures the scope through the callback.
@@ -288,6 +418,23 @@ public static partial class SentrySdk
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
         => CurrentHub.CaptureEvent(evt, scope);
+
+    /// <summary>
+    /// Captures the event, passing a hint, using the specified scope.
+    /// </summary>
+    /// <param name="evt">The event.</param>
+    /// <param name="hint">a hint for the event.</param>
+    /// <param name="scope">The scope.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
+        => CurrentHub.CaptureEvent(evt, hint, scope);
+
+    internal static SentryId CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
+        => CurrentHub is IHubEx hub
+            ? hub.CaptureEventInternal(evt, hint, scope)
+            : CurrentHub.CaptureEvent(evt, hint, scope);
 
     /// <summary>
     /// Captures an event with a configurable scope.
@@ -371,9 +518,26 @@ public static partial class SentrySdk
     /// <summary>
     /// Captures a transaction.
     /// </summary>
+    /// <remarks>
+    /// Note: this method is NOT meant to be called from user code!
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// </remarks>
     [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static void CaptureTransaction(Transaction transaction)
         => CurrentHub.CaptureTransaction(transaction);
+
+    /// <summary>
+    /// Captures a transaction.
+    /// </summary>
+    /// <remarks>
+    /// Note: this method is NOT meant to be called from user code!
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// </remarks>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static void CaptureTransaction(Transaction transaction, Hint? hint)
+        => CurrentHub.CaptureTransaction(transaction, hint);
 
     /// <summary>
     /// Captures a session update.

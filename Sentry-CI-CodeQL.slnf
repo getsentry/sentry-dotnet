@@ -1,10 +1,12 @@
 {
   "solution": {
-    "path": "Sentry.sln",
+    "path": "Sentry.Full.sln",
     "projects": [
+      "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
+      "src\\Sentry.AzureFunctions.Worker\\Sentry.AzureFunctions.Worker.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
@@ -12,6 +14,8 @@
       "src\\Sentry.Log4Net\\Sentry.Log4Net.csproj",
       "src\\Sentry.Maui\\Sentry.Maui.csproj",
       "src\\Sentry.NLog\\Sentry.NLog.csproj",
+      "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
+      "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj"
     ]

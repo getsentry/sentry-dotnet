@@ -1,7 +1,3 @@
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-
 namespace Sentry.PlatformAbstractions;
 
 // https://github.com/dotnet/corefx/issues/17452

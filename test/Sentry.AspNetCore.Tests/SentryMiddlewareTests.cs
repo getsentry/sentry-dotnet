@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -193,6 +192,26 @@ public class SentryMiddlewareTests
         scope.Evaluate();
 
         Assert.Equal(expectedTraceIdentifier, scope.Tags[nameof(HttpContext.TraceIdentifier)]);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_OnEvaluatingClonedScope_HttpContextDataSet()
+    {
+        const string expectedTraceIdentifier = "trace id";
+        _ = _fixture.HttpContext.TraceIdentifier.Returns(expectedTraceIdentifier);
+        var scope = new Scope();
+        _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(c => c.Arg<Action<Scope>>()(scope));
+
+        var sut = _fixture.GetSut();
+
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+
+        var clonedScope = scope.Clone();
+
+        clonedScope.Evaluate();
+
+        Assert.Equal(expectedTraceIdentifier, clonedScope.Tags[nameof(HttpContext.TraceIdentifier)]);
     }
 
     [Fact]
@@ -523,8 +542,8 @@ public class SentryMiddlewareTests
     public async Task InvokeAsync_ScopeNotPopulated_CopyOptionsToScope()
     {
         // Arrange
-        var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
-        _fixture.Options.ConfigureScope(expectedAction);
+        bool configured = false;
+        _fixture.Options.ConfigureScope(_ => configured = true);
         var expectedExceptionMessage = "Expected Exception";
         _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
         var sut = _fixture.GetSut();
@@ -538,17 +557,17 @@ public class SentryMiddlewareTests
         { }
 
         // Assert
-        _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        Assert.True(configured);
     }
 
     [Fact]
     public async Task InvokeAsync_SameMiddleWareWithSameHubs_CopyOptionsOnce()
     {
         // Arrange
-        var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
+        bool configured = false;
         var expectedExceptionMessage = "Expected Exception";
         _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
-        _fixture.Options.ConfigureScope(expectedAction);
+        _fixture.Options.ConfigureScope(_ => configured = true);
         var sut = _fixture.GetSut();
 
         // Act
@@ -567,18 +586,18 @@ public class SentryMiddlewareTests
         { }
 
         // Assert
-        _fixture.Hub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        Assert.True(configured);
     }
 
     [Fact]
     public async Task InvokeAsync_SameMiddleWareWithDifferentHubs_CopyOptionsToAllHubs()
     {
         // Arrange
+        int count = 0;
         var firstHub = _fixture.Hub;
         var expectedExceptionMessage = "Expected Exception";
         _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
-        var expectedAction = new Action<Scope>(scope => scope.SetTag("A", "B"));
-        _fixture.Options.ConfigureScope(expectedAction);
+        _fixture.Options.ConfigureScope(_=> count++);
         var sut = _fixture.GetSut();
 
         // Act
@@ -605,8 +624,7 @@ public class SentryMiddlewareTests
         }
 
         // Assert
-        firstHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
-        secondHub.Received(1).ConfigureScope(Arg.Is(expectedAction));
+        Assert.Equal(2, count);
     }
 
     [Fact]

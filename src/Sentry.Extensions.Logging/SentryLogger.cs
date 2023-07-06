@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Sentry.Infrastructure;
 
@@ -76,7 +75,13 @@ internal sealed class SentryLogger : ILogger
         }
     }
 
-    internal static SentryEvent CreateEvent<TState>(LogLevel logLevel, EventId id, TState state, Exception? exception, string? message, string category)
+    internal static SentryEvent CreateEvent<TState>(
+        LogLevel logLevel,
+        EventId id,
+        TState state,
+        Exception? exception,
+        string? message,
+        string category)
     {
         var @event = new SentryEvent(exception)
         {

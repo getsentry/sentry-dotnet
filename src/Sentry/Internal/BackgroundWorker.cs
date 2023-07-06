@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;

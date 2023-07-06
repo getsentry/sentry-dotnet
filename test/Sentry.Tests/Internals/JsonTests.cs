@@ -1,7 +1,3 @@
-using System.Reflection;
-using System.Text.Json;
-using Sentry.Testing;
-
 namespace Sentry.Tests.Internals;
 
 public class JsonTests
@@ -10,7 +6,7 @@ public class JsonTests
 
     public JsonTests(ITestOutputHelper output)
     {
-        _testOutputLogger = new TestOutputDiagnosticLogger(output);
+        _testOutputLogger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
     }
 
     public static Exception GenerateException(string description)
@@ -77,25 +73,34 @@ public class JsonTests
     public void WriteDynamicValue_ExceptionParameter_SerializedException()
     {
         // Arrange
-        var expectedMessage = "T est";
-        var expectedData = new KeyValuePair<string, string>("a", "b");
-        var ex = GenerateException(expectedMessage);
-        ex.Data.Add(expectedData.Key, expectedData.Value);
-        var expectedStackTrace = ex.StackTrace.ToJsonString(_testOutputLogger);
-        var expectedSerializedData = new[]
-        {
-            $"\"Message\":\"{expectedMessage}\"",
-            "\"Data\":{\"" + expectedData.Key + "\":\"" + expectedData.Value + "\"}",
-            "\"InnerException\":null",
-            "\"Source\":\"Sentry.Tests\"",
-            $"\"StackTrace\":{expectedStackTrace}"
-        };
+        var ex = GenerateException("Test");
+        ex.Data.Add("a", "b");
 
         // Act
         var serializedString = ex.ToJsonString(_testOutputLogger);
 
         // Assert
-        Assert.All(expectedSerializedData, expectedData => Assert.Contains(expectedData, serializedString));
+        var expectedStackTraceString = ex.StackTrace.ToJsonString();
+        var expectedSerializedData = new[]
+        {
+            """
+            "Message":"Test"
+            """,
+            """
+            "Data":{"a":"b"}
+            """,
+            """
+            "InnerException":null
+            """,
+            """
+            "Source":"Sentry.Tests"
+            """,
+            $"""
+            "StackTrace":{expectedStackTraceString}
+            """
+        };
+
+        Assert.All(expectedSerializedData, expected => Assert.Contains(expected, serializedString));
     }
 
     [Fact]
@@ -147,63 +152,93 @@ public class JsonTests
         // Arrange
         var type = typeof(List<>).GetGenericArguments()[0];
         var data = new DataWithSerializableObject<Type>(type);
-        var expectedSerializedData =
-            "{" +
-            "\"Id\":1," +
-            "\"Data\":\"1234\"," +
-            "\"Object\":null" + //This type has no Full Name.
-            "}";
 
         // Act
         var serializedString = data.ToJsonString(_testOutputLogger);
 
         // Assert
-        Assert.Equal(expectedSerializedData, serializedString);
+        const string expected = """{"Id":1,"Data":"1234","Object":null}""";
+        Assert.Equal(expected, serializedString);
     }
 
     [Fact]
     public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
     {
         // Arrange
-        var expectedSerializedData = "{\"Id\":1,\"Data\":\"1234\",\"Object\":null}";
         var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
 
         // Act
         var serializedString = data.ToJsonString(_testOutputLogger);
 
         // Assert
-        Assert.Equal(expectedSerializedData, serializedString);
+        const string expected = """{"Id":1,"Data":"1234","Object":null}""";
+        Assert.Equal(expected, serializedString);
     }
 
-    private class NonSerializableValue
+    [Theory]
+    [MemberData(nameof(NonSerializableObjectTestData))]
+    public void WriteDynamic_NonSerializableObject_LogException(object testObject)
     {
-#pragma warning disable CA1822 // Mark members as static
-        public string Thrower => throw new InvalidDataException();
-#pragma warning restore CA1822
-    }
-
-    [Fact]
-    public void WriteDynamic_NonSerializableValue_LogException()
-    {
-        //Assert
-        var logger = Substitute.For<IDiagnosticLogger>();
-
-        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-
+        // Arrange
+        JsonExtensions.JsonPreserveReferences = false;
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
         {
             writer.WriteStartObject();
 
             // Act
-            writer.WriteDynamic("property_name", new NonSerializableValue(), logger);
+            writer.WriteDynamic("property_name", testObject, _testOutputLogger);
 
             writer.WriteEndObject();
         }
 
         // Assert
-        logger.Received(1).Log(Arg.Is(SentryLevel.Error), "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
-            Arg.Any<InvalidDataException>(),
+        _testOutputLogger.Received(1).Log(
+            Arg.Is(SentryLevel.Error),
+            "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
+            Arg.Any<Exception>(),
             Arg.Any<object[]>());
+    }
+
+    [Fact]
+    public void WriteDynamic_ComplexObject_PreserveReferences()
+    {
+        // Arrange
+        JsonExtensions.JsonPreserveReferences = true;
+        var testObject = new SelfReferencedObject();
+        using var stream = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(stream))
+        {
+            writer.WriteStartObject();
+
+            // Act
+            writer.WriteDynamic("property_name", testObject, _testOutputLogger);
+
+            writer.WriteEndObject();
+        }
+
+        var json = Encoding.UTF8.GetString(stream.ToArray());
+
+        // Assert
+        Assert.Equal("""{"property_name":{"$id":"1","Object":{"$ref":"1"}}}""", json);
+    }
+
+    public static IEnumerable<object[]> NonSerializableObjectTestData =>
+        new[]
+        {
+            new object[] {new NonSerializableObject()},
+            new object[] {new SelfReferencedObject()},
+        };
+
+    public class NonSerializableObject
+    {
+#pragma warning disable CA1822 // Mark members as static
+        public string Thrower => throw new InvalidDataException();
+#pragma warning restore CA1822
+    }
+
+    public class SelfReferencedObject
+    {
+        public SelfReferencedObject Object => this;
     }
 }

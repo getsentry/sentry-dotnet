@@ -1,22 +1,18 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Sentry.PlatformAbstractions;
 
 // ReSharper disable once CheckNamespace
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
 
-[UsesVerify]
-public class SentryStackTraceFactoryTests
+public partial class SentryStackTraceFactoryTests
 {
     private class Fixture
     {
-        public SentryOptions SentryOptions { get; set; } = new();
+        public SentryOptions SentryOptions { get; } = new();
         public SentryStackTraceFactory GetSut() => new(SentryOptions);
     }
 
     private readonly Fixture _fixture = new();
-    private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace;
 
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionFalse_NullResult()
@@ -44,7 +40,7 @@ public class SentryStackTraceFactoryTests
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
             p.Function?.StartsWith(
-                nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                nameof(DebugStackTrace.CreateFrame) + '(',
                 StringComparison.Ordinal
             ) == true);
     }
@@ -108,7 +104,7 @@ public class SentryStackTraceFactoryTests
 
         Assert.DoesNotContain(stackTrace.Frames, p =>
             p.Function?.StartsWith(
-                nameof(SentryStackTraceFactory.CreateFrame) + '(',
+                nameof(DebugStackTrace.CreateFrame) + '(',
                 StringComparison.Ordinal
             ) == true);
     }
@@ -167,15 +163,25 @@ public class SentryStackTraceFactoryTests
             exception = e;
         }
 
-        var expected = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
-        var path = sut.Create(exception)?.Frames[0].FileName;
+        var stackTrace = sut.Create(exception);
+
+        Assert.NotNull(stackTrace);
+
+        var frame = stackTrace.Frames[0];
 
 #if __MOBILE__
         // We don't get file paths on mobile unless we've got a debugger attached.
-        Skip.If(string.IsNullOrEmpty(path));
+        Skip.If(string.IsNullOrEmpty(frame.FileName));
 #endif
-        Assert.Equal(expected, path);
+
+        var path = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
+        Assert.Equal(path, frame.FileName);
+
+        var fullPath = GetThisFilePath();
+        Assert.Equal(fullPath, frame.AbsolutePath);
     }
+
+    private static string GetThisFilePath([CallerFilePath] string path = null) => path;
 
     [Theory]
     [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
@@ -197,99 +203,6 @@ public class SentryStackTraceFactoryTests
         // Assert
         var frame = stackTrace!.Frames.Last();
         frame.Function.Should().Be(method);
-    }
-
-    [SkippableTheory]
-    [InlineData(StackTraceMode.Original)]
-    [InlineData(StackTraceMode.Enhanced)]
-    [Trait("Category", "Verify")]
-    public Task MethodGeneric(StackTraceMode mode)
-    {
-        // TODO: Mono gives different results.  Investigate why.
-        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "Not supported on Mono");
-
-        _fixture.SentryOptions.StackTraceMode = mode;
-
-        // Arrange
-        var i = 5;
-        var exception = Record.Exception(() => GenericMethodThatThrows(i));
-
-        _fixture.SentryOptions.AttachStacktrace = true;
-        var factory = _fixture.GetSut();
-
-        // Act
-        var stackTrace = factory.Create(exception);
-
-        // Assert;
-        var frame = stackTrace!.Frames.Single(x => x.Function!.Contains("GenericMethodThatThrows"));
-        return Verify(frame)
-            .IgnoreMembers<SentryStackFrame>(
-                x => x.Package,
-                x => x.LineNumber,
-                x => x.ColumnNumber,
-                x => x.InstructionOffset).AddScrubber(x => x.Replace(@"\", @"/"))
-            .UseParameters(mode);
-    }
-
-    [Fact]
-    public void CreateSentryStackFrame_AppNamespace_InAppFrame()
-    {
-        var frame = new StackFrame();
-        var sut = _fixture.GetSut();
-
-        var actual = sut.CreateFrame(frame);
-
-        Assert.True(actual.InApp);
-    }
-
-    [Fact]
-    public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
-    {
-        _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
-        var sut = _fixture.GetSut();
-        var frame = new StackFrame();
-
-        var actual = sut.CreateFrame(frame);
-
-        Assert.False(actual.InApp);
-    }
-
-    [Fact]
-    public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
-    {
-        _fixture.SentryOptions.AddInAppExclude(ThisNamespace);
-        _fixture.SentryOptions.AddInAppInclude(ThisNamespace);
-        var sut = _fixture.GetSut();
-        var frame = new StackFrame();
-
-        var actual = sut.CreateFrame(frame);
-
-        Assert.True(actual.InApp);
-    }
-
-    // https://github.com/getsentry/sentry-dotnet/issues/64
-    [Fact]
-    public void DemangleAnonymousFunction_NullFunction_ContinuesNull()
-    {
-        var stackFrame = new SentryStackFrame
-        {
-            Function = null
-        };
-
-        SentryStackTraceFactory.DemangleAnonymousFunction(stackFrame);
-        Assert.Null(stackFrame.Function);
-    }
-
-    [Fact]
-    public void DemangleAsyncFunctionName_NullModule_ContinuesNull()
-    {
-        var stackFrame = new SentryStackFrame
-        {
-            Module = null
-        };
-
-        SentryStackTraceFactory.DemangleAnonymousFunction(stackFrame);
-        Assert.Null(stackFrame.Module);
     }
 
     // ReSharper disable UnusedParameter.Local

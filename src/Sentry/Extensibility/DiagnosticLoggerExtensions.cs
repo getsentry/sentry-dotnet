@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace Sentry.Extensibility;
 
 /// <summary>
@@ -157,16 +155,18 @@ public static class DiagnosticLoggerExtensions
     /// </summary>
     public static void LogWarning(
         this IDiagnosticLogger logger,
-        string message)
-        => logger.LogIfEnabled(SentryLevel.Warning, null, message);
+        string message,
+        Exception? exception = null)
+        => logger.LogIfEnabled(SentryLevel.Warning, exception, message);
 
     /// <summary>
     /// Log a warning message.
     /// </summary>
     internal static void LogWarning(
         this SentryOptions options,
-        string message)
-        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, null, message);
+        string message,
+        Exception? exception = null)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, exception, message);
 
     /// <summary>
     /// Log a warning message.

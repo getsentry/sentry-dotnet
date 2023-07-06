@@ -44,7 +44,7 @@ public class FakeFileSystem : IFileSystem
     public void DeleteFile(string path) => _mockFileSystem.File.Delete(path);
 
     public DateTimeOffset GetFileCreationTime(string path) =>
-        _mockFileSystem.FileInfo.FromFileName(path).CreationTimeUtc;
+        _mockFileSystem.FileInfo.New(path).CreationTimeUtc;
 
     public string ReadAllTextFromFile(string file) => _mockFileSystem.File.ReadAllText(file);
 

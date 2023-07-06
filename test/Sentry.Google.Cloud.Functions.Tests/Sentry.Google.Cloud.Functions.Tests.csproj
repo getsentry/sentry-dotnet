@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj" />
-    <ProjectReference Include="..\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj" />
+    <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
   </ItemGroup>
 
 </Project>

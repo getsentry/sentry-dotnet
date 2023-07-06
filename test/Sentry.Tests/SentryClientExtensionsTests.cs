@@ -72,7 +72,7 @@ public class SentryClientExtensionsTests
     public void CaptureMessage_NullMessage_DoesNotCapturesEventWithMessage()
     {
         _ = _sut.IsEnabled.Returns(true);
-        var id = _sut.CaptureMessage(null);
+        var id = _sut.CaptureMessage(null!);
 
         _ = _sut.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
         Assert.Equal(default, id);
@@ -93,5 +93,45 @@ public class SentryClientExtensionsTests
         _sut.CaptureUserFeedback(Guid.Parse("1ec19311a7c048818de80b18dcc43eea"), "email@email.com", "comments");
 
         _sut.DidNotReceive().CaptureUserFeedback(Arg.Any<UserFeedback>());
+    }
+
+    [Fact]
+    public async Task FlushAsync_NoTimeoutSpecified_UsesFlushTimeoutFromOptions()
+    {
+        var timeout = TimeSpan.FromSeconds(12345);
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
+        {
+            FlushTimeout = timeout
+        };
+
+        await _sut.FlushAsync();
+
+        await _sut.Received(1).FlushAsync(timeout);
+    }
+
+    [Fact]
+    public async Task Flush_NoTimeoutSpecified_UsesFlushTimeoutFromOptions()
+    {
+        var timeout = TimeSpan.FromSeconds(12345);
+        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
+        {
+            FlushTimeout = timeout
+        };
+
+        // ReSharper disable once MethodHasAsyncOverload
+        _sut.Flush();
+
+        await _sut.Received(1).FlushAsync(timeout);
+    }
+
+    [Fact]
+    public async Task Flush_WithTimeoutSpecified_UsesThatTimeout()
+    {
+        var timeout = TimeSpan.FromSeconds(12345);
+
+        // ReSharper disable once MethodHasAsyncOverload
+        _sut.Flush(timeout);
+
+        await _sut.Received(1).FlushAsync(timeout);
     }
 }

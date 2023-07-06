@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol.Context;
 
 public class BrowserTests
@@ -52,8 +50,8 @@ public class BrowserTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new Browser(), "{\"type\":\"browser\"}") };
-        yield return new object[] { (new Browser { Name = "some name" }, "{\"type\":\"browser\",\"name\":\"some name\"}") };
-        yield return new object[] { (new Browser { Version = "some version" }, "{\"type\":\"browser\",\"version\":\"some version\"}") };
+        yield return new object[] { (new Browser(), """{"type":"browser"}""") };
+        yield return new object[] { (new Browser { Name = "some name" }, """{"type":"browser","name":"some name"}""") };
+        yield return new object[] { (new Browser { Version = "some version" }, """{"type":"browser","version":"some version"}""") };
     }
 }

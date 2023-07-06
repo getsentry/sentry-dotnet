@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Sentry.Extensibility;
 
 namespace Sentry;
@@ -56,7 +55,7 @@ public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
     /// <summary>
     /// Generates a new Sentry ID.
     /// </summary>
-    public static SpanId Create() => new(Guid.NewGuid().ToString("n").Substring(0, 16));
+    public static SpanId Create() => new(Guid.NewGuid().ToString("n")[..16]);
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _) => writer.WriteStringValue(GetNormalizedValue());

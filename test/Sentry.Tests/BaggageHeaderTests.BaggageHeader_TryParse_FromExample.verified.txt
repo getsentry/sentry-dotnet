@@ -1,26 +1,20 @@
 ﻿[
   {
-    Key: other-vendor-value-1,
-    Value: foo;bar;baz
+    other-vendor-value-1: foo;bar;baz
   },
   {
-    Key: sentry-trace_id,
-    Value: 771a43a4192642f0b136d5159a501700
+    sentry-trace_id: 771a43a4192642f0b136d5159a501700
   },
   {
-    Key: sentry-public_key,
-    Value: 49d0f7386ad645858ae85020e393bef3
+    sentry-public_key: 49d0f7386ad645858ae85020e393bef3
   },
   {
-    Key: sentry-sample_rate,
-    Value: 0.01337
+    sentry-sample_rate: 0.01337
   },
   {
-    Key: sentry-user_id,
-    Value: Amélie
+    sentry-user_id: Amélie
   },
   {
-    Key: other-vendor-value-2,
-    Value: foo;bar;
+    other-vendor-value-2: foo;bar;
   }
 ]

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
@@ -41,7 +40,8 @@ public static class ServiceCollectionExtensions
 
         // Custom handler for HttpClientFactory.
         // Must be singleton: https://github.com/getsentry/sentry-dotnet/issues/785
-        services.TryAddSingleton<IHttpMessageHandlerBuilderFilter, SentryHttpMessageHandlerBuilderFilter>();
+        // Must use AddSingleton: https://github.com/getsentry/sentry-dotnet/issues/2373
+        services.AddSingleton<IHttpMessageHandlerBuilderFilter, SentryHttpMessageHandlerBuilderFilter>();
 
         return services;
     }

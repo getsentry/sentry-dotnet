@@ -1,5 +1,4 @@
 using System.Data;
-using System.Net.Http;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Sentry.AspNetCore.Samples.Grpc;

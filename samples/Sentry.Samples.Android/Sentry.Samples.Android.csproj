@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-android</TargetFramework>
+    <TargetFramework>net7.0-android</TargetFramework>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
@@ -12,5 +12,22 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <Using Include="Android.App.Activity" Alias="Activity" />
+
+    <!--
+      The NuGet package the containing the binding comes with a .targets that sets the ProguardConfiguration
+      Since we're referencing the project itself we're grabbing the ProguardConfiguration from project directly.
+    -->
+    <ProguardConfiguration Include="..\..\src\Sentry.Bindings.Android\sentry-proguard.cfg" />
   </ItemGroup>
+
+  <!--
+    For this demo app, let's upload sources and symbols to Sentry on every build, regardless of configuration.
+    In a real app, you probably only want to do this on Release builds.
+  -->
+  <PropertyGroup>
+    <SentryUploadSources>true</SentryUploadSources>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadAndroidProguardMapping>true</SentryUploadAndroidProguardMapping>
+  </PropertyGroup>
+
 </Project>

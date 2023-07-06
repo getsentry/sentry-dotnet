@@ -9,17 +9,7 @@ internal static class DeviceExtensions
         device.Manufacturer ??= AndroidBuild.Manufacturer;
         device.Brand ??= AndroidBuild.Brand;
         device.Model ??= AndroidBuild.Model;
-
-        if (AndroidBuild.SupportedAbis is { } abis)
-        {
-            device.Architecture ??= abis[0];
-        }
-        else
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            device.Architecture ??= AndroidBuild.CpuAbi;
-#pragma warning restore CS0618 // Type or member is obsolete
-        }
+        device.Architecture ??= AndroidHelpers.GetCpuAbi();
     }
 
     public static void ApplyFromSentryAndroidSdk(this Device device, JavaSdk.Protocol.Device d)

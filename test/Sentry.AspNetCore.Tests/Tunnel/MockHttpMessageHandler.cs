@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Http;
-
 namespace Sentry.Tunnel.Tests;
 
 public class MockHttpMessageHandler : DelegatingHandler

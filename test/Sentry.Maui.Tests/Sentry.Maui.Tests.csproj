@@ -1,23 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net6.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-
-    <!--
-      Imports MAUI dependencies.
-      Requires the MAUI .NET workload to be installed with:
-        dotnet workload install maui
-    -->
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
     <UseMaui>true</UseMaui>
-
-    <!--
-      MAUI dependencies are not currently signed.  See https://github.com/dotnet/maui/issues/749
-      If MAUI assemblies are signed in the future, remove this to sign these unit tests, then go update
-      the InternalsVisibleTo reference in Sentry.Maui/Properties/AssemblyInfo.cs to use the public key.
-    -->
-    <SignAssembly>false</SignAssembly>
-
   </PropertyGroup>
 
   <ItemGroup>

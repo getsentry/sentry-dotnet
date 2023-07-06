@@ -1,3 +1,5 @@
+using Sentry.AspNetCore.TestUtils;
+
 namespace Sentry.AspNetCore.Tests;
 
 [CollectionDefinition(nameof(AspNetSentrySdkTestFixture))]

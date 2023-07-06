@@ -1,4 +1,4 @@
-[
+﻿[
   {
     Source: {
       Exception: {
@@ -10,11 +10,9 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception,
-          Mechanism: {}
+          Value: my exception
         }
       ],
-      SentryThreads: [],
       Level: error,
       TransactionName: my transaction,
       Request: {},

@@ -37,11 +37,11 @@ public class SentryOptionsExtensionsTests
     }
 
     [Fact]
-    public void DisableTaskUnobservedTaskExceptionCapture_TaskUnobservedTaskExceptionIntegration()
+    public void DisableTaskUnobservedTaskExceptionCapture_UnobservedTaskExceptionIntegration()
     {
-        Sut.DisableTaskUnobservedTaskExceptionCapture();
+        Sut.DisableUnobservedTaskExceptionCapture();
         Assert.DoesNotContain(Sut.Integrations!,
-            p => p.GetType() == typeof(TaskUnobservedTaskExceptionIntegration));
+            p => p.GetType() == typeof(UnobservedTaskExceptionIntegration));
     }
 
     [Fact]
@@ -291,14 +291,14 @@ public class SentryOptionsExtensionsTests
     [Fact]
     public void Integrations_Includes_TaskUnobservedTaskExceptionIntegration()
     {
-        Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(TaskUnobservedTaskExceptionIntegration));
+        Assert.Contains(Sut.Integrations!, i => i.GetType() == typeof(UnobservedTaskExceptionIntegration));
     }
 
     [Theory]
-    [InlineData("Microsoft.")]
-    [InlineData("System.")]
-    [InlineData("FSharp.")]
-    [InlineData("Giraffe.")]
+    [InlineData("Microsoft")]
+    [InlineData("System")]
+    [InlineData("FSharp")]
+    [InlineData("Giraffe")]
     [InlineData("Newtonsoft.Json")]
     public void Integrations_Includes_MajorSystemPrefixes(string expected)
     {

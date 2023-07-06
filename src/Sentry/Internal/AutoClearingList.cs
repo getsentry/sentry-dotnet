@@ -1,14 +1,18 @@
-using System.Collections;
-
 namespace Sentry.Internal;
 // Workaround for the fact that setting a list in config options appends instead of replaces.
 // See https://github.com/dotnet/runtime/issues/36569
 
 internal class AutoClearingList<T> : IList<T>
 {
-    private readonly IList<T> _list = new List<T>();
+    private readonly IList<T> _list;
 
     private bool _clearOnNextAdd;
+
+    public AutoClearingList(IEnumerable<T> initialItems, bool clearOnNextAdd)
+    {
+        _list = initialItems.ToList();
+        _clearOnNextAdd = clearOnNextAdd;
+    }
 
     public void Add(T item)
     {
@@ -19,12 +23,6 @@ internal class AutoClearingList<T> : IList<T>
         }
 
         _list.Add(item);
-    }
-
-    public AutoClearingList<T> ClearOnNextAdd()
-    {
-        _clearOnNextAdd = true;
-        return this;
     }
 
     public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
@@ -45,7 +43,16 @@ internal class AutoClearingList<T> : IList<T>
 
     public int IndexOf(T item) => _list.IndexOf(item);
 
-    public void Insert(int index, T item) => _list.Insert(index, item);
+    public void Insert(int index, T item)
+    {
+        if (_clearOnNextAdd)
+        {
+            Clear();
+            _clearOnNextAdd = false;
+        }
+
+        _list.Insert(index, item);
+    }
 
     public void RemoveAt(int index) => _list.RemoveAt(index);
 

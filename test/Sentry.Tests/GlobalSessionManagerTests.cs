@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests;
 
 public class GlobalSessionManagerTests : IDisposable
@@ -215,7 +213,7 @@ public class GlobalSessionManagerTests : IDisposable
 
         _fixture.Logger.Entries.Should().Contain(e =>
             e.Message == "Failed to end session because there is none active." &&
-            e.Level == SentryLevel.Debug);
+            e.Level == SentryLevel.Warning);
     }
 
     [Fact]

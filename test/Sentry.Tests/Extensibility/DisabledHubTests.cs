@@ -31,11 +31,20 @@ public class DisabledHubTests
     public void WithScope_NoOp() => DisabledHub.Instance.WithScope(null!);
 
     [Fact]
+    public void WithScopeT_NoOp() => DisabledHub.Instance.WithScope<bool>(null!);
+
+    [Fact]
+    public Task WithScopeAsync_NoOp() => DisabledHub.Instance.WithScopeAsync(null!);
+
+    [Fact]
+    public Task WithScopeAsyncT_NoOp() => DisabledHub.Instance.WithScopeAsync<bool>(null!);
+
+    [Fact]
     public void BindClient_NoOp() => DisabledHub.Instance.BindClient(null!);
 
     [Fact]
     public void Dispose_NoOp() => DisabledHub.Instance.Dispose();
 
     [Fact]
-    public async Task FlushAsync_NoOp() => await DisabledHub.Instance.FlushAsync(TimeSpan.FromDays(1));
+    public async Task FlushAsync_NoOp() => await DisabledHub.Instance.FlushAsync();
 }

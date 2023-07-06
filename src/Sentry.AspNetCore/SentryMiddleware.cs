@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.ExceptionServices;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETSTANDARD2_0
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -10,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
-using Sentry.Protocol;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore;
@@ -90,7 +87,7 @@ internal class SentryMiddleware : IMiddleware
             if (_options.FlushOnCompletedRequest)
             {
                 // Serverless environments flush the queue at the end of each request
-                context.Response.OnCompleted(() => hub.FlushAsync(timeout: _options.FlushTimeout));
+                context.Response.OnCompleted(() => hub.FlushAsync(_options.FlushTimeout));
             }
 
             hub.ConfigureScope(scope =>
@@ -101,10 +98,13 @@ internal class SentryMiddleware : IMiddleware
                 // sent to Sentry. This avoid the cost on error-free requests.
                 // In case of event, all data made available through the HTTP Context at the time of the
                 // event creation will be sent to Sentry
-                scope.OnEvaluating += (_, _) =>
+
+                // Important: The scope that the event is attached to is not necessarily the same one that is active
+                // when the event fires.  Use `activeScope`, not `scope` or `hub`.
+                scope.OnEvaluating += (_, activeScope) =>
                 {
-                    SyncOptionsScope(hub);
-                    PopulateScope(context, scope);
+                    SyncOptionsScope(activeScope);
+                    PopulateScope(context, activeScope);
                 };
             });
 
@@ -122,8 +122,13 @@ internal class SentryMiddleware : IMiddleware
                 var exceptionFeature = context.Features.Get<IExceptionHandlerFeature?>();
                 if (exceptionFeature?.Error != null)
                 {
-                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature");
+                    const string description =
+                        "This exception was caught by an ASP.NET Core custom error handler. " +
+                        "The web server likely returned a customized error page as a result of this exception.";
+
+                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
                 }
+
                 if (_options.FlushBeforeRequestCompleted)
                 {
                     await FlushBeforeCompleted().ConfigureAwait(false);
@@ -131,7 +136,12 @@ internal class SentryMiddleware : IMiddleware
             }
             catch (Exception e)
             {
-                CaptureException(e, eventId, "SentryMiddleware.UnhandledException");
+                const string description =
+                    "This exception was captured by the Sentry ASP.NET Core middleware, and then re-thrown." +
+                    "The web server likely returned a 5xx error code as a result of this exception.";
+
+                CaptureException(e, eventId, "SentryMiddleware.UnhandledException", description);
+
                 if (_options.FlushBeforeRequestCompleted)
                 {
                     await FlushBeforeCompleted().ConfigureAwait(false);
@@ -142,12 +152,11 @@ internal class SentryMiddleware : IMiddleware
 
             // Some environments disables the application after sending a request,
             // making the OnCompleted flush to not work.
-            Task FlushBeforeCompleted() => hub.FlushAsync(timeout: _options.FlushTimeout);
+            Task FlushBeforeCompleted() => hub.FlushAsync(_options.FlushTimeout);
 
-            void CaptureException(Exception e, SentryId evtId, string mechanism)
+            void CaptureException(Exception e, SentryId evtId, string mechanism, string description)
             {
-                e.Data[Mechanism.HandledKey] = false;
-                e.Data[Mechanism.MechanismKey] = mechanism;
+                e.SetSentryMechanism(mechanism, description, handled: false);
 
                 var evt = new SentryEvent(e, eventId: evtId);
 
@@ -160,11 +169,11 @@ internal class SentryMiddleware : IMiddleware
         }
     }
 
-    private void SyncOptionsScope(IHub newHub)
+    private void SyncOptionsScope(Scope scope)
     {
         foreach (var callback in _options.ConfigureScopeCallbacks)
         {
-            newHub.ConfigureScope(callback);
+            callback.Invoke(scope);
         }
     }
 

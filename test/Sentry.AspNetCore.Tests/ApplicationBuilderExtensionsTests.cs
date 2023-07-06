@@ -78,7 +78,6 @@ public class ApplicationBuilderExtensionsTests
 
         var sut = _fixture.GetSut();
 
-
         _ = sut.UseSentry();
 
         var missing = originalProviders.Except(_fixture.SentryAspNetCoreOptions.ExceptionProcessorsProviders);

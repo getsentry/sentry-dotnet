@@ -111,14 +111,14 @@ public class DeviceRunner : ITestListener, ITestRunner
             foreach (var assm in TestAssemblies)
             {
 #if WINDOWS
-                    var nameWithoutExt = assm.GetName().Name;
-                    var assemblyFileName = FileSystemUtils.PlatformGetFullAppPackageFilePath($"{nameWithoutExt}.dll");
+                var nameWithoutExt = assm.GetName().Name;
+                var assemblyFileName = Storage.FileSystemUtils.PlatformGetFullAppPackageFilePath($"{nameWithoutExt}.dll");
 #elif ANDROID
-                    // this is required to exist, but is not used
-                    var assemblyFileName = assm.GetName().Name + ".dll";
-                    assemblyFileName = Path.Combine(Android.App.Application.Context.CacheDir.AbsolutePath, assemblyFileName);
-                    if (!File.Exists(assemblyFileName))
-                        File.Create(assemblyFileName).Close();
+                // this is required to exist, but is not used
+                var assemblyFileName = assm.GetName().Name + ".dll";
+                assemblyFileName = Path.Combine(Android.App.Application.Context.CacheDir.AbsolutePath, assemblyFileName);
+                if (!File.Exists(assemblyFileName))
+                    File.Create(assemblyFileName).Close();
 #else
                 var assemblyFileName = assm.Location;
 #endif

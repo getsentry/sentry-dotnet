@@ -15,6 +15,7 @@ Sentry SDK for .NET
 | **Sentry.AspNet**                  | [![Downloads](https://img.shields.io/nuget/dt/Sentry.AspNet.svg)](https://www.nuget.org/packages/Sentry.AspNet) | [![NuGet](https://img.shields.io/nuget/v/Sentry.AspNet.svg)](https://www.nuget.org/packages/Sentry.AspNet)   |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNet.svg)](https://www.nuget.org/packages/Sentry.AspNet)   | [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/guides/aspnet) |
 | **Sentry.AspNetCore**              | [![Downloads](https://img.shields.io/nuget/dt/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore) | [![NuGet](https://img.shields.io/nuget/v/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.svg)](https://www.nuget.org/packages/Sentry.AspNetCore)   | [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/guides/aspnetcore/) |
 | **Sentry.AspNetCore.Grpc**         | [![Downloads](https://img.shields.io/nuget/dt/Sentry.AspNetCore.Grpc.svg)](https://www.nuget.org/packages/Sentry.AspNetCore.Grpc) | [![NuGet](https://img.shields.io/nuget/v/Sentry.AspNetCore.Grpc.svg)](https://www.nuget.org/packages/Sentry.AspNetCore.Grpc)   |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AspNetCore.Grpc.svg)](https://www.nuget.org/packages/Sentry.AspNetCore.Grpc)   | [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/guides/aspnetcore/) |
+| **Sentry.AzureFunctions.Worker**   | [![Downloads](https://img.shields.io/nuget/dt/Sentry.AzureFunctions.Worker.svg)](https://www.nuget.org/packages/Sentry.AzureFunctions.Worker.Grpc) | [![NuGet](https://img.shields.io/nuget/v/Sentry.AzureFunctions.Worker.svg)](https://www.nuget.org/packages/Sentry.AzureFunctions.Worker)   |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.AzureFunctions.Worker.svg)](https://www.nuget.org/packages/Sentry.AzureFunctions.Worker)   | [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/guides/azure-functions-worker/) |
 | **Sentry.DiagnosticSource**        | [![Downloads](https://img.shields.io/nuget/dt/Sentry.DiagnosticSource.svg)](https://www.nuget.org/packages/Sentry.DiagnosticSource) | [![NuGet](https://img.shields.io/nuget/v/Sentry.DiagnosticSource.svg)](https://www.nuget.org/packages/Sentry.DiagnosticSource)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.DiagnosticSource.svg)](https://www.nuget.org/packages/Sentry.DiagnosticSource)   | [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/performance/instrumentation/automatic-instrumentation/#diagnosticsource-integration) |
 | **Sentry.EntityFramework**         | [![Downloads](https://img.shields.io/nuget/dt/Sentry.EntityFramework.svg)](https://www.nuget.org/packages/Sentry.EntityFramework) | [![NuGet](https://img.shields.io/nuget/v/Sentry.EntityFramework.svg)](https://www.nuget.org/packages/Sentry.EntityFramework)   |   [![NuGet](https://img.shields.io/nuget/vpre/Sentry.EntityFramework.svg)](https://www.nuget.org/packages/Sentry.EntityFramework)   | [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/guides/entityframework) |
 | **Sentry.Extensions.Logging**      | [![Downloads](https://img.shields.io/nuget/dt/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging) | [![NuGet](https://img.shields.io/nuget/v/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   | [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/guides/extensions-logging/) |
@@ -48,6 +49,11 @@ Additionally, our [.NET API refererence docs](https://getsentry.github.io/sentry
 
 Looking for more samples? Check out [this repository](https://github.com/getsentry/examples).
 
+### Talks
+
+* On.NET [Error monitoring with Sentry for .NET MAUI](https://www.youtube.com/watch?v=8YmEC4iKD2I)
+* .NET Conf [focus on MAUI](https://www.youtube.com/watch?v=RW3hiukVXZQ&list=PLdo4fOcmZ0oWePZU3W162NJ9vcXqgpMVc) 
+
 ## Compatibility
 
 The packages target **.NET Standard 2.0** and **.NET Framework 4.6.1**.
@@ -65,6 +71,7 @@ That means [they are compatible with](https://docs.microsoft.com/dotnet/standard
 
 Of those, we run our unit and integration tests against the following:
 
+* .NET 7 on Windows, macOS and Linux
 * .NET 6 on Windows, macOS and Linux
 * .NET Core 3.1 on Windows, macOS and Linux
 * .NET Framework 4.8 on Windows

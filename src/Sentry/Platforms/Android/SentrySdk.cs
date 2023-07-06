@@ -4,7 +4,14 @@ using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
 using Sentry.JavaSdk.Android.Core;
-using Sentry.Protocol;
+
+// Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
+// See https://docs.sentry.io/platforms/android/configuration/manual-init/
+// This attribute automatically adds the metadata to the final AndroidManifest.xml
+[assembly: MetaData("io.sentry.auto-init", Value = "false")]
+
+// Set the hybrid SDK name
+[assembly: MetaData("io.sentry.sdk.name", Value = "sentry.java.android.dotnet")]
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -102,14 +109,15 @@ public static partial class SentrySdk
                 });
             }
 
-            if (options.BeforeBreadcrumb is { } beforeBreadcrumb)
+            if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
             {
                 o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb);
             }
 
             // These options we have behind feature flags
-            if (options.Android.EnableAndroidSdkTracing)
+            if (options is {IsTracingEnabled: true, Android.EnableAndroidSdkTracing: true})
             {
+                o.EnableTracing = (JavaBoolean?)options.EnableTracing;
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
 
                 if (options.TracesSampler is { } tracesSampler)
@@ -118,7 +126,7 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Android.EnableAndroidSdkBeforeSend && options.BeforeSend is { } beforeSend)
+            if (options.Android.EnableAndroidSdkBeforeSend && options.BeforeSendInternal is { } beforeSend)
             {
                 o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
             }
@@ -133,6 +141,7 @@ public static partial class SentrySdk
             o.EnableActivityLifecycleTracingAutoFinish = options.Android.EnableActivityLifecycleTracingAutoFinish;
             o.EnableAppComponentBreadcrumbs = options.Android.EnableAppComponentBreadcrumbs;
             o.EnableAppLifecycleBreadcrumbs = options.Android.EnableAppLifecycleBreadcrumbs;
+            o.EnableRootCheck = options.Android.EnableRootCheck;
             o.EnableSystemEventBreadcrumbs = options.Android.EnableSystemEventBreadcrumbs;
             o.EnableUserInteractionBreadcrumbs = options.Android.EnableUserInteractionBreadcrumbs;
             o.EnableUserInteractionTracing = options.Android.EnableUserInteractionTracing;
@@ -155,6 +164,7 @@ public static partial class SentrySdk
             o.EnableExternalConfiguration = false;
             o.EnableDeduplication = false;
             o.AttachServerName = false;
+            o.NativeSdkName = "sentry.native.dotnet";
 
             // These options are intentionally not expose or modified
             //o.MaxRequestBodySize   // N/A for Android apps
@@ -186,9 +196,16 @@ public static partial class SentrySdk
 
     private static void AndroidEnvironment_UnhandledExceptionRaiser(object? _, RaiseThrowableEventArgs e)
     {
-        e.Exception.Data[Mechanism.HandledKey] = e.Handled;
-        e.Exception.Data[Mechanism.MechanismKey] = "UnhandledExceptionRaiser";
+        var description = "This exception was caught by the Android global error handler.";
+        if (!e.Handled)
+        {
+            description += " The application likely crashed as a result of this exception.";
+        }
+
+        e.Exception.SetSentryMechanism("UnhandledExceptionRaiser", description, e.Handled);
+
         CaptureException(e.Exception);
+
         if (!e.Handled)
         {
             Close();

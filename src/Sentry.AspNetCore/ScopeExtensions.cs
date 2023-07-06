@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +50,15 @@ public static class ScopeExtensions
         try
         {
             SetBody(scope, context, options);
+        }
+#if NET5_0_OR_GREATER
+        catch (BadHttpRequestException) when (context.RequestAborted.IsCancellationRequested)
+#else
+        catch (IOException e) when (context.RequestAborted.IsCancellationRequested &&
+                                    e.GetType().Name == "BadHttpRequestException")
+#endif
+        {
+            options.LogDebug("Failed to extract body because the request was aborted.");
         }
         catch (Exception e)
         {
@@ -134,6 +141,11 @@ public static class ScopeExtensions
             }
 
             scope.Request.Headers[requestHeader.Key] = requestHeader.Value;
+
+            if (requestHeader.Key == HeaderNames.Cookie)
+            {
+                scope.Request.Cookies = requestHeader.Value;
+            }
         }
 
         // TODO: Hide these 'Env' behind some extension method as

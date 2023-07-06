@@ -1,9 +1,4 @@
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
-using NSubstitute.ExceptionExtensions;
 using Sentry.Internal.Http;
-using Sentry.Testing;
 
 namespace Sentry.Tests.Internals.Http;
 
@@ -295,6 +290,39 @@ public class CachingTransportTests
 
         // Assert
         innerTransport.GetSentEnvelopes().Should().HaveCount(3);
+    }
+
+    [Fact]
+    public async Task Handle_Malformed_Envelopes_Gracefully()
+    {
+        // Arrange
+        using var cacheDirectory = new TempDirectory(_fileSystem);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path,
+            FileSystem = _fileSystem
+        };
+        var cacheDirectoryPath =
+            options.TryGetProcessSpecificCacheDirectoryPath() ??
+            throw new InvalidOperationException("Cache directory or DSN is not set.");
+        var processingDirectoryPath = Path.Combine(cacheDirectoryPath, "__processing");
+        var fileName = $"{Guid.NewGuid()}.envelope";
+        var filePath = Path.Combine(processingDirectoryPath, fileName);
+
+        _fileSystem.CreateDirectory(processingDirectoryPath);   // Create the processing directory
+        _fileSystem.CreateFileForWriting(filePath).Dispose(); // Make a malformed envelope... just an empty file
+        _fileSystem.FileExists(filePath).Should().BeTrue();
+
+        // Act
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await transport.FlushAsync(); // Flush the worker to process
+
+        // Assert
+        _fileSystem.FileExists(filePath).Should().BeFalse();
     }
 
     [Fact]

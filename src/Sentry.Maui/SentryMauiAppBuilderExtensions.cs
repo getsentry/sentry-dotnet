@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
-using Sentry.Extensions.Logging;
+using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
 using Sentry.Maui.Internal;
@@ -53,11 +53,11 @@ public static class SentryMauiAppBuilderExtensions
         }
 
         services.AddLogging();
-        services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
+        services.AddSingleton<ILoggerProvider, SentryMauiLoggerProvider>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
-        services.AddSingleton<MauiEventsBinder>();
+        services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
         services.AddSentry<SentryMauiOptions>();
 
@@ -77,27 +77,47 @@ public static class SentryMauiAppBuilderExtensions
         builder.ConfigureLifecycleEvents(events =>
         {
 #if __IOS__
-            events.AddiOS(lifecycle => lifecycle.WillFinishLaunching((application, _) =>
+            events.AddiOS(lifecycle => lifecycle.WillFinishLaunching((application, launchOptions) =>
             {
-                (application.Delegate as MauiUIApplicationDelegate)?.BindMauiEvents();
+                // A bit of hackery here, because we can't mock UIKit.UIApplication in tests.
+                var platformApplication = application != null!
+                    ? application.Delegate as IPlatformApplication
+                    : launchOptions["application"] as IPlatformApplication;
+
+                platformApplication?.BindMauiEvents();
                 return true;
             }));
 #elif ANDROID
             events.AddAndroid(lifecycle => lifecycle.OnApplicationCreating(application =>
-                (application as MauiApplication)?.BindMauiEvents()));
+                (application as IPlatformApplication)?.BindMauiEvents()));
 #elif WINDOWS
             events.AddWindows(lifecycle => lifecycle.OnLaunching((application, _) =>
-                (application as MauiWinUIApplication)?.BindMauiEvents()));
+                (application as IPlatformApplication)?.BindMauiEvents()));
 #elif TIZEN
             events.AddTizen(lifecycle => lifecycle.OnCreate(application =>
-                (application as MauiApplication)?.BindMauiEvents()));
+                (application as IPlatformApplication)?.BindMauiEvents()));
 #endif
         });
     }
 
-    private static void BindMauiEvents(this IPlatformApplication application)
+    private static void BindMauiEvents(this IPlatformApplication platformApplication)
     {
-        var binder = application.Services.GetRequiredService<MauiEventsBinder>();
-        binder.BindMauiEvents();
+        // We need to resolve the application manually, because it's not necessarily
+        // set on platformApplication.Application at this point in the lifecycle.
+        var services = platformApplication.Services;
+        var app = services.GetService<IApplication>();
+
+        // Use a real Application control, because the required events needed for binding
+        // are not present on IApplication and related interfaces.
+        if (app is not Application application)
+        {
+            var options = services.GetService<IOptions<SentryMauiOptions>>()?.Value;
+            options?.LogWarning("Could not bind to MAUI events!");
+            return;
+        }
+
+        // Bind the events
+        var binder = services.GetRequiredService<IMauiEventsBinder>();
+        binder.BindApplicationEvents(application);
     }
 }

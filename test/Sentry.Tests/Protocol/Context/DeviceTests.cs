@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol.Context;
 
 public class DeviceTests
@@ -18,7 +16,7 @@ public class DeviceTests
 
         var actual = sut.ToJsonString(_testOutputLogger);
 
-        Assert.Equal("{\"type\":\"device\"}", actual);
+        Assert.Equal("""{"type":"device"}""", actual);
     }
 
     [Fact]
@@ -69,46 +67,49 @@ public class DeviceTests
             SupportsLocationService = true
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
-        Assert.Equal(
-            "{\"type\":\"device\"," +
-            "\"timezone\":\"tz_id\"," +
-            "\"timezone_display_name\":\"my timezone\"," +
-            "\"name\":\"testing.sentry.io\"," +
-            "\"manufacturer\":\"Manufacturer\"," +
-            "\"brand\":\"Brand\"," +
-            "\"family\":\"Windows\"," +
-            "\"model\":\"Windows Server 2012 R2\"," +
-            "\"model_id\":\"0921309128012\"," +
-            "\"arch\":\"x64\"," +
-            "\"battery_level\":99," +
-            "\"charging\":true," +
-            "\"orientation\":\"portrait\"," +
-            "\"simulator\":false," +
-            "\"memory_size\":500000000000," +
-            "\"free_memory\":200000000000," +
-            "\"usable_memory\":100," +
-            "\"low_memory\":true," +
-            "\"storage_size\":100000000," +
-            "\"free_storage\":0," +
-            "\"external_storage_size\":1000000000000000," +
-            "\"external_free_storage\":100000000000000," +
-            "\"screen_resolution\":\"800x600\"," +
-            "\"screen_density\":42," +
-            "\"screen_dpi\":42," +
-            "\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"," +
-            "\"processor_count\":8," +
-            "\"cpu_description\":\"Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz\"," +
-            "\"processor_frequency\":2500," +
-            "\"device_type\":\"Console\"," +
-            "\"battery_status\":\"Charging\"," +
-            "\"device_unique_identifier\":\"d610540d-11d6-4daa-a98c-b71030acae4d\"," +
-            "\"supports_vibration\":false," +
-            "\"supports_accelerometer\":true," +
-            "\"supports_gyroscope\":true," +
-            "\"supports_audio\":true," +
-            "\"supports_location_service\":true}",
+        Assert.Equal("""
+            {
+              "type": "device",
+              "timezone": "tz_id",
+              "timezone_display_name": "my timezone",
+              "name": "testing.sentry.io",
+              "manufacturer": "Manufacturer",
+              "brand": "Brand",
+              "family": "Windows",
+              "model": "Windows Server 2012 R2",
+              "model_id": "0921309128012",
+              "arch": "x64",
+              "battery_level": 99,
+              "charging": true,
+              "orientation": "portrait",
+              "simulator": false,
+              "memory_size": 500000000000,
+              "free_memory": 200000000000,
+              "usable_memory": 100,
+              "low_memory": true,
+              "storage_size": 100000000,
+              "free_storage": 0,
+              "external_storage_size": 1000000000000000,
+              "external_free_storage": 100000000000000,
+              "screen_resolution": "800x600",
+              "screen_density": 42,
+              "screen_dpi": 42,
+              "boot_time": "9999-12-31T23:59:59.9999999+00:00",
+              "processor_count": 8,
+              "cpu_description": "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz",
+              "processor_frequency": 2500,
+              "device_type": "Console",
+              "battery_status": "Charging",
+              "device_unique_identifier": "d610540d-11d6-4daa-a98c-b71030acae4d",
+              "supports_vibration": false,
+              "supports_accelerometer": true,
+              "supports_gyroscope": true,
+              "supports_audio": true,
+              "supports_location_service": true
+            }
+            """,
             actual);
     }
 
@@ -208,7 +209,7 @@ public class DeviceTests
     public void FromJson_NonSystemTimeZone_NoException()
     {
         // Arrange
-        const string json = "{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}";
+        const string json = """{"type":"device","timezone":"tz_id","timezone_display_name":"tz_name"}""";
 
         // Act
         var device = Json.Parse(json, Device.FromJson);
@@ -221,43 +222,43 @@ public class DeviceTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new Device(), "{\"type\":\"device\"}") };
-        yield return new object[] { (new Device { Name = "some name" }, "{\"type\":\"device\",\"name\":\"some name\"}") };
-        yield return new object[] { (new Device { Orientation = DeviceOrientation.Landscape }, "{\"type\":\"device\",\"orientation\":\"landscape\"}") };
-        yield return new object[] { (new Device { Brand = "some brand" }, "{\"type\":\"device\",\"brand\":\"some brand\"}") };
-        yield return new object[] { (new Device { Manufacturer = "some manufacturer" }, "{\"type\":\"device\",\"manufacturer\":\"some manufacturer\"}") };
-        yield return new object[] { (new Device { Family = "some family" }, "{\"type\":\"device\",\"family\":\"some family\"}") };
-        yield return new object[] { (new Device { Model = "some model" }, "{\"type\":\"device\",\"model\":\"some model\"}") };
-        yield return new object[] { (new Device { ModelId = "some model id" }, "{\"type\":\"device\",\"model_id\":\"some model id\"}") };
-        yield return new object[] { (new Device { Architecture = "some arch" }, "{\"type\":\"device\",\"arch\":\"some arch\"}") };
-        yield return new object[] { (new Device { BatteryLevel = 1 }, "{\"type\":\"device\",\"battery_level\":1}") };
-        yield return new object[] { (new Device { IsCharging = true }, "{\"type\":\"device\",\"charging\":true}") };
-        yield return new object[] { (new Device { IsOnline = true }, "{\"type\":\"device\",\"online\":true}") };
-        yield return new object[] { (new Device { Simulator = false }, "{\"type\":\"device\",\"simulator\":false}") };
-        yield return new object[] { (new Device { MemorySize = 1 }, "{\"type\":\"device\",\"memory_size\":1}") };
-        yield return new object[] { (new Device { FreeMemory = 1 }, "{\"type\":\"device\",\"free_memory\":1}") };
-        yield return new object[] { (new Device { UsableMemory = 1 }, "{\"type\":\"device\",\"usable_memory\":1}") };
-        yield return new object[] { (new Device { LowMemory = true }, "{\"type\":\"device\",\"low_memory\":true}") };
-        yield return new object[] { (new Device { StorageSize = 1 }, "{\"type\":\"device\",\"storage_size\":1}") };
-        yield return new object[] { (new Device { FreeStorage = 1 }, "{\"type\":\"device\",\"free_storage\":1}") };
-        yield return new object[] { (new Device { ExternalStorageSize = 1 }, "{\"type\":\"device\",\"external_storage_size\":1}") };
-        yield return new object[] { (new Device { ExternalFreeStorage = 1 }, "{\"type\":\"device\",\"external_free_storage\":1}") };
-        yield return new object[] { (new Device { ScreenResolution = "1x1" }, "{\"type\":\"device\",\"screen_resolution\":\"1x1\"}") };
-        yield return new object[] { (new Device { ScreenDensity = 1 }, "{\"type\":\"device\",\"screen_density\":1}") };
-        yield return new object[] { (new Device { ScreenDpi = 1 }, "{\"type\":\"device\",\"screen_dpi\":1}") };
-        yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, "{\"type\":\"device\",\"boot_time\":\"9999-12-31T23:59:59.9999999+00:00\"}") };
-        yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_name", "tz_name") }, "{\"type\":\"device\",\"timezone\":\"tz_id\",\"timezone_display_name\":\"tz_name\"}") };
-        yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_id", "tz_id") }, "{\"type\":\"device\",\"timezone\":\"tz_id\"}") };
-        yield return new object[] { (new Device { ProcessorCount = 8 }, "{\"type\":\"device\",\"processor_count\":8}") };
-        yield return new object[] { (new Device { CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz" }, "{\"type\":\"device\",\"cpu_description\":\"Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz\"}") };
-        yield return new object[] { (new Device { ProcessorFrequency = 2500 }, "{\"type\":\"device\",\"processor_frequency\":2500}") };
-        yield return new object[] { (new Device { DeviceType = "Handheld" }, "{\"type\":\"device\",\"device_type\":\"Handheld\"}") };
-        yield return new object[] { (new Device { BatteryStatus = "Charging" }, "{\"type\":\"device\",\"battery_status\":\"Charging\"}") };
-        yield return new object[] { (new Device { DeviceUniqueIdentifier = "d610540d-11d6-4daa-a98c-b71030acae4d" }, "{\"type\":\"device\",\"device_unique_identifier\":\"d610540d-11d6-4daa-a98c-b71030acae4d\"}") };
-        yield return new object[] { (new Device { SupportsVibration = false }, "{\"type\":\"device\",\"supports_vibration\":false}") };
-        yield return new object[] { (new Device { SupportsAccelerometer = true }, "{\"type\":\"device\",\"supports_accelerometer\":true}") };
-        yield return new object[] { (new Device { SupportsGyroscope = true }, "{\"type\":\"device\",\"supports_gyroscope\":true}") };
-        yield return new object[] { (new Device { SupportsAudio = true }, "{\"type\":\"device\",\"supports_audio\":true}") };
-        yield return new object[] { (new Device { SupportsLocationService = true }, "{\"type\":\"device\",\"supports_location_service\":true}") };
+        yield return new object[] { (new Device(), """{"type":"device"}""") };
+        yield return new object[] { (new Device { Name = "some name" }, """{"type":"device","name":"some name"}""") };
+        yield return new object[] { (new Device { Orientation = DeviceOrientation.Landscape }, """{"type":"device","orientation":"landscape"}""") };
+        yield return new object[] { (new Device { Brand = "some brand" }, """{"type":"device","brand":"some brand"}""") };
+        yield return new object[] { (new Device { Manufacturer = "some manufacturer" }, """{"type":"device","manufacturer":"some manufacturer"}""") };
+        yield return new object[] { (new Device { Family = "some family" }, """{"type":"device","family":"some family"}""") };
+        yield return new object[] { (new Device { Model = "some model" }, """{"type":"device","model":"some model"}""") };
+        yield return new object[] { (new Device { ModelId = "some model id" }, """{"type":"device","model_id":"some model id"}""") };
+        yield return new object[] { (new Device { Architecture = "some arch" }, """{"type":"device","arch":"some arch"}""") };
+        yield return new object[] { (new Device { BatteryLevel = 1 }, """{"type":"device","battery_level":1}""") };
+        yield return new object[] { (new Device { IsCharging = true }, """{"type":"device","charging":true}""") };
+        yield return new object[] { (new Device { IsOnline = true }, """{"type":"device","online":true}""") };
+        yield return new object[] { (new Device { Simulator = false }, """{"type":"device","simulator":false}""") };
+        yield return new object[] { (new Device { MemorySize = 1 }, """{"type":"device","memory_size":1}""") };
+        yield return new object[] { (new Device { FreeMemory = 1 }, """{"type":"device","free_memory":1}""") };
+        yield return new object[] { (new Device { UsableMemory = 1 }, """{"type":"device","usable_memory":1}""") };
+        yield return new object[] { (new Device { LowMemory = true }, """{"type":"device","low_memory":true}""") };
+        yield return new object[] { (new Device { StorageSize = 1 }, """{"type":"device","storage_size":1}""") };
+        yield return new object[] { (new Device { FreeStorage = 1 }, """{"type":"device","free_storage":1}""") };
+        yield return new object[] { (new Device { ExternalStorageSize = 1 }, """{"type":"device","external_storage_size":1}""") };
+        yield return new object[] { (new Device { ExternalFreeStorage = 1 }, """{"type":"device","external_free_storage":1}""") };
+        yield return new object[] { (new Device { ScreenResolution = "1x1" }, """{"type":"device","screen_resolution":"1x1"}""") };
+        yield return new object[] { (new Device { ScreenDensity = 1 }, """{"type":"device","screen_density":1}""") };
+        yield return new object[] { (new Device { ScreenDpi = 1 }, """{"type":"device","screen_dpi":1}""") };
+        yield return new object[] { (new Device { BootTime = DateTimeOffset.MaxValue }, """{"type":"device","boot_time":"9999-12-31T23:59:59.9999999+00:00"}""") };
+        yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_name", "tz_name") }, """{"type":"device","timezone":"tz_id","timezone_display_name":"tz_name"}""") };
+        yield return new object[] { (new Device { Timezone = TimeZoneInfo.CreateCustomTimeZone("tz_id", TimeSpan.Zero, "tz_id", "tz_id") }, """{"type":"device","timezone":"tz_id"}""") };
+        yield return new object[] { (new Device { ProcessorCount = 8 }, """{"type":"device","processor_count":8}""") };
+        yield return new object[] { (new Device { CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz" }, """{"type":"device","cpu_description":"Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz"}""") };
+        yield return new object[] { (new Device { ProcessorFrequency = 2500 }, """{"type":"device","processor_frequency":2500}""") };
+        yield return new object[] { (new Device { DeviceType = "Handheld" }, """{"type":"device","device_type":"Handheld"}""") };
+        yield return new object[] { (new Device { BatteryStatus = "Charging" }, """{"type":"device","battery_status":"Charging"}""") };
+        yield return new object[] { (new Device { DeviceUniqueIdentifier = "d610540d-11d6-4daa-a98c-b71030acae4d" }, """{"type":"device","device_unique_identifier":"d610540d-11d6-4daa-a98c-b71030acae4d"}""") };
+        yield return new object[] { (new Device { SupportsVibration = false }, """{"type":"device","supports_vibration":false}""") };
+        yield return new object[] { (new Device { SupportsAccelerometer = true }, """{"type":"device","supports_accelerometer":true}""") };
+        yield return new object[] { (new Device { SupportsGyroscope = true }, """{"type":"device","supports_gyroscope":true}""") };
+        yield return new object[] { (new Device { SupportsAudio = true }, """{"type":"device","supports_audio":true}""") };
+        yield return new object[] { (new Device { SupportsLocationService = true }, """{"type":"device","supports_location_service":true}""") };
     }
 }

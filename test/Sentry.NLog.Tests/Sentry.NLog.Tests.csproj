@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,9 +15,6 @@
     <Using Include="NLog.Layouts" />
     <Using Include="NLog.Targets" />
     <Using Include="NLog.Targets.Wrappers" />
-    <Using Include="Sentry.Testing" />
-    <Using Include="Sentry.Tests" />
-    <Using Include="System.Collections" />
     <Using Include="System.Xml" />
 
   </ItemGroup>

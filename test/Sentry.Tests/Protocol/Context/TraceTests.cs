@@ -1,4 +1,4 @@
-using Sentry.Testing;
+using Trace = Sentry.Protocol.Trace;
 
 namespace Sentry.Tests.Protocol.Context;
 
@@ -21,7 +21,7 @@ public class TraceTests
         var actual = trace.ToJsonString(_testOutputLogger);
 
         // Assert
-        Assert.Equal("{\"type\":\"trace\"}", actual);
+        Assert.Equal("""{"type":"trace"}""", actual);
     }
 
     [Fact]
@@ -39,18 +39,20 @@ public class TraceTests
         };
 
         // Act
-        var actual = trace.ToJsonString(_testOutputLogger);
+        var actual = trace.ToJsonString(_testOutputLogger, indented: true);
 
         // Assert
         Assert.Equal(
-            "{" +
-            "\"type\":\"trace\"," +
-            "\"span_id\":\"2000000000000000\"," +
-            "\"parent_span_id\":\"1000000000000000\"," +
-            "\"trace_id\":\"75302ac48a024bde9a3b3734a82e36c8\"," +
-            "\"op\":\"op123\"," +
-            "\"status\":\"aborted\"" +
-            "}",
+            """
+            {
+              "type": "trace",
+              "span_id": "2000000000000000",
+              "parent_span_id": "1000000000000000",
+              "trace_id": "75302ac48a024bde9a3b3734a82e36c8",
+              "op": "op123",
+              "status": "aborted"
+            }
+            """,
             actual);
     }
 

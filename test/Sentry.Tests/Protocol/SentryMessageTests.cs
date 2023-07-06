@@ -1,5 +1,3 @@
-using Sentry.Testing;
-
 namespace Sentry.Tests.Protocol;
 
 public class SentryMessageTests
@@ -21,12 +19,19 @@ public class SentryMessageTests
             Formatted = "Message 100 test-name"
         };
 
-        var actual = sut.ToJsonString(_testOutputLogger);
+        var actual = sut.ToJsonString(_testOutputLogger, indented: true);
 
         Assert.Equal(
-            "{\"message\":\"Message {eventId} {name}\"," +
-            "\"params\":[100,\"test-name\"]," +
-            "\"formatted\":\"Message 100 test-name\"}",
+            """
+            {
+              "message": "Message {eventId} {name}",
+              "params": [
+                100,
+                "test-name"
+              ],
+              "formatted": "Message 100 test-name"
+            }
+            """,
             actual);
     }
 
@@ -42,8 +47,8 @@ public class SentryMessageTests
     public static IEnumerable<object[]> TestCases()
     {
         yield return new object[] { (new SentryMessage(), "{}") };
-        yield return new object[] { (new SentryMessage { Message = "some message" }, "{\"message\":\"some message\"}") };
-        yield return new object[] { (new SentryMessage { Params = new[] { "param" } }, "{\"params\":[\"param\"]}") };
-        yield return new object[] { (new SentryMessage { Formatted = "some formatted" }, "{\"formatted\":\"some formatted\"}") };
+        yield return new object[] { (new SentryMessage { Message = "some message" }, """{"message":"some message"}""") };
+        yield return new object[] { (new SentryMessage { Params = new[] { "param" } }, """{"params":["param"]}""") };
+        yield return new object[] { (new SentryMessage { Formatted = "some formatted" }, """{"formatted":"some formatted"}""") };
     }
 }

@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol.Envelopes;
+using ISerializable = Sentry.Protocol.Envelopes.ISerializable;
 
 namespace Sentry.Internal;
 
@@ -14,7 +15,7 @@ internal static class SerializableExtensions
     {
         var stream = new MemoryStream();
 #if NETFRAMEWORK || NETSTANDARD2_0
-            using (stream)
+        using (stream)
 #else
         await using (stream.ConfigureAwait(false))
 #endif
