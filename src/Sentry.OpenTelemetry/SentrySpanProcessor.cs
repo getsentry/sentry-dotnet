@@ -4,8 +4,6 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.OpenTelemetry;
 
-// https://develop.sentry.dev/sdk/performance/opentelemetry
-
 /// <summary>
 /// Sentry span processor for Open Telemetry.
 /// </summary>
