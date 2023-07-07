@@ -7,15 +7,12 @@
 
     <ItemGroup>
       <PackageReference Include="OpenTelemetry" Version="1.5.0" />
+      <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.5.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Sentry\Sentry.csproj" />
+      <ProjectReference Include="..\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+      <ProjectReference Include="..\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
     </ItemGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="Sentry.OpenTelemetry.AspNetCore" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.OpenTelemetry.Tests" PublicKey="$(SentryPublicKey)" />
-  </ItemGroup>
 
 </Project>
