@@ -190,6 +190,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.Tests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{2502D3A0-7628-4768-A430-0854BEB1E7A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.AspNetCore", "src\Sentry.OpenTelemetry.AspNetCore\Sentry.OpenTelemetry.AspNetCore.csproj", "{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -469,6 +471,10 @@ Global
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -544,6 +550,7 @@ Global
 		{94C5E990-50EE-462F-B83F-B4357F549500} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
