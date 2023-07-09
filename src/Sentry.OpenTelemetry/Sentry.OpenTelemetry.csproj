@@ -1,21 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+  <PropertyGroup>
+      <TargetFrameworks>net6.0;net461</TargetFrameworks>
+      <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="OpenTelemetry" Version="1.5.0" />
-    </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+    <PackageReference Include="OpenTelemetry" Version="1.5.0" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Sentry\Sentry.csproj" />
-    </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="OpenTelemetry" Version="1.4.0" />
+  </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Sentry.OpenTelemetry.AspNetCore" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.OpenTelemetry.Tests" PublicKey="$(SentryPublicKey)" />
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
+
+<ItemGroup>
+  <InternalsVisibleTo Include="Sentry.OpenTelemetry.AspNetCore" PublicKey="$(SentryPublicKey)" />
+  <InternalsVisibleTo Include="Sentry.OpenTelemetry.Tests" PublicKey="$(SentryPublicKey)" />
+</ItemGroup>
 
 </Project>
