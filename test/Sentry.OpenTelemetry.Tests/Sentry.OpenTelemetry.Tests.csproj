@@ -4,18 +4,9 @@
     <TargetFrameworks>net7.0;net6.0;net48</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
-    <PackageReference Include="OpenTelemetry" Version="1.5.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.5.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <PackageReference Include="OpenTelemetry" Version="1.4.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.4.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" Version="1.5.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.5.1" />
   </ItemGroup>
   
   <ItemGroup>

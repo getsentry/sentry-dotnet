@@ -1,3 +1,5 @@
+using Sentry.PlatformAbstractions;
+
 namespace Sentry.OpenTelemetry.Tests;
 
 public class SentrySpanProcessorTests : ActivitySourceTests
@@ -135,12 +137,20 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
+    private void SkipExperimentalFrameworks()
+    {
+        // ActivitySource.StartActivity doesn't set SpanId or TraceId when targeting
+        // .NET Framework 4.8 on Windows Or NetCore 3.1 on Mac OS
+        Skip.If(RuntimeInfo.GetRuntime().Name == ".NET Framework",
+            "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623"
+            );
+    }
+
     [SkippableFact]
     public void OnStart_WithParentSpanId_StartsChildSpan()
     {
-#if !NET6_0_OR_GREATER
-        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
-#endif
+        SkipExperimentalFrameworks();
+
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
@@ -181,9 +191,8 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     [SkippableFact]
     public void OnStart_WithoutParentSpanId_StartsNewTransaction()
     {
-#if !NET6_0_OR_GREATER
-        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
-#endif
+        SkipExperimentalFrameworks();
+
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
@@ -216,9 +225,8 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     [SkippableFact]
     public void OnEnd_FinishesSpan()
     {
-#if !NET6_0_OR_GREATER
-        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
-#endif
+        SkipExperimentalFrameworks();
+
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
@@ -266,9 +274,8 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     [SkippableFact]
     public void OnEnd_FinishesTransaction()
     {
-#if !NET6_0_OR_GREATER
-        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
-#endif
+        SkipExperimentalFrameworks();
+
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
