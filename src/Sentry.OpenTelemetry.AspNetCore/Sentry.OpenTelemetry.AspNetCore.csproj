@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+      <Description>Official OpenTelemetry ASP.NET Core integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+      <PackageTags>$(PackageTags);AspNetCore;MVC;OpenTelemetry</PackageTags>
+      <TargetFramework>net6.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
