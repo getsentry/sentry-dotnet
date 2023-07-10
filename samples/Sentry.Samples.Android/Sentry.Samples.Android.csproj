@@ -12,6 +12,12 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <Using Include="Android.App.Activity" Alias="Activity" />
+
+    <!--
+      The NuGet package the containing the binding comes with a .targets that sets the ProguardConfiguration
+      Since we're referencing the project itself we're grabbing the ProguardConfiguration from project directly.
+    -->
+    <ProguardConfiguration Include="..\..\src\Sentry.Bindings.Android\sentry-proguard.cfg" />
   </ItemGroup>
 
   <!--
@@ -21,6 +27,7 @@
   <PropertyGroup>
     <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadAndroidProguardMapping>true</SentryUploadAndroidProguardMapping>
   </PropertyGroup>
 
 </Project>

@@ -26,51 +26,6 @@ internal class SentryTracingMiddleware
         _options = options.Value;
     }
 
-    private SentryTraceHeader? TryGetSentryTraceHeader(HttpContext context)
-    {
-        var value = context.Request.Headers.GetValueOrDefault(SentryTraceHeader.HttpHeaderName);
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        _options.LogDebug("Received Sentry trace header '{0}'.", value);
-
-        try
-        {
-            return SentryTraceHeader.Parse(value);
-        }
-        catch (Exception ex)
-        {
-            _options.LogError("Invalid Sentry trace header '{0}'.", ex, value);
-            return null;
-        }
-    }
-
-    private BaggageHeader? TryGetBaggageHeader(HttpContext context)
-    {
-        var value = context.Request.Headers.GetValueOrDefault(BaggageHeader.HttpHeaderName);
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        // Note: If there are multiple baggage headers, they will be joined with comma delimiters,
-        // and can thus be treated as a single baggage header.
-
-        _options.LogDebug("Received baggage header '{0}'.", value);
-
-        try
-        {
-            return BaggageHeader.TryParse(value, onlySentry: true);
-        }
-        catch (Exception ex)
-        {
-            _options.LogError("Invalid baggage header '{0}'.", ex, value);
-            return null;
-        }
-    }
-
     private ITransaction? TryStartTransaction(HttpContext context)
     {
         if (context.Request.Method == HttpMethod.Options.Method)
@@ -84,7 +39,7 @@ internal class SentryTracingMiddleware
             var hub = _getHub();
 
             // Attempt to start a transaction from the trace header if it exists
-            var traceHeader = TryGetSentryTraceHeader(context);
+            var traceHeader = context.TryGetSentryTraceHeader(_options);
 
             // It's important to try and set the transaction name to some value here so that it's available for use
             // in sampling.  At a later stage, we will try to get the transaction name again, to account for the
@@ -104,7 +59,7 @@ internal class SentryTracingMiddleware
             };
 
             // Set the Dynamic Sampling Context from the baggage header, if it exists.
-            var baggageHeader = TryGetBaggageHeader(context);
+            var baggageHeader = context.TryGetBaggageHeader(_options);
             var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
             if (traceHeader is { } && baggageHeader is null)
@@ -143,6 +98,17 @@ internal class SentryTracingMiddleware
 
         if (!hub.IsEnabled)
         {
+            await _next(context).ConfigureAwait(false);
+            return;
+        }
+
+        if (_options.Instrumenter == Instrumenter.OpenTelemetry)
+        {
+            _options.LogInfo(
+                "When using OpenTelemetry instrumentation mode, the call to UseSentryTracing can be safely removed. " +
+                "ASP.NET Core should be instrumented by following the instructions at " +
+                "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md");
+
             await _next(context).ConfigureAwait(false);
             return;
         }

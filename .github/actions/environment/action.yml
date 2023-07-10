@@ -16,19 +16,12 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
-    # Android 33 is required for .NET Android targets, but is missing on windows-2019 images.
-    - name: Install Android 33
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: '%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager "platforms;android-33"'
-
-    # Note, the following is needed on the windows-2019 image only.
-    # All other versions of .NET we need are pre-installed on the GitHub Actions virtual images.
-    - name: Install .NET 6 SDK
+    # .NET 3.1 has been removed from all OS due to EOL
+    # https://github.com/actions/runner-images/issues/7667
+    - name: Install .NET 3.1 SDK
       uses: actions/setup-dotnet@v3
-      if: runner.os == 'Windows'
       with:
-        dotnet-version: 6.x.x
+        dotnet-version: 3.1.x
 
     - name: Install .NET 7 SDK
       uses: actions/setup-dotnet@v3

@@ -18,7 +18,7 @@ public static partial class SentrySdk
     public static class SentrySdk
 #endif
 {
-    private static IHub CurrentHub = DisabledHub.Instance;
+    internal static IHub CurrentHub = DisabledHub.Instance;
 
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
 

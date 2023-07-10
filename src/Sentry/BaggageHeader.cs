@@ -124,9 +124,9 @@ internal class BaggageHeader
     public static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders) =>
         new(baggageHeaders.SelectMany(x => x.Members));
 
-    private static bool IsValidKey(string key)
+    private static bool IsValidKey(string? key)
     {
-        if (key.Length == 0)
+        if (string.IsNullOrEmpty(key))
         {
             return false;
         }
