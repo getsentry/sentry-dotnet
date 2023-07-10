@@ -164,12 +164,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleFileTestApp", "test\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry", "src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj", "{D4B29F85-5029-462E-A67E-8B7183A0406D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.AspNetCore", "src\Sentry.OpenTelemetry.AspNetCore\Sentry.OpenTelemetry.AspNetCore.csproj", "{BED556CF-7425-4C1A-942B-CDDB88DD3BAA}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.Tests", "test\Sentry.OpenTelemetry.Tests\Sentry.OpenTelemetry.Tests.csproj", "{A58DE854-6576-4E07-98BF-03B9DCCDBF9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNet", "samples\Sentry.Samples.OpenTelemetry.AspNet\Sentry.Samples.OpenTelemetry.AspNet.csproj", "{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{6F791E40-49A8-4A67-81DB-6913E519310A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.AspNetCore", "src\Sentry.OpenTelemetry.AspNetCore\Sentry.OpenTelemetry.AspNetCore.csproj", "{BED556CF-7425-4C1A-942B-CDDB88DD3BAA}"
-EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
