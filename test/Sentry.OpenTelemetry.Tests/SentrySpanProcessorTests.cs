@@ -135,9 +135,12 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void OnStart_WithParentSpanId_StartsChildSpan()
     {
+#if !NET6_0_OR_GREATER
+        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
+#endif
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
@@ -175,9 +178,12 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void OnStart_WithoutParentSpanId_StartsNewTransaction()
     {
+#if !NET6_0_OR_GREATER
+        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
+#endif
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
@@ -207,9 +213,12 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void OnEnd_FinishesSpan()
     {
+#if !NET6_0_OR_GREATER
+        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
+#endif
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
@@ -254,9 +263,12 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void OnEnd_FinishesTransaction()
     {
+#if !NET6_0_OR_GREATER
+        Skip.If(true, "See https://github.com/open-telemetry/opentelemetry-dotnet/issues/4623");
+#endif
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();

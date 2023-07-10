@@ -22,5 +22,6 @@ public abstract class ActivitySourceTests : IDisposable
     public void Dispose()
     {
         _listener?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
