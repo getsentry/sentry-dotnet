@@ -160,19 +160,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AzureFunctio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{8639DB06-1F74-4890-8974-613305C1B6C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleFileTestApp", "test\SingleFileTestApp\SingleFileTestApp.csproj", "{08C99C2F-08D8-44A3-981F-768DC84DCEC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SingleFileTestApp", "test\SingleFileTestApp\SingleFileTestApp.csproj", "{08C99C2F-08D8-44A3-981F-768DC84DCEC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry", "src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj", "{D4B29F85-5029-462E-A67E-8B7183A0406D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.OpenTelemetry", "src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj", "{D4B29F85-5029-462E-A67E-8B7183A0406D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.AspNetCore", "src\Sentry.OpenTelemetry.AspNetCore\Sentry.OpenTelemetry.AspNetCore.csproj", "{BED556CF-7425-4C1A-942B-CDDB88DD3BAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.OpenTelemetry.Tests", "test\Sentry.OpenTelemetry.Tests\Sentry.OpenTelemetry.Tests.csproj", "{A58DE854-6576-4E07-98BF-03B9DCCDBF9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.OpenTelemetry.Tests", "test\Sentry.OpenTelemetry.Tests\Sentry.OpenTelemetry.Tests.csproj", "{A58DE854-6576-4E07-98BF-03B9DCCDBF9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{6F791E40-49A8-4A67-81DB-6913E519310A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.OpenTelemetry.AspNetCore", "src\Sentry.OpenTelemetry.AspNetCore\Sentry.OpenTelemetry.AspNetCore.csproj", "{BED556CF-7425-4C1A-942B-CDDB88DD3BAA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNet", "samples\Sentry.Samples.OpenTelemetry.AspNet\Sentry.Samples.OpenTelemetry.AspNet.csproj", "{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{6F791E40-49A8-4A67-81DB-6913E519310A}"
-EndProject
-
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -387,6 +386,10 @@ Global
 		{8639DB06-1F74-4890-8974-613305C1B6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8639DB06-1F74-4890-8974-613305C1B6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8639DB06-1F74-4890-8974-613305C1B6C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4B29F85-5029-462E-A67E-8B7183A0406D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D4B29F85-5029-462E-A67E-8B7183A0406D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4B29F85-5029-462E-A67E-8B7183A0406D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -395,10 +398,6 @@ Global
 		{A58DE854-6576-4E07-98BF-03B9DCCDBF9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A58DE854-6576-4E07-98BF-03B9DCCDBF9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A58DE854-6576-4E07-98BF-03B9DCCDBF9A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08C99C2F-08D8-44A3-981F-768DC84DCEC7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6F791E40-49A8-4A67-81DB-6913E519310A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6F791E40-49A8-4A67-81DB-6913E519310A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F791E40-49A8-4A67-81DB-6913E519310A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -407,6 +406,10 @@ Global
 		{BED556CF-7425-4C1A-942B-CDDB88DD3BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BED556CF-7425-4C1A-942B-CDDB88DD3BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BED556CF-7425-4C1A-942B-CDDB88DD3BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -467,11 +470,12 @@ Global
 		{203C4556-16DE-46CE-9FAF-C93D8B30D04A} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{243B75FF-1501-4DB7-B933-EE43D960EB90} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{8639DB06-1F74-4890-8974-613305C1B6C5} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{08C99C2F-08D8-44A3-981F-768DC84DCEC7} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{D4B29F85-5029-462E-A67E-8B7183A0406D} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{A58DE854-6576-4E07-98BF-03B9DCCDBF9A} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
-		{08C99C2F-08D8-44A3-981F-768DC84DCEC7} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{6F791E40-49A8-4A67-81DB-6913E519310A} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{BED556CF-7425-4C1A-942B-CDDB88DD3BAA} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}
