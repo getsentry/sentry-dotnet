@@ -24,18 +24,16 @@ namespace Sentry.Samples.OpenTelemetry.AspNet
         {
             var builder = Sdk.CreateTracerProviderBuilder()
                 .AddAspNetInstrumentation()
-
-                // Other configuration, like adding an exporter and setting resources
                 .AddSource(Telemetry.ServiceName)
                 .SetResourceBuilder(
                     ResourceBuilder.CreateDefault()
-                        .AddService(serviceName: Telemetry.ServiceName, serviceVersion: "1.0.0"));
+                        .AddService(serviceName: Telemetry.ServiceName, serviceVersion: "1.0.0")
+                    );
 
             // Initialize Sentry to capture AppDomain unhandled exceptions and more.
             _sentry = SentrySdk.Init(o =>
             {
                 //o.Dsn = "...Your DSN...";
-                o.Dsn = "https://665adc0bb0024947a0aa92522188a128@o1197552.ingest.sentry.io/4505502182604800";
                 o.Debug = true;
                 o.TracesSampleRate = 1.0;
                 o.AddAspNet(RequestSize.Always);
