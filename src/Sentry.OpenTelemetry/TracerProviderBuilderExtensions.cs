@@ -7,7 +7,7 @@ namespace Sentry.OpenTelemetry;
 /// <summary>
 /// Contains extension methods for the <see cref="TracerProviderBuilder"/> class.
 /// </summary>
-public static class TracerProviderBuilderExtensions
+internal static class TracerProviderBuilderExtensions
 {
     /// <summary>
     /// Ensures OpenTelemetry trace information is sent to Sentry.
@@ -25,7 +25,7 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, TextMapPropagator? defaultTextMapPropagator = null)
+    internal static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, TextMapPropagator? defaultTextMapPropagator = null)
     {
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
