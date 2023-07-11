@@ -39,10 +39,15 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
-    /// Enables OpenTelemetry instrumentation with Sentry
+    /// <para>Configures Sentry to use OpenTelemetry for distributed tracing.</para>
+    /// <para>
+    /// Note: if you are using this method to configure Sentry to work with OpenTelemetry you will also have to call
+    /// <see cref="TracerProviderBuilderExtensions.AddSentry"/> when building your <see cref="TracerProviderBuilder"/>
+    /// to ensure OpenTelemetry sends trace information to Sentry.
+    /// </para>
     /// </summary>
     /// <param name="options"><see cref="SentryOptions"/> instance</param>
-    internal static void UseOpenTelemetry(this SentryOptions options)
+    public static void UseOpenTelemetry(this SentryOptions options)
     {
         options.Instrumenter = Instrumenter.OpenTelemetry;
         options.AddTransactionProcessor(
