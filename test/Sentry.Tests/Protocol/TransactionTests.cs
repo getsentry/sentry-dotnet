@@ -389,6 +389,42 @@ public class TransactionTests
     }
 
     [Fact]
+    public async Task Finish_SentryRequestTransactionGetsIgnored()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            IdleTimeout = TimeSpan.FromMilliseconds(2)
+        };
+        var hub = new Hub(options, client);
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            "my name",
+            "my operation",
+            "description",
+            SpanStatus.Ok,
+            null,
+            true,
+            TransactionNameSource.Component
+        );
+
+        var transaction = new TransactionTracer(hub, context)
+        {
+            IsSentryRequest = true
+        };
+
+        // Act
+        await Task.Delay(5);
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
     public void Finish_CapturesTransaction()
     {
         // Arrange

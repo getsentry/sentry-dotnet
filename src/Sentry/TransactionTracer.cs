@@ -180,6 +180,14 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
 
     internal ITransactionProfiler? TransactionProfiler { get; set; }
 
+    /// <summary>
+    /// Used by the Sentry.OpenTelemetry.SentrySpanProcessor to mark a transaction as a Sentry request. Ideally we wouldn't
+    /// create this transaction but since we can't avoid doing that, once we detect that it's a Sentry request we mark it
+    /// as such so that we can prevent finishing the transaction tracer when idle timeout elapses and the TransactionTracer gets converted into
+    /// a Transaction.
+    /// </summary>
+    internal bool IsSentryRequest { get; set; }
+
     // TODO: mark as internal in version 4
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
@@ -220,7 +228,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Description = context.Description;
         Status = context.Status;
         IsSampled = context.IsSampled;
-		
+
 		if (context is TransactionContext transactionContext)
         {
             _instrumenter = transactionContext.Instrumenter;
@@ -300,6 +308,11 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
             _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
 
             _idleTimer?.Dispose();
+        }
+
+        if (IsSentryRequest)
+        {
+            return;
         }
 
         TransactionProfiler?.Finish();
