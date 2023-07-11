@@ -190,8 +190,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.OpenTelemetry.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{2502D3A0-7628-4768-A430-0854BEB1E7A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.OpenTelemetry.AspNetCore", "src\Sentry.OpenTelemetry.AspNetCore\Sentry.OpenTelemetry.AspNetCore.csproj", "{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.AspNet", "samples\Sentry.Samples.OpenTelemetry.AspNet\Sentry.Samples.OpenTelemetry.AspNet.csproj", "{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}"
 EndProject
 Global
@@ -473,10 +471,6 @@ Global
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -556,7 +550,6 @@ Global
 		{94C5E990-50EE-462F-B83F-B4357F549500} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
 		{2502D3A0-7628-4768-A430-0854BEB1E7A5} = {77454495-55EE-4B40-A089-71B9E8F82E89}
-		{D9FB44DD-5D72-46A1-A446-58472D5CBB1E} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{DDD39CD0-F323-460E-95EA-CFAC1606DDAC} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

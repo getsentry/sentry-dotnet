@@ -1,30 +1,29 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Sentry;
 using Sentry.OpenTelemetry;
-using Sentry.OpenTelemetry.AspNetCore;
 using Sentry.Samples.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // OpenTelemetry Configuration
 // See https://opentelemetry.io/docs/instrumentation/net/getting-started/
-builder.AddOpenTelemetryWithSentry(
-    tracerProviderBuilder =>
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder =>
         tracerProviderBuilder
             .AddSource(Telemetry.ActivitySource.Name)
             .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
             .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation(),
-    options =>
-    {
-        // options.Dsn = "... Your DSN ...";
-        options.TracesSampleRate = 1.0;
-        options.Debug = builder.Environment.IsDevelopment();
-    }
-);
+            .AddHttpClientInstrumentation()
+            .AddSentry()    // <-- Configure OpenTelemetry to send traces to Sentry
+    );
+
+builder.WebHost.UseSentry(options =>
+{
+    options.Debug = builder.Environment.IsDevelopment();
+    options.TracesSampleRate = 1.0;
+    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+});
 
 var app = builder.Build();
 
