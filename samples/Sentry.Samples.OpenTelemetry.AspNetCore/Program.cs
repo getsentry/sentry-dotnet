@@ -52,7 +52,7 @@ app.MapGet("/throw", _ => throw new Exception("test"));
 
 app.Run();
 
-string LookupUser(HttpRequest request)
+static string LookupUser(HttpRequest request)
 {
     using var _ = Telemetry.ActivitySource.StartActivity(nameof(LookupUser));
     Thread.Sleep(100); // Simulate some work
