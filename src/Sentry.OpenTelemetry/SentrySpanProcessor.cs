@@ -23,7 +23,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
     }
 
-
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
     /// </summary>
