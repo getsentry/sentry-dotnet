@@ -238,19 +238,17 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         using (new AssertionScope())
         {
-            using (new AssertionScope())
+            spanTracer.ParentSpanId.Should().Be(parent.SpanId.AsSentrySpanId());
+            spanTracer.Operation.Should().Be(data.OperationName);
+            spanTracer.Description.Should().Be(data.DisplayName);
+            spanTracer.EndTimestamp.Should().NotBeNull();
+            spanTracer.Extra["otel.kind"].Should().Be(data.Kind);
+            foreach (var keyValuePair in tags)
             {
-                spanTracer.ParentSpanId.Should().Be(parent.SpanId.AsSentrySpanId());
-                spanTracer.Operation.Should().Be(data.OperationName);
-                spanTracer.Description.Should().Be(data.DisplayName);
-                spanTracer.EndTimestamp.Should().NotBeNull();
-                spanTracer.Extra["otel.kind"].Should().Be(data.Kind);
-                foreach (var keyValuePair in tags)
-                {
-                    span.Extra[keyValuePair.Key].Should().Be(keyValuePair.Value);
-                }
-                spanTracer.Status.Should().Be(SpanStatus.Ok);
+                span.Extra[keyValuePair.Key].Should().Be(keyValuePair.Value);
             }
+
+            spanTracer.Status.Should().Be(SpanStatus.Ok);
         }
     }
 
@@ -282,19 +280,17 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         using (new AssertionScope())
         {
-            using (new AssertionScope())
+            transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
+            transaction.Operation.Should().Be(data.OperationName);
+            transaction.Description.Should().Be(data.DisplayName);
+            transaction.Name.Should().Be(data.DisplayName);
+            transaction.NameSource.Should().Be(TransactionNameSource.Custom);
+            transaction.EndTimestamp.Should().NotBeNull();
+            transaction.Contexts["otel"].Should().BeEquivalentTo(new Dictionary<string, object>
             {
-                transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
-                transaction.Operation.Should().Be(data.OperationName);
-                transaction.Description.Should().Be(data.DisplayName);
-                transaction.Name.Should().Be(data.DisplayName);
-                transaction.NameSource.Should().Be(TransactionNameSource.Custom);
-                transaction.EndTimestamp.Should().NotBeNull();
-                transaction.Contexts["otel"].Should().BeEquivalentTo(new Dictionary<string, object>{
-                    { "attributes", tags }
-                });
-                transaction.Status.Should().Be(SpanStatus.Ok);
-            }
+                { "attributes", tags }
+            });
+            transaction.Status.Should().Be(SpanStatus.Ok);
         }
     }
 
