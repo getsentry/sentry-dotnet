@@ -1,3 +1,7 @@
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using Sentry.PlatformAbstractions;
+
 namespace Sentry.OpenTelemetry.Tests;
 
 public class SentrySpanProcessorTests : ActivitySourceTests

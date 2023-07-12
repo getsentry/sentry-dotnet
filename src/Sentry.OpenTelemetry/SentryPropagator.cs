@@ -124,9 +124,9 @@ public class SentryPropagator : BaggagePropagator
     private static SentryTraceHeader? TryGetSentryTraceHeader<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
     {
         var headerValue = getter(carrier, SentryTraceHeader.HttpHeaderName);
-        var value = new StringValues(headerValue.ToArray());
         try
         {
+            var value = new StringValues(headerValue.ToArray());
             return SentryTraceHeader.Parse(value);
         }
         catch (Exception)

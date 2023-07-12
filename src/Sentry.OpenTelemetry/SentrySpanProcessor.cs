@@ -1,4 +1,4 @@
-﻿using OpenTelemetry;
+using OpenTelemetry;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -19,6 +19,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
     /// </summary>
+    public SentrySpanProcessor() : this(SentrySdk.CurrentHub)
+    {
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="SentrySpanProcessor"/>.
+    /// </summary>
     public SentrySpanProcessor(IHub hub)
     {
         _hub = hub;
@@ -27,7 +34,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         if (_options is not { })
         {
             throw new InvalidOperationException(
-                $"The Sentry SDK has not been initialised. To use Sentry with OpenTelemetry tracing you need to " +
+                "The Sentry SDK has not been initialised. To use Sentry with OpenTelemetry tracing you need to " +
                 "initialize the Sentry SDK.");
         }
 

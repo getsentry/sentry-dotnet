@@ -1,26 +1,29 @@
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using Sentry.OpenTelemetry.Tests.OpenTelemetry;
+
 namespace Sentry.OpenTelemetry.Tests;
 
 public abstract class ActivitySourceTests : IDisposable
 {
-    protected static readonly ActivitySource Tracer = new("SentrySpanProcessorTests", "1.0.0");
-    private readonly ActivityListener _listener;
+    protected readonly ActivitySource Tracer;
+    private readonly TracerProvider _traceProvider;
 
     protected ActivitySourceTests()
     {
-        // Without a listener, activity source will not create activities
-        _listener = new ActivityListener
-        {
-            ActivityStarted = _ => { },
-            ActivityStopped = _ => { },
-            ShouldListenTo = _ => true,
-            SampleUsingParentId = (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllDataAndRecorded,
-            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded
-        };
-        ActivitySource.AddActivityListener(_listener);
+        var activitySourceName = "SentrySpanProcessorTests";
+        var testSampler = new TestSampler();
+        Tracer = new ActivitySource(activitySourceName);
+        _traceProvider = Sdk.CreateTracerProviderBuilder()
+            .AddSource(activitySourceName)
+            .SetSampler(testSampler)
+            .Build();
     }
 
     public void Dispose()
     {
-        _listener?.Dispose();
+        _traceProvider?.Dispose();
+        Tracer.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
