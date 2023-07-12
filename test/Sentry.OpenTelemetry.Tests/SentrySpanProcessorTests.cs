@@ -297,4 +297,31 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             }
         }
     }
+
+    [Fact]
+    public void OnEnd_does_not_finish_transaction_marked_as_IsSentryRequest()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var tags = new Dictionary<string, object> { { "foo", "bar" }, { "http.url", _fixture.Options.Dsn } };
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        transaction.Contexts.ContainsKey("otel").Should().BeFalse();
+    }
 }
