@@ -20,6 +20,7 @@ builder.Services.AddOpenTelemetry()
 
 builder.WebHost.UseSentry(options =>
 {
+    //options.Dsn = "...Your DSN...";
     options.Debug = builder.Environment.IsDevelopment();
     options.TracesSampleRate = 1.0;
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information

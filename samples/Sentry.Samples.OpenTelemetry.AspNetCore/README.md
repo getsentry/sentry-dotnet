@@ -6,19 +6,23 @@ configured to send trace information to Sentry, with the following initializatio
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddOpenTelemetryWithSentry(
-    tracerProviderBuilder => tracerProviderBuilder
-        .AddSource(Telemetry.ActivitySource.Name)
-        .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation(),
-    options =>
-    {
-        options.Dsn = "...Your DSN...";
-        options.TracesSampleRate = 1.0;
-        options.Debug = builder.Environment.IsDevelopment();
-    }
-);
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder =>
+        tracerProviderBuilder
+            .AddSource(Telemetry.ActivitySource.Name)
+            .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddSentry()    // <-- Configure OpenTelemetry to send trace information to Sentry
+    );
+
+builder.WebHost.UseSentry(options =>
+{
+    options.Dsn = "...Your DSN...";
+    options.Debug = builder.Environment.IsDevelopment();
+    options.TracesSampleRate = 1.0;
+    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+});
 ```
 
 ## Customizing propagation
@@ -29,5 +33,4 @@ and/or to downstream services.
 
 If you need to further customize header propagation in your application (e.g. propagating other vendor specific headers)
 then you can do so by creating a `CompositeTextMapPropagator` consisting of the custom propagator(s) you need plus the
-`SentryPropagator`. You can supply this as a third (optional) parameter to the `AddOpenTelemetryWithSentry` extension 
-method illustrated above.
+`SentryPropagator`. You can supply this as an optional parameter to the `AddSentry` method.
