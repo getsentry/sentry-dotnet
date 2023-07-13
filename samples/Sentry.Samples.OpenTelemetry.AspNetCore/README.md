@@ -13,7 +13,7 @@ builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
-            .AddSentry()    // <-- Configure OpenTelemetry to send trace information to Sentry
+            .AddSentry() // <-- Configure OpenTelemetry to send trace information to Sentry
     );
 
 builder.WebHost.UseSentry(options =>
