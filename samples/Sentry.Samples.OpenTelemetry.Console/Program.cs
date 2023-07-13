@@ -23,11 +23,8 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSentry()    // <-- Configure OpenTelemetry to send traces to Sentry
     .Build();
 
-
 SentrySdk.Init(o =>
 {
     // options.Dsn = "... Your DSN ...";
     o.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
-
-//
