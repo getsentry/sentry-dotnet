@@ -318,6 +318,6 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             return;
         }
 
-        transaction.Contexts.ContainsKey("otel").Should().BeFalse();
+        transaction.IsSentryRequest.Should().BeTrue();
     }
 }
