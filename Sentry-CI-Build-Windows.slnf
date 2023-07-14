@@ -21,6 +21,7 @@
       "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj",
       "samples\\Sentry.Samples.ME.Logging\\Sentry.Samples.ME.Logging.csproj",
       "samples\\Sentry.Samples.NLog\\Sentry.Samples.NLog.csproj",
+      "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNet.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",
       "samples\\Sentry.Samples.Serilog\\Sentry.Samples.Serilog.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
