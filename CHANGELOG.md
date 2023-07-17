@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixes baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
+
 ### Dependencies
 
 - Bump Java SDK from v6.25.1 to v6.25.2 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484))

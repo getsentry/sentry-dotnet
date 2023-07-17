@@ -79,6 +79,16 @@ public sealed class HubAdapter : IHub, IHubEx
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
+    internal ITransaction StartTransaction(
+        ITransactionContext context,
+        IReadOnlyDictionary<string, object?> customSamplingContext,
+        DynamicSamplingContext? dynamicSamplingContext)
+        => SentrySdk.StartTransaction(context, customSamplingContext, dynamicSamplingContext);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
     public void BindException(Exception exception, ISpan span) =>
         SentrySdk.BindException(exception, span);
 
