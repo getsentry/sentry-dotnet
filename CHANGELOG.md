@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixes baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.8.0 to v8.9.0 ([#2479](https://github.com/getsentry/sentry-dotnet/pull/2479))
