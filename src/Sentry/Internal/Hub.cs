@@ -344,6 +344,11 @@ internal class Hub : IHubEx, IDisposable
                 evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
                 evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
                 evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                // Try to read the DSC from the transaction associated with the linked span
+                if (linkedSpan?.GetTransaction() is TransactionTracer transactionTracer)
+                {
+                    evt.DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+                }
             }
 
             var hasTerminalException = evt.HasTerminalException();
@@ -360,9 +365,9 @@ internal class Hub : IHubEx, IDisposable
                 actualScope.SessionUpdate = _sessionManager.ReportError();
             }
 
-            // When a transaction is present, copy its DSC to the event.
+            // Try to get the DSC from the transaction, if we didn't get it already from the linked span
             var transaction = actualScope.Transaction as TransactionTracer;
-            evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
+            evt.DynamicSamplingContext ??= transaction?.DynamicSamplingContext;
 
             // Now capture the event with the Sentry client on the current scope.
             var sentryClient = currentScope.Value;
