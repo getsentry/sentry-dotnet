@@ -215,10 +215,16 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <summary>
     /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context)
+    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="TransactionTracer"/>.
+    /// </summary>
+    internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeoutOverride)
     {
         _hub = hub;
-        var idleTimeout = hub.GetSentryOptions()?.IdleTimeout;
         Name = context.Name;
         NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
         Operation = context.Operation;
@@ -233,6 +239,8 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         {
             _instrumenter = transactionContext.Instrumenter;
         }
+
+        var idleTimeout = idleTimeoutOverride ?? hub.GetSentryOptions()?.IdleTimeout;
 
         if (idleTimeout != null)
         {
