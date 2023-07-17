@@ -252,7 +252,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
                 }
 
                 transactionTracer.Finish(Status ?? SpanStatus.Ok);
-            }, this, TimeSpan.Zero, idleTimeout.Value);
+            }, this, idleTimeout.Value, Timeout.InfiniteTimeSpan);
         }
     }
 
