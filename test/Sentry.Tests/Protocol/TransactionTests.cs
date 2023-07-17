@@ -595,4 +595,37 @@ public class TransactionTests
         // Assert
         transaction.IsFinished.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task IdleTimeoutOverride_should_override_SentryOptions_IdleTimeout()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            IdleTimeout = TimeSpan.FromMilliseconds(2)
+        };
+        var hub = new Hub(options, client);
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            "my name",
+            "my operation",
+            "description",
+            SpanStatus.Ok,
+            null,
+            true,
+            TransactionNameSource.Component
+        );
+
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(30));
+
+        // Act
+        await Task.Delay(5);
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
 }
