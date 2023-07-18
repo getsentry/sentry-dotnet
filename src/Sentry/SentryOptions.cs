@@ -1011,7 +1011,7 @@ public class SentryOptions
     /// <summary>
     /// Idling transaction timeout after which transaction will be finished automatically.
     /// </summary>
-    public TimeSpan? IdleTimeout { get; set; }
+    internal TimeSpan? IdleTimeout { get; set; }
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryOptions"/>
