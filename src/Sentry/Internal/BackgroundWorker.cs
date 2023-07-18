@@ -202,7 +202,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
     {
         if (_disposed)
         {
-            _options.LogDebug("BackgroundWorker disposed. Nothing to flush.");
+            _options.LogDebug("Worker disposed. Nothing to flush.");
             return;
         }
 
@@ -242,7 +242,6 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
             _options.LogDebug("Timeout or shutdown already requested. Exiting.");
             return;
         }
-        _options.LogDebug("Flushing BackgroundWorker.");
 
         var completionSource = new TaskCompletionSource<bool>();
         cancellationToken.Register(() => completionSource.TrySetCanceled());
