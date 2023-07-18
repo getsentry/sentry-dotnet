@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fixes baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
+- Re-enable HubTests.FlushOnDispose_SendsEnvelope ([#2492](https://github.com/getsentry/sentry-dotnet/pull/2492))
 
 ### Dependencies
 
