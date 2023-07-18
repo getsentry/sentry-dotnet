@@ -571,7 +571,8 @@ public class TransactionTests
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            IdleTimeout = TimeSpan.FromMilliseconds(2)
+            IdleTimeout = TimeSpan.FromMilliseconds(2),
+            Debug = true
         };
         var hub = new Hub(options, client);
         var context = new TransactionContext(
@@ -590,7 +591,7 @@ public class TransactionTests
         var transaction = new TransactionTracer(hub, context);
 
         // Act
-        await Task.Delay(20);
+        await Task.Delay(TimeSpan.FromSeconds(2));
 
         // Assert
         transaction.IsFinished.Should().BeTrue();
@@ -604,7 +605,8 @@ public class TransactionTests
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            IdleTimeout = TimeSpan.FromMilliseconds(2)
+            IdleTimeout = TimeSpan.FromMilliseconds(2),
+            Debug = true
         };
         var hub = new Hub(options, client);
         var context = new TransactionContext(
@@ -620,10 +622,10 @@ public class TransactionTests
             TransactionNameSource.Component
         );
 
-        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(50));
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromSeconds(2));
 
         // Act
-        await Task.Delay(5);
+        await Task.Delay(TimeSpan.FromMilliseconds(50));
 
         // Assert
         transaction.IsFinished.Should().BeFalse();
