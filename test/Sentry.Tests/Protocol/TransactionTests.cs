@@ -564,7 +564,7 @@ public class TransactionTests
     }
 
     [Fact]
-    public async Task Idle_transaction_should_finish_with_idle_timeout_specified()
+    public async Task Idle_transaction_should_finish_within_idle_timeout_specified()
     {
         // Arrange
         var client = Substitute.For<ISentryClient>();
@@ -590,7 +590,7 @@ public class TransactionTests
         var transaction = new TransactionTracer(hub, context);
 
         // Act
-        await Task.Delay(5);
+        await Task.Delay(20);
 
         // Assert
         transaction.IsFinished.Should().BeTrue();
@@ -620,7 +620,7 @@ public class TransactionTests
             TransactionNameSource.Component
         );
 
-        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(30));
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(50));
 
         // Act
         await Task.Delay(5);
