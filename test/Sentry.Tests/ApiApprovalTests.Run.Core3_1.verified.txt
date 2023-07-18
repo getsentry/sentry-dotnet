@@ -620,7 +620,6 @@ namespace Sentry
         public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
-        public System.TimeSpan? IdleTimeout { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
         public bool IsEnvironmentUser { get; set; }
         public bool IsGlobalModeEnabled { get; set; }
