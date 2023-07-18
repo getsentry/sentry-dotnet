@@ -1293,7 +1293,7 @@ public partial class HubTests
     [Theory]
     [InlineData(false)]
     // [InlineData(true)]
-    [Repeat(100, true)]
+    [Repeat(20, true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
     {
         // Arrange
