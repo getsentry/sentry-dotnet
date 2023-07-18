@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fixes baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
+- Fix Durable Functions preventing orchestrators from completing ([#2491](https://github.com/getsentry/sentry-dotnet/pull/2491))
 
 ### Dependencies
 
