@@ -8,7 +8,7 @@ namespace Sentry;
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context"/>
 /// <seealso href="https://www.w3.org/TR/baggage"/>
-internal class BaggageHeader
+public class BaggageHeader
 {
     internal const string HttpHeaderName = "baggage";
     internal const string SentryKeyPrefix = "sentry-";
@@ -19,14 +19,14 @@ internal class BaggageHeader
     // "Uniqueness of keys between multiple list-members in a baggage-string is not guaranteed."
     // "The order of duplicate entries SHOULD be preserved when mutating the list."
 
-    public IReadOnlyList<KeyValuePair<string, string>> Members { get; }
+    internal IReadOnlyList<KeyValuePair<string, string>> Members { get; }
 
     private BaggageHeader(IEnumerable<KeyValuePair<string, string>> members) =>
         Members = members.ToList();
 
     // We can safely return a dictionary of Sentry members, as we are in control over the keys added.
     // Just to be safe though, we'll group by key and only take the first of each one.
-    public IReadOnlyDictionary<string, string> GetSentryMembers() =>
+    internal IReadOnlyDictionary<string, string> GetSentryMembers() =>
         Members
             .Where(kvp => kvp.Key.StartsWith(SentryKeyPrefix))
             .GroupBy(kvp => kvp.Key, kvp => kvp.Value)
@@ -107,7 +107,7 @@ internal class BaggageHeader
         return members.Count == 0 ? null : new BaggageHeader(members);
     }
 
-    public static BaggageHeader Create(
+    internal static BaggageHeader Create(
         IEnumerable<KeyValuePair<string, string>> items,
         bool useSentryPrefix = false)
     {
@@ -121,7 +121,7 @@ internal class BaggageHeader
         return new BaggageHeader(members);
     }
 
-    public static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders) =>
+    internal static BaggageHeader Merge(IEnumerable<BaggageHeader> baggageHeaders) =>
         new(baggageHeaders.SelectMany(x => x.Members));
 
     private static bool IsValidKey(string? key)

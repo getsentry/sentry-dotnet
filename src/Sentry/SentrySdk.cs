@@ -614,8 +614,33 @@ public static partial class SentrySdk
     /// Gets the Sentry trace header.
     /// </summary>
     [DebuggerStepThrough]
+    // [Obsolete("This method will be removed in a future major version. Use the `GetTraceParent` instead.")]
     public static SentryTraceHeader? GetTraceHeader()
         => CurrentHub.GetTraceHeader();
+
+    /// <summary>
+    /// Gets the Sentry trace header of the parent that allows tracing across services
+    /// </summary>
+    [DebuggerStepThrough]
+    public static SentryTraceHeader? GetTraceParent()
+        => CurrentHub.GetTraceParent();
+
+    /// <summary>
+    /// Gets the Sentry "baggage" header that allows tracing across services
+    /// </summary>
+    [DebuggerStepThrough]
+    public static BaggageHeader? GetBaggage()
+        => CurrentHub.GetBaggage();
+
+    /// <summary>
+    /// Continues a trace based on HTTP header values.
+    /// </summary>
+    /// <remarks>
+    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static TransactionContext? ContinueTrace(string? sentryTrace, string? baggageHeaders)
+        => CurrentHub.ContinueTrace(sentryTrace, baggageHeaders);
 
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]

@@ -195,7 +195,44 @@ internal class Hub : IHubEx, IDisposable
 
     public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
-    public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
+    public SentryTraceHeader? GetTraceHeader() => GetTraceParent();
+
+    public SentryTraceHeader? GetTraceParent()
+    {
+        var traceHeader = GetSpan()?.GetTraceHeader();
+        if (traceHeader is not null)
+        {
+            return traceHeader;
+        }
+
+        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        if (propagationContext is not null)
+        {
+            return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
+        }
+
+        return null;
+    }
+
+    public BaggageHeader? GetBaggage()
+    {
+        throw new NotImplementedException();
+    }
+
+    public TransactionContext? ContinueTrace(string? sentryTrace, string? baggageHeaders)
+    {
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(sentryTrace, baggageHeaders);
+        ConfigureScope(scope => scope.PropagationContext = propagationContext);
+
+        if (_options.IsTracingEnabled)
+        {
+            return new TransactionContext(propagationContext.SpanId,propagationContext.ParentSpanId, propagationContext.TraceId, "", "", "", null, null, null);
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     public void StartSession()
     {

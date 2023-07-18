@@ -191,6 +191,8 @@ public class Scope : IEventLike, IHasDistribution
         set => _transaction = value;
     }
 
+    internal SentryPropagationContext? PropagationContext { get; set; }
+
     internal SessionUpdate? SessionUpdate { get; set; }
 
     /// <inheritdoc />

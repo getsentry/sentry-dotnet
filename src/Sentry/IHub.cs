@@ -45,6 +45,24 @@ public interface IHub :
     SentryTraceHeader? GetTraceHeader();
 
     /// <summary>
+    /// Gets the Sentry trace header of the parent that allows tracing across services
+    /// </summary>
+    SentryTraceHeader? GetTraceParent();
+
+    /// <summary>
+    /// Gets the Sentry "baggage" header that allows tracing across services
+    /// </summary>
+    BaggageHeader? GetBaggage();
+
+    /// <summary>
+    /// Continues a trace based on HTTP header values.
+    /// </summary>
+    /// /// <remarks>
+    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </remarks>
+    TransactionContext? ContinueTrace(string? sentryTrace, string? baggageHeaders);
+
+    /// <summary>
     /// Starts a new session.
     /// </summary>
     void StartSession();

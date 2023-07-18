@@ -75,6 +75,21 @@ public class DisabledHub : IHub, IDisposable
     public SentryTraceHeader? GetTraceHeader() => null;
 
     /// <summary>
+    /// Returns null.
+    /// </summary>
+    public SentryTraceHeader? GetTraceParent() => null;
+
+    /// <summary>
+    /// Returns null.
+    /// </summary>
+    public BaggageHeader? GetBaggage() => null;
+
+    /// <summary>
+    /// Returns null.
+    /// </summary>
+    public TransactionContext? ContinueTrace(string? sentryTrace, string? baggageHeaders) => null;
+
+    /// <summary>
     /// No-Op.
     /// </summary>
     public void StartSession()
