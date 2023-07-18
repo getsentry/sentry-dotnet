@@ -240,9 +240,11 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
             _instrumenter = transactionContext.Instrumenter;
         }
 
-
-        if (idleTimeout != null)
+        // Set idle timer only if idle timeout has been provided directly or via options
+        if (idleTimeout != null || hub.GetSentryOptions()?.IdleTimeout != null)
         {
+            var idleTimeoutToUse = idleTimeout ?? hub.GetSentryOptions()?.IdleTimeout;
+
             _idleTimer = new Timer(state =>
             {
                 if (state is not TransactionTracer transactionTracer)
@@ -251,7 +253,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
                 }
 
                 transactionTracer.Finish(Status ?? SpanStatus.Ok);
-            }, this, idleTimeout.Value, Timeout.InfiniteTimeSpan);
+            }, this, idleTimeoutToUse!.Value, Timeout.InfiniteTimeSpan);
         }
     }
 
