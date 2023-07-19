@@ -127,6 +127,14 @@ internal class DynamicSamplingContext
             userSegment,
             transactionName);
     }
+
+    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
+    {
+        var publicKey = Dsn.Parse(options.Dsn!).PublicKey;
+        var traceId = propagationContext.TraceId;
+
+        return new DynamicSamplingContext(traceId, publicKey, 1.0f);
+    }
 }
 
 internal static class DynamicSamplingContextExtensions

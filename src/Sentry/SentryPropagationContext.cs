@@ -5,7 +5,7 @@ internal class SentryPropagationContext
     public SentryId TraceId { get; }
     public SpanId SpanId { get; }
     public SpanId? ParentSpanId { get; }
-    public DynamicSamplingContext? DynamicSamplingContext { get; }
+    public DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
     private SentryPropagationContext(
         SentryTraceHeader traceHeader,
@@ -13,15 +13,15 @@ internal class SentryPropagationContext
         DynamicSamplingContext? dynamicSamplingContext)
     {
         TraceId = traceHeader.TraceId;
-        SpanId = traceHeader.SpanId;
-        ParentSpanId = parentSpanId;
+        SpanId = SpanId.Create();
+        ParentSpanId = parentSpanId ?? traceHeader.SpanId;
         DynamicSamplingContext = dynamicSamplingContext;
     }
 
     public SentryPropagationContext()
     {
-        TraceId = new SentryId();
-        SpanId = new SpanId();
+        TraceId = SentryId.Create();
+        SpanId = SpanId.Create();
     }
 
     public static SentryPropagationContext CreateFromHeaders(string? sentryTraceHeader, string? baggageHeadersString)

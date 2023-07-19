@@ -191,7 +191,7 @@ public class Scope : IEventLike, IHasDistribution
         set => _transaction = value;
     }
 
-    internal SentryPropagationContext? PropagationContext { get; set; }
+    internal SentryPropagationContext PropagationContext { get; set; }
 
     internal SessionUpdate? SessionUpdate { get; set; }
 
@@ -449,6 +449,10 @@ public class Scope : IEventLike, IHasDistribution
         {
             other.Sdk.AddPackage(package);
         }
+
+        other.Contexts.Trace.SpanId = PropagationContext.SpanId;
+        other.Contexts.Trace.TraceId = PropagationContext.TraceId;
+        other.Contexts.Trace.ParentSpanId = PropagationContext.ParentSpanId;
     }
 
     /// <summary>

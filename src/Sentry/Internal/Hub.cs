@@ -195,9 +195,9 @@ internal class Hub : IHubEx, IDisposable
 
     public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
-    public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
+    public SentryTraceHeader? GetTraceHeader() => GetTraceParent();
 
-    public SentryTraceHeader? GetTraceParent()
+    public SentryTraceHeader GetTraceParent()
     {
         if (_options.IsTracingEnabled)
         {
@@ -209,12 +209,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
-        if (propagationContext is not null)
-        {
-            return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
-        }
-
-        return null;
+        return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
 
     public BaggageHeader? GetBaggage()
@@ -249,7 +244,7 @@ internal class Hub : IHubEx, IDisposable
 
         return null;
     }
-    
+
     public void StartSession()
     {
         // Attempt to recover persisted session left over from previous run
@@ -391,14 +386,6 @@ internal class Hub : IHubEx, IDisposable
             var currentScope = ScopeManager.GetCurrent();
             var actualScope = scope ?? currentScope.Key;
 
-            // Inject trace information from a linked span
-            if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
-            {
-                evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
-                evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
-                evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
-            }
-
             var hasTerminalException = evt.HasTerminalException();
             if (hasTerminalException)
             {
@@ -413,9 +400,26 @@ internal class Hub : IHubEx, IDisposable
                 actualScope.SessionUpdate = _sessionManager.ReportError();
             }
 
-            // When a transaction is present, copy its DSC to the event.
-            var transaction = actualScope.Transaction as TransactionTracer;
-            evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
+            TransactionTracer? transaction = null;
+            if(_options.IsTracingEnabled)
+            {
+                // Inject trace information from a linked span
+                if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
+                {
+                    evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
+                    evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
+                    evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                }
+
+                // When a transaction is present, copy its DSC to the event.
+                transaction = actualScope.Transaction as TransactionTracer;
+                evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
+            }
+            else
+            {
+                actualScope.PropagationContext.DynamicSamplingContext ??= DynamicSamplingContext.CreateFromPropagationContext(actualScope.PropagationContext, _options);
+                evt.DynamicSamplingContext = actualScope.PropagationContext.DynamicSamplingContext;
+            }
 
             // Now capture the event with the Sentry client on the current scope.
             var sentryClient = currentScope.Value;
