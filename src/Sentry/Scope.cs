@@ -235,8 +235,14 @@ public class Scope : IEventLike, IHasDistribution
     /// Creates a scope with the specified options.
     /// </summary>
     public Scope(SentryOptions? options)
+        : this(options, null)
+    {
+    }
+
+    internal Scope(SentryOptions? options, SentryPropagationContext? propagationContext)
     {
         Options = options ?? new SentryOptions();
+        PropagationContext = propagationContext ?? new SentryPropagationContext();
     }
 
     // For testing. Should explicitly require SentryOptions.
@@ -478,7 +484,7 @@ public class Scope : IEventLike, IHasDistribution
     /// </summary>
     public Scope Clone()
     {
-        var clone = new Scope(Options)
+        var clone = new Scope(Options, PropagationContext)
         {
             OnEvaluating = OnEvaluating
         };
