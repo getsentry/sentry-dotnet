@@ -211,16 +211,6 @@ public class SentryClient : ISentryClient, IDisposable
     // TODO: this method needs to be refactored, it's really hard to analyze nullability
     private SentryId DoSendEvent(SentryEvent @event, Hint? hint, Scope? scope)
     {
-        if (_options.SampleRate != null)
-        {
-            if (!_randomValuesFactory.NextBool(_options.SampleRate.Value))
-            {
-                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
-                _options.LogDebug("Event sampled.");
-                return SentryId.Empty;
-            }
-        }
-
         var filteredExceptions = ApplyExceptionFilters(@event.Exception);
         if (filteredExceptions?.Count > 0)
         {
@@ -279,6 +269,20 @@ public class SentryClient : ISentryClient, IDisposable
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
             _options.LogInfo("Event dropped by BeforeSend callback.");
             return SentryId.Empty;
+        }
+
+        if (_options.SampleRate != null)
+        {
+            if (!_randomValuesFactory.NextBool(_options.SampleRate.Value))
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
+                _options.LogDebug("Event sampled.");
+                return SentryId.Empty;
+            }
+        }
+        else
+        {
+            _options.LogDebug("Event not sampled.");
         }
 
         if (!_options.SendDefaultPii)
