@@ -32,6 +32,7 @@
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
         sample_rate: 1,
+        sampled: true,
         trace_id: Guid_3,
         transaction: my transaction
       }
@@ -144,6 +145,7 @@
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
         sample_rate: 1,
+        sampled: true,
         trace_id: Guid_3,
         transaction: my transaction
       }

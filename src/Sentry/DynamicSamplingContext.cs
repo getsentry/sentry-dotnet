@@ -22,6 +22,7 @@ internal class DynamicSamplingContext
     private DynamicSamplingContext(
         SentryId traceId,
         string publicKey,
+        bool? sampled,
         double sampleRate,
         string? release = null,
         string? environment = null,
@@ -50,6 +51,11 @@ internal class DynamicSamplingContext
             ["public_key"] = publicKey,
             ["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture)
         };
+
+        if (sampled.HasValue)
+        {
+            items.Add("sampled", sampled.Value ? "true" : "false");
+        }
 
         // Set optional values
         if (!string.IsNullOrWhiteSpace(release))
@@ -95,6 +101,11 @@ internal class DynamicSamplingContext
             return null;
         }
 
+        if (items.TryGetValue("sampled", out var sampledString) && !bool.TryParse(sampledString, out _))
+        {
+            return null;
+        }
+
         if (!items.TryGetValue("sample_rate", out var sampleRate) ||
             !double.TryParse(sampleRate, NumberStyles.Float, CultureInfo.InvariantCulture, out var rate) ||
             rate is < 0.0 or > 1.0)
@@ -110,6 +121,7 @@ internal class DynamicSamplingContext
         // These should already be set on the transaction.
         var publicKey = Dsn.Parse(options.Dsn!).PublicKey;
         var traceId = transaction.TraceId;
+        var sampled = transaction.IsSampled;
         var sampleRate = transaction.SampleRate!.Value;
         var userSegment = transaction.User.Segment;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
@@ -121,6 +133,7 @@ internal class DynamicSamplingContext
         return new DynamicSamplingContext(
             traceId,
             publicKey,
+            sampled,
             sampleRate,
             release,
             environment,
