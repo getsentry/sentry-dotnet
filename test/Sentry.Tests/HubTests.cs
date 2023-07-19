@@ -1290,12 +1290,7 @@ public partial class HubTests
         hint.Attachments.Should().Contain(attachments);
     }
 
-#if ANDROID && CI_BUILD
-    // TODO: Test is flaky in CI
-    [SkippableTheory(typeof(NSubstitute.Exceptions.ReceivedCallsException))]
-#else
     [Theory]
-#endif
     [InlineData(false)]
     [InlineData(true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
