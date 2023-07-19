@@ -18,7 +18,7 @@ internal class SentryPropagationContext
         DynamicSamplingContext = dynamicSamplingContext;
     }
 
-    private SentryPropagationContext()
+    public SentryPropagationContext()
     {
         TraceId = new SentryId();
         SpanId = new SpanId();

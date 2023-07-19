@@ -195,14 +195,17 @@ internal class Hub : IHubEx, IDisposable
 
     public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
-    public SentryTraceHeader? GetTraceHeader() => GetTraceParent();
+    public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
 
     public SentryTraceHeader? GetTraceParent()
     {
-        var traceHeader = GetSpan()?.GetTraceHeader();
-        if (traceHeader is not null)
+        if (_options.IsTracingEnabled)
         {
-            return traceHeader;
+            var traceHeader = GetSpan()?.GetTraceHeader();
+            if (traceHeader is not null)
+            {
+                return traceHeader;
+            }
         }
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
@@ -216,7 +219,22 @@ internal class Hub : IHubEx, IDisposable
 
     public BaggageHeader? GetBaggage()
     {
-        throw new NotImplementedException();
+        if (_options.IsTracingEnabled)
+        {
+            var transaction = GetSpan();
+            if (transaction is TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc})
+            {
+                return dsc.ToBaggageHeader();
+            }
+        }
+
+        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        if (propagationContext?.DynamicSamplingContext is not null)
+        {
+            return propagationContext.DynamicSamplingContext.ToBaggageHeader();
+        }
+
+        return null;
     }
 
     public TransactionContext? ContinueTrace(string? sentryTrace, string? baggageHeaders)
@@ -228,12 +246,10 @@ internal class Hub : IHubEx, IDisposable
         {
             return new TransactionContext(propagationContext.SpanId,propagationContext.ParentSpanId, propagationContext.TraceId, "", "", "", null, null, null);
         }
-        else
-        {
-            return null;
-        }
-    }
 
+        return null;
+    }
+    
     public void StartSession()
     {
         // Attempt to recover persisted session left over from previous run
