@@ -241,7 +241,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         }
 
         // Set idle timer only if an idle timeout has been provided directly
-        if (idleTimeout)
+        if (idleTimeout.HasValue)
         {
             _idleTimer = new Timer(state =>
             {
@@ -251,7 +251,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
                 }
 
                 transactionTracer.Finish(Status ?? SpanStatus.Ok);
-            }, this, idleTimeoutToUse, Timeout.InfiniteTimeSpan);
+            }, this, idleTimeout.Value, Timeout.InfiniteTimeSpan);
         }
     }
 

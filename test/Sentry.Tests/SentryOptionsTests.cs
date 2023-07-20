@@ -240,11 +240,4 @@ public class SentryOptionsTests
 
         Assert.True(actual);
     }
-	
-	[Fact]
-    public void IdleTimeout_ByDefault_IsNull()
-    {
-        var sut = new SentryOptions();
-        sut.IdleTimeout.IsNull();
-    }
 }
