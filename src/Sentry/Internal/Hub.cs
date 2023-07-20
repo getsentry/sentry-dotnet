@@ -239,16 +239,7 @@ internal class Hub : IHubEx, IDisposable
 
         if (_options.IsTracingEnabled)
         {
-            return new TransactionContext(
-                propagationContext.SpanId,
-                propagationContext.ParentSpanId,
-                propagationContext.TraceId,
-                "",
-                "",
-                "",
-                null,
-                null,
-                null);
+            return new TransactionContext("", "", new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, false));
         }
 
         return null;
