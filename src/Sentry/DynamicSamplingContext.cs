@@ -22,7 +22,7 @@ internal class DynamicSamplingContext
     private DynamicSamplingContext(
         SentryId traceId,
         string publicKey,
-        double sampleRate,
+        double? sampleRate = null,
         string? release = null,
         string? environment = null,
         string? userSegment = null,
@@ -48,10 +48,14 @@ internal class DynamicSamplingContext
         {
             ["trace_id"] = traceId.ToString(),
             ["public_key"] = publicKey,
-            ["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture)
         };
 
         // Set optional values
+        if (sampleRate is not null)
+        {
+            items.Add("sample_rate", sampleRate.Value.ToString(CultureInfo.InvariantCulture));
+        }
+
         if (!string.IsNullOrWhiteSpace(release))
         {
             items.Add("release", release);
@@ -133,7 +137,7 @@ internal class DynamicSamplingContext
         var publicKey = Dsn.Parse(options.Dsn!).PublicKey;
         var traceId = propagationContext.TraceId;
 
-        return new DynamicSamplingContext(traceId, publicKey, 1.0f);
+        return new DynamicSamplingContext(traceId, publicKey);
     }
 }
 

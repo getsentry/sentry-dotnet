@@ -232,14 +232,23 @@ internal class Hub : IHubEx, IDisposable
         return null;
     }
 
-    public TransactionContext? ContinueTrace(string? sentryTrace, string? baggageHeaders)
+    public TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders)
     {
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(sentryTrace, baggageHeaders);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(sentryTraceHeader, baggageHeaders);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
         if (_options.IsTracingEnabled)
         {
-            return new TransactionContext(propagationContext.SpanId,propagationContext.ParentSpanId, propagationContext.TraceId, "", "", "", null, null, null);
+            return new TransactionContext(
+                propagationContext.SpanId,
+                propagationContext.ParentSpanId,
+                propagationContext.TraceId,
+                "",
+                "",
+                "",
+                null,
+                null,
+                null);
         }
 
         return null;
@@ -417,8 +426,13 @@ internal class Hub : IHubEx, IDisposable
             }
             else
             {
-                actualScope.PropagationContext.DynamicSamplingContext ??= DynamicSamplingContext.CreateFromPropagationContext(actualScope.PropagationContext, _options);
-                evt.DynamicSamplingContext = actualScope.PropagationContext.DynamicSamplingContext;
+                var propagationContext = actualScope.PropagationContext;
+                propagationContext.DynamicSamplingContext ??= DynamicSamplingContext.CreateFromPropagationContext(propagationContext, _options);
+
+                evt.Contexts.Trace.TraceId = propagationContext.TraceId;
+                evt.Contexts.Trace.SpanId = propagationContext.SpanId;
+                evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
+                evt.DynamicSamplingContext = propagationContext.DynamicSamplingContext;
             }
 
             // Now capture the event with the Sentry client on the current scope.

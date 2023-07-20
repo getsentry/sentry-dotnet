@@ -354,6 +354,7 @@ public class Scope : IEventLike, IHasDistribution
         _extra.Clear();
         _tags.Clear();
         ClearAttachments();
+        PropagationContext = new();
     }
 
     /// <summary>
@@ -449,10 +450,6 @@ public class Scope : IEventLike, IHasDistribution
         {
             other.Sdk.AddPackage(package);
         }
-
-        other.Contexts.Trace.SpanId = PropagationContext.SpanId;
-        other.Contexts.Trace.TraceId = PropagationContext.TraceId;
-        other.Contexts.Trace.ParentSpanId = PropagationContext.ParentSpanId;
     }
 
     /// <summary>

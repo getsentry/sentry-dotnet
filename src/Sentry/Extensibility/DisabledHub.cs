@@ -87,7 +87,7 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// Returns null.
     /// </summary>
-    public TransactionContext? ContinueTrace(string? sentryTrace, string? baggageHeaders) => null;
+    public TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders) => null;
 
     /// <summary>
     /// No-Op.
