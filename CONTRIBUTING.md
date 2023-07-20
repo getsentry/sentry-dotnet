@@ -103,6 +103,16 @@ Below that, you'll add the heading 3 mentioned above. For example, if you're add
 
 There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
 
+## Naming tests
+
+Ideally we like tests to be named following the convention `Method_Context_Expectation`.
+
+[For example](https://github.com/getsentry/sentry-dotnet/blob/ebd70ffafd5f8bd5eb6bb9ee1a03cac77ae67b8d/test/Sentry.Tests/HubTests.cs#L43C1-L44C68):
+```csharp
+    [Fact]
+    public void PushScope_BreadcrumbWithinScope_NotVisibleOutside()
+```
+
 ## Verify tests
 
 Some tests use [Verify](https://github.com/VerifyTests/Verify) to check returned objects against snapshots that are part of the repo.
