@@ -295,7 +295,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
-    public void OnEnd_does_not_finish_transaction_marked_as_IsSentryRequest()
+    public void OnEnd_IsSentryRequest_DoesNotFinishTransaction()
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;

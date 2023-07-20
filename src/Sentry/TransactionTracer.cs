@@ -241,7 +241,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         }
 
         // Set idle timer only if idle timeout has been provided directly or via options
-        if ((idleTimeout ?? hub.GetSentryOptions()?.IdleTimeout) is { } idleTimeoutToUse)
+        if (idleTimeout)
         {
             _idleTimer = new Timer(state =>
             {

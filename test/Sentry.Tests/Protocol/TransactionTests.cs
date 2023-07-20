@@ -396,7 +396,6 @@ public class TransactionTests
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            IdleTimeout = TimeSpan.FromMilliseconds(2)
         };
         var hub = new Hub(options, client);
         var context = new TransactionContext(
@@ -412,13 +411,13 @@ public class TransactionTests
             TransactionNameSource.Component
         );
 
-        var transaction = new TransactionTracer(hub, context)
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2))
         {
             IsSentryRequest = true
         };
 
         // Act
-        await Task.Delay(5);
+        await Task.Delay(TimeSpan.FromMilliseconds(5));
 
         // Assert
         transaction.IsFinished.Should().BeFalse();
@@ -564,14 +563,13 @@ public class TransactionTests
     }
 
     [Fact]
-    public async Task Idle_transaction_should_finish_within_idle_timeout_specified()
+    public async Task NewTransactionTracer_IdleTimeoutProvided_AutomaticallyFinishes()
     {
         // Arrange
         var client = Substitute.For<ISentryClient>();
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
-            IdleTimeout = TimeSpan.FromMilliseconds(2),
             Debug = true
         };
         var hub = new Hub(options, client);
@@ -588,7 +586,7 @@ public class TransactionTests
             TransactionNameSource.Component
         );
 
-        var transaction = new TransactionTracer(hub, context);
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2));
 
         // Act
         await Task.Delay(TimeSpan.FromSeconds(2));
@@ -597,37 +595,4 @@ public class TransactionTests
         transaction.IsFinished.Should().BeTrue();
     }
 
-    [Fact]
-    public async Task IdleTimeoutOverride_should_override_SentryOptions_IdleTimeout()
-    {
-        // Arrange
-        var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            IdleTimeout = TimeSpan.FromMilliseconds(2),
-            Debug = true
-        };
-        var hub = new Hub(options, client);
-        var context = new TransactionContext(
-            SpanId.Create(),
-            SpanId.Create(),
-            SentryId.Create(),
-            "my name",
-            "my operation",
-            "description",
-            SpanStatus.Ok,
-            null,
-            true,
-            TransactionNameSource.Component
-        );
-
-        var transaction = new TransactionTracer(hub, context, TimeSpan.FromSeconds(2));
-
-        // Act
-        await Task.Delay(TimeSpan.FromMilliseconds(50));
-
-        // Assert
-        transaction.IsFinished.Should().BeFalse();
-    }
 }
