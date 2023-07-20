@@ -240,7 +240,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
             _instrumenter = transactionContext.Instrumenter;
         }
 
-        // Set idle timer only if idle timeout has been provided directly or via options
+        // Set idle timer only if an idle timeout has been provided directly
         if (idleTimeout)
         {
             _idleTimer = new Timer(state =>
