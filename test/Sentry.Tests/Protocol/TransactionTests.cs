@@ -389,6 +389,41 @@ public class TransactionTests
     }
 
     [Fact]
+    public async Task Finish_SentryRequestTransactionGetsIgnored()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+        };
+        var hub = new Hub(options, client);
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            "my name",
+            "my operation",
+            "description",
+            SpanStatus.Ok,
+            null,
+            true,
+            TransactionNameSource.Component
+        );
+
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2))
+        {
+            IsSentryRequest = true
+        };
+
+        // Act
+        await Task.Delay(TimeSpan.FromMilliseconds(5));
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
     public void Finish_CapturesTransaction()
     {
         // Arrange
@@ -526,4 +561,38 @@ public class TransactionTests
         // Assert
         Assert.Same(transaction, result);
     }
+
+    [Fact]
+    public async Task NewTransactionTracer_IdleTimeoutProvided_AutomaticallyFinishes()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Debug = true
+        };
+        var hub = new Hub(options, client);
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            "my name",
+            "my operation",
+            "description",
+            SpanStatus.Ok,
+            null,
+            true,
+            TransactionNameSource.Component
+        );
+
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2));
+
+        // Act
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        // Assert
+        transaction.IsFinished.Should().BeTrue();
+    }
+
 }

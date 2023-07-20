@@ -10,6 +10,8 @@ namespace Sentry;
 public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
 {
     private readonly IHub _hub;
+    private readonly Timer? _idleTimer;
+    private long _idleTimerStopped;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -179,6 +181,15 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     internal ITransactionProfiler? TransactionProfiler { get; set; }
 
     /// <summary>
+    /// Used by the Sentry.OpenTelemetry.SentrySpanProcessor to mark a transaction as a Sentry request. Ideally we wouldn't
+    /// create this transaction but since we can't avoid doing that, once we detect that it's a Sentry request we mark it
+    /// as such so that we can prevent finishing the transaction tracer when idle timeout elapses and the TransactionTracer gets converted into
+    /// a Transaction.
+    /// </summary>
+    internal bool IsSentryRequest { get; set; }
+
+    // TODO: mark as internal in version 4
+    /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
     public TransactionTracer(IHub hub, string name, string operation)
@@ -186,6 +197,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     {
     }
 
+    // TODO: mark as internal in version 4
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
@@ -203,7 +215,14 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <summary>
     /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context)
+    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="TransactionTracer"/>.
+    /// </summary>
+    internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
     {
         _hub = hub;
         Name = context.Name;
@@ -215,11 +234,24 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Description = context.Description;
         Status = context.Status;
         IsSampled = context.IsSampled;
-        StartTimestamp = _stopwatch.StartDateTimeOffset;
 
-        if (context is TransactionContext transactionContext)
+		if (context is TransactionContext transactionContext)
         {
             _instrumenter = transactionContext.Instrumenter;
+        }
+
+        // Set idle timer only if an idle timeout has been provided directly
+        if (idleTimeout.HasValue)
+        {
+            _idleTimer = new Timer(state =>
+            {
+                if (state is not TransactionTracer transactionTracer)
+                {
+                    return;
+                }
+
+                transactionTracer.Finish(Status ?? SpanStatus.Ok);
+            }, this, idleTimeout.Value, Timeout.InfiniteTimeSpan);
         }
     }
 
@@ -278,6 +310,18 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
+        if (Interlocked.Exchange(ref _idleTimerStopped, 1) == 0)
+        {
+            _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+
+            _idleTimer?.Dispose();
+        }
+
+        if (IsSentryRequest)
+        {
+            return;
+        }
+
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
