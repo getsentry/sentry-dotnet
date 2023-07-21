@@ -541,9 +541,9 @@ public class SentryOptions
     public IWebProxy? HttpProxy { get; set; }
 
     /// <summary>
-    /// Creates the inner most <see cref="HttpClientHandler"/>.
+    /// Creates the inner most <see cref="HttpMessageHandler"/>.
     /// </summary>
-    public Func<HttpClientHandler>? CreateHttpClientHandler { get; set; }
+    public Func<HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
 
     /// <summary>
     /// A callback invoked when a <see cref="SentryClient"/> is created.
