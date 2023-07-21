@@ -20,25 +20,63 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
             throw new ArgumentNullException(nameof(options));
         }
 
-        var httpClientHandler = options.CreateHttpClientHandler?.Invoke() ?? new HttpClientHandler();
-        if (options.HttpProxy != null)
+        HttpMessageHandler handler = options.CreateHttpMessageHandler?.Invoke() ?? new HttpClientHandler();
+        if (handler is HttpClientHandler httpClientHandler)
         {
-            httpClientHandler.Proxy = options.HttpProxy;
-            options.LogInfo("Using Proxy: {0}", options.HttpProxy);
-        }
+            if (options.HttpProxy != null)
+            {
+                httpClientHandler.Proxy = options.HttpProxy;
+                options.LogInfo("Using Proxy: {0}", options.HttpProxy);
+            }
 
-        // If the platform supports automatic decompression
-        if (SupportsAutomaticDecompression(httpClientHandler))
-        {
-            // if the SDK is configured to accept compressed data
-            httpClientHandler.AutomaticDecompression = options.DecompressionMethods;
+            // If the platform supports automatic decompression
+            if (SupportsAutomaticDecompression(httpClientHandler))
+            {
+                // if the SDK is configured to accept compressed data
+                httpClientHandler.AutomaticDecompression = options.DecompressionMethods;
+            }
+            else
+            {
+                options.LogDebug("No response compression supported by HttpClientHandler.");
+            }
         }
-        else
+#if IOS
+        if (handler is System.Net.Http.NSUrlSessionHandler nsUrlSessionHandler)
         {
-            options.LogDebug("No response compression supported by HttpClientHandler.");
-        }
+            if (options.HttpProxy != null)
+            {
+                try
+                {
+                    nsUrlSessionHandler.Proxy = options.HttpProxy;
+                    options.LogInfo("Using Proxy: {0}", options.HttpProxy);
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    options.LogDebug("No proxy supported by NSUrlSessionHandler.");
+                }
+            }
 
-        HttpMessageHandler handler = httpClientHandler;
+            // If the platform supports automatic decompression
+            bool compressionSupported = false;
+            try
+            {
+                if (nsUrlSessionHandler.SupportsAutomaticDecompression)
+                {
+                    // if the SDK is configured to accept compressed data
+                    nsUrlSessionHandler.AutomaticDecompression = options.DecompressionMethods;
+                    compressionSupported = true;
+                }
+            }
+            catch (PlatformNotSupportedException)
+            {
+                compressionSupported = false;
+            }
+            if (!compressionSupported)
+            {
+                options.LogDebug("No response compression supported by NSUrlSessionHandler.");
+            }
+        }
+#endif
 
         if (options.RequestBodyCompressionLevel != CompressionLevel.NoCompression)
         {

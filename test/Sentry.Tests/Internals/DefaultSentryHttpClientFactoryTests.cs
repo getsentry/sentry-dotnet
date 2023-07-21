@@ -98,7 +98,7 @@ public class DefaultSentryHttpClientFactoryTests
     public void Create_ProvidedCreateHttpClientHandler_ReturnedHandlerUsed()
     {
         var handler = Substitute.For<HttpClientHandler>();
-        _fixture.HttpOptions.CreateHttpClientHandler = () => handler;
+        _fixture.HttpOptions.CreateHttpMessageHandler = () => handler;
         var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
@@ -109,7 +109,7 @@ public class DefaultSentryHttpClientFactoryTests
     [Fact]
     public void Create_NullCreateHttpClientHandler_HttpClientHandlerUsed()
     {
-        _fixture.HttpOptions.CreateHttpClientHandler = null;
+        _fixture.HttpOptions.CreateHttpMessageHandler = null;
         var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);
@@ -120,7 +120,7 @@ public class DefaultSentryHttpClientFactoryTests
     [Fact]
     public void Create_NullReturnedCreateHttpClientHandler_HttpClientHandlerUsed()
     {
-        _fixture.HttpOptions.CreateHttpClientHandler = () => null;
+        _fixture.HttpOptions.CreateHttpMessageHandler = () => null;
         var sut = Fixture.GetSut();
 
         var client = sut.Create(_fixture.HttpOptions);

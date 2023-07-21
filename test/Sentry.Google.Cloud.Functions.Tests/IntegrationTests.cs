@@ -34,7 +34,7 @@ public class IntegrationTests
                     {
                         // So we can assert on the payload without the need to Gzip decompress
                         o.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
-                        o.CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync);
+                        o.CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync);
                     });
                     services.AddFunctionTarget<FailingFunction>();
                 })

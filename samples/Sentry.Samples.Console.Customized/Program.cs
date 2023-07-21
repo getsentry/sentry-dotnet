@@ -90,8 +90,8 @@ internal static class Program
             // Using a proxy:
             o.HttpProxy = null; //new WebProxy("https://localhost:3128");
 
-            // Example customizing the HttpClientHandlers created
-            o.CreateHttpClientHandler = () => new HttpClientHandler
+            // Example customizing the HttpMessageHandlers created
+            o.CreateHttpMessageHandler = () => new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (_, certificate, _, _) =>
                     !certificate.Archived
