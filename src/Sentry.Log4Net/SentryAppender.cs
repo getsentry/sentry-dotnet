@@ -86,12 +86,14 @@ public class SentryAppender : AppenderSkeleton
 
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
 
-        if (loggingEvent.Level < MinimumEventLevel)
+        if (MinimumEventLevel is not null && loggingEvent.Level < MinimumEventLevel)
         {
             var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
             var category = loggingEvent.LoggerName;
-            BreadcrumbLevel level = loggingEvent.ToBreadcrumbLevel();
-            IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent).ToDictionary(x => x.Key, x => x.Value.ToString());
+            var level = loggingEvent.ToBreadcrumbLevel();
+            IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent)
+                .Where(kvp => kvp.Value != null)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString());
 
             _hub.AddBreadcrumb(message, category, type: null, data, level);
             return;

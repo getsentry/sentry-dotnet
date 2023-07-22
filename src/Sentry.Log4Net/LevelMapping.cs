@@ -16,7 +16,7 @@ internal static class LevelMapping
         };
     }
 
-    public static BreadcrumbLevel? ToBreadcrumbLevel(this LoggingEvent loggingLevel)
+    public static BreadcrumbLevel ToBreadcrumbLevel(this LoggingEvent loggingLevel)
     {
         return loggingLevel.Level switch
         {
@@ -26,7 +26,7 @@ internal static class LevelMapping
             var l when l == Level.Notice || l == Level.Info => BreadcrumbLevel.Info,
             var l when l == Level.Debug || l == Level.Verbose || l == Level.Trace || l == Level.Finer || l == Level.Finest ||
                        l == Level.Fine => BreadcrumbLevel.Debug,
-            _ => null
+            _ => BreadcrumbLevel.Info
         };
     }
 }
