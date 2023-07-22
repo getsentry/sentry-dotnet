@@ -331,13 +331,6 @@ public class SentryAppenderTests
         });
         sut.DoAppend(warnEvt);
 
-        var errorEvent = new LoggingEvent(new LoggingEventData
-        {
-            Level = Level.Error,
-            Message = "log4net event"
-        });
-        sut.DoAppend(errorEvent);
-
         var breadcrumb = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(expectedBreadcrumbMsg, breadcrumb.Message);
     }
