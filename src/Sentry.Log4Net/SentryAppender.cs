@@ -90,12 +90,19 @@ public class SentryAppender : AppenderSkeleton
         {
             var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
             var category = loggingEvent.LoggerName;
-            var level = loggingEvent.ToBreadcrumbLevel();
             IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent)
                 .Where(kvp => kvp.Value != null)
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString());
 
-            _hub.AddBreadcrumb(message, category, type: null, data, level);
+            var level = loggingEvent.ToBreadcrumbLevel();
+            if (level is null)
+            {
+                _hub.AddBreadcrumb(message, category, type: null, data);
+            }
+            else
+            {
+                _hub.AddBreadcrumb(message, category, type: null, data, level.Value);
+            }
             return;
         }
 

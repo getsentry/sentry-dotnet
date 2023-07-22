@@ -9,10 +9,15 @@ public class SentryAppenderTests
         public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
         public Func<string, IDisposable> InitAction { get; set; }
         public IHub Hub { get; set; } = Substitute.For<IHub>();
+        public Func<IHub> HubAccessor { get; set; }
+        public Scope Scope { get; } = new(new SentryOptions());
         public string Dsn { get; set; } = "dsn";
 
         public Fixture()
         {
+            Hub.IsEnabled.Returns(true);
+            HubAccessor = () => Hub;
+            Hub.ConfigureScope(Arg.Invoke(Scope));
             InitAction = s =>
             {
                 DsnReceivedOnInit = s;
@@ -123,6 +128,19 @@ public class SentryAppenderTests
         var sut = _fixture.GetSut();
 
         sut.DoAppend(null as LoggingEvent);
+    }
+
+    [Fact]
+    public void Append_BelowThreshold_NoOp()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Warn;
+        var evt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Info
+        });
+
+        sut.DoAppend(evt);
     }
 
     [Fact]
@@ -289,6 +307,39 @@ public class SentryAppenderTests
 
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
+    }
+
+    [Fact]
+    public void MinimumEventLevel_DefaultsToNull()
+    {
+        var appender = new SentryAppender();
+        Assert.Null(appender.MinimumEventLevel);
+    }
+
+    [Fact]
+    public void MinimumEventLevel_ConvertsEventsBelowToBreadcrumbs()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Debug;
+        sut.MinimumEventLevel = Level.Error;
+
+        const string expectedBreadcrumbMsg = "log4net breadcrumb";
+        var warnEvt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Warn,
+            Message = expectedBreadcrumbMsg
+        });
+        sut.DoAppend(warnEvt);
+
+        var errorEvent = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Error,
+            Message = "log4net event"
+        });
+        sut.DoAppend(errorEvent);
+
+        var breadcrumb = _fixture.Scope.Breadcrumbs.First();
+        Assert.Equal(expectedBreadcrumbMsg, breadcrumb.Message);
     }
 
     [Fact]
