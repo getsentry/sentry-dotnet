@@ -31,6 +31,12 @@ public class SentryAppender : AppenderSkeleton
     /// Environment to send in the event.
     /// </summary>
     public string? Environment { get; set; }
+    
+    /// <summary>
+    /// Lowest level required for a log message to become an event.
+    /// Every level above threshold and below this level will become a breadcrumb.
+    /// </summary>
+    public Level? MinimumEventLevel { get; set; }
 
     /// <summary>
     /// log4net SDK name.
@@ -79,6 +85,18 @@ public class SentryAppender : AppenderSkeleton
         }
 
         var exception = loggingEvent.ExceptionObject ?? loggingEvent.MessageObject as Exception;
+
+        if (loggingEvent.Level < MinimumEventLevel)
+        {
+            string? message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : null;
+            string category = loggingEvent.LoggerName;
+            BreadcrumbLevel level = loggingEvent.ToBreadcrumbLevel();
+            IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent).ToDictionary(x => x.Key, x => x.Value.ToString());
+
+            _hub.AddBreadcrumb(message, category, type: null, data, level);
+            return;
+        }
+
         var evt = new SentryEvent(exception)
         {
             Logger = loggingEvent.LoggerName,
