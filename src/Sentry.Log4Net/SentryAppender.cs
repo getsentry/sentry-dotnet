@@ -31,7 +31,7 @@ public class SentryAppender : AppenderSkeleton
     /// Environment to send in the event.
     /// </summary>
     public string? Environment { get; set; }
-    
+
     /// <summary>
     /// Lowest level required for a log message to become an event.
     /// Every level above threshold and below this level will become a breadcrumb.
@@ -88,8 +88,8 @@ public class SentryAppender : AppenderSkeleton
 
         if (loggingEvent.Level < MinimumEventLevel)
         {
-            string? message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : null;
-            string category = loggingEvent.LoggerName;
+            var message = !string.IsNullOrWhiteSpace(loggingEvent.RenderedMessage) ? loggingEvent.RenderedMessage : string.Empty;
+            var category = loggingEvent.LoggerName;
             BreadcrumbLevel level = loggingEvent.ToBreadcrumbLevel();
             IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent).ToDictionary(x => x.Key, x => x.Value.ToString());
 
