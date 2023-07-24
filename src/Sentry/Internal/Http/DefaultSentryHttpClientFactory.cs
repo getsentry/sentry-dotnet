@@ -51,7 +51,12 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
                     supportsProxy = true;
                     try
                     {
+                        // Code analysis reports this as error, since it is marked as unsupported.
+                        // Being aware of that this code is meant to support this feature as soon as
+                        // <see cref="T:System.Net.Http.NSUrlSessionHandler" /> supports it.
+#pragma warning disable CA1416
                         nsUrlSessionHandler.Proxy = options.HttpProxy;
+#pragma warning restore CA1416
                         options.LogInfo("Using Proxy: {0}", options.HttpProxy);
                     }
                     catch (PlatformNotSupportedException)
