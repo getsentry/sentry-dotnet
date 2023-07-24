@@ -440,16 +440,23 @@ internal class DebugStackTrace : SentryStackTrace
 #if NET5_0_OR_GREATER && PLATFORM_NEUTRAL
         // Maybe we're dealing with a single file assembly
         // https://github.com/getsentry/sentry-dotnet/issues/2362
-        if (SingleFileApp.MainModule.IsBundle())
+        try
         {
-            if (SingleFileApp.MainModule?.GetDebugImage(module) is not { } embeddedDebugImage)
+            if (SingleFileApp.MainModule.IsBundle())
             {
-                options.LogInfo("Skipping embedded debug image for module '{0}' because the Debug ID couldn't be determined", moduleName);
-                return null;
-            }
+                if (SingleFileApp.MainModule?.GetDebugImage(module) is not { } embeddedDebugImage)
+                {
+                    options.LogInfo("Skipping embedded debug image for module '{0}' because the Debug ID couldn't be determined", moduleName);
+                    return null;
+                }
 
-            options.LogDebug("Got embedded debug image for '{0}' having Debug ID: {1}", moduleName, embeddedDebugImage.DebugId);
-            return embeddedDebugImage;
+                options.LogDebug("Got embedded debug image for '{0}' having Debug ID: {1}", moduleName, embeddedDebugImage.DebugId);
+                return embeddedDebugImage;
+            }
+        }
+        catch (PlatformNotSupportedException)
+        {
+            // Thrown by Blazor WASM (and possibly other platforms).
         }
 #endif
 
