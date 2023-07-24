@@ -112,7 +112,7 @@ internal class DynamicSamplingContext
     public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options)
     {
         // These should already be set on the transaction.
-        var publicKey = Dsn.Parse(options.Dsn!).PublicKey;
+        var publicKey = options.ParsedDsn.PublicKey;
         var traceId = transaction.TraceId;
         var sampleRate = transaction.SampleRate!.Value;
         var userSegment = transaction.User.Segment;
@@ -133,12 +133,7 @@ internal class DynamicSamplingContext
     }
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
-    {
-        var publicKey = Dsn.Parse(options.Dsn!).PublicKey;
-        var traceId = propagationContext.TraceId;
-
-        return new DynamicSamplingContext(traceId, publicKey);
-    }
+        => new(propagationContext.TraceId, options.ParsedDsn.PublicKey);
 }
 
 internal static class DynamicSamplingContextExtensions

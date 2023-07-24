@@ -304,10 +304,21 @@ public class SentryOptions
     /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/environments/"/>
     public string? Environment { get; set; }
 
+    private string? _dsn;
     /// <summary>
     /// The Data Source Name of a given project in Sentry.
     /// </summary>
-    public string? Dsn { get; set; }
+    public string? Dsn {
+        get => _dsn;
+        set
+        {
+            _dsn = value;
+            _parsedDsn = null;
+        }
+    }
+
+    private Dsn? _parsedDsn;
+    internal Dsn ParsedDsn => _parsedDsn ??= Sentry.Dsn.Parse(Dsn!);
 
     private readonly Lazy<string> _sentryBaseUrl;
 
