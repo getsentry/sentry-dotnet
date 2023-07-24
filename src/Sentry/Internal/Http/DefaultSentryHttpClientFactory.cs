@@ -45,12 +45,21 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
         {
             if (options.HttpProxy != null)
             {
-                try
+                bool supportsProxy = false;
+                if (nsUrlSessionHandler.SupportsProxy)
                 {
-                    nsUrlSessionHandler.Proxy = options.HttpProxy;
-                    options.LogInfo("Using Proxy: {0}", options.HttpProxy);
+                    supportsProxy = true;
+                    try
+                    {
+                        nsUrlSessionHandler.Proxy = options.HttpProxy;
+                        options.LogInfo("Using Proxy: {0}", options.HttpProxy);
+                    }
+                    catch (PlatformNotSupportedException)
+                    {
+                        supportsProxy = false;
+                    }
                 }
-                catch (PlatformNotSupportedException)
+                if (!supportsProxy)
                 {
                     options.LogDebug("No proxy supported by NSUrlSessionHandler.");
                 }

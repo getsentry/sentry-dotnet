@@ -11,6 +11,7 @@
 - Fixed baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
 - Fix Durable Functions preventing orchestrators from completing ([#2491](https://github.com/getsentry/sentry-dotnet/pull/2491))
 - Re-enable HubTests.FlushOnDispose_SendsEnvelope ([#2492](https://github.com/getsentry/sentry-dotnet/pull/2492))
+- Fixes #2502 SentryOptions should use 'HttpMessageHandler' instead of 'HttpClientHandler' to support NSUrlSessionHandler on iOS  ([#2503](https://github.com/getsentry/sentry-dotnet/pull/2503))
 
 ### Dependencies
 
