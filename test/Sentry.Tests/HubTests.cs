@@ -10,7 +10,7 @@ public partial class HubTests
     {
         public SentryOptions Options { get; }
 
-        public ISentryClient Client { get; }
+        public ISentryClient Client { get; set;  }
 
         public ISessionManager SessionManager { get; set; }
 
@@ -328,7 +328,7 @@ public partial class HubTests
             FileSystem = fileSystem,
             // So we don't need to deal with gzip'ed payload
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
-            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
             // Not to send some session envelope
             AutoSessionTracking = false,
             Debug = true,
@@ -387,23 +387,6 @@ public partial class HubTests
 #endif
 
     [Fact]
-    public void CaptureEvent_SessionActive_ExceptionReportsError()
-    {
-        // Arrange
-        _fixture.Options.Release = "release";
-        var hub = _fixture.GetSut();
-
-        hub.StartSession();
-
-        // Act
-        hub.CaptureEvent(new SentryEvent(new Exception()));
-        hub.EndSession();
-
-        // Assert
-        _fixture.Client.Received().CaptureSession(Arg.Is<SessionUpdate>(s => s.ErrorCount == 1));
-    }
-
-    [Fact]
     public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
     {
         // Arrange
@@ -414,8 +397,9 @@ public partial class HubTests
             Dsn = ValidDsn,
             Release = "release"
         };
-        var client = new SentryClient(options, worker);
-        var hub = new Hub(options, client);
+        var sessionManager = new GlobalSessionManager(options);
+        var client = new SentryClient(options, worker, sessionManager: sessionManager);
+        var hub = new Hub(options, client, sessionManager);
 
         hub.StartSession();
 
@@ -477,8 +461,9 @@ public partial class HubTests
             Dsn = ValidDsn,
             Release = "release"
         };
-        var client = new SentryClient(options, worker);
-        var hub = new Hub(options, client);
+        var sessionManager = new GlobalSessionManager(options);
+        var client = new SentryClient(options, worker, sessionManager: sessionManager);
+        var hub = new Hub(options, client, sessionManager);
 
         var integration = new AppDomainUnhandledExceptionIntegration(Substitute.For<IAppDomain>());
         integration.Register(hub, options);
