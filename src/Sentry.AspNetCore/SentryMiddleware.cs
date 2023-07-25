@@ -7,6 +7,7 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Reflection;
 
@@ -63,6 +64,31 @@ internal class SentryMiddleware : IMiddleware
         _transactionProcessors = transactionProcessors;
     }
 
+    private class ExceptionHandlerFeatureDetails
+    {
+        private readonly ILogger _logger;
+        private readonly string _originalMethod;
+        private readonly IExceptionHandlerFeature _exceptionHandlerFeature;
+
+        public ExceptionHandlerFeatureDetails(ILogger logger, string originalMethod, IExceptionHandlerFeature exceptionHandlerFeature)
+        {
+            _logger = logger;
+            _originalMethod = originalMethod;
+            _exceptionHandlerFeature = exceptionHandlerFeature;
+        }
+
+        /// <summary>
+        /// When exceptions get caught by the UseExceptionHandler feature we the TransactionName and Tags representing
+        /// the different route values to reflect those of the original route (not the global error handling route)
+        /// </summary>
+        public void ApplyOriginalRouteValues(SentryEvent evt)
+        {
+            _logger.LogTrace("Applying original route values for ExceptionHandlerFeature");
+            _exceptionHandlerFeature.ApplyTransactionName(evt, _originalMethod);
+            _exceptionHandlerFeature.ApplyRouteTags(evt);
+        }
+    }
+
     /// <summary>
     /// Handles the <see cref="HttpContext"/> while capturing any errors
     /// </summary>
@@ -116,6 +142,7 @@ internal class SentryMiddleware : IMiddleware
 
             try
             {
+                var originalMethod = context.Request.Method; // In case the custom error handler changes this
                 await next(context).ConfigureAwait(false);
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).
@@ -126,7 +153,9 @@ internal class SentryMiddleware : IMiddleware
                         "This exception was caught by an ASP.NET Core custom error handler. " +
                         "The web server likely returned a customized error page as a result of this exception.";
 
-                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
+                    var handlerDetails = new ExceptionHandlerFeatureDetails(_logger, originalMethod, exceptionFeature);
+                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description,
+                        handlerDetails);
                 }
 
                 if (_options.FlushBeforeRequestCompleted)
@@ -151,14 +180,15 @@ internal class SentryMiddleware : IMiddleware
             }
 
             // Some environments disables the application after sending a request,
-            // making the OnCompleted flush to not work.
+            // preventing OnCompleted flush from working.
             Task FlushBeforeCompleted() => hub.FlushAsync(_options.FlushTimeout);
 
-            void CaptureException(Exception e, SentryId evtId, string mechanism, string description)
+            void CaptureException(Exception e, SentryId evtId, string mechanism, string description, ExceptionHandlerFeatureDetails? exceptionHandlerDetails = null)
             {
                 e.SetSentryMechanism(mechanism, description, handled: false);
 
                 var evt = new SentryEvent(e, eventId: evtId);
+                exceptionHandlerDetails?.ApplyOriginalRouteValues(evt);
 
                 _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 
