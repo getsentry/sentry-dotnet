@@ -553,7 +553,7 @@ public class SentryOptions
     public Func<HttpClientHandler>? CreateHttpClientHandler
     {
         get => _createClientHandler;
-        set =>
+        set
         {
             CreateHttpMessageHandler = value;
             _createClientHandler = value;
