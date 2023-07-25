@@ -13,15 +13,19 @@
 - Re-enable HubTests.FlushOnDispose_SendsEnvelope ([#2492](https://github.com/getsentry/sentry-dotnet/pull/2492))
 - Fixed SDK not sending exceptions via Blazor WebAssembly due to a `PlatformNotSupportedException` ([#2506](https://github.com/getsentry/sentry-dotnet/pull/2506))
 - Align SDK with docs regarding session update for dropped events ([#2496](https://github.com/getsentry/sentry-dotnet/pull/2496))
+- Introduced `HttpMessageHandler` in favor of the now deprecated `HttpClientHandler` on the options. This allows the SDK to support NSUrlSessionHandler on iOS ([#2503](https://github.com/getsentry/sentry-dotnet/pull/2503))
 
 ### Dependencies
 
 - Bump Java SDK from v6.25.1 to v6.25.2 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6252)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.25.1...6.25.2)
-- Bump Cocoa SDK from v8.8.0 to v8.9.2 ([#2479](https://github.com/getsentry/sentry-dotnet/pull/2479), [#2483](https://github.com/getsentry/sentry-dotnet/pull/2483), [#2500](https://github.com/getsentry/sentry-dotnet/pull/2500))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#892)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.8.0...8.9.2)
+- Bump CLI from v2.19.4 to v2.20.0 ([#2509](https://github.com/getsentry/sentry-dotnet/pull/2509))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2200)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.19.4...2.20.0)
+- Bump Cocoa SDK from v8.8.0 to v8.9.3 ([#2479](https://github.com/getsentry/sentry-dotnet/pull/2479), [#2483](https://github.com/getsentry/sentry-dotnet/pull/2483), [#2500](https://github.com/getsentry/sentry-dotnet/pull/2500), [#2510](https://github.com/getsentry/sentry-dotnet/pull/2510))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#893)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.8.0...8.9.3)
 
 ## 3.34.0
 

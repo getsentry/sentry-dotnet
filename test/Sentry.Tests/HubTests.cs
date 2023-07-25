@@ -328,7 +328,7 @@ public partial class HubTests
             FileSystem = fileSystem,
             // So we don't need to deal with gzip'ed payload
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
-            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
             // Not to send some session envelope
             AutoSessionTracking = false,
             Debug = true,
