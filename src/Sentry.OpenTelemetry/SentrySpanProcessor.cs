@@ -112,10 +112,20 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         if (attributes.TryGetTypedValue("http.url", out string? url) && (_options?.IsSentryRequest(url) ?? false))
         {
             _options?.DiagnosticLogger?.LogDebug($"Ignoring Activity {data.SpanId} for Sentry request.");
-            if (_map.TryRemove(data.SpanId, out var removed) && (removed is SpanTracer spanTracerToRemove))
+
+            if (_map.TryRemove(data.SpanId, out var removed))
             {
-                spanTracerToRemove.IsSentryRequest = true;
+                if (removed is SpanTracer spanTracerToRemove)
+                {
+                    spanTracerToRemove.IsSentryRequest = true;
+                }
+
+                if (removed is TransactionTracer transactionTracer)
+                {
+                    transactionTracer.IsSentryRequest = true;
+                }
             }
+
             return;
         }
 

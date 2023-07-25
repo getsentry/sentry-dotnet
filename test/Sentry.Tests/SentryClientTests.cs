@@ -1063,7 +1063,7 @@ public partial class SentryClientTests
         var invoked = false;
         _fixture.BackgroundWorker = null;
         _fixture.SentryOptions.Dsn = ValidDsn;
-        _fixture.SentryOptions.CreateHttpClientHandler = () =>
+        _fixture.SentryOptions.CreateHttpMessageHandler = () =>
         {
             invoked = true;
             return Substitute.For<HttpClientHandler>();

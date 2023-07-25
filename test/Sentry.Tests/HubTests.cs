@@ -155,6 +155,46 @@ public partial class HubTests
     }
 
     [Fact]
+    public void CaptureException_TransactionFinished_Gets_DSC_From_LinkedSpan()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+        var exception = new Exception("error");
+
+        var traceHeader = new SentryTraceHeader(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"),
+            true);
+        var transactionContext = new TransactionContext("foo", "bar", traceHeader);
+
+        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-sample_rate", "1.0"},
+            {"sentry-trace_id", "75302ac48a024bde9a3b3734a82e36c8"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
+        }).CreateDynamicSamplingContext();
+
+        var transaction = hub.StartTransaction(
+            transactionContext,
+            new Dictionary<string, object>(),
+            dsc
+            );
+        transaction.Finish(exception);
+
+        // Act
+        hub.CaptureException(exception);
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEvent(
+            Arg.Is<SentryEvent>(evt =>
+                evt.DynamicSamplingContext == dsc),
+            Arg.Any<Hint>(),
+            Arg.Any<Scope>());
+    }
+
+    [Fact]
     public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
     {
         // Arrange
@@ -288,7 +328,7 @@ public partial class HubTests
             FileSystem = fileSystem,
             // So we don't need to deal with gzip'ed payload
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
-            CreateHttpClientHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
             // Not to send some session envelope
             AutoSessionTracking = false,
             Debug = true,
@@ -1250,12 +1290,7 @@ public partial class HubTests
         hint.Attachments.Should().Contain(attachments);
     }
 
-#if ANDROID && CI_BUILD
-    // TODO: Test is flaky in CI
-    [SkippableTheory(typeof(NSubstitute.Exceptions.ReceivedCallsException))]
-#else
     [Theory]
-#endif
     [InlineData(false)]
     [InlineData(true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)

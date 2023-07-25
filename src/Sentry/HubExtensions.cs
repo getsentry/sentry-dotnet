@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -227,10 +228,12 @@ public static class HubExtensions
         this IHub hub,
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
-        DynamicSamplingContext? dynamicSamplingContext)
-        => hub is Hub fullHub
-            ? fullHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext)
-            : hub.StartTransaction(context, customSamplingContext);
+        DynamicSamplingContext? dynamicSamplingContext) => hub switch
+        {
+            Hub fullHub => fullHub.StartTransaction(context, customSamplingContext, dynamicSamplingContext),
+            HubAdapter adapter => adapter.StartTransaction(context, customSamplingContext, dynamicSamplingContext),
+            _ => hub.StartTransaction(context, customSamplingContext)
+        };
 
     internal static ITransaction? GetTransaction(this IHub hub)
     {

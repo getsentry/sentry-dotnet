@@ -242,19 +242,17 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         using (new AssertionScope())
         {
-            using (new AssertionScope())
+            spanTracer.ParentSpanId.Should().Be(parent.SpanId.AsSentrySpanId());
+            spanTracer.Operation.Should().Be(data.OperationName);
+            spanTracer.Description.Should().Be(data.DisplayName);
+            spanTracer.EndTimestamp.Should().NotBeNull();
+            spanTracer.Extra["otel.kind"].Should().Be(data.Kind);
+            foreach (var keyValuePair in tags)
             {
-                spanTracer.ParentSpanId.Should().Be(parent.SpanId.AsSentrySpanId());
-                spanTracer.Operation.Should().Be(data.OperationName);
-                spanTracer.Description.Should().Be(data.DisplayName);
-                spanTracer.EndTimestamp.Should().NotBeNull();
-                spanTracer.Extra["otel.kind"].Should().Be(data.Kind);
-                foreach (var keyValuePair in tags)
-                {
-                    span.Extra[keyValuePair.Key].Should().Be(keyValuePair.Value);
-                }
-                spanTracer.Status.Should().Be(SpanStatus.Ok);
+                span.Extra[keyValuePair.Key].Should().Be(keyValuePair.Value);
             }
+
+            spanTracer.Status.Should().Be(SpanStatus.Ok);
         }
     }
 
@@ -286,19 +284,44 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         using (new AssertionScope())
         {
-            using (new AssertionScope())
+            transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
+            transaction.Operation.Should().Be(data.OperationName);
+            transaction.Description.Should().Be(data.DisplayName);
+            transaction.Name.Should().Be(data.DisplayName);
+            transaction.NameSource.Should().Be(TransactionNameSource.Custom);
+            transaction.EndTimestamp.Should().NotBeNull();
+            transaction.Contexts["otel"].Should().BeEquivalentTo(new Dictionary<string, object>
             {
-                transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
-                transaction.Operation.Should().Be(data.OperationName);
-                transaction.Description.Should().Be(data.DisplayName);
-                transaction.Name.Should().Be(data.DisplayName);
-                transaction.NameSource.Should().Be(TransactionNameSource.Custom);
-                transaction.EndTimestamp.Should().NotBeNull();
-                transaction.Contexts["otel"].Should().BeEquivalentTo(new Dictionary<string, object>{
-                    { "attributes", tags }
-                });
-                transaction.Status.Should().Be(SpanStatus.Ok);
-            }
+                { "attributes", tags }
+            });
+            transaction.Status.Should().Be(SpanStatus.Ok);
         }
+    }
+
+    [Fact]
+    public void OnEnd_IsSentryRequest_DoesNotFinishTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var tags = new Dictionary<string, object> { { "foo", "bar" }, { "http.url", _fixture.Options.Dsn } };
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        transaction.IsSentryRequest.Should().BeTrue();
     }
 }

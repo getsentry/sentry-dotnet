@@ -172,7 +172,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         // Use the provided DSC, or create one based on this transaction.
-        // This must be done AFTER the sampling decision has been made.
+        // DSC creation must be done AFTER the sampling decision has been made.
         transaction.DynamicSamplingContext =
             dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
 
@@ -380,20 +380,6 @@ internal class Hub : IHubEx, IDisposable
             var currentScope = ScopeManager.GetCurrent();
             var actualScope = scope ?? currentScope.Key;
 
-            var hasTerminalException = evt.HasTerminalException();
-            if (hasTerminalException)
-            {
-                // Event contains a terminal exception -> end session as crashed
-                _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-                actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-            }
-            else if (evt.HasException())
-            {
-                // Event contains a non-terminal exception -> report error
-                // (this might return null if the session has already reported errors before)
-                actualScope.SessionUpdate = _sessionManager.ReportError();
-            }
-
             TransactionTracer? transaction = null;
             if(_options.IsTracingEnabled)
             {
@@ -426,7 +412,7 @@ internal class Hub : IHubEx, IDisposable
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (hasTerminalException)
+            if (evt.HasTerminalException())
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
