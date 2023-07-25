@@ -1,3 +1,5 @@
+using Xunit.Sdk;
+
 namespace Sentry.Tests;
 
 public class DynamicSamplingContextTests
@@ -143,6 +145,22 @@ public class DynamicSamplingContextTests
     }
 
     [Fact]
+    public void CreateFromBaggage_Sampled_MalFormed()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"},
+            {"sentry-sampled", "foo"},
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
     public void CreateFromBaggage_Valid_Minimum()
     {
         var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
@@ -168,6 +186,7 @@ public class DynamicSamplingContextTests
         {
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sampled", "true"},
             {"sentry-sample_rate", "1.0"},
             {"sentry-release", "test@1.0.0+abc"},
             {"sentry-environment", "production"},
@@ -178,9 +197,10 @@ public class DynamicSamplingContextTests
         var dsc = baggage.CreateDynamicSamplingContext();
 
         Assert.NotNull(dsc);
-        Assert.Equal(7, dsc.Items.Count);
+        Assert.Equal(baggage.Members.Count, dsc.Items.Count);
         Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("true", Assert.Contains("sampled", dsc.Items));
         Assert.Equal("1.0", Assert.Contains("sample_rate", dsc.Items));
         Assert.Equal("test@1.0.0+abc", Assert.Contains("release", dsc.Items));
         Assert.Equal("production", Assert.Contains("environment", dsc.Items));
@@ -210,8 +230,11 @@ public class DynamicSamplingContextTests
         Assert.Equal(original.Members, result.Members);
     }
 
-    [Fact]
-    public void CreateFromTransaction()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [InlineData(null)]
+    public void CreateFromTransaction(bool? isSampled)
     {
         var options = new SentryOptions
         {
@@ -230,7 +253,7 @@ public class DynamicSamplingContextTests
         {
             Name = "GET /person/{id}",
             NameSource = TransactionNameSource.Route,
-            IsSampled = true,
+            IsSampled = isSampled,
             SampleRate = 0.5,
             User =
             {
@@ -241,9 +264,17 @@ public class DynamicSamplingContextTests
         var dsc = transaction.CreateDynamicSamplingContext(options);
 
         Assert.NotNull(dsc);
-        Assert.Equal(7, dsc.Items.Count);
+        Assert.Equal(isSampled.HasValue ? 8 : 7, dsc.Items.Count);
         Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        if (transaction.IsSampled is { } sampled)
+        {
+            Assert.Equal(sampled ? "true" : "false", Assert.Contains("sampled", dsc.Items));
+        }
+        else
+        {
+            Assert.DoesNotContain("sampled", dsc.Items);
+        }
         Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
         Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));

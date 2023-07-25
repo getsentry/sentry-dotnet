@@ -172,7 +172,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         // Use the provided DSC, or create one based on this transaction.
-        // This must be done AFTER the sampling decision has been made.
+        // DSC creation must be done AFTER the sampling decision has been made.
         transaction.DynamicSamplingContext =
             dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
 

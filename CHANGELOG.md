@@ -2,11 +2,16 @@
 
 ## Unreleased
 
+### Features
+
+- Added Sampling Decision to Trace Envelope Header ([#2495](https://github.com/getsentry/sentry-dotnet/pull/2495))
+
 ### Fixes
 
-- Fixes baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
+- Fixed baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
 - Fix Durable Functions preventing orchestrators from completing ([#2491](https://github.com/getsentry/sentry-dotnet/pull/2491))
 - Re-enable HubTests.FlushOnDispose_SendsEnvelope ([#2492](https://github.com/getsentry/sentry-dotnet/pull/2492))
+- Fixed SDK not sending exceptions via Blazor WebAssembly due to a `PlatformNotSupportedException` ([#2506](https://github.com/getsentry/sentry-dotnet/pull/2506))
 - Align SDK with docs regarding session update for dropped events ([#2496](https://github.com/getsentry/sentry-dotnet/pull/2496))
 
 ### Dependencies
@@ -14,9 +19,9 @@
 - Bump Java SDK from v6.25.1 to v6.25.2 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6252)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.25.1...6.25.2)
-- Bump Cocoa SDK from v8.8.0 to v8.9.1 ([#2479](https://github.com/getsentry/sentry-dotnet/pull/2479), [#2483](https://github.com/getsentry/sentry-dotnet/pull/2483))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#891)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.8.0...8.9.1)
+- Bump Cocoa SDK from v8.8.0 to v8.9.2 ([#2479](https://github.com/getsentry/sentry-dotnet/pull/2479), [#2483](https://github.com/getsentry/sentry-dotnet/pull/2483), [#2500](https://github.com/getsentry/sentry-dotnet/pull/2500))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#892)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.8.0...8.9.2)
 
 ## 3.34.0
 
@@ -26,6 +31,7 @@
 - Added a MSBuild property `SentryUploadAndroidProguardMapping` to automatically upload the Proguard mapping file when targeting Android ([#2455](https://github.com/getsentry/sentry-dotnet/pull/2455))
 - Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 - Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
+- Support transaction finishing automatically with 'idle timeout' ([#2452](https://github.com/getsentry/sentry-dotnet/pull/2452))
 
 ### Fixes
 
