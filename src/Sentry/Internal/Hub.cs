@@ -205,6 +205,7 @@ internal class Hub : IHubEx, IDisposable
             return traceHeader;
         }
 
+        // Fallback: Either tracing was disabled or there was no span on the current scope.
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
         return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
@@ -226,14 +227,15 @@ internal class Hub : IHubEx, IDisposable
         string? name = null,
         string? operation = null)
     {
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger,
-            traceHeader,
-            baggageHeader);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
         if (_options.IsTracingEnabled)
         {
-            return new TransactionContext(name ?? string.Empty, operation ?? string.Empty, new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, false));
+            return new TransactionContext(
+                name ?? string.Empty,
+                operation ?? string.Empty,
+                new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, false));
         }
 
         return null;
@@ -381,7 +383,7 @@ internal class Hub : IHubEx, IDisposable
             var actualScope = scope ?? currentScope.Key;
 
             TransactionTracer? transaction = null;
-            if(_options.IsTracingEnabled)
+            if (_options.IsTracingEnabled)
             {
                 // Inject trace information from a linked span
                 if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
