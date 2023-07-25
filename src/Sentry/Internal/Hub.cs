@@ -233,16 +233,20 @@ internal class Hub : IHubEx, IDisposable
         return null;
     }
 
-    public TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders)
+    public TransactionContext? ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null)
     {
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger,
-            sentryTraceHeader,
-            baggageHeaders);
+            traceHeader,
+            baggageHeader);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
         if (_options.IsTracingEnabled)
         {
-            return new TransactionContext("", "", new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, false));
+            return new TransactionContext(name ?? string.Empty, operation ?? string.Empty, new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, false));
         }
 
         return null;

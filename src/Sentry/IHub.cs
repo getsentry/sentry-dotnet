@@ -60,7 +60,11 @@ public interface IHub :
     /// <remarks>
     /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
     /// </remarks>
-    TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders);
+    TransactionContext? ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null);
 
     /// <summary>
     /// Starts a new session.

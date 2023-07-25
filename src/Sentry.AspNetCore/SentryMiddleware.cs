@@ -91,6 +91,13 @@ internal class SentryMiddleware : IMiddleware
                 context.Response.OnCompleted(() => hub.FlushAsync(_options.FlushTimeout));
             }
 
+            if (!_options.IsTracingEnabled)
+            {
+                var traceHeader = context.TryGetSentryTraceHeader(_options);
+                var baggageHeader = context.TryGetBaggageHeader(_options);
+                hub.ContinueTrace(traceHeader, baggageHeader);
+            }
+
             hub.ConfigureScope(scope =>
             {
                 // At the point lots of stuff from the request are not yet filled
@@ -114,9 +121,6 @@ internal class SentryMiddleware : IMiddleware
             // handler page to access the event ID, enabling user feedback, etc.
             var eventId = SentryId.Create();
             hub.ConfigureScope(scope => scope.LastEventId = eventId);
-
-            var headers = context.TryGetSentryTraceHeader(_options);
-            var baggage = context.TryGetBaggageHeader(_options);
 
             try
             {

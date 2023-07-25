@@ -639,8 +639,12 @@ public static partial class SentrySdk
     /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
     /// </remarks>
     [DebuggerStepThrough]
-    public static TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders)
-        => CurrentHub.ContinueTrace(sentryTraceHeader, baggageHeaders);
+    public static TransactionContext? ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null)
+        => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]

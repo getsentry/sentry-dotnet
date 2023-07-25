@@ -115,8 +115,12 @@ public sealed class HubAdapter : IHub, IHubEx
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders)
-        => SentrySdk.ContinueTrace(sentryTraceHeader, baggageHeaders);
+    public TransactionContext? ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null)
+        => SentrySdk.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

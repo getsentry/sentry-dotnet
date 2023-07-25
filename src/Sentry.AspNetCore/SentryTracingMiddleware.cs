@@ -38,17 +38,15 @@ internal class SentryTracingMiddleware
         {
             var hub = _getHub();
 
-            // Attempt to start a transaction from the trace header if it exists
-            var traceHeader = context.TryGetSentryTraceHeader(_options);
-
             // It's important to try and set the transaction name to some value here so that it's available for use
             // in sampling.  At a later stage, we will try to get the transaction name again, to account for the
             // other middlewares that may have ran after ours.
             var transactionName = context.TryGetTransactionName() ?? string.Empty;
 
-            var transactionContext = traceHeader is not null
-                ? new TransactionContext(transactionName, OperationName, traceHeader, TransactionNameSource.Route)
-                : new TransactionContext(transactionName, OperationName, TransactionNameSource.Route);
+            // Continue the trace. If the trace header is null a new one will be created
+            var traceHeader = context.TryGetSentryTraceHeader(_options);
+            var baggageHeader = context.TryGetBaggageHeader(_options);
+            var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, transactionName, OperationName);
 
             var customSamplingContext = new Dictionary<string, object?>(4, StringComparer.Ordinal)
             {
@@ -58,11 +56,9 @@ internal class SentryTracingMiddleware
                 [SamplingExtensions.KeyForHttpContext] = context,
             };
 
-            // Set the Dynamic Sampling Context from the baggage header, if it exists.
-            var baggageHeader = context.TryGetBaggageHeader(_options);
             var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
-            if (traceHeader is { } && baggageHeader is null)
+            if (traceHeader is not null && baggageHeader is null)
             {
                 // We received a sentry-trace header without a baggage header, which indicates the request
                 // originated from an older SDK that doesn't support dynamic sampling.
@@ -73,14 +69,19 @@ internal class SentryTracingMiddleware
                 dynamicSamplingContext = DynamicSamplingContext.Empty;
             }
 
-            var transaction = hub.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
+            if (transactionContext is not null)
+            {
+                var transaction = hub.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
 
-            _options.LogInfo(
-                "Started transaction with span ID '{0}' and trace ID '{1}'.",
-                transaction.SpanId,
-                transaction.TraceId);
+                _options.LogInfo(
+                    "Started transaction with span ID '{0}' and trace ID '{1}'.",
+                    transaction.SpanId,
+                    transaction.TraceId);
 
-            return transaction;
+                return transaction;
+            }
+
+            return null;
         }
         catch (Exception ex)
         {

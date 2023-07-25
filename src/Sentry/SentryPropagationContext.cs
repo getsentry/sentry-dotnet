@@ -26,21 +26,19 @@ internal class SentryPropagationContext
         SpanId = SpanId.Create();
     }
 
-    public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, string? sentryTraceHeader, string? baggageHeadersString)
+    public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader)
     {
-        if (sentryTraceHeader == null)
+        if (traceHeader == null)
         {
             return new SentryPropagationContext();
         }
 
         try
         {
-            var traceHeader = SentryTraceHeader.Parse(sentryTraceHeader);
             DynamicSamplingContext? dynamicSamplingContext = null;
-            if (baggageHeadersString is not null)
+            if (baggageHeader is not null)
             {
-                var baggageHeader = BaggageHeader.TryParse(baggageHeadersString);
-                dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
+                dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
             }
 
             return new SentryPropagationContext(traceHeader.TraceId, traceHeader.SpanId, dynamicSamplingContext);
@@ -49,7 +47,7 @@ internal class SentryPropagationContext
         {
             logger?.LogError(
                 "Failed to create the 'SentryPropagationContext' from provided headers: '{0}', '{1}'. " +
-                        "\nFalling back to new PropagationContext.", e, sentryTraceHeader, baggageHeadersString);
+                        "\nFalling back to new PropagationContext.", e, traceHeader, baggageHeader);
             return new SentryPropagationContext();
         }
     }
