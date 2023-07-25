@@ -95,7 +95,6 @@ internal class SentryTracingMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var hub = _getHub();
-
         if (!hub.IsEnabled)
         {
             await _next(context).ConfigureAwait(false);

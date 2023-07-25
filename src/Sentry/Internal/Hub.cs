@@ -195,6 +195,7 @@ internal class Hub : IHubEx, IDisposable
 
     public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
+    [Obsolete("Use GetTraceParent instead")]
     public SentryTraceHeader? GetTraceHeader() => GetTraceParent();
 
     public SentryTraceHeader GetTraceParent()
@@ -234,7 +235,9 @@ internal class Hub : IHubEx, IDisposable
 
     public TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders)
     {
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(sentryTraceHeader, baggageHeaders);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger,
+            sentryTraceHeader,
+            baggageHeaders);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
         if (_options.IsTracingEnabled)

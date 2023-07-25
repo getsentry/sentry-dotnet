@@ -614,7 +614,7 @@ public static partial class SentrySdk
     /// Gets the Sentry trace header.
     /// </summary>
     [DebuggerStepThrough]
-    // [Obsolete("This method will be removed in a future major version. Use the `GetTraceParent` instead.")]
+    [Obsolete("This method will be removed in a future major version. Use the `GetTraceParent` instead.")]
     public static SentryTraceHeader? GetTraceHeader()
         => CurrentHub.GetTraceHeader();
 

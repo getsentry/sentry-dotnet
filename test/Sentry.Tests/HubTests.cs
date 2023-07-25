@@ -803,7 +803,7 @@ public partial class HubTests
     }
 
     [Fact]
-    public void GetTraceHeader_ReturnsHeaderForActiveSpan()
+    public void GetTraceParent_ReturnsHeaderForActiveSpan()
     {
         // Arrange
         var hub = _fixture.GetSut();
@@ -814,7 +814,7 @@ public partial class HubTests
         {
             scope.Transaction = transaction;
 
-            var header = hub.GetTraceHeader();
+            var header = hub.GetTraceParent();
 
             // Assert
             header.Should().NotBeNull();

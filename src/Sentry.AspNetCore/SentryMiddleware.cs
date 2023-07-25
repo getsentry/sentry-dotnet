@@ -7,6 +7,7 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Reflection;
 
@@ -113,6 +114,9 @@ internal class SentryMiddleware : IMiddleware
             // handler page to access the event ID, enabling user feedback, etc.
             var eventId = SentryId.Create();
             hub.ConfigureScope(scope => scope.LastEventId = eventId);
+
+            var headers = context.TryGetSentryTraceHeader(_options);
+            var baggage = context.TryGetBaggageHeader(_options);
 
             try
             {

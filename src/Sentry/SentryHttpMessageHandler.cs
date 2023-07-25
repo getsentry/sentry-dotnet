@@ -148,7 +148,7 @@ public class SentryHttpMessageHandler : DelegatingHandler
     private void AddSentryTraceHeader(HttpRequestMessage request)
     {
         // Set trace header if it hasn't already been set
-        if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
+        if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) && _hub.GetTraceParent() is { } traceHeader)
         {
             request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
         }

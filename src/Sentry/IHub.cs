@@ -57,7 +57,7 @@ public interface IHub :
     /// <summary>
     /// Continues a trace based on HTTP header values.
     /// </summary>
-    /// /// <remarks>
+    /// <remarks>
     /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
     /// </remarks>
     TransactionContext? ContinueTrace(string? sentryTraceHeader, string? baggageHeaders);

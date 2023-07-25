@@ -93,6 +93,7 @@ public sealed class HubAdapter : IHub, IHubEx
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
+    [Obsolete("This method will be removed in a future major version. Use the `GetTraceParent` instead.")]
     public SentryTraceHeader? GetTraceHeader()
         => SentrySdk.GetTraceHeader();
 
