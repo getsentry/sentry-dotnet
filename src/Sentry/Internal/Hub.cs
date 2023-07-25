@@ -211,22 +211,13 @@ internal class Hub : IHubEx, IDisposable
 
     public BaggageHeader? GetBaggage()
     {
-        if (_options.IsTracingEnabled)
+        if (_options.IsTracingEnabled && GetSpan() is TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc} )
         {
-            var transaction = GetSpan();
-            if (transaction is TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc})
-            {
-                return dsc.ToBaggageHeader();
-            }
+            return dsc.ToBaggageHeader();
         }
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
-        if (propagationContext?.DynamicSamplingContext is not null)
-        {
-            return propagationContext.DynamicSamplingContext.ToBaggageHeader();
-        }
-
-        return null;
+        return propagationContext.DynamicSamplingContext?.ToBaggageHeader();
     }
 
     public TransactionContext? ContinueTrace(
