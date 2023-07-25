@@ -12,6 +12,7 @@
 - Fix Durable Functions preventing orchestrators from completing ([#2491](https://github.com/getsentry/sentry-dotnet/pull/2491))
 - Re-enable HubTests.FlushOnDispose_SendsEnvelope ([#2492](https://github.com/getsentry/sentry-dotnet/pull/2492))
 - Fixed the SDK failing to report issues via Blazor WebAssembly due to a `PlatformNotSupportedException` ([#2506](https://github.com/getsentry/sentry-dotnet/pull/2506))
+- Fixed Transaction name not reporting correctly when using UseExceptionHandler ([#2511](https://github.com/getsentry/sentry-dotnet/pull/2511))
 
 ### Dependencies
 
