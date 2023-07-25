@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
@@ -47,6 +48,10 @@ internal class SentryTracingMiddleware
             var traceHeader = context.TryGetSentryTraceHeader(_options);
             var baggageHeader = context.TryGetBaggageHeader(_options);
             var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, transactionName, OperationName);
+            if (transactionContext is null)
+            {
+                throw new NullReferenceException("Failed to retrieve a 'TransactionContext' when continuing the trace. Did you enable tracing?");
+            }
 
             var customSamplingContext = new Dictionary<string, object?>(4, StringComparer.Ordinal)
             {
@@ -69,19 +74,14 @@ internal class SentryTracingMiddleware
                 dynamicSamplingContext = DynamicSamplingContext.Empty;
             }
 
-            if (transactionContext is not null)
-            {
-                var transaction = hub.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
+            var transaction = hub.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
 
-                _options.LogInfo(
-                    "Started transaction with span ID '{0}' and trace ID '{1}'.",
-                    transaction.SpanId,
-                    transaction.TraceId);
+            _options.LogInfo(
+                "Started transaction with span ID '{0}' and trace ID '{1}'.",
+                transaction.SpanId,
+                transaction.TraceId);
 
-                return transaction;
-            }
-
-            return null;
+            return transaction;
         }
         catch (Exception ex)
         {
