@@ -46,7 +46,7 @@ internal class Hub : IHubEx, IDisposable
 
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
-        _ownedClient = client ?? new SentryClient(options, _randomValuesFactory);
+        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory);
         _clock = clock ?? SystemClock.Clock;
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
@@ -335,8 +335,8 @@ internal class Hub : IHubEx, IDisposable
     {
         try
         {
-            var currentScope = ScopeManager.GetCurrent();
-            var actualScope = scope ?? currentScope.Key;
+            ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
+            var actualScope = scope ?? currentScope;
 
             // Inject trace information from a linked span
             if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
@@ -351,31 +351,16 @@ internal class Hub : IHubEx, IDisposable
                 }
             }
 
-            var hasTerminalException = evt.HasTerminalException();
-            if (hasTerminalException)
-            {
-                // Event contains a terminal exception -> end session as crashed
-                _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-                actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-            }
-            else if (evt.HasException())
-            {
-                // Event contains a non-terminal exception -> report error
-                // (this might return null if the session has already reported errors before)
-                actualScope.SessionUpdate = _sessionManager.ReportError();
-            }
-
             // Try to get the DSC from the transaction, if we didn't get it already from the linked span
             var transaction = actualScope.Transaction as TransactionTracer;
             evt.DynamicSamplingContext ??= transaction?.DynamicSamplingContext;
 
             // Now capture the event with the Sentry client on the current scope.
-            var sentryClient = currentScope.Value;
             var id = sentryClient.CaptureEvent(evt, hint, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (hasTerminalException)
+            if (evt.HasTerminalException())
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.

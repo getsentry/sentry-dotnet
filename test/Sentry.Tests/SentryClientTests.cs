@@ -18,6 +18,7 @@ public partial class SentryClientTests
 
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
+        public ISessionManager SessionManager { get; } = Substitute.For<ISessionManager>();
 
         public Fixture()
         {
@@ -28,7 +29,7 @@ public partial class SentryClientTests
         public SentryClient GetSut()
         {
             var randomValuesFactory = new IsolatedRandomValuesFactory();
-            return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory);
+            return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory, SessionManager);
         }
     }
 
@@ -646,6 +647,9 @@ public partial class SentryClientTests
             return e;
         });
 
+        _fixture.SessionManager.When(x => x.ReportError())
+            .Do(_ => processingOrder.Add("UpdateSession"));
+
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
         logger.When(x => x.Log(Arg.Any<SentryLevel>(), Arg.Is("Event not sampled.")))
@@ -665,7 +669,7 @@ public partial class SentryClientTests
             "exceptionProcessor",
             "eventProcessor",
             "SetBeforeSend",
-            // TODO: work out what to do with session update
+            "UpdateSession",
             "SampleRate"
         };
         processingOrder.Should().Equal(expectedOrder);
@@ -1179,5 +1183,43 @@ public partial class SentryClientTests
 
         var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
         _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
+    }
+
+    [Fact]
+    public void CaptureEvent_Exception_ReportsError()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(new Exception()));
+
+        // Assert
+        _fixture.SessionManager.Received(1).ReportError();
+    }
+
+    [Fact]
+    public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+
+        // Act
+        client.CaptureEvent(new SentryEvent()
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new()
+                    {
+                        Handled = false
+                    }
+                }
+            }
+        });
+
+        // Assert
+        _fixture.SessionManager.Received().EndSession(SessionEndStatus.Crashed);
     }
 }

@@ -16,6 +16,7 @@ namespace Sentry;
 public class SentryClient : ISentryClient, IDisposable
 {
     private readonly SentryOptions _options;
+    private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
 
     internal IBackgroundWorker Worker { get; }
@@ -32,22 +33,17 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     /// <param name="options">The configuration for this client.</param>
     public SentryClient(SentryOptions options)
-        : this(options, null, null) { }
+        : this(options, null, null, null) { }
 
     internal SentryClient(
         SentryOptions options,
-        RandomValuesFactory? randomValuesFactory)
-        : this(options, null, randomValuesFactory)
-    {
-    }
-
-    internal SentryClient(
-        SentryOptions options,
-        IBackgroundWorker? worker,
-        RandomValuesFactory? randomValuesFactory = null)
+        IBackgroundWorker? worker = null,
+        RandomValuesFactory? randomValuesFactory = null,
+        ISessionManager? sessionManager = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
+        _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
@@ -269,6 +265,20 @@ public class SentryClient : ISentryClient, IDisposable
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
             _options.LogInfo("Event dropped by BeforeSend callback.");
             return SentryId.Empty;
+        }
+
+        var hasTerminalException = processedEvent.HasTerminalException();
+        if (hasTerminalException)
+        {
+            // Event contains a terminal exception -> end session as crashed
+            _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
+            scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+        }
+        else if (processedEvent.HasException())
+        {
+            // Event contains a non-terminal exception -> report error
+            // (this might return null if the session has already reported errors before)
+            scope.SessionUpdate = _sessionManager.ReportError();
         }
 
         if (_options.SampleRate != null)
