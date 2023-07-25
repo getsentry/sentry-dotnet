@@ -37,7 +37,7 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
             }
             else
             {
-                options.LogDebug("No response compression supported by HttpClientHandler.");
+                options.LogWarning("No response compression supported by HttpClientHandler.");
             }
         }
 #if IOS
@@ -66,7 +66,7 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
                 }
                 if (!supportsProxy)
                 {
-                    options.LogDebug("No proxy supported by NSUrlSessionHandler.");
+                    options.LogWarning("No proxy supported by NSUrlSessionHandler.");
                 }
             }
 
@@ -87,7 +87,7 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
             }
             if (!compressionSupported)
             {
-                options.LogDebug("No response compression supported by NSUrlSessionHandler.");
+                options.LogInfo("No response compression supported by NSUrlSessionHandler.");
             }
         }
 #endif

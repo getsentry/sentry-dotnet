@@ -541,14 +541,23 @@ public class SentryOptions
     public IWebProxy? HttpProxy { get; set; }
 
     /// <summary>
+    /// private field to hold the <see cref="CreateHttpClientHandler"/>, since a typecheck or cast won't work here.
+    /// </summary>
+    private Func<HttpClientHandler>? _createClientHandler = null;
+
+    /// <summary>
     /// Creates the inner most <see cref="HttpClientHandler"/>.
     /// Deprecated in favor of <see cref="CreateHttpMessageHandler"/>.
     /// </summary>
     [Obsolete("Use CreateHttpMessageHandler instead")]
     public Func<HttpClientHandler>? CreateHttpClientHandler
     {
-        get => CreateHttpMessageHandler as Func<HttpClientHandler>;
-        set => CreateHttpMessageHandler = value;
+        get => _createClientHandler;
+        set =>
+        {
+            CreateHttpMessageHandler = value;
+            _createClientHandler = value;
+        }
     }
 
     /// <summary>
