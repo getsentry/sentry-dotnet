@@ -200,13 +200,9 @@ internal class Hub : IHubEx, IDisposable
 
     public SentryTraceHeader GetTraceParent()
     {
-        if (_options.IsTracingEnabled)
+        if (_options.IsTracingEnabled && GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
-            var traceHeader = GetSpan()?.GetTraceHeader();
-            if (traceHeader is not null)
-            {
-                return traceHeader;
-            }
+            return traceHeader;
         }
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
