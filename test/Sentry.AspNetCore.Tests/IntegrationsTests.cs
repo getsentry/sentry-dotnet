@@ -1,4 +1,9 @@
+#if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+#endif
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.AspNetCore.TestUtils;
@@ -50,6 +55,91 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
         // Assert
         exceptionEvent.Should().NotBeNull();
         exceptionEvent.TransactionName.Should().Be("GET /throw");
+    }
+
+    [Fact]
+    public async Task CaptureException_UseExceptionHandler_SetRouteDataFromInitialRequest()
+    {
+        // Arrange
+        SentryEvent exceptionEvent = null;
+        var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+        exceptionProcessor.Process(Arg.Any<Exception>(), Arg.Do<SentryEvent>(
+            evt => exceptionEvent = evt
+        ));
+        Configure = o =>
+        {
+            o.ExceptionProcessors.Add(exceptionProcessor);
+        };
+
+        const string throwPath = "/test/throw";
+        const string errorPath = "/test/error";
+        ConfigureServices = services =>
+        {
+            services.AddRouting();
+            var controllers = services.AddControllers();
+            controllers.UseSpecificControllers(typeof(TestController));
+        };
+        ConfigureApp = app =>
+        {
+            app.UseExceptionHandler(errorPath);
+            app.UseRouting();
+            app.UseEndpoints(routeBuilder => routeBuilder.MapControllers());
+        };
+
+        //Build();
+        var builder = new WebHostBuilder();
+
+        _ = builder.ConfigureServices(s =>
+        {
+            var lastException = new LastExceptionFilter();
+            _ = s.AddSingleton<IStartupFilter>(lastException);
+            _ = s.AddSingleton(lastException);
+
+            ConfigureServices?.Invoke(s);
+        });
+        _ = builder.Configure(app =>
+        {
+            ConfigureApp?.Invoke(app);
+        });
+
+        ConfigureWebHost?.Invoke(builder);
+        ConfigureBuilder(builder);
+
+        TestServer = new TestServer(builder);
+        HttpClient = TestServer.CreateClient();
+
+        // Act
+        _ = await HttpClient.GetAsync(throwPath);
+
+        // Assert
+        exceptionEvent.Should().NotBeNull();
+        using (new AssertionScope())
+        {
+            exceptionEvent.Tags.Should().Contain(kvp =>
+                kvp.Key == "ActionName" &&
+                kvp.Value == "Sentry.AspNetCore.Tests.IntegrationsTests+TestController.Throw (Sentry.AspNetCore.Tests)"
+                );
+            exceptionEvent.Tags.Should().Contain(kvp =>
+                kvp.Key == "route.controller" &&
+                kvp.Value == "Test"
+                );
+            exceptionEvent.Tags.Should().Contain(kvp =>
+                kvp.Key == "route.action" &&
+                kvp.Value == "Throw"
+                );
+        }
+    }
+
+    public class TestController : Controller
+    {
+        [HttpGet("[controller]/[action]")]
+        public IActionResult Error() => Content("Error");
+
+        [HttpGet("[controller]/[action]")]
+        public IActionResult Throw()
+        {
+            throw new Exception("This is an example exception");
+        }
     }
 #endif
 
