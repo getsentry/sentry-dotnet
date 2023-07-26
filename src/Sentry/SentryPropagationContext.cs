@@ -7,17 +7,20 @@ internal class SentryPropagationContext
     public SentryId TraceId { get; }
     public SpanId SpanId { get; }
     public SpanId? ParentSpanId { get; }
+    public bool? IsSampled { get; }
     public DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
     private SentryPropagationContext(
         SentryId traceId,
         SpanId parentSpanId,
+        bool? isSampled,
         DynamicSamplingContext? dynamicSamplingContext)
     {
         TraceId = traceId;
         SpanId = SpanId.Create();
         ParentSpanId = parentSpanId;
         DynamicSamplingContext = dynamicSamplingContext;
+        IsSampled = isSampled;
     }
 
     public SentryPropagationContext()
@@ -41,7 +44,8 @@ internal class SentryPropagationContext
                 dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
             }
 
-            return new SentryPropagationContext(traceHeader.TraceId, traceHeader.SpanId, dynamicSamplingContext);
+            dynamicSamplingContext?.Items.TryGetValue("sampled", out var isSampled);
+            return new SentryPropagationContext(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled, dynamicSamplingContext);
         }
         catch (Exception e)
         {

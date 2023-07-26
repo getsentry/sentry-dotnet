@@ -51,12 +51,12 @@ internal class DynamicSamplingContext
             ["public_key"] = publicKey,
         };
 
+        // Set optional values
         if (sampled.HasValue)
         {
             items.Add("sampled", sampled.Value ? "true" : "false");
         }
 
-        // Set optional values
         if (sampleRate is not null)
         {
             items.Add("sample_rate", sampleRate.Value.ToString(CultureInfo.InvariantCulture));
@@ -146,7 +146,7 @@ internal class DynamicSamplingContext
     }
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
-        => new(propagationContext.TraceId, options.ParsedDsn.PublicKey, null); // TODO: can I get `sampled`?
+        => new(propagationContext.TraceId, options.ParsedDsn.PublicKey, propagationContext.IsSampled);
 }
 
 internal static class DynamicSamplingContextExtensions

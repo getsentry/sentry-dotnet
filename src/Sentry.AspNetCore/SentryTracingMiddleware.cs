@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
@@ -37,21 +36,19 @@ internal class SentryTracingMiddleware
 
         try
         {
-            var hub = _getHub();
+            // The trace gets continued in the SentryMiddleware.
+            context.Items.TryGetValue(SentryMiddleware.TransactionContextItemKey, out var transactionContextObject);
+            if (transactionContextObject is not TransactionContext transactionContext)
+            {
+                throw new KeyNotFoundException($"Failed to retrieve the '{SentryMiddleware.TransactionContextItemKey}' from the HttpContext items.");
+            }
 
             // It's important to try and set the transaction name to some value here so that it's available for use
             // in sampling.  At a later stage, we will try to get the transaction name again, to account for the
             // other middlewares that may have ran after ours.
-            var transactionName = context.TryGetTransactionName() ?? string.Empty;
-
-            // Continue the trace. If the trace header is null a new one will be created
-            var traceHeader = context.TryGetSentryTraceHeader(_options);
-            var baggageHeader = context.TryGetBaggageHeader(_options);
-            var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, transactionName, OperationName);
-            if (transactionContext is null)
-            {
-                throw new NullReferenceException("Failed to retrieve a 'TransactionContext' when continuing the trace. Did you enable tracing?");
-            }
+            transactionContext.Name = context.TryGetTransactionName() ?? string.Empty;
+            transactionContext.Operation = OperationName;
+            transactionContext.NameSource = TransactionNameSource.Route;
 
             var customSamplingContext = new Dictionary<string, object?>(4, StringComparer.Ordinal)
             {
@@ -60,6 +57,11 @@ internal class SentryTracingMiddleware
                 [SamplingExtensions.KeyForHttpPath] = context.Request.Path.Value,
                 [SamplingExtensions.KeyForHttpContext] = context,
             };
+
+            var traceHeader = context.Items.TryGetValue(SentryMiddleware.TraceHeaderItemKey, out var traceHeaderObject)
+                ? traceHeaderObject as SentryTraceHeader : null;
+            var baggageHeader = context.Items.TryGetValue(SentryMiddleware.BaggageHeaderItemKey, out var baggageHeaderObject)
+                ? baggageHeaderObject as BaggageHeader : null;
 
             var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
@@ -74,6 +76,7 @@ internal class SentryTracingMiddleware
                 dynamicSamplingContext = DynamicSamplingContext.Empty;
             }
 
+            var hub = _getHub();
             var transaction = hub.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
 
             _options.LogInfo(

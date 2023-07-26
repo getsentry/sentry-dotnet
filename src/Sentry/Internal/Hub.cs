@@ -207,6 +207,7 @@ internal class Hub : IHubEx, IDisposable
 
         // Fallback: Either tracing was disabled or there was no span on the current scope.
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        // With performance disabled, we must not append a sampling decision.
         return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
 
@@ -235,7 +236,7 @@ internal class Hub : IHubEx, IDisposable
             return new TransactionContext(
                 name ?? string.Empty,
                 operation ?? string.Empty,
-                new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, false));
+                new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, propagationContext.IsSampled));
         }
 
         return null;

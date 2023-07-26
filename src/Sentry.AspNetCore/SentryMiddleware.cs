@@ -18,6 +18,10 @@ namespace Sentry.AspNetCore;
 /// </summary>
 internal class SentryMiddleware : IMiddleware
 {
+    internal const string TraceHeaderItemKey = "sentry-trace-header";
+    internal const string BaggageHeaderItemKey = "sentry-baggage-header";
+    internal const string TransactionContextItemKey = "sentry-transaction-context";
+
     private readonly Func<IHub> _getHub;
     private readonly SentryAspNetCoreOptions _options;
     private readonly IHostingEnvironment _hostingEnvironment;
@@ -91,12 +95,14 @@ internal class SentryMiddleware : IMiddleware
                 context.Response.OnCompleted(() => hub.FlushAsync(_options.FlushTimeout));
             }
 
-            if (!_options.IsTracingEnabled)
-            {
-                var traceHeader = context.TryGetSentryTraceHeader(_options);
-                var baggageHeader = context.TryGetBaggageHeader(_options);
-                hub.ContinueTrace(traceHeader, baggageHeader);
-            }
+            var traceHeader = context.TryGetSentryTraceHeader(_options);
+            var baggageHeader = context.TryGetBaggageHeader(_options);
+            var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader);
+
+            // Adding the headers and thw TransactionContext to the context to be picked up by the Sentry tracing middleware
+            context.Items.Add(TraceHeaderItemKey, traceHeader);
+            context.Items.Add(BaggageHeaderItemKey, baggageHeader);
+            context.Items.Add(TransactionContextItemKey, transactionContext);
 
             hub.ConfigureScope(scope =>
             {
