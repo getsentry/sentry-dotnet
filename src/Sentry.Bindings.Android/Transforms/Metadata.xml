@@ -95,7 +95,7 @@
     Here we force using JsonObjectWriter as otherwise we'd get the following error message:
       Argument 1: cannot convert from 'Sentry.JavaSdk.JsonObjectWriter' to 'Sentry.JavaSdk.IObjectWriter'
   -->
-  <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent']/method[@name='serialize']/parameter[1]"
+  <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent']/method[@name='serialize']/parameter[@name='writer']"
     name="managedType">Sentry.JavaSdk.JsonObjectWriter</attr>
 
   <!--
