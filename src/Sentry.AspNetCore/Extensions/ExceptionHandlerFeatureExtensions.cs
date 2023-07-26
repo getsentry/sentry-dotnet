@@ -41,7 +41,8 @@ internal static class ExceptionHandlerFeatureExtensions
     internal static void ApplyTransactionName(this IExceptionHandlerFeature exceptionFeature, SentryEvent evt,
         string method)
     {
-        var route = exceptionFeature.TryGetRouteTemplate();
+        // If no route template details are available, fall back to the Path
+        var route = exceptionFeature.TryGetRouteTemplate() ?? exceptionFeature.Path;
         if (!string.IsNullOrWhiteSpace(route))
         {
             evt.TransactionName = $"{method} {route}"; // e.g. "GET /pets/{id}"

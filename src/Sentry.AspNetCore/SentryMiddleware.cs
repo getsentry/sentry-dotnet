@@ -142,7 +142,7 @@ internal class SentryMiddleware : IMiddleware
 
             try
             {
-                var originalMethod = context.Request.Method; // In case the custom error handler changes this
+                var originalMethod = context.Request.Method;
                 await next(context).ConfigureAwait(false);
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).
