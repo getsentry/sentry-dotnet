@@ -1,4 +1,5 @@
 using OpenTelemetry;
+using OpenTelemetry.Trace;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -169,14 +170,22 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         _map.TryRemove(data.SpanId, out _);
     }
 
-    internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes) =>
-        status switch
+    internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes)
+    {
+        // See https://github.com/open-telemetry/opentelemetry-dotnet/discussions/4703
+        if (attributes.TryGetValue(SpanAttributeConstants.StatusCodeKey, out var statusCode)
+            && statusCode is StatusTags.ErrorStatusCodeTagValue
+           )
         {
+            return GetErrorSpanStatus(attributes);
+        }
+        return status switch {
             ActivityStatusCode.Unset => SpanStatus.Ok,
             ActivityStatusCode.Ok => SpanStatus.Ok,
             ActivityStatusCode.Error => GetErrorSpanStatus(attributes),
             _ => SpanStatus.UnknownError
         };
+    }
 
     private static SpanStatus GetErrorSpanStatus(IDictionary<string, object?> attributes)
     {
@@ -203,7 +212,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // HTTP span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/http/
-        if (attributes.TryGetTypedValue("http.method", out string httpMethod))
+        if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpMethod, out string httpMethod))
         {
             if (activity.Kind == ActivityKind.Client)
             {
@@ -211,13 +220,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 return ("http.client", httpMethod, TransactionNameSource.Custom);
             }
 
-            if (attributes.TryGetTypedValue("http.route", out string httpRoute))
+            if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpRoute, out string httpRoute))
             {
                 // A route exists.  Use the method and route.
                 return ("http.server", $"{httpMethod} {httpRoute}", TransactionNameSource.Route);
             }
 
-            if (attributes.TryGetTypedValue("http.target", out string httpTarget))
+            if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpTarget, out string httpTarget))
             {
                 // A target exists.  Use the method and target.  If the target is "/" we can treat it like a route.
                 var source = httpTarget == "/" ? TransactionNameSource.Route : TransactionNameSource.Url;
@@ -230,9 +239,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // DB span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/database/
-        if (attributes.ContainsKey("db.system"))
+        if (attributes.ContainsKey(SemanticConventions.AttributeDbSystem))
         {
-            if (attributes.TryGetTypedValue("db.statement", out string dbStatement))
+            if (attributes.TryGetTypedValue(SemanticConventions.AttributeDbStatement, out string dbStatement))
             {
                 // We have a database statement.  Use it.
                 return ("db", dbStatement, TransactionNameSource.Task);
@@ -244,21 +253,21 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // RPC span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/rpc/
-        if (attributes.ContainsKey("rpc.service"))
+        if (attributes.ContainsKey(SemanticConventions.AttributeRpcService))
         {
             return ("rpc", activity.DisplayName, TransactionNameSource.Route);
         }
 
         // Messaging span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/messaging/
-        if (attributes.ContainsKey("messaging.system"))
+        if (attributes.ContainsKey(SemanticConventions.AttributeMessagingSystem))
         {
             return ("message", activity.DisplayName, TransactionNameSource.Route);
         }
 
         // FaaS (Functions/Lambda) span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/faas/
-        if (attributes.TryGetTypedValue("faas.trigger", out string faasTrigger))
+        if (attributes.TryGetTypedValue(SemanticConventions.AttributeFaasTrigger, out string faasTrigger))
         {
             return (faasTrigger, activity.DisplayName, TransactionNameSource.Route);
         }
