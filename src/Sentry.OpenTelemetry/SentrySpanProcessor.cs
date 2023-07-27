@@ -295,36 +295,57 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
     private void GenerateSentryErrorsFromOtelSpan(Activity activity, IDictionary<string, object?> spanAttributes)
     {
-    //     // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
-    //     // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
-    //
-    //     foreach (var @event in activity.Events.Where(e => e.Name == "exception"))
-    //     {
-    //         // Note, this doesn't do anything yet because `exception` is not a valid attribute.
-    //         // We cannot just use `exception.type`, `exception.message`, and `exception.stacktrace`.
-    //         // See https://github.com/open-telemetry/opentelemetry-dotnet/issues/2439#issuecomment-1577314568
-    //
-    //         var eventAttributes = @event.Tags.ToDictionary();
-    //         if (!eventAttributes.TryGetTypedValue("exception", out Exception exception))
-    //         {
-    //             continue;
-    //         }
-    //
-    //         // TODO: Validate that our `DuplicateEventDetectionEventProcessor` prevents this from doubling exceptions
-    //         // that are also caught by other means, such as our AspNetCore middleware, etc.
-    //         // (When options.RecordException = true is set on AddAspNetCoreInstrumentation...)
-    //         // Also, in such cases - how will we get the otel scope and trace context on the other one?
-    //
-    //         var sentryEvent = new SentryEvent(exception, @event.Timestamp);
-    //         _hub.CaptureEvent(sentryEvent, scope =>
-    //         {
-    //             scope.Contexts["otel"] = GetOtelContext(spanAttributes);
-    //
-    //             var trace = scope.Contexts.Trace;
-    //             trace.TraceId = activity.TraceId.AsSentryId();
-    //             trace.SpanId = activity.SpanId.AsSentrySpanId();
-    //             trace.ParentSpanId = activity.ParentSpanId.AsSentrySpanId();
-    //         });
-    //     }
+        // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
+        // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
+        foreach (var @event in activity.Events.Where(e => e.Name == SemanticConventions.AttributeExceptionEventName))
+        {
+            var eventAttributes = @event.Tags.ToDictionary();
+            // This would be where we would ideally implement full exception capture. That's not possible at the
+            // moment since the full exception isn't yet available via the OpenTelemetry API.
+            // See https://github.com/open-telemetry/opentelemetry-dotnet/issues/2439#issuecomment-1577314568
+            // if (!eventAttributes.TryGetTypedValue("exception", out Exception exception))
+            // {
+            //      continue;
+            // }
+
+            // At the moment, OTEL only gives us `exception.type`, `exception.message`, and `exception.stacktrace`...
+            // So the best we can do is a poor man's exception (no accurate symbolication or anything)
+            if (!eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionType, out string exceptionType))
+            {
+                continue;
+            }
+            eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionMessage, out string message);
+            eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionStacktrace, out string stackTrace);
+
+            Exception exception;
+            try
+            {
+                var type = Type.GetType(exceptionType)!;
+                exception = (Exception)Activator.CreateInstance(type, message)!;
+                exception.SetSentryMechanism("SentrySpanProcessor.ErrorSpan");
+            }
+            catch
+            {
+                _options?.DiagnosticLogger?.LogError($"Failed to create poor man's exception for type : {exceptionType}");
+                continue;
+            }
+
+            // TODO: Validate that our `DuplicateEventDetectionEventProcessor` prevents this from doubling exceptions
+            // that are also caught by other means, such as our AspNetCore middleware, etc.
+            // (When options.RecordException = true is set on AddAspNetCoreInstrumentation...)
+            // Also, in such cases - how will we get the otel scope and trace context on the other one?
+
+            var sentryEvent = new SentryEvent(exception, @event.Timestamp);
+            var otelContext = GetOtelContext(spanAttributes);
+            otelContext.Add("stack_trace", stackTrace);
+            sentryEvent.Contexts["otel"] = otelContext;
+            _hub.CaptureEvent(sentryEvent, scope =>
+            {
+                var trace = scope.Contexts.Trace;
+                trace.SpanId = activity.SpanId.AsSentrySpanId();
+                trace.ParentSpanId = activity.ParentSpanId.AsSentrySpanId();
+                trace.TraceId = activity.TraceId.AsSentryId();
+            });
+        }
     }
 }
