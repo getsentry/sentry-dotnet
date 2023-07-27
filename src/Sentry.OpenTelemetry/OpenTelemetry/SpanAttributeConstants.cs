@@ -17,6 +17,7 @@
 // limitations under the License.
 // </copyright>
 
+// ReSharper disable once CheckNamespace
 namespace Sentry.OpenTelemetry;
 
 /// <summary>

@@ -1,3 +1,4 @@
+// ReSharper disable once CheckNamespace
 namespace Sentry.OpenTelemetry;
 
 internal static class StatusTags
