@@ -14,7 +14,7 @@
 - Fixed SDK not sending exceptions via Blazor WebAssembly due to a `PlatformNotSupportedException` ([#2506](https://github.com/getsentry/sentry-dotnet/pull/2506))
 - Align SDK with docs regarding session update for dropped events ([#2496](https://github.com/getsentry/sentry-dotnet/pull/2496))
 - Introduced `HttpMessageHandler` in favor of the now deprecated `HttpClientHandler` on the options. This allows the SDK to support NSUrlSessionHandler on iOS ([#2503](https://github.com/getsentry/sentry-dotnet/pull/2503))
-- Fixed Error status of OpenTelemetry Spans when using Activity.RecordException ([#2515](https://github.com/getsentry/sentry-dotnet/pull/2515))
+- Using `Activity.RecordException` now correctly updates the error status of OpenTelemetry Spans ([#2515](https://github.com/getsentry/sentry-dotnet/pull/2515))
 
 ### Dependencies
 
