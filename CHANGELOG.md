@@ -15,6 +15,7 @@
 - Align SDK with docs regarding session update for dropped events ([#2496](https://github.com/getsentry/sentry-dotnet/pull/2496))
 - Introduced `HttpMessageHandler` in favor of the now deprecated `HttpClientHandler` on the options. This allows the SDK to support NSUrlSessionHandler on iOS ([#2503](https://github.com/getsentry/sentry-dotnet/pull/2503))
 - Using `Activity.RecordException` now correctly updates the error status of OpenTelemetry Spans ([#2515](https://github.com/getsentry/sentry-dotnet/pull/2515))
+- NLog logging Level.All now maps to SentryLevel.Debug ([#2522]([url](https://github.com/getsentry/sentry-dotnet/pull/2522)))
 
 ### Dependencies
 
