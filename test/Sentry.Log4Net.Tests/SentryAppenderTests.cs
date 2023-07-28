@@ -337,6 +337,50 @@ public class SentryAppenderTests
     }
 
     [Fact]
+    public void DoAppend_NullMinimumEventLevel_AddsEvent()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Debug;
+        sut.MinimumEventLevel = null;
+
+        const string expectedMessage = "log4net message";
+        var warnEvt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Warn,
+            Message = expectedMessage
+        });
+        sut.DoAppend(warnEvt);
+
+        // No breadcrumb is added.
+        Assert.Empty(_fixture.Scope.Breadcrumbs);
+        // Event is sent instead.
+        _ = _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == expectedMessage));
+    }
+
+    [Fact]
+    public void DoAppend_AboveMinimumEventLevel_AddsEvent()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Debug;
+        sut.MinimumEventLevel = Level.Warn;
+
+        const string expectedMessage = "log4net message";
+        var warnEvt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Error,
+            Message = expectedMessage
+        });
+        sut.DoAppend(warnEvt);
+
+        // No breadcrumb is added.
+        Assert.Empty(_fixture.Scope.Breadcrumbs);
+        // Event is sent instead.
+        _ = _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == expectedMessage));
+    }
+
+    [Fact]
     public void Close_DisposesSdk()
     {
         const string expectedDsn = "dsn";
