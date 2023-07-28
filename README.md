@@ -41,7 +41,7 @@ Each NuGet package in the table above has its custom view of the docs. Click on 
 
 Sentry has extensive documentation for its SDKs on [https://docs.sentry.io](https://docs.sentry.io/platforms/dotnet/).
 
-Additionally, our [.NET API refererence docs](https://getsentry.github.io/sentry-dotnet/index.html) are generated and deployed on each merge to main.
+Additionally, our [.NET API reference docs](https://getsentry.github.io/sentry-dotnet/index.html) are generated and deployed on each merge to main.
 
 ### Samples
 

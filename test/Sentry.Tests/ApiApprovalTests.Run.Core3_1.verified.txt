@@ -603,7 +603,9 @@ namespace Sentry
         public bool CaptureFailedRequests { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }
+        [System.Obsolete("Use CreateHttpMessageHandler instead")]
         public System.Func<System.Net.Http.HttpClientHandler>? CreateHttpClientHandler { get; set; }
+        public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
         public bool Debug { get; set; }
         public System.Net.DecompressionMethods DecompressionMethods { get; set; }
         public Sentry.DeduplicateMode DeduplicateMode { get; set; }
