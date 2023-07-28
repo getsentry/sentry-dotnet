@@ -1,4 +1,5 @@
 using OpenTelemetry;
+using OpenTelemetry.Trace;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -169,14 +170,22 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         _map.TryRemove(data.SpanId, out _);
     }
 
-    internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes) =>
-        status switch
+    internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes)
+    {
+        // See https://github.com/open-telemetry/opentelemetry-dotnet/discussions/4703
+        if (attributes.TryGetValue(SpanAttributeConstants.StatusCodeKey, out var statusCode)
+            && statusCode is StatusTags.ErrorStatusCodeTagValue
+           )
         {
+            return GetErrorSpanStatus(attributes);
+        }
+        return status switch {
             ActivityStatusCode.Unset => SpanStatus.Ok,
             ActivityStatusCode.Ok => SpanStatus.Ok,
             ActivityStatusCode.Error => GetErrorSpanStatus(attributes),
             _ => SpanStatus.UnknownError
         };
+    }
 
     private static SpanStatus GetErrorSpanStatus(IDictionary<string, object?> attributes)
     {
@@ -203,7 +212,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // HTTP span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/http/
-        if (attributes.TryGetTypedValue("http.method", out string httpMethod))
+        if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpMethod, out string httpMethod))
         {
             if (activity.Kind == ActivityKind.Client)
             {
@@ -211,13 +220,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 return ("http.client", httpMethod, TransactionNameSource.Custom);
             }
 
-            if (attributes.TryGetTypedValue("http.route", out string httpRoute))
+            if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpRoute, out string httpRoute))
             {
                 // A route exists.  Use the method and route.
                 return ("http.server", $"{httpMethod} {httpRoute}", TransactionNameSource.Route);
             }
 
-            if (attributes.TryGetTypedValue("http.target", out string httpTarget))
+            if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpTarget, out string httpTarget))
             {
                 // A target exists.  Use the method and target.  If the target is "/" we can treat it like a route.
                 var source = httpTarget == "/" ? TransactionNameSource.Route : TransactionNameSource.Url;
@@ -230,9 +239,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // DB span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/database/
-        if (attributes.ContainsKey("db.system"))
+        if (attributes.ContainsKey(SemanticConventions.AttributeDbSystem))
         {
-            if (attributes.TryGetTypedValue("db.statement", out string dbStatement))
+            if (attributes.TryGetTypedValue(SemanticConventions.AttributeDbStatement, out string dbStatement))
             {
                 // We have a database statement.  Use it.
                 return ("db", dbStatement, TransactionNameSource.Task);
@@ -244,21 +253,21 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // RPC span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/rpc/
-        if (attributes.ContainsKey("rpc.service"))
+        if (attributes.ContainsKey(SemanticConventions.AttributeRpcService))
         {
             return ("rpc", activity.DisplayName, TransactionNameSource.Route);
         }
 
         // Messaging span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/messaging/
-        if (attributes.ContainsKey("messaging.system"))
+        if (attributes.ContainsKey(SemanticConventions.AttributeMessagingSystem))
         {
             return ("message", activity.DisplayName, TransactionNameSource.Route);
         }
 
         // FaaS (Functions/Lambda) span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/faas/
-        if (attributes.TryGetTypedValue("faas.trigger", out string faasTrigger))
+        if (attributes.TryGetTypedValue(SemanticConventions.AttributeFaasTrigger, out string faasTrigger))
         {
             return (faasTrigger, activity.DisplayName, TransactionNameSource.Route);
         }
@@ -286,36 +295,57 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
     private void GenerateSentryErrorsFromOtelSpan(Activity activity, IDictionary<string, object?> spanAttributes)
     {
-    //     // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
-    //     // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
-    //
-    //     foreach (var @event in activity.Events.Where(e => e.Name == "exception"))
-    //     {
-    //         // Note, this doesn't do anything yet because `exception` is not a valid attribute.
-    //         // We cannot just use `exception.type`, `exception.message`, and `exception.stacktrace`.
-    //         // See https://github.com/open-telemetry/opentelemetry-dotnet/issues/2439#issuecomment-1577314568
-    //
-    //         var eventAttributes = @event.Tags.ToDictionary();
-    //         if (!eventAttributes.TryGetTypedValue("exception", out Exception exception))
-    //         {
-    //             continue;
-    //         }
-    //
-    //         // TODO: Validate that our `DuplicateEventDetectionEventProcessor` prevents this from doubling exceptions
-    //         // that are also caught by other means, such as our AspNetCore middleware, etc.
-    //         // (When options.RecordException = true is set on AddAspNetCoreInstrumentation...)
-    //         // Also, in such cases - how will we get the otel scope and trace context on the other one?
-    //
-    //         var sentryEvent = new SentryEvent(exception, @event.Timestamp);
-    //         _hub.CaptureEvent(sentryEvent, scope =>
-    //         {
-    //             scope.Contexts["otel"] = GetOtelContext(spanAttributes);
-    //
-    //             var trace = scope.Contexts.Trace;
-    //             trace.TraceId = activity.TraceId.AsSentryId();
-    //             trace.SpanId = activity.SpanId.AsSentrySpanId();
-    //             trace.ParentSpanId = activity.ParentSpanId.AsSentrySpanId();
-    //         });
-    //     }
+        // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
+        // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
+        foreach (var @event in activity.Events.Where(e => e.Name == SemanticConventions.AttributeExceptionEventName))
+        {
+            var eventAttributes = @event.Tags.ToDictionary();
+            // This would be where we would ideally implement full exception capture. That's not possible at the
+            // moment since the full exception isn't yet available via the OpenTelemetry API.
+            // See https://github.com/open-telemetry/opentelemetry-dotnet/issues/2439#issuecomment-1577314568
+            // if (!eventAttributes.TryGetTypedValue("exception", out Exception exception))
+            // {
+            //      continue;
+            // }
+
+            // At the moment, OTEL only gives us `exception.type`, `exception.message`, and `exception.stacktrace`...
+            // So the best we can do is a poor man's exception (no accurate symbolication or anything)
+            if (!eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionType, out string exceptionType))
+            {
+                continue;
+            }
+            eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionMessage, out string message);
+            eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionStacktrace, out string stackTrace);
+
+            Exception exception;
+            try
+            {
+                var type = Type.GetType(exceptionType)!;
+                exception = (Exception)Activator.CreateInstance(type, message)!;
+                exception.SetSentryMechanism("SentrySpanProcessor.ErrorSpan");
+            }
+            catch
+            {
+                _options?.DiagnosticLogger?.LogError($"Failed to create poor man's exception for type : {exceptionType}");
+                continue;
+            }
+
+            // TODO: Validate that our `DuplicateEventDetectionEventProcessor` prevents this from doubling exceptions
+            // that are also caught by other means, such as our AspNetCore middleware, etc.
+            // (When options.RecordException = true is set on AddAspNetCoreInstrumentation...)
+            // Also, in such cases - how will we get the otel scope and trace context on the other one?
+
+            var sentryEvent = new SentryEvent(exception, @event.Timestamp);
+            var otelContext = GetOtelContext(spanAttributes);
+            otelContext.Add("stack_trace", stackTrace);
+            sentryEvent.Contexts["otel"] = otelContext;
+            _hub.CaptureEvent(sentryEvent, scope =>
+            {
+                var trace = scope.Contexts.Trace;
+                trace.SpanId = activity.SpanId.AsSentrySpanId();
+                trace.ParentSpanId = activity.ParentSpanId.AsSentrySpanId();
+                trace.TraceId = activity.TraceId.AsSentryId();
+            });
+        }
     }
 }
