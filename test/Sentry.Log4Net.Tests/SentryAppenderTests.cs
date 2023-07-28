@@ -318,7 +318,7 @@ public class SentryAppenderTests
     }
 
     [Fact]
-    public void MinimumEventLevel_ConvertsEventsBelowToBreadcrumbs()
+    public void DoAppend_BelowMinimumEventLevel_AddsBreadcrumb()
     {
         var sut = _fixture.GetSut();
         sut.Threshold = Level.Debug;
