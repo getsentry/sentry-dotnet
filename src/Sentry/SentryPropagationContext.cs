@@ -10,11 +10,11 @@ internal class SentryPropagationContext
     public bool? IsSampled { get; }
     public DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
-    private SentryPropagationContext(
+    internal SentryPropagationContext(
         SentryId traceId,
         SpanId parentSpanId,
-        bool? isSampled,
-        DynamicSamplingContext? dynamicSamplingContext)
+        bool? isSampled = null,
+        DynamicSamplingContext? dynamicSamplingContext = null)
     {
         TraceId = traceId;
         SpanId = SpanId.Create();

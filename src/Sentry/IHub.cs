@@ -40,17 +40,12 @@ public interface IHub :
     ISpan? GetSpan();
 
     /// <summary>
-    /// Gets the Sentry trace header for the last active span.
+    /// Gets the Sentry trace header that allows tracing across services
     /// </summary>
     SentryTraceHeader? GetTraceHeader();
 
     /// <summary>
-    /// Gets the Sentry trace header of the parent that allows tracing across services
-    /// </summary>
-    SentryTraceHeader? GetTraceParent();
-
-    /// <summary>
-    /// Gets the Sentry "baggage" header that allows tracing across services
+    /// Gets the Sentry baggage header that allows tracing across services
     /// </summary>
     BaggageHeader? GetBaggage();
 

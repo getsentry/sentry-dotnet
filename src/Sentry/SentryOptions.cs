@@ -317,7 +317,7 @@ public class SentryOptions
         }
     }
 
-    private Dsn? _parsedDsn;
+    internal Dsn? _parsedDsn;
     internal Dsn ParsedDsn => _parsedDsn ??= Sentry.Dsn.Parse(Dsn!);
 
     private readonly Lazy<string> _sentryBaseUrl;

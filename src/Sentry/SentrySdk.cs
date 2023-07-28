@@ -611,19 +611,11 @@ public static partial class SentrySdk
         => CurrentHub.GetSpan();
 
     /// <summary>
-    /// Gets the Sentry trace header.
-    /// </summary>
-    [DebuggerStepThrough]
-    [Obsolete("This method will be removed in a future major version. Use the `GetTraceParent` instead.")]
-    public static SentryTraceHeader? GetTraceHeader()
-        => CurrentHub.GetTraceHeader();
-
-    /// <summary>
     /// Gets the Sentry trace header of the parent that allows tracing across services
     /// </summary>
     [DebuggerStepThrough]
-    public static SentryTraceHeader? GetTraceParent()
-        => CurrentHub.GetTraceParent();
+    public static SentryTraceHeader? GetTraceHeader()
+        => CurrentHub.GetTraceHeader();
 
     /// <summary>
     /// Gets the Sentry "baggage" header that allows tracing across services

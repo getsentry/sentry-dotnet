@@ -240,4 +240,33 @@ public class SentryOptionsTests
 
         Assert.True(actual);
     }
+
+    [Fact]
+    public void ParseDsn_ReturnsParsedDsn()
+    {
+        var sut = new SentryOptions
+        {
+            Dsn = "https://123@456.ingest.sentry.io/789"
+        };
+        var expected = Dsn.Parse(sut.Dsn);
+
+        var actual = sut.ParsedDsn;
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void ParseDsn_DsnIsSetAgain_Resets()
+    {
+        var sut = new SentryOptions
+        {
+            Dsn = "https://123@456.ingest.sentry.io/789"
+        };
+
+        _ = sut.ParsedDsn;
+        Assert.NotNull(sut._parsedDsn); // Sanity check
+        sut.Dsn = "some-other-dsn";
+
+        Assert.Null(sut._parsedDsn);
+    }
 }

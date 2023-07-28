@@ -195,12 +195,9 @@ internal class Hub : IHubEx, IDisposable
 
     public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
-    [Obsolete("Use GetTraceParent instead")]
-    public SentryTraceHeader? GetTraceHeader() => GetTraceParent();
-
-    public SentryTraceHeader GetTraceParent()
+    public SentryTraceHeader GetTraceHeader()
     {
-        if (_options.IsTracingEnabled && GetSpan()?.GetTraceHeader() is { } traceHeader)
+        if (GetSpan()?.GetTraceHeader() is { } traceHeader)
         {
             return traceHeader;
         }
@@ -211,18 +208,20 @@ internal class Hub : IHubEx, IDisposable
         return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
 
-    public BaggageHeader? GetBaggage()
+    public BaggageHeader GetBaggage()
     {
-        if (_options.IsTracingEnabled && GetSpan() is TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc} )
+        if (GetSpan() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc } )
         {
             return dsc.ToBaggageHeader();
         }
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
-        return propagationContext.DynamicSamplingContext?.ToBaggageHeader();
+        propagationContext.DynamicSamplingContext ??=
+            DynamicSamplingContext.CreateFromPropagationContext(propagationContext, _options);
+        return propagationContext.DynamicSamplingContext.ToBaggageHeader();
     }
 
-    public TransactionContext? ContinueTrace(
+    public TransactionContext ContinueTrace(
         SentryTraceHeader? traceHeader,
         BaggageHeader? baggageHeader,
         string? name = null,
@@ -231,15 +230,13 @@ internal class Hub : IHubEx, IDisposable
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
-        if (_options.IsTracingEnabled)
-        {
-            return new TransactionContext(
-                name ?? string.Empty,
-                operation ?? string.Empty,
-                new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, propagationContext.IsSampled));
-        }
+        traceHeader ??= new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId,
+            propagationContext.IsSampled);
 
-        return null;
+        return new TransactionContext(
+            name ?? string.Empty,
+            operation ?? string.Empty,
+            traceHeader);
     }
 
     public void StartSession()
