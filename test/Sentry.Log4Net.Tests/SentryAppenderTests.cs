@@ -131,7 +131,7 @@ public class SentryAppenderTests
     }
 
     [Fact]
-    public void Append_BelowThreshold_NoOp()
+    public void Append_BelowThreshold_DoesNotSendEvent()
     {
         var sut = _fixture.GetSut();
         sut.Threshold = Level.Warn;
@@ -141,6 +141,7 @@ public class SentryAppenderTests
         });
 
         sut.DoAppend(evt);
+        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
