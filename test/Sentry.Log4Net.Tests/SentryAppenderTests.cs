@@ -15,7 +15,6 @@ public class SentryAppenderTests
 
         public Fixture()
         {
-            Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
             Hub.ConfigureScope(Arg.Invoke(Scope));
             InitAction = s =>
