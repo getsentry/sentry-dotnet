@@ -7,20 +7,33 @@ internal class SentryPropagationContext
     public SentryId TraceId { get; }
     public SpanId SpanId { get; }
     public SpanId? ParentSpanId { get; }
-    public bool? IsSampled { get; }
-    public DynamicSamplingContext? DynamicSamplingContext { get; set; }
+
+    private DynamicSamplingContext? _dynamicSamplingContext;
+    public DynamicSamplingContext? DynamicSamplingContext
+    {
+        get => _dynamicSamplingContext;
+        set
+        {
+            if (_dynamicSamplingContext is null)
+            {
+                _dynamicSamplingContext = value;
+            }
+            else
+            {
+                throw new Exception("should not do that.");
+            }
+        }
+    }
 
     internal SentryPropagationContext(
         SentryId traceId,
         SpanId parentSpanId,
-        bool? isSampled = null,
         DynamicSamplingContext? dynamicSamplingContext = null)
     {
         TraceId = traceId;
         SpanId = SpanId.Create();
         ParentSpanId = parentSpanId;
         DynamicSamplingContext = dynamicSamplingContext;
-        IsSampled = isSampled;
     }
 
     public SentryPropagationContext()
@@ -31,28 +44,15 @@ internal class SentryPropagationContext
 
     public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader)
     {
+        logger?.LogDebug("Creating a propagation context from headers.");
+
         if (traceHeader == null)
         {
+            logger?.LogInfo("Sentry trace header is null. Creating new Sentry Propagation Context.");
             return new SentryPropagationContext();
         }
 
-        try
-        {
-            DynamicSamplingContext? dynamicSamplingContext = null;
-            if (baggageHeader is not null)
-            {
-                dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
-            }
-
-            dynamicSamplingContext?.Items.TryGetValue("sampled", out var isSampled);
-            return new SentryPropagationContext(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled, dynamicSamplingContext);
-        }
-        catch (Exception e)
-        {
-            logger?.LogError(
-                "Failed to create the 'SentryPropagationContext' from provided headers: '{0}', '{1}'. " +
-                        "\nFalling back to new PropagationContext.", e, traceHeader, baggageHeader);
-            return new SentryPropagationContext();
-        }
+        var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
+        return new SentryPropagationContext(traceHeader.TraceId, traceHeader.SpanId, dynamicSamplingContext);
     }
 }

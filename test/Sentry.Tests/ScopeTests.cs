@@ -90,6 +90,18 @@ public class ScopeTests
     }
 
     [Fact]
+    public void Clone_NewScope_IncludesPropagationContext()
+    {
+        var options = new SentryOptions();
+        var propagationContext = new SentryPropagationContext();
+        var sut = new Scope(options, propagationContext);
+
+        var clone = sut.Clone();
+
+        Assert.Same(propagationContext, clone.PropagationContext);
+    }
+
+    [Fact]
     public void Clone_CopiesFields()
     {
         _sut.Environment = "test";
@@ -307,6 +319,18 @@ public class ScopeTests
         {
             _sut.ShouldBeEquivalentTo(new Scope());
         }
+    }
+
+    [Fact]
+    public void Clear_ResetsPropagationContext()
+    {
+        var options = new SentryOptions();
+        var propagationContext = new SentryPropagationContext();
+        var sut = new Scope(options, propagationContext);
+
+        sut.Clear();
+
+        Assert.NotSame(propagationContext, sut.PropagationContext);
     }
 
     [Fact]

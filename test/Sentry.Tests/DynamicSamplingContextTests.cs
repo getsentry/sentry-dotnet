@@ -209,21 +209,6 @@ public class DynamicSamplingContextTests
     }
 
     [Fact]
-    public void CreateFromPropagationContext_Valid()
-    {
-        var options = new SentryOptions { Dsn = "https://a@sentry.io/1" };
-        var propagationContext = new SentryPropagationContext(
-            SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1234"));
-
-        var dsc = DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options);
-
-        Assert.NotNull(dsc);
-        Assert.Equal(2, dsc.Items.Count);
-        Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
-        Assert.Equal("a", Assert.Contains("public_key", dsc.Items));
-    }
-
-    [Fact]
     public void ToBaggageHeader()
     {
         var original = BaggageHeader.Create(new List<KeyValuePair<string, string>>
@@ -295,5 +280,20 @@ public class DynamicSamplingContextTests
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
         Assert.Equal("Group A", Assert.Contains("user_segment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromPropagationContext_Valid_Complete()
+    {
+        var options = new SentryOptions { Dsn = "https://a@sentry.io/1" };
+        var propagationContext = new SentryPropagationContext(
+            SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1234"));
+
+        var dsc = propagationContext.CreateDynamicSamplingContext(options);
+
+        Assert.NotNull(dsc);
+        Assert.Equal(4, dsc.Items.Count);
+        Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("a", Assert.Contains("public_key", dsc.Items));
     }
 }

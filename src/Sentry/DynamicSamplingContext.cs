@@ -146,7 +146,19 @@ internal class DynamicSamplingContext
     }
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
-        => new(propagationContext.TraceId, options.ParsedDsn.PublicKey, propagationContext.IsSampled);
+    {
+        var publicKey = options.ParsedDsn.PublicKey;
+        var traceId = propagationContext.TraceId;
+        var release = options.SettingLocator.GetRelease();
+        var environment = options.SettingLocator.GetEnvironment();
+
+        return new DynamicSamplingContext(
+            traceId,
+            publicKey,
+            null,
+            release: release,
+            environment:environment);
+    }
 }
 
 internal static class DynamicSamplingContextExtensions
@@ -156,4 +168,7 @@ internal static class DynamicSamplingContextExtensions
 
     public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options)
         => DynamicSamplingContext.CreateFromTransaction(transaction, options);
+
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options)
+        => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options);
 }

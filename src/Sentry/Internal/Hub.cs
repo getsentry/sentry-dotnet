@@ -216,8 +216,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
-        propagationContext.DynamicSamplingContext ??=
-            DynamicSamplingContext.CreateFromPropagationContext(propagationContext, _options);
+        propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
         return propagationContext.DynamicSamplingContext.ToBaggageHeader();
     }
 
@@ -230,9 +229,8 @@ internal class Hub : IHubEx, IDisposable
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
-        traceHeader ??= new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId,
-            propagationContext.IsSampled);
-
+        // If we have to create a new SentryTraceHeader we don't make a sampling decision
+        traceHeader ??= new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
         return new TransactionContext(
             name ?? string.Empty,
             operation ?? string.Empty,
@@ -398,7 +396,7 @@ internal class Hub : IHubEx, IDisposable
             else
             {
                 var propagationContext = actualScope.PropagationContext;
-                propagationContext.DynamicSamplingContext ??= DynamicSamplingContext.CreateFromPropagationContext(propagationContext, _options);
+                propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
 
                 evt.Contexts.Trace.TraceId = propagationContext.TraceId;
                 evt.Contexts.Trace.SpanId = propagationContext.SpanId;
