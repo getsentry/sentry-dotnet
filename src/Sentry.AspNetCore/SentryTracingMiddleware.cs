@@ -40,7 +40,7 @@ internal class SentryTracingMiddleware
             context.Items.TryGetValue(SentryMiddleware.TransactionContextItemKey, out var transactionContextObject);
             if (transactionContextObject is not TransactionContext transactionContext)
             {
-                throw new KeyNotFoundException($"Failed to retrieve the '{SentryMiddleware.TransactionContextItemKey}' from the HttpContext items.");
+                throw new KeyNotFoundException($"Failed to retrieve the '{nameof(SentryMiddleware.TransactionContextItemKey)}' from the HttpContext items.");
             }
 
             // It's important to try and set the transaction name to some value here so that it's available for use
