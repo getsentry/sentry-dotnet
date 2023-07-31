@@ -16,17 +16,13 @@ internal static class LevelMapping
         };
     }
 
-    public static BreadcrumbLevel? ToBreadcrumbLevel(this LoggingEvent loggingLevel)
+    public static BreadcrumbLevel? ToBreadcrumbLevel(this LoggingEvent loggingLevel) => loggingLevel.Level switch
     {
-        return loggingLevel.Level switch
-        {
-            var l when l == Level.Fatal || l == Level.Emergency => BreadcrumbLevel.Critical,
-            var l when l == Level.Alert || l == Level.Critical || l == Level.Severe || l == Level.Error => BreadcrumbLevel.Error,
-            var l when l == Level.Warn => BreadcrumbLevel.Warning,
-            var l when l == Level.Notice || l == Level.Info => BreadcrumbLevel.Info,
-            var l when l == Level.Debug || l == Level.Verbose || l == Level.Trace || l == Level.Finer || l == Level.Finest ||
-                       l == Level.Fine || l == Level.All => BreadcrumbLevel.Debug,
-            _ => null
-        };
-    }
+        Level.Fatal or Level.Emergency => BreadcrumbLevel.Critical,
+        Level.Alert or Level.Critical or Level.Severe or Level.Error => BreadcrumbLevel.Error,
+        Level.Warn => BreadcrumbLevel.Warning,
+        Level.Notice or Level.Info => BreadcrumbLevel.Info,
+        Level.Debug or Level.Verbose or Level.Trace or Level.Finer or Level.Finest or Level.Fine or Level.All => BreadcrumbLevel.Debug,
+        _ => null
+    };
 }
