@@ -719,7 +719,7 @@ public class SentryOptions
     /// Indicates whether tracing is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
-    internal bool IsPerformanceMonitoringEnabled => EnableTracing switch
+    internal bool IsTracingEnabled => EnableTracing switch
     {
         false => false,
         null => TracesSampler is not null || TracesSampleRate is > 0.0,

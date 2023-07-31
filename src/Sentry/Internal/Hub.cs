@@ -379,7 +379,7 @@ internal class Hub : IHubEx, IDisposable
             var actualScope = scope ?? currentScope;
 
             TransactionTracer? transaction = null;
-            if (_options.IsPerformanceMonitoringEnabled)
+            if (_options.IsTracingEnabled)
             {
                 // Inject trace information from a linked span
                 if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)

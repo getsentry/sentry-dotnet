@@ -55,7 +55,7 @@ public class SentryOptionsTests
     public void IsTracingEnabled_Default_False()
     {
         var sut = new SentryOptions();
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
+        Assert.False(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class SentryOptionsTests
             EnableTracing = true
         };
 
-        Assert.True(sut.IsPerformanceMonitoringEnabled);
+        Assert.True(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class SentryOptionsTests
             EnableTracing = false
         };
 
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
+        Assert.False(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public class SentryOptionsTests
             TracesSampleRate = 0.0
         };
 
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
+        Assert.False(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class SentryOptionsTests
             TracesSampleRate = double.Epsilon
         };
 
-        Assert.True(sut.IsPerformanceMonitoringEnabled);
+        Assert.True(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class SentryOptionsTests
             TracesSampler = _ => null
         };
 
-        Assert.True(sut.IsPerformanceMonitoringEnabled);
+        Assert.True(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class SentryOptionsTests
             TracesSampleRate = 0.0
         };
 
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
+        Assert.False(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public class SentryOptionsTests
             TracesSampleRate = 1.0
         };
 
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
+        Assert.False(sut.IsTracingEnabled);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class SentryOptionsTests
             TracesSampler = _ => null
         };
 
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
+        Assert.False(sut.IsTracingEnabled);
     }
 
     [Fact]
