@@ -77,11 +77,6 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// Returns null.
     /// </summary>
-    public SentryTraceHeader? GetTraceParent() => null;
-
-    /// <summary>
-    /// Returns null.
-    /// </summary>
     public BaggageHeader? GetBaggage() => null;
 
     /// <summary>
