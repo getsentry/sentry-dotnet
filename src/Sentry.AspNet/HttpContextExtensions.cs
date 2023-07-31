@@ -91,12 +91,6 @@ public static class HttpContextExtensions
         const string transactionOperation = "http.server";
 
         var transactionContext = SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, transactionOperation);
-        if (transactionContext is null)
-        {
-            throw new NullReferenceException("Failed to create a transaction context. Tracing was " +
-                        "most likely disabled. Make sure set a `TraceSampler` and to set the `TracesSampleRate` > 0.");
-        }
-
         transactionContext.NameSource = TransactionNameSource.Url;
 
         var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)

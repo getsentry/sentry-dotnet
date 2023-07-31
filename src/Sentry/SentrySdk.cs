@@ -631,7 +631,7 @@ public static partial class SentrySdk
     /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
     /// </remarks>
     [DebuggerStepThrough]
-    public static TransactionContext? ContinueTrace(
+    public static TransactionContext ContinueTrace(
         SentryTraceHeader? traceHeader,
         BaggageHeader? baggageHeader,
         string? name = null,

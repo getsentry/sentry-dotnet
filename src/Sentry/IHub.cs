@@ -55,7 +55,7 @@ public interface IHub :
     /// <remarks>
     /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
     /// </remarks>
-    TransactionContext? ContinueTrace(
+    TransactionContext ContinueTrace(
         SentryTraceHeader? traceHeader,
         BaggageHeader? baggageHeader,
         string? name = null,
