@@ -64,31 +64,6 @@ internal class SentryMiddleware : IMiddleware
         _transactionProcessors = transactionProcessors;
     }
 
-    private class ExceptionHandlerFeatureDetails
-    {
-        private readonly ILogger _logger;
-        private readonly string _originalMethod;
-        private readonly IExceptionHandlerFeature _exceptionHandlerFeature;
-
-        public ExceptionHandlerFeatureDetails(ILogger logger, string originalMethod, IExceptionHandlerFeature exceptionHandlerFeature)
-        {
-            _logger = logger;
-            _originalMethod = originalMethod;
-            _exceptionHandlerFeature = exceptionHandlerFeature;
-        }
-
-        /// <summary>
-        /// When exceptions get caught by the UseExceptionHandler feature we the TransactionName and Tags representing
-        /// the different route values to reflect those of the original route (not the global error handling route)
-        /// </summary>
-        public void ApplyOriginalRouteValues(SentryEvent evt)
-        {
-            _logger.LogTrace("Applying original route values for ExceptionHandlerFeature");
-            _exceptionHandlerFeature.ApplyTransactionName(evt, _originalMethod);
-            _exceptionHandlerFeature.ApplyRouteTags(evt);
-        }
-    }
-
     /// <summary>
     /// Handles the <see cref="HttpContext"/> while capturing any errors
     /// </summary>
@@ -153,9 +128,15 @@ internal class SentryMiddleware : IMiddleware
                         "This exception was caught by an ASP.NET Core custom error handler. " +
                         "The web server likely returned a customized error page as a result of this exception.";
 
-                    var handlerDetails = new ExceptionHandlerFeatureDetails(_logger, originalMethod, exceptionFeature);
-                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description,
-                        handlerDetails);
+#if NET6_0_OR_GREATER
+                    hub.ConfigureScope(scope =>
+                    {
+                        scope.ExceptionProcessors.Add(
+                            new ExceptionHandlerFeatureProcessor(originalMethod, exceptionFeature)
+                            );
+                    });
+#endif
+                    CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
                 }
 
                 if (_options.FlushBeforeRequestCompleted)
@@ -183,12 +164,11 @@ internal class SentryMiddleware : IMiddleware
             // preventing OnCompleted flush from working.
             Task FlushBeforeCompleted() => hub.FlushAsync(_options.FlushTimeout);
 
-            void CaptureException(Exception e, SentryId evtId, string mechanism, string description, ExceptionHandlerFeatureDetails? exceptionHandlerDetails = null)
+            void CaptureException(Exception e, SentryId evtId, string mechanism, string description)
             {
                 e.SetSentryMechanism(mechanism, description, handled: false);
 
                 var evt = new SentryEvent(e, eventId: evtId);
-                exceptionHandlerDetails?.ApplyOriginalRouteValues(evt);
 
                 _logger.LogTrace("Sending event '{SentryEvent}' to Sentry.", evt);
 
