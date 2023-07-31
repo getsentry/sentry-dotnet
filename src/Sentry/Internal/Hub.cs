@@ -46,7 +46,7 @@ internal class Hub : IHubEx, IDisposable
 
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
-        _ownedClient = client ?? new SentryClient(options, _randomValuesFactory);
+        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory);
         _clock = clock ?? SystemClock.Clock;
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
@@ -377,8 +377,8 @@ internal class Hub : IHubEx, IDisposable
     {
         try
         {
-            var currentScope = ScopeManager.GetCurrent();
-            var actualScope = scope ?? currentScope.Key;
+            ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
+            var actualScope = scope ?? currentScope;
 
             TransactionTracer? transaction = null;
             if (_options.IsTracingEnabled)
@@ -407,7 +407,6 @@ internal class Hub : IHubEx, IDisposable
             }
 
             // Now capture the event with the Sentry client on the current scope.
-            var sentryClient = currentScope.Value;
             var id = sentryClient.CaptureEvent(evt, hint, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;

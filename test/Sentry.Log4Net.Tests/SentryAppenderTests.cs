@@ -9,10 +9,14 @@ public class SentryAppenderTests
         public IDisposable SdkDisposeHandle { get; set; } = Substitute.For<IDisposable>();
         public Func<string, IDisposable> InitAction { get; set; }
         public IHub Hub { get; set; } = Substitute.For<IHub>();
+        public Func<IHub> HubAccessor { get; set; }
+        public Scope Scope { get; } = new(new SentryOptions());
         public string Dsn { get; set; } = "dsn";
 
         public Fixture()
         {
+            HubAccessor = () => Hub;
+            Hub.ConfigureScope(Arg.Invoke(Scope));
             InitAction = s =>
             {
                 DsnReceivedOnInit = s;
@@ -123,6 +127,20 @@ public class SentryAppenderTests
         var sut = _fixture.GetSut();
 
         sut.DoAppend(null as LoggingEvent);
+    }
+
+    [Fact]
+    public void Append_BelowThreshold_DoesNotSendEvent()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Warn;
+        var evt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Info
+        });
+
+        sut.DoAppend(evt);
+        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -289,6 +307,76 @@ public class SentryAppenderTests
 
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e => e.Environment == expected));
+    }
+
+    [Fact]
+    public void MinimumEventLevel_DefaultsToNull()
+    {
+        var appender = new SentryAppender();
+        Assert.Null(appender.MinimumEventLevel);
+    }
+
+    [Fact]
+    public void DoAppend_BelowMinimumEventLevel_AddsBreadcrumb()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Debug;
+        sut.MinimumEventLevel = Level.Error;
+
+        const string expectedBreadcrumbMsg = "log4net breadcrumb";
+        var warnEvt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Warn,
+            Message = expectedBreadcrumbMsg
+        });
+        sut.DoAppend(warnEvt);
+
+        var breadcrumb = _fixture.Scope.Breadcrumbs.First();
+        Assert.Equal(expectedBreadcrumbMsg, breadcrumb.Message);
+    }
+
+    [Fact]
+    public void DoAppend_NullMinimumEventLevel_AddsEvent()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Debug;
+        sut.MinimumEventLevel = null;
+
+        const string expectedMessage = "log4net message";
+        var warnEvt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Warn,
+            Message = expectedMessage
+        });
+        sut.DoAppend(warnEvt);
+
+        // No breadcrumb is added.
+        Assert.Empty(_fixture.Scope.Breadcrumbs);
+        // Event is sent instead.
+        _ = _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == expectedMessage));
+    }
+
+    [Fact]
+    public void DoAppend_AboveMinimumEventLevel_AddsEvent()
+    {
+        var sut = _fixture.GetSut();
+        sut.Threshold = Level.Debug;
+        sut.MinimumEventLevel = Level.Warn;
+
+        const string expectedMessage = "log4net message";
+        var warnEvt = new LoggingEvent(new LoggingEventData
+        {
+            Level = Level.Error,
+            Message = expectedMessage
+        });
+        sut.DoAppend(warnEvt);
+
+        // No breadcrumb is added.
+        Assert.Empty(_fixture.Scope.Breadcrumbs);
+        // Event is sent instead.
+        _ = _fixture.Hub.Received(1)
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Message.Message == expectedMessage));
     }
 
     [Fact]
