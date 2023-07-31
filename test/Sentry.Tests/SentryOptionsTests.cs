@@ -252,7 +252,7 @@ public class SentryOptionsTests
 
         var actual = sut.ParsedDsn;
 
-        Assert.Equal(expected, actual);
+        Assert.Equal(expected.Source, actual.Source);
     }
 
     [Fact]
