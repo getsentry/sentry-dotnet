@@ -1,4 +1,3 @@
-using System.Security.Policy;
 using Sentry.Extensibility;
 
 namespace Sentry.AspNet;
