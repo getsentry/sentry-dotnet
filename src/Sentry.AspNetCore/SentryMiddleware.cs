@@ -18,9 +18,9 @@ namespace Sentry.AspNetCore;
 /// </summary>
 internal class SentryMiddleware : IMiddleware
 {
-    internal const string TraceHeaderItemKey = "sentry-trace-header";
-    internal const string BaggageHeaderItemKey = "sentry-baggage-header";
-    internal const string TransactionContextItemKey = "sentry-transaction-context";
+    internal static readonly object TraceHeaderItemKey = new();
+    internal static readonly object BaggageHeaderItemKey = new();
+    internal static readonly object TransactionContextItemKey = new();
 
     private readonly Func<IHub> _getHub;
     private readonly SentryAspNetCoreOptions _options;
