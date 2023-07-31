@@ -202,9 +202,9 @@ internal class Hub : IHubEx, IDisposable
             return traceHeader;
         }
 
-        // Fallback: Either tracing was disabled or there was no span on the current scope.
+        // With either tracing disabled or no active span on the current scope we fall back to the propagation context
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
-        // With performance disabled, we must not append a sampling decision.
+        // In either case, we must not append a sampling decision.
         return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
 
