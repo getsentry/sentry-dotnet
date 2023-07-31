@@ -99,7 +99,7 @@ internal class SentryMiddleware : IMiddleware
             var baggageHeader = context.TryGetBaggageHeader(_options);
             var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader);
 
-            // Adding the headers and thw TransactionContext to the context to be picked up by the Sentry tracing middleware
+            // Adding the headers and the TransactionContext to the context to be picked up by the Sentry tracing middleware
             context.Items.Add(TraceHeaderItemKey, traceHeader);
             context.Items.Add(BaggageHeaderItemKey, baggageHeader);
             context.Items.Add(TransactionContextItemKey, transactionContext);

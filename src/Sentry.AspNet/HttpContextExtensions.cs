@@ -93,7 +93,7 @@ public static class HttpContextExtensions
         var transactionContext = SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, transactionOperation);
         if (transactionContext is null)
         {
-            throw new NullReferenceException("Failed to create a transaction context. " + "Tracing was " +
+            throw new NullReferenceException("Failed to create a transaction context. Tracing was " +
                         "most likely disabled. Make sure set a `TraceSampler` and to set the `TracesSampleRate` > 0.");
         }
 
