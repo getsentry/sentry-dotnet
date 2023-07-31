@@ -76,8 +76,7 @@ internal class SentryTracingMiddleware
                 dynamicSamplingContext = DynamicSamplingContext.Empty;
             }
 
-            var hub = _getHub();
-            var transaction = hub.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
+            var transaction = _getHub().StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
 
             _options.LogInfo(
                 "Started transaction with span ID '{0}' and trace ID '{1}'.",
