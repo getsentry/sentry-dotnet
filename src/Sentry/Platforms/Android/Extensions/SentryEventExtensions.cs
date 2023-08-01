@@ -21,7 +21,8 @@ internal static class SentryEventExtensions
         using var streamWriter = new JavaOutputStreamWriter(stream);
         using var jsonWriter = new JavaSdk.JsonObjectWriter(streamWriter, javaOptions.MaxDepth);
         sentryEvent.Serialize(jsonWriter, javaOptions.Logger);
-        jsonWriter.Flush();
+
+        streamWriter.Flush();
         stream.Seek(0, SeekOrigin.Begin);
 
         using var json = JsonDocument.Parse(stream);
