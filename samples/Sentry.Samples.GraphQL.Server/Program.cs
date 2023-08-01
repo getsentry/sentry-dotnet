@@ -5,6 +5,20 @@ using Sentry.Samples.GraphQL.Server.Notes;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseSentry(o =>
+    {
+        // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
+        o.Dsn = "...Your DSN Here...";
+
+        // Enable Sentry performance monitoring
+        o.EnableTracing = true;
+
+#if DEBUG
+        // Log debug information about the Sentry SDK
+        o.Debug = true;
+#endif
+    });
+
 // Add services to the container.
 // add notes schema
 builder.Services.AddSingleton<ISchema, NotesSchema>(services => new NotesSchema(new SelfActivatingServiceProvider(services)));
@@ -22,6 +36,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+app.UseSentryTracing();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -37,6 +52,11 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// An example ASP.NET Core middleware that throws an
+// exception when serving a request to path: /throw
+app.MapGet("/", () => "Hello World!");
+app.MapGet("/throw", () => { throw new NotImplementedException(); });
 
 // make sure all our schemas registered to route
 app.UseGraphQL<ISchema>();
