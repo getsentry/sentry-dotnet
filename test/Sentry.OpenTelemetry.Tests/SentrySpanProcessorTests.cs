@@ -95,6 +95,10 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             var grpcAttributes = new Dictionary<string, object> { ["rpc.grpc.status_code"] = 7 };
             SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, grpcAttributes)
                 .Should().Be(SpanStatus.PermissionDenied);
+
+            var errorAttributes = new Dictionary<string, object> { [SpanAttributeConstants.StatusCodeKey] = StatusTags.ErrorStatusCodeTagValue };
+            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Ok, errorAttributes).Should().Be(SpanStatus.UnknownError);
+            SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Unset, errorAttributes).Should().Be(SpanStatus.UnknownError);
         }
     }
 
