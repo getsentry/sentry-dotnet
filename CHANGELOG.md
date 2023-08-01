@@ -20,9 +20,9 @@
 
 ### Dependencies
 
-- Bump Java SDK from v6.25.1 to v6.25.2 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6252)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.25.1...6.25.2)
+- Bump Java SDK from v6.25.1 to v6.26.0 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484), [#2498](https://github.com/getsentry/sentry-dotnet/pull/2498))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6260)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.25.1...6.26.0)
 - Bump CLI from v2.19.4 to v2.20.1 ([#2509](https://github.com/getsentry/sentry-dotnet/pull/2509), [#2518](https://github.com/getsentry/sentry-dotnet/pull/2518))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2201)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.19.4...2.20.1)
