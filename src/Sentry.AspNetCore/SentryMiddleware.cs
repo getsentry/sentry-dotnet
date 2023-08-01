@@ -7,6 +7,7 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Reflection;
 
@@ -116,6 +117,7 @@ internal class SentryMiddleware : IMiddleware
 
             try
             {
+                var originalMethod = context.Request.Method;
                 await next(context).ConfigureAwait(false);
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).
@@ -126,6 +128,14 @@ internal class SentryMiddleware : IMiddleware
                         "This exception was caught by an ASP.NET Core custom error handler. " +
                         "The web server likely returned a customized error page as a result of this exception.";
 
+#if NET6_0_OR_GREATER
+                    hub.ConfigureScope(scope =>
+                    {
+                        scope.ExceptionProcessors.Add(
+                            new ExceptionHandlerFeatureProcessor(originalMethod, exceptionFeature)
+                            );
+                    });
+#endif
                     CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
                 }
 
@@ -151,7 +161,7 @@ internal class SentryMiddleware : IMiddleware
             }
 
             // Some environments disables the application after sending a request,
-            // making the OnCompleted flush to not work.
+            // preventing OnCompleted flush from working.
             Task FlushBeforeCompleted() => hub.FlushAsync(_options.FlushTimeout);
 
             void CaptureException(Exception e, SentryId evtId, string mechanism, string description)

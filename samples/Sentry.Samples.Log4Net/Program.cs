@@ -26,6 +26,10 @@ internal class Program
         // Does not result in an event in Sentry
         Log.Debug("Debug message which is not sent.");
 
+        // app.config sets MinimumEventLevel to ERROR, so every below that level is added as a breadcrumb.
+        Log.Info("Info message which is added as a breadcrumb.");
+        Log.Error("Error message which is sent as an event.");
+
         try
         {
             DoWork();

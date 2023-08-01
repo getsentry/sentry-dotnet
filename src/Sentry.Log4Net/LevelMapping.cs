@@ -15,4 +15,18 @@ internal static class LevelMapping
             _ => null
         };
     }
+
+    public static BreadcrumbLevel? ToBreadcrumbLevel(this LoggingEvent loggingLevel)
+    {
+        return loggingLevel.Level switch
+        {
+            var l when l == Level.Fatal || l == Level.Emergency => BreadcrumbLevel.Critical,
+            var l when l == Level.Alert || l == Level.Critical || l == Level.Severe || l == Level.Error => BreadcrumbLevel.Error,
+            var l when l == Level.Warn => BreadcrumbLevel.Warning,
+            var l when l == Level.Notice || l == Level.Info => BreadcrumbLevel.Info,
+            var l when l == Level.Debug || l == Level.Verbose || l == Level.Trace || l == Level.Finer || l == Level.Finest ||
+                l == Level.Fine || l == Level.All => BreadcrumbLevel.Debug,
+            _ => null
+        };
+    }
 }
