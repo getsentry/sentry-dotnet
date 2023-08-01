@@ -4,6 +4,9 @@ using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using GraphQL.MicrosoftDI;
 using GraphQL.Types;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Sentry.OpenTelemetry;
 using Sentry.Samples.GraphQL.Server.Notes;
 
 namespace Sentry.Samples.GraphQL.Server;
@@ -20,48 +23,61 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddOpenTelemetry()
+            .WithTracing(tracerProviderBuilder =>
+                tracerProviderBuilder
+                    .AddSource(Telemetry.ActivitySource.Name)
+                    .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddSentry()
+                ); // <-- Configure OpenTelemetry to send traces to Sentry
+
         builder.WebHost.UseSentry(o =>
         {
             // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
             // o.Dsn = "...Your DSN Here...";
             o.EnableTracing = true;
             o.Debug = true;
+            o.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
         });
 
-        // Add services to the container.
-        // add notes schema
-        builder.Services.AddSingleton<ISchema, NotesSchema>(services =>
-            new NotesSchema(new SelfActivatingServiceProvider(services))
-        );
+        builder.Services
+            // add notes schema
+            .AddSingleton<ISchema, NotesSchema>(services =>
+                new NotesSchema(new SelfActivatingServiceProvider(services))
+            )
+            // register graphQL
+            .AddGraphQL(options => options
+                .AddAutoSchema<NotesSchema>()
+                .AddSystemTextJson()
+                .UseTelemetry(telemetryOptions =>
+                {
+                    telemetryOptions.RecordDocument = true; // <-- Configure GraphQL to use OpenTelemetry
+                })
+            );
 
-        // register graphQL
-        builder.Services.AddGraphQL(options => options
-            .AddAutoSchema<NotesSchema>()
-            .AddSystemTextJson()
-        );
-
-        // Permit anything Origin - not appropriate for production
+        // Permit any Origin - not appropriate for production!!!
         builder.Services.AddCors(cors => cors.AddDefaultPolicy(policy => policy.WithOrigins("*").AllowAnyHeader()));
         builder.Services.AddControllers();
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new()
             {
-                Title = "GraphQLNetExample",
+                Title = "Sentry.Samples.GraphQL",
                 Version = "v1"
             });
         });
 
         var app = builder.Build();
-        app.UseSentryTracing();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GraphQLNetExample v1"));
-            // add altair UI to development only
-            app.UseGraphQLAltair();
+            app.UseSwaggerUI(c =>
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sentry.Samples.GraphQL v1"));
+            app.UseGraphQLAltair(); // Exposed at /ui/altair
         }
 
         app.UseHttpsRedirection();
@@ -72,8 +88,7 @@ public static class Program
         // exception when serving a request to path: /throw
         app.MapGet("/", async context =>
         {
-            var request = context.Request;
-            var url = $"{request.Scheme}://{request.Host}{request.PathBase}/graphql";
+            var url = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase}/graphql";
             var graphClient = new GraphQLHttpClient(url, new SystemTextJsonSerializer());
             var notesRequest = new GraphQLRequest
             {
