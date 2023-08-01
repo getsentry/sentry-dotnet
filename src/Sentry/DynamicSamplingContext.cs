@@ -147,8 +147,8 @@ internal class DynamicSamplingContext
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
     {
-        var publicKey = options.ParsedDsn.PublicKey;
         var traceId = propagationContext.TraceId;
+        var publicKey = options.ParsedDsn.PublicKey;
         var release = options.SettingLocator.GetRelease();
         var environment = options.SettingLocator.GetEnvironment();
 

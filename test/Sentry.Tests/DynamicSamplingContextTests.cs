@@ -285,15 +285,16 @@ public class DynamicSamplingContextTests
     [Fact]
     public void CreateFromPropagationContext_Valid_Complete()
     {
-        var options = new SentryOptions { Dsn = "https://a@sentry.io/1" };
+        var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Release = "test-release", Environment = "test-environment"};
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1234"));
 
         var dsc = propagationContext.CreateDynamicSamplingContext(options);
 
         Assert.NotNull(dsc);
-        Assert.Equal(4, dsc.Items.Count);
         Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("a", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("test-release", Assert.Contains("release", dsc.Items));
+        Assert.Equal("test-environment", Assert.Contains("environment", dsc.Items));
     }
 }

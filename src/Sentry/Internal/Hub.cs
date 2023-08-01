@@ -323,7 +323,7 @@ internal class Hub : IHubEx, IDisposable
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
         EndSession(_clock.GetUtcNow(), status);
 
-    private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
+    private ISpan? GetLinkedSpan(SentryEvent evt)
     {
         // Find the span which is bound to the same exception
         if (evt.Exception is { } exception &&
@@ -332,13 +332,19 @@ internal class Hub : IHubEx, IDisposable
             return spanBoundToException;
         }
 
-        // Otherwise just get the currently active span on the scope (unless it's sampled out)
-        if (scope.Span is { IsSampled: not false } span)
-        {
-            return span;
-        }
-
         return null;
+    }
+
+    private void ApplyTraceContextToEvent(SentryEvent evt, ISpan span)
+    {
+        evt.Contexts.Trace.SpanId = span.SpanId;
+        evt.Contexts.Trace.TraceId = span.TraceId;
+        evt.Contexts.Trace.ParentSpanId = span.ParentSpanId;
+
+        if (span.GetTransaction() is TransactionTracer transactionTracer)
+        {
+            evt.DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+        }
     }
 
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
@@ -378,30 +384,23 @@ internal class Hub : IHubEx, IDisposable
             ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
             var actualScope = scope ?? currentScope;
 
-            TransactionTracer? transaction = null;
-            if (_options.IsTracingEnabled)
+            // We get the span linked to the event or fall back to the current span (if it's not sampled out)
+            var span = GetLinkedSpan(evt) ?? actualScope.Span;
+            if (span is not null)
             {
-                // Inject trace information from a linked span
-                if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
+                if (span.IsSampled is not false)
                 {
-                    evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
-                    evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
-                    evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                    ApplyTraceContextToEvent(evt, span);
                 }
-
-                // When a transaction is present, copy its DSC to the event.
-                transaction = actualScope.Transaction as TransactionTracer;
-                evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
             }
             else
             {
-                var propagationContext = actualScope.PropagationContext;
-                propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
+                evt.Contexts.Trace.TraceId = actualScope.PropagationContext.TraceId;
+                evt.Contexts.Trace.SpanId = actualScope.PropagationContext.SpanId;
+                evt.Contexts.Trace.ParentSpanId = actualScope.PropagationContext.ParentSpanId;
 
-                evt.Contexts.Trace.TraceId = propagationContext.TraceId;
-                evt.Contexts.Trace.SpanId = propagationContext.SpanId;
-                evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-                evt.DynamicSamplingContext = propagationContext.DynamicSamplingContext;
+                actualScope.PropagationContext.DynamicSamplingContext ??= actualScope.PropagationContext.CreateDynamicSamplingContext(_options);
+                evt.DynamicSamplingContext = actualScope.PropagationContext.DynamicSamplingContext;
             }
 
             // Now capture the event with the Sentry client on the current scope.
@@ -414,7 +413,7 @@ internal class Hub : IHubEx, IDisposable
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                transaction?.Finish(SpanStatus.Aborted);
+                actualScope.Transaction?.Finish(SpanStatus.Aborted);
             }
 
             return id;

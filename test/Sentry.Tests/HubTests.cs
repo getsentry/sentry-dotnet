@@ -218,11 +218,12 @@ public partial class HubTests
     }
 
     [Fact]
-    public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
+    public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventContainsPropagationContext()
     {
         // Arrange
         _fixture.Options.TracesSampleRate = 1.0;
         var hub = _fixture.GetSut();
+        var scope = hub.ScopeManager.GetCurrent().Key;
 
         // Act
         hub.CaptureException(new Exception("error"));
@@ -230,8 +231,8 @@ public partial class HubTests
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
-                evt.Contexts.Trace.TraceId == default &&
-                evt.Contexts.Trace.SpanId == default),
+                evt.Contexts.Trace.TraceId == scope.PropagationContext.TraceId &&
+                evt.Contexts.Trace.SpanId == scope.PropagationContext.SpanId),
             Arg.Any<Hint>(),
             Arg.Any<Scope>());
     }
