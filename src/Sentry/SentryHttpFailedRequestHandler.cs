@@ -2,18 +2,21 @@ using Sentry.Protocol;
 
 namespace Sentry;
 
-internal class SentryFailedRequestHandler : ISentryFailedRequestHandler
+internal class SentryHttpFailedRequestHandler : ISentryFailedRequestHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions _options;
 
     public const string MechanismType = "SentryFailedRequestHandler";
 
-    internal SentryFailedRequestHandler(IHub hub, SentryOptions options)
+    internal SentryHttpFailedRequestHandler(IHub hub, SentryOptions options)
     {
         _hub = hub;
         _options = options;
     }
+
+    internal static ISentryFailedRequestHandler Create(IHub hub, SentryOptions options)
+        => new SentryHttpFailedRequestHandler(hub, options);
 
     public void HandleResponse(HttpResponseMessage response)
     {

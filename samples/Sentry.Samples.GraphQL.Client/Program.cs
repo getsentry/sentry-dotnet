@@ -26,12 +26,13 @@ var graphClient = new GraphQLHttpClient(
     options =>
     {
         options.EndPoint = new Uri("http://localhost:5051/graphql"); // Assumes Sentry.Samples.GraphQL.Server is running
-        options.HttpMessageHandler = new SentryHttpMessageHandler(); // <-- Configure GraphQL use Sentry Message Handler
+        options.HttpMessageHandler = new SentryGraphQLHttpMessageHandler(); // <-- Use SentryGraphQLHttpMessageHandler
     },
     new SystemTextJsonSerializer()
     );
 var notesRequest = new GraphQLRequest
 {
+    OperationName = "getAllNotes",
     Query = @"
         {
           notes {
