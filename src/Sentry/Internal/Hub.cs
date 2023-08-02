@@ -347,6 +347,16 @@ internal class Hub : IHubEx, IDisposable
         }
     }
 
+    private void ApplyTraceContextToEvent(SentryEvent evt, SentryPropagationContext propagationContext)
+    {
+        evt.Contexts.Trace.TraceId = propagationContext.TraceId;
+        evt.Contexts.Trace.SpanId = propagationContext.SpanId;
+        evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
+
+        propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
+        evt.DynamicSamplingContext = propagationContext.DynamicSamplingContext;
+    }
+
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
         CaptureEvent(evt, null, configureScope);
 
@@ -384,7 +394,7 @@ internal class Hub : IHubEx, IDisposable
             ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
             var actualScope = scope ?? currentScope;
 
-            // We get the span linked to the event or fall back to the current span (if it's not sampled out)
+            // We get the span linked to the event or fall back to the current span
             var span = GetLinkedSpan(evt) ?? actualScope.Span;
             if (span is not null)
             {
@@ -395,12 +405,8 @@ internal class Hub : IHubEx, IDisposable
             }
             else
             {
-                evt.Contexts.Trace.TraceId = actualScope.PropagationContext.TraceId;
-                evt.Contexts.Trace.SpanId = actualScope.PropagationContext.SpanId;
-                evt.Contexts.Trace.ParentSpanId = actualScope.PropagationContext.ParentSpanId;
-
-                actualScope.PropagationContext.DynamicSamplingContext ??= actualScope.PropagationContext.CreateDynamicSamplingContext(_options);
-                evt.DynamicSamplingContext = actualScope.PropagationContext.DynamicSamplingContext;
+                // If there is no span on the scope (and not just no sampled one), fall back to the propagation context
+                ApplyTraceContextToEvent(evt, actualScope.PropagationContext);
             }
 
             // Now capture the event with the Sentry client on the current scope.
