@@ -8,6 +8,7 @@
       trace: {
         environment: production,
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: test-release,
         trace_id: Guid_2
       }
     },
@@ -27,7 +28,7 @@
             Request: {},
             Contexts: {
               trace: {
-                Operation: 
+                Operation:
               }
             },
             User: {},
