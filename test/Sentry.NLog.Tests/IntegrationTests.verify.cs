@@ -76,6 +76,7 @@ public class IntegrationTests
                 options.Transport = transport;
                 options.Dsn = ValidDsn;
                 options.AttachStacktrace = false;
+                options.Release = "test-release";
             });
 
         LogManager.Configuration = configuration;

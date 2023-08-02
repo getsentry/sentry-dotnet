@@ -20,7 +20,7 @@ internal class SentryPropagationContext
             }
             else
             {
-                throw new Exception("should not do that.");
+                throw new Exception("Attempted to set the DynamicSamplingContext but the context exists already.");
             }
         }
     }

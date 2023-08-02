@@ -76,6 +76,7 @@ public class IntegrationTests
                 _.Dsn = ValidDsn;
                 _.Debug = true;
                 _.AttachStacktrace = false;
+                _.Release = "test-release";
             });
 
         Log.Logger = configuration.CreateLogger();

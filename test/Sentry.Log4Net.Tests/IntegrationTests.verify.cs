@@ -47,7 +47,8 @@ public class IntegrationTests
             DiagnosticLevel = SentryLevel.Debug,
             Transport = transport,
             Dsn = ValidDsn,
-            AttachStacktrace = false
+            AttachStacktrace = false,
+            Release = "test-release"
         };
 
         var hub = SentrySdk.InitHub(options);

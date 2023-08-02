@@ -20,7 +20,8 @@ public class IntegrationTests
             TracesSampleRate = 1,
             Transport = transport,
             Dsn = ValidDsn,
-            DiagnosticLevel = SentryLevel.Debug
+            DiagnosticLevel = SentryLevel.Debug,
+            Release = "test-release"
         };
 
         options.AddEntityFramework();
