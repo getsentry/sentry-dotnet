@@ -89,7 +89,7 @@ public class DisabledHub : IHub, IDisposable
         string? operation = null)
     {
         // Transactions from DisabledHub are always sampled out
-        return new TransactionContext(string.Empty, string.Empty, false);
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
     }
 
     /// <summary>
