@@ -200,7 +200,7 @@
                       FileName: IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
-                      LineNumber: 46,
+                      LineNumber: 47,
                       ColumnNumber: 17,
                       AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
