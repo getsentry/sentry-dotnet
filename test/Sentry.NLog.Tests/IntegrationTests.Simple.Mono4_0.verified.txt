@@ -80,7 +80,7 @@
             Request: {},
             Contexts: {
               trace: {
-                Operation:
+                Operation: 
               }
             },
             User: {

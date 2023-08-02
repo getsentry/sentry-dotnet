@@ -29,7 +29,7 @@
             Request: {},
             Contexts: {
               trace: {
-                Operation:
+                Operation: 
               }
             },
             User: {
@@ -76,7 +76,7 @@
             Request: {},
             Contexts: {
               trace: {
-                Operation:
+                Operation: 
               }
             },
             User: {
@@ -129,7 +129,7 @@
             Request: {},
             Contexts: {
               trace: {
-                Operation:
+                Operation: 
               }
             },
             User: {
@@ -243,7 +243,7 @@
             Request: {},
             Contexts: {
               trace: {
-                Operation:
+                Operation: 
               }
             },
             User: {
