@@ -4,12 +4,6 @@
       event_id: Guid_1,
       sdk: {
         name: sentry.dotnet
-      },
-      trace: {
-        environment: production,
-        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-        release: test-release,
-        trace_id: Guid_2
       }
     },
     Items: [
@@ -40,7 +34,7 @@
                       FileName: IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
-                      LineNumber: 48,
+                      LineNumber: 47,
                       ColumnNumber: 17,
                       AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
@@ -78,11 +72,7 @@
             ],
             Level: error,
             Request: {},
-            Contexts: {
-              trace: {
-                Operation:
-              }
-            },
+            Contexts: {},
             User: {
               Id: myId,
               Username: ,

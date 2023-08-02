@@ -1,4 +1,4 @@
-﻿{
+{
   diagnosticLoggerEntries: [
     {
       Level: error,
@@ -11,12 +11,6 @@
         event_id: Guid_1,
         sdk: {
           name: sentry.dotnet
-        },
-        trace: {
-          environment: production,
-          public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-          release: test-release,
-          trace_id: Guid_2
         }
       },
       Items: [
@@ -33,11 +27,7 @@
               Platform: csharp,
               Level: error,
               Request: {},
-              Contexts: {
-                trace: {
-                  Operation: 
-                }
-              },
+              Contexts: {},
               User: {},
               Environment: production
             }

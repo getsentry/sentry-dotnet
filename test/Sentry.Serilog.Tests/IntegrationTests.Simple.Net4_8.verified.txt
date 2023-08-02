@@ -4,12 +4,6 @@
       event_id: Guid_1,
       sdk: {
         name: sentry.dotnet
-      },
-      trace: {
-        environment: production,
-        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-        release: test-release,
-        trace_id: Guid_2
       }
     },
     Items: [
@@ -27,11 +21,7 @@
             ServerName: TheMachineName,
             Level: debug,
             Request: {},
-            Contexts: {
-              trace: {
-                Operation:
-              }
-            },
+            Contexts: {},
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}
@@ -48,15 +38,9 @@
   },
   {
     Header: {
-      event_id: Guid_3,
+      event_id: Guid_2,
       sdk: {
         name: sentry.dotnet
-      },
-      trace: {
-        environment: production,
-        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-        release: test-release,
-        trace_id: Guid_2
       }
     },
     Items: [
@@ -74,11 +58,7 @@
             ServerName: TheMachineName,
             Level: debug,
             Request: {},
-            Contexts: {
-              trace: {
-                Operation:
-              }
-            },
+            Contexts: {},
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}
@@ -101,15 +81,9 @@
   },
   {
     Header: {
-      event_id: Guid_4,
+      event_id: Guid_3,
       sdk: {
         name: sentry.dotnet
-      },
-      trace: {
-        environment: production,
-        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-        release: test-release,
-        trace_id: Guid_2
       }
     },
     Items: [
@@ -127,11 +101,7 @@
             ServerName: TheMachineName,
             Level: error,
             Request: {},
-            Contexts: {
-              trace: {
-                Operation:
-              }
-            },
+            Contexts: {},
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}
@@ -158,15 +128,9 @@
   },
   {
     Header: {
-      event_id: Guid_5,
+      event_id: Guid_4,
       sdk: {
         name: sentry.dotnet
-      },
-      trace: {
-        environment: production,
-        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
-        release: test-release,
-        trace_id: Guid_2
       }
     },
     Items: [
@@ -200,7 +164,7 @@
                       FileName: IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
-                      LineNumber: 47,
+                      LineNumber: 46,
                       ColumnNumber: 17,
                       AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
@@ -241,11 +205,7 @@
             ],
             Level: fatal,
             Request: {},
-            Contexts: {
-              trace: {
-                Operation:
-              }
-            },
+            Contexts: {},
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}
