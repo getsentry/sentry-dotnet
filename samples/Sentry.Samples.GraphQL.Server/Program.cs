@@ -84,9 +84,8 @@ public static class Program
         app.UseAuthorization();
         app.MapControllers();
 
-        // An example ASP.NET Core middleware that throws an
-        // exception when serving a request to path: /throw
-        app.MapGet("/", async context =>
+        app.MapGet("/", () => "Hello world!");
+        app.MapGet("/request", async context =>
         {
             var url = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase}/graphql";
             var graphClient = new GraphQLHttpClient(url, new SystemTextJsonSerializer());
