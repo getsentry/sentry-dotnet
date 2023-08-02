@@ -4,6 +4,11 @@
       event_id: Guid_1,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        trace_id: Guid_2
       }
     },
     Items: [
@@ -72,7 +77,11 @@
             ],
             Level: error,
             Request: {},
-            Contexts: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
             User: {
               Id: myId,
               Username: ,
