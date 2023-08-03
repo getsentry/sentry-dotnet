@@ -1,4 +1,4 @@
-using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
@@ -12,31 +12,9 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     /// <summary>
     /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
     /// </summary>
-    public SentryGraphQLHttpMessageHandler()
-        : this(default, default, default) { }
-
-    /// <summary>
-    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
-    /// </summary>
-    /// <param name="innerHandler">An inner message handler to delegate calls to.</param>
-    public SentryGraphQLHttpMessageHandler(HttpMessageHandler innerHandler)
-        : this(default, default, innerHandler) { }
-
-    /// <summary>
-    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
-    /// </summary>
-    /// <param name="hub">The Sentry hub.</param>
-    public SentryGraphQLHttpMessageHandler(IHub hub)
-        : this(hub, default)
-    {
-    }
-
-    /// <summary>
-    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
-    /// </summary>
     /// <param name="innerHandler">An inner message handler to delegate calls to.</param>
     /// <param name="hub">The Sentry hub.</param>
-    public SentryGraphQLHttpMessageHandler(HttpMessageHandler innerHandler, IHub hub)
+    public SentryGraphQLHttpMessageHandler(HttpMessageHandler? innerHandler = default, IHub? hub = default)
         : this(hub, default, innerHandler)
     {
     }
@@ -49,51 +27,80 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     }
 
     /// <inheritdoc />
-    protected override ISpan DoStartChildSpan(ISpan parentSpan, HttpRequestMessage request, string method, string url)
+    protected internal override void OnProcessRequest(HttpRequestMessage request, ISpan? span, string method, string url)
+    {
+        UnpackGraphQLRequest(request);
+    }
+
+    internal class GraphQLRequestInfo
+    {
+        public string? OperationName { get; set; }
+        public string? OperationType { get; set; }
+        public string? Query { get; set; }
+
+        /// <summary>
+        /// GraphQL operation name, type (`query`, `mutation` or `subscription`) and status code, if possible.
+        /// Fallback to something sensible/unique otherwise (e.g. the canonical name of the actual/generated class.)
+        /// </summary>
+        public string? GetSpanDescriptionOrDefault(HttpStatusCode statusCode)
+        {
+            var parts = new List<string>();
+            if (OperationName is { } operationName)
+            {
+                parts.Add(operationName);
+            }
+
+            if (OperationType is { } operationType)
+            {
+                parts.Add(operationType);
+            }
+
+            var description = string.Join(" ", parts);
+            return description != string.Empty ? $"{description} {(int)statusCode}" : null;
+        }
+
+        public void AddToBreadcrumbData(Dictionary<string, string> data)
+        {
+            AddIfNotNull("operation_name", OperationName); // The GraphQL operation name
+            AddIfNotNull("operation_type", OperationType); // i.e. `query`, `mutation`, `subscription`
+            // AddIfNotNull("operation_id", ???); // The GraphQL operation ID... not included in the request/response
+
+            void AddIfNotNull(string key, string? possibleValue)
+            {
+                if (possibleValue is { } value)
+                {
+                    data[key] = value;
+                }
+            }
+        }
+    }
+
+    private void UnpackGraphQLRequest(HttpRequestMessage request)
     {
         // Need the reverse of:
         // Content = new StringContent(serializer.SerializeToString(this), Encoding.UTF8, options.MediaType)
         // TODO: This is a hack... we should pass a deserialization function in via the constructor
         var json = TryGetJsonContent(request.Content);
 
-        // The operation type should follow the [Span Operation Conventions](https://develop.sentry.dev/sdk/performance/span-operations/).
-        var operation = "http.client";
-        // GraphQL operation name, operation type (`query`, `mutation` or `subscription`) and status code, if possible.
-        // otherwise fallback to something unique that makes sense, e.g. the canonical name of the actual/generated class.
-        var description = TryGetSpanDescription(json) ?? $"{method} {url}";
+        if (json is not { } jsonElement)
+        {
+            return;
+        }
 
-        var span = parentSpan.StartChild(operation, description);
-        return span;
+        var graphqlInfo = request.With<GraphQLRequestInfo>();
+        if (TryGetStringProperty(jsonElement, "operationName") is { } operationName)
+        {
+            graphqlInfo.OperationName = operationName;
+        }
+        if (TryGetStringProperty(jsonElement, "query") is { } query)
+        {
+            graphqlInfo.OperationType = "query";
+            graphqlInfo.Query = query;
+        }
     }
 
     private JsonElement? TryGetJsonContent(HttpContent? content) =>
         content is StringContent stringContent ? stringContent.ReadAsJson() : null;
-
-    /// <summary>
-    /// GraphQL operation name, operation type (`query`, `mutation` or `subscription`) and status code, if possible.
-    /// otherwise fallback to something unique that makes sense, e.g. the canonical name of the actual/generated class.
-    /// </summary>
-    private string? TryGetSpanDescription(JsonElement? json)
-    {
-        if (json is not { } jsonElement)
-        {
-            return null;
-        }
-
-        var parts = new List<string>();
-        if (TryGetStringProperty(jsonElement, "operationName") is { } operationName)
-        {
-            parts.Add(operationName);
-        }
-
-        if (jsonElement.TryGetProperty("query", out _))
-        {
-            parts.Add("query");
-        }
-
-        var description = string.Join(" ", parts);
-        return description != string.Empty ? description : null;
-    }
 
     private string? TryGetStringProperty(JsonElement jsonElement, string propertyName)
     {
@@ -109,52 +116,34 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     }
 
     /// <inheritdoc />
-    protected override void DoAddBreadcrumb(IHub hub, HttpResponseMessage response, ISpan? span, string method,
+    protected internal override Breadcrumb GetBreadcrumb(HttpResponseMessage response, ISpan? span, string method,
         string url)
     {
-        // Additional fields for breadcrumbs:
-        // - data (all fields are optional but recommended):
-        // - `operation_name` - The GraphQL operation name
-        //     - `operation_type` - The GraphQL operation type, i.e: `query`, `mutation`, `subscription`
-        // - `operation_id` - The GraphQL operation ID
-        //
-        //     Avoid setting the query String as part of the data field since the event can be dropped due to size limit.
-        //
-        //     In case more additional fields are needed, the data field can be used to add more context, e.g. `graphql.path`,
-        //     `graphql.field`, `graphql.type`, etc.
-        //
-        //     The `category` can also be adapted to its own type, e.g. `graphql.resolver`, `graphql.data_loader`, etc.
-        //
-        //     For resolvers or data fetchers a breadcrumb could have the following fields:
-        // - `type` = `graphql`
-        // - `category` = `graphql.fetcher`
-        // - `path` - Path in the query, e.g. `project/status`
-        // - `field` - Field being fetched, e.g. `status`
-        // - `type` - Type being fetched, e.g. `String`
-        // - `object_type` - Object type being fetched, e.g. `Project`
-        //
-        // For data loaders a breadcrumb could have the following fields:
-        // - `type` = graphql
-        //     - `category` = `graphql.data_loader`
-        // - `keys` - Keys that should be loaded by the data loader
-        //     - `key_type` - Type of the key
-        //     - `value_type` - Type of the value
-        //     - `name` - Name of the data loader
         var breadcrumbData = new Dictionary<string, string>
         {
             {"url", url},
             {"method", method},
             {"status_code", ((int) response.StatusCode).ToString()}
         };
-        // The Breadcrumb `type` should be `graphql` and the `category` should be the operation type, otherwise `graphql.operation`
-        // if not available.
-        hub.AddBreadcrumb(string.Empty, "graphql.operation", "graphql", breadcrumbData);
+        var graphqlRequestInfo = response.RequestMessage?.With<GraphQLRequestInfo>();
+        graphqlRequestInfo?.AddToBreadcrumbData(breadcrumbData);
+
+        var category = graphqlRequestInfo?.OperationType ?? "graphql.operation";
+
+        return new Breadcrumb(
+            SystemClock.Clock.GetUtcNow(),
+            type: "graphql",
+            category: category,
+            data: breadcrumbData
+        );
     }
 
     /// <inheritdoc />
-    protected override SpanStatus DetermineSpanStatus(HttpResponseMessage response) =>
+    protected internal override void OnBeforeFinishSpan(HttpResponseMessage response, ISpan span, string method, string url)
+    {
         // TODO: See how we can determine the span status for a GraphQL request... this is the guidance for Http Requests
-        // - span status must match HTTP response status code (see [Span status to HTTP status code mapping](https://develop.sentry.dev/sdk/event-payloads/span/))
-        // - when network error occurs, span status must be set to `internal_error`
-        SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
+        span.Status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode); // TODO: Don't do this if the span is errored
+        span.Description = response.RequestMessage?.With<GraphQLRequestInfo>()
+            .GetSpanDescriptionOrDefault(response.StatusCode) ?? $"{method} {url}";
+    }
 }

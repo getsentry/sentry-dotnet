@@ -536,13 +536,10 @@ namespace Sentry
     }
     public class SentryGraphQLHttpMessageHandler : Sentry.SentryMessageHandler
     {
-        public SentryGraphQLHttpMessageHandler() { }
-        public SentryGraphQLHttpMessageHandler(Sentry.IHub hub) { }
-        public SentryGraphQLHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler) { }
-        public SentryGraphQLHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler, Sentry.IHub hub) { }
-        protected override Sentry.SpanStatus DetermineSpanStatus(System.Net.Http.HttpResponseMessage response) { }
-        protected override void DoAddBreadcrumb(Sentry.IHub hub, System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
-        protected override Sentry.ISpan DoStartChildSpan(Sentry.ISpan parentSpan, System.Net.Http.HttpRequestMessage request, string method, string url) { }
+        public SentryGraphQLHttpMessageHandler(System.Net.Http.HttpMessageHandler? innerHandler = null, Sentry.IHub? hub = null) { }
+        protected override Sentry.Breadcrumb GetBreadcrumb(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
+        protected override void OnBeforeFinishSpan(System.Net.Http.HttpResponseMessage response, Sentry.ISpan span, string method, string url) { }
+        protected override void OnProcessRequest(System.Net.Http.HttpRequestMessage request, Sentry.ISpan? span, string method, string url) { }
     }
     public class SentryHttpMessageHandler : Sentry.SentryMessageHandler
     {
@@ -550,9 +547,9 @@ namespace Sentry
         public SentryHttpMessageHandler(Sentry.IHub hub) { }
         public SentryHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler) { }
         public SentryHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler, Sentry.IHub hub) { }
-        protected override Sentry.SpanStatus DetermineSpanStatus(System.Net.Http.HttpResponseMessage response) { }
-        protected override void DoAddBreadcrumb(Sentry.IHub hub, System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
-        protected override Sentry.ISpan DoStartChildSpan(Sentry.ISpan parentSpan, System.Net.Http.HttpRequestMessage request, string method, string url) { }
+        protected override Sentry.Breadcrumb GetBreadcrumb(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
+        protected override void OnBeforeFinishSpan(System.Net.Http.HttpResponseMessage response, Sentry.ISpan span, string method, string url) { }
+        protected override void OnProcessRequest(System.Net.Http.HttpRequestMessage request, Sentry.ISpan? span, string method, string url) { }
     }
     public readonly struct SentryId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SentryId>
     {
@@ -596,9 +593,9 @@ namespace Sentry
     }
     public abstract class SentryMessageHandler : System.Net.Http.DelegatingHandler
     {
-        protected abstract Sentry.SpanStatus DetermineSpanStatus(System.Net.Http.HttpResponseMessage response);
-        protected abstract void DoAddBreadcrumb(Sentry.IHub hub, System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url);
-        protected abstract Sentry.ISpan DoStartChildSpan(Sentry.ISpan parentSpan, System.Net.Http.HttpRequestMessage request, string method, string url);
+        protected abstract Sentry.Breadcrumb GetBreadcrumb(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url);
+        protected abstract void OnBeforeFinishSpan(System.Net.Http.HttpResponseMessage response, Sentry.ISpan span, string method, string url);
+        protected abstract void OnProcessRequest(System.Net.Http.HttpRequestMessage request, Sentry.ISpan? span, string method, string url);
         protected override System.Net.Http.HttpResponseMessage Send(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
     }

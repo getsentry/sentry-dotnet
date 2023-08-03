@@ -1,5 +1,4 @@
-using Sentry.Extensibility;
-using Sentry.Internal.Extensions;
+using Sentry.Infrastructure;
 
 namespace Sentry;
 
@@ -44,29 +43,28 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         ISentryFailedRequestHandler? failedRequestHandler = null)
         : base(hub, options, innerHandler, failedRequestHandler)
     {
-
     }
 
     /// <inheritdoc />
-    protected override ISpan DoStartChildSpan(ISpan parentSpan, HttpRequestMessage request, string method, string url)
+    protected internal override void OnProcessRequest(HttpRequestMessage request, ISpan? span, string method, string url)
     {
-        return parentSpan.StartChild("http.client", $"{method} {url}");
     }
 
     /// <inheritdoc />
-    protected override void DoAddBreadcrumb(IHub hub, HttpResponseMessage response, ISpan? span, string method,
-        string url)
-    {
-        var breadcrumbData = new Dictionary<string, string>
-        {
-            {"url", url},
-            {"method", method},
-            {"status_code", ((int) response.StatusCode).ToString()}
-        };
-        hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
-    }
+    protected internal override Breadcrumb GetBreadcrumb(HttpResponseMessage response, ISpan? span, string method, string url)
+        => new(
+            SystemClock.Clock.GetUtcNow(),
+            type: "http",
+            category: "http",
+            data: new Dictionary<string, string>
+            {
+                {"url", url},
+                {"method", method},
+                {"status_code", ((int) response.StatusCode).ToString()}
+            }
+        );
 
     /// <inheritdoc />
-    protected override SpanStatus DetermineSpanStatus(HttpResponseMessage response) =>
+    protected internal override void OnBeforeFinishSpan(HttpResponseMessage response, ISpan span, string method, string url) =>
         SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
 }

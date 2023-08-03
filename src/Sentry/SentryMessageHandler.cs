@@ -97,51 +97,57 @@ public abstract class SentryMessageHandler : DelegatingHandler
 
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
+        // TODO: We need to unpack the request even if we don't create a span... so that our breadcrumbs work
         var span = (_hub.GetSpan() is { } parentSpan)
-            ? DoStartChildSpan(parentSpan, request, method, url)
+            ? parentSpan.StartChild("http.client", $"{method} {url}")
             : null;
 
+        OnProcessRequest(request, span, method, url);
         return (span, method, url);
     }
 
     /// <summary>
-    /// Creates a <see cref="ISpan"/> for each message being handled.
+    /// Called when the request is processed.
     /// </summary>
-    /// <param name="parentSpan">The parent <see cref="ISpan"/></param>
     /// <param name="request">The <see cref="HttpRequestMessage"/></param>
+    /// <param name="span">The <see cref="ISpan"/> representing the message</param>
     /// <param name="method">The request method (in upper case)</param>
     /// <param name="url">The request url (as a string)</param>
-    /// <returns>An <see cref="ISpan"/> child of the parentSpan</returns>
-    protected abstract ISpan DoStartChildSpan(ISpan parentSpan, HttpRequestMessage request, string method, string url);
+    protected internal abstract void OnProcessRequest(HttpRequestMessage request, ISpan? span, string method, string url);
 
     /// <summary>
-    /// Adds a <see cref="Breadcrumb"/> for a each handled message.
+    /// Create a <see cref="Breadcrumb"/> for the handled message.
     /// </summary>
-    /// <param name="hub">A <see cref="IHub"/> that can be used to create the breadcrumb</param>
     /// <param name="response">The <see cref="HttpResponseMessage"/></param>
     /// <param name="span">The <see cref="ISpan"/> representing the message</param>
     /// <param name="method">The request method (in upper case)</param>
     /// <param name="url">The request url (as a string)</param>
     /// <returns></returns>
-    protected abstract void DoAddBreadcrumb(IHub hub, HttpResponseMessage response, ISpan? span, string method, string url);
+    protected internal abstract Breadcrumb GetBreadcrumb(HttpResponseMessage response, ISpan? span, string method, string url);
 
     /// <summary>
-    /// Determine the status that should be used for a handled message.
+    /// Called immediately before finishing the span. Should set the Span.Status and any other properties appropriately.
     /// </summary>
-    /// <param name="response">A <see cref="HttpResponseMessage"/></param>
-    /// <returns>The <see cref="SpanStatus"/> to use when recording Spans for this message handler</returns>
-    protected abstract SpanStatus DetermineSpanStatus(HttpResponseMessage response);
+    /// <param name="response">The <see cref="HttpResponseMessage"/></param>
+    /// <param name="span">The <see cref="ISpan"/> representing the message</param>
+    /// <param name="method">The request method (in upper case)</param>
+    /// <param name="url">The request url (as a string)</param>
+    protected internal abstract void OnBeforeFinishSpan(HttpResponseMessage response, ISpan span, string method, string url);
 
     private void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url)
     {
-        DoAddBreadcrumb(_hub, response, span, method, url);
+        var breadcrumb = GetBreadcrumb(response, span, method, url);
+        _hub.AddBreadcrumb(breadcrumb);
 
         // Create events for failed requests
         _failedRequestHandler?.HandleResponse(response);
 
         // This will handle unsuccessful status codes as well
-        var status = DetermineSpanStatus(response);
-        span?.Finish(status);
+        if (span is not null)
+        {
+            OnBeforeFinishSpan(response, span, method, url);
+            span.Finish();
+        }
     }
 
     private void AddSentryTraceHeader(HttpRequestMessage request)
