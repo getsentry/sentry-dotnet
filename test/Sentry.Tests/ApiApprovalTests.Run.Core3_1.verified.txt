@@ -534,13 +534,22 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryEvent FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class SentryHttpMessageHandler : System.Net.Http.DelegatingHandler
+    public class SentryGraphQLHttpMessageHandler : Sentry.SentryMessageHandler
+    {
+        public SentryGraphQLHttpMessageHandler(System.Net.Http.HttpMessageHandler? innerHandler = null, Sentry.IHub? hub = null) { }
+        protected override Sentry.Breadcrumb GetBreadcrumb(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
+        protected override void OnBeforeFinishSpan(System.Net.Http.HttpResponseMessage response, Sentry.ISpan span, string method, string url) { }
+        protected override void OnProcessRequest(System.Net.Http.HttpRequestMessage request, Sentry.ISpan? span, string method, string url) { }
+    }
+    public class SentryHttpMessageHandler : Sentry.SentryMessageHandler
     {
         public SentryHttpMessageHandler() { }
         public SentryHttpMessageHandler(Sentry.IHub hub) { }
         public SentryHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler) { }
         public SentryHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler, Sentry.IHub hub) { }
-        protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
+        protected override Sentry.Breadcrumb GetBreadcrumb(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
+        protected override void OnBeforeFinishSpan(System.Net.Http.HttpResponseMessage response, Sentry.ISpan span, string method, string url) { }
+        protected override void OnProcessRequest(System.Net.Http.HttpRequestMessage request, Sentry.ISpan? span, string method, string url) { }
     }
     public readonly struct SentryId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SentryId>
     {
@@ -581,6 +590,13 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryMessage FromJson(System.Text.Json.JsonElement json) { }
         public static Sentry.SentryMessage op_Implicit(string? message) { }
+    }
+    public abstract class SentryMessageHandler : System.Net.Http.DelegatingHandler
+    {
+        protected abstract Sentry.Breadcrumb GetBreadcrumb(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url);
+        protected abstract void OnBeforeFinishSpan(System.Net.Http.HttpResponseMessage response, Sentry.ISpan span, string method, string url);
+        protected abstract void OnProcessRequest(System.Net.Http.HttpRequestMessage request, Sentry.ISpan? span, string method, string url);
+        protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
     }
     public class SentryOptions
     {
