@@ -4,6 +4,12 @@
       event_id: Guid_1,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: test-release,
+        trace_id: Guid_2
       }
     },
     Items: [
@@ -21,7 +27,11 @@
             ServerName: TheMachineName,
             Level: debug,
             Request: {},
-            Contexts: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}
@@ -38,9 +48,15 @@
   },
   {
     Header: {
-      event_id: Guid_2,
+      event_id: Guid_3,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: test-release,
+        trace_id: Guid_2
       }
     },
     Items: [
@@ -58,7 +74,11 @@
             ServerName: TheMachineName,
             Level: debug,
             Request: {},
-            Contexts: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}
@@ -81,9 +101,15 @@
   },
   {
     Header: {
-      event_id: Guid_3,
+      event_id: Guid_4,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: test-release,
+        trace_id: Guid_2
       }
     },
     Items: [
@@ -101,7 +127,11 @@
             ServerName: TheMachineName,
             Level: error,
             Request: {},
-            Contexts: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}
@@ -128,9 +158,15 @@
   },
   {
     Header: {
-      event_id: Guid_4,
+      event_id: Guid_5,
       sdk: {
         name: sentry.dotnet
+      },
+      trace: {
+        environment: production,
+        public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
+        release: test-release,
+        trace_id: Guid_2
       }
     },
     Items: [
@@ -205,7 +241,11 @@
             ],
             Level: fatal,
             Request: {},
-            Contexts: {},
+            Contexts: {
+              trace: {
+                Operation: 
+              }
+            },
             User: {
               Username: TheUserName,
               IpAddress: {{auto}}

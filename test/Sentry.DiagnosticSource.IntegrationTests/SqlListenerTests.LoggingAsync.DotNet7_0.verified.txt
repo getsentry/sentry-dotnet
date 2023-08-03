@@ -16,7 +16,11 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
       Platform: csharp,
       Level: error,
       Request: {},
-      Contexts: {},
+      Contexts: {
+        trace: {
+          Operation: 
+        }
+      },
       User: {},
       Breadcrumbs: [
         {

@@ -6,10 +6,10 @@ namespace Sentry;
 public class TransactionContext : SpanContext, ITransactionContext, IHasTransactionNameSource
 {
     /// <inheritdoc />
-    public string Name { get; }
+    public string Name { get; set; }
 
     /// <inheritdoc />
-    public TransactionNameSource NameSource { get; }
+    public TransactionNameSource NameSource { get; set; }
 
     /// <summary>
     /// Whether the parent transaction of this transaction has been sampled.

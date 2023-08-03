@@ -18,6 +18,10 @@ namespace Sentry.AspNetCore;
 /// </summary>
 internal class SentryMiddleware : IMiddleware
 {
+    internal static readonly object TraceHeaderItemKey = new();
+    internal static readonly object BaggageHeaderItemKey = new();
+    internal static readonly object TransactionContextItemKey = new();
+
     private readonly Func<IHub> _getHub;
     private readonly SentryAspNetCoreOptions _options;
     private readonly IHostingEnvironment _hostingEnvironment;
@@ -90,6 +94,15 @@ internal class SentryMiddleware : IMiddleware
                 // Serverless environments flush the queue at the end of each request
                 context.Response.OnCompleted(() => hub.FlushAsync(_options.FlushTimeout));
             }
+
+            var traceHeader = context.TryGetSentryTraceHeader(_options);
+            var baggageHeader = context.TryGetBaggageHeader(_options);
+            var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader);
+
+            // Adding the headers and the TransactionContext to the context to be picked up by the Sentry tracing middleware
+            context.Items.Add(TraceHeaderItemKey, traceHeader);
+            context.Items.Add(BaggageHeaderItemKey, baggageHeader);
+            context.Items.Add(TransactionContextItemKey, transactionContext);
 
             hub.ConfigureScope(scope =>
             {
