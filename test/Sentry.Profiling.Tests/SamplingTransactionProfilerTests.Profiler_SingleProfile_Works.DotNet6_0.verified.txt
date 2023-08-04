@@ -14,6 +14,11 @@
   ],
   frames: [
     {
+      function: System.Threading.Monitor.Wait(class System.Object,int32),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
       function: System.Threading.ManualResetEventSlim.Wait(int32,value class System.Threading.CancellationToken),
       module: System.Private.CoreLib.il,
       in_app: false
@@ -40,11 +45,6 @@
     },
     {
       function: Microsoft.VisualStudio.TestPlatform.TestHost.DefaultEngineInvoker.Invoke(class System.Collections.Generic.IDictionary`2<class System.String,class System.String>),
-      module: testhost,
-      in_app: true
-    },
-    {
-      function: Microsoft.VisualStudio.TestPlatform.TestHost.Program.Run(class System.String[],class Microsoft.VisualStudio.TestPlatform.Execution.UiLanguageOverride),
       module: testhost,
       in_app: true
     },

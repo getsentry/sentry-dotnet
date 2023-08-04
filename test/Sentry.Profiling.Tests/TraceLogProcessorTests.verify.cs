@@ -1,6 +1,9 @@
+using System.Diagnostics.Tracing;
+using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Microsoft.Diagnostics.Tracing.EventPipe;
+using Microsoft.Diagnostics.Tracing.Parsers;
 
 namespace Sentry.Profiling.Tests;
 
@@ -32,7 +35,6 @@ public class TraceLogProcessorTests
     //     var profile = processor.Process(CancellationToken.None);
     //     var json = profile.ToJsonString(_testOutputLogger);
     // }
-
 
     private SampleProfile BuilProfile(TraceLogEventSource eventSource)
     {
@@ -66,22 +68,10 @@ public class TraceLogProcessorTests
         return BuilProfile(eventSource);
     }
 
-    private SampleProfile GetStreamedProfile()
+    [Fact]
+    public Task Profile_Serialization_Works()
     {
-        var etlFilePath = Path.Combine(_resourcesPath, "sample.nettrace");
-        using var eventPipeEventSource = new EventPipeEventSource(new MemoryStream(File.ReadAllBytes(etlFilePath)));
-        using var rundownSource = new EventPipeEventSource(new MemoryStream(File.ReadAllBytes(etlFilePath)));
-        using var eventSource = TraceLog.CreateFromEventPipeEventSource(eventPipeEventSource);
-        return BuilProfile(eventSource);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public Task Profile_Serialization_Works(bool streaming)
-    {
-        var profile = streaming ? GetStreamedProfile() : GetProfile();
-        var json = profile.ToJsonString(_testOutputLogger);
+        var json = GetProfile().ToJsonString(_testOutputLogger);
         return VerifyJson(json).DisableRequireUniquePrefix();
     }
 

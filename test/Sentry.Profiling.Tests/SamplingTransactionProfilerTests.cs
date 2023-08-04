@@ -89,12 +89,12 @@ public class SamplingTransactionProfilerTests
         // We "Verify" part of a profile that seems to be stable.
         var profileToVerify = new SampleProfile();
         profileToVerify.Stacks.Add(profile.Stacks[0]);
-        for (var i = 0; i < profile.Stacks[0].Count; i++)
+        for (var i = 0; i < profileToVerify.Stacks[0].Count; i++)
         {
-            profileToVerify.Frames.Add(profile.Frames[i]);
+            profileToVerify.Frames.Add(profile.Frames[profileToVerify.Stacks[0][i]]);
         }
         var json = profileToVerify.ToJsonString(_testOutputLogger);
-        return VerifyJson(json);
+        return VerifyJson(json).UniqueForRuntimeAndVersion();
     }
 
     [Fact]
