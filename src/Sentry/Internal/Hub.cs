@@ -41,11 +41,12 @@ internal class Hub : IHubEx, IDisposable
             options.LogFatal(msg);
             throw new InvalidOperationException(msg);
         }
+
         options.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
-        _ownedClient = client ?? new SentryClient(options, _randomValuesFactory);
+        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory);
         _clock = clock ?? SystemClock.Clock;
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
@@ -116,6 +117,16 @@ internal class Hub : IHubEx, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
+        var instrumenter = (context as SpanContext)?.Instrumenter;
+        if (instrumenter != _options.Instrumenter)
+        {
+            _options.LogWarning(
+                $"Attempted to start a transaction via {instrumenter} instrumentation when the SDK is" +
+                $" configured for {_options.Instrumenter} instrumentation.  The transaction will not be created.");
+
+            return NoOpTransaction.Instance;
+        }
+
         var transaction = new TransactionTracer(this, context);
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
@@ -161,7 +172,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         // Use the provided DSC, or create one based on this transaction.
-        // This must be done AFTER the sampling decision has been made.
+        // DSC creation must be done AFTER the sampling decision has been made.
         transaction.DynamicSamplingContext =
             dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
 
@@ -184,7 +195,47 @@ internal class Hub : IHubEx, IDisposable
 
     public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
-    public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
+    public SentryTraceHeader GetTraceHeader()
+    {
+        if (GetSpan()?.GetTraceHeader() is { } traceHeader)
+        {
+            return traceHeader;
+        }
+
+        // With either tracing disabled or no active span on the current scope we fall back to the propagation context
+        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        // In either case, we must not append a sampling decision.
+        return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
+    }
+
+    public BaggageHeader GetBaggage()
+    {
+        if (GetSpan() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc } )
+        {
+            return dsc.ToBaggageHeader();
+        }
+
+        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
+        return propagationContext.DynamicSamplingContext.ToBaggageHeader();
+    }
+
+    public TransactionContext ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null)
+    {
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
+        ConfigureScope(scope => scope.PropagationContext = propagationContext);
+
+        // If we have to create a new SentryTraceHeader we don't make a sampling decision
+        traceHeader ??= new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
+        return new TransactionContext(
+            name ?? string.Empty,
+            operation ?? string.Empty,
+            traceHeader);
+    }
 
     public void StartSession()
     {
@@ -272,7 +323,7 @@ internal class Hub : IHubEx, IDisposable
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
         EndSession(_clock.GetUtcNow(), status);
 
-    private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
+    private ISpan? GetLinkedSpan(SentryEvent evt)
     {
         // Find the span which is bound to the same exception
         if (evt.Exception is { } exception &&
@@ -281,13 +332,29 @@ internal class Hub : IHubEx, IDisposable
             return spanBoundToException;
         }
 
-        // Otherwise just get the currently active span on the scope (unless it's sampled out)
-        if (scope.Span is { IsSampled: not false } span)
-        {
-            return span;
-        }
-
         return null;
+    }
+
+    private void ApplyTraceContextToEvent(SentryEvent evt, ISpan span)
+    {
+        evt.Contexts.Trace.SpanId = span.SpanId;
+        evt.Contexts.Trace.TraceId = span.TraceId;
+        evt.Contexts.Trace.ParentSpanId = span.ParentSpanId;
+
+        if (span.GetTransaction() is TransactionTracer transactionTracer)
+        {
+            evt.DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+        }
+    }
+
+    private void ApplyTraceContextToEvent(SentryEvent evt, SentryPropagationContext propagationContext)
+    {
+        evt.Contexts.Trace.TraceId = propagationContext.TraceId;
+        evt.Contexts.Trace.SpanId = propagationContext.SpanId;
+        evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
+
+        propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
+        evt.DynamicSamplingContext = propagationContext.DynamicSamplingContext;
     }
 
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
@@ -324,47 +391,35 @@ internal class Hub : IHubEx, IDisposable
     {
         try
         {
-            var currentScope = ScopeManager.GetCurrent();
-            var actualScope = scope ?? currentScope.Key;
+            ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
+            var actualScope = scope ?? currentScope;
 
-            // Inject trace information from a linked span
-            if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
+            // We get the span linked to the event or fall back to the current span
+            var span = GetLinkedSpan(evt) ?? actualScope.Span;
+            if (span is not null)
             {
-                evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
-                evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
-                evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                if (span.IsSampled is not false)
+                {
+                    ApplyTraceContextToEvent(evt, span);
+                }
             }
-
-            var hasTerminalException = evt.HasTerminalException();
-            if (hasTerminalException)
+            else
             {
-                // Event contains a terminal exception -> end session as crashed
-                _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-                actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                // If there is no span on the scope (and not just no sampled one), fall back to the propagation context
+                ApplyTraceContextToEvent(evt, actualScope.PropagationContext);
             }
-            else if (evt.HasException())
-            {
-                // Event contains a non-terminal exception -> report error
-                // (this might return null if the session has already reported errors before)
-                actualScope.SessionUpdate = _sessionManager.ReportError();
-            }
-
-            // When a transaction is present, copy its DSC to the event.
-            var transaction = actualScope.Transaction as TransactionTracer;
-            evt.DynamicSamplingContext = transaction?.DynamicSamplingContext;
 
             // Now capture the event with the Sentry client on the current scope.
-            var sentryClient = currentScope.Value;
             var id = sentryClient.CaptureEvent(evt, hint, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (hasTerminalException)
+            if (evt.HasTerminalException())
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                transaction?.Finish(SpanStatus.Aborted);
+                actualScope.Transaction?.Finish(SpanStatus.Aborted);
             }
 
             return id;

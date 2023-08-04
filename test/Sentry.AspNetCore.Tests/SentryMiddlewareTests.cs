@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
+using Sentry.AspNetCore.Extensions;
 
 #if NETCOREAPP3_1_OR_GREATER
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
@@ -656,6 +657,73 @@ public class SentryMiddlewareTests
 
         var eventId = _fixture.Scope.LastEventId;
         _ = _fixture.Hub.Received().CaptureEvent(Arg.Is<SentryEvent>(e => e.EventId.Equals(eventId)));
+    }
+
+    [Fact]
+    public async Task InvokeAsync_RequestContainsSentryHeaders_ContinuesTrace()
+    {
+        SentryTraceHeader capturedTraceHeader = null;
+        BaggageHeader capturedBaggageHeader = null;
+        _fixture.Hub.When(hub => hub.ContinueTrace(Arg.Any<SentryTraceHeader>(), Arg.Any<BaggageHeader>()))
+            .Do(callInfo =>
+            {
+                capturedTraceHeader = callInfo.Arg<SentryTraceHeader>();
+                capturedBaggageHeader = callInfo.Arg<BaggageHeader>();
+            });
+
+        var sut = _fixture.GetSut();
+        var request = Substitute.For<HttpRequest>();
+        var fakeHeaders = new HeaderDictionary
+        {
+            { "Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de"},
+            { "Baggage", "sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c"},
+        };
+        _ = request.Headers.Returns(fakeHeaders);
+        _ = _fixture.HttpContext.Request.Returns(request);
+        _ = request.HttpContext.Returns(_fixture.HttpContext);
+
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+
+        _fixture.Hub.Received().ContinueTrace(Arg.Any<SentryTraceHeader>(),Arg.Any<BaggageHeader>());
+
+        Assert.NotNull(capturedTraceHeader);
+        Assert.Equal("4b4d2878507b43d3af7dd8c4ab7a96d9", capturedTraceHeader.TraceId.ToString());
+        Assert.NotNull(capturedBaggageHeader);
+        Assert.Equal("sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c", capturedBaggageHeader.ToString());
+    }
+
+    [Fact]
+    public async Task InvokeAsync_RequestContainsSentryHeaders_AddsHeadersAndTransactionContextToItems()
+    {
+        var sut = _fixture.GetSut();
+        var request = Substitute.For<HttpRequest>();
+        var fakeHeaders = new HeaderDictionary
+        {
+            { "Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de"},
+            { "Baggage", "sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c"},
+        };
+        var contextItems = new Dictionary<object, object>();
+        _fixture.HttpContext.Items.When(items => items.Add(Arg.Any<object>(), Arg.Any<object>()))
+            .Do(info =>
+            {
+                contextItems.Add(info.Args()[0], info.Args()[1]);
+            });
+        _ = request.Headers.Returns(fakeHeaders);
+        _ = _fixture.HttpContext.Request.Returns(request);
+        _ = request.HttpContext.Returns(_fixture.HttpContext);
+
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+
+        _fixture.HttpContext.Items.Received(3);
+
+        var traceHeader = contextItems[SentryMiddleware.TraceHeaderItemKey] as SentryTraceHeader;
+        Assert.NotNull(traceHeader);
+        Assert.Equal("4b4d2878507b43d3af7dd8c4ab7a96d9", traceHeader.TraceId.ToString());
+        var baggageHeader = contextItems[SentryMiddleware.BaggageHeaderItemKey] as BaggageHeader;
+        Assert.NotNull(baggageHeader);
+        Assert.Equal("sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c", baggageHeader.ToString());
+        var transactionContext = contextItems[SentryMiddleware.BaggageHeaderItemKey] as BaggageHeader;
+        Assert.NotNull(transactionContext);
     }
 
     [Fact]

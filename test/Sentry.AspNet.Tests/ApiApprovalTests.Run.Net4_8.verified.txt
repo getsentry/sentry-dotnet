@@ -3,6 +3,7 @@
     public static class HttpContextExtensions
     {
         public static void FinishSentryTransaction(this System.Web.HttpContext httpContext) { }
+        public static void StartOrContinueTrace(this System.Web.HttpContext httpContext) { }
         public static Sentry.ITransaction StartSentryTransaction(this System.Web.HttpContext httpContext) { }
     }
     public static class SentryAspNetOptionsExtensions

@@ -28,9 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{9D7E2F87
 		CONTRIBUTING.md = CONTRIBUTING.md
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
-		README.md = README.md
 		global.json = global.json
 		GlobalUsings.cs = GlobalUsings.cs
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{77454495-55EE-4B40-A089-71B9E8F82E89}"
@@ -136,7 +136,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Android", "samples\Sentry.Samples.Android\Sentry.Samples.Android.csproj", "{5CB9167E-ED23-4A67-8D3A-B66B0C5196C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.DiagnosticSource.IntegrationTests", "test\Sentry.DiagnosticSource.IntegrationTests\Sentry.DiagnosticSource.IntegrationTests.csproj", "{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.DiagnosticSource.IntegrationTests", "test\Sentry.DiagnosticSource.IntegrationTests\Sentry.DiagnosticSource.IntegrationTests.csproj", "{F8120B9C-D4CA-43DA-B5E1-1CFBA7C36E3B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Maui", "samples\Sentry.Samples.Maui\Sentry.Samples.Maui.csproj", "{EBCCABF9-F670-4C8D-AABC-4EB132961929}"
 EndProject
@@ -154,23 +154,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUtils.DeviceTests.Runne
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MauiTestUtils", "MauiTestUtils", "{3945EBC3-DDF3-4EBB-9401-B3027E87F855}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Ios", "samples\Sentry.Samples.Ios\Sentry.Samples.Ios.csproj", "{C2876321-A612-4E66-AF33-D3928FA6366F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Ios", "samples\Sentry.Samples.Ios\Sentry.Samples.Ios.csproj", "{C2876321-A612-4E66-AF33-D3928FA6366F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Testing.CrashableApp", "test\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj", "{DA3CECBB-83BE-441A-852C-077809C48307}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Testing.CrashableApp", "test\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj", "{DA3CECBB-83BE-441A-852C-077809C48307}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.MacCatalyst", "samples\Sentry.Samples.MacCatalyst\Sentry.Samples.MacCatalyst.csproj", "{3506539B-983C-44FD-BD95-1931562E7919}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.MacCatalyst", "samples\Sentry.Samples.MacCatalyst\Sentry.Samples.MacCatalyst.csproj", "{3506539B-983C-44FD-BD95-1931562E7919}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.Blazor.Server", "samples\Sentry.Samples.AspNetCore.Blazor.Server\Sentry.Samples.AspNetCore.Blazor.Server.csproj", "{70066C6C-0A18-4322-A02A-9A0DFE59C02B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AspNetCore.Blazor.Server", "samples\Sentry.Samples.AspNetCore.Blazor.Server\Sentry.Samples.AspNetCore.Blazor.Server.csproj", "{70066C6C-0A18-4322-A02A-9A0DFE59C02B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Bindings.Android", "src\Sentry.Bindings.Android\Sentry.Bindings.Android.csproj", "{9A23DA57-3F0B-4646-A37A-71A4CE7C94CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Bindings.Android", "src\Sentry.Bindings.Android\Sentry.Bindings.Android.csproj", "{9A23DA57-3F0B-4646-A37A-71A4CE7C94CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Bindings.Cocoa", "src\Sentry.Bindings.Cocoa\Sentry.Bindings.Cocoa.csproj", "{F533FD6D-1E10-4F06-BE3A-3B3C713A75A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Bindings.Cocoa", "src\Sentry.Bindings.Cocoa\Sentry.Bindings.Cocoa.csproj", "{F533FD6D-1E10-4F06-BE3A-3B3C713A75A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Android.AssemblyReader.Tests", "test\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj", "{5E12E053-22AF-4184-8581-3FCFD225617D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Android.AssemblyReader.Tests", "test\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj", "{5E12E053-22AF-4184-8581-3FCFD225617D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.TestUtils", "test\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj", "{C96CB65D-3D2D-404E-85C0-69A3FC03B48F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AspNetCore.TestUtils", "test\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj", "{C96CB65D-3D2D-404E-85C0-69A3FC03B48F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Android.AssemblyReader", "src\Sentry.Android.AssemblyReader\Sentry.Android.AssemblyReader.csproj", "{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Android.AssemblyReader", "src\Sentry.Android.AssemblyReader\Sentry.Android.AssemblyReader.csproj", "{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Profiling", "src\Sentry.Profiling\Sentry.Profiling.csproj", "{BD6CEF44-E05E-4C22-8D2F-0558A93DD2D6}"
 EndProject
@@ -178,11 +178,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Profiling.Tests", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.Console.Profiling", "samples\Sentry.Samples.Console.Profiling\Sentry.Samples.Console.Profiling.csproj", "{0F84C0BB-FDD4-43A9-B594-923EB10C8E3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker", "src\Sentry.AzureFunctions.Worker\Sentry.AzureFunctions.Worker.csproj", "{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AzureFunctions.Worker", "src\Sentry.AzureFunctions.Worker\Sentry.AzureFunctions.Worker.csproj", "{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AzureFunctions.Worker", "samples\Sentry.Samples.AzureFunctions.Worker\Sentry.Samples.AzureFunctions.Worker.csproj", "{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.AzureFunctions.Worker", "samples\Sentry.Samples.AzureFunctions.Worker\Sentry.Samples.AzureFunctions.Worker.csproj", "{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.OpenTelemetry", "src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj", "{94C5E990-50EE-462F-B83F-B4357F549500}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.OpenTelemetry.Tests", "test\Sentry.OpenTelemetry.Tests\Sentry.OpenTelemetry.Tests.csproj", "{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.OpenTelemetry.AspNetCore", "samples\Sentry.Samples.OpenTelemetry.AspNetCore\Sentry.Samples.OpenTelemetry.AspNetCore.csproj", "{2502D3A0-7628-4768-A430-0854BEB1E7A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentry.Samples.OpenTelemetry.Console", "samples\Sentry.Samples.OpenTelemetry.Console\Sentry.Samples.OpenTelemetry.Console.csproj", "{A9176F5B-0CA6-4479-BE64-A3C3CEA632D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -394,15 +402,15 @@ Global
 		{C2876321-A612-4E66-AF33-D3928FA6366F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2876321-A612-4E66-AF33-D3928FA6366F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C2876321-A612-4E66-AF33-D3928FA6366F}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{DA3CECBB-83BE-441A-852C-077809C48307}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA3CECBB-83BE-441A-852C-077809C48307}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DA3CECBB-83BE-441A-852C-077809C48307}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DA3CECBB-83BE-441A-852C-077809C48307}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA3CECBB-83BE-441A-852C-077809C48307}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA3CECBB-83BE-441A-852C-077809C48307}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3506539B-983C-44FD-BD95-1931562E7919}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3506539B-983C-44FD-BD95-1931562E7919}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3506539B-983C-44FD-BD95-1931562E7919}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{3506539B-983C-44FD-BD95-1931562E7919}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3506539B-983C-44FD-BD95-1931562E7919}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3506539B-983C-44FD-BD95-1931562E7919}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{70066C6C-0A18-4322-A02A-9A0DFE59C02B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{70066C6C-0A18-4322-A02A-9A0DFE59C02B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70066C6C-0A18-4322-A02A-9A0DFE59C02B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -451,6 +459,22 @@ Global
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94C5E990-50EE-462F-B83F-B4357F549500}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94C5E990-50EE-462F-B83F-B4357F549500}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94C5E990-50EE-462F-B83F-B4357F549500}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94C5E990-50EE-462F-B83F-B4357F549500}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9176F5B-0CA6-4479-BE64-A3C3CEA632D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9176F5B-0CA6-4479-BE64-A3C3CEA632D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9176F5B-0CA6-4479-BE64-A3C3CEA632D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9176F5B-0CA6-4479-BE64-A3C3CEA632D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -523,6 +547,10 @@ Global
 		{DDDF66BE-EC0E-4488-8A35-3D8BEB63F2DB} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{C38B2A7A-0B21-41BA-8AE4-5D0A2AB6B029} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 		{CCABBDB9-CDEF-4DE6-9264-69797E8831DF} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{94C5E990-50EE-462F-B83F-B4357F549500} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
+		{C51A781A-C568-4E1A-834C-8E4EFA3C5B54} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{2502D3A0-7628-4768-A430-0854BEB1E7A5} = {77454495-55EE-4B40-A089-71B9E8F82E89}
+		{A9176F5B-0CA6-4479-BE64-A3C3CEA632D4} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

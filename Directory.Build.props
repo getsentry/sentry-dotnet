@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.33.0</Version>
+    <Version>3.34.0</Version>
     <LangVersion>11</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
@@ -85,8 +85,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.*" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.*" PrivateAssets="All" />
+    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="4.3.0" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Import the root global usings, except for samples. -->
@@ -100,7 +100,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.18.1</SentryCLIVersion>
+    <SentryCLIVersion>2.20.3</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

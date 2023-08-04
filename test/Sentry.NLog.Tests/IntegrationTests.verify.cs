@@ -20,6 +20,7 @@ public class IntegrationTests
                 options.IncludeEventDataOnBreadcrumbs = true;
                 options.MinimumBreadcrumbLevel = LogLevel.Debug;
                 options.Dsn = ValidDsn;
+                options.Release = "test-release";
                 options.User = new SentryNLogUser
                 {
                     Id = "${scopeproperty:item=id}",
@@ -76,6 +77,7 @@ public class IntegrationTests
                 options.Transport = transport;
                 options.Dsn = ValidDsn;
                 options.AttachStacktrace = false;
+                options.Release = "test-release";
             });
 
         LogManager.Configuration = configuration;

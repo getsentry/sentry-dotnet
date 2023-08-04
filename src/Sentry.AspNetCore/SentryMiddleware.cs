@@ -7,6 +7,7 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Reflection;
 
@@ -17,6 +18,10 @@ namespace Sentry.AspNetCore;
 /// </summary>
 internal class SentryMiddleware : IMiddleware
 {
+    internal static readonly object TraceHeaderItemKey = new();
+    internal static readonly object BaggageHeaderItemKey = new();
+    internal static readonly object TransactionContextItemKey = new();
+
     private readonly Func<IHub> _getHub;
     private readonly SentryAspNetCoreOptions _options;
     private readonly IHostingEnvironment _hostingEnvironment;
@@ -90,6 +95,15 @@ internal class SentryMiddleware : IMiddleware
                 context.Response.OnCompleted(() => hub.FlushAsync(_options.FlushTimeout));
             }
 
+            var traceHeader = context.TryGetSentryTraceHeader(_options);
+            var baggageHeader = context.TryGetBaggageHeader(_options);
+            var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader);
+
+            // Adding the headers and the TransactionContext to the context to be picked up by the Sentry tracing middleware
+            context.Items.Add(TraceHeaderItemKey, traceHeader);
+            context.Items.Add(BaggageHeaderItemKey, baggageHeader);
+            context.Items.Add(TransactionContextItemKey, transactionContext);
+
             hub.ConfigureScope(scope =>
             {
                 // At the point lots of stuff from the request are not yet filled
@@ -116,6 +130,7 @@ internal class SentryMiddleware : IMiddleware
 
             try
             {
+                var originalMethod = context.Request.Method;
                 await next(context).ConfigureAwait(false);
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).
@@ -126,6 +141,14 @@ internal class SentryMiddleware : IMiddleware
                         "This exception was caught by an ASP.NET Core custom error handler. " +
                         "The web server likely returned a customized error page as a result of this exception.";
 
+#if NET6_0_OR_GREATER
+                    hub.ConfigureScope(scope =>
+                    {
+                        scope.ExceptionProcessors.Add(
+                            new ExceptionHandlerFeatureProcessor(originalMethod, exceptionFeature)
+                            );
+                    });
+#endif
                     CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
                 }
 
@@ -151,7 +174,7 @@ internal class SentryMiddleware : IMiddleware
             }
 
             // Some environments disables the application after sending a request,
-            // making the OnCompleted flush to not work.
+            // preventing OnCompleted flush from working.
             Task FlushBeforeCompleted() => hub.FlushAsync(_options.FlushTimeout);
 
             void CaptureException(Exception e, SentryId evtId, string mechanism, string description)

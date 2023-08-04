@@ -19,6 +19,10 @@ namespace Sentry
         UnrealLogs = 4,
         ViewHierarchy = 5,
     }
+    public class BaggageHeader
+    {
+        public override string ToString() { }
+    }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
     public sealed class Breadcrumb : Sentry.IJsonSerializable
     {
@@ -224,7 +228,9 @@ namespace Sentry
         Sentry.SentryId LastEventId { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
+        Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null);
         void EndSession(Sentry.SessionEndStatus status = 0);
+        Sentry.BaggageHeader? GetBaggage();
         Sentry.ISpan? GetSpan();
         Sentry.SentryTraceHeader? GetTraceHeader();
         void PauseSession();
@@ -317,6 +323,11 @@ namespace Sentry
         All = 1,
         AllButFirst = 2,
         None = 3,
+    }
+    public enum Instrumenter
+    {
+        Sentry = 0,
+        OpenTelemetry = 1,
     }
     public static class MeasurementExtensions
     {
@@ -597,7 +608,9 @@ namespace Sentry
         public bool CaptureFailedRequests { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }
+        [System.Obsolete("Use CreateHttpMessageHandler instead")]
         public System.Func<System.Net.Http.HttpClientHandler>? CreateHttpClientHandler { get; set; }
+        public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
         public bool Debug { get; set; }
         public System.Net.DecompressionMethods DecompressionMethods { get; set; }
         public Sentry.DeduplicateMode DeduplicateMode { get; set; }
@@ -726,11 +739,13 @@ namespace Sentry
         public static void Close() { }
         public static void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public static Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public static void EndSession(Sentry.SessionEndStatus status = 0) { }
         public static void Flush() { }
         public static void Flush(System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync() { }
         public static System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
+        public static Sentry.BaggageHeader? GetBaggage() { }
         public static Sentry.ISpan? GetSpan() { }
         public static Sentry.SentryTraceHeader? GetTraceHeader() { }
         public static System.IDisposable Init() { }
@@ -881,8 +896,9 @@ namespace Sentry
     {
         public SpanContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled) { }
         public string? Description { get; }
+        public Sentry.Instrumenter Instrumenter { get; }
         public bool? IsSampled { get; }
-        public string Operation { get; }
+        public string Operation { get; set; }
         public Sentry.SpanId? ParentSpanId { get; }
         public Sentry.SpanId SpanId { get; }
         public Sentry.SpanStatus? Status { get; }
@@ -1041,8 +1057,8 @@ namespace Sentry
         public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled) { }
         public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled, Sentry.TransactionNameSource nameSource) { }
         public bool? IsParentSampled { get; }
-        public string Name { get; }
-        public Sentry.TransactionNameSource NameSource { get; }
+        public string Name { get; set; }
+        public Sentry.TransactionNameSource NameSource { get; set; }
     }
     public enum TransactionNameSource
     {
@@ -1199,9 +1215,11 @@ namespace Sentry.Extensibility
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public void Dispose() { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
+        public Sentry.BaggageHeader? GetBaggage() { }
         public Sentry.ISpan? GetSpan() { }
         public Sentry.SentryTraceHeader? GetTraceHeader() { }
         public void PauseSession() { }
@@ -1238,8 +1256,10 @@ namespace Sentry.Extensibility
         public void CaptureUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
+        public Sentry.BaggageHeader? GetBaggage() { }
         public Sentry.ISpan? GetSpan() { }
         public Sentry.SentryTraceHeader? GetTraceHeader() { }
         public void PauseSession() { }

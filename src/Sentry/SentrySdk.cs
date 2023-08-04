@@ -18,7 +18,7 @@ public static partial class SentrySdk
     public static class SentrySdk
 #endif
 {
-    private static IHub CurrentHub = DisabledHub.Instance;
+    internal static IHub CurrentHub = DisabledHub.Instance;
 
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
 
@@ -611,11 +611,32 @@ public static partial class SentrySdk
         => CurrentHub.GetSpan();
 
     /// <summary>
-    /// Gets the Sentry trace header.
+    /// Gets the Sentry trace header of the parent that allows tracing across services
     /// </summary>
     [DebuggerStepThrough]
     public static SentryTraceHeader? GetTraceHeader()
         => CurrentHub.GetTraceHeader();
+
+    /// <summary>
+    /// Gets the Sentry "baggage" header that allows tracing across services
+    /// </summary>
+    [DebuggerStepThrough]
+    public static BaggageHeader? GetBaggage()
+        => CurrentHub.GetBaggage();
+
+    /// <summary>
+    /// Continues a trace based on HTTP header values.
+    /// </summary>
+    /// <remarks>
+    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static TransactionContext ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null)
+        => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]

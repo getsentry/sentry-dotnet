@@ -304,10 +304,37 @@ public class SentryOptions
     /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/environments/"/>
     public string? Environment { get; set; }
 
+    private string? _dsn;
     /// <summary>
     /// The Data Source Name of a given project in Sentry.
     /// </summary>
-    public string? Dsn { get; set; }
+    public string? Dsn {
+        get => _dsn;
+        set
+        {
+            _dsn = value;
+            _parsedDsn = null;
+        }
+    }
+
+    internal Dsn? _parsedDsn;
+    internal Dsn ParsedDsn => _parsedDsn ??= Sentry.Dsn.Parse(Dsn!);
+
+    private readonly Lazy<string> _sentryBaseUrl;
+
+    internal bool IsSentryRequest(string? requestUri)=>
+        !string.IsNullOrEmpty(requestUri) && IsSentryRequest(new Uri(requestUri));
+
+    internal bool IsSentryRequest(Uri? requestUri)
+    {
+        if (string.IsNullOrEmpty(Dsn) || requestUri is null)
+        {
+            return false;
+        }
+
+        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+        return string.Equals(requestBaseUrl, _sentryBaseUrl.Value, StringComparison.OrdinalIgnoreCase);
+    }
 
     private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
 
@@ -525,9 +552,29 @@ public class SentryOptions
     public IWebProxy? HttpProxy { get; set; }
 
     /// <summary>
-    /// Creates the inner most <see cref="HttpClientHandler"/>.
+    /// private field to hold the <see cref="CreateHttpClientHandler"/>, since a typecheck or cast won't work here.
     /// </summary>
-    public Func<HttpClientHandler>? CreateHttpClientHandler { get; set; }
+    private Func<HttpClientHandler>? _createClientHandler = null;
+
+    /// <summary>
+    /// Creates the inner most <see cref="HttpClientHandler"/>.
+    /// Deprecated in favor of <see cref="CreateHttpMessageHandler"/>.
+    /// </summary>
+    [Obsolete("Use CreateHttpMessageHandler instead")]
+    public Func<HttpClientHandler>? CreateHttpClientHandler
+    {
+        get => _createClientHandler;
+        set
+        {
+            CreateHttpMessageHandler = value;
+            _createClientHandler = value;
+        }
+    }
+
+    /// <summary>
+    /// Creates the inner most <see cref="HttpMessageHandler"/>.
+    /// </summary>
+    public Func<HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
 
     /// <summary>
     /// A callback invoked when a <see cref="SentryClient"/> is created.
@@ -900,6 +947,16 @@ public class SentryOptions
     public Func<bool>? CrashedLastRun { get; set; }
 
     /// <summary>
+    /// <para>
+    ///     Gets the <see cref="Instrumenter"/> used to create spans.
+    /// </para>
+    /// <para>
+    ///     Defaults to <see cref="Instrumenter.Sentry"/>
+    /// </para>
+    /// </summary>
+    internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
+
+    /// <summary>
     /// This property is no longer used.  It will be removed in a future version.
     /// </summary>
     /// <remarks>
@@ -1097,5 +1154,10 @@ public class SentryOptions
             "Sentry.Samples"
         };
 #endif
+        _sentryBaseUrl = new Lazy<string>(() =>
+            new Uri(Dsn ?? string.Empty).GetComponents(
+                UriComponents.SchemeAndServer,
+                UriFormat.Unescaped)
+        );
     }
 }

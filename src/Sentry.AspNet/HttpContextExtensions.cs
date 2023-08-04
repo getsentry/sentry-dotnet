@@ -56,6 +56,25 @@ public static class HttpContextExtensions
     }
 
     /// <summary>
+    /// Starts or continues a Sentry trace.
+    /// </summary>
+    public static void StartOrContinueTrace(this HttpContext httpContext)
+    {
+        var options = SentrySdk.CurrentOptions;
+
+        var traceHeader = TryGetSentryTraceHeader(httpContext, options);
+        var baggageHeader = TryGetBaggageHeader(httpContext, options);
+
+        var method = httpContext.Request.HttpMethod;
+        var path = httpContext.Request.Path;
+
+        var transactionName = $"{method} {path}";
+        const string operation = "http.server";
+
+        SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, operation);
+    }
+
+    /// <summary>
     /// Starts a new Sentry transaction that encompasses the currently executing HTTP request.
     /// </summary>
     public static ITransaction StartSentryTransaction(this HttpContext httpContext)
@@ -65,13 +84,13 @@ public static class HttpContextExtensions
         var options = SentrySdk.CurrentOptions;
 
         var traceHeader = TryGetSentryTraceHeader(httpContext, options);
+        var baggageHeader = TryGetBaggageHeader(httpContext, options);
 
         var transactionName = $"{method} {path}";
         const string transactionOperation = "http.server";
 
-        var transactionContext = traceHeader is not null
-            ? new TransactionContext(transactionName, transactionOperation, traceHeader, TransactionNameSource.Url)
-            : new TransactionContext(transactionName, transactionOperation, TransactionNameSource.Url);
+        var transactionContext = SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, transactionOperation);
+        transactionContext.NameSource = TransactionNameSource.Url;
 
         var customSamplingContext = new Dictionary<string, object?>(3, StringComparer.Ordinal)
         {
@@ -81,10 +100,9 @@ public static class HttpContextExtensions
         };
 
         // Set the Dynamic Sampling Context from the baggage header, if it exists.
-        var baggageHeader = TryGetBaggageHeader(httpContext, options);
         var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
-        if (traceHeader is { } && baggageHeader is null)
+        if (traceHeader is not null && baggageHeader is null)
         {
             // We received a sentry-trace header without a baggage header, which indicates the request
             // originated from an older SDK that doesn't support dynamic sampling.
@@ -99,6 +117,11 @@ public static class HttpContextExtensions
 
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;
+
+        if (options?.SendDefaultPii is true)
+        {
+            transaction.Request.Cookies = string.Join("; ", httpContext.Request.Cookies.AllKeys.Select(x => $"{x}={httpContext.Request.Cookies[x]?.Value}"));
+        }
 
         return transaction;
     }

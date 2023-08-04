@@ -15,7 +15,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        var transactionName = await GetHttpTransactionNameAsync(context).ConfigureAwait(false) ?? context.FunctionDefinition.Name;
+        var transactionName = await GetHttpTransactionNameAsync(context) ?? context.FunctionDefinition.Name;
         var transaction = _hub.StartTransaction(transactionName, "function");
         Exception? unhandledException = null;
 
@@ -35,7 +35,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            await next(context).ConfigureAwait(false);
+            await next(context);
         }
         catch (Exception exception)
         {
@@ -76,7 +76,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
     private static async Task<string?> GetHttpTransactionNameAsync(FunctionContext context)
     {
         // Get the HTTP request data
-        var requestData = await context.GetHttpRequestDataAsync().ConfigureAwait(false);
+        var requestData = await context.GetHttpRequestDataAsync();
         if (requestData is null)
         {
             // not an HTTP trigger

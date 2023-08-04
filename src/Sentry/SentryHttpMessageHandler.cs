@@ -156,13 +156,11 @@ public class SentryHttpMessageHandler : DelegatingHandler
 
     private void AddBaggageHeader(HttpRequestMessage request)
     {
-        var transaction = _hub.GetSpan();
-        if (transaction is not TransactionTracer {DynamicSamplingContext: {IsEmpty: false} dsc})
+        var baggage = _hub.GetBaggage();
+        if (baggage is null)
         {
             return;
         }
-
-        var baggage = dsc.ToBaggageHeader();
 
         if (request.Headers.TryGetValues(BaggageHeader.HttpHeaderName, out var baggageHeaders))
         {

@@ -2,10 +2,70 @@
 
 ## Unreleased
 
+### Features
+
+- Distributed tracing now works independently of the performance feature. This allows you to connect errors to other Sentry instrumented applications ([#2493](https://github.com/getsentry/sentry-dotnet/pull/2493))
+- Added Sampling Decision to Trace Envelope Header ([#2495](https://github.com/getsentry/sentry-dotnet/pull/2495))
+- Add MinimumEventLevel to Sentry.Log4Net and convert events below it to breadcrumbs ([#2505](https://github.com/getsentry/sentry-dotnet/pull/2505))
+
+### Fixes
+
+- Fixed baggage propagation when an exception is thrown from middleware ([#2487](https://github.com/getsentry/sentry-dotnet/pull/2487))
+- Fix Durable Functions preventing orchestrators from completing ([#2491](https://github.com/getsentry/sentry-dotnet/pull/2491))
+- Re-enable HubTests.FlushOnDispose_SendsEnvelope ([#2492](https://github.com/getsentry/sentry-dotnet/pull/2492))
+- Fixed SDK not sending exceptions via Blazor WebAssembly due to a `PlatformNotSupportedException` ([#2506](https://github.com/getsentry/sentry-dotnet/pull/2506))
+- Align SDK with docs regarding session update for dropped events ([#2496](https://github.com/getsentry/sentry-dotnet/pull/2496))
+- Introduced `HttpMessageHandler` in favor of the now deprecated `HttpClientHandler` on the options. This allows the SDK to support NSUrlSessionHandler on iOS ([#2503](https://github.com/getsentry/sentry-dotnet/pull/2503))
+- Using `Activity.RecordException` now correctly updates the error status of OpenTelemetry Spans ([#2515](https://github.com/getsentry/sentry-dotnet/pull/2515))
+- Fixed Transaction name not reporting correctly when using UseExceptionHandler ([#2511](https://github.com/getsentry/sentry-dotnet/pull/2511))
+- log4net logging Level.All now maps to SentryLevel.Debug ([#2522]([url](https://github.com/getsentry/sentry-dotnet/pull/2522)))
+
+### Dependencies
+
+- Bump Java SDK from v6.25.1 to v6.27.0 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484), [#2498](https://github.com/getsentry/sentry-dotnet/pull/2498), [#2517](https://github.com/getsentry/sentry-dotnet/pull/2517))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6270)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.25.1...6.27.0)
+- Bump CLI from v2.19.4 to v2.20.3 ([#2509](https://github.com/getsentry/sentry-dotnet/pull/2509), [#2518](https://github.com/getsentry/sentry-dotnet/pull/2518), [#2527](https://github.com/getsentry/sentry-dotnet/pull/2527))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2203)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.19.4...2.20.3)
+- Bump Cocoa SDK from v8.8.0 to v8.9.4 ([#2479](https://github.com/getsentry/sentry-dotnet/pull/2479), [#2483](https://github.com/getsentry/sentry-dotnet/pull/2483), [#2500](https://github.com/getsentry/sentry-dotnet/pull/2500), [#2510](https://github.com/getsentry/sentry-dotnet/pull/2510), [#2531](https://github.com/getsentry/sentry-dotnet/pull/2531))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#894)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.8.0...8.9.4)
+
+## 3.34.0
+
+### Features
+
+- Open Telemetry Support ([#2453](https://github.com/getsentry/sentry-dotnet/pull/2453))
+- Added a MSBuild property `SentryUploadAndroidProguardMapping` to automatically upload the Proguard mapping file when targeting Android ([#2455](https://github.com/getsentry/sentry-dotnet/pull/2455))
+- Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
+- Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
+- Support transaction finishing automatically with 'idle timeout' ([#2452](https://github.com/getsentry/sentry-dotnet/pull/2452))
+
+### Fixes
+
+- Builds targeting Android with `r8` enabled no longer crash during SDK init. The package now contains the required proguard rules ([#2450]https://github.com/getsentry/sentry-dotnet/pull/2450)
+- Fix Sentry logger options for MAUI and Azure Functions ([#2423](https://github.com/getsentry/sentry-dotnet/pull/2423))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.7.3 to v8.8.0 ([#2427](https://github.com/getsentry/sentry-dotnet/pull/2427), [#2430](https://github.com/getsentry/sentry-dotnet/pull/2430))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#880)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.7.3...8.8.0)
+- Bump CLI from v2.18.1 to v2.19.4 ([#2428](https://github.com/getsentry/sentry-dotnet/pull/2428), [#2431](https://github.com/getsentry/sentry-dotnet/pull/2431), [#2451](https://github.com/getsentry/sentry-dotnet/pull/2451), [#2454](https://github.com/getsentry/sentry-dotnet/pull/2454))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2194)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.1...2.19.4)
+- Bump Java SDK from v6.22.0 to v6.25.1 ([#2429](https://github.com/getsentry/sentry-dotnet/pull/2429), [#2440](https://github.com/getsentry/sentry-dotnet/pull/2440), [#2458](https://github.com/getsentry/sentry-dotnet/pull/2458), [#2476](https://github.com/getsentry/sentry-dotnet/pull/2476))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6251)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.22.0...6.25.1)
+
+## 3.33.1
+
 ### Fixes
 
 - SentryHttpMessageHandler added when AddHttpClient is before UseSentry ([#2390](https://github.com/getsentry/sentry-dotnet/pull/2390))
 - Set the native sdk name for Android ([#2389](https://github.com/getsentry/sentry-dotnet/pull/2389))
+- Fix db connection spans not finishing ([#2398](https://github.com/getsentry/sentry-dotnet/pull/2398))
 - Various .NET MAUI fixes / improvements ([#2403](https://github.com/getsentry/sentry-dotnet/pull/2403))
   - The battery level was being reported incorrectly due to percentage multiplier.
   - The device architecture (x64, arm64, etc.) is now reported
@@ -14,15 +74,19 @@
 - Reduce debug files uploaded ([#2404](https://github.com/getsentry/sentry-dotnet/pull/2404))
 - Fix system frames being marked as "in-app" ([#2408](https://github.com/getsentry/sentry-dotnet/pull/2408))
   - NOTE: This important fix corrects a value that is used during issue grouping, so you may receive new alerts for existing issues after deploying this update.
+- DB Connection spans presented poorly ([#2409](https://github.com/getsentry/sentry-dotnet/pull/2409))
+- Populate scope's Cookies property ([#2411](https://github.com/getsentry/sentry-dotnet/pull/2411))
+- Fix UWP GateKeeper errors ([#2415](https://github.com/getsentry/sentry-dotnet/pull/2415))
+- Fix sql client db name ([#2418](https://github.com/getsentry/sentry-dotnet/pull/2418))
 
 ### Dependencies
 
 - Bump Cocoa SDK from v8.7.2 to v8.7.3 ([#2394](https://github.com/getsentry/sentry-dotnet/pull/2394))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#873)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.7.2...8.7.3)
-- Bump Java SDK from v6.19.1 to v6.21.0 ([#2395](https://github.com/getsentry/sentry-dotnet/pull/2395), [#2405](https://github.com/getsentry/sentry-dotnet/pull/2405))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6210)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.19.1...6.21.0)
+- Bump Java SDK from v6.19.1 to v6.22.0 ([#2395](https://github.com/getsentry/sentry-dotnet/pull/2395), [#2405](https://github.com/getsentry/sentry-dotnet/pull/2405), [#2417](https://github.com/getsentry/sentry-dotnet/pull/2417))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.19.1...6.22.0)
 
 ## 3.33.0
 

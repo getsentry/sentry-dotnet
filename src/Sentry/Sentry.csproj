@@ -4,6 +4,7 @@
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
@@ -95,33 +96,29 @@
     <ItemGroup>
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Darwin-arm64" FileHash="ea7d526282fabbaed267ac7504bfb227a67c372bc9c5ada9434489d659a09384" />
+        Include="sentry-cli-Darwin-arm64" FileHash="9b39ca8f6b633f971753c99b2742cfc4f29d84357e04e6ddf97ff436259f1d41" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Darwin-x86_64" FileHash="b3007f699e5c75e4a03706914ebeae9506de0dcafa4b136eacde28b8906db317" />
+        Include="sentry-cli-Darwin-x86_64" FileHash="a260e81796edf73e54320c8d6bf1839bfe9be5a8781ccce7882b262200955bd2" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Linux-aarch64" FileHash="1e85b33e06706274cba807627cf7d57960e13d90aa9a8a529c241665591f6a00" />
+        Include="sentry-cli-Linux-aarch64" FileHash="fae5777deee53329b8c427fb9eda86bd4f01412b73d0d672b9485e6f95be0247" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Linux-i686" FileHash="152547d8e93d1fd3c06f03d640e056261f908195014ccc9cb5592d3911342260" />
+        Include="sentry-cli-Linux-i686" FileHash="b9e36903099d050892a977f5490a5a92dc43907b39331e291cec49270e47d56a" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Linux-x86_64" FileHash="551d26ad4067b82e7a63139c4898f4d5294112746fcd7f0c7e61d08dff37ea33" />
+        Include="sentry-cli-Linux-x86_64" FileHash="f2d4eb5a5d338278b7c38d5fa16a33026602827c6fac5cdb7b35b909c91de001" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Windows-i686.exe" FileHash="5083108cdfe437b5d33d7a07214c09b6bce2fc802c800e86519b711de22d6400" />
+        Include="sentry-cli-Windows-i686.exe" FileHash="1f874311502f39d2a0a5d192b785a66d5bb8fd0cbca75b992aff86acfad7a916" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')"
-        Include="sentry-cli-Windows-x86_64.exe" FileHash="ecac161350b928081ec748a831bd687a60d42fcbbed059a6c96927084504d225" />
+        Include="sentry-cli-Windows-x86_64.exe" FileHash="8762fb82bc12e3a9642013ef91a495d459d533ff6d1a0112baaf776c7540aef1" />
     </ItemGroup>
 
     <!-- Download the files -->
-    <DownloadFile
-      SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)"
-      DestinationFolder="$(SentryCLIDirectory)"
-      Condition="!Exists('$(SentryCLIDirectory)%(Identity)')"
-      Retries="3">
+    <DownloadFile SourceUrl="https://downloads.sentry-cdn.com/sentry-cli/$(SentryCLIVersion)/%(SentryCLIDownload.Identity)" DestinationFolder="$(SentryCLIDirectory)" Condition="!Exists('$(SentryCLIDirectory)%(Identity)')" Retries="3">
       <Output TaskParameter="DownloadedFile" ItemName="SentryCLIDownloadedFile" />
     </DownloadFile>
 
@@ -165,6 +162,9 @@
     <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.NLog" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.NLog.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.OpenTelemetry" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.OpenTelemetry.AspNetCore" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.OpenTelemetry.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Profiling" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Profiling.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Serilog" PublicKey="$(SentryPublicKey)" />
