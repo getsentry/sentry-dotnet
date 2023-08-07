@@ -69,7 +69,7 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options is {IsTracingEnabled: true, iOS.EnableCocoaSdkTracing: true})
+        if (options is {IsPerformanceMonitoringEnabled: true, iOS.EnableCocoaSdkTracing: true})
         {
             if (options.EnableTracing != null)
             {
