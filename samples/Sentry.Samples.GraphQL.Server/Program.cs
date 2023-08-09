@@ -80,7 +80,6 @@ public static class Program
             app.UseGraphQLAltair(); // Exposed at /ui/altair
         }
 
-        app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
 

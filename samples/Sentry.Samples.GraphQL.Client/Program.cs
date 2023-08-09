@@ -13,7 +13,6 @@ using Sentry;
 SentrySdk.Init(options =>
 {
     // options.Dsn = "... Your DSN ...";
-    options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
     options.EnableTracing = true;
@@ -33,7 +32,7 @@ var graphClient = new GraphQLHttpClient(
 var notesRequest = new GraphQLRequest
 {
     Query = @"
-        {
+        getAllNotes {
           notes {
             id,
             message
