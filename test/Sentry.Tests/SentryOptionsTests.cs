@@ -52,14 +52,14 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_Default_False()
+    public void IsPerformanceMonitoringEnabled_Default_False()
     {
         var sut = new SentryOptions();
         Assert.False(sut.IsPerformanceMonitoringEnabled);
     }
 
     [Fact]
-    public void IsTracingEnabled_EnableTracing_True()
+    public void IsPerformanceMonitoringEnabled_EnableTracing_True()
     {
         var sut = new SentryOptions
         {
@@ -70,7 +70,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_EnableTracing_False()
+    public void IsPerformanceMonitoringEnabled_EnableTracing_False()
     {
         var sut = new SentryOptions
         {
@@ -81,7 +81,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_TracesSampleRate_Zero()
+    public void IsPerformanceMonitoringEnabled_TracesSampleRate_Zero()
     {
         var sut = new SentryOptions
         {
@@ -92,7 +92,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_TracesSampleRate_GreaterThanZero()
+    public void IsPerformanceMonitoringEnabled_TracesSampleRate_GreaterThanZero()
     {
         var sut = new SentryOptions
         {
@@ -103,7 +103,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_TracesSampleRate_LessThanZero()
+    public void IsPerformanceMonitoringEnabled_TracesSampleRate_LessThanZero()
     {
         var sut = new SentryOptions();
         Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -111,7 +111,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_TracesSampleRate_GreaterThanOne()
+    public void IsPerformanceMonitoringEnabled_TracesSampleRate_GreaterThanOne()
     {
         var sut = new SentryOptions();
         Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -119,7 +119,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_TracesSampler_Provided()
+    public void IsPerformanceMonitoringEnabled_TracesSampler_Provided()
     {
         var sut = new SentryOptions
         {
@@ -130,7 +130,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_EnableTracing_True_TracesSampleRate_Zero()
+    public void IsPerformanceMonitoringEnabled_EnableTracing_True_TracesSampleRate_Zero()
     {
         // Edge Case:
         //   Tracing enabled, but sample rate set to zero, and no sampler function, should be treated as disabled.
@@ -145,7 +145,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_EnableTracing_False_TracesSampleRate_One()
+    public void IsPerformanceMonitoringEnabled_EnableTracing_False_TracesSampleRate_One()
     {
         // Edge Case:
         //   Tracing disabled should be treated as disabled regardless of sample rate set.
@@ -160,7 +160,7 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void IsTracingEnabled_EnableTracing_False_TracesSampler_Provided()
+    public void IsPerformanceMonitoringEnabled_EnableTracing_False_TracesSampler_Provided()
     {
         // Edge Case:
         //   Tracing disabled should be treated as disabled regardless of sampler function set.

@@ -716,7 +716,7 @@ public class SentryOptions
     public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
     /// <summary>
-    /// Indicates whether tracing is enabled, via any combination of
+    /// Indicates whether the performance feature is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
     internal bool IsPerformanceMonitoringEnabled => EnableTracing switch
