@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- The SDK retrieves `IEventProcessors` added as a transient service during initialization ([#2537](https://github.com/getsentry/sentry-dotnet/pull/2537))
+
 ## 3.35.0
 
 ### Features
