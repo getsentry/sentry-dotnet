@@ -15,7 +15,7 @@ public class SpanContext : ISpanContext
     public SentryId TraceId { get; }
 
     /// <inheritdoc />
-    public string Operation { get; }
+    public string Operation { get; set; }
 
     /// <inheritdoc />
     public string? Description { get; }

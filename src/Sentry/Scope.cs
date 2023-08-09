@@ -191,6 +191,8 @@ public class Scope : IEventLike, IHasDistribution
         set => _transaction = value;
     }
 
+    internal SentryPropagationContext PropagationContext { get; set; }
+
     internal SessionUpdate? SessionUpdate { get; set; }
 
     /// <inheritdoc />
@@ -233,8 +235,14 @@ public class Scope : IEventLike, IHasDistribution
     /// Creates a scope with the specified options.
     /// </summary>
     public Scope(SentryOptions? options)
+        : this(options, null)
+    {
+    }
+
+    internal Scope(SentryOptions? options, SentryPropagationContext? propagationContext)
     {
         Options = options ?? new SentryOptions();
+        PropagationContext = propagationContext ?? new SentryPropagationContext();
     }
 
     // For testing. Should explicitly require SentryOptions.
@@ -346,6 +354,7 @@ public class Scope : IEventLike, IHasDistribution
         _extra.Clear();
         _tags.Clear();
         ClearAttachments();
+        PropagationContext = new();
     }
 
     /// <summary>
@@ -476,7 +485,7 @@ public class Scope : IEventLike, IHasDistribution
     /// </summary>
     public Scope Clone()
     {
-        var clone = new Scope(Options)
+        var clone = new Scope(Options, PropagationContext)
         {
             OnEvaluating = OnEvaluating
         };

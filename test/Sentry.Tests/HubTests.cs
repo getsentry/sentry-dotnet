@@ -218,11 +218,12 @@ public partial class HubTests
     }
 
     [Fact]
-    public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventIsNotLinkedToSpan()
+    public void CaptureException_NoActiveSpanAndNoSpanBoundToSameException_EventContainsPropagationContext()
     {
         // Arrange
         _fixture.Options.TracesSampleRate = 1.0;
         var hub = _fixture.GetSut();
+        var scope = hub.ScopeManager.GetCurrent().Key;
 
         // Act
         hub.CaptureException(new Exception("error"));
@@ -230,8 +231,8 @@ public partial class HubTests
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
-                evt.Contexts.Trace.TraceId == default &&
-                evt.Contexts.Trace.SpanId == default),
+                evt.Contexts.Trace.TraceId == scope.PropagationContext.TraceId &&
+                evt.Contexts.Trace.SpanId == scope.PropagationContext.SpanId),
             Arg.Any<Hint>(),
             Arg.Any<Scope>());
     }
@@ -847,6 +848,94 @@ public partial class HubTests
             header?.TraceId.Should().Be(transaction.TraceId);
             header?.IsSampled.Should().Be(transaction.IsSampled);
         });
+    }
+
+    [Fact]
+    public void GetTraceHeader_NoSpanActive_ReturnsHeaderFromPropagationContext()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var propagationContext = new SentryPropagationContext(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"));
+        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+
+        // Act
+        var header = hub.GetTraceHeader();
+
+        // Assert
+        header.Should().NotBeNull();
+        header.SpanId.Should().Be(propagationContext.SpanId);
+        header.TraceId.Should().Be(propagationContext.TraceId);
+        header.IsSampled.Should().BeNull();
+    }
+
+    [Fact]
+    public void GetBaggage_SpanActive_ReturnsBaggageFromSpan()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var transaction = hub.StartTransaction("test-name", "_");
+
+        // Act
+        hub.WithScope(scope =>
+        {
+            scope.Transaction = transaction;
+
+            var baggage = hub.GetBaggage();
+
+            // Assert
+            baggage.Should().NotBeNull();
+            Assert.Contains("test-name", baggage!.ToString());
+        });
+    }
+
+    [Fact]
+    public void GetBaggage_NoSpanActive_ReturnsBaggageFromPropagationContext()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var propagationContext = new SentryPropagationContext(
+            SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
+        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+
+        // Act
+        var baggage = hub.GetBaggage();
+
+        // Assert
+        baggage.Should().NotBeNull();
+        Assert.Contains("43365712692146d08ee11a729dfbcaca", baggage!.ToString());
+    }
+
+    [Fact]
+    public void ContinueTrace_SetsPropagationContextAndReturnsTransactionContext()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var propagationContext = new SentryPropagationContext(
+            SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
+        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        var traceHeader = new SentryTraceHeader(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
+            SpanId.Parse("2000000000000000"), null);
+        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-public_key", "49d0f7386ad645858ae85020e393bef3"}
+        });
+
+        hub.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be("43365712692146d08ee11a729dfbcaca")); // Sanity check
+
+        // Act
+        var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name");
+
+        // Assert
+        hub.ConfigureScope(scope =>
+        {
+            scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
+            scope.PropagationContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
+        });
+
+        transactionContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
+        transactionContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
     }
 
     [Fact]
