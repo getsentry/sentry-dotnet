@@ -94,27 +94,13 @@
       <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
     </PropertyGroup>
     <ItemGroup>
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Darwin-arm64" FileHash="25f1ff796b349a133cd3c28ac12afd89e6cd849863a66994e6958a93880cdc26" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Darwin-x86_64" FileHash="04f4b832cba392ff275c67c26315ac218450fd0dbd654b0bf94a8db31575db9b" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Linux-aarch64" FileHash="0c67bc6edd8d3c205980a5082c549099f8d84eed0516028dcdcddbdf1d20d9a7" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Linux-i686" FileHash="24bf81e4ff3ed71af756d1a6ade905f9a885a91bfccf7160c458651798caa491" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Linux-x86_64" FileHash="dde8e494a4178143417a2a208559493ad7954be2a6aecf2195c21d36468b53a1" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Windows-i686.exe" FileHash="5f10392c11d3a0e6ca98a8e85a0741f5b1e798d5b58ee09a923bd5fd2b70f449" />
-      <SentryCLIDownload
-        Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')"
-        Include="sentry-cli-Windows-x86_64.exe" FileHash="4e7dfde7b0d54a755755f2b3133ec1c11b5f058883025849b113fa5ef7a95df5" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="25f1ff796b349a133cd3c28ac12afd89e6cd849863a66994e6958a93880cdc26" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="04f4b832cba392ff275c67c26315ac218450fd0dbd654b0bf94a8db31575db9b" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="0c67bc6edd8d3c205980a5082c549099f8d84eed0516028dcdcddbdf1d20d9a7" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="24bf81e4ff3ed71af756d1a6ade905f9a885a91bfccf7160c458651798caa491" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="dde8e494a4178143417a2a208559493ad7954be2a6aecf2195c21d36468b53a1" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="5f10392c11d3a0e6ca98a8e85a0741f5b1e798d5b58ee09a923bd5fd2b70f449" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="4e7dfde7b0d54a755755f2b3133ec1c11b5f058883025849b113fa5ef7a95df5" />
     </ItemGroup>
 
     <!-- Download the files -->
@@ -154,6 +140,8 @@
     <InternalsVisibleTo Include="Sentry.Extensions.Logging" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging.EfCore.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.GraphQl" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.GraphQl.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Google.Cloud.Functions" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Google.Cloud.Functions.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Log4Net" PublicKey="$(SentryPublicKey)" />

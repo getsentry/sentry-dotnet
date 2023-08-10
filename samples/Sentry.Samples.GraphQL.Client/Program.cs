@@ -9,6 +9,7 @@ using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using Sentry;
+using Sentry.GraphQl;
 
 SentrySdk.Init(options =>
 {
@@ -25,19 +26,18 @@ var graphClient = new GraphQLHttpClient(
     options =>
     {
         options.EndPoint = new Uri("http://localhost:5051/graphql"); // Assumes Sentry.Samples.GraphQL.Server is running
-        options.HttpMessageHandler = new SentryHttpMessageHandler(); // <-- Configure GraphQL use Sentry Message Handler
+        options.HttpMessageHandler = new SentryGraphQlHttpMessageHandler(); // <-- Configure GraphQL use Sentry Message Handler
     },
     new SystemTextJsonSerializer()
     );
 var notesRequest = new GraphQLRequest
 {
-    Query = @"
-        getAllNotes {
-          notes {
-            id,
-            message
-          }
-        }"
+    Query = @"query getAllNotes {
+  notes {
+    id,
+    message
+  }
+}"
 };
 
 while(true)

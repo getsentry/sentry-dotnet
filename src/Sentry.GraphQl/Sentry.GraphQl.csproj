@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Official GraphQL integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <PackageTags>$(PackageTags);graphql;graphql-client</PackageTags>
+    <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.0.0" />
+    <PackageReference Include="GraphQL.SystemTextJson" Version="7.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.GraphQl.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
+</Project>
