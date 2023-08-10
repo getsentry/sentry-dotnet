@@ -9,7 +9,7 @@ internal class DbInterceptionIntegration : ISdkIntegration
 
     public void Register(IHub hub, SentryOptions options)
     {
-        if (!options.IsTracingEnabled)
+        if (!options.IsPerformanceMonitoringEnabled)
         {
             options.DiagnosticLogger?.LogInfo(SampleRateDisabledMessage);
         }
