@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
+
 ## 3.35.0
 
 ### Features
