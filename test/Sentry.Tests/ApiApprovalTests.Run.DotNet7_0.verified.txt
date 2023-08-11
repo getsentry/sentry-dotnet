@@ -404,6 +404,7 @@ namespace Sentry
     public sealed class Request : Sentry.IJsonSerializable
     {
         public Request() { }
+        public string? ApiTarget { get; set; }
         public string? Cookies { get; set; }
         public object? Data { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Env { get; }
@@ -1635,6 +1636,7 @@ namespace Sentry.Protocol
         public Response() { }
         public long? BodySize { get; set; }
         public string? Cookies { get; set; }
+        public object? Data { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Headers { get; }
         public short? StatusCode { get; set; }
         public Sentry.Protocol.Response Clone() { }
