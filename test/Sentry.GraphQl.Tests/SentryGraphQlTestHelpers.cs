@@ -2,16 +2,10 @@ namespace Sentry.GraphQl.Tests;
 
 internal static class SentryGraphQlTestHelpers
 {
+    /// <summary>
+    /// GraphQL Queries get sent in a dictionary using the GraphQL over HTTP protocol
+    /// </summary>
     public static string WrapRequestContent(string queryText)
-    {
-        var wrapped = new Dictionary<string, object>()
-        {
-            { "query", queryText }
-        };
-        return wrapped.ToJsonString();
-    }
-
-    public static string WrapResponseContent(string queryText)
     {
         var wrapped = new Dictionary<string, object>()
         {
@@ -25,7 +19,7 @@ internal static class SentryGraphQlTestHelpers
         var content = query is not null
             ? new StringContent(WrapRequestContent(query))
             : null;
-        return GetRequest(content);
+        return GetRequest(content, url);
     }
 
     public static HttpRequestMessage GetRequest(HttpContent content, string url = "http://foo") => new (HttpMethod.Post, url)
@@ -42,13 +36,6 @@ internal static class SentryGraphQlTestHelpers
             Headers = { ContentLength = serialised.Length }
         };
     }
-
-    public static StringContent RequestContent(string queryText) => JsonContent(
-        new
-        {
-            query = queryText
-        }
-    );
 
     public static StringContent ResponesContent(string responseText) => JsonContent(
         new

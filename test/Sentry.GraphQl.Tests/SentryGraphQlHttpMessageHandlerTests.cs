@@ -7,18 +7,18 @@ namespace Sentry.GraphQl.Tests;
 
 public class SentryGraphQlHttpMessageHandlerTests
 {
-    private const string ValidQueryWithName = "query getAllNotes { notes { id } }";
-    private const string ValidResponseData = @"{
-                                                    ""notes"": [
-                                                            {
-                                                            ""id"": 0
-                                                        },
-                                                        {
-                                                            ""id"": 1
-                                                        }
-                                                    ]
-                                                }";
-    private StringContent ValidResponse => SentryGraphQlTestHelpers.ResponesContent(ValidResponseData);
+    private const string ValidQuery = "query getAllNotes { notes { id } }";
+    private const string ValidResponse = @"{
+    ""notes"": [
+            {
+            ""id"": 0
+        },
+        {
+            ""id"": 1
+        }
+    ]
+}";
+    private StringContent ValidResponseContent => SentryGraphQlTestHelpers.ResponesContent(ValidResponse);
 
     [Fact]
     public void ProcessRequest_ExtractsGraphQlRequestContent()
@@ -28,7 +28,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         var method = "POST";
         var url = "http://example.com/graphql";
         var sut = new SentryGraphQlHttpMessageHandler(hub, null);
-        var query = ValidQueryWithName;
+        var query = ValidQuery;
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query);
 
         // Act
@@ -56,7 +56,7 @@ public class SentryGraphQlHttpMessageHandlerTests
 
         var method = "POST";
         var url = "http://example.com/graphql";
-        var query = ValidQueryWithName;
+        var query = ValidQuery;
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query);
 
         // Act
@@ -69,7 +69,7 @@ public class SentryGraphQlHttpMessageHandlerTests
     }
 
     // [Theory]
-    // [InlineData(ValidQueryWithName)]
+    // [InlineData(ValidQuery)]
     [Fact]
     public void HandleResponse_AddsBreadcrumb()
     {
@@ -82,9 +82,9 @@ public class SentryGraphQlHttpMessageHandlerTests
         hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
             .Do(c => c.Arg<Action<Scope>>()(scope));
 
-        var query = ValidQueryWithName;
+        var query = ValidQuery;
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query, url);
-        var response = new HttpResponseMessage { Content = ValidResponse, StatusCode = HttpStatusCode.OK, RequestMessage = request};
+        var response = new HttpResponseMessage { Content = ValidResponseContent, StatusCode = HttpStatusCode.OK, RequestMessage = request};
         var wrappedQuery = SentryGraphQlTestHelpers.WrapRequestContent(query);
         request.SetFused(new GraphQlRequestContent(wrappedQuery));
 
@@ -119,7 +119,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         var response = new HttpResponseMessage(HttpStatusCode.OK);
         var method = "POST";
         var url = "http://example.com/graphql";
-        var request = SentryGraphQlTestHelpers.GetRequestQuery(ValidQueryWithName, url);
+        var request = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, url);
         response.RequestMessage = request;
         var sut = new SentryGraphQlHttpMessageHandler(hub, null);
 

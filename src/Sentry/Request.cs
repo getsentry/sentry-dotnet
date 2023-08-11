@@ -10,6 +10,7 @@ namespace Sentry;
 /// "request": {
 ///     "url": "http://absolute.uri/foo",
 ///     "method": "POST",
+///     "api_target": "apiType",
 ///     "data": {
 ///         "foo": "bar"
 ///     },
@@ -43,6 +44,12 @@ public sealed class Request : IJsonSerializable
     /// </summary>
     /// <value>The HTTP method.</value>
     public string? Method { get; set; }
+
+    /// <summary>
+    /// Gets or sets the API target for the request (e.g. "graphql")
+    /// </summary>
+    /// <value>The API Target.</value>
+    public string? ApiTarget { get; set; }
 
     // byte[] or Memory<T>?
     // TODO: serializable object or string?
