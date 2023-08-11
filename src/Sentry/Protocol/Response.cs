@@ -98,6 +98,7 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     {
         BodySize ??= source.BodySize;
         Cookies ??= source.Cookies;
+        Data ??= source.Data;
         StatusCode ??= source.StatusCode;
         source.InternalHeaders?.TryCopyTo(Headers);
     }

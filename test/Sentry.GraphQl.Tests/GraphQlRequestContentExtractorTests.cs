@@ -77,6 +77,7 @@ public class GraphQlRequestContentExtractorTests
         // Arrange
         var sut = _fixture.GetSut();
         var stream = new MemoryStream();
+        stream.Close();
         var content = new StreamContent(stream);
         var request = SentryGraphQlTestHelpers.GetRequest(content);
 

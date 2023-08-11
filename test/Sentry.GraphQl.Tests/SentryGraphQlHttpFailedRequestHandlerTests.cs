@@ -141,7 +141,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         };
         var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
 
-        var response = InternalServerErrorResponse();
+        var response = PreconditionFailedResponse();
         var uri = new Uri("http://admin:1234@localhost/test/path?query=string#fragment");
         response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
@@ -152,6 +152,9 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
 
         // Assert
         @event.Request.Url.Should().Be("http://localhost/test/path?query=string"); // No admin:1234
+        @event.Request.Data.Should().BeNull();
+        var responseContext = @event.Contexts[Response.Type] as Response;
+        responseContext?.Data.Should().BeNull();
     }
 
     [Fact]
@@ -229,7 +232,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         };
         var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
 
-        var response = InternalServerErrorResponse(); // This is in the range
+        var response = PreconditionFailedResponse(); // This is in the range
         response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery);
 
         // Act

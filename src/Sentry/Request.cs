@@ -129,6 +129,7 @@ public sealed class Request : IJsonSerializable
             return;
         }
 
+        request.ApiTarget ??= ApiTarget;
         request.Url ??= Url;
         request.Method ??= Method;
         request.Data ??= Data;

@@ -2,15 +2,19 @@ namespace Sentry.GraphQl;
 
 internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandler
 {
+    private readonly IHub _hub;
     private readonly SentryOptions _options;
     private readonly GraphQlContentExtractor _extractor;
     internal const string MechanismType = "SentryGraphQLHttpFailedRequestHandler";
+    private readonly SentryHttpFailedRequestHandler _httpFailedRequestHandler;
 
     internal SentryGraphQlHttpFailedRequestHandler(IHub hub, SentryOptions options, GraphQlContentExtractor? extractor = null)
         : base(hub, options)
     {
+        _hub = hub;
         _options = options;
         _extractor = extractor ?? new GraphQlContentExtractor(options);
+        _httpFailedRequestHandler = new SentryHttpFailedRequestHandler(hub, options);
     }
 
     private static readonly Regex ErrorsRegex = new ("(?i)\"errors\"\\s*:\\s*\\[", RegexOptions.Compiled);
@@ -21,14 +25,15 @@ internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandle
         try
         {
             json = _extractor.ExtractResponseContentAsync(response).Result;
-            if (json is not { } jsonElement)
+            if (json is { } jsonElement)
             {
-                return;
+                if (jsonElement.TryGetProperty("errors", out var errorsElement))
+                {
+                    throw new SentryGraphQlHttpFailedRequestException("GraphQL Error");
+                }
             }
-            if (jsonElement.TryGetProperty("errors", out var errorsElement))
-            {
-                throw new SentryGraphQlHttpFailedRequestException("GraphQL Error");
-            }
+            // No GraphQL errors, but we still might have an HTTP error status
+            _httpFailedRequestHandler.DoEnsureSuccessfulResponse(request, response);
         }
         catch (Exception exception)
         {

@@ -20,7 +20,7 @@ internal class GraphQlContentExtractor
     public async Task<GraphQlRequestContent?> ExtractRequestContentAsync(HttpRequestMessage request)
     {
         var json = await ExtractContentAsync(request?.Content).ConfigureAwait(false);
-        return new GraphQlRequestContent(json);
+        return json is not null ? new GraphQlRequestContent(json) : null;
     }
 
     /// <summary>
