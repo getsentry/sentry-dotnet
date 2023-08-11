@@ -5,7 +5,7 @@ namespace Sentry.GraphQl;
 /// </summary>
 public class SentryGraphQlHttpMessageHandler : SentryMessageHandler
 {
-    private readonly GraphQlRequestContentExtractor _extractor;
+    private readonly GraphQlContentExtractor _extractor;
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
@@ -27,18 +27,18 @@ public class SentryGraphQlHttpMessageHandler : SentryMessageHandler
     {
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? _hub.GetSentryOptions();
-        _extractor = new GraphQlRequestContentExtractor(options);
+        _extractor = new GraphQlContentExtractor(options);
         _failedRequestHandler = failedRequestHandler;
         if (_options != null)
         {
-            _failedRequestHandler ??= new SentryGraphQlHttpFailedRequestHandler(_hub, _options);
+            _failedRequestHandler ??= new SentryGraphQlHttpFailedRequestHandler(_hub, _options, _extractor);
         }
     }
 
     /// <inheritdoc />
     protected internal override ISpan? ProcessRequest(HttpRequestMessage request, string method, string url)
     {
-        var content = _extractor.ExtractContent(request).Result;
+        var content = _extractor.ExtractRequestContentAsync(request).Result;
         if (content is not { } graphQlRequestContent)
         {
             _options?.LogDebug("Unable to process non GraphQL request content");
@@ -90,8 +90,8 @@ public class SentryGraphQlHttpMessageHandler : SentryMessageHandler
 
     private string? GetSpanDescriptionOrDefault(GraphQlRequestContent? graphqlInfo, HttpStatusCode statusCode) =>
         string.Join(" ",
-            graphqlInfo?.OperationName ?? "graphql",
-            graphqlInfo?.OperationType ?? "graphql.operation",
+            graphqlInfo?.OperationNameOrFallback(),
+            graphqlInfo?.OperationTypeOrFallback(),
             ((int)statusCode).ToString()
         );
 

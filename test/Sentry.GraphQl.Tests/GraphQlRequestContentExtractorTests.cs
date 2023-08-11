@@ -17,9 +17,9 @@ public class GraphQlRequestContentExtractorTests
     {
         public SentryOptions Options => Substitute.For<SentryOptions>();
 
-        public GraphQlRequestContentExtractor GetSut()
+        public GraphQlContentExtractor GetSut()
         {
-            return new GraphQlRequestContentExtractor(Options);
+            return new GraphQlContentExtractor(Options);
         }
     }
 
@@ -35,7 +35,7 @@ public class GraphQlRequestContentExtractorTests
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query);
 
         // Act
-        var result = await sut.ExtractContent(request);
+        var result = await sut.ExtractRequestContentAsync(request);
 
         // Assert
         result.Should().NotBeNull();
@@ -51,7 +51,7 @@ public class GraphQlRequestContentExtractorTests
         var sut = _fixture.GetSut();
 
         // Act
-        var result = await sut.ExtractContent(null);
+        var result = await sut.ExtractRequestContentAsync(null);
 
         // Assert
         result.Should().BeNull();
@@ -65,7 +65,7 @@ public class GraphQlRequestContentExtractorTests
         var request = SentryGraphQlTestHelpers.GetRequest(null);
 
         // Act
-        var result = await sut.ExtractContent(request);
+        var result = await sut.ExtractRequestContentAsync(request);
 
         // Assert
         result.Should().BeNull();
@@ -81,7 +81,7 @@ public class GraphQlRequestContentExtractorTests
         var request = SentryGraphQlTestHelpers.GetRequest(content);
 
         // Act
-        var result = await sut.ExtractContent(request);
+        var result = await sut.ExtractRequestContentAsync(request);
 
         // Assert
         result.Should().BeNull();

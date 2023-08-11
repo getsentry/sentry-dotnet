@@ -58,4 +58,14 @@ internal class GraphQlRequestContent
     public string? Query { get; }
     public string? OperationName { get; }
     public string? OperationType { get; }
+
+    /// <summary>
+    /// Returns the OperationName if present or "graphql" otherwise.
+    /// </summary>
+    public string OperationNameOrFallback() => OperationName ?? "graphql";
+
+    /// <summary>
+    /// Returns the OperationType if present or "graphql.operation" otherwise.
+    /// </summary>
+    public string OperationTypeOrFallback() => OperationType ?? "graphql.operation";
 }

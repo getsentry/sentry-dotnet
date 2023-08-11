@@ -7,6 +7,7 @@ public class RequestTests
     {
         var sut = new Request
         {
+            ApiTarget = "graphql",
             Url = "https://sentry.io",
             Method = "OPTIONS",
             Data = new object(),
@@ -18,6 +19,7 @@ public class RequestTests
 
         var clone = sut.Clone();
 
+        Assert.Equal(sut.ApiTarget, clone.ApiTarget);
         Assert.Equal(sut.Url, clone.Url);
         Assert.Equal(sut.Method, clone.Method);
         Assert.Same(sut.Data, clone.Data);

@@ -169,16 +169,19 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
 
         var query = ValidQuery;
         var url = "http://foo/bar/hello";
-        var response = InternalServerErrorResponse(); // This is in the range
+        var response = PreconditionFailedResponse();
         response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(query, url);
+        var requestContent = new GraphQlRequestContent(SentryGraphQlTestHelpers.WrapRequestContent(query));
+        response.RequestMessage!.SetFused(requestContent);
         response.Headers.Add("myHeader", "myValue");
 
-        // Act
         SentryEvent @event = null;
         hub.CaptureEvent(
             Arg.Do<SentryEvent>(e => @event = e),
             Arg.Any<Hint>()
             );
+
+        // Act
         sut.HandleResponse(response);
 
         // Assert
@@ -192,6 +195,8 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             // Ensure the request properties are captured
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());
             @event.Request.Url.Should().Be(url);
+            @event.Request.ApiTarget.Should().Be("graphql");
+            @event.Request.Data.Should().Be(query);
 
             // Ensure the response context is captured
             @event.Contexts.Should().Contain(x => x.Key == Response.Type && x.Value is Response);
@@ -199,9 +204,17 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             var responseContext = @event.Contexts[Response.Type] as Response;
             responseContext?.StatusCode.Should().Be((short)response.StatusCode);
             responseContext?.BodySize.Should().Be(response.Content.Headers.ContentLength);
+            responseContext?.Data?.ToString().Should().Be(
+                SentryGraphQlTestHelpers.ErrorContent("Bad query", "BAD_OP").ReadAsJson().ToString()
+                );
 
             @event.Contexts.Response.Headers.Should().ContainKey("myHeader");
             @event.Contexts.Response.Headers.Should().ContainValue("myValue");
+
+            // The fingerprints field should be set to ["$operationName", "$operationType", "$statusCode"].
+            @event.Fingerprint.Should().BeEquivalentTo(
+                "getAllNotes", "query", $"{(int)HttpStatusCode.PreconditionFailed}"
+                );
         }
     }
 

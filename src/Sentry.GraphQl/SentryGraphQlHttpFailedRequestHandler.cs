@@ -3,27 +3,31 @@ namespace Sentry.GraphQl;
 internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandler
 {
     private readonly SentryOptions _options;
+    private readonly GraphQlContentExtractor _extractor;
     internal const string MechanismType = "SentryGraphQLHttpFailedRequestHandler";
 
-    internal SentryGraphQlHttpFailedRequestHandler(IHub hub, SentryOptions options)
+    internal SentryGraphQlHttpFailedRequestHandler(IHub hub, SentryOptions options, GraphQlContentExtractor? extractor = null)
         : base(hub, options)
     {
         _options = options;
+        _extractor = extractor ?? new GraphQlContentExtractor(options);
     }
 
     private static readonly Regex ErrorsRegex = new ("(?i)\"errors\"\\s*:\\s*\\[", RegexOptions.Compiled);
 
     protected internal override void DoEnsureSuccessfulResponse([NotNull]HttpRequestMessage request, [NotNull]HttpResponseMessage response)
     {
+        JsonElement? json = null;
         try
         {
-            var json = response.Content?.ReadAsJson();
-            if (json is { } jsonElement)
+            json = _extractor.ExtractResponseContentAsync(response).Result;
+            if (json is not { } jsonElement)
             {
-                if (jsonElement.TryGetProperty("errors", out var errorsElement))
-                {
-                    throw new SentryGraphQlHttpFailedRequestException("GraphQL Error");
-                }
+                return;
+            }
+            if (jsonElement.TryGetProperty("errors", out var errorsElement))
+            {
+                throw new SentryGraphQlHttpFailedRequestException("GraphQL Error");
             }
         }
         catch (Exception exception)
@@ -33,7 +37,6 @@ internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandle
             var @event = new SentryEvent(exception);
             var hint = new Hint(HintTypes.HttpResponseMessage, response);
 
-            var requestContent = request.GetFused<GraphQlRequestContent>();
             var sentryRequest = new Request
             {
                 QueryString = request.RequestUri?.Query,
@@ -52,22 +55,33 @@ internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandle
 #endif
             };
 
+            var requestContent = request.GetFused<GraphQlRequestContent>();
             if (!_options.SendDefaultPii)
             {
                 sentryRequest.Url = request.RequestUri?.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             else
             {
-                sentryRequest.Url = request.RequestUri?.AbsoluteUri;
                 sentryRequest.Cookies = request.Headers.GetCookies();
+                sentryRequest.Data = requestContent?.Query;
+                sentryRequest.Url = request.RequestUri?.AbsoluteUri;
                 sentryRequest.AddHeaders(request.Headers);
                 responseContext.Cookies = response.Headers.GetCookies();
+                responseContext.Data = json;
                 responseContext.AddHeaders(response.Headers);
             }
 
             @event.Request = sentryRequest;
             @event.Contexts[Response.Type] = responseContext;
-
+            if (requestContent is not null)
+            {
+                @event.Fingerprint = new[]
+                {
+                    requestContent.OperationNameOrFallback(),
+                    requestContent.OperationTypeOrFallback(),
+                    ((int)response.StatusCode).ToString()
+                };
+            }
             Hub.CaptureEvent(@event, hint);
         }
     }

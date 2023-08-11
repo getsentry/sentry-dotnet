@@ -42,6 +42,17 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     /// </summary>
     public string? Cookies { get; set; }
 
+    // byte[] or Memory<T>?
+    // TODO: serializable object or string?
+    /// <summary>
+    /// Submitted data in whatever format makes most sense.
+    /// </summary>
+    /// <remarks>
+    /// This data should not be provided by default as it can get quite large.
+    /// </remarks>
+    /// <value>The request payload.</value>
+    public object? Data { get; set; }
+
     /// <summary>
     /// Gets or sets the headers.
     /// </summary>
@@ -111,6 +122,7 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
         writer.WriteString("type", Type);
         writer.WriteNumberIfNotNull("body_size", BodySize);
         writer.WriteStringIfNotWhiteSpace("cookies", Cookies);
+        writer.WriteDynamicIfNotNull("data", Data, logger);
         writer.WriteStringDictionaryIfNotEmpty("headers", InternalHeaders!);
         writer.WriteNumberIfNotNull("status_code", StatusCode);
 
@@ -124,6 +136,7 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     {
         var bodySize = json.GetPropertyOrNull("body_size")?.GetInt64();
         var cookies = json.GetPropertyOrNull("cookies")?.GetString();
+        var data = json.GetPropertyOrNull("data")?.GetDynamicOrNull();
         var headers = json.GetPropertyOrNull("headers")?.GetStringDictionaryOrNull();
         var statusCode = json.GetPropertyOrNull("status_code")?.GetInt16();
 
@@ -131,6 +144,7 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
         {
             BodySize = bodySize,
             Cookies = cookies,
+            Data = data,
             InternalHeaders = headers?.WhereNotNullValue().ToDictionary(),
             StatusCode = statusCode
         };
