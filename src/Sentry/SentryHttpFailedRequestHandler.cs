@@ -49,7 +49,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
             var sentryRequest = new Request
             {
                 QueryString = uri?.Query,
-                Method = response.RequestMessage.MethodString()
+                Method = response.RequestMessage?.Method.Method.ToUpperInvariant()
             };
 
             var responseContext = new Response {

@@ -45,7 +45,7 @@ internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandle
             var sentryRequest = new Request
             {
                 QueryString = request.RequestUri?.Query,
-                Method = request.MethodString(),
+                Method = request.Method.Method.ToUpperInvariant(),
                 ApiTarget = "graphql"
             };
 

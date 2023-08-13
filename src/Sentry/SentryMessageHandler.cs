@@ -80,8 +80,8 @@ public abstract class SentryMessageHandler : DelegatingHandler
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var method = request.MethodString();
-        var url = request.UrlString();
+        var method = request.Method.Method.ToUpperInvariant();
+        var url = request.RequestUri?.ToString() ?? string.Empty;
 
         PropagateTraceHeaders(request, url);
         var span = ProcessRequest(request, method, url);
