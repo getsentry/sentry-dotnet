@@ -34,6 +34,14 @@ internal class GraphQlContentExtractor
         return (json is not null) ? JsonDocument.Parse(json).RootElement.Clone() : null;
     }
 
+    void TrySeek(Stream? stream, long position)
+    {
+        if (stream?.CanSeek ?? false)
+        {
+            stream.Position = position;
+        }
+    }
+
     public async Task<string?> ExtractContentAsync(HttpContent? content)
     {
         // Not to throw on code that ignores nullability warnings.
@@ -42,17 +50,18 @@ internal class GraphQlContentExtractor
             return null;
         }
 
+        // var contentStream = new MemoryStream();
+        // await content.CopyToAsync(contentStream).ConfigureAwait(false);
         var contentStream = await content.ReadAsStreamAsync().ConfigureAwait(false);
-        if (!contentStream.CanSeek || !contentStream.CanRead)
+        if (!contentStream.CanRead)
         {
             return null;
         }
 
-        var originalPosition = contentStream.Position;
+        var originalPosition = (contentStream.CanSeek) ? contentStream.Position : 0;
         try
         {
-            contentStream.Position = 0;
-
+            TrySeek(contentStream, 0);
             // https://github.com/dotnet/corefx/blob/master/src/Common/src/CoreLib/System/IO/StreamReader.cs#L186
             // Default parameters other than 'leaveOpen'
             using var reader = new StreamReader(contentStream, Encoding.UTF8, true,
@@ -66,7 +75,7 @@ internal class GraphQlContentExtractor
         }
         finally
         {
-            contentStream.Position = originalPosition;
+            TrySeek(contentStream, originalPosition);
         }
     }
 }

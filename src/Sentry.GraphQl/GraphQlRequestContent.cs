@@ -27,12 +27,12 @@ internal class GraphQlRequestContent
         // Try to read the values directly from the array (in case they've been supplied explicitly)
         if (Items.TryGetValue("operationName", out var operationName))
         {
-            OperationName = operationName.ToString();
+            OperationName = operationName?.ToString();
         }
         // TODO: The query can be null... see https://www.apollographql.com/docs/apollo-server/performance/apq/
         if (Items.TryGetValue("query", out var query))
         {
-            Query = query.ToString();
+            Query = query?.ToString();
         }
 
         var match = Expression.Match(Query ?? requestContent);

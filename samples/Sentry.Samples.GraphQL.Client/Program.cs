@@ -14,6 +14,7 @@ using Sentry.GraphQl;
 SentrySdk.Init(options =>
 {
     // options.Dsn = "... Your DSN ...";
+    options.CaptureFailedRequests = true;
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
     options.EnableTracing = true;
@@ -30,30 +31,37 @@ var graphClient = new GraphQLHttpClient(
     },
     new SystemTextJsonSerializer()
     );
-var notesRequest = new GraphQLRequest
-{
-    Query = @"query getAllNotes {
-  notes {
-    id,
-    message
-  }
-}"
-};
 
-while(true)
+var errorQuery = @"{ test { id } }";
+var getAllNotes = @"query getAllNotes { notes { id, message } }";
+
+Console.WriteLine("Select a query to send:");
+Console.WriteLine("1. Get all notes");
+Console.WriteLine("2. Generate a GraphQL Error");
+// Console.WriteLine("3. Update a note");
+var input = Console.ReadKey().KeyChar;
+switch (input)
 {
-    Console.WriteLine("Press any key to continue (or `q` to quit)");
-    if (Console.ReadKey().KeyChar == 'q')
-    {
+    case '1':
+        var notesResponse = await graphClient.SendQueryAsync<NotesResult>(new GraphQLRequest(getAllNotes));
+        PrintResponseAsJson(notesResponse);
         break;
-    }
-
-    var graphResponse = await graphClient.SendQueryAsync<NotesResult>(notesRequest);
-    var result = JsonSerializer.Serialize(graphResponse.Data);
-    Console.WriteLine(result);
+    case '2':
+        var errorResponse = await graphClient.SendQueryAsync<NotesResult>(new GraphQLRequest(errorQuery));
+        PrintResponseAsJson(errorResponse);
+        break;
+    default:
+        Console.WriteLine("Invalid selection.");
+        break;
 }
 
 transaction.Finish(SpanStatus.Ok);
+
+void PrintResponseAsJson(object response)
+{
+    var result = JsonSerializer.Serialize(response);
+    Console.WriteLine(result);
+}
 
 public class Note
 {
