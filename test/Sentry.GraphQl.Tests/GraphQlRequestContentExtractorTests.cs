@@ -1,3 +1,5 @@
+using Sentry.Internal.Http;
+
 namespace Sentry.GraphQl.Tests;
 
 public class GraphQlRequestContentExtractorTests

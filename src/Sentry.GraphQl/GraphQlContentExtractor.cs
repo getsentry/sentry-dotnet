@@ -20,7 +20,7 @@ internal class GraphQlContentExtractor
     public async Task<GraphQlRequestContent?> ExtractRequestContentAsync(HttpRequestMessage request)
     {
         var json = await ExtractContentAsync(request?.Content).ConfigureAwait(false);
-        return json is not null ? new GraphQlRequestContent(json) : null;
+        return json is not null ? new GraphQlRequestContent(json, _options) : null;
     }
 
     /// <summary>
@@ -50,9 +50,18 @@ internal class GraphQlContentExtractor
             return null;
         }
 
-        // var contentStream = new MemoryStream();
-        // await content.CopyToAsync(contentStream).ConfigureAwait(false);
-        var contentStream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+        Stream contentStream;
+        try
+        {
+            await content.LoadIntoBufferAsync().ConfigureAwait(false);
+            contentStream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _options?.LogDebug($"Unable to read GraphQL content stream: {exception.Message}");
+            return null;
+        }
+
         if (!contentStream.CanRead)
         {
             return null;

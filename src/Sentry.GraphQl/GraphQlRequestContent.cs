@@ -12,7 +12,7 @@ internal class GraphQlRequestContent
     private string? RequestContent { get; }
     private IReadOnlyDictionary<string, object> Items { get; }
 
-    public GraphQlRequestContent(string? requestContent)
+    public GraphQlRequestContent(string? requestContent, SentryOptions? options = null)
     {
         RequestContent = requestContent;
         if (requestContent is null)
@@ -21,8 +21,17 @@ internal class GraphQlRequestContent
             return;
         }
 
-        var deserialized = JsonSerializer.Deserialize<Dictionary<string, object>>(requestContent, SerializerOptions);
-        Items = (deserialized ?? new Dictionary<string, object>()).AsReadOnly();
+        try
+        {
+            var deserialized = JsonSerializer.Deserialize<Dictionary<string, object>>(requestContent, SerializerOptions);
+            Items = (deserialized ?? new Dictionary<string, object>()).AsReadOnly();
+        }
+        catch (Exception e)
+        {
+            options?.LogDebug($"Unable to parse GraphQL request content: {e.Message}");
+            Items = new Dictionary<string, object>().AsReadOnly();
+            return;
+        }
 
         // Try to read the values directly from the array (in case they've been supplied explicitly)
         if (Items.TryGetValue("operationName", out var operationName))
