@@ -10,4 +10,4 @@
 	branch = xcframework-catalyst
 [submodule "modules/perfview"]
 	path = modules/perfview
-	url = https://github.com/vaind/perfview.git
+	url = https://github.com/getsentry/perfview.git
