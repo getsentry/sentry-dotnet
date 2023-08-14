@@ -42,8 +42,6 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
     /// </summary>
     public string? Cookies { get; set; }
 
-    // byte[] or Memory<T>?
-    // TODO: serializable object or string?
     /// <summary>
     /// Submitted data in whatever format makes most sense.
     /// </summary>

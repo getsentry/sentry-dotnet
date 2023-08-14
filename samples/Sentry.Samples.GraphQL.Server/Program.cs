@@ -43,6 +43,8 @@ public static class Program
         });
 
         builder.Services
+            // Add our data store
+            .AddSingleton<NotesData>()
             // add notes schema
             .AddSingleton<ISchema, NotesSchema>(services =>
                 new NotesSchema(new SelfActivatingServiceProvider(services))
