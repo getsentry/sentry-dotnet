@@ -172,11 +172,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.GraphQL.Server", "samples\Sentry.Samples.GraphQL.Server\Sentry.Samples.GraphQL.Server.csproj", "{B3BFB7BA-1A5E-468F-8C47-F0841AA75848}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.GraphQL.Client", "samples\Sentry.Samples.GraphQL.Client\Sentry.Samples.GraphQL.Client.csproj", "{B01C5D8F-62EE-4E63-AE96-745BA1D2E175}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.GraphQL.Client.Http", "samples\Sentry.Samples.GraphQL.Client.Http\Sentry.Samples.GraphQL.Client.Http.csproj", "{B01C5D8F-62EE-4E63-AE96-745BA1D2E175}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.GraphQl", "src\Sentry.GraphQl\Sentry.GraphQl.csproj", "{A976354F-8451-4A6B-8BAC-CF94C2FCC6A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.GraphQL.Client", "src\Sentry.GraphQL.Client\Sentry.GraphQL.Client.csproj", "{A976354F-8451-4A6B-8BAC-CF94C2FCC6A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.GraphQl.Tests", "test\Sentry.GraphQl.Tests\Sentry.GraphQl.Tests.csproj", "{1897129B-BA05-49C7-B37D-0328752C4A7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.GraphQL.Client.Tests", "test\Sentry.GraphQL.Client.Tests\Sentry.GraphQL.Client.Tests.csproj", "{1897129B-BA05-49C7-B37D-0328752C4A7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

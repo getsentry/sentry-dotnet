@@ -1,4 +1,4 @@
-namespace Sentry.GraphQl.Tests;
+namespace Sentry.GraphQL.Client.Tests;
 
 public class SentryGraphQlHttpFailedRequestHandlerTests
 {
@@ -24,7 +24,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             CaptureFailedRequests = false
         };
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = InternalServerErrorResponse();
         response.RequestMessage = new HttpRequestMessage();
@@ -46,7 +46,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             CaptureFailedRequests = true,
             Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537"
         };
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = InternalServerErrorResponse();
         response.RequestMessage = new HttpRequestMessage(HttpMethod.Post, options.Dsn);
@@ -68,7 +68,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             CaptureFailedRequests = true,
             FailedRequestTargets = new List<SubstringOrRegexPattern> { "http://foo/" }
         };
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = InternalServerErrorResponse();
         response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://bar/");
@@ -89,7 +89,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             CaptureFailedRequests = true
         };
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = InternalServerErrorResponse();
         response.RequestMessage = new HttpRequestMessage();
@@ -114,7 +114,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             CaptureFailedRequests = true
         };
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = PreconditionFailedResponse();
         response.RequestMessage = new HttpRequestMessage();
@@ -139,7 +139,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             CaptureFailedRequests = true
         };
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = PreconditionFailedResponse();
         var uri = new Uri("http://admin:1234@localhost/test/path?query=string#fragment");
@@ -168,13 +168,13 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             SendDefaultPii = true
         };
 
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var query = ValidQuery;
         var url = "http://foo/bar/hello";
         var response = PreconditionFailedResponse();
         response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(query, url);
-        var requestContent = new GraphQlRequestContent(SentryGraphQlTestHelpers.WrapRequestContent(query));
+        var requestContent = new GraphQLRequestContent(SentryGraphQlTestHelpers.WrapRequestContent(query));
         response.RequestMessage!.SetFused(requestContent);
         response.Headers.Add("myHeader", "myValue");
 
@@ -193,7 +193,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             @event.Should().NotBeNull();
 
             // Ensure the mechanism is set
-            @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryGraphQlHttpFailedRequestHandler.MechanismType);
+            @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryGraphQLHttpFailedRequestHandler.MechanismType);
 
             // Ensure the request properties are captured
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());
@@ -230,7 +230,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             CaptureFailedRequests = true
         };
-        var sut = new SentryGraphQlHttpFailedRequestHandler(hub, options);
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = PreconditionFailedResponse(); // This is in the range
         response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery);

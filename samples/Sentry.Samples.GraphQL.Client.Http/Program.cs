@@ -1,5 +1,5 @@
 ﻿/*
- * This sample demonstrates using Sentry to capture traces and exceptions from a GraphQL client.
+ * This sample demonstrates using Sentry to capture traces and exceptions from a GraphQL over HTTP client.
  * It assumes the Sentry.Samples.GraphQL.Server is running on http://localhost:5051
  * (see `/Samples/Sentry.Samples.GraphQL.Server/Properties/launchSettings.json`)
  */
@@ -9,7 +9,7 @@ using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using Sentry;
-using Sentry.GraphQl;
+using Sentry.GraphQL.Client;
 
 SentrySdk.Init(options =>
 {
@@ -27,7 +27,7 @@ var graphClient = new GraphQLHttpClient(
     options =>
     {
         options.EndPoint = new Uri("http://localhost:5051/graphql"); // Assumes Sentry.Samples.GraphQL.Server is running
-        options.HttpMessageHandler = new SentryGraphQlHttpMessageHandler(); // <-- Configure GraphQL use Sentry Message Handler
+        options.HttpMessageHandler = new SentryGraphQLHttpMessageHandler(); // <-- Configure GraphQL use Sentry Message Handler
     },
     new SystemTextJsonSerializer()
     );

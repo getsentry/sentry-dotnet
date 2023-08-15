@@ -1,4 +1,4 @@
-namespace Sentry.GraphQl.Tests;
+namespace Sentry.GraphQL.Client.Tests;
 
 /*
  * NOTE: All tests should be done for both asynchronous `SendAsync` and synchronous `Send` methods.
@@ -27,7 +27,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         var hub = Substitute.For<IHub>();
         var method = "POST";
         var url = "http://example.com/graphql";
-        var sut = new SentryGraphQlHttpMessageHandler(hub, null);
+        var sut = new SentryGraphQLHttpMessageHandler(hub, null);
         var query = ValidQuery;
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query);
 
@@ -35,7 +35,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         sut.ProcessRequest(request, method, url);
 
         // Assert
-        var graphqlInfo = request.GetFused<GraphQlRequestContent>();
+        var graphqlInfo = request.GetFused<GraphQLRequestContent>();
         graphqlInfo.OperationName.Should().Be("getAllNotes");
         graphqlInfo.OperationType.Should().Be("query");
         graphqlInfo.Query.Should().Be(query);
@@ -52,7 +52,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         parentSpan.When(p => p.StartChild(Arg.Any<string>()))
                   .Do(op => childSpan.Operation = op.Arg<string>());
         parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
-        var sut = new SentryGraphQlHttpMessageHandler(hub, null);
+        var sut = new SentryGraphQLHttpMessageHandler(hub, null);
 
         var method = "POST";
         var url = "http://example.com/graphql";
@@ -86,13 +86,13 @@ public class SentryGraphQlHttpMessageHandlerTests
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query, url);
         var response = new HttpResponseMessage { Content = ValidResponseContent, StatusCode = HttpStatusCode.OK, RequestMessage = request};
         var wrappedQuery = SentryGraphQlTestHelpers.WrapRequestContent(query);
-        request.SetFused(new GraphQlRequestContent(wrappedQuery));
+        request.SetFused(new GraphQLRequestContent(wrappedQuery));
 
         var options = new SentryOptions()
         {
             CaptureFailedRequests = true
         };
-        var sut = new SentryGraphQlHttpMessageHandler(hub, options);
+        var sut = new SentryGraphQLHttpMessageHandler(hub, options);
 
         // Act
         sut.HandleResponse(response, null, method, url);
@@ -121,7 +121,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         var url = "http://example.com/graphql";
         var request = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, url);
         response.RequestMessage = request;
-        var sut = new SentryGraphQlHttpMessageHandler(hub, null);
+        var sut = new SentryGraphQLHttpMessageHandler(hub, null);
 
         // Act
         var span = sut.ProcessRequest(request, method, url); // HandleResponse relies on this having been called first

@@ -11,12 +11,12 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <!-- Use the net7.0 target to test netcoreapp3.1 -->
-    <ProjectReference Include="..\..\src\Sentry.GraphQl\Sentry.GraphQl.csproj" AdditionalProperties="TargetFramework=netcoreapp3.1" />
+    <ProjectReference Include="..\..\src\Sentry.GraphQL.Client\Sentry.GraphQL.Client.csproj" AdditionalProperties="TargetFramework=netcoreapp3.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <!-- Use the net6.0 target to test netstandard2.0 -->
-    <ProjectReference Include="..\..\src\Sentry.GraphQl\Sentry.GraphQl.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
+    <ProjectReference Include="..\..\src\Sentry.GraphQL.Client\Sentry.GraphQL.Client.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
   </ItemGroup>
 
 </Project>

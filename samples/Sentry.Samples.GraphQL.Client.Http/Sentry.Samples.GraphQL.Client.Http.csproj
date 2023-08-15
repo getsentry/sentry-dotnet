@@ -5,6 +5,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Sentry.Samples.GraphQL.Client</RootNamespace>
     </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Sentry.GraphQl\Sentry.GraphQl.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.GraphQL.Client\Sentry.GraphQL.Client.csproj" />
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
 

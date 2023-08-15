@@ -1,6 +1,6 @@
-namespace Sentry.GraphQl;
+namespace Sentry.GraphQL.Client;
 
-internal class GraphQlRequestContent
+internal class GraphQLRequestContent
 {
     private static JsonSerializerOptions SerializerOptions => new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -12,7 +12,7 @@ internal class GraphQlRequestContent
     private string? RequestContent { get; }
     private IReadOnlyDictionary<string, object> Items { get; }
 
-    public GraphQlRequestContent(string? requestContent, SentryOptions? options = null)
+    public GraphQLRequestContent(string? requestContent, SentryOptions? options = null)
     {
         RequestContent = requestContent;
         if (requestContent is null)

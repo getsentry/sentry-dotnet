@@ -1,19 +1,19 @@
-namespace Sentry.GraphQl;
+namespace Sentry.GraphQL.Client;
 
-internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandler
+internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions _options;
-    private readonly GraphQlContentExtractor _extractor;
+    private readonly GraphQLContentExtractor _extractor;
     internal const string MechanismType = "SentryGraphQLHttpFailedRequestHandler";
     private readonly SentryHttpFailedRequestHandler _httpFailedRequestHandler;
 
-    internal SentryGraphQlHttpFailedRequestHandler(IHub hub, SentryOptions options, GraphQlContentExtractor? extractor = null)
+    internal SentryGraphQLHttpFailedRequestHandler(IHub hub, SentryOptions options, GraphQLContentExtractor? extractor = null)
         : base(hub, options)
     {
         _hub = hub;
         _options = options;
-        _extractor = extractor ?? new GraphQlContentExtractor(options);
+        _extractor = extractor ?? new GraphQLContentExtractor(options);
         _httpFailedRequestHandler = new SentryHttpFailedRequestHandler(hub, options);
     }
 
@@ -29,7 +29,7 @@ internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandle
             {
                 if (jsonElement.TryGetProperty("errors", out var errorsElement))
                 {
-                    throw new SentryGraphQlHttpFailedRequestException("GraphQL Error");
+                    throw new SentryGraphQLHttpFailedRequestException("GraphQL Error");
                 }
             }
             // No GraphQL errors, but we still might have an HTTP error status
@@ -60,7 +60,7 @@ internal class SentryGraphQlHttpFailedRequestHandler : SentryFailedRequestHandle
 #endif
             };
 
-            var requestContent = request.GetFused<GraphQlRequestContent>();
+            var requestContent = request.GetFused<GraphQLRequestContent>();
             if (!_options.SendDefaultPii)
             {
                 sentryRequest.Url = request.RequestUri?.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);

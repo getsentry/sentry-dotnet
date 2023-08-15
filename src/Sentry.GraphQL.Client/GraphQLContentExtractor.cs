@@ -1,13 +1,13 @@
-namespace Sentry.GraphQl;
+namespace Sentry.GraphQL.Client;
 
 /// <summary>
 /// Helper class to extract the content from GraphQL requests and responses
 /// </summary>
-internal class GraphQlContentExtractor
+internal class GraphQLContentExtractor
 {
     private readonly SentryOptions? _options;
 
-    public GraphQlContentExtractor(SentryOptions? options)
+    public GraphQLContentExtractor(SentryOptions? options)
     {
         _options = options;
     }
@@ -17,10 +17,10 @@ internal class GraphQlContentExtractor
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    public async Task<GraphQlRequestContent?> ExtractRequestContentAsync(HttpRequestMessage request)
+    public async Task<GraphQLRequestContent?> ExtractRequestContentAsync(HttpRequestMessage request)
     {
         var json = await ExtractContentAsync(request?.Content).ConfigureAwait(false);
-        return json is not null ? new GraphQlRequestContent(json, _options) : null;
+        return json is not null ? new GraphQLRequestContent(json, _options) : null;
     }
 
     /// <summary>

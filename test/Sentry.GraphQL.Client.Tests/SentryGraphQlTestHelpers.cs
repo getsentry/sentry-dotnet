@@ -1,4 +1,4 @@
-namespace Sentry.GraphQl.Tests;
+namespace Sentry.GraphQL.Client.Tests;
 
 internal static class SentryGraphQlTestHelpers
 {

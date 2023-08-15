@@ -1,11 +1,11 @@
-namespace Sentry.GraphQl;
+namespace Sentry.GraphQL.Client;
 
 /// <summary>
 /// Special HTTP message handler that can be used to propagate Sentry headers and other contextual information.
 /// </summary>
-public class SentryGraphQlHttpMessageHandler : SentryMessageHandler
+public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
 {
-    private readonly GraphQlContentExtractor _extractor;
+    private readonly GraphQLContentExtractor _extractor;
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
@@ -15,23 +15,23 @@ public class SentryGraphQlHttpMessageHandler : SentryMessageHandler
     /// </summary>
     /// <param name="innerHandler">An inner message handler to delegate calls to.</param>
     /// <param name="hub">The Sentry hub.</param>
-    public SentryGraphQlHttpMessageHandler(HttpMessageHandler? innerHandler = default, IHub? hub = default)
+    public SentryGraphQLHttpMessageHandler(HttpMessageHandler? innerHandler = default, IHub? hub = default)
         : this(hub, default, innerHandler)
     {
     }
 
-    internal SentryGraphQlHttpMessageHandler(IHub? hub, SentryOptions? options,
+    internal SentryGraphQLHttpMessageHandler(IHub? hub, SentryOptions? options,
         HttpMessageHandler? innerHandler = default,
         ISentryFailedRequestHandler? failedRequestHandler = null)
     : base(hub, options, innerHandler)
     {
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? _hub.GetSentryOptions();
-        _extractor = new GraphQlContentExtractor(options);
+        _extractor = new GraphQLContentExtractor(options);
         _failedRequestHandler = failedRequestHandler;
         if (_options != null)
         {
-            _failedRequestHandler ??= new SentryGraphQlHttpFailedRequestHandler(_hub, _options, _extractor);
+            _failedRequestHandler ??= new SentryGraphQLHttpFailedRequestHandler(_hub, _options, _extractor);
         }
     }
 
@@ -57,7 +57,7 @@ public class SentryGraphQlHttpMessageHandler : SentryMessageHandler
     /// <inheritdoc />
     protected internal override void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url)
     {
-        var graphqlInfo = response.RequestMessage?.GetFused<GraphQlRequestContent>();
+        var graphqlInfo = response.RequestMessage?.GetFused<GraphQLRequestContent>();
         var breadcrumbData = new Dictionary<string, string>
         {
             {"url", url},
@@ -88,7 +88,7 @@ public class SentryGraphQlHttpMessageHandler : SentryMessageHandler
         }
     }
 
-    private string? GetSpanDescriptionOrDefault(GraphQlRequestContent? graphqlInfo, HttpStatusCode statusCode) =>
+    private string? GetSpanDescriptionOrDefault(GraphQLRequestContent? graphqlInfo, HttpStatusCode statusCode) =>
         string.Join(" ",
             graphqlInfo?.OperationNameOrFallback(),
             graphqlInfo?.OperationTypeOrFallback(),

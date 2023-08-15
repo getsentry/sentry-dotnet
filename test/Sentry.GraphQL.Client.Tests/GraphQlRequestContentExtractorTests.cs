@@ -1,6 +1,6 @@
 using Sentry.Internal.Http;
 
-namespace Sentry.GraphQl.Tests;
+namespace Sentry.GraphQL.Client.Tests;
 
 public class GraphQlRequestContentExtractorTests
 {
@@ -19,9 +19,9 @@ public class GraphQlRequestContentExtractorTests
     {
         public SentryOptions Options => Substitute.For<SentryOptions>();
 
-        public GraphQlContentExtractor GetSut()
+        public GraphQLContentExtractor GetSut()
         {
-            return new GraphQlContentExtractor(Options);
+            return new GraphQLContentExtractor(Options);
         }
     }
 
