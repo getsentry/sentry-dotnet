@@ -50,10 +50,7 @@ internal static class GraphQLContentExtractor
         try
         {
             TrySeek(contentStream, 0);
-            // https://github.com/dotnet/corefx/blob/master/src/Common/src/CoreLib/System/IO/StreamReader.cs#L186
-            // Default parameters other than 'leaveOpen'
-            using var reader = new StreamReader(contentStream, Encoding.UTF8, true,
-                1024, leaveOpen: true);
+            using var reader = new StreamReader(contentStream, Encoding.UTF8, true, -1, true);
             return await reader.ReadToEndAsync().ConfigureAwait(false);
         }
         catch (Exception exception)
