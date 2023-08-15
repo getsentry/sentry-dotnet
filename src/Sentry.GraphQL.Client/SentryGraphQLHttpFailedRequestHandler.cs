@@ -15,8 +15,6 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
         _httpFailedRequestHandler = new SentryHttpFailedRequestHandler(hub, options);
     }
 
-    private static readonly Regex ErrorsRegex = new ("(?i)\"errors\"\\s*:\\s*\\[", RegexOptions.Compiled);
-
     protected internal override void DoEnsureSuccessfulResponse([NotNull]HttpRequestMessage request, [NotNull]HttpResponseMessage response)
     {
         JsonElement? json = null;

@@ -1,28 +1,13 @@
 namespace Sentry.GraphQL.Client;
 
-/// <summary>
-/// Helper class to extract the content from GraphQL requests and responses
-/// </summary>
 internal static class GraphQLContentExtractor
 {
-    /// <summary>
-    /// Extracts a <see cref="GraphQLRequest"/> from the <paramref name="request"/>
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="options">Sentry options</param>
-    /// <returns></returns>
     internal static async Task<GraphQLRequestContent?> ExtractRequestContentAsync(HttpRequestMessage request, SentryOptions? options)
     {
         var json = await ExtractContentAsync(request?.Content, options).ConfigureAwait(false);
         return json is not null ? new GraphQLRequestContent(json, options) : null;
     }
 
-    /// <summary>
-    /// Extracts the Json text a <paramref name="response"/>
-    /// </summary>
-    /// <param name="response"></param>
-    /// <param name="options">Sentry options</param>
-    /// <returns></returns>
     internal static async Task<JsonElement?> ExtractResponseContentAsync(HttpResponseMessage response, SentryOptions? options)
     {
         var json = await ExtractContentAsync(response?.Content, options).ConfigureAwait(false);
@@ -37,9 +22,8 @@ internal static class GraphQLContentExtractor
         }
     }
 
-    internal static async Task<string?> ExtractContentAsync(HttpContent? content, SentryOptions? options)
+    private static async Task<string?> ExtractContentAsync(HttpContent? content, SentryOptions? options)
     {
-        // Not to throw on code that ignores nullability warnings.
         if (content is null)
         {
             return null;
