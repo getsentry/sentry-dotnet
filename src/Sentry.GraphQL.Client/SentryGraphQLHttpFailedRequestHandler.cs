@@ -4,16 +4,14 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
 {
     private readonly IHub _hub;
     private readonly SentryOptions _options;
-    private readonly GraphQLContentExtractor _extractor;
     internal const string MechanismType = "SentryGraphQLHttpFailedRequestHandler";
     private readonly SentryHttpFailedRequestHandler _httpFailedRequestHandler;
 
-    internal SentryGraphQLHttpFailedRequestHandler(IHub hub, SentryOptions options, GraphQLContentExtractor? extractor = null)
+    internal SentryGraphQLHttpFailedRequestHandler(IHub hub, SentryOptions options)
         : base(hub, options)
     {
         _hub = hub;
         _options = options;
-        _extractor = extractor ?? new GraphQLContentExtractor(options);
         _httpFailedRequestHandler = new SentryHttpFailedRequestHandler(hub, options);
     }
 
@@ -24,7 +22,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
         JsonElement? json = null;
         try
         {
-            json = _extractor.ExtractResponseContentAsync(response).Result;
+            json = GraphQLContentExtractor.ExtractResponseContentAsync(response, _options).Result;
             if (json is { } jsonElement)
             {
                 if (jsonElement.TryGetProperty("errors", out var errorsElement))

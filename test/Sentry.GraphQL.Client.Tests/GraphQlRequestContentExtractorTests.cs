@@ -4,26 +4,10 @@ namespace Sentry.GraphQL.Client.Tests;
 
 public class GraphQlRequestContentExtractorTests
 {
-    private readonly Fixture _fixture;
     private const string ValidQuery = "query { notes { id } }";
     private const string ValidQueryWithName = "query getAllNotes { notes { id } }";
     private const string ValidShorthandQuery = "{ notes { id } }";
     private const string ValidMutation = "mutation saveSomething { id }";
-
-    public GraphQlRequestContentExtractorTests()
-    {
-        _fixture = new Fixture();
-    }
-
-    private class Fixture
-    {
-        public SentryOptions Options => Substitute.For<SentryOptions>();
-
-        public GraphQLContentExtractor GetSut()
-        {
-            return new GraphQLContentExtractor(Options);
-        }
-    }
 
     [Theory]
     [InlineData(ValidQuery, "query", "")]
@@ -33,11 +17,10 @@ public class GraphQlRequestContentExtractorTests
     public async Task ExtractContent_ValidQuery_UnpacksRequest(string query, string operationType, string operationName)
     {
         // Arrange
-        var sut = _fixture.GetSut();
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query);
 
         // Act
-        var result = await sut.ExtractRequestContentAsync(request);
+        var result = await GraphQLContentExtractor.ExtractRequestContentAsync(request, null);
 
         // Assert
         result.Should().NotBeNull();
@@ -49,11 +32,8 @@ public class GraphQlRequestContentExtractorTests
     [Fact]
     public async Task ExtractContent_WithNullRequest_ReturnsNull()
     {
-        // Arrange
-        var sut = _fixture.GetSut();
-
         // Act
-        var result = await sut.ExtractRequestContentAsync(null);
+        var result = await GraphQLContentExtractor.ExtractRequestContentAsync(null!, null);
 
         // Assert
         result.Should().BeNull();
@@ -63,11 +43,10 @@ public class GraphQlRequestContentExtractorTests
     public async Task ExtractContent_WithNullRequestContent_ReturnsNull()
     {
         // Arrange
-        var sut = _fixture.GetSut();
         var request = SentryGraphQlTestHelpers.GetRequest(null);
 
         // Act
-        var result = await sut.ExtractRequestContentAsync(request);
+        var result = await GraphQLContentExtractor.ExtractRequestContentAsync(request, null);
 
         // Assert
         result.Should().BeNull();
@@ -77,14 +56,13 @@ public class GraphQlRequestContentExtractorTests
     public async Task ExtractContent_WithUnreadableStream_ReturnsNull()
     {
         // Arrange
-        var sut = _fixture.GetSut();
         var stream = new MemoryStream();
         stream.Close();
         var content = new StreamContent(stream);
         var request = SentryGraphQlTestHelpers.GetRequest(content);
 
         // Act
-        var result = await sut.ExtractRequestContentAsync(request);
+        var result = await GraphQLContentExtractor.ExtractRequestContentAsync(request, null);
 
         // Assert
         result.Should().BeNull();

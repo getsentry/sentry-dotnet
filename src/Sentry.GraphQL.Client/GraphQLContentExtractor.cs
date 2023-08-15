@@ -3,38 +3,33 @@ namespace Sentry.GraphQL.Client;
 /// <summary>
 /// Helper class to extract the content from GraphQL requests and responses
 /// </summary>
-internal class GraphQLContentExtractor
+internal static class GraphQLContentExtractor
 {
-    private readonly SentryOptions? _options;
-
-    public GraphQLContentExtractor(SentryOptions? options)
-    {
-        _options = options;
-    }
-
     /// <summary>
     /// Extracts a <see cref="GraphQLRequest"/> from the <paramref name="request"/>
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="options">Sentry options</param>
     /// <returns></returns>
-    public async Task<GraphQLRequestContent?> ExtractRequestContentAsync(HttpRequestMessage request)
+    internal static async Task<GraphQLRequestContent?> ExtractRequestContentAsync(HttpRequestMessage request, SentryOptions? options)
     {
-        var json = await ExtractContentAsync(request?.Content).ConfigureAwait(false);
-        return json is not null ? new GraphQLRequestContent(json, _options) : null;
+        var json = await ExtractContentAsync(request?.Content, options).ConfigureAwait(false);
+        return json is not null ? new GraphQLRequestContent(json, options) : null;
     }
 
     /// <summary>
     /// Extracts the Json text a <paramref name="response"/>
     /// </summary>
     /// <param name="response"></param>
+    /// <param name="options">Sentry options</param>
     /// <returns></returns>
-    public async Task<JsonElement?> ExtractResponseContentAsync(HttpResponseMessage response)
+    internal static async Task<JsonElement?> ExtractResponseContentAsync(HttpResponseMessage response, SentryOptions? options)
     {
-        var json = await ExtractContentAsync(response?.Content).ConfigureAwait(false);
+        var json = await ExtractContentAsync(response?.Content, options).ConfigureAwait(false);
         return (json is not null) ? JsonDocument.Parse(json).RootElement.Clone() : null;
     }
 
-    void TrySeek(Stream? stream, long position)
+    private static void TrySeek(Stream? stream, long position)
     {
         if (stream?.CanSeek ?? false)
         {
@@ -42,7 +37,7 @@ internal class GraphQLContentExtractor
         }
     }
 
-    public async Task<string?> ExtractContentAsync(HttpContent? content)
+    internal static async Task<string?> ExtractContentAsync(HttpContent? content, SentryOptions? options)
     {
         // Not to throw on code that ignores nullability warnings.
         if (content is null)
@@ -58,7 +53,7 @@ internal class GraphQLContentExtractor
         }
         catch (Exception exception)
         {
-            _options?.LogDebug($"Unable to read GraphQL content stream: {exception.Message}");
+            options?.LogDebug($"Unable to read GraphQL content stream: {exception.Message}");
             return null;
         }
 
@@ -79,7 +74,7 @@ internal class GraphQLContentExtractor
         }
         catch (Exception exception)
         {
-            _options?.LogDebug($"Unable to extract GraphQL content: {exception.Message}");
+            options?.LogDebug($"Unable to extract GraphQL content: {exception.Message}");
             return null;
         }
         finally
