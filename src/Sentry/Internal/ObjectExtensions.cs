@@ -3,7 +3,8 @@ using Sentry.Internal.Extensions;
 namespace Sentry.Internal;
 
 /// <summary>
-/// Utility methods to enable storing arbitrary properties on any object, without worrying about garbage collection.
+/// Copied/Modified from
+/// https://github.com/mentaldesk/fuse/blob/91af00dc9bc7e1deb2f11ab679c536194f85dd4a/MentalDesk.Fuse/ObjectExtensions.cs
 /// </summary>
 internal static class ObjectExtensions
 {
@@ -12,30 +13,16 @@ internal static class ObjectExtensions
     private static Dictionary<string, object?> AssociatedProperties(this object source) =>
         Map.GetValue(source, _ => new Dictionary<string, object?>());
 
-    internal static void SetFused(this object source, string propertyName, object? value) =>
-        AssociatedProperties(source)[propertyName] = value;
-
-    internal static void SetFused<T>(this object source, T value)
-    {
-        var propertyName = typeof(T).Name;
+    public static void SetFused(this object source, string propertyName, object? value) =>
         source.AssociatedProperties()[propertyName] = value;
-    }
 
-    internal static T? GetFused<T>(this object source, string? propertyName = null)
+    public static void SetFused<T>(this object source, T value) => SetFused(source, typeof(T).Name, value);
+
+    public static T? GetFused<T>(this object source, string? propertyName = null)
     {
         propertyName ??= typeof(T).Name;
-        return AssociatedProperties(source).TryGetTypedValue<T>(propertyName, out var value)
+        return source.AssociatedProperties().TryGetTypedValue<T>(propertyName, out var value)
             ? value
             : default;
-    }
-    internal static T Fused<T>(this object source) where T : new()
-    {
-        var propertyName = typeof(T).Name;
-        if (!source.AssociatedProperties().TryGetTypedValue<T>(propertyName, out var value))
-        {
-            value = new T();
-            source.AssociatedProperties()[propertyName] = value;
-        }
-        return value;
     }
 }

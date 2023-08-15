@@ -64,8 +64,8 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
         };
         AddIfExists(breadcrumbData, "request_body_size", response.RequestMessage?.Content?.Headers.ContentLength?.ToString());
         AddIfExists(breadcrumbData, "response_body_size", response.Content.Headers.ContentLength?.ToString());
-        AddIfExists(breadcrumbData, "operation_name", graphqlInfo?.OperationName); // The GraphQL operation name
-        AddIfExists(breadcrumbData, "operation_type", graphqlInfo?.OperationType); // i.e. `query`, `mutation`, `subscription`
+        AddIfExists(breadcrumbData, "operation_name", graphqlInfo?.OperationNameOrFallback()); // The GraphQL operation name
+        AddIfExists(breadcrumbData, "operation_type", graphqlInfo?.OperationTypeOrFallback()); // i.e. `query`, `mutation`, `subscription`
         _hub.AddBreadcrumb(
             string.Empty,
             graphqlInfo?.OperationType ?? "graphql.operation",
