@@ -54,7 +54,7 @@ internal static class GraphQLContentExtractor
             // Default parameters other than 'leaveOpen'
             using var reader = new StreamReader(contentStream, Encoding.UTF8, true,
                 1024, leaveOpen: true);
-            return reader.ReadToEndAsync().GetAwaiter().GetResult();
+            return await reader.ReadToEndAsync().ConfigureAwait(false);
         }
         catch (Exception exception)
         {
