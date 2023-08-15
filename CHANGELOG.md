@@ -6,6 +6,12 @@
 
 - Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
 
+### Dependencies
+
+- Bump CLI from v2.20.4 to v2.20.5 ([#2539](https://github.com/getsentry/sentry-dotnet/pull/2539))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2205)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.4...2.20.5)
+
 ## 3.35.0
 
 ### Features
