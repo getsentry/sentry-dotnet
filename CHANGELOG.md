@@ -22,6 +22,7 @@
 - Distributed tracing now works independently of the performance feature. This allows you to connect errors to other Sentry instrumented applications ([#2493](https://github.com/getsentry/sentry-dotnet/pull/2493))
 - Added Sampling Decision to Trace Envelope Header ([#2495](https://github.com/getsentry/sentry-dotnet/pull/2495))
 - Add MinimumEventLevel to Sentry.Log4Net and convert events below it to breadcrumbs ([#2505](https://github.com/getsentry/sentry-dotnet/pull/2505))
+- Support transaction finishing automatically with 'idle timeout' (#2452)
 
 ### Fixes
 
@@ -55,7 +56,6 @@
 - Added a MSBuild property `SentryUploadAndroidProguardMapping` to automatically upload the Proguard mapping file when targeting Android ([#2455](https://github.com/getsentry/sentry-dotnet/pull/2455))
 - Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 - Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
-- Support transaction finishing automatically with 'idle timeout' ([#2452](https://github.com/getsentry/sentry-dotnet/pull/2452))
 
 ### Fixes
 
