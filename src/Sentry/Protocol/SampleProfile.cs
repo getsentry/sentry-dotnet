@@ -8,9 +8,6 @@ using Sentry.PlatformAbstractions;
 
 namespace Sentry.Protocol;
 
-// A list of frame indexes.
-using SentryProfileStackTrace = HashableGrowableArray<int>;
-
 /// <summary>
 /// Sentry sampling profiler output profile
 /// </summary>
@@ -19,7 +16,7 @@ internal sealed class SampleProfile : IJsonSerializable
     // Note: changing these to properties would break because GrowableArray is a struct.
     internal Internal.GrowableArray<Sample> Samples = new(10000);
     internal Internal.GrowableArray<SentryStackFrame> Frames = new(100);
-    internal Internal.GrowableArray<SentryProfileStackTrace> Stacks = new(100);
+    internal Internal.GrowableArray<Internal.GrowableArray<int>> Stacks = new(100);
     internal List<SentryThread> Threads = new(10);
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
