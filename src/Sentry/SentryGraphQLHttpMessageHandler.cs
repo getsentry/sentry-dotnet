@@ -1,4 +1,7 @@
-namespace Sentry.GraphQL.Client;
+using Sentry.Extensibility;
+using Sentry.Internal;
+
+namespace Sentry;
 
 /// <summary>
 /// Special HTTP message handler that can be used to propagate Sentry headers and other contextual information.
@@ -63,7 +66,12 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
             {"status_code", ((int) response.StatusCode).ToString()}
         };
         AddIfExists(breadcrumbData, "request_body_size", response.RequestMessage?.Content?.Headers.ContentLength?.ToString());
+#if NET5_0_OR_GREATER
+        // Starting with .NET 5, the content and headers are guaranteed to not be null.
         AddIfExists(breadcrumbData, "response_body_size", response.Content.Headers.ContentLength?.ToString());
+#else
+        AddIfExists(breadcrumbData, "response_body_size", response.Content?.Headers.ContentLength?.ToString());
+#endif
         AddIfExists(breadcrumbData, "operation_name", graphqlInfo?.OperationName); // The GraphQL operation name
         AddIfExists(breadcrumbData, "operation_type", graphqlInfo?.OperationType); // i.e. `query`, `mutation`, `subscription`
         _hub.AddBreadcrumb(

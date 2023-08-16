@@ -1,4 +1,7 @@
-namespace Sentry.GraphQL.Client;
+using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
+
+namespace Sentry;
 
 internal class GraphQLRequestContent
 {

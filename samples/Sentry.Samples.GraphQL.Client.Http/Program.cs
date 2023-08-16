@@ -9,7 +9,6 @@ using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using Sentry;
-using Sentry.GraphQL.Client;
 
 SentrySdk.Init(options =>
 {

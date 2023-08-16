@@ -1,4 +1,4 @@
-namespace Sentry.GraphQL.Client.Tests;
+namespace Sentry.Tests;
 
 /*
  * NOTE: All tests should be done for both asynchronous `SendAsync` and synchronous `Send` methods.

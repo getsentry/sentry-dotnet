@@ -1,4 +1,6 @@
-namespace Sentry.GraphQL.Client;
+using Sentry.Extensibility;
+
+namespace Sentry;
 
 internal static class GraphQLContentExtractor
 {
@@ -50,7 +52,13 @@ internal static class GraphQLContentExtractor
         try
         {
             TrySeek(contentStream, 0);
+#if NETFRAMEWORK
+            // On .NET Framework a positive buffer size needs to be specified
+            using var reader = new StreamReader(contentStream, Encoding.UTF8, true, 128, true);
+#else
+            // For .NET Core Apps, setting the buffer size to -1 uses the default buffer size
             using var reader = new StreamReader(contentStream, Encoding.UTF8, true, -1, true);
+#endif
             return await reader.ReadToEndAsync().ConfigureAwait(false);
         }
         catch (Exception exception)

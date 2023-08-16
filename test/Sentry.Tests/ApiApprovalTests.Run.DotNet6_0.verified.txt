@@ -541,6 +541,12 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryEvent FromJson(System.Text.Json.JsonElement json) { }
     }
+    public class SentryGraphQLHttpMessageHandler : Sentry.SentryMessageHandler
+    {
+        public SentryGraphQLHttpMessageHandler(System.Net.Http.HttpMessageHandler? innerHandler = null, Sentry.IHub? hub = null) { }
+        protected override void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
+        protected override Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url) { }
+    }
     public class SentryHttpMessageHandler : Sentry.SentryMessageHandler
     {
         public SentryHttpMessageHandler() { }

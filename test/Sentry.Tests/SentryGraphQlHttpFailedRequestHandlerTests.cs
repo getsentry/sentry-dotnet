@@ -1,4 +1,4 @@
-namespace Sentry.GraphQL.Client.Tests;
+namespace Sentry.Tests;
 
 public class SentryGraphQlHttpFailedRequestHandlerTests
 {

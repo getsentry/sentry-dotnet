@@ -1,4 +1,4 @@
-namespace Sentry.GraphQL.Client;
+namespace Sentry;
 
 internal class SentryGraphQLHttpFailedRequestException : Exception
 {
