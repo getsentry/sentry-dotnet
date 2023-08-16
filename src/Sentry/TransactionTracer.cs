@@ -234,6 +234,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         Description = context.Description;
         Status = context.Status;
         IsSampled = context.IsSampled;
+        StartTimestamp = _stopwatch.StartDateTimeOffset;
 
 		if (context is TransactionContext transactionContext)
         {

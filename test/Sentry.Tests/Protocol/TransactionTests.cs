@@ -10,6 +10,57 @@ public class TransactionTests
     }
 
     [Fact]
+    public void NewTransactionTracer_ConstructingWithNameAndOperation_HasValidStartTime()
+    {
+        var actualTransaction = new TransactionTracer(DisabledHub.Instance, "test-name", "test-operation");
+
+        Assert.NotEqual(DateTimeOffset.MinValue, actualTransaction.StartTimestamp);
+    }
+
+    [Fact]
+    public void NewTransactionTracer_ConstructingWithContext_HasValidStartTime()
+    {
+        var context = new TransactionContext("test-name", "test-operation");
+
+        var actualTransaction = new TransactionTracer(DisabledHub.Instance, context);
+
+        Assert.NotEqual(DateTimeOffset.MinValue, actualTransaction.StartTimestamp);
+    }
+
+    [Fact]
+    public async Task NewTransactionTracer_IdleTimeoutProvided_AutomaticallyFinishes()
+    {
+        // Arrange
+        var client = Substitute.For<ISentryClient>();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Debug = true
+        };
+        var hub = new Hub(options, client);
+        var context = new TransactionContext(
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(),
+            "my name",
+            "my operation",
+            "description",
+            SpanStatus.Ok,
+            null,
+            true,
+            TransactionNameSource.Component
+        );
+
+        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2));
+
+        // Act
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        // Assert
+        transaction.IsFinished.Should().BeTrue();
+    }
+
+    [Fact]
     public void Redact_Redacts_Urls()
     {
         // Arrange
@@ -561,38 +612,4 @@ public class TransactionTests
         // Assert
         Assert.Same(transaction, result);
     }
-
-    [Fact]
-    public async Task NewTransactionTracer_IdleTimeoutProvided_AutomaticallyFinishes()
-    {
-        // Arrange
-        var client = Substitute.For<ISentryClient>();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            Debug = true
-        };
-        var hub = new Hub(options, client);
-        var context = new TransactionContext(
-            SpanId.Create(),
-            SpanId.Create(),
-            SentryId.Create(),
-            "my name",
-            "my operation",
-            "description",
-            SpanStatus.Ok,
-            null,
-            true,
-            TransactionNameSource.Component
-        );
-
-        var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2));
-
-        // Act
-        await Task.Delay(TimeSpan.FromSeconds(2));
-
-        // Assert
-        transaction.IsFinished.Should().BeTrue();
-    }
-
 }
