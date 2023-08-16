@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK no longer creates transactions with their start date set to `Jan 01, 001` ([#2544](https://github.com/getsentry/sentry-dotnet/pull/2544))
+
+### Dependencies
+
+- Bump CLI from v2.20.4 to v2.20.5 ([#2539](https://github.com/getsentry/sentry-dotnet/pull/2539))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2205)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.4...2.20.5)
+- Bump Cocoa SDK from v8.9.4 to v8.9.5 ([#2542](https://github.com/getsentry/sentry-dotnet/pull/2542))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#895)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.9.4...8.9.5)
+
+## 3.35.0
+
 ### Features
 
 - Distributed tracing now works independently of the performance feature. This allows you to connect errors to other Sentry instrumented applications ([#2493](https://github.com/getsentry/sentry-dotnet/pull/2493))
@@ -22,12 +37,12 @@
 
 ### Dependencies
 
-- Bump Java SDK from v6.25.1 to v6.27.0 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484), [#2498](https://github.com/getsentry/sentry-dotnet/pull/2498), [#2517](https://github.com/getsentry/sentry-dotnet/pull/2517))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6270)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.25.1...6.27.0)
-- Bump CLI from v2.19.4 to v2.20.3 ([#2509](https://github.com/getsentry/sentry-dotnet/pull/2509), [#2518](https://github.com/getsentry/sentry-dotnet/pull/2518), [#2527](https://github.com/getsentry/sentry-dotnet/pull/2527))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2203)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.19.4...2.20.3)
+- Bump Java SDK from v6.25.1 to v6.28.0 ([#2484](https://github.com/getsentry/sentry-dotnet/pull/2484), [#2498](https://github.com/getsentry/sentry-dotnet/pull/2498), [#2517](https://github.com/getsentry/sentry-dotnet/pull/2517), [#2533](https://github.com/getsentry/sentry-dotnet/pull/2533))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6280)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.25.1...6.28.0)
+- Bump CLI from v2.19.4 to v2.20.4 ([#2509](https://github.com/getsentry/sentry-dotnet/pull/2509), [#2518](https://github.com/getsentry/sentry-dotnet/pull/2518), [#2527](https://github.com/getsentry/sentry-dotnet/pull/2527), [#2530](https://github.com/getsentry/sentry-dotnet/pull/2530))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2204)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.19.4...2.20.4)
 - Bump Cocoa SDK from v8.8.0 to v8.9.4 ([#2479](https://github.com/getsentry/sentry-dotnet/pull/2479), [#2483](https://github.com/getsentry/sentry-dotnet/pull/2483), [#2500](https://github.com/getsentry/sentry-dotnet/pull/2500), [#2510](https://github.com/getsentry/sentry-dotnet/pull/2510), [#2531](https://github.com/getsentry/sentry-dotnet/pull/2531))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#894)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.8.0...8.9.4)

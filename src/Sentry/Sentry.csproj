@@ -96,25 +96,25 @@
     <ItemGroup>
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Darwin-arm64" FileHash="9b39ca8f6b633f971753c99b2742cfc4f29d84357e04e6ddf97ff436259f1d41" />
+        Include="sentry-cli-Darwin-arm64" FileHash="51910fee9a12f062e72eb4c3cfd52e57537a398da2634b50f83d1fcb2666b159" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Darwin-x86_64" FileHash="a260e81796edf73e54320c8d6bf1839bfe9be5a8781ccce7882b262200955bd2" />
+        Include="sentry-cli-Darwin-x86_64" FileHash="01bfff67c5b5f1981d885a9800ccef124596c657a4f0e5901b11e8e0cd2f327e" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')"
-        Include="sentry-cli-Linux-aarch64" FileHash="fae5777deee53329b8c427fb9eda86bd4f01412b73d0d672b9485e6f95be0247" />
+        Include="sentry-cli-Linux-aarch64" FileHash="d111f436e48893dbf19e8894d48a5001a2d702fcec98af8dc0d45c7ee8d885cf" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Linux-i686" FileHash="b9e36903099d050892a977f5490a5a92dc43907b39331e291cec49270e47d56a" />
+        Include="sentry-cli-Linux-i686" FileHash="21a2f454006e48222ec7c92ea9be2bee19b2013ebcb78e83eb9d062f3ec87f60" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')"
-        Include="sentry-cli-Linux-x86_64" FileHash="f2d4eb5a5d338278b7c38d5fa16a33026602827c6fac5cdb7b35b909c91de001" />
+        Include="sentry-cli-Linux-x86_64" FileHash="7f949b842cc5c48e6fe291469f972df915c68db53d0ff0b51cf8d30dd90cd719" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')"
-        Include="sentry-cli-Windows-i686.exe" FileHash="1f874311502f39d2a0a5d192b785a66d5bb8fd0cbca75b992aff86acfad7a916" />
+        Include="sentry-cli-Windows-i686.exe" FileHash="3ccd585433a3dba3fb014b151ab59aae816de1445a7395e7aff8b831e0c2e11a" />
       <SentryCLIDownload
         Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')"
-        Include="sentry-cli-Windows-x86_64.exe" FileHash="8762fb82bc12e3a9642013ef91a495d459d533ff6d1a0112baaf776c7540aef1" />
+        Include="sentry-cli-Windows-x86_64.exe" FileHash="c06c4e22b8edc6d3c1e4cc11fd6cd515f980069b4c736b0ec04fd5cfc1689c3c" />
     </ItemGroup>
 
     <!-- Download the files -->
