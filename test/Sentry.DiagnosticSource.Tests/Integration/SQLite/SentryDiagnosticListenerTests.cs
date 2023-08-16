@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sentry.Internal.DiagnosticSource;
+using Sentry.PlatformAbstractions;
 
 namespace Sentry.DiagnosticSource.Tests.Integration.SQLite;
 
@@ -14,6 +15,13 @@ public class SentryDiagnosticListenerTests
         internal SentryScopeManager ScopeManager { get; }
         public Fixture()
         {
+            // We're skipping not just the tests but here too.
+            // Fixture creation breaks on Mono due to `Library e_sqlite3 not found`.
+            if (RuntimeInfo.GetRuntime().IsMono())
+            {
+                return;
+            }
+
             var options = new SentryOptions
             {
                 TracesSampleRate = 1.0,
@@ -38,11 +46,7 @@ public class SentryDiagnosticListenerTests
         }
         public ItemsContext NewContext() => new(_database.ContextOptions);
 
-        public ISpan GetSpan()
-        {
-            var (currentScope, _) = ScopeManager.GetCurrent();
-            return currentScope.GetSpan();
-        }
+        public ISpan GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
         public ITransaction StartTransaction(IHub hub, ITransactionContext context)
         {
@@ -58,9 +62,11 @@ public class SentryDiagnosticListenerTests
 
     private readonly Fixture _fixture = new();
 
-    [Fact]
+    [SkippableFact]
     public void EfCoreIntegration_RunSynchronousQueryWithIssue_TransactionWithSpans()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
@@ -90,9 +96,11 @@ public class SentryDiagnosticListenerTests
         Assert.All(spans, span => Assert.True(span.IsFinished));
     }
 
-    [Fact]
+    [SkippableFact]
     public void EfCoreIntegration_RunSynchronousQuery_TransactionWithSpans()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
@@ -112,9 +120,11 @@ public class SentryDiagnosticListenerTests
         Assert.All(spans, span => Assert.True(span.IsFinished));
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpansWithOneCompiler()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var context = _fixture.NewContext();
         var commands = new List<int>();
@@ -161,9 +171,11 @@ public class SentryDiagnosticListenerTests
         });
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task EfCoreIntegration_RunAsyncQuery_TransactionWithSpans()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono());
+
         // Arrange
         var context = _fixture.NewContext();
         var hub = _fixture.Hub;

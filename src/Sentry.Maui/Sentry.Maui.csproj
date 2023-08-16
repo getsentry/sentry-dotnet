@@ -37,4 +37,8 @@
     <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
 </Project>

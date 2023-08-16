@@ -62,7 +62,7 @@ public partial class TransactionProcessorTests
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             AttachStacktrace = false,
-            Release = "Sentry.Tests@1.0.0",
+            Release = "release",
             InitNativeSdks = false
         };
 }

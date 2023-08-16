@@ -40,9 +40,26 @@ public interface IHub :
     ISpan? GetSpan();
 
     /// <summary>
-    /// Gets the Sentry trace header for the last active span.
+    /// Gets the Sentry trace header that allows tracing across services
     /// </summary>
     SentryTraceHeader? GetTraceHeader();
+
+    /// <summary>
+    /// Gets the Sentry baggage header that allows tracing across services
+    /// </summary>
+    BaggageHeader? GetBaggage();
+
+    /// <summary>
+    /// Continues a trace based on HTTP header values.
+    /// </summary>
+    /// <remarks>
+    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </remarks>
+    TransactionContext ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null);
 
     /// <summary>
     /// Starts a new session.

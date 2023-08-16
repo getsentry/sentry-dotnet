@@ -11,7 +11,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.DiagnosticSource.IntegrationTests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.DiagnosticSource.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>

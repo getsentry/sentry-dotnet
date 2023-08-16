@@ -6,14 +6,15 @@
       On Mac, we'll also build for iOS and MacCatalyst.
       On Windows, we'll also build for Windows 10.
     -->
-    <TargetFrameworks>net6.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>net7.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Samples.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
+    <PublishReadyToRun>false</PublishReadyToRun>
 
     <!-- Display name -->
     <ApplicationTitle>Sentry.Samples.Maui</ApplicationTitle>
@@ -38,10 +39,17 @@
     -->
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
 
+    <!--
+      For this demo app, let's upload sources and symbols to Sentry on every build, regardless of configuration.
+      In a real app, you probably only want to do this on Release builds.
+    -->
+    <SentryUploadSources>true</SentryUploadSources>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+
   </PropertyGroup>
 
   <!--
-    Use the arm64 runtime when building on arm64 Macs.
+    Use the arm64 runtime when building on arm64, and the x64 runtime when building on x64 Macs.
     See https://github.com/xamarin/xamarin-macios/issues/17841
   -->
   <PropertyGroup>
@@ -49,6 +57,7 @@
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios' And '$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And '$(OSArchitecture)' == 'Arm64' And ('$(_MacCatalystRuntimeIdentifier)' == 'maccatalyst-x64' Or ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">maccatalyst-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And '$(OSArchitecture)' == 'x64' And ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == '')">maccatalyst-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 
 namespace Sentry.Internal;
 
@@ -40,11 +41,12 @@ internal class Hub : IHubEx, IDisposable
             options.LogFatal(msg);
             throw new InvalidOperationException(msg);
         }
+
         options.LogDebug("Initializing Hub for Dsn: '{0}'.", options.Dsn);
 
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
-        _ownedClient = client ?? new SentryClient(options, _randomValuesFactory);
+        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory);
         _clock = clock ?? SystemClock.Clock;
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
 
@@ -58,14 +60,12 @@ internal class Hub : IHubEx, IDisposable
 
         _enricher = new Enricher(options);
 
-        var integrations = options.Integrations;
-        if (integrations?.Count > 0)
+        // An integration _can_ deregister itself, so make a copy of the list before iterating.
+        var integrations = options.Integrations?.ToList() ?? Enumerable.Empty<ISdkIntegration>();
+        foreach (var integration in integrations)
         {
-            foreach (var integration in integrations)
-            {
-                options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
-                integration.Register(this, options);
-            }
+            options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
+            integration.Register(this, options);
         }
     }
 
@@ -117,6 +117,16 @@ internal class Hub : IHubEx, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
+        var instrumenter = (context as SpanContext)?.Instrumenter;
+        if (instrumenter != _options.Instrumenter)
+        {
+            _options.LogWarning(
+                $"Attempted to start a transaction via {instrumenter} instrumentation when the SDK is" +
+                $" configured for {_options.Instrumenter} instrumentation.  The transaction will not be created.");
+
+            return NoOpTransaction.Instance;
+        }
+
         var transaction = new TransactionTracer(this, context);
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
@@ -149,7 +159,7 @@ internal class Hub : IHubEx, IDisposable
             // Random sampling runs only if the sampling decision hasn't been made already.
             if (transaction.IsSampled == null)
             {
-                var sampleRate = _options.TracesSampleRate;
+                var sampleRate = _options.TracesSampleRate ?? (_options.EnableTracing is true ? 1.0 : 0.0);
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
@@ -162,7 +172,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         // Use the provided DSC, or create one based on this transaction.
-        // This must be done AFTER the sampling decision has been made.
+        // DSC creation must be done AFTER the sampling decision has been made.
         transaction.DynamicSamplingContext =
             dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
 
@@ -183,13 +193,49 @@ internal class Hub : IHubEx, IDisposable
         _ = ExceptionToSpanMap.GetValue(exception, _ => span);
     }
 
-    public ISpan? GetSpan()
+    public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
+
+    public SentryTraceHeader GetTraceHeader()
     {
-        var (currentScope, _) = ScopeManager.GetCurrent();
-        return currentScope.GetSpan();
+        if (GetSpan()?.GetTraceHeader() is { } traceHeader)
+        {
+            return traceHeader;
+        }
+
+        // With either tracing disabled or no active span on the current scope we fall back to the propagation context
+        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        // In either case, we must not append a sampling decision.
+        return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
 
-    public SentryTraceHeader? GetTraceHeader() => GetSpan()?.GetTraceHeader();
+    public BaggageHeader GetBaggage()
+    {
+        if (GetSpan() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc } )
+        {
+            return dsc.ToBaggageHeader();
+        }
+
+        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
+        return propagationContext.DynamicSamplingContext.ToBaggageHeader();
+    }
+
+    public TransactionContext ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null)
+    {
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
+        ConfigureScope(scope => scope.PropagationContext = propagationContext);
+
+        // If we have to create a new SentryTraceHeader we don't make a sampling decision
+        traceHeader ??= new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
+        return new TransactionContext(
+            name ?? string.Empty,
+            operation ?? string.Empty,
+            traceHeader);
+    }
 
     public void StartSession()
     {
@@ -277,7 +323,7 @@ internal class Hub : IHubEx, IDisposable
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
         EndSession(_clock.GetUtcNow(), status);
 
-    private ISpan? GetLinkedSpan(SentryEvent evt, Scope scope)
+    private ISpan? GetLinkedSpan(SentryEvent evt)
     {
         // Find the span which is bound to the same exception
         if (evt.Exception is { } exception &&
@@ -286,16 +332,35 @@ internal class Hub : IHubEx, IDisposable
             return spanBoundToException;
         }
 
-        // Otherwise just get the currently active span on the scope (unless it's sampled out)
-        if (scope.GetSpan() is { IsSampled: not false } span)
-        {
-            return span;
-        }
-
         return null;
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+    private void ApplyTraceContextToEvent(SentryEvent evt, ISpan span)
+    {
+        evt.Contexts.Trace.SpanId = span.SpanId;
+        evt.Contexts.Trace.TraceId = span.TraceId;
+        evt.Contexts.Trace.ParentSpanId = span.ParentSpanId;
+
+        if (span.GetTransaction() is TransactionTracer transactionTracer)
+        {
+            evt.DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+        }
+    }
+
+    private void ApplyTraceContextToEvent(SentryEvent evt, SentryPropagationContext propagationContext)
+    {
+        evt.Contexts.Trace.TraceId = propagationContext.TraceId;
+        evt.Contexts.Trace.SpanId = propagationContext.SpanId;
+        evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
+
+        propagationContext.DynamicSamplingContext ??= propagationContext.CreateDynamicSamplingContext(_options);
+        evt.DynamicSamplingContext = propagationContext.DynamicSamplingContext;
+    }
+
+    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
+        CaptureEvent(evt, null, configureScope);
+
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
     {
         if (!IsEnabled)
         {
@@ -307,7 +372,7 @@ internal class Hub : IHubEx, IDisposable
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, clonedScope);
+            return CaptureEvent(evt, hint, clonedScope);
         }
         catch (Exception e)
         {
@@ -317,42 +382,39 @@ internal class Hub : IHubEx, IDisposable
     }
 
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
-        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, scope) : SentryId.Empty;
+        CaptureEvent(evt, null, scope);
 
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Scope? scope)
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) =>
+        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, hint, scope) : SentryId.Empty;
+
+    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
     {
         try
         {
-            var currentScope = ScopeManager.GetCurrent();
-            var actualScope = scope ?? currentScope.Key;
+            ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
+            var actualScope = scope ?? currentScope;
 
-            // Inject trace information from a linked span
-            if (GetLinkedSpan(evt, actualScope) is { } linkedSpan)
+            // We get the span linked to the event or fall back to the current span
+            var span = GetLinkedSpan(evt) ?? actualScope.Span;
+            if (span is not null)
             {
-                evt.Contexts.Trace.SpanId = linkedSpan.SpanId;
-                evt.Contexts.Trace.TraceId = linkedSpan.TraceId;
-                evt.Contexts.Trace.ParentSpanId = linkedSpan.ParentSpanId;
+                if (span.IsSampled is not false)
+                {
+                    ApplyTraceContextToEvent(evt, span);
+                }
+            }
+            else
+            {
+                // If there is no span on the scope (and not just no sampled one), fall back to the propagation context
+                ApplyTraceContextToEvent(evt, actualScope.PropagationContext);
             }
 
-            var hasTerminalException = evt.HasTerminalException();
-            if (hasTerminalException)
-            {
-                // Event contains a terminal exception -> end session as crashed
-                _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-                actualScope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-            }
-            else if (evt.HasException())
-            {
-                // Event contains a non-terminal exception -> report error
-                // (this might return null if the session has already reported errors before)
-                actualScope.SessionUpdate = _sessionManager.ReportError();
-            }
-
-            var id = currentScope.Value.CaptureEvent(evt, actualScope);
+            // Now capture the event with the Sentry client on the current scope.
+            var id = sentryClient.CaptureEvent(evt, hint, actualScope);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (hasTerminalException)
+            if (evt.HasTerminalException())
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
@@ -386,7 +448,9 @@ internal class Hub : IHubEx, IDisposable
         }
     }
 
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,
@@ -400,20 +464,24 @@ internal class Hub : IHubEx, IDisposable
         try
         {
             // Apply scope data
-            var currentScope = ScopeManager.GetCurrent();
-            var scope = currentScope.Key;
+            var currentScopeAndClient = ScopeManager.GetCurrent();
+            var scope = currentScopeAndClient.Key;
             scope.Evaluate();
             scope.Apply(transaction);
 
             // Apply enricher
             _enricher.Apply(transaction);
 
+            // Add attachments to the hint for processors and callbacks
+            hint ??= new Hint();
+            hint.AddAttachmentsFromScope(scope);
+
             var processedTransaction = transaction;
             if (transaction.IsSampled != false)
             {
                 foreach (var processor in scope.GetAllTransactionProcessors())
                 {
-                    processedTransaction = processor.Process(transaction);
+                    processedTransaction = processor.DoProcessTransaction(transaction, hint);
                     if (processedTransaction == null)
                     {
                         _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
@@ -423,7 +491,8 @@ internal class Hub : IHubEx, IDisposable
                 }
             }
 
-            currentScope.Value.CaptureTransaction(processedTransaction);
+            var client = currentScopeAndClient.Value;
+            client.CaptureTransaction(processedTransaction, hint);
         }
         catch (Exception e)
         {

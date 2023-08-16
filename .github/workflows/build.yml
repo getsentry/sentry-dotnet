@@ -15,13 +15,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Using ubuntu-20.04 because ubuntu-latest is 22.04, which is fails Sentry.DiagnosticSource.Tests due to a SQLite on Mono issue.
-        # Using macos-12 because we need Xcode 13.3 or later to build Sentry.Samples.Maui. (macos-latest currently points at macos-11 which uses Xcode 13.2)
-        # Using windows-2019 because windows-latest is much slower and we don't need anything in particular from it.
-        os: [ubuntu-20.04, windows-2019, macos-12]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Cancel Previous Runs
+        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@b173b6ec0100793626c2d9e6b90435061f4fc3e5 # Tag: 0.11.0
 
       - name: Checkout

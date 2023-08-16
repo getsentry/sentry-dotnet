@@ -180,7 +180,7 @@ internal static class JsonExtensions
 
         // Otherwise, let's get the value as a string and parse it ourselves.
         // Note that we already know this will succeed due to JsonValueKind.Number
-        return double.Parse(json.ToString()!);
+        return double.Parse(json.ToString()!, CultureInfo.InvariantCulture);
     }
 
     public static long? GetAddressAsLong(this JsonElement json)

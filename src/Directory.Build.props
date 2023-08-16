@@ -6,9 +6,6 @@
     <!--Generate xml docs for all projects under 'src'-->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <!-- CS1591: Missing XML comment for publicly visible type or member -->
-    <NoWarn Condition="'$(Configuration)' == 'Debug'">$(NoWarn);CS1591</NoWarn>
-
     <Authors>Sentry Team and Contributors</Authors>
     <Company>Sentry.io</Company>
     <Product>Sentry</Product>

@@ -55,8 +55,7 @@ internal class GlobalSessionManager : ISessionManager
 
             Directory.CreateDirectory(directoryPath);
 
-            _options.LogDebug("Created directory for installation ID file ({0}).",
-                directoryPath);
+            _options.LogDebug("Created directory for installation ID file ({0}).", directoryPath);
 
             var filePath = Path.Combine(directoryPath, ".installation");
 
@@ -67,24 +66,19 @@ internal class GlobalSessionManager : ISessionManager
             }
             catch (FileNotFoundException)
             {
-                _options.LogDebug("File containing installation ID does not exist ({0}).",
-                    filePath);
+                _options.LogDebug("File containing installation ID does not exist ({0}).", filePath);
             }
             catch (DirectoryNotFoundException)
             {
                 // on PS4 we're seeing CreateDirectory work but ReadAllText throw DirectoryNotFoundException
-                _options.LogDebug(
-                    "Directory containing installation ID does not exist ({0}).",
-                    filePath);
+                _options.LogDebug("Directory containing installation ID does not exist ({0}).", filePath);
             }
 
             // Generate new installation ID and store it in a file
             var id = Guid.NewGuid().ToString();
             File.WriteAllText(filePath, id);
 
-            _options.LogDebug("Saved installation ID '{0}' to file '{1}'.",
-                id, filePath);
-
+            _options.LogDebug("Saved installation ID '{0}' to file '{1}'.", id, filePath);
             return id;
         }
         // If there's no write permission or the platform doesn't support this, we handle
@@ -92,7 +86,6 @@ internal class GlobalSessionManager : ISessionManager
         catch (Exception ex)
         {
             _options.LogError("Failed to resolve persistent installation ID.", ex);
-
             return null;
         }
     }
@@ -112,9 +105,7 @@ internal class GlobalSessionManager : ISessionManager
 
             if (string.IsNullOrWhiteSpace(installationId))
             {
-                _options.LogError(
-                    "Failed to find an appropriate network interface for installation ID.");
-
+                _options.LogError("Failed to find an appropriate network interface for installation ID.");
                 return null;
             }
 
@@ -123,7 +114,6 @@ internal class GlobalSessionManager : ISessionManager
         catch (Exception ex)
         {
             _options.LogError("Failed to resolve hardware installation ID.", ex);
-
             return null;
         }
     }
@@ -155,7 +145,7 @@ internal class GlobalSessionManager : ISessionManager
             var id =
                 TryGetPersistentInstallationId() ??
                 TryGetHardwareInstallationId() ??
-                GlobalSessionManager.GetMachineNameInstallationId();
+                GetMachineNameInstallationId();
 
             if (!string.IsNullOrWhiteSpace(id))
             {
@@ -186,9 +176,7 @@ internal class GlobalSessionManager : ISessionManager
         {
             Directory.CreateDirectory(_persistenceDirectoryPath);
 
-            _options.LogDebug(
-                "Created persistence directory for session file '{0}'.",
-                _persistenceDirectoryPath);
+            _options.LogDebug("Created persistence directory for session file '{0}'.", _persistenceDirectoryPath);
 
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
@@ -219,15 +207,12 @@ internal class GlobalSessionManager : ISessionManager
             {
                 try
                 {
-                    _options.LogDebug("Deleting persisted session file with contents: {0}",
-                        File.ReadAllText(filePath));
+                    var contents = File.ReadAllText(filePath);
+                    _options.LogDebug("Deleting persisted session file with contents: {0}", contents);
                 }
                 catch (Exception ex)
                 {
-                    _options.LogError(
-                        "Failed to read the contents of persisted session file '{0}'.",
-                        ex,
-                        filePath);
+                    _options.LogError("Failed to read the contents of persisted session file '{0}'.", ex, filePath);
                 }
             }
 
@@ -237,10 +222,7 @@ internal class GlobalSessionManager : ISessionManager
         }
         catch (Exception ex)
         {
-            _options.LogError(
-                "Failed to delete persisted session from the file system: '{0}'",
-                ex,
-                filePath);
+            _options.LogError("Failed to delete persisted session from the file system: '{0}'", ex, filePath);
         }
     }
 
@@ -316,8 +298,7 @@ internal class GlobalSessionManager : ISessionManager
         if (string.IsNullOrWhiteSpace(release))
         {
             // Release health without release is just health (useless)
-            _options.LogError(
-                "Failed to start a session because there is no release information.");
+            _options.LogError("Failed to start a session because there is no release information.");
 
             return null;
         }
@@ -333,16 +314,13 @@ internal class GlobalSessionManager : ISessionManager
         var previousSession = Interlocked.Exchange(ref _currentSession, session);
         if (previousSession is not null)
         {
-            _options.LogWarning(
-                "Starting a new session while an existing one is still active.");
+            _options.LogWarning("Starting a new session while an existing one is still active.");
 
             // End previous session
             EndSession(previousSession, _clock.GetUtcNow(), SessionEndStatus.Exited);
         }
 
-        AddSessionBreadcrumb("Starting Sentry Session");
-        _options.LogInfo("Started new session (SID: {0}; DID: {1}).",
-            session.Id, session.DistinctId);
+        _options.LogInfo("Started new session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
 
         var update = session.CreateUpdate(true, _clock.GetUtcNow());
 
@@ -360,7 +338,6 @@ internal class GlobalSessionManager : ISessionManager
             session.ReportError();
         }
 
-        AddSessionBreadcrumb("Ending Sentry Session");
         _options.LogInfo("Ended session (SID: {0}; DID: {1}) with status '{2}'.",
             session.Id, session.DistinctId, status);
 
@@ -376,8 +353,7 @@ internal class GlobalSessionManager : ISessionManager
         var session = Interlocked.Exchange(ref _currentSession, null);
         if (session is null)
         {
-            _options.LogDebug("Failed to end session because there is none active.");
-
+            _options.LogWarning("Failed to end session because there is none active.");
             return null;
         }
 
@@ -388,28 +364,35 @@ internal class GlobalSessionManager : ISessionManager
 
     public void PauseSession()
     {
-        if (_currentSession is { } session)
+        if (_currentSession is not { } session)
         {
-            AddSessionBreadcrumb("Pausing Sentry Session");
-
-            var now = _clock.GetUtcNow();
-            _lastPauseTimestamp = now;
-            PersistSession(session.CreateUpdate(false, now), now);
+            _options.LogWarning("Attempted to pause a session, but a session has not been started.");
+            return;
         }
+
+        _options.LogInfo("Pausing session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
+
+        var now = _clock.GetUtcNow();
+        _lastPauseTimestamp = now;
+        PersistSession(session.CreateUpdate(false, now), now);
     }
 
     public IReadOnlyList<SessionUpdate> ResumeSession()
     {
-        // Ensure a session has been paused before
-        if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
+        if (_currentSession is not { } session)
         {
-            _options.LogDebug(
-                "Attempted to resume a session, but the current session hasn't been paused.");
-
+            _options.LogWarning("Attempted to resume a session, but a session has not been started.");
             return Array.Empty<SessionUpdate>();
         }
 
-        AddSessionBreadcrumb("Resuming Sentry Session");
+        // Ensure a session has been paused before
+        if (_lastPauseTimestamp is not { } sessionPauseTimestamp)
+        {
+            _options.LogWarning("Attempted to resume a session, but the current session hasn't been paused.");
+            return Array.Empty<SessionUpdate>();
+        }
+
+        _options.LogInfo("Resuming session (SID: {0}; DID: {1}).", session.Id, session.DistinctId);
 
         // Reset the pause timestamp since the session is about to be resumed
         _lastPauseTimestamp = null;
@@ -441,38 +424,29 @@ internal class GlobalSessionManager : ISessionManager
             return updates;
         }
 
-        _options.LogDebug(
-            "Paused session has been paused for {0}, which is shorter than the configured timeout.",
-            pauseDuration);
+        _options.LogInfo("Resumed session (SID: {0}; DID: {1}) after being paused for {2}.",
+            session.Id, session.DistinctId, pauseDuration);
 
         return Array.Empty<SessionUpdate>();
     }
 
     public SessionUpdate? ReportError()
     {
-        if (_currentSession is { } session)
+        if (_currentSession is not { } session)
         {
-            session.ReportError();
-
-            // If we already have at least one error reported, the session update is pointless,
-            // so don't return anything.
-            if (session.ErrorCount > 1)
-            {
-                _options.LogDebug(
-                    "Reported an error on a session that already contains errors. Not creating an update.");
-
-                return null;
-            }
-
-            return session.CreateUpdate(false, _clock.GetUtcNow());
+            _options.LogDebug("Failed to report an error on a session because there is none active.");
+            return null;
         }
 
-        _options.LogDebug(
-            "Failed to report an error on a session because there is none active.");
+        session.ReportError();
 
-        return null;
+        // If we already have at least one error reported, the session update is pointless, so don't return anything.
+        if (session.ErrorCount > 1)
+        {
+            _options.LogDebug("Reported an error on a session that already contains errors. Not creating an update.");
+            return null;
+        }
+
+        return session.CreateUpdate(false, _clock.GetUtcNow());
     }
-
-    private static void AddSessionBreadcrumb(string message)
-        => SentrySdk.AddBreadcrumb(message, "app.lifecycle", "session");
 }

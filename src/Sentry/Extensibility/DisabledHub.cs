@@ -75,6 +75,24 @@ public class DisabledHub : IHub, IDisposable
     public SentryTraceHeader? GetTraceHeader() => null;
 
     /// <summary>
+    /// Returns null.
+    /// </summary>
+    public BaggageHeader? GetBaggage() => null;
+
+    /// <summary>
+    /// Returns null.
+    /// </summary>
+    public TransactionContext ContinueTrace(
+        SentryTraceHeader? traceHeader,
+        BaggageHeader? baggageHeader,
+        string? name = null,
+        string? operation = null)
+    {
+        // Transactions from DisabledHub are always sampled out
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
+    }
+
+    /// <summary>
     /// No-Op.
     /// </summary>
     public void StartSession()
@@ -117,12 +135,24 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) => SentryId.Empty;
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) => SentryId.Empty;
 
     /// <summary>
     /// No-Op.
     /// </summary>
     public void CaptureTransaction(Transaction transaction)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public void CaptureTransaction(Transaction transaction, Hint? hint)
     {
     }
 

@@ -197,6 +197,8 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
         ) ?? false;
     }
 
+    internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
+
     /// <summary>
     /// Creates a new instance of <see cref="T:Sentry.SentryEvent" />.
     /// </summary>
@@ -239,6 +241,14 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistributio
     /// <inheritdoc />
     public void UnsetTag(string key) =>
         (_tags ??= new Dictionary<string, string>()).Remove(key);
+
+    internal void Redact()
+    {
+        foreach (var breadcrumb in Breadcrumbs)
+        {
+            breadcrumb.Redact();
+        }
+    }
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)

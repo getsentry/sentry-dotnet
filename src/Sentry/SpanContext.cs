@@ -15,7 +15,7 @@ public class SpanContext : ISpanContext
     public SentryId TraceId { get; }
 
     /// <inheritdoc />
-    public string Operation { get; }
+    public string Operation { get; set; }
 
     /// <inheritdoc />
     public string? Description { get; }
@@ -25,6 +25,11 @@ public class SpanContext : ISpanContext
 
     /// <inheritdoc />
     public bool? IsSampled { get; }
+
+    /// <summary>
+    /// Identifies which instrumentation is being used.
+    /// </summary>
+    public Instrumenter Instrumenter { get; internal set; } = Instrumenter.Sentry;
 
     /// <summary>
     /// Initializes an instance of <see cref="SpanContext"/>.

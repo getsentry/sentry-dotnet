@@ -95,7 +95,6 @@ public static class SentryWebHostBuilderExtensions
 
             var sentryBuilder = logging.Services.AddSentry();
             configureSentry?.Invoke(context, sentryBuilder);
-
         });
 
         _ = builder.ConfigureServices(c => _ =

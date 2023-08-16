@@ -23,6 +23,7 @@ public class IntegrationTests
                 _.SendDefaultPii = true;
                 _.TextFormatter = new MessageTemplateTextFormatter("[{MyTaskId}] {Message}");
                 _.AttachStacktrace = false;
+                _.Release = "test-release";
             });
 
         Log.Logger = configuration.CreateLogger();
@@ -76,6 +77,7 @@ public class IntegrationTests
                 _.Dsn = ValidDsn;
                 _.Debug = true;
                 _.AttachStacktrace = false;
+                _.Release = "test-release";
             });
 
         Log.Logger = configuration.CreateLogger();

@@ -9,13 +9,7 @@ internal sealed class SparseScalarArray<T> where T : IEquatable<T>
     private GrowableArray<T> _items;
     private T _uninitializedValue;
 
-    public SparseScalarArray(T uninitializedValue)
-    {
-        _items = new GrowableArray<T>();
-        _uninitializedValue = uninitializedValue;
-    }
-
-    public SparseScalarArray(T uninitializedValue, int capacity)
+    public SparseScalarArray(T uninitializedValue, int capacity = 0)
     {
         _items = new GrowableArray<T>(capacity);
         _uninitializedValue = uninitializedValue;

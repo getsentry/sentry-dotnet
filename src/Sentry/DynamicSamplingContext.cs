@@ -22,7 +22,8 @@ internal class DynamicSamplingContext
     private DynamicSamplingContext(
         SentryId traceId,
         string publicKey,
-        double sampleRate,
+        bool? sampled,
+        double? sampleRate = null,
         string? release = null,
         string? environment = null,
         string? userSegment = null,
@@ -48,10 +49,19 @@ internal class DynamicSamplingContext
         {
             ["trace_id"] = traceId.ToString(),
             ["public_key"] = publicKey,
-            ["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture)
         };
 
         // Set optional values
+        if (sampled.HasValue)
+        {
+            items.Add("sampled", sampled.Value ? "true" : "false");
+        }
+
+        if (sampleRate is not null)
+        {
+            items.Add("sample_rate", sampleRate.Value.ToString(CultureInfo.InvariantCulture));
+        }
+
         if (!string.IsNullOrWhiteSpace(release))
         {
             items.Add("release", release);
@@ -95,6 +105,11 @@ internal class DynamicSamplingContext
             return null;
         }
 
+        if (items.TryGetValue("sampled", out var sampledString) && !bool.TryParse(sampledString, out _))
+        {
+            return null;
+        }
+
         if (!items.TryGetValue("sample_rate", out var sampleRate) ||
             !double.TryParse(sampleRate, NumberStyles.Float, CultureInfo.InvariantCulture, out var rate) ||
             rate is < 0.0 or > 1.0)
@@ -108,8 +123,9 @@ internal class DynamicSamplingContext
     public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options)
     {
         // These should already be set on the transaction.
-        var publicKey = Dsn.Parse(options.Dsn!).PublicKey;
+        var publicKey = options.ParsedDsn.PublicKey;
         var traceId = transaction.TraceId;
+        var sampled = transaction.IsSampled;
         var sampleRate = transaction.SampleRate!.Value;
         var userSegment = transaction.User.Segment;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
@@ -121,11 +137,27 @@ internal class DynamicSamplingContext
         return new DynamicSamplingContext(
             traceId,
             publicKey,
+            sampled,
             sampleRate,
             release,
             environment,
             userSegment,
             transactionName);
+    }
+
+    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
+    {
+        var traceId = propagationContext.TraceId;
+        var publicKey = options.ParsedDsn.PublicKey;
+        var release = options.SettingLocator.GetRelease();
+        var environment = options.SettingLocator.GetEnvironment();
+
+        return new DynamicSamplingContext(
+            traceId,
+            publicKey,
+            null,
+            release: release,
+            environment:environment);
     }
 }
 
@@ -136,4 +168,7 @@ internal static class DynamicSamplingContextExtensions
 
     public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options)
         => DynamicSamplingContext.CreateFromTransaction(transaction, options);
+
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options)
+        => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options);
 }

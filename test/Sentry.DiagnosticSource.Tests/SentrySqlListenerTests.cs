@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore.Storage;
 using Sentry.Internal.DiagnosticSource;
+using Sentry.Internal.Extensions;
 using static Sentry.Internal.DiagnosticSource.SentrySqlListener;
 
 namespace Sentry.DiagnosticSource.Tests;
@@ -14,8 +16,7 @@ public class SentrySqlListenerTests
                 SqlDataWriteConnectionOpenAfterCommand or
                 SqlMicrosoftWriteConnectionCloseAfterCommand or
                 SqlDataWriteConnectionCloseAfterCommand =>
-                span => span.Description is null &&
-                        span.Operation == "db.connection",
+                span => span.Operation == "db.connection",
 
             SqlDataBeforeExecuteCommand or
                 SqlMicrosoftBeforeExecuteCommand or
@@ -103,7 +104,7 @@ public class SentrySqlListenerTests
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         if (addConnectionSpan)
         {
-            _fixture.Tracer.StartChild("abc").SetExtra(ConnectionExtraKey, Guid.Empty);
+            _fixture.Tracer.StartChild("abc").SetExtra(SqlKeys.DbConnectionId, Guid.Empty);
         }
 
         // Act
@@ -169,20 +170,29 @@ public class SentrySqlListenerTests
         var connectionOperationId = Guid.NewGuid();
         var connectionOperationIdClosed = Guid.NewGuid();
         var queryOperationId = Guid.NewGuid();
+        var dbName = "rentals";
 
         // Act
         interceptor.OnNext(
             new(connectionOpenKey,
                 new
                 {
-                    OperationId = connectionOperationId
+                    OperationId = connectionOperationId,
+                    Connection = new
+                    {
+                        Database = dbName
+                    }
                 }));
         interceptor.OnNext(
             new(connectionUpdateKey,
                 new
                 {
                     OperationId = connectionOperationId,
-                    ConnectionId = connectionId
+                    ConnectionId = connectionId,
+                    Connection = new
+                    {
+                        Database = dbName
+                    }
                 }));
         interceptor.OnNext(
             new(queryStartKey,
@@ -225,9 +235,18 @@ public class SentrySqlListenerTests
 
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
+        // Validate descriptions and extra data is set correctly
         Assert.Equal(query, commandSpan.Description);
+        Assert.Equal(queryOperationId, commandSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
+        Assert.Equal(connectionId, commandSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
+        Assert.Equal(dbName, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
+
+        Assert.Equal(dbName, connectionSpan.Description);
+        Assert.Equal(connectionOperationId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
+        Assert.Equal(connectionId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
+        Assert.Equal(dbName, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
     }
 
     [Theory]
@@ -305,7 +324,7 @@ public class SentrySqlListenerTests
 
         // Check connections between spans.
         Assert.Equal(childSpan.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(childSpan.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(query, commandSpan.Description);
     }
@@ -363,7 +382,7 @@ public class SentrySqlListenerTests
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
-            Assert.Equal(connectionId, (Guid)span.Extra[ConnectionExtraKey]!);
+            Assert.Equal(connectionId, (Guid)span.Extra[SqlKeys.DbConnectionId]!);
         });
     }
 
@@ -442,7 +461,7 @@ public class SentrySqlListenerTests
 
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(query, commandSpan.Description);
     }
@@ -467,7 +486,7 @@ public class SentrySqlListenerTests
     [InlineData(17)]
     [InlineData(18)]
     [InlineData(19)]
-    public async Task OnNext_ParallelExecution_IsValid(int testNumber)
+    public async Task OnNext_ParallelExecution_IsValidAsync(int testNumber)
     {
         _ = testNumber;
         // Arrange
@@ -530,27 +549,26 @@ public class SentrySqlListenerTests
         querySpans.Should().HaveCount(2 * maxItems);
 
         // Open Spans should not have any Connection key.
-        Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(ConnectionExtraKey)));
+        Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(SqlKeys.DbConnectionId)));
         Assert.All(closedSpans, span => Assert.Equal(SpanStatus.Ok, span.Status));
 
         // Assert that all connectionIds is set and ParentId set to Trace.
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.All(closedConnectionSpans, connectionSpan =>
         {
-            Assert.NotNull(connectionSpan.Extra[ConnectionExtraKey]);
-            Assert.NotNull(connectionSpan.Extra[OperationExtraKey]);
+            Assert.NotNull(connectionSpan.Extra[SqlKeys.DbConnectionId]);
+            Assert.NotNull(connectionSpan.Extra[SqlKeys.DbOperationId]);
             Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
         });
 
-        // Assert all Query spans have the correct ParentId Set and not the Transaction Id.
+        // Assert all Query spans have the correct ParentId Set and record the Connection Id.
         Assert.All(querySpans, querySpan =>
         {
             Assert.True(querySpan.IsFinished);
-            var connectionId = (Guid)querySpan.Extra[ConnectionExtraKey]!;
-            var connectionSpan = connectionSpans.Single(span => span.SpanId == querySpan.ParentSpanId);
+            Assert.Equal(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
 
-            Assert.NotEqual(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
-            Assert.Equal((Guid)connectionSpan.Extra[ConnectionExtraKey]!, connectionId);
+            var queryConnectionId = querySpan.Extra.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
+            queryConnectionId.Should().NotBeNull();
         });
 
         _fixture.Logger.Entries.Should().BeEmpty();
@@ -624,7 +642,7 @@ public class SentrySqlListenerTests
 
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(connectionSpan.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(query, commandSpan.Description);
     }

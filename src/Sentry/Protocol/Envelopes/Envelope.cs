@@ -207,6 +207,18 @@ public sealed class Envelope : ISerializable, IDisposable
             ["event_id"] = eventId.ToString()
         };
 
+    private static Dictionary<string, object?> CreateHeader(SentryId eventId, DynamicSamplingContext? dsc)
+    {
+        if (dsc == null)
+        {
+            return CreateHeader(eventId);
+        }
+
+        var header = CreateHeader(eventId, extraCapacity: 1);
+        header["trace"] = dsc.Items;
+        return header;
+    }
+
     /// <summary>
     /// Creates an envelope that contains a single event.
     /// </summary>
@@ -217,7 +229,7 @@ public sealed class Envelope : ISerializable, IDisposable
         SessionUpdate? sessionUpdate = null)
     {
         var eventId = @event.EventId;
-        var header = CreateHeader(eventId);
+        var header = CreateHeader(eventId, @event.DynamicSamplingContext);
 
         var items = new List<EnvelopeItem>
         {
@@ -228,6 +240,13 @@ public sealed class Envelope : ISerializable, IDisposable
         {
             foreach (var attachment in attachments)
             {
+                // Safety check, in case the user forcefully added a null attachment.
+                if (attachment.IsNull())
+                {
+                    logger?.LogWarning("Encountered a null attachment.  Skipping.");
+                    continue;
+                }
+
                 try
                 {
                     // We pull the stream out here so we can length check
@@ -285,16 +304,7 @@ public sealed class Envelope : ISerializable, IDisposable
     public static Envelope FromTransaction(Transaction transaction)
     {
         var eventId = transaction.EventId;
-        Dictionary<string, object?> header;
-        if (transaction.DynamicSamplingContext is { } dsc)
-        {
-            header = CreateHeader(eventId, extraCapacity: 1);
-            header["trace"] = dsc.Items;
-        }
-        else
-        {
-            header = CreateHeader(eventId);
-        }
+        var header = CreateHeader(eventId, transaction.DynamicSamplingContext);
 
         var items = new List<EnvelopeItem>
         {

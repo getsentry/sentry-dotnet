@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.*" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
   </ItemGroup>
 
 </Project>

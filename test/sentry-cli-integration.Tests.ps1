@@ -1,3 +1,5 @@
+using namespace System.Runtime.InteropServices
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -8,15 +10,18 @@ if (!(Test-Path env:CI ))
 }
 
 BeforeAll {
-    function DotnetBuild([string]$Sample)
+    function DotnetBuild([string]$Sample, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = '')
     {
         $rootDir = "$(Get-Item $PSScriptRoot/../../)"
+        $framework = $TargetFramework -eq '' ? '' : @('-f', $TargetFramework)
 
         Invoke-SentryServer {
             Param([string]$url)
             Write-Host "Building $Sample"
-            dotnet build "samples/$sample/$sample.csproj" -c Release --no-restore --nologo `
+            dotnet build "samples/$sample/$sample.csproj" -c Release $framework --no-restore --nologo `
                 /p:UseSentryCLI=true `
+                /p:SentryUploadSymbols=$Symbols `
+                /p:SentryUploadSources=$Sources `
                 /p:SentryOrg=org `
                 /p:SentryProject=project `
                 /p:SentryUrl=$url `
@@ -46,141 +51,84 @@ BeforeAll {
 }
 
 Describe 'CLI-integration' {
-    It "uploads symbols for a console app build" {
-        $result = DotnetBuild 'Sentry.Samples.Console.Basic'
+
+    It "uploads symbols and sources for a console app build" {
+        $result = DotnetBuild 'Sentry.Samples.Console.Basic' $True $True
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
-        return; # TODO enable actual test, see https://github.com/getsentry/sentry-dotnet/issues/2260
-        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('apphost.exe', 'Sentry.pdb', 'Sentry.Samples.Console.Basic.pdb')
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'Sentry.pdb',
+            'Sentry.Samples.Console.Basic.pdb',
+            'Sentry.Samples.Console.Basic.src.zip')
     }
 
-    It "uploads symbols for a MAUI app build" {
-        $result = DotnetBuild 'Sentry.Samples.Maui'
+    It "uploads symbols for a console app build" {
+        $result = DotnetBuild 'Sentry.Samples.Console.Basic' $True $False
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
-        return; # TODO enable actual test, see https://github.com/getsentry/sentry-dotnet/issues/2260
-        $actual = $result.UploadedDebugFiles() | Sort-Object -Unique
-        $expected = @(
-            'apphost.exe', `
-                'Java.Interop.dll.so', `
-                'K4os.Compression.LZ4.dll.so', `
-                'libmonodroid.so', `
-                'libmonosgen-2.0.so', `
-                'libsentry-android.so', `
-                'libsentry.so', `
-                'libsentrysupplemental.so', `
-                'libSystem.IO.Compression.Native.so', `
-                'libSystem.Native.so', `
-                'libSystem.Security.Cryptography.Native.Android.so', `
-                'libxamarin-app.so', `
-                'Microsoft.Extensions.Configuration.Abstractions.dll.so', `
-                'Microsoft.Extensions.Configuration.Binder.dll.so', `
-                'Microsoft.Extensions.Configuration.dll.so', `
-                'Microsoft.Extensions.DependencyInjection.Abstractions.dll.so', `
-                'Microsoft.Extensions.DependencyInjection.dll.so', `
-                'Microsoft.Extensions.Http.dll.so', `
-                'Microsoft.Extensions.Logging.Abstractions.dll.so', `
-                'Microsoft.Extensions.Logging.Configuration.dll.so', `
-                'Microsoft.Extensions.Logging.dll.so', `
-                'Microsoft.Extensions.Options.ConfigurationExtensions.dll.so', `
-                'Microsoft.Extensions.Options.dll.so', `
-                'Microsoft.Extensions.Primitives.dll.so', `
-                'Microsoft.Maui.Controls.Compatibility.dll.so', `
-                'Microsoft.Maui.Controls.dll.so', `
-                'Microsoft.Maui.Controls.Xaml.dll.so', `
-                'Microsoft.Maui.dll.so', `
-                'Microsoft.Maui.Essentials.dll.so', `
-                'Microsoft.Maui.Graphics.dll.so', `
-                'Microsoft.Win32.Primitives.dll.so', `
-                'Mono.Android.dll.so', `
-                'Sentry.Android.AssemblyReader.dll.so', `
-                'Sentry.Android.AssemblyReader.pdb', `
-                'Sentry.Bindings.Android.dll.so', `
-                'Sentry.Bindings.Android.pdb', `
-                'Sentry.dll.so', `
-                'Sentry.Extensions.Logging.dll.so', `
-                'Sentry.Extensions.Logging.pdb', `
-                'Sentry.Maui.dll.so', `
-                'Sentry.Maui.pdb', `
-                'Sentry.pdb', `
-                'Sentry.Samples.Maui.dll.so', `
-                'Sentry.Samples.Maui.pdb', `
-                'System.Collections.Concurrent.dll.so', `
-                'System.Collections.dll.so', `
-                'System.Collections.Immutable.dll.so', `
-                'System.Collections.NonGeneric.dll.so', `
-                'System.Collections.Specialized.dll.so', `
-                'System.ComponentModel.dll.so', `
-                'System.ComponentModel.Primitives.dll.so', `
-                'System.ComponentModel.TypeConverter.dll.so', `
-                'System.Console.dll.so', `
-                'System.Diagnostics.DiagnosticSource.dll.so', `
-                'System.Diagnostics.StackTrace.dll.so', `
-                'System.Diagnostics.TraceSource.dll.so', `
-                'System.dll.so', `
-                'System.IO.Compression.dll.so', `
-                'System.IO.Compression.ZipFile.dll.so', `
-                'System.IO.FileSystem.DriveInfo.dll.so', `
-                'System.IO.MemoryMappedFiles.dll.so', `
-                'System.Linq.dll.so', `
-                'System.Linq.Expressions.dll.so', `
-                'System.Memory.dll.so', `
-                'System.Net.Http.dll.so', `
-                'System.Net.NetworkInformation.dll.so', `
-                'System.Net.Primitives.dll.so', `
-                'System.Net.Requests.dll.so', `
-                'System.Net.Security.dll.so', `
-                'System.Net.WebProxy.dll.so', `
-                'System.Numerics.Vectors.dll.so', `
-                'System.ObjectModel.dll.so', `
-                'System.Private.CoreLib.dll.so', `
-                'System.Private.Uri.dll.so', `
-                'System.Private.Xml.dll.so', `
-                'System.Reflection.Metadata.dll.so', `
-                'System.Reflection.Primitives.dll.so', `
-                'System.Runtime.CompilerServices.Unsafe.dll.so', `
-                'System.Runtime.dll.so', `
-                'System.Runtime.InteropServices.dll.so', `
-                'System.Runtime.InteropServices.RuntimeInformation.dll.so', `
-                'System.Runtime.Serialization.Primitives.dll.so', `
-                'System.Security.Cryptography.Algorithms.dll.so', `
-                'System.Security.Cryptography.Primitives.dll.so', `
-                'System.Text.Encodings.Web.dll.so', `
-                'System.Text.Json.dll.so', `
-                'System.Text.RegularExpressions.dll.so', `
-                'System.Threading.dll.so', `
-                'System.Threading.Thread.dll.so', `
-                'System.Threading.ThreadPool.dll.so', `
-                'System.Xml.ReaderWriter.dll.so', `
-                'Xamarin.AndroidX.Activity.dll.so', `
-                'Xamarin.AndroidX.AppCompat.AppCompatResources.dll.so', `
-                'Xamarin.AndroidX.AppCompat.dll.so', `
-                'Xamarin.AndroidX.CardView.dll.so', `
-                'Xamarin.AndroidX.Collection.dll.so', `
-                'Xamarin.AndroidX.CoordinatorLayout.dll.so', `
-                'Xamarin.AndroidX.Core.dll.so', `
-                'Xamarin.AndroidX.CursorAdapter.dll.so', `
-                'Xamarin.AndroidX.CustomView.dll.so', `
-                'Xamarin.AndroidX.DrawerLayout.dll.so', `
-                'Xamarin.AndroidX.Fragment.dll.so', `
-                'Xamarin.AndroidX.Lifecycle.Common.dll.so', `
-                'Xamarin.AndroidX.Lifecycle.LiveData.Core.dll.so', `
-                'Xamarin.AndroidX.Lifecycle.ViewModel.dll.so', `
-                'Xamarin.AndroidX.Lifecycle.ViewModelSavedState.dll.so', `
-                'Xamarin.AndroidX.Loader.dll.so', `
-                'Xamarin.AndroidX.Navigation.Common.dll.so', `
-                'Xamarin.AndroidX.Navigation.Fragment.dll.so', `
-                'Xamarin.AndroidX.Navigation.Runtime.dll.so', `
-                'Xamarin.AndroidX.Navigation.UI.dll.so', `
-                'Xamarin.AndroidX.RecyclerView.dll.so', `
-                'Xamarin.AndroidX.SavedState.dll.so', `
-                'Xamarin.AndroidX.SwipeRefreshLayout.dll.so', `
-                'Xamarin.AndroidX.ViewPager.dll.so', `
-                'Xamarin.AndroidX.ViewPager2.dll.so', `
-                'Xamarin.Google.Android.Material.dll.so', `
-                'Xamarin.Kotlin.StdLib.dll.so', `
-                'Xamarin.KotlinX.Coroutines.Core.Jvm.dll.so' `
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'Sentry.pdb',
+            'Sentry.Samples.Console.Basic.pdb')
+    }
+
+    It "uploads sources for a console app build" {
+        $result = DotnetBuild 'Sentry.Samples.Console.Basic' $False $True
+        $result.ScriptOutput | Should -Contain 'Build succeeded.'
+        $result.HasErrors() | Should -BeFalse
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'Sentry.Samples.Console.Basic.src.zip')
+    }
+
+    It "uploads nothing for a console app build when disabled" {
+        $result = DotnetBuild 'Sentry.Samples.Console.Basic' $False $False
+        $result.ScriptOutput | Should -Contain 'Build succeeded.'
+        $result.HasErrors() | Should -BeFalse
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @()
+    }
+
+    It "uploads symbols and sources for a MAUI Android app build" {
+        $result = DotnetBuild 'Sentry.Samples.Maui' $True $True 'net7.0-android'
+        $result.ScriptOutput | Should -Contain 'Build succeeded.'
+        $result.HasErrors() | Should -BeFalse
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'Sentry.Android.AssemblyReader.pdb',
+            'Sentry.Bindings.Android.pdb',
+            'Sentry.Extensions.Logging.pdb',
+            'Sentry.Maui.pdb',
+            'Sentry.pdb',
+            'Sentry.Samples.Maui.pdb',
+            'Sentry.Samples.Maui.src.zip'
         )
-        @(Compare-Object -ReferenceObject $expected -DifferenceObject $actual -PassThru) | Should -Be @()
+    }
+
+    if (![RuntimeInformation]::IsOSPlatform([OSPlatform]::OSX)) {
+        # Remaining tests run on macOS only
+        return
+    }
+
+    It "uploads symbols and sources for a MAUI iOS app build" {
+        $result = DotnetBuild 'Sentry.Samples.Maui' $True $True 'net7.0-ios'
+        $result.ScriptOutput | Should -Contain 'Build succeeded.'
+        $result.HasErrors() | Should -BeFalse
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'libmono-component-debugger.dylib',
+            'libmono-component-diagnostics_tracing.dylib',
+            'libmono-component-hot_reload.dylib',
+            'libmonosgen-2.0.dylib',
+            'libSystem.IO.Compression.Native.dylib',
+            'libSystem.Native.dylib',
+            'libSystem.Net.Security.Native.dylib',
+            'libSystem.Security.Cryptography.Native.Apple.dylib',
+            'libxamarin-dotnet-debug.dylib',
+            'libxamarin-dotnet.dylib',
+            'Sentry',
+            'Sentry.Bindings.Cocoa.pdb',
+            'Sentry.Extensions.Logging.pdb',
+            'Sentry.Maui.pdb',
+            'Sentry.pdb',
+            'Sentry.Samples.Maui',
+            'Sentry.Samples.Maui.pdb',
+            'Sentry.Samples.Maui.src.zip'
+        )
     }
 }

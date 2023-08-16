@@ -15,8 +15,9 @@ public partial class HubTests
             Release = "release",
             TracesSampleRate = 1.0
         };
-        var client = new SentryClient(options, worker);
-        var hub = new Hub(options, client);
+        var sessionManager = new GlobalSessionManager(options);
+        var client = new SentryClient(options, worker, sessionManager: sessionManager);
+        var hub = new Hub(options, client, sessionManager);
 
         var transaction = hub.StartTransaction("my transaction", "my operation");
         hub.ConfigureScope(scope => scope.Transaction = transaction);

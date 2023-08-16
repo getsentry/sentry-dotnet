@@ -208,6 +208,8 @@ public partial class ScopeExtensionsTests
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
         Assert.Equal(headers[firstKey], _sut.Request.Headers[firstKey]);
+
+        _sut.Request.Cookies.Should().Be(headers[firstKey]);
     }
 
     [Fact]

@@ -132,6 +132,11 @@ public class SentryOptions
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
     /// <summary>
+    /// List of substrings or regular expression patterns to filter out tags
+    /// </summary>
+    public ICollection<SubstringOrRegexPattern> TagFilters { get; set; } = new List<SubstringOrRegexPattern>();
+
+    /// <summary>
     /// The worker used by the client to pass envelopes.
     /// </summary>
     public IBackgroundWorker? BackgroundWorker { get; set; }
@@ -299,20 +304,82 @@ public class SentryOptions
     /// <seealso href="https://docs.sentry.io/platforms/dotnet/configuration/environments/"/>
     public string? Environment { get; set; }
 
+    private string? _dsn;
     /// <summary>
     /// The Data Source Name of a given project in Sentry.
     /// </summary>
-    public string? Dsn { get; set; }
+    public string? Dsn {
+        get => _dsn;
+        set
+        {
+            _dsn = value;
+            _parsedDsn = null;
+        }
+    }
+
+    internal Dsn? _parsedDsn;
+    internal Dsn ParsedDsn => _parsedDsn ??= Sentry.Dsn.Parse(Dsn!);
+
+    private readonly Lazy<string> _sentryBaseUrl;
+
+    internal bool IsSentryRequest(string? requestUri)=>
+        !string.IsNullOrEmpty(requestUri) && IsSentryRequest(new Uri(requestUri));
+
+    internal bool IsSentryRequest(Uri? requestUri)
+    {
+        if (string.IsNullOrEmpty(Dsn) || requestUri is null)
+        {
+            return false;
+        }
+
+        var requestBaseUrl = requestUri.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+        return string.Equals(requestBaseUrl, _sentryBaseUrl.Value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
+
+    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
-    /// A callback to invoke before sending an event to Sentry
+    /// Configures a callback to invoke before sending an event to Sentry
+    /// </summary>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
+    [Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
+    public Func<SentryEvent, SentryEvent?>? BeforeSend
+    {
+        get => null;
+        set => _beforeSend = value is null ? null : (e, _) => value(e);
+    }
+
+    /// <summary>
+    /// Configures a callback function to be invoked before sending an event to Sentry
     /// </summary>
     /// <remarks>
-    /// The return of this event will be sent to Sentry. This allows the application
-    /// a chance to inspect and/or modify the event before it's sent. If the event
-    /// should not be sent at all, return null from the callback.
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the event before it's sent. If the
+    /// event should not be sent at all, return null from the callback.
     /// </remarks>
-    public Func<SentryEvent, SentryEvent?>? BeforeSend { get; set; }
+    public void SetBeforeSend(Func<SentryEvent, Hint, SentryEvent?> beforeSend)
+    {
+        _beforeSend = beforeSend;
+    }
+
+    /// <summary>
+    /// Configures a callback function to be invoked before sending an event to Sentry
+    /// </summary>
+    /// <remarks>
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the event before it's sent. If the
+    /// event should not be sent at all, return null from the callback.
+    /// </remarks>
+    public void SetBeforeSend(Func<SentryEvent, SentryEvent?> beforeSend)
+    {
+        _beforeSend = (@event, _) => beforeSend(@event);
+    }
+
+    private Func<Transaction, Hint, Transaction?>? _beforeSendTransaction;
+
+    internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
     /// A callback to invoke before sending a transaction to Sentry
@@ -322,15 +389,67 @@ public class SentryOptions
     /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
     /// should not be sent at all, return null from the callback.
     /// </remarks>
-    public Func<Transaction, Transaction?>? BeforeSendTransaction { get; set; }
+    [Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction instead.")]
+    public Func<Transaction, Transaction?>? BeforeSendTransaction {
+        get => null;
+        set => _beforeSendTransaction = value is null ? null : (e, _) => value(e);
+    }
 
     /// <summary>
-    /// A callback invoked when a breadcrumb is about to be stored.
+    /// Configures a callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <param name="beforeSendTransaction">The callback</param>
+    public void SetBeforeSendTransaction(Func<Transaction, Hint, Transaction?> beforeSendTransaction)
+    {
+        _beforeSendTransaction = beforeSendTransaction;
+    }
+
+    /// <summary>
+    /// Configures a callback to invoke before sending a transaction to Sentry
+    /// </summary>
+    /// <param name="beforeSendTransaction">The callback</param>
+    public void SetBeforeSendTransaction(Func<Transaction, Transaction?> beforeSendTransaction)
+    {
+        _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
+    }
+
+    private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
+
+    internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
+
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
+    /// </summary>
+    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
+    [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
+    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb {
+        get => null;
+        set => _beforeBreadcrumb = value is null ? null : (e, _) => value(e);
+    }
+
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
     /// </summary>
     /// <remarks>
-    /// Gives a chance to inspect and modify/reject a breadcrumb.
+    /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
+    /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
     /// </remarks>
-    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb { get; set; }
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
+    {
+        _beforeBreadcrumb = beforeBreadcrumb;
+    }
+
+    /// <summary>
+    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
+    /// </summary>
+    /// <remarks>
+    /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
+    /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
+    /// </remarks>
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
+    {
+        _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
+    }
 
     private int _maxQueueItems = 30;
 
@@ -433,9 +552,29 @@ public class SentryOptions
     public IWebProxy? HttpProxy { get; set; }
 
     /// <summary>
-    /// Creates the inner most <see cref="HttpClientHandler"/>.
+    /// private field to hold the <see cref="CreateHttpClientHandler"/>, since a typecheck or cast won't work here.
     /// </summary>
-    public Func<HttpClientHandler>? CreateHttpClientHandler { get; set; }
+    private Func<HttpClientHandler>? _createClientHandler = null;
+
+    /// <summary>
+    /// Creates the inner most <see cref="HttpClientHandler"/>.
+    /// Deprecated in favor of <see cref="CreateHttpMessageHandler"/>.
+    /// </summary>
+    [Obsolete("Use CreateHttpMessageHandler instead")]
+    public Func<HttpClientHandler>? CreateHttpClientHandler
+    {
+        get => _createClientHandler;
+        set
+        {
+            CreateHttpMessageHandler = value;
+            _createClientHandler = value;
+        }
+    }
+
+    /// <summary>
+    /// Creates the inner most <see cref="HttpMessageHandler"/>.
+    /// </summary>
+    public Func<HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
 
     /// <summary>
     /// A callback invoked when a <see cref="SentryClient"/> is created.
@@ -523,6 +662,34 @@ public class SentryOptions
     public string? CacheDirectoryPath { get; set; }
 
     /// <summary>
+    /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
+    /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
+    /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
+    /// <para>Defaults to false due to PII reasons.</para>
+    /// </summary>
+    public bool CaptureFailedRequests { get; set; }
+
+    /// <summary>
+    /// <para>The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.</para>
+    /// <para>Defaults to 500-599 (Server error responses only).</para>
+    /// </summary>
+    public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange> { (500, 599) };
+
+    // The default failed request target list will match anything, but adding to the list should clear that.
+    private IList<SubstringOrRegexPattern> _failedRequestTargets = new AutoClearingList<SubstringOrRegexPattern>(
+        new[] {new SubstringOrRegexPattern(".*")}, clearOnNextAdd: true);
+
+    /// <summary>
+    /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
+    /// <para>Targets may be URLs or Regular expressions.</para>
+    /// <para>Matches "*." by default.</para>
+    /// </summary>
+    public IList<SubstringOrRegexPattern> FailedRequestTargets {
+        get => _failedRequestTargets;
+        set => _failedRequestTargets = value.SetWithConfigBinding();
+    }
+
+    /// <summary>
     /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
     /// Used for testing.
     /// </summary>
@@ -549,10 +716,15 @@ public class SentryOptions
     public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
 
     /// <summary>
-    /// Indicates whether tracing is enabled, via any combination of
+    /// Indicates whether the performance feature is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
-    internal bool IsTracingEnabled => EnableTracing ?? (_tracesSampleRate > 0.0 || TracesSampler is not null);
+    internal bool IsPerformanceMonitoringEnabled => EnableTracing switch
+    {
+        false => false,
+        null => TracesSampler is not null || TracesSampleRate is > 0.0,
+        true => TracesSampler is not null || TracesSampleRate is > 0.0 or null
+    };
 
     /// <summary>
     /// Simplified option for enabling or disabling tracing.
@@ -589,25 +761,43 @@ public class SentryOptions
 
     /// <summary>
     /// Indicates the percentage of the tracing data that is collected.
-    /// Setting this to <c>0.0</c> discards all trace data.
-    /// Setting this to <c>1.0</c> collects all trace data.
-    /// Values outside of this range are invalid.
-    /// The default value is either <c>0.0</c> or <c>1.0</c>, depending on the <see cref="EnableTracing"/> property.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>&gt;= 0.0 and &lt;=1.0</c></term>
+    ///     <description>
+    ///       A custom sample rate is used unless <see cref="EnableTracing"/> is <c>false</c>,
+    ///       or unless overriden by a <see cref="TracesSampler"/> function.
+    ///       Values outside of this range are invalid.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       The tracing sample rate is determined by the <see cref="EnableTracing"/> property,
+    ///       unless overriden by a <see cref="TracesSampler"/> function.
+    ///     </description>
+    ///   </item>
+    /// </list>
     /// </summary>
     /// <remarks>
     /// Random sampling rate is only applied to transactions that don't already
     /// have a sampling decision set by other means, such as through <see cref="TracesSampler"/>,
     /// by inheriting it from an incoming trace header, or by copying it from <see cref="TransactionContext"/>.
     /// </remarks>
-    public double TracesSampleRate
+    public double? TracesSampleRate
     {
-        get => _tracesSampleRate ?? (EnableTracing is true ? 1.0 : 0.0);
+        get => _tracesSampleRate;
         set
         {
             if (value is < 0.0 or > 1.0)
             {
-                throw new InvalidOperationException(
-                    $"The value {value} is not a valid tracing sample rate. Use values between 0.0 and 1.0.");
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "The traces sample rate must be between 0.0 and 1.0, inclusive.");
             }
 
             _tracesSampleRate = value;
@@ -646,29 +836,8 @@ public class SentryOptions
         // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
-
         get => _tracePropagationTargets;
-        set
-        {
-            switch (value.Count)
-            {
-                case 1 when value[0].ToString() == ".*":
-                    // There's only one item in the list, and it's the wildcard, so reset to the initial state.
-                    _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>(value, clearOnNextAdd: true);
-                    break;
-
-                case > 1:
-                    // There's more than one item in the list.  Remove the wildcard.
-                    var targets = value.ToList();
-                    targets.RemoveAll(t => t.ToString() == ".*");
-                    _tracePropagationTargets = targets;
-                    break;
-
-                default:
-                    _tracePropagationTargets = value;
-                    break;
-            }
-        }
+        set => _tracePropagationTargets = value.SetWithConfigBinding();
     }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
@@ -778,10 +947,24 @@ public class SentryOptions
     public Func<bool>? CrashedLastRun { get; set; }
 
     /// <summary>
-    /// Keep <see cref="AggregateException"/> in sentry logging.
-    /// The default behaviour is to only log <see cref="AggregateException.InnerExceptions"/> and not include the root <see cref="AggregateException"/>.
-    /// Set KeepAggregateException to true to include the root <see cref="AggregateException"/>.
+    /// <para>
+    ///     Gets the <see cref="Instrumenter"/> used to create spans.
+    /// </para>
+    /// <para>
+    ///     Defaults to <see cref="Instrumenter.Sentry"/>
+    /// </para>
     /// </summary>
+    internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
+
+    /// <summary>
+    /// This property is no longer used.  It will be removed in a future version.
+    /// </summary>
+    /// <remarks>
+    /// All exceptions are now sent to Sentry, including <see cref="AggregateException"/>s.
+    /// The issue grouping rules in Sentry have been updated to accomodate "exception groups",
+    /// such as <see cref="AggregateException"/> in .NET.
+    /// </remarks>
+    [Obsolete("This property is no longer used.  It will be removed in a future version.")]
     public bool KeepAggregateException { get; set; }
 
     /// <summary>
@@ -928,6 +1111,9 @@ public class SentryOptions
                 "Sentry",
                 "Microsoft",
                 "MS", // MS.Win32, MS.Internal, etc: Desktop apps
+                "ABI.Microsoft", // MAUI
+                "WinRT", // WinRT, UWP, WinUI
+                "UIKit", // iOS / MacCatalyst
                 "Newtonsoft.Json",
                 "FSharp",
                 "Serilog",
@@ -968,5 +1154,10 @@ public class SentryOptions
             "Sentry.Samples"
         };
 #endif
+        _sentryBaseUrl = new Lazy<string>(() =>
+            new Uri(Dsn ?? string.Empty).GetComponents(
+                UriComponents.SchemeAndServer,
+                UriFormat.Unescaped)
+        );
     }
 }

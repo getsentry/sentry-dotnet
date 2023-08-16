@@ -37,6 +37,11 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
     public OperatingSystem OperatingSystem => this.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
 
     /// <summary>
+    /// Response interface that contains information on any HTTP response related to the event.
+    /// </summary>
+    public Response Response => this.GetOrCreate<Response>(Response.Type);
+
+    /// <summary>
     /// This describes a runtime in more detail.
     /// </summary>
     public Runtime Runtime => this.GetOrCreate<Runtime>(Runtime.Type);
@@ -143,6 +148,10 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
             else if (string.Equals(type, OperatingSystem.Type, StringComparison.OrdinalIgnoreCase))
             {
                 result[name] = OperatingSystem.FromJson(value);
+            }
+            else if (string.Equals(type, Response.Type, StringComparison.OrdinalIgnoreCase))
+            {
+                result[name] = Response.FromJson(value);
             }
             else if (string.Equals(type, Runtime.Type, StringComparison.OrdinalIgnoreCase))
             {

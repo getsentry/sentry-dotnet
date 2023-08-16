@@ -26,4 +26,8 @@
     <PackageReference Remove="SIL.ReleaseTasks" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Android.AssemblyReader.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
 </Project>

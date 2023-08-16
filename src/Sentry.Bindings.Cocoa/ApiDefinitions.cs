@@ -237,17 +237,29 @@ interface SentryCrashExceptionApplication
 [Internal]
 interface SentryDebugImageProvider
 {
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads __attribute__((deprecated("Use -[getDebugImagesForThreads:isCrash:] instead.")));
     [Export ("getDebugImagesForThreads:")]
     SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads isCrash:(BOOL)isCrash;
+    [Export ("getDebugImagesForThreads:isCrash:")]
+    SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads, bool isCrash);
+
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames __attribute__((deprecated("Use -[getDebugImagesForFrames:isCrash:] instead.")));
     [Export ("getDebugImagesForFrames:")]
     SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames isCrash:(BOOL)isCrash;
+    [Export ("getDebugImagesForFrames:isCrash:")]
+    SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames, bool isCrash);
+
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages __attribute__((deprecated("Use -[getDebugImagesCrashed:] instead.")));
     [Export ("getDebugImages")]
     SentryDebugMeta[] DebugImages { get; }
+
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash;
+    [Export ("getDebugImagesCrashed:")]
+    SentryDebugMeta[] GetDebugImagesCrashed (bool isCrash);
 }
 
 // @interface SentryDebugMeta : NSObject <SentrySerializable>
@@ -712,10 +724,6 @@ interface SentryOptions
     [Export ("attachStacktrace")]
     bool AttachStacktrace { get; set; }
 
-    // @property (assign, nonatomic) BOOL stitchAsyncCode;
-    [Export ("stitchAsyncCode")]
-    bool StitchAsyncCode { get; set; }
-
     // @property (assign, nonatomic) NSUInteger maxAttachmentSize;
     [Export ("maxAttachmentSize")]
     nuint MaxAttachmentSize { get; set; }
@@ -727,6 +735,10 @@ interface SentryOptions
     // @property (assign, nonatomic) BOOL enableAutoPerformanceTracing;
     [Export ("enableAutoPerformanceTracing")]
     bool EnableAutoPerformanceTracing { get; set; }
+
+    // @property (nonatomic) SentryScope * _Nonnull (^ _Nonnull)(SentryScope * _Nonnull) initialScope;
+    [Export ("initialScope", ArgumentSemantic.Assign)]
+    Func<SentryScope, SentryScope> InitialScope { get; set; }
 
     // @property (assign, nonatomic) BOOL enableUIViewControllerTracing;
     [Export ("enableUIViewControllerTracing")]
@@ -862,6 +874,10 @@ interface SentryOptions
     // @property (nonatomic) BOOL enableTimeToFullDisplay;
     [Export ("enableTimeToFullDisplay")]
     bool EnableTimeToFullDisplay { get; set; }
+
+    // @property (assign, nonatomic) BOOL swiftAsyncStacktraces;
+    [Export ("swiftAsyncStacktraces")]
+    bool SwiftAsyncStacktraces { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>
@@ -909,6 +925,10 @@ interface SentrySpanContext : SentrySerializable
     // @property (readonly, copy, nonatomic) NSString * _Nullable spanDescription;
     [NullAllowed, Export ("spanDescription")]
     string SpanDescription { get; }
+
+    // @property (copy, nonatomic) NSString * _Nonnull origin;
+    [Export ("origin")]
+    string Origin { get; set; }
 
     // -(instancetype _Nonnull)initWithOperation:(NSString * _Nonnull)operation;
     [Export ("initWithOperation:")]
@@ -958,6 +978,11 @@ interface SentrySpan : SentrySerializable
     [Abstract]
     [Export ("operation")]
     string Operation { get; set; }
+
+    // @required @property (copy, nonatomic) NSString * _Nonnull origin;
+    [Abstract]
+    [Export ("origin")]
+    string Origin { get; set; }
 
     // @required @property (copy, nonatomic) NSString * _Nullable spanDescription;
     [Abstract]
@@ -2179,6 +2204,10 @@ interface SentryEnvelopeHeader
     // @property (readonly, copy, nonatomic) SentryTraceContext * _Nullable traceContext;
     [NullAllowed, Export ("traceContext", ArgumentSemantic.Copy)]
     SentryTraceContext TraceContext { get; }
+
+    // @property (copy, nonatomic) NSDate * _Nullable sentAt;
+    [NullAllowed, Export ("sentAt", ArgumentSemantic.Copy)]
+    NSDate SentAt { get; set; }
 }
 
 // @interface SentryEnvelopeItem : NSObject
@@ -2334,6 +2363,11 @@ interface PrivateSentrySDKOnly
     [Export ("getDebugImages")]
     SentryDebugMeta[] DebugImages { get; }
 
+    // +(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash;
+    [Static]
+    [Export ("getDebugImagesCrashed:")]
+    SentryDebugMeta[] GetDebugImagesCrashed (bool isCrash);
+
     // +(void)setSdkName:(NSString * _Nonnull)sdkName andVersionString:(NSString * _Nonnull)versionString;
     [Static]
     [Export ("setSdkName:andVersionString:")]
@@ -2408,4 +2442,14 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("captureViewHierarchy")]
     NSData CaptureViewHierarchy();
+
+    // +(SentryUser * _Nonnull)userWithDictionary:(NSDictionary * _Nonnull)dictionary;
+    [Static]
+    [Export ("userWithDictionary:")]
+    SentryUser UserWithDictionary (NSDictionary dictionary);
+
+    // +(SentryBreadcrumb * _Nonnull)breadcrumbWithDictionary:(NSDictionary * _Nonnull)dictionary;
+    [Static]
+    [Export ("breadcrumbWithDictionary:")]
+    SentryBreadcrumb BreadcrumbWithDictionary (NSDictionary dictionary);
 }

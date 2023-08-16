@@ -88,6 +88,13 @@ public partial class SentryOptions
         public bool EnableAppLifecycleBreadcrumbs { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets a value that controls checking whether the device has been rooted.  The check itself may cause app stores to flag
+        /// an application as harmful, in which case this property can be set <c>false</c> to disable the check.
+        /// The default value is <c>true</c> (enabled).
+        /// </summary>
+        public bool EnableRootCheck { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets a value that indicates if automatic breadcrumbs for system events are enabled.
         /// The default value is <c>true</c> (enabled).
         /// </summary>

@@ -259,7 +259,9 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         _breadcrumbs = tracer.Breadcrumbs.ToList();
         _extra = tracer.Extra.ToDictionary();
         _tags = tracer.Tags.ToDictionary();
-        _spans = tracer.Spans.Select(s => new Span(s)).ToArray();
+        _spans = tracer.Spans
+            .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
+            .Select(s => new Span(s)).ToArray();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
         if (tracer is TransactionTracer transactionTracer)
@@ -297,6 +299,23 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         TraceId,
         SpanId,
         IsSampled);
+
+    /// <summary>
+    /// Redacts PII from the transaction
+    /// </summary>
+    internal void Redact()
+    {
+        Description = Description?.RedactUrl();
+        foreach (var breadcrumb in Breadcrumbs)
+        {
+            breadcrumb.Redact();
+        }
+
+        foreach (var span in Spans)
+        {
+            span.Redact();
+        }
+    }
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
