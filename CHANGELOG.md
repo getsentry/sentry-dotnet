@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK no longer creates transactions with their start date set to `Jan 01, 001` ([#2544](https://github.com/getsentry/sentry-dotnet/pull/2544))
+
 ### Dependencies
 
 - Bump CLI from v2.20.4 to v2.20.5 ([#2539](https://github.com/getsentry/sentry-dotnet/pull/2539))
