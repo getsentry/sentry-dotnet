@@ -55,6 +55,7 @@
 
   <!-- Profiling dependencies are compiled directly into Sentry. -->
   <ItemGroup Condition="'$(_ProfilingSupported)' == 'true'">
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
     <Compile Include="../../modules/perfview/src/TraceEvent/**/*.cs">
       <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
