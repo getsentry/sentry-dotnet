@@ -64,7 +64,18 @@ transaction.Finish(SpanStatus.Ok);
 
 async Task CreateError()
 {
-    var query = new GraphQLRequest(@"{ test { id } }");
+    // var query = new GraphQLRequest(@"{ test { id } }");
+    var query = new GraphQLRequest{
+        Query = @"mutation fakeMutation($note:NoteInput!) { playNote(note: $note) { id } }",
+        OperationName = "fakeMutation",
+        Variables = new
+        {
+            note = new
+            {
+                message = "This should put a spanner in the works"
+            }
+        }
+    };
     var response = await graphClient!.SendQueryAsync<NotesResult>(query);
     var result = JsonSerializer.Serialize(response);
     Console.WriteLine(result);

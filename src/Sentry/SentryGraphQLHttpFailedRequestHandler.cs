@@ -7,7 +7,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
 {
     private readonly IHub _hub;
     private readonly SentryOptions _options;
-    internal const string MechanismType = "SentryGraphQLHttpFailedRequestHandler";
+    internal const string MechanismType = "GraphqlInstrumentation";
     private readonly SentryHttpFailedRequestHandler _httpFailedRequestHandler;
 
     internal SentryGraphQLHttpFailedRequestHandler(IHub hub, SentryOptions options)
@@ -28,7 +28,10 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             {
                 if (jsonElement.TryGetProperty("errors", out var errorsElement))
                 {
-                    throw new SentryGraphQLHttpFailedRequestException("GraphQL Error");
+                    // We just show the first error... maybe there's a better way to do this when multiple errors exist.
+                    // We should check what the Java code is doing.
+                    var errorMessage = errorsElement[0].GetProperty("message").GetString() ?? "GraphQL Error";
+                    throw new GraphQLHttpRequestException(errorMessage);
                 }
             }
             // No GraphQL errors, but we still might have an HTTP error status
@@ -36,7 +39,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
         }
         catch (Exception exception)
         {
-            exception.SetSentryMechanism(MechanismType);
+            exception.SetSentryMechanism(MechanismType, "GraphQL Failed Request Handler", false);
 
             var @event = new SentryEvent(exception);
             var hint = new Hint(HintTypes.HttpResponseMessage, response);
@@ -67,7 +70,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             else
             {
                 sentryRequest.Cookies = request.Headers.GetCookies();
-                sentryRequest.Data = requestContent?.Query;
+                sentryRequest.Data = requestContent?.RequestContent;
                 sentryRequest.Url = request.RequestUri?.AbsoluteUri;
                 sentryRequest.AddHeaders(request.Headers);
                 responseContext.Cookies = response.Headers.GetCookies();

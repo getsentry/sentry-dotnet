@@ -12,7 +12,6 @@ internal class GraphQLRequestContent
         RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase
         );
 
-    private string? RequestContent { get; }
     private IReadOnlyDictionary<string, object> Items { get; }
 
     public GraphQLRequestContent(string? requestContent, SentryOptions? options = null)
@@ -61,6 +60,8 @@ internal class GraphQLRequestContent
             OperationType = "query";
         }
     }
+
+    internal string? RequestContent { get; }
 
     /// <summary>
     /// Document containing GraphQL to execute.

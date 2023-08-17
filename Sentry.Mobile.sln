@@ -94,6 +94,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Extensions.Logging",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Extensions.Logging.Tests", "test\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj", "{CA1C30A4-2AAC-4199-B679-405217D05D94}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maui2540", "..\Maui2540\Maui2540.csproj", "{F8ADF585-B1F3-446A-841F-537EF0B4AE86}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -185,6 +187,10 @@ Global
 		{CA1C30A4-2AAC-4199-B679-405217D05D94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA1C30A4-2AAC-4199-B679-405217D05D94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA1C30A4-2AAC-4199-B679-405217D05D94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8ADF585-B1F3-446A-841F-537EF0B4AE86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8ADF585-B1F3-446A-841F-537EF0B4AE86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8ADF585-B1F3-446A-841F-537EF0B4AE86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8ADF585-B1F3-446A-841F-537EF0B4AE86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -213,6 +219,7 @@ Global
 		{ED5E4F7E-8267-4F3C-BD2A-779AC9BF3D7C} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{C5B9F867-726C-4CC8-B9D4-41DD2BA89E91} = {AF6AF4C7-8AA2-4D59-8064-2D79560904EB}
 		{CA1C30A4-2AAC-4199-B679-405217D05D94} = {83263231-1A2A-4733-B759-EEFF14E8C5D5}
+		{F8ADF585-B1F3-446A-841F-537EF0B4AE86} = {77454495-55EE-4B40-A089-71B9E8F82E89}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C652B1A-DF72-4EE5-A98B-194FE2C054F6}

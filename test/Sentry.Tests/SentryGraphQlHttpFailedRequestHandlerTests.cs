@@ -194,12 +194,13 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
 
             // Ensure the mechanism is set
             @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryGraphQLHttpFailedRequestHandler.MechanismType);
+            @event.Exception?.Data[Mechanism.HandledKey].Should().Be(false);
 
             // Ensure the request properties are captured
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());
             @event.Request.Url.Should().Be(url);
             @event.Request.ApiTarget.Should().Be("graphql");
-            @event.Request.Data.Should().Be(query);
+            @event.Request.Data.Should().Be(SentryGraphQlTestHelpers.WrapRequestContent(query));
 
             // Ensure the response context is captured
             @event.Contexts.Should().Contain(x => x.Key == Response.Type && x.Value is Response);
