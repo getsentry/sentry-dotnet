@@ -6,7 +6,7 @@ namespace Sentry;
 
 public static partial class SentrySdk
 {
-    private static void InitSentryCorcoaSdk(SentryOptions options)
+    private static void InitSentryCocoaSdk(SentryOptions options)
     {
         // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
         ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
