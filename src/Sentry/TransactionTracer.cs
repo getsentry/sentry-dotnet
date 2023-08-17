@@ -10,6 +10,7 @@ namespace Sentry;
 public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
 {
     private readonly IHub _hub;
+    private readonly SentryOptions? _options;
     private readonly Timer? _idleTimer;
     private long _idleTimerStopped;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
@@ -204,6 +205,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
     {
         _hub = hub;
+        _options = _hub.GetSentryOptions();
         Name = name;
         NameSource = nameSource;
         SpanId = SpanId.Create();
@@ -225,6 +227,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
     {
         _hub = hub;
+        _options = _hub.GetSentryOptions();
         Name = context.Name;
         NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
         Operation = context.Operation;
@@ -248,7 +251,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
             {
                 if (state is not TransactionTracer transactionTracer)
                 {
-                    _hub.GetSentryOptions()?.LogDebug(
+                    _options?.LogDebug(
                         $"Idle timeout callback received nor non-TransactionTracer state. " +
                         "Unable to finish transaction automatically."
                     );
@@ -284,7 +287,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     {
         if (instrumenter != _instrumenter)
         {
-            _hub.GetSentryOptions()?.LogWarning(
+            _options?.LogWarning(
                 $"Attempted to create a span via {instrumenter} instrumentation to a span or transaction" +
                 $" originating from {_instrumenter} instrumentation. The span will not be created.");
             return NoOpSpan.Instance;
@@ -315,10 +318,10 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
-        _hub.GetSentryOptions()?.LogDebug($"Attempting to finish Transaction {SpanId}.");
+        _options?.LogDebug($"Attempting to finish Transaction {SpanId}.");
         if (Interlocked.Exchange(ref _idleTimerStopped, 1) == 0)
         {
-            _hub.GetSentryOptions()?.LogDebug($"Disposing of idle timer for Transaction {SpanId}.");
+            _options?.LogDebug($"Disposing of idle timer for Transaction {SpanId}.");
             _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             _idleTimer?.Dispose();
         }
@@ -328,20 +331,20 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
             // Normally we wouldn't start transactions for Sentry requests but when instrumenting with OpenTelemetry
             // we are only able to determine whether it's a sentry request or not when closing a span... we leave these
             // to be garbage collected and we don't want idle timers triggering on them
-            _hub.GetSentryOptions()?.LogDebug($"Transaction {SpanId} is a Sentry Request. Don't complete.");
+            _options?.LogDebug($"Transaction {SpanId} is a Sentry Request. Don't complete.");
             return;
         }
 
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
-        _hub.GetSentryOptions()?.LogDebug($"Finished Transaction {SpanId}.");
+        _options?.LogDebug($"Finished Transaction {SpanId}.");
 
         foreach (var span in _spans)
         {
             if (!span.IsFinished)
             {
-                _hub.GetSentryOptions()?.LogDebug($"Deadline exceeded for Transaction {SpanId} -> Span {span.SpanId}.");
+                _options?.LogDebug($"Deadline exceeded for Transaction {SpanId} -> Span {span.SpanId}.");
                 span.Finish(SpanStatus.DeadlineExceeded);
             }
         }
