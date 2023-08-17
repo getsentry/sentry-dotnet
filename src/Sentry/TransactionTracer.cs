@@ -248,6 +248,10 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
             {
                 if (state is not TransactionTracer transactionTracer)
                 {
+                    _hub.GetSentryOptions()?.LogDebug(
+                        $"Idle timeout callback received nor non-TransactionTracer state. " +
+                        "Unable to finish transaction automatically."
+                    );
                     return;
                 }
 
@@ -311,26 +315,33 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish()
     {
+        _hub.GetSentryOptions()?.LogDebug($"Attempting to finish Transaction {SpanId}.");
         if (Interlocked.Exchange(ref _idleTimerStopped, 1) == 0)
         {
+            _hub.GetSentryOptions()?.LogDebug($"Disposing of idle timer for Transaction {SpanId}.");
             _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-
             _idleTimer?.Dispose();
         }
 
         if (IsSentryRequest)
         {
+            // Normally we wouldn't start transactions for Sentry requests but when instrumenting with OpenTelemetry
+            // we are only able to determine whether it's a sentry request or not when closing a span... we leave these
+            // to be garbage collected and we don't want idle timers triggering on them
+            _hub.GetSentryOptions()?.LogDebug($"Transaction {SpanId} is a Sentry Request. Don't complete.");
             return;
         }
 
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
+        _hub.GetSentryOptions()?.LogDebug($"Finished Transaction {SpanId}.");
 
         foreach (var span in _spans)
         {
             if (!span.IsFinished)
             {
+                _hub.GetSentryOptions()?.LogDebug($"Deadline exceeded for Transaction {SpanId} -> Span {span.SpanId}.");
                 span.Finish(SpanStatus.DeadlineExceeded);
             }
         }
