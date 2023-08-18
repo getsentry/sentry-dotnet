@@ -1,3 +1,5 @@
+namespace Sentry.Testing;
+
 internal static class JsonSerializableExtensions
 {
     private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);

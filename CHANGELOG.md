@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.9.5 to v8.9.6 ([#2546](https://github.com/getsentry/sentry-dotnet/pull/2546))
