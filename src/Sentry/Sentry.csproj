@@ -47,6 +47,33 @@
     </Compile>
   </ItemGroup>
 
+  <!-- Profiling is supported only for select TargetFrameworks -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <_ProfilingSupported>true</_ProfilingSupported>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    <!-- Required for TraceEvent -->
+  </PropertyGroup>
+
+  <!-- Profiling dependencies are compiled directly into Sentry. -->
+  <ItemGroup Condition="'$(_ProfilingSupported)' == 'true'">
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
+    <Compile Include="../../modules/perfview/src/TraceEvent/**/*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="../../modules/perfview/src/FastSerialization/**/*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="../../modules/perfview/src/Utilities/**/*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <!-- Exclude samples, tests and some problematic files -->
+    <Compile Remove="../../modules/perfview/src/TraceEvent/Samples/**/*" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/Properties/**/*" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/AutomatedAnalysis/**/*" />
+    <Compile Remove="../../modules/perfview/src/**/*.Tests/**/*" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/ETWReloggerTraceEventSource.cs" />
+    <Compile Remove="../../modules/perfview/src/TraceEvent/Symbols/NativeSymbolModule.cs" />
+  </ItemGroup>
+
   <!--
     We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
     https://github.com/SimonCropp/Polyfill
