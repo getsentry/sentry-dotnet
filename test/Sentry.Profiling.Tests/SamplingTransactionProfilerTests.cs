@@ -15,6 +15,12 @@ public class SamplingTransactionProfilerTests
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
         _testSentryOptions = new SentryOptions { Debug = true, DiagnosticLogger = _testOutputLogger };
+
+        // TODO: Change this API. This static API is problematic because state isn't getting cleared anywhere after it's used (end of test runs).
+        // This could be resolved if on IDisposable of each test class setting a value, it reset to null.
+        // But expects folks to remember doing that, and it hasn't be done so far.
+        // Additionally and parallel tests will race and fail.
+        SentryClientExtensions.SentryOptionsForTestingOnly = _testSentryOptions;
     }
 
     private void ValidateProfile(SampleProfile profile, ulong maxTimestampNs)
