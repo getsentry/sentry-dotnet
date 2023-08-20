@@ -12,7 +12,7 @@ public class ProfilerTests
 
     private static void AddStack(SampleProfile sut, List<int> frames)
     {
-        var stack = new GrowableArray<int>(frames.Count);
+        var stack = new Internal.GrowableArray<int>(frames.Count);
         foreach (var frame in frames)
         {
             stack.Add(frame);
