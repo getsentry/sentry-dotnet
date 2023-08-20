@@ -71,8 +71,8 @@
 
     <!--    NativeSymbolModule depends on types and native libraries coming from this package which seem to be Windows-only:-->
     <!--    Also see: https://github.com/microsoft/perfview/issues/1479 and https://github.com/microsoft/perfview/issues/814-->
-    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent.SupportFiles" Version="1.0.23" />
-    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent.SupportFiles" Version="1.0.23" /> <!-- No transient deps -->
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" /> <!-- Depends on Microsoft.Extensions.Logging -->
 
     <Compile Include="../../modules/perfview/src/TraceEvent/**/*.cs">
       <Link>Profiling\PerfView\TraceEvent\%(RecursiveDir)\%(Filename)%(Extension)</Link>
