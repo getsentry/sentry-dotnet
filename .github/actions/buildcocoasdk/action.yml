@@ -1,4 +1,5 @@
 name: Build Native Dependencies
+description: Builds Sentry Cocoa SDK with custom Carthage
 runs:
   using: composite
 
