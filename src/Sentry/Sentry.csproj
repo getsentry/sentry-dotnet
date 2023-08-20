@@ -57,21 +57,21 @@
   <ItemGroup Condition="'$(_ProfilingSupported)' == 'true'">
     <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
     <Compile Include="../../modules/perfview/src/TraceEvent/**/*.cs">
-      <Link>Profiling\PerfView\%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Link>Profiling\PerfView\TraceEvent\%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
     <Compile Include="../../modules/perfview/src/FastSerialization/**/*.cs">
-      <Link>Profiling\PerfView\%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Link>Profiling\PerfView\FastSerialization\%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
     <Compile Include="../../modules/perfview/src/Utilities/**/*.cs">
-      <Link>Profiling\PerfView\%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Link>Profiling\PerfView\Utilities\%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
     <!-- Exclude samples, tests and some problematic files -->
     <Compile Remove="../../modules/perfview/src/TraceEvent/Samples/**/*" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/Properties/**/*" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/AutomatedAnalysis/**/*" />
-    <Compile Remove="../../modules/perfview/src/**/*.Tests/**/*" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/ETWReloggerTraceEventSource.cs" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/Symbols/NativeSymbolModule.cs" />
+    <Compile Remove="../../modules/perfview/src/**/*.Tests/**/*" />
     <Compile Remove="../../modules/perfview/**/obj/**" />
   </ItemGroup>
 
