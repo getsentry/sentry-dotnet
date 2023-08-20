@@ -57,13 +57,13 @@
   <ItemGroup Condition="'$(_ProfilingSupported)' == 'true'">
     <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
     <Compile Include="../../modules/perfview/src/TraceEvent/**/*.cs">
-      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Link>Profiling\PerfView\%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
     <Compile Include="../../modules/perfview/src/FastSerialization/**/*.cs">
-      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Link>Profiling\PerfView\%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
     <Compile Include="../../modules/perfview/src/Utilities/**/*.cs">
-      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      <Link>Profiling\PerfView\%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
     <!-- Exclude samples, tests and some problematic files -->
     <Compile Remove="../../modules/perfview/src/TraceEvent/Samples/**/*" />
