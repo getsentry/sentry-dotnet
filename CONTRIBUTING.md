@@ -29,7 +29,11 @@ For big feature it's advised to raise an issue to discuss it first.
 ## .NET MAUI Requirements
 
 To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, you'll need to have .NET SDK 6.0.400 or greater installed, and have installed the MAUI workloads installed, either through Visual Studio setup, or by running `dotnet workload restore` (or `dotnet workload install maui`) from the Sentry source code root directory.
-You may also need other platform dependencies.  See https://docs.microsoft.com/dotnet/maui/ for details.  Basically, if you can build and run the "MyMauiApp" example you should also be able to build and run the Sentry MAUI sample app.
+You may also need other platform dependencies.  
+
+See https://docs.microsoft.com/dotnet/maui/ for details. JetBrains also have a great blog post if you're developing on a Mac: https://blog.jetbrains.com/dotnet/2022/05/25/macos-environment-setup-for-maui-development/
+
+Basically, if you can build and run the "MyMauiApp" example you should also be able to build and run the Sentry MAUI sample app.
 
 ### Targeting Android, iOS and Mac Catalyst
 
