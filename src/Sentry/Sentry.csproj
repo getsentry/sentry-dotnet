@@ -72,6 +72,7 @@
     <Compile Remove="../../modules/perfview/src/**/*.Tests/**/*" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/ETWReloggerTraceEventSource.cs" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/Symbols/NativeSymbolModule.cs" />
+    <Compile Remove="../../modules/perfview/**/obj/**" />
   </ItemGroup>
 
   <!--
