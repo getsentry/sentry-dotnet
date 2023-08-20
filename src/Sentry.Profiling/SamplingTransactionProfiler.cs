@@ -64,6 +64,9 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     // We need custom sampling because the TraceLog dispatches events from a queue with a delay of about 2 seconds.
     private void OnThreadSample(TraceEvent data)
     {
+#if DEBUG
+        _options.LogDebug("OnThreadSample: {0}", data);
+#endif
         var timestampMs = data.TimeStampRelativeMSec;
         if (timestampMs >= _startTimeMs)
         {
@@ -108,7 +111,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         var completedTask = await Task.WhenAny(_completionSource.Task, Task.Delay(10_000, _cancellationToken)).ConfigureAwait(false);
         if (!completedTask.Equals(_completionSource.Task))
         {
-            _options.LogWarning("Collected sampled with the 10s timeout because last sample didn't complete under it.");
+            _options.LogWarning("CollectAsync timed out after 10ms. Were there any samples collected?");
         }
 
         return CreateProfileInfo(transaction, _processor.Profile);

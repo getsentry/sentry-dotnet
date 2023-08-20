@@ -3,6 +3,7 @@
     "path": "Sentry.sln",
     "projects": [
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
+      "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Profiling.Tests\\Sentry.Profiling.Tests.csproj",

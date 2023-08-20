@@ -1,5 +1,3 @@
-using System.Reflection;
-using System.Xml.Xsl;
 using Sentry;
 using Sentry.Profiling;
 
@@ -10,25 +8,13 @@ internal static class Program
         // Enable the SDK
         using (SentrySdk.Init(options =>
         {
-            // A Sentry Data Source Name (DSN) is required.
-            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-            // You can set it in the SENTRY_DSN environment variable, or you can set it in code here.
-            // options.Dsn = "... Your DSN ...";
+            options.Dsn =
+                // NOTE: ADD YOUR OWN DSN BELOW so you can see the events in your own Sentry account
+                "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
-            // When debug is enabled, the Sentry client will emit detailed debugging information to the console.
-            // This might be helpful, or might interfere with the normal operation of your application.
-            // We enable it here for demonstration purposes.
-            // You should not do this in your applications unless you are troubleshooting issues with Sentry.
             options.Debug = true;
-
-            // This option is recommended, which enables Sentry's "Release Health" feature.
             options.AutoSessionTracking = true;
-
-            // This option is recommended for client applications only. It ensures all threads use the same global scope.
-            // If you are writing a background service of any kind, you should remove this.
             options.IsGlobalModeEnabled = true;
-
-            // This option will enable Sentry's tracing features. You still need to start transactions and spans.
             options.EnableTracing = true;
 
             options.AddIntegration(new ProfilingIntegration());
