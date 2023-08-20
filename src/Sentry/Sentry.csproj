@@ -30,6 +30,7 @@
     <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
       <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
     </Compile>
+    <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
   </ItemGroup>
 
   <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
