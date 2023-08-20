@@ -51,10 +51,14 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <_ProfilingSupported>true</_ProfilingSupported>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    <!-- Required for TraceEvent -->
+    <!-- RCS1075: Avoid empty catch blog-->
+    <NoWarn>$(NoWarn);RCS1075</NoWarn>
   </PropertyGroup>
 
   <!-- Profiling dependencies are compiled directly into Sentry. -->
   <ItemGroup Condition="'$(_ProfilingSupported)' == 'true'">
+    <Using Include="FastSerialization.SerializationException" Alias="SerializationException" />
+
     <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
     <Compile Include="../../modules/perfview/src/TraceEvent/**/*.cs">
       <Link>Profiling\PerfView\TraceEvent\%(RecursiveDir)\%(Filename)%(Extension)</Link>
@@ -70,9 +74,14 @@
     <Compile Remove="../../modules/perfview/src/TraceEvent/Properties/**/*" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/AutomatedAnalysis/**/*" />
     <Compile Remove="../../modules/perfview/src/TraceEvent/ETWReloggerTraceEventSource.cs" />
-    <Compile Remove="../../modules/perfview/src/TraceEvent/Symbols/NativeSymbolModule.cs" />
+<!--    <Compile Remove="../../modules/perfview/src/TraceEvent/Symbols/NativeSymbolModule.cs" />-->
     <Compile Remove="../../modules/perfview/src/**/*.Tests/**/*" />
     <Compile Remove="../../modules/perfview/**/obj/**" />
+  </ItemGroup>
+  <ItemGroup>
+<!--    NativeSymbolModule depends on types and native libraries coming from this package which seem to be Windows-only:-->
+<!--    Also see: https://github.com/microsoft/perfview/issues/1479 and https://github.com/microsoft/perfview/issues/814-->
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent.SupportFiles" Version="1.0.23" />
   </ItemGroup>
 
   <!--
