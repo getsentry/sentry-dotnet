@@ -23,7 +23,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         _session = session;
         _cancellationToken = cancellationToken;
         _startTimeMs = session.Elapsed.TotalMilliseconds;
-        _endTimeMs = Double.MaxValue;
+        _endTimeMs = double.MaxValue;
         _processor = new SampleProfileBuilder(options, session.TraceLog);
         session.SampleEventParser.ThreadSample += OnThreadSample;
         cancellationToken.Register(() =>
@@ -117,9 +117,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             Contexts = transaction.Contexts,
             Environment = transaction.Environment,
             Transaction = transaction,
-            // TODO FIXME - see https://github.com/getsentry/relay/pull/1902
-            // Platform = transaction.Platform,
-            Platform = "dotnet",
+            Platform = transaction.Platform,
             Release = transaction.Release,
             StartTimestamp = transaction.StartTimestamp,
             Profile = profile

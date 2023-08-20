@@ -51,7 +51,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             }
             catch (Exception e)
             {
-                _options.LogWarning("Failed to start a profiler session.", e);
+                _options.LogError("Failed to start a profiler session.", e);
                 _inProgress = FALSE;
             }
         }
