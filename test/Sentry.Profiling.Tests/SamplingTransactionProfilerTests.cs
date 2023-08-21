@@ -117,7 +117,6 @@ public class SamplingTransactionProfilerTests
     [Fact]
     public void Profiler_AfterTimeout_Stops()
     {
-        var hub = Substitute.For<IHub>();
         using var session = SampleProfilerSession.StartNew(_testOutputLogger);
         var limitMs = 50;
         var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);

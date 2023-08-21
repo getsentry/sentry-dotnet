@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Sentry;
 using Sentry.Profiling;
 
@@ -13,9 +14,12 @@ internal static class Program
                 "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
             options.Debug = true;
-            options.AutoSessionTracking = true;
+            // options.AutoSessionTracking = true;
             options.IsGlobalModeEnabled = true;
             options.EnableTracing = true;
+
+            // Debugging
+            options.ShutdownTimeout = TimeSpan.FromMinutes(5);
 
             options.AddIntegration(new ProfilingIntegration());
         }))
@@ -26,7 +30,28 @@ internal static class Program
             {
                 FindPrimeNumber(100000);
             }
+
             tx.Finish();
+            var sw = Stopwatch.StartNew();
+
+            // Flushing takes 10 seconds consistently?
+            SentrySdk.Flush(TimeSpan.FromMinutes(5));
+            Console.WriteLine("Flushed in " + sw.Elapsed);
+
+            // is the second profile faster?
+            tx = SentrySdk.StartTransaction("app", "run");
+            count = 10;
+            for (var i = 0; i < count; i++)
+            {
+                FindPrimeNumber(100000);
+            }
+
+            tx.Finish();
+            sw = Stopwatch.StartNew();
+
+            // Flushing takes 10 seconds consistently?
+            SentrySdk.Flush(TimeSpan.FromMinutes(5));
+            Console.WriteLine("Flushed in " + sw.Elapsed);
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
