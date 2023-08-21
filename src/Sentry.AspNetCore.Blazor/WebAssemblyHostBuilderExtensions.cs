@@ -7,18 +7,31 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 public static class WebAssemblyHostBuilderExtensions
 {
-    public static WebAssemblyHostBuilder UseSentry(this WebAssemblyHostBuilder builder, Action<SentryLoggingOptions> configureOptions)
+    public static WebAssemblyHostBuilder UseSentry(this WebAssemblyHostBuilder builder, Action<SentryBlazorOptions> configureOptions)
     {
-        builder.Logging.AddSentry(options =>
+        var blazorOptions = new SentryBlazorOptions();
+
+        if (blazorOptions.ReplaysSessionSampleRate > 0)
         {
-            configureOptions(options);
+            // Add Session Replay
+        }
+        builder.Logging.AddSentry<SentryBlazorOptions>(loggingOptions =>
+        {
+            configureOptions(blazorOptions);
 
             // System.PlatformNotSupportedException: System.Diagnostics.Process is not supported on this platform.
-            options.DetectStartupTime = StartupTimeDetectionMode.Fast;
+            loggingOptions.DetectStartupTime = StartupTimeDetectionMode.Fast;
             // Warning: No response compression supported by HttpClientHandler.
-            options.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
+            loggingOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
 
         });
         return builder;
     }
+}
+
+public class SentryBlazorOptions : SentryLoggingOptions
+{
+    // https://docs.sentry.io/platforms/javascript/session-replay/
+    public int ReplaysSessionSampleRate { get; set; }
+    public int ReplaysOnErrorSampleRate { get; set; }
 }

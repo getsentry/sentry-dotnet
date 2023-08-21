@@ -999,6 +999,7 @@ namespace Sentry
     {
         None = 0,
         Fast = 1,
+        [System.Runtime.Versioning.UnsupportedOSPlatform("browser")]
         Best = 2,
     }
     public class StreamAttachmentContent : Sentry.IAttachmentContent
