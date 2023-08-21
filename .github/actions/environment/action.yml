@@ -1,4 +1,5 @@
 name: Setup Environment
+description: Sets env vars and installs dependencies
 runs:
   using: composite
 
