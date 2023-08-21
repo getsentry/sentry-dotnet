@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <UseBlazorWebAssembly>true</UseBlazorWebAssembly>
+    <SentryJavaScriptVersion>7.64.0</SentryJavaScriptVersion>
 </PropertyGroup>
 
   <ItemGroup>
@@ -20,5 +21,20 @@
 <!--    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.10" />-->
   </ItemGroup>
 
+    <!-- Download JS SDK from CDN: https://docs.sentry.io/platforms/javascript/install/loader/#cdn -->
+    <Target Name="DownloadSentryJavaScript" BeforeTargets="Build">
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.replay.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayPerformance" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.replay.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplay" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsPerformance" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrors" />
+    </DownloadFile>
+  </Target>
 
 </Project>
