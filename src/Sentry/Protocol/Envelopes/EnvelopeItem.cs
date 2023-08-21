@@ -41,6 +41,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         TypeValueTransaction => DataCategory.Transaction,
         TypeValueSession => DataCategory.Session,
         TypeValueAttachment => DataCategory.Attachment,
+        TypeValueProfile => DataCategory.Profile,
 
         // Not all envelope item types equate to data categories
         // Specifically, user_report and client_report just use "default"

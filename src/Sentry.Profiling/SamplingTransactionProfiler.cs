@@ -23,7 +23,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         _session = session;
         _cancellationToken = cancellationToken;
         _startTimeMs = session.Elapsed.TotalMilliseconds;
-        _endTimeMs = Double.MaxValue;
+        _endTimeMs = double.MaxValue;
         _processor = new SampleProfileBuilder(options, session.TraceLog);
         session.SampleEventParser.ThreadSample += OnThreadSample;
         cancellationToken.Register(() =>
@@ -103,9 +103,13 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             throw new InvalidOperationException("Profiler.CollectAsync() called before Finish()");
         }
 
-        // Wait for the last sample (<= _endTimeMs), or at most 10 seconds. The timeout shouldn't happen because
-        // TraceLog.realTimeQueue should dispatch events after ~2 seconds, but if it does, send what we have.
-        await Task.WhenAny(_completionSource.Task, Task.Delay(10_000, _cancellationToken)).ConfigureAwait(false);
+        // Wait for the last sample (<= _endTimeMs), or at most 1 second. The timeout shouldn't happen because
+        // TraceLog should dispatch events immediately. But if it does, send at least what we have already got.
+        var completedTask = await Task.WhenAny(_completionSource.Task, Task.Delay(1_000, _cancellationToken)).ConfigureAwait(false);
+        if (!completedTask.Equals(_completionSource.Task))
+        {
+            _options.LogWarning("CollectAsync timed out after 1 second. Were there any samples collected?");
+        }
 
         return CreateProfileInfo(transaction, _processor.Profile);
     }
@@ -117,9 +121,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             Contexts = transaction.Contexts,
             Environment = transaction.Environment,
             Transaction = transaction,
-            // TODO FIXME - see https://github.com/getsentry/relay/pull/1902
-            // Platform = transaction.Platform,
-            Platform = "dotnet",
+            Platform = transaction.Platform,
             Release = transaction.Release,
             StartTimestamp = transaction.StartTimestamp,
             Profile = profile

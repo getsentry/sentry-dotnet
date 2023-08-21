@@ -17,13 +17,13 @@ internal class SampleProfilerSession : IDisposable
     private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
 
-    private SampleProfilerSession(SentryStopwatch stopatch, EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
+    private SampleProfilerSession(SentryStopwatch stopwatch, EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
     {
         _session = session;
         _logger = logger;
         _eventSource = eventSource;
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
-        _stopwatch = stopatch;
+        _stopwatch = stopwatch;
     }
 
     // Exposed only for benchmarks.

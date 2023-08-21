@@ -14,9 +14,9 @@ namespace Sentry.Protocol;
 internal sealed class SampleProfile : IJsonSerializable
 {
     // Note: changing these to properties would break because GrowableArray is a struct.
-    internal GrowableArray<Sample> Samples = new(10000);
-    internal GrowableArray<SentryStackFrame> Frames = new(100);
-    internal GrowableArray<GrowableArray<int>> Stacks = new(100);
+    internal Internal.GrowableArray<Sample> Samples = new(10000);
+    internal Internal.GrowableArray<SentryStackFrame> Frames = new(100);
+    internal Internal.GrowableArray<Internal.GrowableArray<int>> Stacks = new(100);
     internal List<SentryThread> Threads = new(10);
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
