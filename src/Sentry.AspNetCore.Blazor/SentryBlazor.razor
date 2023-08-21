@@ -1,27 +1,43 @@
-<div class="my-component">
-    <p>Sentry Blazor SDK!</p>
-    <script>
-    console.log("SentryBlazor: Loading Sentry JavaScript...");
-    </script>
-  @* <script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js"></script> *@
+@using Microsoft.JSInterop
 
-    <script>
-    window.initSentry = (options) => {
-        console.log("Sentry obj: " + Sentry);
-        console.log("Sentry dsn: " + options.dsn);
-        console.log("Sentry debug: " + options.debug);
-        // window.Sentry = Sentry;
-        Sentry.init({
-          // dsn: "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537",
-          // debug: true,
-          // tracesSampleRate: 1.0,
-          // replaysSessionSampleRate: 0.1,
-          // replaysOnErrorSampleRate: 1.0,
-          integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
-          ...options
-        });
+<script type="text/javascript" id="loadSentry"></script>
+<script type="text/javascript">
+console.log("SentryBlazor: Loading Sentry JavaScript...");
+if (typeof Sentry === 'undefined') {
+    console.log("Sentry Browser not installed");
+    try {
+        const s = document.getElementById('loadSentry');
+        console.log("Found script by id");
+        s.setAttribute("src", "_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js");
+        console.log("src set");
+        s.addEventListener("error", (e) => console.log("onerror: Failed to add Sentry Browser:" + e));
+    } catch (e) {
+        console.log("Failed to add Sentry Browser:" + e);
     }
-    console.log("SentryBlazor: Loaded Sentry JavaScript...");
-    </script>
-</div>
+} else {
+    console.log("Sentry Browser is already installed");
+}
+</script>
+
+@* <script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js"></script> *@
+
+<script>
+window.initSentry = (options) => {
+
+    console.log("Sentry obj: " + Sentry);
+    console.log("Sentry dsn: " + options.dsn);
+    console.log("Sentry debug: " + options.debug);
+    // window.Sentry = Sentry;
+    Sentry.init({
+      // dsn: "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537",
+      // debug: true,
+      // tracesSampleRate: 1.0,
+      // replaysSessionSampleRate: 0.1,
+      // replaysOnErrorSampleRate: 1.0,
+      integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
+      ...options
+    });
+}
+console.log("SentryBlazor: Loaded Sentry JavaScript...");
+</script>
 

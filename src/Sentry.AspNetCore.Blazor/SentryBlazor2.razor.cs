@@ -9,18 +9,41 @@ using Sentry;
 
 namespace Sentry.AspNetCore.Blazor;
 
-public partial class SentryBlazor : ComponentBase, IDisposable
+public partial class SentryBlazor2 : ComponentBase, IDisposable
 {
     [Inject] private SentryBlazorOptions SentryBlazorOptions { get; set; } = null!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
+    private bool _isSentryBrowserAvailable = false;
+
     // Early enough?
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("SentryBlazor: OnInitializedAsync Starting");
+        _isSentryBrowserAvailable = !await JSRuntime.InvokeAsync<bool>("eval", "typeof Sentry === 'undefined'")
+            .ConfigureAwait(true);
+
+        Console.WriteLine("_isSentryBrowserAvailable: " + _isSentryBrowserAvailable);
+
         await Task.CompletedTask.ConfigureAwait(false);
         Console.WriteLine("SentryBlazor: OnInitializedAsync Completed");
+    }
+
+    protected override void BuildRenderTree(RenderTreeBuilder builder)
+    {
+        Console.WriteLine("SentryBlazor: BuildRenderTree Starting");
+
+        if (!_isSentryBrowserAvailable)
+        {
+            Console.WriteLine("SentryBlazor: Adding script tag");
+            builder.OpenElement(0, "script");
+            builder.AddAttribute(1, "src", "_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js");
+            builder.AddAttribute(2, "type", "text/javascript");
+            builder.CloseElement();
+        }
+
+        Console.WriteLine("SentryBlazor: BuildRenderTree Completed");
     }
 
     protected override Task OnParametersSetAsync()
@@ -36,6 +59,14 @@ public partial class SentryBlazor : ComponentBase, IDisposable
         {
             NavigationManager.LocationChanged += NavigationManager_LocationChanged;
 
+            _isSentryBrowserAvailable = !await JSRuntime.InvokeAsync<bool>("eval", "typeof Sentry === 'undefined'")
+                .ConfigureAwait(true);
+
+            Console.WriteLine("_isSentryBrowserAvailable: " + _isSentryBrowserAvailable);
+            if (!_isSentryBrowserAvailable)
+            {
+                return;
+            }
 
             var options = new
             {
@@ -51,8 +82,8 @@ public partial class SentryBlazor : ComponentBase, IDisposable
             try
             {
                 await Task.CompletedTask.ConfigureAwait(false);
-                await JSRuntime.InvokeVoidAsync("initSentry", options)
-                    .ConfigureAwait(true);
+                // await JSRuntime.InvokeVoidAsync("initSentry", options)
+                //     .ConfigureAwait(true);
             }
             catch (JSException e)
             {
