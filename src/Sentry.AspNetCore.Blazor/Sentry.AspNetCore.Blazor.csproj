@@ -1,8 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
+<PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <UseBlazorWebAssembly>true</UseBlazorWebAssembly>
+</PropertyGroup>
 
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -14,6 +16,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.21" />
+<!--    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.10" />-->
   </ItemGroup>
+
 
 </Project>
