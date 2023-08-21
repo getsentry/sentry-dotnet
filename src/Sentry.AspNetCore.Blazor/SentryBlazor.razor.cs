@@ -22,9 +22,10 @@ public partial class SentryBlazor : ComponentBase, IDisposable
         if (SentryBlazorOptions is null) return Task.CompletedTask;
         if (SentryBlazorOptions.ReplaysSessionSampleRate > 0 || SentryBlazorOptions.ReplaysOnErrorSampleRate > 0)
         {
-            _sentryBundleName = "bundle.tracing.replay.min.js";
+            // _sentryBundleName = "~/wwwroot/bundle.tracing.replay.min.js";
+            // _sentryBundleName = "./SentryBlazor.razor.js";
+            _sentryBundleName = "_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.min.js";
         }
-
         return Task.CompletedTask;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -41,23 +42,25 @@ public partial class SentryBlazor : ComponentBase, IDisposable
 
                 try
                 {
-                    // TODO: needs to be disposed?
-                    var module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", $"./{_sentryBundleName}")
-                        // TODO: Requires context?
-                        .ConfigureAwait(true);
-                    if (module is null) return;
+                    // // TODO: needs to be disposed?
+                    // var module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", _sentryBundleName)
+                    //     // TODO: Requires context?
+                    //     .ConfigureAwait(true);
 
-                    await module.InvokeAsync<Action<dynamic>>("init", callback)
+                    await JSRuntime.InvokeVoidAsync("sentryBlazor.initSentryJavaScript", callback)
                         // TODO: Requires context?
                         .ConfigureAwait(true);
                 }
                 catch (JSException e)
                 {
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e.StackTrace);
                     SentrySdk.CaptureException(e);
                     return;
                 }
             }
 
+            Console.WriteLine("Loaded");
             if (NavigationManager is null) return;
             NavigationManager.LocationChanged += NavigationManager_LocationChanged;
         }

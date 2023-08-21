@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
 <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <UseBlazorWebAssembly>true</UseBlazorWebAssembly>
+<!--    <UseBlazorWebAssembly>true</UseBlazorWebAssembly>-->
     <SentryJavaScriptVersion>7.64.0</SentryJavaScriptVersion>
 </PropertyGroup>
 
@@ -20,8 +20,31 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
-    
+
 <!--    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.10" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="_content\bundle.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="_content\bundle.replay.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="_content\bundle.tracing.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="_content\bundle.tracing.replay.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="SentryBlazor.razor.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
     <!-- Download JS SDK from CDN: https://docs.sentry.io/platforms/javascript/install/loader/#cdn -->
