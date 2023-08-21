@@ -1,7 +1,6 @@
 <Project InitialTargets="RestoreSubmodule">
   <!-- If Ben.Demystifer is not found, restore git submodules -->
   <Target Name="RestoreSubmodule"
-    Condition="!Exists('modules\Ben.Demystifier\Ben.Demystifier.sln')">
     <Message Importance="High" Text="Ben.Demystifer not found. Restoring git submodules." />
     <Exec Command="git submodule update --init --recursive" />
   </Target>
