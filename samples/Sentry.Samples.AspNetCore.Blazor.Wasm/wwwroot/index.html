@@ -6,9 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>BlazorApp1</title>
     <base href="/" />
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
+<!--TODO: Remove this when we get the JS SDK via the NuGet package-->
+<script
+        src="https://js.sentry-cdn.com/eb18e953812b41c3aeb042e666fd3b5c.min.js"
+        crossorigin="anonymous"
+></script>
+
 <div id="app">Loading...</div>
 
 <div id="blazor-error-ui">
@@ -28,6 +40,13 @@
     }
 </script>
 <script src="_framework/blazor.webassembly.js"></script>
+<script type="text/javascript">
+    Sentry.init({
+        dsn: 'https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537',
+        debug: true,
+    });
+
+</script>
 </body>
 
 </html>

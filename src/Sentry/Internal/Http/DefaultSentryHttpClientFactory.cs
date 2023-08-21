@@ -37,7 +37,8 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
             }
             else
             {
-                options.LogWarning("No response compression supported by HttpClientHandler.");
+                // For example, WebAssembly
+                options.LogDebug("No response compression supported by HttpClientHandler.");
             }
         }
 #if IOS

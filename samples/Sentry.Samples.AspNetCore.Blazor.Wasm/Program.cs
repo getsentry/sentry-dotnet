@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO.Compression;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Sentry;
 using Sentry.Samples.AspNetCore.Blazor.Wasm;
@@ -8,6 +9,12 @@ using var sdk = SentrySdk.Init(o =>
 {
     o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
     o.Debug = true;
+
+    // System.PlatformNotSupportedException: System.Diagnostics.Process is not supported on this platform.
+    o.DetectStartupTime = StartupTimeDetectionMode.Fast;
+    // Warning: No response compression supported by HttpClientHandler.
+    o.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
+
     //IsGlobalModeEnabled will be true for Blazor WASM
     Debug.Assert(o.IsGlobalModeEnabled);
 });

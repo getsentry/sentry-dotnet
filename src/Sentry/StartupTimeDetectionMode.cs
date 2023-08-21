@@ -1,3 +1,5 @@
+using System.Runtime.Versioning;
+
 namespace Sentry;
 
 /// <summary>
@@ -22,5 +24,6 @@ public enum StartupTimeDetectionMode
     /// <remarks>
     /// This can require starting work on the thread pool due to P/Invoke calls.
     /// </remarks>
+    [UnsupportedOSPlatform("browser")]
     Best,
 }
