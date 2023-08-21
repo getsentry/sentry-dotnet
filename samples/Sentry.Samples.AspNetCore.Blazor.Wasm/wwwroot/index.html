@@ -15,11 +15,7 @@
 </head>
 
 <body>
-<script
-        src="https://browser.sentry-cdn.com/7.64.0/bundle.tracing.replay.min.js"
-        integrity="sha384-dS0vEoM8E0IzoGVKpXCmS030gN8VyUqHgYw8H9Waud0UjrKeu+gwWbwY80HAzp3U"
-        crossorigin="anonymous"
-></script>
+
 <div id="app">Loading...</div>
 
 <div id="blazor-error-ui">
@@ -27,6 +23,24 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+<script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js"></script>
+<script type="text/javascript">
+// Sentry.init({
+//     dsn: 'https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537',
+//     debug: true,
+//     integrations: [
+//         new Sentry.BrowserTracing(),
+//         new Sentry.Replay(),
+//     ],
+//     replaysSessionSampleRate: 1.0,
+//     replaysOnErrorSampleRate: 1.0,
+//     tracesSampleRate: 1.0,
+// });
+</script>
+<!--Add Sentry Browser before adding Blazor-->
+<script src="_framework/blazor.webassembly.js"></script>
+
+<!--Example errors from JavaScript-->
 <script type="text/javascript">
     function throwFromJavaScript(caller) {
         throw Error("Exceptional JavaScript function called by: " + caller);
@@ -38,14 +52,6 @@
             1000);
     }
 </script>
-<script src="_framework/blazor.webassembly.js"></script>
-<!--<script type="text/javascript">-->
-<!--    Sentry.init({-->
-<!--        dsn: 'https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537',-->
-<!--        debug: true,-->
-<!--    });-->
-
-<!--</script>-->
 </body>
 
 </html>

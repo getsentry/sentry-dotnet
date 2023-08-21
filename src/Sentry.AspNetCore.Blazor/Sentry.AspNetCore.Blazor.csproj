@@ -61,6 +61,18 @@
     <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.min.js" DestinationFolder="wwwroot" Retries="2">
       <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrors" />
     </DownloadFile>
+      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayPerformanceDebug" />
+      </DownloadFile>
+      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayDebug" />
+      </DownloadFile>
+      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsPerformanceDebug" />
+      </DownloadFile>
+      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsDebug" />
+      </DownloadFile>
   </Target>
 
 </Project>

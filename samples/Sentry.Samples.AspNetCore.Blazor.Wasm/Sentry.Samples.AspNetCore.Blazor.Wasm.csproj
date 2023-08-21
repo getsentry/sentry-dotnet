@@ -13,4 +13,12 @@
   </ItemGroup>
 
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\_content-test\README.md" />
+    <_ContentIncludedByDefault Remove="wwwroot\_content-test\Sentry.AspNetCore.Blazor\bundle.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\_content-test\Sentry.AspNetCore.Blazor\bundle.replay.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\_content-test\Sentry.AspNetCore.Blazor\bundle.tracing.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\_content-test\Sentry.AspNetCore.Blazor\bundle.tracing.replay.min.js" />
+  </ItemGroup>
+
 </Project>

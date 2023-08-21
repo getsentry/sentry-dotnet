@@ -3,7 +3,25 @@
     <script>
     console.log("SentryBlazor: Loading Sentry JavaScript...");
     </script>
-  <script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.min.js"></script>
+  @* <script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js"></script> *@
 
+    <script>
+    window.initSentry = (options) => {
+        console.log("Sentry obj: " + Sentry);
+        console.log("Sentry dsn: " + options.dsn);
+        console.log("Sentry debug: " + options.debug);
+        // window.Sentry = Sentry;
+        Sentry.init({
+          // dsn: "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537",
+          // debug: true,
+          // tracesSampleRate: 1.0,
+          // replaysSessionSampleRate: 0.1,
+          // replaysOnErrorSampleRate: 1.0,
+          integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
+          ...options
+        });
+    }
+    console.log("SentryBlazor: Loaded Sentry JavaScript...");
+    </script>
 </div>
 

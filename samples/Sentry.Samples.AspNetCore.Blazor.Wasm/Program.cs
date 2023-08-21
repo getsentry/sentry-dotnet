@@ -5,9 +5,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.UseSentry(o =>
 {
     o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-    o.Debug = true;
-    o.ReplaysSessionSampleRate = 1.0;
-    o.ReplaysOnErrorSampleRate = 1.0;
+    // o.Debug = true;
+    o.TracesSampleRate = 1.0;
 
 });
 builder.RootComponents.Add<App>("#app");

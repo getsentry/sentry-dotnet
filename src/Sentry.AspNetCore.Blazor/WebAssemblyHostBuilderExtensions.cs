@@ -24,9 +24,4 @@ public static class WebAssemblyHostBuilderExtensions
 
 public class SentryBlazorOptions : SentryLoggingOptions
 {
-    // https://docs.sentry.io/platforms/javascript/session-replay/
-    public double ReplaysOnErrorSampleRate { get; set; }
-    public double ReplaysSessionSampleRate { get; set; }
-    public bool MaskAllText { get; set; } = true;
-    public bool BlockAllMedia { get; set; } = true;
 }

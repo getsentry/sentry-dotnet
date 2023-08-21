@@ -1,4 +1,4 @@
-console.log("Running: SentryBlazor.razor.js");
+console.log("SentryBlazor: Running SentryBlazor.razor.js");
 
 window.sentryBlazor = {
   initSentryJavaScript: function (configure) {

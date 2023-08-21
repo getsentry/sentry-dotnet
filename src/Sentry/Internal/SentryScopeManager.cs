@@ -54,7 +54,7 @@ internal sealed class SentryScopeManager : IInternalScopeManager
     {
         if (IsGlobalMode)
         {
-            _options.LogWarning("Push scope called in global mode, returning.");
+            _options.LogDebug("Push scope called in global mode, returning.");
             return DisabledHub.Instance;
         }
 
