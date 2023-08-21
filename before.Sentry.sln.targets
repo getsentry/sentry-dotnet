@@ -1,5 +1,5 @@
 <Project InitialTargets="RestoreSubmodule">
-  <!-- If Ben.Demystifer is not found, restore git submodules -->
+  <!-- Always restore, to apply changes when we change branches. If no changes happened, this is pretty quick so no need to optimize by adding a Condition -->
   <Target Name="RestoreSubmodule"
     <Exec Command="git submodule update --init --recursive" />
   </Target>
