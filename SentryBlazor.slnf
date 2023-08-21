@@ -1,0 +1,15 @@
+{
+  "solution": {
+    "path": "Sentry.sln",
+    "projects": [
+      "samples\\Sentry.Samples.AspNetCore.Blazor.Server\\Sentry.Samples.AspNetCore.Blazor.Server.csproj",
+      "samples\\Sentry.Samples.AspNetCore.Blazor.Wasm\\Sentry.Samples.AspNetCore.Blazor.Wasm.csproj",
+      "src\\Sentry\\Sentry.csproj",
+      "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
+      "src\\Sentry.AspNetCore.Blazor\\Sentry.AspNetCore.Blazor.csproj",
+      "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
+      "test\\Sentry.Testing\\Sentry.Testing.csproj",
+      "test\\Sentry.Tests\\Sentry.Tests.csproj"
+    ]
+  }
+}
