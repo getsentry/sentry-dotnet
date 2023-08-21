@@ -10,6 +10,7 @@ public class ResponseTests
         {
             BodySize = 42,
             Cookies = "PHPSESSID=298zf09hf012fh2; csrftoken=u32t4o3tb3gg43; _gat=1;",
+            Data = "foo",
             StatusCode = 500
         };
         sut.Headers.Add("X-Test", "header");
@@ -20,6 +21,7 @@ public class ResponseTests
         // Assert
         clone.BodySize.Should().Be(sut.BodySize);
         clone.Cookies.Should().Be(sut.Cookies);
+        clone.Data.Should().Be(sut.Data);
         clone.StatusCode.Should().Be(sut.StatusCode);
         clone.InternalHeaders.Should().NotBeSameAs(sut.InternalHeaders);
         clone.Headers.Should().BeEquivalentTo(sut.Headers);
@@ -33,6 +35,7 @@ public class ResponseTests
         {
             BodySize = 42,
             Cookies = "PHPSESSID=298zf09hf012fh2; csrftoken=u32t4o3tb3gg43; _gat=1;",
+            Data = "foo",
             StatusCode = 500
         };
         expected.Headers.Add("X-Test", "header");

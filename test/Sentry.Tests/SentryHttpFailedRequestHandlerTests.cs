@@ -1,17 +1,17 @@
 namespace Sentry.Tests;
 
-public class SentryFailedRequestHandlerTests
+public class SentryHttpFailedRequestHandlerTests
 {
     private readonly IHub _hub;
 
-    public SentryFailedRequestHandlerTests()
+    public SentryHttpFailedRequestHandlerTests()
     {
         _hub = Substitute.For<IHub>();
     }
 
-    private SentryFailedRequestHandler GetSut(SentryOptions options)
+    private SentryHttpFailedRequestHandler GetSut(SentryOptions options)
     {
-        return new SentryFailedRequestHandler(_hub, options);
+        return new SentryHttpFailedRequestHandler(_hub, options);
     }
 
     private static HttpResponseMessage ForbiddenResponse()
@@ -182,7 +182,7 @@ public class SentryFailedRequestHandlerTests
             @event.Should().NotBeNull();
 
             // Ensure the mechanism is set
-            @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryFailedRequestHandler.MechanismType);
+            @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryHttpFailedRequestHandler.MechanismType);
 
             // Ensure the request properties are captured
             @event.Request.Method.Should().Be(HttpMethod.Post.ToString());

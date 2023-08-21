@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Features
+
+- Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.9.5 to v8.10.0 ([#2546](https://github.com/getsentry/sentry-dotnet/pull/2546), [#2550](https://github.com/getsentry/sentry-dotnet/pull/2550))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8100)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.9.5...8.10.0)
+- Bump gradle/gradle-build-action from 2.7.0 to 2.7.1 ([2564](https://github.com/getsentry/sentry-dotnet/pull/2564))
+  - [diff](https://github.com/gradle/gradle-build-action/compare/v2.7.0...v2.7.1)
+
+## 3.35.1
+
 ### Fixes
 
 - The SDK no longer creates transactions with their start date set to `Jan 01, 001` ([#2544](https://github.com/getsentry/sentry-dotnet/pull/2544))
@@ -22,6 +36,7 @@
 - Distributed tracing now works independently of the performance feature. This allows you to connect errors to other Sentry instrumented applications ([#2493](https://github.com/getsentry/sentry-dotnet/pull/2493))
 - Added Sampling Decision to Trace Envelope Header ([#2495](https://github.com/getsentry/sentry-dotnet/pull/2495))
 - Add MinimumEventLevel to Sentry.Log4Net and convert events below it to breadcrumbs ([#2505](https://github.com/getsentry/sentry-dotnet/pull/2505))
+- Support transaction finishing automatically with 'idle timeout' (#2452)
 
 ### Fixes
 
@@ -55,7 +70,6 @@
 - Added a MSBuild property `SentryUploadAndroidProguardMapping` to automatically upload the Proguard mapping file when targeting Android ([#2455](https://github.com/getsentry/sentry-dotnet/pull/2455))
 - Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 - Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
-- Support transaction finishing automatically with 'idle timeout' ([#2452](https://github.com/getsentry/sentry-dotnet/pull/2452))
 
 ### Fixes
 
