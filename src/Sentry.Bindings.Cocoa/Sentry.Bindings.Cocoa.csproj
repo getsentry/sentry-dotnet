@@ -54,12 +54,13 @@
   </Target>
 
   <!-- Generate bindings -->
-  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
-    Inputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha" Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
+  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerGenerateSentryCocoaBindings">
     <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
+    <!-- See https://github.com/getsentry/sentry-dotnet/pull/2558 -->
+    <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 $(MSBuildThisFileDirectory)" />
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
