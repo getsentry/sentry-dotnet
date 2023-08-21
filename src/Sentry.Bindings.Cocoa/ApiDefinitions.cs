@@ -560,10 +560,6 @@ interface SentryFrame : SentrySerializable
     [NullAllowed, Export ("instructionAddress")]
     string InstructionAddress { get; set; }
 
-    // @property (nonatomic) NSUInteger instruction;
-    [Export ("instruction")]
-    nuint Instruction { get; set; }
-
     // @property (copy, nonatomic) NSNumber * _Nullable lineNumber;
     [NullAllowed, Export ("lineNumber", ArgumentSemantic.Copy)]
     NSNumber LineNumber { get; set; }
@@ -875,9 +871,9 @@ interface SentryOptions
     [Export ("enableMetricKit")]
     bool EnableMetricKit { get; set; }
 
-    // @property (nonatomic) BOOL enableTimeToFullDisplayTracing;
-    [Export ("enableTimeToFullDisplayTracing")]
-    bool EnableTimeToFullDisplayTracing { get; set; }
+    // @property (nonatomic) BOOL enableTimeToFullDisplay;
+    [Export ("enableTimeToFullDisplay")]
+    bool EnableTimeToFullDisplay { get; set; }
 
     // @property (assign, nonatomic) BOOL swiftAsyncStacktraces;
     [Export ("swiftAsyncStacktraces")]
@@ -2298,7 +2294,7 @@ interface SentryEnvelope
     SentryEnvelopeItem[] Items { get; }
 }
 
-// @interface SentryScreenFrames : NSObject <NSCopying>
+// @interface SentryScreenFrames : NSObject
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
@@ -2396,17 +2392,6 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("getExtraContext")]
     NSDictionary ExtraContext { get; }
-
-    // +(uint64_t)startProfilingForTrace:(SentryId * _Nonnull)traceId;
-    [Static]
-    [Export ("startProfilingForTrace:")]
-    ulong StartProfilingForTrace (SentryId traceId);
-
-    // +(NSDictionary<NSString *,id> * _Nullable)collectProfileForTrace:(SentryId * _Nonnull)traceId since:(uint64_t)startSystemTime;
-    [Static]
-    [Export ("collectProfileForTrace:since:")]
-    [return: NullAllowed]
-    NSDictionary<NSString, NSObject> CollectProfileForTrace (SentryId traceId, ulong startSystemTime);
 
     // @property (copy, nonatomic, class) SentryOnAppStartMeasurementAvailable _Nullable onAppStartMeasurementAvailable;
     [Static]
