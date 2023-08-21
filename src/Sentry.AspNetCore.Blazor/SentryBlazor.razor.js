@@ -1,9 +1,12 @@
+console.log("Running: SentryBlazor.razor.js");
+
 window.sentryBlazor = {
   initSentryJavaScript: function (configure) {
     if (Sentry.init !== undefined) {
+      console.log("SentryBlazor: calling Sentry.init");
       Sentry.init(configure);
     } else {
-      console.log("Sentry.init is not available");
+      console.log("SentryBlazor: Sentry.init is not available");
     }
   }
 }
