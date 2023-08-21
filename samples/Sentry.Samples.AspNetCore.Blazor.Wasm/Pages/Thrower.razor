@@ -1,10 +1,14 @@
 ﻿@page "/thrower"
 @using Microsoft.Extensions.Logging
 @inject ILogger<Thrower> Logger
+@inject IJSRuntime Js;
 
 <h1>Throw Exception</h1>
 
 <button class="btn btn-primary" @onclick="Throw">Throw</button>
+
+<button class="btn btn-primary" @onclick="ThrowFromJavaScript">Throw From JavaScript</button>
+<button class="btn btn-primary" @onclick="ThrowOnSetTimeout">Throw from setTimeout in JavaScript</button>
 
 @if (SentrySdk.LastEventId != SentryId.Empty)
 {
@@ -22,5 +26,15 @@
     {
         public static void DoSomething() => Thrower();
         private static void Thrower() => throw null;
+    }
+
+    private async Task ThrowFromJavaScript()
+    {
+        await Js.InvokeAsync<string>("throwFromJavaScript", "from C#");
+    }
+
+    private async Task ThrowOnSetTimeout()
+    {
+        await Js.InvokeAsync<string>("throwOnSetTimeout", "from C#");
     }
 }

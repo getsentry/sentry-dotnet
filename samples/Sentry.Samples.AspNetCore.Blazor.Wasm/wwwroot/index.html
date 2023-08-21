@@ -16,6 +16,17 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+<script type="text/javascript">
+    function throwFromJavaScript(caller) {
+        throw Error("Exceptional JavaScript function called by: " + caller);
+    }
+    function throwOnSetTimeout(caller) {
+        setTimeout(() => {
+                throw Error("JavaScript error on setTimeout called by: " + caller);
+            },
+            1000);
+    }
+</script>
 <script src="_framework/blazor.webassembly.js"></script>
 </body>
 
