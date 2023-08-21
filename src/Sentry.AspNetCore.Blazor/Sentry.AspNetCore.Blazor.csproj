@@ -3,7 +3,6 @@
 <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-<!--    <UseBlazorWebAssembly>true</UseBlazorWebAssembly>-->
     <SentryJavaScriptVersion>7.64.0</SentryJavaScriptVersion>
 </PropertyGroup>
 
@@ -12,43 +11,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--    <ProjectReference Include="..\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />-->
-<!--    <ProjectReference Include="..\Sentry\Sentry.csproj" />-->
     <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
-
-<!--    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.10" />-->
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="_content\bundle.min.js">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="_content\bundle.replay.min.js">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="_content\bundle.tracing.min.js">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="_content\bundle.tracing.replay.min.js">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="SentryBlazor.razor.js">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 
     <!-- Download JS SDK from CDN: https://docs.sentry.io/platforms/javascript/install/loader/#cdn -->
-    <Target Name="DownloadSentryJavaScript" BeforeTargets="Build">
+  <Target Name="DownloadSentryJavaScript" BeforeTargets="Build">
     <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.replay.min.js" DestinationFolder="wwwroot" Retries="2">
       <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayPerformance" />
     </DownloadFile>
@@ -61,18 +33,18 @@
     <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.min.js" DestinationFolder="wwwroot" Retries="2">
       <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrors" />
     </DownloadFile>
-      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayPerformanceDebug" />
-      </DownloadFile>
-      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayDebug" />
-      </DownloadFile>
-      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsPerformanceDebug" />
-      </DownloadFile>
-      <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-        <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsDebug" />
-      </DownloadFile>
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayPerformanceDebug" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayDebug" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsPerformanceDebug" />
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.debug.min.js" DestinationFolder="wwwroot" Retries="2">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsDebug" />
+    </DownloadFile>
   </Target>
 
 </Project>
