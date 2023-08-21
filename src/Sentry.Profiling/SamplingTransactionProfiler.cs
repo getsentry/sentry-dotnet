@@ -106,12 +106,12 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             throw new InvalidOperationException("Profiler.CollectAsync() called before Finish()");
         }
 
-        // Wait for the last sample (<= _endTimeMs), or at most 10 seconds. The timeout shouldn't happen because
-        // TraceLog.realTimeQueue should dispatch events after ~2 seconds, but if it does, send what we have.
-        var completedTask = await Task.WhenAny(_completionSource.Task, Task.Delay(10_000, _cancellationToken)).ConfigureAwait(false);
+        // Wait for the last sample (<= _endTimeMs), or at most 1 second. The timeout shouldn't happen because
+        // TraceLog should dispatch events immediately. But if it does, send at least what we have already got.
+        var completedTask = await Task.WhenAny(_completionSource.Task, Task.Delay(1_000, _cancellationToken)).ConfigureAwait(false);
         if (!completedTask.Equals(_completionSource.Task))
         {
-            _options.LogWarning("CollectAsync timed out after 10ms. Were there any samples collected?");
+            _options.LogWarning("CollectAsync timed out after 1 second. Were there any samples collected?");
         }
 
         return CreateProfileInfo(transaction, _processor.Profile);
