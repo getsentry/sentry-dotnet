@@ -9,21 +9,14 @@ public static class WebAssemblyHostBuilderExtensions
 {
     public static WebAssemblyHostBuilder UseSentry(this WebAssemblyHostBuilder builder, Action<SentryBlazorOptions> configureOptions)
     {
-        var blazorOptions = new SentryBlazorOptions();
-
-        if (blazorOptions.ReplaysSessionSampleRate > 0)
-        {
-            // Add Session Replay
-        }
-        builder.Logging.AddSentry<SentryBlazorOptions>(loggingOptions =>
+        builder.Logging.AddSentry<SentryBlazorOptions>(blazorOptions =>
         {
             configureOptions(blazorOptions);
 
             // System.PlatformNotSupportedException: System.Diagnostics.Process is not supported on this platform.
-            loggingOptions.DetectStartupTime = StartupTimeDetectionMode.Fast;
+            blazorOptions.DetectStartupTime = StartupTimeDetectionMode.Fast;
             // Warning: No response compression supported by HttpClientHandler.
-            loggingOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
-
+            blazorOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
         });
         return builder;
     }
@@ -32,6 +25,8 @@ public static class WebAssemblyHostBuilderExtensions
 public class SentryBlazorOptions : SentryLoggingOptions
 {
     // https://docs.sentry.io/platforms/javascript/session-replay/
-    public int ReplaysSessionSampleRate { get; set; }
-    public int ReplaysOnErrorSampleRate { get; set; }
+    public double ReplaysOnErrorSampleRate { get; set; }
+    public double ReplaysSessionSampleRate { get; set; }
+    public bool MaskAllText { get; set; } = true;
+    public bool BlockAllMedia { get; set; } = true;
 }

@@ -52,6 +52,7 @@ public static class LoggingBuilderExtensions
         }
 
         builder.Services.AddSingleton<IConfigureOptions<TOptions>, SentryLoggingOptionsSetup>();
+        builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
 
         builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
 
