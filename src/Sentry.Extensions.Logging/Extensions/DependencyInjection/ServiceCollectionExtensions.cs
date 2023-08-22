@@ -32,6 +32,11 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<Func<IHub>>(c =>
         {
             var options = c.GetRequiredService<IOptions<TOptions>>().Value;
+            var observer = c.GetService<IScopeObserver>();
+            if (observer is not null)
+            {
+                options.ScopeObserver = observer;
+            }
             Console.WriteLine($"DSN: {options.Dsn}");
 
             if (options.InitializeSdk)

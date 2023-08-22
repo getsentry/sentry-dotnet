@@ -1,5 +1,7 @@
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Sentry;
+using Sentry.AspNetCore.Blazor;
 using Sentry.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace - Discoverability
@@ -9,6 +11,7 @@ public static class WebAssemblyHostBuilderExtensions
 {
     public static WebAssemblyHostBuilder UseSentry(this WebAssemblyHostBuilder builder, Action<SentryBlazorOptions> configureOptions)
     {
+        builder.Services.TryAddSingleton<IScopeObserver, JavaScriptScopeObserver>();
         builder.Logging.AddSentry<SentryBlazorOptions>(blazorOptions =>
         {
             configureOptions(blazorOptions);
