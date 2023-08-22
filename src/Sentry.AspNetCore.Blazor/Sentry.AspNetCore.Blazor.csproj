@@ -3,7 +3,6 @@
 <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <SentryJavaScriptVersion>7.64.0</SentryJavaScriptVersion>
 </PropertyGroup>
 
   <ItemGroup>
@@ -19,32 +18,32 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
   </ItemGroup>
 
-
-    <!-- Download JS SDK from CDN: https://docs.sentry.io/platforms/javascript/install/loader/#cdn -->
+  <!-- Download JS SDK from CDN: https://docs.sentry.io/platforms/javascript/install/loader/#cdn -->
+  <PropertyGroup>
+    <SentryJavaScriptVersion>7.64.0</SentryJavaScriptVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <SentryJavaScriptDownload Include="bundle.debug.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.debug.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.replay.debug.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.replay.debug.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.replay.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.replay.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.debug.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.debug.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.debug.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.debug.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.min.js"  />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.min.js.map"  />
+  </ItemGroup>
   <Target Name="DownloadSentryJavaScript" BeforeTargets="Build">
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.replay.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayPerformance" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.replay.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplay" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsPerformance" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrors" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayPerformanceDebug" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.replay.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsReplayDebug" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.tracing.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsPerformanceDebug" />
-    </DownloadFile>
-    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/bundle.debug.min.js" DestinationFolder="wwwroot" Retries="2">
-      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptErrorsDebug" />
+    <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/%(SentryJavaScriptDownload.Identity)"
+                  DestinationFolder="wwwroot" Condition="!Exists('wwwroot/%(Identity)')" Retries="3">
+      <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptDownloadedFile" />
     </DownloadFile>
   </Target>
 
