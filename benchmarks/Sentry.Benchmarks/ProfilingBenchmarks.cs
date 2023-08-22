@@ -1,12 +1,13 @@
 using System.Diagnostics.Tracing;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Diagnostics.NETCore.Client;
-using Microsoft.Diagnostics.Tracing.Parsers;
 using NSubstitute;
 using Sentry.Internal;
 using Sentry.Profiling;
 
 namespace Sentry.Benchmarks;
+
+extern alias BenchmarkDotNetTransientTraceEvent;
 
 public class ProfilingBenchmarks
 {
@@ -138,9 +139,9 @@ public class ProfilingBenchmarks
     {
         EventPipeProvider[] providers = provider switch
         {
-            "runtime" => new[] { new EventPipeProvider("Microsoft-Windows-DotNETRuntime", EventLevel.Informational, (long)ClrTraceEventParser.Keywords.Default) },
+            "runtime" => new[] { new EventPipeProvider("Microsoft-Windows-DotNETRuntime", EventLevel.Informational, (long)BenchmarkDotNetTransientTraceEvent::Microsoft.Diagnostics.Tracing.Parsers.ClrTraceEventParser.Keywords.Default) },
             "sample" => new[] { new EventPipeProvider("Microsoft-DotNETCore-SampleProfiler", EventLevel.Informational) },
-            "tpl" => new[] { new EventPipeProvider("System.Threading.Tasks.TplEventSource", EventLevel.Informational, (long)TplEtwProviderTraceEventParser.Keywords.Default) },
+            "tpl" => new[] { new EventPipeProvider("System.Threading.Tasks.TplEventSource", EventLevel.Informational, (long)BenchmarkDotNetTransientTraceEvent::Microsoft.Diagnostics.Tracing.Parsers.TplEtwProviderTraceEventParser.Keywords.Default) },
             "all" => SampleProfilerSession.Providers,
             _ => throw new InvalidEnumArgumentException(nameof(provider))
         };
