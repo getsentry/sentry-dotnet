@@ -7,6 +7,8 @@
     <ApplicationId>io.sentry.dotnet.samples.android</ApplicationId>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <!-- XA0119: Using fast deployment and a code shrinker at the same time is not recommended. Use fast deployment for Debug configurations and a code shrinker for Release configurations.-->
+    <NoWarn>$(NoWarn);XA0119</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +29,13 @@
   <PropertyGroup>
     <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
+    <!-- Use ProGuard (R8), and upload mapping to Sentry-->
+    <AndroidLinkTool Condition=" '$(AndroidLinkTool)' == '' ">r8</AndroidLinkTool>
+    <AndroidDexTool Condition=" '$(AndroidDexTool)' == '' ">d8</AndroidDexTool>
     <SentryUploadAndroidProguardMapping>true</SentryUploadAndroidProguardMapping>
+    <!-- Since we're doing this in Debug builds: https://github.com/xamarin/xamarin-android/issues/6612#issuecomment-1006125892-->
+    <PublishTrimmed>true</PublishTrimmed>
+    <AndroidLinkMode>full</AndroidLinkMode>
   </PropertyGroup>
 
 </Project>
