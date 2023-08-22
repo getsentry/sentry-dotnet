@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # this should point at the Android SDK root directory
 : ${ANDROID_HOME:=~/Library/Android/sdk}
@@ -15,7 +16,8 @@ find obj bin -mindepth 1 -delete
 
 # use the latest NDK installed, if not already specified
 : ${ANDROID_NDK:=$(dirname $(find $ANDROID_HOME/ndk/*/build -maxdepth 0 | sort -V | tail -1))}  
-echo "Using Android NDK at $ANDROID_NDK"
+[ -z "$ANDROID_NDK" ] || [ ! -d $ANDROID_NDK ] && echo "NDK not installed." && exit 1
+echo "Using Android NDK at '$ANDROID_NDK'"
 
 # compile for each ABI
 cd obj

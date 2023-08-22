@@ -1,16 +1,22 @@
 # Changelog
 
-## Unreleased
+## 3.36.0
 
 ### Features
 
 - Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
+
+###  Fixes
+
+- Android: Fix proguard/r8 mapping file upload ([#2574](https://github.com/getsentry/sentry-dotnet/pull/2574))
 
 ### Dependencies
 
 - Bump Cocoa SDK from v8.9.5 to v8.10.0 ([#2546](https://github.com/getsentry/sentry-dotnet/pull/2546), [#2550](https://github.com/getsentry/sentry-dotnet/pull/2550))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8100)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.9.5...8.10.0)
+- Bump gradle/gradle-build-action from 2.7.0 to 2.7.1 ([2564](https://github.com/getsentry/sentry-dotnet/pull/2564))
+  - [diff](https://github.com/gradle/gradle-build-action/compare/v2.7.0...v2.7.1)
 
 ## 3.35.1
 

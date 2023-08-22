@@ -49,6 +49,7 @@
   -->
   <attr path="/api/package[@name='io.sentry']/class[@name='SentryBaseEvent']/field[@name='throwable']" name="managedName">ThrowableValue</attr>
   <attr path="/api/package[@name='io.sentry']/class[@name='SpanContext']/field[@name='description']" name="managedName">DescriptionValue</attr>
+  <attr path="/api/package[@name='io.sentry']/class[@name='SpanContext']/field[@name='origin']" name="managedName">OriginValue</attr>
   <attr path="/api/package[@name='io.sentry']/class[@name='SpanContext']/field[@name='status']" name="managedName">StatusValue</attr>
   <attr path="/api/package[@name='io.sentry']/class[@name='SpanContext']/field[@name='tags']" name="managedName">TagsValue</attr>
 
