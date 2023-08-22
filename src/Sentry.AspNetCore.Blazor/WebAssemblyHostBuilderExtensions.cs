@@ -16,6 +16,7 @@ public static class WebAssemblyHostBuilderExtensions
         {
             configureOptions(blazorOptions);
 
+            blazorOptions.EnableScopeSync = true;
             // System.PlatformNotSupportedException: System.Diagnostics.Process is not supported on this platform.
             blazorOptions.DetectStartupTime = StartupTimeDetectionMode.Fast;
             // Warning: No response compression supported by HttpClientHandler.

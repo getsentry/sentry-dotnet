@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
+using Sentry.Extensibility;
 
 namespace Sentry.AspNetCore.Blazor;
 
@@ -13,9 +14,18 @@ public class JavaScriptScopeObserver : IScopeObserver
         _jsRuntime = jsRuntime;
         _options = options;
     }
-    public void AddBreadcrumb(Breadcrumb breadcrumb)
+
+    public async void AddBreadcrumb(Breadcrumb breadcrumb)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("Sentry.addBreadcrumb", breadcrumb)
+                .ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.DiagnosticLogger?.LogError("Failed to sync scope with JavaScript", e);
+        }
     }
 
     public void SetExtra(string key, object? value)
@@ -23,9 +33,17 @@ public class JavaScriptScopeObserver : IScopeObserver
         throw new NotImplementedException();
     }
 
-    public void SetTag(string key, string value)
+    public async void SetTag(string key, string value)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("Sentry.setTag", key, value)
+                .ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.DiagnosticLogger?.LogError("Failed to sync scope with JavaScript", e);
+        }
     }
 
     public void UnsetTag(string key)
@@ -33,8 +51,16 @@ public class JavaScriptScopeObserver : IScopeObserver
         throw new NotImplementedException();
     }
 
-    public void SetUser(User? user)
+    public async void SetUser(User? user)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("Sentry.setUser", user)
+                .ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.DiagnosticLogger?.LogError("Failed to sync scope with JavaScript", e);
         }
     }
+}

@@ -25,17 +25,17 @@
 </div>
 <script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js"></script>
 <script type="text/javascript">
-// Sentry.init({
-//     dsn: 'https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537',
-//     debug: true,
-//     integrations: [
-//         new Sentry.BrowserTracing(),
-//         new Sentry.Replay(),
-//     ],
-//     replaysSessionSampleRate: 1.0,
-//     replaysOnErrorSampleRate: 1.0,
-//     tracesSampleRate: 1.0,
-// });
+Sentry.init({
+    dsn: 'https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537',
+    debug: true,
+    integrations: [
+        new Sentry.BrowserTracing(),
+        new Sentry.Replay(),
+    ],
+    replaysSessionSampleRate: 1.0,
+    replaysOnErrorSampleRate: 1.0,
+    tracesSampleRate: 1.0,
+});
 </script>
 <!--Add Sentry Browser before adding Blazor-->
 <script src="_framework/blazor.webassembly.js"></script>
