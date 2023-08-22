@@ -3,20 +3,6 @@
 <script type="text/javascript" id="loadSentry"></script>
 <script type="text/javascript">
 console.log("SentryBlazor: Loading Sentry JavaScript...");
-if (typeof Sentry === 'undefined') {
-    console.log("Sentry Browser not installed");
-    try {
-        const s = document.getElementById('loadSentry');
-        console.log("Found script by id");
-        s.setAttribute("src", "_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js");
-        console.log("src set");
-        s.addEventListener("error", (e) => console.log("onerror: Failed to add Sentry Browser:" + e));
-    } catch (e) {
-        console.log("Failed to add Sentry Browser:" + e);
-    }
-} else {
-    console.log("Sentry Browser is already installed");
-}
 </script>
 
 @* <script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js"></script> *@
