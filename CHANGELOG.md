@@ -4,7 +4,8 @@
 
 ### Features
 
-- Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
+- graphql-client integration ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
+- graphql-dotnet server integration ([#2572](https://github.com/getsentry/sentry-dotnet/pull/2572))
 
 ### Dependencies
 
