@@ -97,7 +97,9 @@ public class SamplingTransactionProfilerTests
         profileToVerify.Stacks.Add(profile.Stacks[0]);
         for (var i = 0; i < profileToVerify.Stacks[0].Count; i++)
         {
-            profileToVerify.Frames.Add(profile.Frames[profileToVerify.Stacks[0][i]]);
+            var frame = profile.Frames[profileToVerify.Stacks[0][i]];
+            frame.Module = frame.Module.Replace("System.Private.CoreLib.il", "System.Private.CoreLib");
+            profileToVerify.Frames.Add(frame);
         }
         var json = profileToVerify.ToJsonString(_testOutputLogger);
         return VerifyJson(json).UniqueForRuntimeAndVersion();
