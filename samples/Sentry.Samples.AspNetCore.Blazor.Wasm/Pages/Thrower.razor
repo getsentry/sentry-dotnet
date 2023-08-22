@@ -1,10 +1,46 @@
 ﻿@page "/thrower"
+@using Microsoft.Extensions.Logging
+@inject ILogger<Thrower> Logger
+@inject IJSRuntime Js;
+
+<h1>Throw Exception</h1>
+
+<button class="btn btn-primary" @onclick="Throw">Throw</button>
+
+<button class="btn btn-primary" @onclick="ThrowFromJavaScript">Throw From JavaScript</button>
+<button class="btn btn-primary" @onclick="ThrowOnSetTimeout">Throw from setTimeout in JavaScript</button>
 
 <button class="btn btn-primary" @onclick="SetUser">Set User</button>
 <button class="btn btn-primary" @onclick="SetTag">Set Tag</button>
 
+
+@if (SentrySdk.LastEventId != SentryId.Empty)
+{
+<p>Event Id: @SentrySdk.LastEventId</p>
+}
+
 @code {
-    private void SetTag() => SentrySdk.ConfigureScope(s => s.SetTag("key-from-csharp", "value-from-csharp"));
+    private void Throw()
+    {
+        Logger.LogInformation("Doing something ... ");
+        Stuff.DoSomething();
+    }
+
+    private static class Stuff
+    {
+        public static void DoSomething() => Thrower();
+        private static void Thrower() => throw null;
+    }
+
+    private async Task ThrowFromJavaScript()
+    {
+        await Js.InvokeAsync<string>("throwFromJavaScript", "from C#");
+    }
+
+    private async Task ThrowOnSetTimeout()
+    {
+        await Js.InvokeAsync<string>("throwOnSetTimeout", "from C#");
+    }
 
     private void SetUser()
     {
@@ -16,5 +52,10 @@
                 {"key", "value"}
             }
         });
+    }
+
+    private void SetTag()
+    {
+        SentrySdk.ConfigureScope(s => s.SetTag("key-from-csharp", "value-from-csharp"));
     }
 }
