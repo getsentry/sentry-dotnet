@@ -6,9 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>BlazorApp1</title>
     <base href="/" />
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
+
 <div id="app">Loading...</div>
 
 <div id="blazor-error-ui">
@@ -16,7 +23,36 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+<script src="_content/Sentry.AspNetCore.Blazor/bundle.tracing.replay.debug.min.js"></script>
+<script type="text/javascript">
+Sentry.init({
+    dsn: 'https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537',
+    debug: true,
+    integrations: [
+        new Sentry.BrowserTracing(),
+        new Sentry.Replay(),
+    ],
+    replaysSessionSampleRate: 1.0,
+    replaysOnErrorSampleRate: 1.0,
+    tracesSampleRate: 1.0,
+});
+</script>
+<!--Add Sentry Browser before adding Blazor-->
 <script src="_framework/blazor.webassembly.js"></script>
+
+<!--Example errors from JavaScript-->
+<script type="text/javascript">
+    function throwFromJavaScript(caller) {
+        throw Error("Exceptional JavaScript function called by: " + caller);
+    }
+    function throwOnSetTimeout(caller) {
+        setTimeout(() => {
+                throw Error("JavaScript error on setTimeout called by: " + caller);
+            },
+            1000);
+    }
+</script>
+<button type="button" onclick="throwFromJavaScript('JavaScript')">JavaScript Error without any C# involved</button>
 </body>
 
 </html>

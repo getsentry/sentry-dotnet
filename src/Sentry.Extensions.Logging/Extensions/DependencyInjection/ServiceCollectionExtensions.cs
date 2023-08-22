@@ -19,7 +19,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSentry<TOptions>(this IServiceCollection services)
         where TOptions : SentryLoggingOptions, new()
     {
+        services.TryAddSingleton<TOptions>(
+            c => c.GetRequiredService<IOptions<TOptions>>().Value);
         services.TryAddSingleton<SentryOptions>(
+            c => c.GetRequiredService<IOptions<TOptions>>().Value);
+        services.TryAddSingleton<SentryLoggingOptions>(
             c => c.GetRequiredService<IOptions<TOptions>>().Value);
 
         services.TryAddTransient<ISentryClient>(c => c.GetRequiredService<IHub>());
@@ -28,6 +32,12 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<Func<IHub>>(c =>
         {
             var options = c.GetRequiredService<IOptions<TOptions>>().Value;
+            var observer = c.GetService<IScopeObserver>();
+            if (observer is not null)
+            {
+                options.ScopeObserver = observer;
+            }
+            Console.WriteLine($"DSN: {options.Dsn}");
 
             if (options.InitializeSdk)
             {
