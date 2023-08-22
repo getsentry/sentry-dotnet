@@ -3,6 +3,7 @@ using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using GraphQL.MicrosoftDI;
+using GraphQL.Telemetry;
 using GraphQL.Types;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -26,11 +27,11 @@ public static class Program
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracerProviderBuilder =>
                 tracerProviderBuilder
-                    .AddSource(Telemetry.ActivitySource.Name)
-                    .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
+                    .AddSource(GraphQLTelemetryProvider.SourceName)  // <-- Ensure telemetry is gathered from graphql
+                    .ConfigureResource(resource => resource.AddService("Sentry.Samples.GraphQL.Server"))
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
+                    .AddSentry() // <-- Ensure telemetry is sent to Sentry
                 );
 
         builder.WebHost.UseSentry(o =>
