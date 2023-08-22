@@ -1,7 +1,6 @@
 <Project InitialTargets="RestoreSubmodule">
-  <!-- Restore git submodules if needed-->
-  <Target Name="RestoreSubmodule" Condition="!Exists('modules\Ben.Demystifier\Ben.Demystifier.sln') or !Exists('modules\perfview\PerfView.sln')">
-    <Message Importance="High" Text="Restoring git submodules." />
+  <!-- Always restore, to apply changes when we change branches. If no changes happened, this is pretty quick so no need to optimize by adding a Condition -->
+  <Target Name="RestoreSubmodule">
     <Exec Command="git submodule update --init --recursive" />
   </Target>
 </Project>

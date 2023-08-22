@@ -225,8 +225,9 @@ public class SentryOptions
     /// </value>
     public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
+    private float? _sampleRate;
     /// <summary>
-    /// The rate to sample events
+    /// The rate to sample error and crash events.
     /// </summary>
     /// <remarks>
     /// Can be anything between 0.01 (1%) and 1.0 (99.9%) or null (default), to disable it.
@@ -235,10 +236,6 @@ public class SentryOptions
     /// 0.1 = 10% of events are sent
     /// </example>
     /// <see href="https://develop.sentry.dev/sdk/features/#event-sampling"/>
-    private float? _sampleRate;
-    /// <summary>
-    /// The optional sample rate.
-    /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public float? SampleRate
     {

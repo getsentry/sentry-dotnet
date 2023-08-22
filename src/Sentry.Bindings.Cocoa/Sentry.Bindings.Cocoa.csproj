@@ -54,7 +54,8 @@
   </Target>
 
   <!-- Generate bindings -->
-  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+          Inputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha" Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerGenerateSentryCocoaBindings">
