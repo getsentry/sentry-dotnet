@@ -6,6 +6,10 @@
 
 - Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
 
+###  Fixes
+
+- Android: Fix proguard/r8 mapping file upload ([#2574](https://github.com/getsentry/sentry-dotnet/pull/2574))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.9.5 to v8.10.0 ([#2546](https://github.com/getsentry/sentry-dotnet/pull/2546), [#2550](https://github.com/getsentry/sentry-dotnet/pull/2550))
