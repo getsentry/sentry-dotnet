@@ -37,7 +37,6 @@ public static class ServiceCollectionExtensions
             {
                 options.ScopeObserver = observer;
             }
-            Console.WriteLine($"DSN: {options.Dsn}");
 
             if (options.InitializeSdk)
             {
