@@ -15,6 +15,8 @@ groupConfigs:
   - windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
+  - testUtils:
+    - "**/*TestUtils*.csproj"
 
 filterConfigs:
 
@@ -26,6 +28,7 @@ filterConfigs:
       groups:
         - "macOnly"
         - "windowsOnly"
+        - "testUtils"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -39,5 +42,6 @@ filterConfigs:
     exclude:
       groups:
         - "macOnly"
+        - "testUtils"
       patterns:
         - "**/*SourceGen.csproj"
