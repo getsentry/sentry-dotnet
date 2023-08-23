@@ -1,41 +1,59 @@
 using System.Diagnostics.Tracing;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Diagnostics.NETCore.Client;
-using Microsoft.Diagnostics.Tracing.Parsers;
 using NSubstitute;
 using Sentry.Internal;
 using Sentry.Profiling;
 
 namespace Sentry.Benchmarks;
 
+extern alias BenchmarkDotNetTransientTraceEvent;
+
 public class ProfilingBenchmarks
 {
     private IHub _hub = Substitute.For<IHub>();
-    private ITransactionProfilerFactory _factory = new SamplingTransactionProfilerFactory(Path.GetTempPath(), new());
+    private SamplingTransactionProfilerFactory _factory;
+    private ITransactionProfiler _profiler;
+
+    [GlobalSetup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
+    public void StartProfiler()
+    {
+        _factory = SamplingTransactionProfilerFactory.Create(new());
+    }
+
+    [GlobalCleanup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
+    public void StopProfiler()
+    {
+        _profiler?.Finish();
+        _profiler?.CollectAsync(new Transaction("", "")).Wait();
+        _profiler = null;
+        _factory.Dispose();
+        _factory = null;
+    }
 
     #region full transaction profiling
-    public IEnumerable<object[]> ProfilerArguments()
+    public IEnumerable<object[]> TransactionBenchmarkArguments()
     {
         foreach (var runtimeMs in new[] { 25, 100, 1000, 10000 })
         {
-            foreach (var processing in new[] { true, false })
+            foreach (var collect in new[] { true, false })
             {
-                yield return new object[] { runtimeMs, processing };
+                yield return new object[] { runtimeMs, collect };
             }
         }
     }
 
     // Run a profiled transaction. Profiler starts and stops for each transaction separately.
     [Benchmark]
-    [ArgumentsSource(nameof(ProfilerArguments))]
-    public long Transaction(int runtimeMs, bool processing)
+    [ArgumentsSource(nameof(TransactionBenchmarkArguments))]
+    public long Transaction(int runtimeMs, bool collect)
     {
         var tt = new TransactionTracer(_hub, "test", "");
         tt.TransactionProfiler = _factory.Start(tt, CancellationToken.None);
         var result = RunForMs(runtimeMs);
-        tt.TransactionProfiler?.Finish();
+        tt.TransactionProfiler.Finish();
         var transaction = new Transaction(tt);
-        if (processing)
+        if (collect)
         {
             var collectTask = tt.TransactionProfiler.CollectAsync(transaction);
             collectTask.Wait();
@@ -97,11 +115,7 @@ public class ProfilingBenchmarks
     [Benchmark]
     public void DiagnosticsSessionStartStop()
     {
-        var session = DiagnosticsClientNew().StartEventPipeSession(
-            SampleProfilerSession.Providers,
-            SampleProfilerSession.RequestRundown,
-            SampleProfilerSession.CircularBufferMB
-        );
+        var session = DiagnosticsClientNew().StartEventPipeSession(SampleProfilerSession.Providers, true, SampleProfilerSession.CircularBufferMB);
         session.EventStream.Dispose();
         session.Dispose();
     }
@@ -125,9 +139,9 @@ public class ProfilingBenchmarks
     {
         EventPipeProvider[] providers = provider switch
         {
-            "runtime" => new[] { new EventPipeProvider("Microsoft-Windows-DotNETRuntime", EventLevel.Informational, (long)ClrTraceEventParser.Keywords.Default) },
+            "runtime" => new[] { new EventPipeProvider("Microsoft-Windows-DotNETRuntime", EventLevel.Informational, (long)BenchmarkDotNetTransientTraceEvent::Microsoft.Diagnostics.Tracing.Parsers.ClrTraceEventParser.Keywords.Default) },
             "sample" => new[] { new EventPipeProvider("Microsoft-DotNETCore-SampleProfiler", EventLevel.Informational) },
-            "tpl" => new[] { new EventPipeProvider("System.Threading.Tasks.TplEventSource", EventLevel.Informational, (long)TplEtwProviderTraceEventParser.Keywords.Default) },
+            "tpl" => new[] { new EventPipeProvider("System.Threading.Tasks.TplEventSource", EventLevel.Informational, (long)BenchmarkDotNetTransientTraceEvent::Microsoft.Diagnostics.Tracing.Parsers.TplEtwProviderTraceEventParser.Keywords.Default) },
             "all" => SampleProfilerSession.Providers,
             _ => throw new InvalidEnumArgumentException(nameof(provider))
         };
@@ -139,19 +153,10 @@ public class ProfilingBenchmarks
         session.Dispose();
     }
 
-    // Same as DiagnosticsSessionStartCopyStop(rundown: true, provider: 'all')
-    [Benchmark]
-    public void SampleProfilerSessionStartStopFinishWait()
-    {
-        var session = SampleProfilerSession.StartNew(CancellationToken.None);
-        session.Stop();
-        session.FinishAsync().Wait();
-    }
-
     [Benchmark]
     public void SampleProfilerSessionStartStop()
     {
-        var session = SampleProfilerSession.StartNew(CancellationToken.None);
+        using var session = SampleProfilerSession.StartNew();
         session.Stop();
     }
     #endregion
@@ -163,30 +168,15 @@ public class ProfilingBenchmarks
     [ArgumentsSource(nameof(OverheadRunArguments))]
     public long DoHardWork(int n)
     {
-        return ProfilingBenchmarks.FindPrimeNumber(n);
+        return FindPrimeNumber(n);
     }
 
     [BenchmarkCategory("overhead"), Benchmark]
     [ArgumentsSource(nameof(OverheadRunArguments))]
     public long DoHardWorkWhileProfiling(int n)
     {
-        return ProfilingBenchmarks.FindPrimeNumber(n);
-    }
-
-    private ITransactionProfiler _profiler;
-
-    [GlobalSetup(Target = nameof(DoHardWorkWhileProfiling))]
-    public void StartProfiler()
-    {
-        _profiler = _factory.Start(new TransactionTracer(_hub, "", ""), CancellationToken.None);
-    }
-
-    [GlobalCleanup(Target = nameof(DoHardWorkWhileProfiling))]
-    public void StopProfiler()
-    {
-        _profiler?.Finish();
-        _profiler?.CollectAsync(new Transaction("", "")).Wait();
-        _profiler = null;
+        _profiler ??= _factory.Start(new TransactionTracer(_hub, "", ""), CancellationToken.None);
+        return FindPrimeNumber(n);
     }
     #endregion
 }
