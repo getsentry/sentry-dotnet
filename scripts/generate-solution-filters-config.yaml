@@ -17,4 +17,5 @@ filterConfigs:
       - "**/*Ios.csproj"
       - "**/*Cocoa*.csproj"
       - "**/*MacCatalyst.csproj"
+      - "**/*SourceGen.csproj"
       - "**/*.AspNet.csproj"

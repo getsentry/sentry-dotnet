@@ -44,7 +44,6 @@
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\AndroidTestApp\\AndroidTestApp.csproj",
-      "test\\MauiTestUtils\\DeviceTests.Runners.SourceGen\\TestUtils.DeviceTests.Runners.SourceGen.csproj",
       "test\\MauiTestUtils\\DeviceTests.Runners\\TestUtils.DeviceTests.Runners.csproj",
       "test\\MauiTestUtils\\DeviceTests\\TestUtils.DeviceTests.csproj",
       "test\\Sentry.Android.AssemblyReader.Tests\\Sentry.Android.AssemblyReader.Tests.csproj",
