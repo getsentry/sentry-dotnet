@@ -4,55 +4,69 @@ param(
 
 import-module powershell-yaml
 
-$separator = [IO.Path]::DirectorySeparatorChar
-
-# Get the script directory
 $scriptDir = $PSScriptRoot
+$separator = [IO.Path]::DirectorySeparatorChar.ToString()
 $repoRoot = Join-Path $scriptDir ('..' + $separator) -Resolve
 
-# Configuration
+# Load configuration
 $configPath = Join-Path $scriptDir $ConfigFile
-$config = Get-Content $configPath | ConvertFrom-Yaml
+Write-Debug "Loading configuration file $configPath"
+if (-not (Test-Path $configPath)) {
+    Write-Error "Config file '$configPath' does not exist."
+    exit 1
+}
+try {
+    $config = Get-Content $configPath | ConvertFrom-Yaml
+}
+catch {
+    Write-Error "Error parsing config file '$configPath': $_"
+    exit 1
+}
 
 # Get list of all projects in solution
-$projectPaths = Get-ChildItem -Path $repoRoot -Recurse -Filter *.csproj | Select-Object -ExpandProperty FullName
+Write-Debug "Searching the repository for projects..."
+$projectPaths = Get-ChildItem -Path $repoRoot -Recurse -Filter *.csproj |
+        Select-Object -ExpandProperty FullName |
+        ForEach-Object { $_ -replace $repoRoot, '' }
+Write-Debug "Found $($projectPaths.Count) projects"
 
-# Strip repo root from projects
-$projectPaths = $projectPaths | ForEach-Object {
-    $_.Replace($repoRoot, '')
-  }
-
-# Loop through each filter config
+# Generate a solution filter for each filter config
 foreach($filter in $config.filterConfigs){
+    Write-Debug "Processing filter $($filter.outputPath)"
 
     $includedProjects = @()
 
     # Add include groups
     foreach($group in $filter.include.groups){
-        foreach($include in $config.groupConfigs.$group){
+      Write-Debug "Include $group"
+      foreach($include in $config.groupConfigs.$group){
             $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
         }
     }
 
-    # Add explicit include
+    # Add ad-hoc includes
     foreach($include in $filter.include.patterns){
-        $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
+      Write-Debug "Include $include"
+      $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
     }
 
    # Remove exclude groups
    foreach($group in $filter.exclude.groups){
-      foreach($exclude in $config.groupConfigs.$group){
+    Write-Debug "Exclude $group"
+    foreach($exclude in $config.groupConfigs.$group){
         $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
       }
    }
 
-    # Remove specific exclude
+    # Remove ad-hoc excludes
     foreach($exclude in $filter.exclude.patterns){
-        $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
+      Write-Debug "Exclude $exclude"
+      $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
     }
 
-    # Remove duplicates
-    $includedProjects = $includedProjects | Select-Object -Unique
+    # Remove duplicates and sort
+    $includedProjects = $includedProjects | Select-Object -Unique | Sort-Object
+    Write-Debug "Writing filter matching $($includedProjects.Count) projects"
 
     # Start filter file
     $content = "{
@@ -62,9 +76,9 @@ foreach($filter in $config.filterConfigs){
 
     # Add all the projects we want to include
     $firstProject = $true;
-    foreach($project in $includedProjects | Sort-Object) {
+    foreach($project in $includedProjects) {
         # Escape path separators for Windows-style
-        $escapedProject = $project.ToString().Replace($separator.ToString(), '\\')
+        $escapedProject = $project.Replace($separator, '\\')
         $line = "`n      ""$escapedProject"""
         if (!$firstProject) {
             $line = "," + $line
@@ -84,4 +98,5 @@ foreach($filter in $config.filterConfigs){
   # Output filter file
   $outputPath = Join-Path $repoRoot $filter.outputPath
   $content | Set-Content $outputPath
+  Write-Debug "Created $outputPath"
 }
