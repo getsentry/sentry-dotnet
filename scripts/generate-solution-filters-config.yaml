@@ -18,18 +18,23 @@ groupConfigs:
 
 filterConfigs:
 
-  # Core filter for CI builds on Linux
   - outputPath: Sentry-CI-Build-Linux.slnf
-
-    # Include all projects
     include:
       groups:
         - "allProjects"
-
-    # Exclude iOS/MacCatalyst and .NET Framework projects
     exclude:
       groups:
         - "macOnly"
         - "windowsOnly"
+      patterns:
+        - "**/*SourceGen.csproj"
+
+  - outputPath: Sentry-CI-Build-Windows.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "macOnly"
       patterns:
         - "**/*SourceGen.csproj"
