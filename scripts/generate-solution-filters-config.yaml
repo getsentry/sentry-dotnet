@@ -44,5 +44,7 @@ filterConfigs:
         - "macOnly"
         - "testUtils"
       patterns:
+        - "**/*AndroidTestApp.csproj"
+        - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
         - "**/*SourceGen.csproj"
