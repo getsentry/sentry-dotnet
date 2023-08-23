@@ -1,0 +1,21 @@
+{
+    "solution": "Sentry.Full.sln",
+    "filterConfigs": [
+      {
+        "outputPath": "MyProjects.slnf",
+        "includes": [
+          "src/**/*.csproj" 
+        ],
+        "excludes": [
+          "src/Tests/**/*.csproj"
+        ]
+      },
+      {
+        "outputPath": "MyTestProjects.slnf",
+        "includes": [
+          "test/**/*.csproj"
+        ]
+      }
+    ]
+  }
+  
