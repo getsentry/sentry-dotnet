@@ -1,0 +1,20 @@
+# Sentry filter configuration
+
+solution: Sentry.Full.sln
+
+filterConfigs:
+
+  # Core filter for CI builds on Linux
+  - outputPath: Sentry-CI-Build-Linux.slnf
+
+    # Include all projects
+    includes:
+      - "**/*.csproj"
+
+    # Exclude native mobile and some ASP.NET projects
+    excludes:
+      - modules/**/*.csproj
+      - "**/*Ios.csproj"
+      - "**/*Cocoa*.csproj"
+      - "**/*MacCatalyst.csproj"
+      - "**/*Sentry.AspNet.csproj"

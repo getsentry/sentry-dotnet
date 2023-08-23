@@ -1,5 +1,7 @@
+import-module powershell-yaml
+
 param(
-    [string]$ConfigFile = "generate-solution-filters-config.json"
+    [string]$ConfigFile = "generate-solution-filters-config.yaml"
 )
 
 $separator = [IO.Path]::DirectorySeparatorChar
@@ -10,7 +12,7 @@ $repoRoot = Join-Path $scriptDir ('..' + $separator) -Resolve
 
 # Configuration
 $configPath = Join-Path $scriptDir $ConfigFile
-$config = Get-Content $configPath | ConvertFrom-Json
+$config = Get-Content $configPath | ConvertFrom-Yaml
 
 # Get list of all projects in solution
 $projectPaths = Get-ChildItem -Path $repoRoot -Recurse -Filter *.csproj | Select-Object -ExpandProperty FullName
@@ -50,7 +52,7 @@ foreach($filter in $config.filterConfigs){
         $escapedProject = $project.ToString().Replace($separator.ToString(), '\\')
         $line = "`n      ""$escapedProject"""
         if (!$firstProject) {
-            $line = "," + $line 
+            $line = "," + $line
         }
         $firstProject = $false;
         $content += $line
