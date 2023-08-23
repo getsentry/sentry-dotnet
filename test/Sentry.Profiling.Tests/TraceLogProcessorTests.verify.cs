@@ -1,5 +1,9 @@
+using System.Diagnostics.Tracing;
+using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
+using Microsoft.Diagnostics.Tracing.EventPipe;
+using Microsoft.Diagnostics.Tracing.Parsers;
 
 namespace Sentry.Profiling.Tests;
 
@@ -32,6 +36,17 @@ public class TraceLogProcessorTests
     //     var json = profile.ToJsonString(_testOutputLogger);
     // }
 
+    private SampleProfile BuilProfile(TraceLogEventSource eventSource)
+    {
+        var builder = new SampleProfileBuilder(new() { DiagnosticLogger = _testOutputLogger }, eventSource.TraceLog);
+        new SampleProfilerTraceEventParser(eventSource).ThreadSample += delegate (ClrThreadSampleTraceData data)
+                {
+                    builder.AddSample(data, data.TimeStampRelativeMSec);
+                };
+        eventSource.Process();
+        return builder.Profile;
+    }
+
     private SampleProfile GetProfile()
     {
         var etlxFilePath = Path.Combine(_resourcesPath, "sample.etlx");
@@ -40,7 +55,6 @@ public class TraceLogProcessorTests
         {
             var etlFilePath = Path.ChangeExtension(etlxFilePath, "nettrace");
             var source = new EventPipeEventSource(etlFilePath);
-            new Downsampler().AttachTo(source);
             typeof(TraceLog)
             .GetMethod(
                 "CreateFromEventPipeEventSources",
@@ -49,17 +63,16 @@ public class TraceLogProcessorTests
             .Invoke(null, new object[] { source, etlxFilePath, new TraceLogOptions() { ContinueOnError = true } });
         }
 
-        using var eventLog = new TraceLog(etlxFilePath);
-        var processor = new TraceLogProcessor(new(), eventLog);
-        return processor.Process(CancellationToken.None);
+        using var traceLog = new TraceLog(etlxFilePath);
+        using var eventSource = traceLog.Events.GetSource();
+        return BuilProfile(eventSource);
     }
 
     [Fact]
     public Task Profile_Serialization_Works()
     {
-        var profile = GetProfile();
-        var json = profile.ToJsonString(_testOutputLogger);
-        return VerifyJson(json);
+        var json = GetProfile().ToJsonString(_testOutputLogger);
+        return VerifyJson(json).DisableRequireUniquePrefix();
     }
 
     [Fact]

@@ -16,4 +16,12 @@
     <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
   </ItemGroup>
 
+  <!-- BenchmarkDotNet depends on Microsoft.Diagnostics.Tracing.TraceEvent which includes types we're vendoring in Sentry through the perview submodule.-->
+  <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'Microsoft.Diagnostics.Tracing.TraceEvent'">
+        <Aliases>BenchmarkDotNetTransientTraceEvent</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
 </Project>

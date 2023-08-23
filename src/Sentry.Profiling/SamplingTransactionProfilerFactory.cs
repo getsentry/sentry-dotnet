@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry.Profiling;
 
-internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
+internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionProfilerFactory
 {
     // We only allow a single profile so let's keep track of the current status.
     internal int _inProgress = FALSE;
@@ -14,14 +14,25 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;
 
-    private readonly string _tempDirectoryPath;
-
     private readonly SentryOptions _options;
+    private SampleProfilerSession _session;
 
-    public SamplingTransactionProfilerFactory(string tempDirectoryPath, SentryOptions options)
+    public static SamplingTransactionProfilerFactory Create(SentryOptions options)
     {
-        _tempDirectoryPath = tempDirectoryPath;
+        var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+        return new SamplingTransactionProfilerFactory(options, session);
+    }
+
+    public static async Task<SamplingTransactionProfilerFactory> CreateAsync(SentryOptions options)
+    {
+        var session = await Task.Run(() => SampleProfilerSession.StartNew(options.DiagnosticLogger)).ConfigureAwait(false);
+        return new SamplingTransactionProfilerFactory(options, session);
+    }
+
+    private SamplingTransactionProfilerFactory(SentryOptions options, SampleProfilerSession session)
+    {
         _options = options;
+        _session = session;
     }
 
     /// <inheritdoc />
@@ -30,22 +41,25 @@ internal class SamplingTransactionProfilerFactory : ITransactionProfilerFactory
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
-            _options.LogDebug("Starting a sampling profiler session.");
+            _options.LogDebug("Starting a sampling profiler.");
             try
             {
-                var profiler = new SamplingTransactionProfiler(_tempDirectoryPath, _options, cancellationToken)
+                return new SamplingTransactionProfiler(_options, _session, TIME_LIMIT_MS, cancellationToken)
                 {
                     OnFinish = () => _inProgress = FALSE
                 };
-                profiler.Start(TIME_LIMIT_MS);
-                return profiler;
             }
             catch (Exception e)
             {
-                _options.LogWarning("Failed to start a profiler session.", e);
+                _options.LogError("Failed to start a profiler session.", e);
                 _inProgress = FALSE;
             }
         }
         return null;
+    }
+
+    public void Dispose()
+    {
+        _session.Dispose();
     }
 }

@@ -2,8 +2,12 @@
   "solution": {
     "path": "Sentry.sln",
     "projects": [
+      "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
+      "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
+      "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry\\Sentry.csproj",
+      "test\\Sentry.Profiling.Tests\\Sentry.Profiling.Tests.csproj",
       "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
       "test\\Sentry.Tests\\Sentry.Tests.csproj"

@@ -6,46 +6,29 @@ using Microsoft.Diagnostics.Tracing.EventPipe;
 /// </summary>
 internal class Downsampler
 {
-    public double SamplingRateMs { get; set; } = (double)1_000 / 101; // 101 Hz
-    private double NextSampleCounter = 0;
-    private double NextSampleLow = 0;
-    private double NextSampleHigh = -1;
+    private static double _samplingRateMs = (double)1_000 / 101; // 101 Hz
+    private double _samplingGapMs = _samplingRateMs * 0.9;
 
-    public void AttachTo(EventPipeEventSource source)
+    // Maps from ThreadIndex to the last sample timestamp for that thread.
+    private GrowableArray<double> _prevThreadSamples = new(10);
+
+    public void NewThreadAdded(int threadIndex)
     {
-        source.AddDispatchHook(DispatchHook);
+        if (threadIndex >= _prevThreadSamples.Count)
+        {
+            _prevThreadSamples.Count = threadIndex + 1;
+            _prevThreadSamples[threadIndex] = Double.MinValue;
+        }
     }
 
-    // Downsamples to the configured SamplingRateMs by keeping a shifting window of where the timestamp must fall.
-    // Alternatively, we could keep a map of the previous sample for each thread and check that instead but that would
-    // be a bit less performant (albeit more precise).
-    private void DispatchHook(TraceEvent traceEvent, Action<TraceEvent> realDispatch)
+    public bool ShouldSample(int threadIndex, double timestampMs)
     {
-        if (traceEvent.ProviderGuid.Equals(SampleProfilerTraceEventParser.ProviderGuid))
+        Debug.Assert(threadIndex < _prevThreadSamples.Count, "ThreadIndex too large - you must call NewThreadAdded() if a new thread is added.");
+        if (_prevThreadSamples[threadIndex] + _samplingRateMs <= timestampMs)
         {
-            var timestampMs = traceEvent.TimeStampRelativeMSec;
-            // Don't sample until the NextSampleLow is reached.
-            if (NextSampleLow >= timestampMs)
-            {
-                NextSampleHigh = -1;
-                return; // skip the event
-            }
-
-            // This is the first sample after reaching the lower bound - configure the Upper bound to some reasonable value.
-            if (NextSampleHigh < 0)
-            {
-                NextSampleHigh = timestampMs + 0.9;
-            }
-            // After the upper bound is breached, advance the lower bound to the next window we care about.
-            else if (NextSampleHigh < timestampMs)
-            {
-                NextSampleCounter += 1;
-                NextSampleLow = SamplingRateMs * NextSampleCounter - 0.5;
-                return; // skip the event
-            }
+            _prevThreadSamples[threadIndex] = timestampMs;
+            return true;
         }
-
-        // Process the event.
-        realDispatch(traceEvent);
+        return false;
     }
 }
