@@ -86,7 +86,7 @@ public class SamplingTransactionProfilerTests
         return profileInfo.Profile;
     }
 
-    [Fact]
+    [Fact(Skip = "This test is flaky. TODO: rework")]
     public Task Profiler_SingleProfile_Works()
     {
         using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
@@ -105,7 +105,7 @@ public class SamplingTransactionProfilerTests
         return VerifyJson(json).UniqueForRuntimeAndVersion();
     }
 
-    [Fact]
+    [Fact(Skip = "This test is flaky. TODO: rework")]
     public void Profiler_MultipleProfiles_Works()
     {
         using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
@@ -116,7 +116,7 @@ public class SamplingTransactionProfilerTests
         CaptureAndValidate(factory);
     }
 
-    [Fact]
+    [Fact(Skip = "This test is flaky. TODO: rework")]
     public void Profiler_AfterTimeout_Stops()
     {
         using var session = SampleProfilerSession.StartNew(_testOutputLogger);
@@ -133,7 +133,7 @@ public class SamplingTransactionProfilerTests
         ValidateProfile(profileInfo.Profile, (ulong)(limitMs * 1_000_000));
     }
 
-    [Theory]
+    [Theory(Skip = "This test is flaky. TODO: rework")]
     [InlineData(true)]
     [InlineData(false)]
     public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)

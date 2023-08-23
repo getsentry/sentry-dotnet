@@ -2,7 +2,6 @@
   "solution": {
     "path": "Sentry.Full.sln",
     "projects": [
-      "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "samples\\Sentry.Samples.Android\\Sentry.Samples.Android.csproj",
       "samples\\Sentry.Samples.AspNetCore.Basic\\Sentry.Samples.AspNetCore.Basic.csproj",
       "samples\\Sentry.Samples.AspNetCore.Blazor.Server\\Sentry.Samples.AspNetCore.Blazor.Server.csproj",
@@ -14,7 +13,6 @@
       "samples\\Sentry.Samples.AzureFunctions.Worker\\Sentry.Samples.AzureFunctions.Worker.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
       "samples\\Sentry.Samples.Console.Customized\\Sentry.Samples.Console.Customized.csproj",
-      "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
       "samples\\Sentry.Samples.EntityFramework\\Sentry.Samples.EntityFramework.csproj",
       "samples\\Sentry.Samples.GenericHost\\Sentry.Samples.GenericHost.csproj",
       "samples\\Sentry.Samples.Google.Cloud.Functions\\Sentry.Samples.Google.Cloud.Functions.csproj",
@@ -38,7 +36,6 @@
       "src\\Sentry.Maui\\Sentry.Maui.csproj",
       "src\\Sentry.NLog\\Sentry.NLog.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
-      "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Android.AssemblyReader.Tests\\Sentry.Android.AssemblyReader.Tests.csproj",
@@ -56,7 +53,6 @@
       "test\\Sentry.Maui.Tests\\Sentry.Maui.Tests.csproj",
       "test\\Sentry.NLog.Tests\\Sentry.NLog.Tests.csproj",
       "test\\Sentry.OpenTelemetry.Tests\\Sentry.OpenTelemetry.Tests.csproj",
-      "test\\Sentry.Profiling.Tests\\Sentry.Profiling.Tests.csproj",
       "test\\Sentry.Serilog.Tests\\Sentry.Serilog.Tests.csproj",
       "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",

@@ -5,7 +5,6 @@
 ### Features
 
 - Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
-- Profiling multiple transactions in parallel ([#2385](https://github.com/getsentry/sentry-dotnet/pull/2385))
 
 ### Dependencies
 
