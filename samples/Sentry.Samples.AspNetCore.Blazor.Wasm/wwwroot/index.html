@@ -56,7 +56,7 @@ function patchWebAssembly() {
                             // Will fail and give us a stack trace we can use to get the module URL (e.g: wasm://wasm/009931b2)
                             rv.instance.exports.mono_wasm_assembly_find_method(1);
                         } catch (e) {
-                            const match = e.stack.match(/^.*(wasm:.*?):wasm-function\[\d+\]:(0x[a-fA-F0-9]+)$/m);
+                            const match = e.stack.match(/^.*(wasm:.*?):wasm-function.*$/m);
                             let url = match[1];
                             if (match !== null) {
                                 console.log("WebAssembly module: URL: " + url)
