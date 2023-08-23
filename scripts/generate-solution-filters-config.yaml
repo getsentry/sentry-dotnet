@@ -2,20 +2,34 @@
 
 solution: Sentry.Full.sln
 
+groupConfigs:
+  - allProjects:
+      - "benchmarks/**/*.csproj"
+      - "src/**/*.csproj"
+      - "test/**/*.csproj"
+      - "samples/**/*.csproj"
+  - macOnly:
+    - "**/*Ios.csproj"
+    - "**/*Cocoa*.csproj"
+    - "**/*MacCatalyst.csproj"
+  - windowsOnly:
+    # .NET Framework projects
+    - "**/*.AspNet.csproj"
+
 filterConfigs:
 
   # Core filter for CI builds on Linux
   - outputPath: Sentry-CI-Build-Linux.slnf
 
     # Include all projects
-    includes:
-      - "**/*.csproj"
+    include:
+      groups:
+        - "allProjects"
 
-    # Exclude native mobile and some ASP.NET projects
-    excludes:
-      - modules/**/*.csproj
-      - "**/*Ios.csproj"
-      - "**/*Cocoa*.csproj"
-      - "**/*MacCatalyst.csproj"
-      - "**/*SourceGen.csproj"
-      - "**/*.AspNet.csproj"
+    # Exclude iOS/MacCatalyst and .NET Framework projects
+    exclude:
+      groups:
+        - "macOnly"
+        - "windowsOnly"
+      patterns:
+        - "**/*SourceGen.csproj"

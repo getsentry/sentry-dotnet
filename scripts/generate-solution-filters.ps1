@@ -25,14 +25,29 @@ $projectPaths = $projectPaths | ForEach-Object {
 # Loop through each filter config
 foreach($filter in $config.filterConfigs){
 
-    # Add includes
     $includedProjects = @()
-    foreach($include in $filter.includes){
+
+    # Add include groups
+    foreach($group in $filter.include.groups){
+        foreach($include in $config.groupConfigs.$group){
+            $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
+        }
+    }
+
+    # Add explicit include
+    foreach($include in $filter.include.patterns){
         $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
     }
 
-    # Remove excludes
-    foreach($exclude in $filter.excludes){
+   # Remove exclude groups
+   foreach($group in $filter.exclude.groups){
+      foreach($exclude in $config.groupConfigs.$group){
+        $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
+      }
+   }
+
+    # Remove specific exclude
+    foreach($exclude in $filter.exclude.patterns){
         $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
     }
 
