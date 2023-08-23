@@ -67,31 +67,6 @@ public partial class SentryBlazor : ComponentBase, IDisposable
         if (firstRender)
         {
             NavigationManager.LocationChanged += NavigationManager_LocationChanged;
-
-
-            // var options = new
-            // {
-            //     // dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537",
-            //     dsn = SentryBlazorOptions.Dsn,
-            //     replaysSessionSampleRate = 1.0,
-            //     replaysOnErrorSampleRate = 1.0,
-            //     tracesSampleRate = 1.0,
-            //     release = SentryBlazorOptions.Release,
-            //     debug = true
-            // };
-            //
-            // try
-            // {
-            //     await JSRuntime.InvokeVoidAsync("initSentry", options)
-            //         .ConfigureAwait(true);
-            // }
-            // catch (JSException e)
-            // {
-            //     Console.WriteLine(e.Message);
-            //     Console.WriteLine(e.StackTrace);
-            //     SentrySdk.CaptureException(e);
-            //     return;
-            // }
             Console.WriteLine("SentryBlazor: backend loaded");
         }
     }
