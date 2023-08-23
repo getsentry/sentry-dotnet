@@ -2,20 +2,17 @@
     "solution": "Sentry.Full.sln",
     "filterConfigs": [
       {
-        "outputPath": "MyProjects.slnf",
+        "outputPath": "Sentry-CI-Build-Linux.slnf",
         "includes": [
-          "src/**/*.csproj" 
+          "**/*.csproj"
         ],
         "excludes": [
-          "src/Tests/**/*.csproj"
-        ]
-      },
-      {
-        "outputPath": "MyTestProjects.slnf",
-        "includes": [
-          "test/**/*.csproj"
+          "modules/**/*.csproj",
+          "**/*Ios.csproj",
+          "**/*Cocoa*.csproj",
+          "**/*MacCatalyst.csproj",
+          "**/*Sentry.AspNet.csproj"
         ]
       }
     ]
   }
-  

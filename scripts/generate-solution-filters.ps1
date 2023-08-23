@@ -44,11 +44,17 @@ foreach($filter in $config.filterConfigs){
     `"projects`": ["
 
     # Add all the projects we want to include
-    foreach($project in $includedProjects) {
+    $firstProject = $true;
+    foreach($project in $includedProjects | Sort-Object) {
         # Escape path separators for Windows-style
         $escapedProject = $project.ToString().Replace($separator.ToString(), '\\')
-        $content += "`n      ""$escapedProject"","
-      }
+        $line = "`n      ""$escapedProject"""
+        if (!$firstProject) {
+            $line = "," + $line 
+        }
+        $firstProject = $false;
+        $content += $line
+    }
 
     # Finalize filter file
     $content += "`n"
