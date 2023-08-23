@@ -44,4 +44,5 @@ filterConfigs:
         - "macOnly"
         - "testUtils"
       patterns:
+        - "**/*OpenTelemetry.AspNet.csproj"
         - "**/*SourceGen.csproj"
