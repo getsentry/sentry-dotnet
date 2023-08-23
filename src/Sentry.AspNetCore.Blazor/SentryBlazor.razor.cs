@@ -34,6 +34,8 @@ public partial class SentryBlazor : ComponentBase, IDisposable
         Sentry.CaptureException(ex);
     }
 
+    public DebugImage[] DebugImages { get; set; } = Array.Empty<DebugImage>();
+
     // Early enough?
     protected override async Task OnInitializedAsync()
     {
@@ -68,6 +70,19 @@ public partial class SentryBlazor : ComponentBase, IDisposable
         {
             NavigationManager.LocationChanged += NavigationManager_LocationChanged;
             Console.WriteLine("SentryBlazor: backend loaded");
+        }
+        // TODO: On each render? New modules can load but overhead?
+        try
+        {
+            var asd  = await JSRuntime.InvokeAsync<dynamic[]>("getImages")
+                .ConfigureAwait(true);
+
+            DebugImages = await JSRuntime.InvokeAsync<DebugImage[]>("getImages")
+                .ConfigureAwait(true);
+        }
+        catch (Exception e)
+        {
+            SentryOptions.DiagnosticLogger?.LogError("Failed to get DebugImages.", e);
         }
     }
 

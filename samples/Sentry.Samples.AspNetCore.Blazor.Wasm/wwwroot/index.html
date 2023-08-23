@@ -27,7 +27,7 @@
 <script type="text/javascript">
 Sentry.init({
     dsn: 'https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537',
-    debug: true,
+    // debug: true,
     integrations: [
         new Sentry.BrowserTracing(),
         new Sentry.Replay(),
@@ -36,6 +36,125 @@ Sentry.init({
     replaysOnErrorSampleRate: 1.0,
     tracesSampleRate: 1.0,
 });
+
+
+function patchWebAssembly() {
+    if ('instantiateStreaming' in WebAssembly) {
+        const origInstantiateStreaming = WebAssembly.instantiateStreaming;
+        console.log("patching WebAssembly.instantiateStreaming")
+        WebAssembly.instantiateStreaming = function instantiateStreaming(
+            response,
+            importObject,
+        ) {
+            return Promise.resolve(response).then(response => {
+                return origInstantiateStreaming(response, importObject).then(rv => {
+                    if (response.url) {
+                        console.log("Registering WebAssembly module: " + response.url)
+                        registerModule(rv.module, response.url);
+                    } else {
+                        try {
+                            // Will fail and give us a stack trace we can use to get the module URL (e.g: wasm://wasm/009931b2)
+                            rv.instance.exports.mono_wasm_assembly_find_method(1);
+                        } catch (e) {
+                            const match = e.stack.match(/^.*(wasm:.*?):wasm-function\[\d+\]:(0x[a-fA-F0-9]+)$/m);
+                            let url = match[1];
+                            if (match !== null) {
+                                console.log("WebAssembly module: URL: " + url)
+                                registerModule(rv.module, url);
+                            }
+                        }
+                    }
+                    return rv;
+                });
+            });
+        };
+    }
+
+    if ('compileStreaming' in WebAssembly) {
+        const origCompileStreaming = WebAssembly.compileStreaming;
+        WebAssembly.compileStreaming = function compileStreaming(source,
+        ) {
+            console.log("patching WebAssembly.compileStreaming")
+            return Promise.resolve(source).then(response => {
+                return origCompileStreaming(response).then(module => {
+                    if (response.url) {
+                        console.log("Registering WebAssembly module: " + response.url)
+                        registerModule(module, response.url);
+                    }
+                    return module;
+                });
+            });
+        };
+    }
+}
+
+function getModuleInfo(module) {
+    const buildIds = WebAssembly.Module.customSections(module, 'build_id');
+    let buildId = null;
+    let debugFile = null;
+
+    if (buildIds.length > 0) {
+        console.log("WebAssembly buildIds: " + buildIds)
+        const firstBuildId = new Uint8Array(buildIds[0]);
+        buildId = Array.from(firstBuildId).reduce((acc, x) => {
+            return acc + x.toString(16).padStart(2, '0');
+        }, '');
+    } else {
+        console.log("buildIds: is empty")
+    }
+
+    const externalDebugInfo = WebAssembly.Module.customSections(module, 'external_debug_info');
+    if (externalDebugInfo.length > 0) {
+        console.log("externalDebugInfo.length: " + externalDebugInfo.length)
+        const firstExternalDebugInfo = new Uint8Array(externalDebugInfo[0]);
+        const decoder = new TextDecoder('utf-8');
+        debugFile = decoder.decode(firstExternalDebugInfo);
+    } else {
+        console.log("No debug info for module: " + module)
+    }
+
+    return { buildId, debugFile };
+}
+
+IMAGES = [];
+function registerModule(module, url) {
+    const { buildId, debugFile } = getModuleInfo(module);
+    if (buildId) {
+        const oldIdx = getImage(url);
+        if (oldIdx >= 0) {
+            IMAGES.splice(oldIdx, 1);
+        }
+
+        let debugFileUrl = null;
+        if (debugFile) {
+            try {
+                debugFileUrl = new URL(debugFile, url).href;
+            } catch {
+                // debugFile could be a blob URL which causes the URL constructor to throw
+                // for now we just ignore this case
+            }
+        }
+
+        IMAGES.push({
+            type: 'wasm',
+            code_id: buildId,
+            code_file: url,
+            debug_file: debugFileUrl,
+            debug_id: `${buildId.padEnd(32, '0').slice(0, 32)}0`,
+        });
+    }
+}
+function getImages() {
+    return IMAGES;
+}
+function getImage(url) {
+    return IMAGES.findIndex(image => {
+        return image.type === 'wasm' && image.code_file === url;
+    });
+}
+
+patchWebAssembly();
+
 </script>
 <!--Add Sentry Browser before adding Blazor-->
 <script src="_framework/blazor.webassembly.js"></script>
@@ -45,6 +164,17 @@ Sentry.init({
     function throwFromJavaScript(caller) {
         throw Error("Exceptional JavaScript function called by: " + caller);
     }
+
+    function throwFromCsharp(caller) {
+        try {
+            // DotNet.invokeMethod("Sentry.Samples.AspNetCore.Blazor.Wasm","CrashMe");
+
+
+        } catch (e) {
+            print(e);
+            window.DotNetCrash = e;
+        }
+    }
     function throwOnSetTimeout(caller) {
         setTimeout(() => {
                 throw Error("JavaScript error on setTimeout called by: " + caller);
@@ -53,6 +183,7 @@ Sentry.init({
     }
 </script>
 <button type="button" onclick="throwFromJavaScript('JavaScript')">JavaScript Error without any C# involved</button>
+<button type="button" onclick="throwFromCsharp()">JavaScript Error from C#</button>
 </body>
 
 </html>
