@@ -194,8 +194,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.GraphQL.Serv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.GraphQL.Client.Http", "samples\Sentry.Samples.GraphQL.Client.Http\Sentry.Samples.GraphQL.Client.Http.csproj", "{81692A01-F064-41CD-BB0E-DF499521E601}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.OpenTelemetry.Console", "samples\Sentry.Samples.OpenTelemetry.Console\Sentry.Samples.OpenTelemetry.Console.csproj", "{9C88CCCE-F80C-4047-868A-828A080D16FA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidTestApp", "test\AndroidTestApp\AndroidTestApp.csproj", "{968D335D-544D-41E6-8FA0-9042CA17996C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUtils.DeviceTests", "test\MauiTestUtils\DeviceTests\TestUtils.DeviceTests.csproj", "{4C0EDB09-FE32-4E14-8430-D420ED0C449C}"
