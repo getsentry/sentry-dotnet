@@ -8,6 +8,7 @@
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry\\Sentry.csproj",
+      "test\\Sentry.AspNetCore.Blazor.Tests\\Sentry.AspNetCore.Blazor.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
