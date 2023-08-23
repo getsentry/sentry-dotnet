@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
+<!--    https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly?view=aspnetcore-7.0#disable-integrity-checking-for-non-pwa-apps-->
+<!--    Patching the wasm file to get debug_id fails the integrity check. But disabling it have it load via URL so the hack with calling a func to get a stack trace isn't needed-->
+    <BlazorCacheBootResources>false</BlazorCacheBootResources>
   </PropertyGroup>
 
   <ItemGroup>
