@@ -1,8 +1,8 @@
-import-module powershell-yaml
-
 param(
     [string]$ConfigFile = "generate-solution-filters-config.yaml"
 )
+
+import-module powershell-yaml
 
 $separator = [IO.Path]::DirectorySeparatorChar
 
