@@ -29,7 +29,7 @@
     private static class Stuff
     {
         public static void DoSomething() => Thrower();
-        private static void Thrower() => throw null;
+        private static void Thrower() => throw null!;
     }
 
     private async Task ThrowFromJavaScript()

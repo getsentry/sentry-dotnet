@@ -28,9 +28,17 @@ public class JavaScriptScopeObserver : IScopeObserver
         }
     }
 
-    public void SetExtra(string key, object? value)
+    public async void SetExtra(string key, object? value)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("Sentry.setExtra", key, value)
+                .ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.DiagnosticLogger?.LogError("Failed to sync scope with JavaScript", e);
+        }
     }
 
     public async void SetTag(string key, string value)
@@ -46,9 +54,17 @@ public class JavaScriptScopeObserver : IScopeObserver
         }
     }
 
-    public void UnsetTag(string key)
+    public async void UnsetTag(string key)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("Sentry.setTag", key, null)
+                .ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.DiagnosticLogger?.LogError("Failed to sync scope with JavaScript", e);
+        }
     }
 
     public async void SetUser(User? user)

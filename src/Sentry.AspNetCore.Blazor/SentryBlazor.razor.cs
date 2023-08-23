@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using Sentry;
+using Sentry.Extensibility;
 
 namespace Sentry.AspNetCore.Blazor;
 
@@ -14,10 +15,40 @@ public partial class SentryBlazor : ComponentBase, IDisposable
     [Inject] private SentryBlazorOptions SentryBlazorOptions { get; set; } = null!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private IHub Sentry { get; set; } = null!;
+    [Inject] private SentryOptions SentryOptions { get; set; } = null!;
+
+    private string _previousUrl = "";
+
+    /// <summary>
+    /// ChildContent render fragment
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // https://learn.microsoft.com/en-us/aspnet/core/blazor/fundamentals/handle-errors?view=aspnetcore-7.0
+    public void ProcessError(Exception ex)
+    {
+        // TODO: URL and other context already set?
+        ex.SetSentryMechanism("SentryBlazorComponent");
+        Sentry.CaptureException(ex);
+    }
 
     // Early enough?
     protected override async Task OnInitializedAsync()
     {
+        _previousUrl = NavigationManager.Uri;
+        //
+        try
+        {
+            var userAgent = await JSRuntime.InvokeAsync<string>("eval", "(() => navigator.userAgent)();")
+                .ConfigureAwait(true);
+            Sentry.ConfigureScope(s => s.Request.Headers["User-Agent"] = userAgent);
+        }
+        catch (Exception e)
+        {
+            SentryOptions.DiagnosticLogger?.LogError("Failed to read browser User-Agent.", e);
+        }
         Console.WriteLine("SentryBlazor: OnInitializedAsync Starting");
         await Task.CompletedTask.ConfigureAwait(false);
         Console.WriteLine("SentryBlazor: OnInitializedAsync Completed");
@@ -67,8 +98,26 @@ public partial class SentryBlazor : ComponentBase, IDisposable
 
     private void NavigationManager_LocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        if (sender is null) return;
-        SentrySdk.AddBreadcrumb("Location changed: " + ((NavigationManager)sender).Uri);
+        if (sender is null)
+        {
+            return;
+        }
+
+        SentrySdk.ConfigureScope(s =>
+        {
+            var url = e.Location;
+            s.AddBreadcrumb("",
+                type: "navigation",
+				category: "navigation",
+                data: new Dictionary<string, string>
+                {
+                    {"to", url},
+                    {"from", _previousUrl},
+                });
+            s.Request.Url = url;
+            // keep tabs for the next call
+            _previousUrl = url;
+        });
     }
 
     public void Dispose()
