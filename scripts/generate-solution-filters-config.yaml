@@ -27,6 +27,9 @@ filterConfigs:
         - "macOnly"
         - "windowsOnly"
       patterns:
+        - "**/*AndroidTestApp.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
