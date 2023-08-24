@@ -15,8 +15,6 @@ groupConfigs:
   - windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
-  - testUtils:
-    - "**/*TestUtils*.csproj"
 
 filterConfigs:
 
@@ -28,12 +26,12 @@ filterConfigs:
       groups:
         - "macOnly"
         - "windowsOnly"
-        - "testUtils"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
+        - "**/*TestUtils*.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -42,9 +40,10 @@ filterConfigs:
     exclude:
       groups:
         - "macOnly"
-        - "testUtils"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
+        - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
         - "**/*SourceGen.csproj"
