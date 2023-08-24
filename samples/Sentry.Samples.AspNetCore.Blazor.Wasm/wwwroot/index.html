@@ -38,6 +38,7 @@ Sentry.init({
 });
 
 
+// https://github.com/getsentry/sentry-javascript/blob/develop/packages/wasm/src/registry.ts
 function patchWebAssembly() {
     if ('instantiateStreaming' in WebAssembly) {
         const origInstantiateStreaming = WebAssembly.instantiateStreaming;
@@ -77,23 +78,24 @@ function getModuleInfo(module) {
     let debugFile = null;
 
     if (buildIds.length > 0) {
-        console.log("WebAssembly buildIds: " + buildIds)
         const firstBuildId = new Uint8Array(buildIds[0]);
         buildId = Array.from(firstBuildId).reduce((acc, x) => {
             return acc + x.toString(16).padStart(2, '0');
         }, '');
+        console.log("buildId is: " + buildId);
+
     } else {
-        console.log("buildIds: is empty")
+        console.log("buildIds: is empty");
     }
 
     const externalDebugInfo = WebAssembly.Module.customSections(module, 'external_debug_info');
     if (externalDebugInfo.length > 0) {
-        console.log("externalDebugInfo.length: " + externalDebugInfo.length)
         const firstExternalDebugInfo = new Uint8Array(externalDebugInfo[0]);
         const decoder = new TextDecoder('utf-8');
         debugFile = decoder.decode(firstExternalDebugInfo);
+        console.log("debugFile is: " + debugFile);
     } else {
-        console.log("No debug info for module: " + module)
+        console.log("No external_debug_info for module: " + module);
     }
 
     return { buildId, debugFile };
@@ -112,7 +114,8 @@ function registerModule(module, url) {
         if (debugFile) {
             try {
                 debugFileUrl = new URL(debugFile, url).href;
-            } catch {
+            } catch (e) {
+                console.log("failed to get URL: " + e)
                 // debugFile could be a blob URL which causes the URL constructor to throw
                 // for now we just ignore this case
             }
@@ -120,10 +123,10 @@ function registerModule(module, url) {
 
         IMAGES.push({
             type: 'wasm',
-            code_id: buildId,
-            code_file: url,
-            debug_file: debugFileUrl,
-            debug_id: `${buildId.padEnd(32, '0').slice(0, 32)}0`,
+            codeId: buildId,
+            codeFile: url,
+            debugFile: debugFileUrl,
+            debugId: `${buildId.padEnd(32, '0').slice(0, 32)}0`,
         });
     }
 }

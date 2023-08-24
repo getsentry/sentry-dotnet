@@ -4,10 +4,6 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- https://github.com/dotnet/runtime/blob/ba6a4adb228567a6bb3f4a9e5789fb74c47c8c94/src/mono/wasm/build/WasmApp.targets#L23-L26-->
-    <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
-    <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
-    <WasmEmitSourceMap>true</WasmEmitSourceMap>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore.Blazor\Sentry.AspNetCore.Blazor.csproj" />

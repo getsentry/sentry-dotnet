@@ -39,6 +39,12 @@ public partial class SentryBlazor : ComponentBase, IDisposable
     // Early enough?
     protected override async Task OnInitializedAsync()
     {
+        SentryBlazorOptions.GetDebugImages = () => DebugImages;
+        Sentry.ConfigureScope(s => s.AddEventProcessor(evt =>
+        {
+            evt.DebugImages = DebugImages.ToList();
+            return evt;
+        }));
         _previousUrl = NavigationManager.Uri;
         //
         try
@@ -74,9 +80,6 @@ public partial class SentryBlazor : ComponentBase, IDisposable
         // TODO: On each render? New modules can load but overhead?
         try
         {
-            var asd  = await JSRuntime.InvokeAsync<dynamic[]>("getImages")
-                .ConfigureAwait(true);
-
             DebugImages = await JSRuntime.InvokeAsync<DebugImage[]>("getImages")
                 .ConfigureAwait(true);
         }

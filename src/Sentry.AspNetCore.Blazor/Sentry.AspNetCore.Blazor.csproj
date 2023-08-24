@@ -28,5 +28,9 @@
       <Output TaskParameter="DownloadedFile" ItemName="SentryJavaScriptDownloadedFile" />
     </DownloadFile>
   </Target>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.AspNetCore.Blazor.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
 
 </Project>
