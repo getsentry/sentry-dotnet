@@ -10,6 +10,10 @@
     <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
     <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
     <WasmEmitSourceMap>true</WasmEmitSourceMap>
+    <WasmNativeStrip>true</WasmNativeStrip>
+<!--    https://stackoverflow.com/questions/73651974/how-do-i-make-the-wasmemitsymbolmap-and-or-wasmnativestrip-properties-take-effec-->
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <RunAOTCompilationAfterBuild>true</RunAOTCompilationAfterBuild>
   </PropertyGroup>
 
   <ItemGroup>

@@ -23,22 +23,22 @@
     <SentryJavaScriptVersion>7.64.0</SentryJavaScriptVersion>
   </PropertyGroup>
   <ItemGroup>
-    <SentryJavaScriptDownload Include="bundle.debug.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.debug.min.js.map"  />
-    <SentryJavaScriptDownload Include="bundle.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.min.js.map"  />
-    <SentryJavaScriptDownload Include="bundle.replay.debug.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.replay.debug.min.js.map"  />
-    <SentryJavaScriptDownload Include="bundle.replay.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.replay.min.js.map"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.debug.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.debug.min.js.map"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.min.js.map"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.replay.debug.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.replay.debug.min.js.map"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.replay.min.js"  />
-    <SentryJavaScriptDownload Include="bundle.tracing.replay.min.js.map"  />
+    <SentryJavaScriptDownload Include="bundle.debug.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.debug.min.js.map" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.min.js.map" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.replay.debug.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.replay.debug.min.js.map" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.replay.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.replay.min.js.map" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.debug.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.debug.min.js.map" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.min.js.map" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.debug.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.debug.min.js.map" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.min.js" Visible="false" />
+    <SentryJavaScriptDownload Include="bundle.tracing.replay.min.js.map" Visible="false" />
   </ItemGroup>
   <Target Name="DownloadSentryJavaScript" BeforeTargets="Build">
     <DownloadFile SourceUrl="https://browser.sentry-cdn.com/$(SentryJavaScriptVersion)/%(SentryJavaScriptDownload.Identity)"
