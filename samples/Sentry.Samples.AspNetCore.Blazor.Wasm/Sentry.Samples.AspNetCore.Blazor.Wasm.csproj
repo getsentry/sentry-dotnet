@@ -8,12 +8,13 @@
 
     <!-- https://github.com/dotnet/runtime/blob/ba6a4adb228567a6bb3f4a9e5789fb74c47c8c94/src/mono/wasm/build/WasmApp.targets#L23-L26-->
     <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
+    <WasmNativeStrip>true</WasmNativeStrip>
+
     <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
     <WasmEmitSourceMap>true</WasmEmitSourceMap>
-    <WasmNativeStrip>true</WasmNativeStrip>
 <!--    https://stackoverflow.com/questions/73651974/how-do-i-make-the-wasmemitsymbolmap-and-or-wasmnativestrip-properties-take-effec-->
-    <RunAOTCompilation>true</RunAOTCompilation>
-    <RunAOTCompilationAfterBuild>true</RunAOTCompilationAfterBuild>
+<!--    <RunAOTCompilation>true</RunAOTCompilation>-->
+<!--    <RunAOTCompilationAfterBuild>true</RunAOTCompilationAfterBuild>-->
   </PropertyGroup>
 
   <ItemGroup>

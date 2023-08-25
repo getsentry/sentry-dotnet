@@ -4,7 +4,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.AspNetCore.Blazor;
 
-public class JavaScriptScopeObserver : IScopeObserver
+internal class JavaScriptScopeObserver : IScopeObserver
 {
     private readonly IJSRuntime _jsRuntime;
     private readonly SentryBlazorOptions _options;

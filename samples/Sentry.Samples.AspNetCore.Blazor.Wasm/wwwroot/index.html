@@ -144,21 +144,6 @@ patchWebAssembly();
 </script>
 <!--Add Sentry Browser before adding Blazor-->
 <script src="_framework/blazor.webassembly.js"></script>
-
-<!--Example errors from JavaScript-->
-<script type="text/javascript">
-    function throwFromJavaScript(caller) {
-        throw Error("Exceptional JavaScript function called by: " + caller);
-    }
-
-    function throwOnSetTimeout(caller) {
-        setTimeout(() => {
-                throw Error("JavaScript error on setTimeout called by: " + caller);
-            },
-            1000);
-    }
-</script>
-<button type="button" onclick="throwFromJavaScript('JavaScript')">JavaScript Error without any C# involved</button>
 </body>
 
 </html>

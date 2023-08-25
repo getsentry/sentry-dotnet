@@ -1,0 +1,85 @@
+ @* ReSharper disable once CheckNamespace - Easier to demo *@
+@namespace Sentry
+@using Microsoft.Extensions.Logging
+@using Microsoft.JSInterop
+@inherits LayoutComponentBase
+@inject ILogger<ExampleErrors> Logger
+@inject IJSRuntime JSRuntime;
+
+ <h3>Sentry Example Errors</h3>
+ <style>
+     button {
+         display: block;
+     }
+ </style>
+
+ <script type="text/javascript">
+    function throwFromJavaScript(caller) {
+        throw Error("JavaScript exception. Function called by: " + caller);
+    }
+
+    function throwOnSetTimeout(caller) {
+        console.log("setTimeout will trigger an error in 1 second.");
+        setTimeout(() => {
+                throw Error("JavaScript setTimeout exception. Function called by: " + caller);
+            },
+            1000);
+    }
+</script>
+
+<button onclick="throwFromJavaScript('JavaScript')">JavaScript throw Error</button>
+<button @onclick="Throw">C# Throw Exception</button>
+<button @onclick="Throw">C# Throw Exception</button>
+<button @onclick="ThrowOnSetTimeout">JavaScript Throw from setTimeout</button>
+
+<button @onclick="SetUser">Set User</button>
+<button @onclick="SetTag">Set Tag</button>
+
+@code {
+    private void Throw()
+    {
+        Logger.LogInformation("Test exception requested to Sentry test component.");
+        Stuff.DoSomething();
+    }
+
+    private static class Stuff
+    {
+        public static void DoSomething() => Thrower();
+        private static void Thrower() => throw new Exception("Test exception!")
+        {
+            Data = { {"MoreData","Can be added to exception.Data"} }
+        };
+    }
+
+    private async Task ThrowFromJavaScript()
+    {
+        await JSRuntime.InvokeAsync<string>("throwFromJavaScript", "from C#");
+    }
+
+    private async Task ThrowOnSetTimeout()
+    {
+        await JSRuntime.InvokeAsync<string>("throwOnSetTimeout", "from C#");
+    }
+    private void SetUser()
+    {
+        var user = new User
+        {
+            Email = "test-user@sentry.dev",
+            Other = new Dictionary<string, string>
+            {
+                { "key", "value" }
+            }
+        };
+        SentrySdk.ConfigureScope(s => s.User = user);
+        Logger.LogInformation("User {user} set to scope and will be added to JS and C# errors.", user.Email);
+
+    }
+
+    private void SetTag()
+    {
+        const string tagKey = "key-set-via-csharp";
+        const string tagValue = "value-set-via-csharp";
+        SentrySdk.ConfigureScope(s => s.SetTag(tagKey, tagValue));
+        Logger.LogInformation("Tag {key} with value: {value} were set to the Sentry scope. Errors in JS and C# will include it.", tagKey, tagValue);
+    }
+}

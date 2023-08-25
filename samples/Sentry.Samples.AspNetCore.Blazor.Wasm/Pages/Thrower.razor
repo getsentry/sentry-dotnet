@@ -1,18 +1,12 @@
 ﻿@page "/thrower"
-@using Microsoft.Extensions.Logging
-@inject ILogger<Thrower> Logger
-@inject IJSRuntime Js;
+@using Sentry.AspNetCore.Blazor
 
 <h1>Throw Exception</h1>
 
-<button class="btn btn-primary" @onclick="Throw">Throw</button>
-
-<button class="btn btn-primary" @onclick="ThrowFromJavaScript">Throw From JavaScript</button>
-<button class="btn btn-primary" @onclick="ThrowOnSetTimeout">Throw from setTimeout in JavaScript</button>
-
-<button class="btn btn-primary" @onclick="SetUser">Set User</button>
-<button class="btn btn-primary" @onclick="SetTag">Set Tag</button>
-
+<div>
+    <button @onclock=IncrementCount>Click twice to capture error.</button>
+    <Sentry.ExampleErrors/>
+</div>
 
 @if (SentrySdk.LastEventId != SentryId.Empty)
 {
@@ -20,42 +14,27 @@
 }
 
 @code {
-    private void Throw()
-    {
-        Logger.LogInformation("Doing something ... ");
-        Stuff.DoSomething();
-    }
 
-    private static class Stuff
-    {
-        public static void DoSomething() => Thrower();
-        private static void Thrower() => throw null!;
-    }
+    // https://learn.microsoft.com/en-us/aspnet/core/blazor/fundamentals/handle-errors?view=aspnetcore-7.0#alternative-global-exception-handling
+    [CascadingParameter]
+    public SentryBlazor SentryBlazor { get; set; }
 
-    private async Task ThrowFromJavaScript()
-    {
-        await Js.InvokeAsync<string>("throwFromJavaScript", "from C#");
-    }
+    private int _currentCount = 0;
 
-    private async Task ThrowOnSetTimeout()
+    private void IncrementCount()
     {
-        await Js.InvokeAsync<string>("throwOnSetTimeout", "from C#");
-    }
-
-    private void SetUser()
-    {
-        SentrySdk.ConfigureScope(s => s.User = new User
+        try
         {
-            Email = "test-user@sentry.dev",
-            Other = new Dictionary<string, string>
-            {
-                {"key", "value"}
-            }
-        });
-    }
+            _currentCount++;
 
-    private void SetTag()
-    {
-        SentrySdk.ConfigureScope(s => s.SetTag("key-from-csharp", "value-from-csharp"));
+            if (_currentCount > 2)
+            {
+                throw new InvalidOperationException("Current count is over five!");
+            }
+        }
+        catch (Exception ex)
+        {
+            SentryBlazor?.ProcessError(ex);
+        }
     }
 }

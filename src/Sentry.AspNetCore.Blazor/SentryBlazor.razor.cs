@@ -101,7 +101,7 @@ public partial class SentryBlazor : ComponentBase, IDisposable
             var url = e.Location;
             s.AddBreadcrumb("",
                 type: "navigation",
-				category: "navigation",
+                category: "navigation",
                 data: new Dictionary<string, string>
                 {
                     {"to", url},
