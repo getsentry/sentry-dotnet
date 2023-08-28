@@ -1,5 +1,3 @@
-using System.Runtime.Remoting.Channels;
-
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryPerformanceListener : IDbCommandInterceptor
@@ -8,9 +6,9 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     internal const string DbReaderKey = "db.query";
     internal const string DbNonQueryKey = "db.execute";
     internal const string DbScalarKey = "db.query.scalar";
-
-    internal const string DbName = "db.name";
+    
     internal const string DbSystem = "db.system";
+    internal const string DbName = "db.name";
     internal const string ServerAddress = "server.address";
 
     private SentryOptions _options;
