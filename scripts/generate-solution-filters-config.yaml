@@ -1,6 +1,9 @@
-# Sentry filter configuration
+################################################################
+# This file is used by generate-solution-filters.ps1 to generate 
+# the *.slnf solution filters for the Sentry solution.
+################################################################
 
-solution: Sentry.Full.sln
+solution: Sentry.sln
 
 groupConfigs:
   - allProjects:
