@@ -145,6 +145,26 @@ filterConfigs:
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
 
+  - outputPath: SentryMobile.slnf
+    include:
+      patterns:
+        - "samples/**/*Android.csproj"
+        - "samples/**/*Ios.csproj"
+        - "samples/**/*MacCatalyst.csproj"
+        - "samples/**/*Maui.csproj"
+        - "src/**/Sentry.csproj"
+        - "src/**/*Android*.csproj"
+        - "src/**/*Bindings*.csproj"
+        - "src/**/Sentry.Extensions.Logging.csproj"
+        - "src/**/Sentry.Maui.csproj"
+        - "test/**/Sentry.Android.AssemblyReader.Tests.csproj"
+        - "test/**/Sentry.Extensions.Logging.Tests.csproj"
+        - "test/**/Sentry.Maui.Device.TestApp.csproj"
+        - "test/**/Sentry.Maui.Tests.csproj"
+        - "test/**/Sentry.Testing.csproj"
+        - "test/**/Sentry.Tests.csproj"
+        - "test/MauiTestUtils/**/*.csproj"
+
   - outputPath: SentryNoSamples.slnf
     include:
       groups:
