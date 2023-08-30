@@ -53,7 +53,7 @@ Also note `/Directory.Build.targets` contains some [convention based rules](http
 
 Most contributors will rarely need to load Sentry.sln. The repository contains various solution filters that will be more practical for day to day tasks. 
 
-These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
+These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
 
 ## API changes approval process
 
