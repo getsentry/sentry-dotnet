@@ -144,3 +144,14 @@ filterConfigs:
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+
+  - outputPath: SentryNoSamples.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      patterns:
+        - "samples/**/*"
+        - "**/*Bindings*"
+        - "**/*DeviceTests*"
+        - "**/*TestApp*"
