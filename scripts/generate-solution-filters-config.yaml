@@ -18,6 +18,10 @@ groupConfigs:
   - windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
+  - legacy:
+    # In slnf files that we maintain purely for developer convenience,
+    # we typically exclude these projects
+    - "**/*.AspNet.csproj"
 
 filterConfigs:
 
@@ -103,7 +107,6 @@ filterConfigs:
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
-        # Include dependencies
         - "**/Sentry.DiagnosticSource.csproj"
         - "**/Sentry.Extensions.Logging.csproj" 
         - "**/Sentry.Extensions.Logging.Tests.csproj" 
@@ -116,7 +119,6 @@ filterConfigs:
     include:
       patterns:
         - "**/*AzureFunctions*.csproj"
-        # Include dependencies
         - "**/Sentry.Samples.Console.Basic.csproj" 
         - "**/Sentry.Extensions.Logging.csproj" 
         - "**/Sentry.Extensions.Logging.Tests.csproj" 
@@ -173,18 +175,21 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "legacy"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"
         - "**/*Ios*.csproj"
         - "**/*Maui*.csproj"
-        - "**/*AspNet.csproj" # Technically not mobile, but annoying
 
   - outputPath: SentryNoSamples.slnf
     include:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "legacy"
       patterns:
         - "samples/**/*"
         - "**/*Bindings*"
