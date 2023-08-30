@@ -5,7 +5,14 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-import-module powershell-yaml
+$yamlModule = "powershell-yaml"
+$moduleInstalled = Get-Module -ListAvailable -Name $yamlModule
+if (-not $moduleInstalled) {
+    Write-Debug "The module '$yamlModule' is not installed. Installing..."
+    Install-Module -Name $yamlModule -Scope CurrentUser -Force
+}
+
+import-module $yamlModule
 
 $scriptDir = $PSScriptRoot
 $separator = [IO.Path]::DirectorySeparatorChar.ToString()
