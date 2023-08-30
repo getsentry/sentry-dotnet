@@ -121,7 +121,6 @@ filterConfigs:
         - "**/*AzureFunctions*.csproj"
         - "**/Sentry.Samples.Console.Basic.csproj" 
         - "**/Sentry.Extensions.Logging.csproj" 
-        - "**/Sentry.Extensions.Logging.Tests.csproj" 
         - "**/Sentry.csproj" 
         - "**/Sentry.Testing.csproj" 
         - "**/Sentry.Testing.CrashableApp.csproj" 
