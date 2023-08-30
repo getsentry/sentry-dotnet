@@ -13,13 +13,13 @@ public class Hint
     /// <summary>
     /// Creates a new instance of <see cref="Hint"/>.
     /// </summary>
-    public Hint() : this(SentrySdk.CurrentHub)
+    public Hint() : this(SentrySdk.CurrentHub.GetSentryOptions())
     {
     }
 
-    internal Hint(IHub hub)
+    internal Hint(SentryOptions? options)
     {
-        _options = hub.GetSentryOptions();
+        _options = options;
     }
 
     /// <summary>

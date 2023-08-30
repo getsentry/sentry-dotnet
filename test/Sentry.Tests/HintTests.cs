@@ -19,7 +19,7 @@ public class HintTests : IDisposable
         File.Create(attachmentPath1);
         File.Create(attachmentPath2);
 
-        var hint = new Hint();
+        var hint = new Hint(new SentryOptions());
 
         // Act
         hint.AddAttachment(attachmentPath1);
