@@ -86,3 +86,12 @@ filterConfigs:
         - "benchmarks/**/*.csproj"
         - "samples/**/*.csproj"
         - "test/**/*.csproj"
+
+  - outputPath: Sentry-CI-Test.slnf
+    include:
+      patterns:
+        - "test/**/*.csproj"
+    exclude:
+      patterns:
+        - "test/MauiTestUtils/**"
+        - "**/*TestApp.csproj"
