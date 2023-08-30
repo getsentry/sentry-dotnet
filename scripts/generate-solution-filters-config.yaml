@@ -134,3 +134,13 @@ filterConfigs:
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+
+  - outputPath: SentryDiagnosticSource.slnf
+    include:
+      patterns:
+        - "**/*DiagnosticSource*.csproj"
+        - "**/Sentry.csproj"
+        - "**/Sentry.Extensions.Logging.csproj"
+        - "**/Sentry.Testing.csproj"
+        - "**/Sentry.Testing.CrashableApp.csproj"
+        - "**/Sentry.Tests.csproj"
