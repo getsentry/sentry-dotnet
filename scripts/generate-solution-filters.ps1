@@ -2,6 +2,9 @@ param(
     [string]$ConfigFile = "generate-solution-filters-config.yaml"
 )
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
 import-module powershell-yaml
 
 $scriptDir = $PSScriptRoot
