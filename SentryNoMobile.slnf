@@ -1,4 +1,4 @@
-﻿{
+{
   "solution": {
     "path": "Sentry.sln",
     "projects": [
@@ -20,13 +20,12 @@
       "samples\\Sentry.Samples.GraphQL.Client.Http\\Sentry.Samples.GraphQL.Client.Http.csproj",
       "samples\\Sentry.Samples.GraphQL.Server\\Sentry.Samples.GraphQL.Server.csproj",
       "samples\\Sentry.Samples.Log4Net\\Sentry.Samples.Log4Net.csproj",
-      "samples\\Sentry.Samples.ME.Logging\\Sentry.Samples.ME.Logging.csproj",
       "samples\\Sentry.Samples.MacCatalyst\\Sentry.Samples.MacCatalyst.csproj",
+      "samples\\Sentry.Samples.ME.Logging\\Sentry.Samples.ME.Logging.csproj",
       "samples\\Sentry.Samples.NLog\\Sentry.Samples.NLog.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.Console\\Sentry.Samples.OpenTelemetry.Console.csproj",
       "samples\\Sentry.Samples.Serilog\\Sentry.Samples.Serilog.csproj",
-      "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
       "src\\Sentry.AzureFunctions.Worker\\Sentry.AzureFunctions.Worker.csproj",
@@ -35,7 +34,6 @@
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry.Google.Cloud.Functions\\Sentry.Google.Cloud.Functions.csproj",
       "src\\Sentry.Log4Net\\Sentry.Log4Net.csproj",
-      "src\\Sentry.Maui\\Sentry.Maui.csproj",
       "src\\Sentry.NLog\\Sentry.NLog.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
@@ -43,8 +41,8 @@
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
-      "test\\Sentry.AspNetCore.TestUtils\\Sentry.AspNetCore.TestUtils.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
+      "test\\Sentry.AspNetCore.TestUtils\\Sentry.AspNetCore.TestUtils.csproj",
       "test\\Sentry.AzureFunctions.Worker.Tests\\Sentry.AzureFunctions.Worker.Tests.csproj",
       "test\\Sentry.DiagnosticSource.IntegrationTests\\Sentry.DiagnosticSource.IntegrationTests.csproj",
       "test\\Sentry.DiagnosticSource.Tests\\Sentry.DiagnosticSource.Tests.csproj",

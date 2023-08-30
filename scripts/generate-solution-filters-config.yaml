@@ -168,6 +168,18 @@ filterConfigs:
         - "test/**/Sentry.Tests.csproj"
         - "test/MauiTestUtils/**/*.csproj"
 
+  - outputPath: SentryNoMobile.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      patterns:
+        - "**/*Bindings*.csproj"
+        - "**/*Android*.csproj"
+        - "**/*Ios*.csproj"
+        - "**/*Maui*.csproj"
+        - "**/*AspNet.csproj" # Technically not mobile, but annoying
+
   - outputPath: SentryNoSamples.slnf
     include:
       groups:
