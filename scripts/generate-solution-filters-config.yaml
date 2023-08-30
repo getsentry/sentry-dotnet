@@ -95,3 +95,16 @@ filterConfigs:
       patterns:
         - "test/MauiTestUtils/**"
         - "**/*TestApp.csproj"
+
+  - outputPath: SentryAspNetCore.slnf
+    include:
+      patterns:
+        - "**/*AspNetCore*.csproj"
+        # Include dependencies
+        - "**/Sentry.DiagnosticSource.csproj"
+        - "**/Sentry.Extensions.Logging.csproj" 
+        - "**/Sentry.Extensions.Logging.Tests.csproj" 
+        - "**/Sentry.OpenTelemetry.csproj" 
+        - "**/Sentry.csproj" 
+        - "**/Sentry.Testing.csproj" 
+        - "**/Sentry.Tests.csproj" 
