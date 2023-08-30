@@ -121,3 +121,16 @@ filterConfigs:
         - "**/Sentry.Testing.csproj" 
         - "**/Sentry.Testing.CrashableApp.csproj" 
         - "**/Sentry.Tests.csproj" 
+
+  - outputPath: SentryCore.slnf
+    include:
+      patterns:
+        - "**/Sentry.Benchmarks.csproj"
+        - "**/Sentry.Samples.Console.Basic.csproj"
+        - "**/Sentry.Samples.Console.Profiling.csproj"
+        - "**/Sentry.Profiling.csproj"
+        - "**/Sentry.csproj"
+        - "**/Sentry.Profiling.Tests.csproj"
+        - "**/Sentry.Testing.csproj"
+        - "**/Sentry.Testing.CrashableApp.csproj"
+        - "**/Sentry.Tests.csproj"
