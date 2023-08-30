@@ -75,3 +75,14 @@ filterConfigs:
         - "benchmarks/**/*.csproj"
         - "samples/**/*.csproj"
         - "test/**/*.csproj"
+
+  - outputPath: Sentry-CI-Pack.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      patterns:
+        - "**/Sentry.Profiling.csproj"
+        - "benchmarks/**/*.csproj"
+        - "samples/**/*.csproj"
+        - "test/**/*.csproj"
