@@ -64,3 +64,14 @@ filterConfigs:
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
         - "**/*SourceGen.csproj"
+
+  - outputPath: Sentry-CI-CodeQL.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      patterns:
+        - "**/Sentry.Bindings*.csproj"
+        - "benchmarks/**/*.csproj"
+        - "samples/**/*.csproj"
+        - "test/**/*.csproj"
