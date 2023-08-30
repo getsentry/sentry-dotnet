@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- `Hints` now accept attachments provided as a file path via `AddAttachment` method ([#2585](https://github.com/getsentry/sentry-dotnet/pull/2585))
+
 ## 3.36.0
 
 ### Features
