@@ -14,6 +14,6 @@ if($changes){
 }
 else
 {
-    Write-Output 'Working directory clean excluding untracked files'
+    Write-Output '$pathToCheck matches HEAD.'
 }
 
