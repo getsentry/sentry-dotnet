@@ -1,5 +1,5 @@
 ################################################################
-# This file is used by generate-solution-filters.ps1 to generate 
+# This file is used by generate-solution-filters.ps1 to generate
 # the *.slnf solution filters for the Sentry solution.
 ################################################################
 
@@ -83,48 +83,28 @@ filterConfigs:
         - "samples/**/*.csproj"
         - "test/**/*.csproj"
 
-  - outputPath: Sentry-CI-Pack.slnf
-    include:
-      groups:
-        - "allProjects"
-    exclude:
-      patterns:
-        - "**/Sentry.Profiling.csproj"
-        - "benchmarks/**/*.csproj"
-        - "samples/**/*.csproj"
-        - "test/**/*.csproj"
-
-  - outputPath: Sentry-CI-Test.slnf
-    include:
-      patterns:
-        - "test/**/*.csproj"
-    exclude:
-      patterns:
-        - "test/MauiTestUtils/**"
-        - "**/*TestApp.csproj"
-
   - outputPath: SentryAspNetCore.slnf
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
         - "**/Sentry.DiagnosticSource.csproj"
-        - "**/Sentry.Extensions.Logging.csproj" 
-        - "**/Sentry.Extensions.Logging.Tests.csproj" 
-        - "**/Sentry.OpenTelemetry.csproj" 
-        - "**/Sentry.csproj" 
-        - "**/Sentry.Testing.csproj" 
-        - "**/Sentry.Tests.csproj" 
+        - "**/Sentry.Extensions.Logging.csproj"
+        - "**/Sentry.Extensions.Logging.Tests.csproj"
+        - "**/Sentry.OpenTelemetry.csproj"
+        - "**/Sentry.csproj"
+        - "**/Sentry.Testing.csproj"
+        - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryAzureFunctions.slnf
     include:
       patterns:
         - "**/*AzureFunctions*.csproj"
-        - "**/Sentry.Samples.Console.Basic.csproj" 
-        - "**/Sentry.Extensions.Logging.csproj" 
-        - "**/Sentry.csproj" 
-        - "**/Sentry.Testing.csproj" 
-        - "**/Sentry.Testing.CrashableApp.csproj" 
-        - "**/Sentry.Tests.csproj" 
+        - "**/Sentry.Samples.Console.Basic.csproj"
+        - "**/Sentry.Extensions.Logging.csproj"
+        - "**/Sentry.csproj"
+        - "**/Sentry.Testing.csproj"
+        - "**/Sentry.Testing.CrashableApp.csproj"
+        - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryCore.slnf
     include:
