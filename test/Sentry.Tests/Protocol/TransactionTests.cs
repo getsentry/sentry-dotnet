@@ -439,10 +439,123 @@ public class TransactionTests
         transaction.Spans.Should().NotContain(s => s.Operation == "sentryRequest");
     }
 
-    [Fact]
-    public async Task Finish_SentryRequestTransactionGetsIgnored()
+    private const int RepeatCount = 500;
+
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_00(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_02(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_03(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_04(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_05(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_06(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_07(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_08(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_09(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_10(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_12(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_13(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_14(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_15(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_16(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_17(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_18(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+    [Theory]
+    [Repeat(RepeatCount, "")]
+    public async Task Finish_SentryRequestTransactionGetsIgnored_Batch_19(string fakeParam)
+    {
+        await Finish_SentryRequestTransactionGetsIgnored(fakeParam);
+    }
+
+    // [Fact]
+    private async Task Finish_SentryRequestTransactionGetsIgnored(string fakeParam)
     {
         // Arrange
+        _testOutputLogger.Log(SentryLevel.Debug, $"Test run {fakeParam}");
         var client = Substitute.For<ISentryClient>();
         var options = new SentryOptions
         {
