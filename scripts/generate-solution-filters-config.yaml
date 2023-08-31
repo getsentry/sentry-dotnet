@@ -83,15 +83,6 @@ filterConfigs:
         - "samples/**/*.csproj"
         - "test/**/*.csproj"
 
-  - outputPath: Sentry-CI-Test.slnf
-    include:
-      patterns:
-        - "test/**/*.csproj"
-    exclude:
-      patterns:
-        - "test/MauiTestUtils/**"
-        - "**/*TestApp.csproj"
-
   - outputPath: SentryAspNetCore.slnf
     include:
       patterns:
