@@ -49,6 +49,12 @@ These `*.props` files are used to add platform-specific files, such as reference
 
 Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution. 
 
+## Solution Filters
+
+Most contributors will rarely need to load Sentry.sln. The repository contains various solution filters that will be more practical for day to day tasks. 
+
+These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
+
 ## API changes approval process
 
 This repository uses [Verify](https://github.com/VerifyTests/Verify) to store the public API diffs in snapshot files.

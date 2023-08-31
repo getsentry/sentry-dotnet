@@ -61,7 +61,7 @@
   <Target Name="_InnerGenerateSentryCocoaBindings">
     <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
     <!-- See https://github.com/getsentry/sentry-dotnet/pull/2558 -->
-    <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 $(MSBuildThisFileDirectory)" />
+    <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 -PathToCheck $(MSBuildThisFileDirectory)" />
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->

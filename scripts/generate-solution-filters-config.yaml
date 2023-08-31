@@ -1,0 +1,196 @@
+################################################################
+# This file is used by generate-solution-filters.ps1 to generate 
+# the *.slnf solution filters for the Sentry solution.
+################################################################
+
+solution: Sentry.sln
+
+groupConfigs:
+  allProjects:
+      - "benchmarks/**/*.csproj"
+      - "src/**/*.csproj"
+      - "test/**/*.csproj"
+      - "samples/**/*.csproj"
+  macOnly:
+    - "**/*Ios.csproj"
+    - "**/*Cocoa*.csproj"
+    - "**/*MacCatalyst.csproj"
+  windowsOnly:
+    # .NET Framework projects
+    - "**/*.AspNet.csproj"
+  legacy:
+    # In slnf files that we maintain purely for developer convenience,
+    # we typically exclude these projects
+    - "**/*.AspNet.csproj"
+
+filterConfigs:
+
+  - outputPath: Sentry-CI-Build-Linux.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "macOnly"
+        - "windowsOnly"
+      patterns:
+        - "**/*AndroidTestApp.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Maui.Device.TestApp.csproj"
+        - "**/*SourceGen.csproj"
+        - "**/*TestUtils*.csproj"
+
+  - outputPath: Sentry-CI-Build-macOS.slnf
+    include:
+      groups:
+        - "allProjects"
+      patterns:
+        - "modules/perfview/**/TraceEvent.csproj"
+        - "modules/perfview/**/FastSerialization.csproj"
+    exclude:
+      groups:
+        - "windowsOnly"
+      patterns:
+        - "**/*AndroidTestApp.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Maui.Device.TestApp.csproj"
+        - "**/*SourceGen.csproj"
+        - "**/Sentry.Samples.Android.csproj"
+
+  - outputPath: Sentry-CI-Build-Windows.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "macOnly"
+      patterns:
+        - "**/*AndroidTestApp.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Sentry.Maui.Device.TestApp.csproj"
+        - "**/*Sentry.Samples.Android.csproj"
+        - "**/*OpenTelemetry.AspNet.csproj"
+        - "**/*SourceGen.csproj"
+
+  - outputPath: Sentry-CI-CodeQL.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      patterns:
+        - "**/Sentry.Bindings*.csproj"
+        - "benchmarks/**/*.csproj"
+        - "samples/**/*.csproj"
+        - "test/**/*.csproj"
+
+  - outputPath: Sentry-CI-Pack.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      patterns:
+        - "**/Sentry.Profiling.csproj"
+        - "benchmarks/**/*.csproj"
+        - "samples/**/*.csproj"
+        - "test/**/*.csproj"
+
+  - outputPath: Sentry-CI-Test.slnf
+    include:
+      patterns:
+        - "test/**/*.csproj"
+    exclude:
+      patterns:
+        - "test/MauiTestUtils/**"
+        - "**/*TestApp.csproj"
+
+  - outputPath: SentryAspNetCore.slnf
+    include:
+      patterns:
+        - "**/*AspNetCore*.csproj"
+        - "**/Sentry.DiagnosticSource.csproj"
+        - "**/Sentry.Extensions.Logging.csproj" 
+        - "**/Sentry.Extensions.Logging.Tests.csproj" 
+        - "**/Sentry.OpenTelemetry.csproj" 
+        - "**/Sentry.csproj" 
+        - "**/Sentry.Testing.csproj" 
+        - "**/Sentry.Tests.csproj" 
+
+  - outputPath: SentryAzureFunctions.slnf
+    include:
+      patterns:
+        - "**/*AzureFunctions*.csproj"
+        - "**/Sentry.Samples.Console.Basic.csproj" 
+        - "**/Sentry.Extensions.Logging.csproj" 
+        - "**/Sentry.csproj" 
+        - "**/Sentry.Testing.csproj" 
+        - "**/Sentry.Testing.CrashableApp.csproj" 
+        - "**/Sentry.Tests.csproj" 
+
+  - outputPath: SentryCore.slnf
+    include:
+      patterns:
+        - "**/Sentry.Benchmarks.csproj"
+        - "**/Sentry.Samples.Console.Basic.csproj"
+        - "**/Sentry.Samples.Console.Profiling.csproj"
+        - "**/Sentry.Profiling.csproj"
+        - "**/Sentry.csproj"
+        - "**/Sentry.Profiling.Tests.csproj"
+        - "**/Sentry.Testing.csproj"
+        - "**/Sentry.Testing.CrashableApp.csproj"
+        - "**/Sentry.Tests.csproj"
+
+  - outputPath: SentryDiagnosticSource.slnf
+    include:
+      patterns:
+        - "**/*DiagnosticSource*.csproj"
+        - "**/Sentry.csproj"
+        - "**/Sentry.Extensions.Logging.csproj"
+        - "**/Sentry.Testing.csproj"
+        - "**/Sentry.Testing.CrashableApp.csproj"
+        - "**/Sentry.Tests.csproj"
+
+  - outputPath: SentryMobile.slnf
+    include:
+      patterns:
+        - "samples/**/*Android.csproj"
+        - "samples/**/*Ios.csproj"
+        - "samples/**/*MacCatalyst.csproj"
+        - "samples/**/*Maui.csproj"
+        - "src/**/Sentry.csproj"
+        - "src/**/*Android*.csproj"
+        - "src/**/*Bindings*.csproj"
+        - "src/**/Sentry.Extensions.Logging.csproj"
+        - "src/**/Sentry.Maui.csproj"
+        - "test/**/Sentry.Android.AssemblyReader.Tests.csproj"
+        - "test/**/Sentry.Extensions.Logging.Tests.csproj"
+        - "test/**/Sentry.Maui.Device.TestApp.csproj"
+        - "test/**/Sentry.Maui.Tests.csproj"
+        - "test/**/Sentry.Testing.csproj"
+        - "test/**/Sentry.Tests.csproj"
+        - "test/MauiTestUtils/**/*.csproj"
+
+  - outputPath: SentryNoMobile.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "legacy"
+      patterns:
+        - "**/*Bindings*.csproj"
+        - "**/*Android*.csproj"
+        - "**/*Ios*.csproj"
+        - "**/*Maui*.csproj"
+
+  - outputPath: SentryNoSamples.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "legacy"
+      patterns:
+        - "samples/**/*"
+        - "**/*Bindings*"
+        - "**/*DeviceTests*"
+        - "**/*TestApp*"
