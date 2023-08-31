@@ -11,7 +11,8 @@ jobs:
   build:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
+    env:
+      SOLUTION_FILTER: Sentry-CI-Build-${{ runner.os }}.slnf
     strategy:
       fail-fast: false
       matrix:
@@ -51,15 +52,15 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+        run: dotnet restore $SOLUTION_FILTER --nologo
 
       - name: Build (for non-release branch)
         if: env.CI_PUBLISHING_BUILD != 'true'
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo
+        run: dotnet build $SOLUTION_FILTER -c Release --no-restore --nologo
 
       - name: Build (for release branch)
         if: env.CI_PUBLISHING_BUILD == 'true'
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
+        run: dotnet build $SOLUTION_FILTER -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
@@ -82,7 +83,7 @@ jobs:
 
       - name: Create Nuget Packages (release branch only)
         if: env.CI_PUBLISHING_BUILD == 'true'
-        run: dotnet pack Sentry-CI-Pack.slnf -c Release --no-build --nologo
+        run: dotnet pack $SOLUTION_FILTER -c Release --no-build --nologo
 
       - name: Archive Nuget Packages (release branch only)
         if: env.CI_PUBLISHING_BUILD == 'true'
