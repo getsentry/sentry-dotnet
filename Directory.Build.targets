@@ -41,6 +41,38 @@
     </AssemblyAttribute>
   </ItemGroup>
 
+  <Target Name="OnlyTargetInstalledWorkloads" BeforeTargets="BeforeBuild" Condition="'$(WorkloadList)' == ''">
+
+    <Exec Command="dotnet workload list" ConsoleToMSBuild="true" StandardOutputImportance="Low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="WorkloadList"/>
+    </Exec>
+
+    <PropertyGroup>
+      <AndroidWorkloadVersion>$([System.Text.RegularExpressions.Regex]::Match($(WorkloadList), "\s*(android)\s+(\S+)\s+SDK\s+([0-9\.]+).+").Groups[3].Value)</AndroidWorkloadVersion>
+      <IosWorkloadVersion>$([System.Text.RegularExpressions.Regex]::Match($(WorkloadList), "\s*(ios)\s+(\S+)\s+SDK\s+([0-9\.]+).+").Groups[3].Value)</IosWorkloadVersion>
+      <MacCatalystWorkloadVersion>$([System.Text.RegularExpressions.Regex]::Match($(WorkloadList), "\s*(maccatalyst)\s+(\S+)\s+SDK\s+([0-9\.]+).+").Groups[3].Value)</MacCatalystWorkloadVersion>
+      <MauiWorkloadVersion>$([System.Text.RegularExpressions.Regex]::Match($(WorkloadList), "\s*(maui)\s+(\S+)\s+SDK\s+([0-9\.]+).+").Groups[3].Value)</MauiWorkloadVersion>
+    </PropertyGroup>
+
+    <!-- Disable mobile targets if workloads aren't installed. -->
+    <PropertyGroup Condition="'$(AndroidWorkloadVersion)' == ''">
+      <NO_ANDROID>true</NO_ANDROID>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(IosWorkloadVersion)' == ''">
+      <NO_IOS>true</NO_IOS>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(MacCatalystWorkloadVersion)' == ''">
+      <NO_MACCATALYST>true</NO_MACCATALYST>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(MauiWorkloadVersion)' == ''">
+      <NO_WINDOWS>true</NO_WINDOWS>
+    </PropertyGroup>
+    <PropertyGroup Condition="!Exists('$(MSBuildBinPath)\..\..\packs\Samsung.Tizen.Sdk')">
+      <NO_TIZEN>true</NO_TIZEN>
+    </PropertyGroup>
+
+  </Target>
+
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
   <Target Name="_SetPublishFolderTypeNoneOnDocFileItems"
     BeforeTargets="_ComputePublishLocation"
