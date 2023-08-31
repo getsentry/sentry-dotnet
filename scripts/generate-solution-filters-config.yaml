@@ -6,19 +6,19 @@
 solution: Sentry.sln
 
 groupConfigs:
-  - allProjects:
+  allProjects:
       - "benchmarks/**/*.csproj"
       - "src/**/*.csproj"
       - "test/**/*.csproj"
       - "samples/**/*.csproj"
-  - macOnly:
+  macOnly:
     - "**/*Ios.csproj"
     - "**/*Cocoa*.csproj"
     - "**/*MacCatalyst.csproj"
-  - windowsOnly:
+  windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
-  - legacy:
+  legacy:
     # In slnf files that we maintain purely for developer convenience,
     # we typically exclude these projects
     - "**/*.AspNet.csproj"

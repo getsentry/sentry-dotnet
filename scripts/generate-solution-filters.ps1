@@ -46,32 +46,52 @@ foreach($filter in $config.filterConfigs){
 
     $includedProjects = @()
 
-    # Add include groups
-    foreach($group in $filter.include.groups){
-      Write-Debug "Include $group"
-      foreach($include in $config.groupConfigs.$group){
-            $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
+    # Process includes, if present
+    if ($filter.ContainsKey("include"))
+    {
+      # Add include groups
+      if ($filter.include.ContainsKey("groups"))
+      {
+        foreach($group in $filter.include.groups){
+          Write-Debug "Include $group"
+          foreach($include in $config.groupConfigs.$group){
+                $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
+            }
         }
-    }
-
-    # Add ad-hoc includes
-    foreach($include in $filter.include.patterns){
-      Write-Debug "Include $include"
-      $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
-    }
-
-   # Remove exclude groups
-   foreach($group in $filter.exclude.groups){
-    Write-Debug "Exclude $group"
-    foreach($exclude in $config.groupConfigs.$group){
-        $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
       }
-   }
 
-    # Remove ad-hoc excludes
-    foreach($exclude in $filter.exclude.patterns){
-      Write-Debug "Exclude $exclude"
-      $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
+      # Add ad-hoc includes
+      if ($filter.include.ContainsKey("patterns"))
+      {
+        foreach($include in $filter.include.patterns){
+          Write-Debug "Include $include"
+          $includedProjects += ($projectPaths | Where-Object { $_ -like $include })
+        }
+      }
+    }
+
+    # Process excludes, if present
+    if ($filter.ContainsKey("exclude"))
+    {
+      # Remove exclude groups
+      if ($filter.exclude.ContainsKey("groups"))
+      {
+        foreach($group in $filter.exclude.groups){
+          Write-Debug "Exclude $group"
+          foreach($exclude in $config.groupConfigs.$group){
+            $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
+          }
+        }
+      }
+
+      # Remove ad-hoc excludes
+      if ($filter.exclude.ContainsKey("patterns"))
+      {
+        foreach($exclude in $filter.exclude.patterns){
+          Write-Debug "Exclude $exclude"
+          $includedProjects = ($includedProjects | Where-Object { $_ -notlike $exclude })
+        }
+      }
     }
 
     # Remove duplicates and sort
