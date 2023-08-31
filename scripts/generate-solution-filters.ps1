@@ -37,7 +37,7 @@ catch {
 Write-Debug "Searching the repository for projects..."
 $projectPaths = Get-ChildItem -Path $repoRoot -Recurse -Filter *.csproj |
         Select-Object -ExpandProperty FullName |
-        ForEach-Object { $_ -replace $repoRoot, '' }
+        ForEach-Object { $_.Replace($repoRoot, '').Replace('\', '/') } # Force linux style separators for glob matching
 Write-Debug "Found $($projectPaths.Count) projects"
 
 # Generate a solution filter for each filter config
@@ -107,8 +107,8 @@ foreach($filter in $config.filterConfigs){
     # Add all the projects we want to include
     $firstProject = $true;
     foreach($project in $includedProjects) {
-        # Escape path separators for Windows-style
-        $escapedProject = $project.Replace($separator, '\\')
+        # Solution Filter files use escaped Windows style path separators
+        $escapedProject = $project.Replace('/', '\\')  
         $line = "`n      ""$escapedProject"""
         if (!$firstProject) {
             $line = "," + $line
