@@ -14,8 +14,10 @@ if (-not $moduleInstalled) {
 
 import-module $yamlModule
 
-$scriptDir = $PSScriptRoot
 $separator = [IO.Path]::DirectorySeparatorChar.ToString()
+$lf = if ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT) { "`r`n" } else { "`n" }
+
+$scriptDir = $PSScriptRoot
 $repoRoot = Join-Path $scriptDir ('..' + $separator) -Resolve
 
 # Load configuration
@@ -109,7 +111,7 @@ foreach($filter in $config.filterConfigs){
     foreach($project in $includedProjects) {
         # Solution Filter files use escaped Windows style path separators
         $escapedProject = $project.Replace('/', '\\')  
-        $line = "`n      ""$escapedProject"""
+        $line = "$lf      ""$escapedProject"""
         if (!$firstProject) {
             $line = "," + $line
         }
@@ -118,7 +120,7 @@ foreach($filter in $config.filterConfigs){
     }
 
     # Finalize filter file
-    $content += "`n"
+    $content += "$lf"
     $content += @'
     ]
   }
