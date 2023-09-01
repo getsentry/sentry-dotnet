@@ -3,7 +3,7 @@ namespace Sentry.Tests;
 public class SentryPropagationContextTests
 {
     [Fact]
-    public void CreateFromHeaders_TraceHeaderNullButBaggageExists_CreatesPropagationContextWithoutDynamicSamplingContext()
+    public void CreateFromHeaders_TraceHeaderNullButBaggageExists_CreatesNewPropagationContext()
     {
         var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
@@ -15,7 +15,7 @@ public class SentryPropagationContextTests
 
         var propagationContext = SentryPropagationContext.CreateFromHeaders(null, null, baggageHeader);
 
-        Assert.Null(propagationContext.DynamicSamplingContext);
+        Assert.Null(propagationContext._dynamicSamplingContext);
     }
 
     [Fact]
@@ -32,7 +32,6 @@ public class SentryPropagationContextTests
 
         var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader);
 
-        Assert.NotNull(propagationContext.DynamicSamplingContext);
-        Assert.Equal(4, propagationContext.DynamicSamplingContext.Items.Count);
+        Assert.Equal(4, propagationContext.GetDynamicSamplingContext(new SentryOptions()).Items.Count);
     }
 }

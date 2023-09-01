@@ -8,22 +8,9 @@ internal class SentryPropagationContext
     public SpanId SpanId { get; }
     public SpanId? ParentSpanId { get; }
 
-    private DynamicSamplingContext? _dynamicSamplingContext;
-    public DynamicSamplingContext? DynamicSamplingContext
-    {
-        get => _dynamicSamplingContext;
-        set
-        {
-            if (_dynamicSamplingContext is null)
-            {
-                _dynamicSamplingContext = value;
-            }
-            else
-            {
-                throw new Exception("Attempted to set the DynamicSamplingContext but the context exists already.");
-            }
-        }
-    }
+    internal DynamicSamplingContext? _dynamicSamplingContext;
+
+    public DynamicSamplingContext GetDynamicSamplingContext(SentryOptions options) => _dynamicSamplingContext ??= this.CreateDynamicSamplingContext(options);
 
     internal SentryPropagationContext(
         SentryId traceId,
@@ -33,7 +20,7 @@ internal class SentryPropagationContext
         TraceId = traceId;
         SpanId = SpanId.Create();
         ParentSpanId = parentSpanId;
-        DynamicSamplingContext = dynamicSamplingContext;
+        _dynamicSamplingContext = dynamicSamplingContext;
     }
 
     public SentryPropagationContext()
