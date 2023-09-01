@@ -3,7 +3,7 @@ namespace Sentry.Tests;
 public class SentryPropagationContextTests
 {
     [Fact]
-    public void CreateFromHeaders_TraceHeaderNullButBaggageExists_CreatesNewPropagationContext()
+    public void CreateFromHeaders_TraceHeaderNullButBaggageExists_CreatesPropagationContextWithoutDynamicSamplingContext()
     {
         var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {

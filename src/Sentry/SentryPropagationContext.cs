@@ -10,7 +10,16 @@ internal class SentryPropagationContext
 
     internal DynamicSamplingContext? _dynamicSamplingContext;
 
-    public DynamicSamplingContext GetDynamicSamplingContext(SentryOptions options) => _dynamicSamplingContext ??= this.CreateDynamicSamplingContext(options);
+    public DynamicSamplingContext GetDynamicSamplingContext(SentryOptions options)
+    {
+        if (_dynamicSamplingContext is null)
+        {
+            options.LogDebug("Creating the Dynamic Sampling Context from the Propagation Context");
+            _dynamicSamplingContext = this.CreateDynamicSamplingContext(options);
+        }
+
+        return _dynamicSamplingContext;
+    }
 
     internal SentryPropagationContext(
         SentryId traceId,
