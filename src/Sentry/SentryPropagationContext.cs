@@ -10,7 +10,7 @@ internal class SentryPropagationContext
 
     internal DynamicSamplingContext? _dynamicSamplingContext;
 
-    public DynamicSamplingContext GetDynamicSamplingContext(SentryOptions options)
+    public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options)
     {
         if (_dynamicSamplingContext is null)
         {

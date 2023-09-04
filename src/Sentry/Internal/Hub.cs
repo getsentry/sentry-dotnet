@@ -216,7 +216,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
-        return propagationContext.GetDynamicSamplingContext(_options).ToBaggageHeader();
+        return propagationContext.GetOrCreateDynamicSamplingContext(_options).ToBaggageHeader();
     }
 
     public TransactionContext ContinueTrace(
@@ -351,7 +351,7 @@ internal class Hub : IHubEx, IDisposable
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetDynamicSamplingContext(_options);
+        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options);
     }
 
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
