@@ -32,10 +32,16 @@ internal class SentryPropagationContext
         _dynamicSamplingContext = dynamicSamplingContext;
     }
 
-    public SentryPropagationContext()
+    public SentryPropagationContext() : this(null)
+    { }
+
+    public SentryPropagationContext(SentryPropagationContext? other)
     {
-        TraceId = SentryId.Create();
-        SpanId = SpanId.Create();
+        TraceId = other?.TraceId ?? SentryId.Create();
+        SpanId = other?.SpanId ?? SpanId.Create();
+        ParentSpanId = other?.ParentSpanId;
+
+        _dynamicSamplingContext = other?._dynamicSamplingContext;
     }
 
     public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader)
