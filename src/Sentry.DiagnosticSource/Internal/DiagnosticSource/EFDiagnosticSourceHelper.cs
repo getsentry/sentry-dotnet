@@ -14,8 +14,21 @@ internal abstract class EFDiagnosticSourceHelper
     protected static string? GetDatabaseName(object? diagnosticSourceValue) =>
         diagnosticSourceValue?.GetStringProperty("Connection.Database");
 
-    protected static string? GetDatabaseSystem(object? diagnosticSourceValue) =>
-            diagnosticSourceValue?.GetProperty("Connection")?.GetType().Namespace;
+    protected static string? GetDatabaseSystem(object? diagnosticSourceValue)
+    {
+        var providerName = diagnosticSourceValue?.GetStringProperty("Context.Database.ProviderName");
+        if (providerName is null)
+        {
+            return null;
+        }
+
+        if (DatabaseProviderSystems.ProviderSystems.TryGetValue(providerName, out var dbSystem))
+        {
+            return dbSystem;
+        }
+
+        return null;
+    }
 
     protected static string? GetDatabaseServerAddress(object? diagnosticSourceValue) =>
         diagnosticSourceValue?.GetStringProperty("Connection.DataSource");
@@ -83,14 +96,14 @@ internal abstract class EFDiagnosticSourceHelper
             span.SetExtra(OTelKeys.DbName, dataBaseName);
         }
 
-        if (GetDatabaseSystem(diagnosticSourceValue) is { } databaseSystem)
+        if (GetDatabaseSystem(diagnosticSourceValue) is { } databaseProviderName)
         {
-            span.SetExtra("db.system", databaseSystem);
+            span.SetExtra(OTelKeys.DbSystem, databaseProviderName);
         }
 
         if (GetDatabaseServerAddress(diagnosticSourceValue) is { } databaseServerAddress)
         {
-            span.SetExtra("db.server", databaseServerAddress);
+            span.SetExtra(OTelKeys.DbServer, databaseServerAddress);
         }
     }
 

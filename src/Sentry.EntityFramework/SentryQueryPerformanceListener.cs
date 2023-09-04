@@ -6,10 +6,6 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     internal const string DbReaderKey = "db.query";
     internal const string DbNonQueryKey = "db.execute";
     internal const string DbScalarKey = "db.query.scalar";
-    
-    internal const string DbSystem = "db.system";
-    internal const string DbName = "db.name";
-    internal const string ServerAddress = "server.address";
 
     private SentryOptions _options;
     private IHub _hub;
@@ -21,35 +17,28 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     }
 
     public void ReaderExecuting(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
-        => CreateSpan(DbReaderKey, command, interceptionContext);
+        => CreateSpan(DbReaderKey, command.CommandText, interceptionContext);
 
     public void ReaderExecuted(DbCommand command, DbCommandInterceptionContext<DbDataReader> interceptionContext)
         => Finish(DbReaderKey, interceptionContext);
 
     public void NonQueryExecuting(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
-        => CreateSpan(DbNonQueryKey, command, interceptionContext);
+        => CreateSpan(DbNonQueryKey, command.CommandText, interceptionContext);
 
     public void NonQueryExecuted(DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
         => Finish(DbNonQueryKey, interceptionContext);
 
     public void ScalarExecuting(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
-        => CreateSpan(DbScalarKey, command, interceptionContext);
+        => CreateSpan(DbScalarKey, command.CommandText, interceptionContext);
 
     public void ScalarExecuted(DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
         => Finish(DbScalarKey, interceptionContext);
 
-    private void CreateSpan<T>(string key, DbCommand command,
+    private void CreateSpan<T>(string key, string? command,
         DbCommandInterceptionContext<T> interceptionContext)
     {
-        if (_hub.GetSpan()?.StartChild(key, command.CommandText) is { } span)
+        if (_hub.GetSpan()?.StartChild(key, command) is { } span)
         {
-            if (command.Connection is not null)
-            {
-                span.SetExtra(DbSystem, command.Connection.GetType().Namespace);
-                span.SetExtra(DbName, command.Connection.Database);
-                span.SetExtra(ServerAddress, command.Connection.DataSource);
-            }
-
             interceptionContext.AttachSpan(span);
         }
     }
