@@ -98,7 +98,8 @@ public class ScopeTests
 
         var clone = sut.Clone();
 
-        Assert.Same(propagationContext, clone.PropagationContext);
+        Assert.Equal(propagationContext.TraceId, clone.PropagationContext.TraceId);
+        Assert.Equal(propagationContext.SpanId, clone.PropagationContext.SpanId);
     }
 
     [Fact]

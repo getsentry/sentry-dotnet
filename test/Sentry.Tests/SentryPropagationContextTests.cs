@@ -3,6 +3,43 @@ namespace Sentry.Tests;
 public class SentryPropagationContextTests
 {
     [Fact]
+    public void CopyConstructor_CreatesCopy()
+    {
+        var original = new SentryPropagationContext();
+        original.GetOrCreateDynamicSamplingContext(new SentryOptions {Dsn = ValidDsn});
+
+        var copy = new SentryPropagationContext(original);
+
+        Assert.Equal(original.TraceId, copy.TraceId);
+        Assert.Equal(original.SpanId, copy.SpanId);
+        Assert.Equal(original._dynamicSamplingContext, copy._dynamicSamplingContext);
+    }
+
+    [Fact]
+    public void GetOrCreateDynamicSamplingContext_DynamicSamplingContextIsNull_CreatesDynamicSamplingContext()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn };
+        var propagationContext = new SentryPropagationContext();
+
+        Assert.Null(propagationContext._dynamicSamplingContext); // Sanity check
+        _ = propagationContext.GetOrCreateDynamicSamplingContext(options);
+
+        Assert.NotNull(propagationContext._dynamicSamplingContext);
+    }
+
+    [Fact]
+    public void GetOrCreateDynamicSamplingContext_DynamicSamplingContextIsNotNull_ReturnsSameDynamicSamplingContext()
+    {
+        var options = new SentryOptions { Dsn = ValidDsn };
+        var propagationContext = new SentryPropagationContext();
+        var firstDynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(options);
+
+        var secondDynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(options);
+
+        Assert.Same(firstDynamicSamplingContext, secondDynamicSamplingContext);
+    }
+
+    [Fact]
     public void CreateFromHeaders_TraceHeaderNullButBaggageExists_CreatesPropagationContextWithoutDynamicSamplingContext()
     {
         var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
@@ -32,6 +69,6 @@ public class SentryPropagationContextTests
 
         var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader);
 
-        Assert.Equal(4, propagationContext.GetDynamicSamplingContext(new SentryOptions()).Items.Count);
+        Assert.Equal(4, propagationContext.GetOrCreateDynamicSamplingContext(new SentryOptions()).Items.Count);
     }
 }
