@@ -6,6 +6,12 @@
 
 - `Hints` now accept attachments provided as a file path via `AddAttachment` method ([#2585](https://github.com/getsentry/sentry-dotnet/pull/2585))
 
+### Dependencies
+
+- Bump CLI from v2.20.5 to v2.20.6 ([#2590](https://github.com/getsentry/sentry-dotnet/pull/2590))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2206)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.5...2.20.6)
+
 ## 3.36.0
 
 ### Features
