@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Resolved an isse where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
+
 ## 3.36.0
 
 ### Features
