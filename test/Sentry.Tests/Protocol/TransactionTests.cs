@@ -554,8 +554,12 @@ public class TransactionTests
     // [Fact]
     private async Task Finish_SentryRequestTransactionGetsIgnored(string fakeParam)
     {
+        if (fakeParam != "")
+        {
+            _testOutputLogger.Log(SentryLevel.Debug, $"Test run {fakeParam}");
+        }
+
         // Arrange
-        _testOutputLogger.Log(SentryLevel.Debug, $"Test run {fakeParam}");
         var client = Substitute.For<ISentryClient>();
         var options = new SentryOptions
         {
