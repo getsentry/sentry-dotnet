@@ -32,8 +32,11 @@ internal class SentryPropagationContext
         _dynamicSamplingContext = dynamicSamplingContext;
     }
 
-    public SentryPropagationContext() : this(null)
-    { }
+    public SentryPropagationContext()
+    {
+        TraceId = SentryId.Create();
+        SpanId = SpanId.Create();
+    }
 
     public SentryPropagationContext(SentryPropagationContext? other)
     {
