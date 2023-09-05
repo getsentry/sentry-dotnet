@@ -56,7 +56,8 @@ public class SentryPropagationContextTests
         var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, null);
 
         Assert.Equal(traceHeader.TraceId, propagationContext.TraceId);
-        Assert.NotEqual(traceHeader.SpanId, propagationContext.SpanId);
+        Assert.NotEqual(traceHeader.SpanId, propagationContext.SpanId); // Sanity check
+        Assert.Equal(traceHeader.SpanId, propagationContext.ParentSpanId);
     }
 
     [Fact]
