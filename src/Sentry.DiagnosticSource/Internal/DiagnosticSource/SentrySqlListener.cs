@@ -49,7 +49,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
     {
         Debug.Assert(databaseAddress != string.Empty);
 
-        span.SetExtra(OTelKeys.DbName, databaseAddress);
+        span.SetExtra(OTelKeys.DbServer, databaseAddress);
     }
 
     private static void SetConnectionId(ISpan span, Guid? connectionId)
