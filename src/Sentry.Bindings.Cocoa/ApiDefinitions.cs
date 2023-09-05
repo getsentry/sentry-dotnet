@@ -2397,16 +2397,21 @@ interface PrivateSentrySDKOnly
     [Export ("getExtraContext")]
     NSDictionary ExtraContext { get; }
 
-    // +(uint64_t)startProfilingForTrace:(SentryId * _Nonnull)traceId;
+    // +(uint64_t)startProfilerForTrace:(SentryId * _Nonnull)traceId;
     [Static]
-    [Export ("startProfilingForTrace:")]
-    ulong StartProfilingForTrace (SentryId traceId);
+    [Export ("startProfilerForTrace:")]
+    ulong StartProfilerForTrace (SentryId traceId);
 
-    // +(NSDictionary<NSString *,id> * _Nullable)collectProfileForTrace:(SentryId * _Nonnull)traceId since:(uint64_t)startSystemTime;
+    // +(NSDictionary<NSString *,id> * _Nullable)collectProfileBetween:(uint64_t)startSystemTime and:(uint64_t)endSystemTime forTrace:(SentryId * _Nonnull)traceId;
     [Static]
-    [Export ("collectProfileForTrace:since:")]
+    [Export ("collectProfileBetween:and:forTrace:")]
     [return: NullAllowed]
-    NSDictionary<NSString, NSObject> CollectProfileForTrace (SentryId traceId, ulong startSystemTime);
+    NSDictionary<NSString, NSObject> CollectProfileBetween (ulong startSystemTime, ulong endSystemTime, SentryId traceId);
+
+    // +(void)discardProfilerForTrace:(SentryId * _Nonnull)traceId;
+    [Static]
+    [Export ("discardProfilerForTrace:")]
+    void DiscardProfilerForTrace (SentryId traceId);
 
     // @property (copy, nonatomic, class) SentryOnAppStartMeasurementAvailable _Nullable onAppStartMeasurementAvailable;
     [Static]

@@ -1,18 +1,29 @@
 namespace Sentry.Tests;
 
-public class HintTests
+public class HintTests : IDisposable
 {
+    private readonly string _testDirectory;
+
+    public HintTests()
+    {
+        _testDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(_testDirectory);
+    }
+
     [Fact]
-    public void AddAttachments_WithAttachments_AddsToHint()
+    public void AddAttachment_AddsToHint()
     {
         // Arrange
-        var hint = new Hint();
-        var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
-        var attachment2 = AttachmentHelper.FakeAttachment("attachment2");
+        var attachmentPath1 = Path.Combine(_testDirectory, Path.GetTempFileName());
+        var attachmentPath2 = Path.Combine(_testDirectory, Path.GetTempFileName());
+        File.Create(attachmentPath1);
+        File.Create(attachmentPath2);
+
+        var hint = new Hint(new SentryOptions());
 
         // Act
-        hint.Attachments.Add(attachment1);
-        hint.Attachments.Add(attachment2);
+        hint.AddAttachment(attachmentPath1);
+        hint.AddAttachment(attachmentPath2);
 
         // Assert
         Assert.Equal(2, hint.Attachments.Count);
@@ -36,8 +47,8 @@ public class HintTests
     {
         // Arrange
         var hint = new Hint();
-        var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
-        hint.Attachments.Add(attachment1);
+        var attachment1 = Path.Combine(_testDirectory, Path.GetTempFileName());
+        hint.AddAttachment(attachment1);
 
         // Act
         hint.Attachments.Clear();
@@ -145,4 +156,6 @@ public class HintTests
         hint.Attachments.Should().Contain(attachment1);
         hint.Attachments.Should().Contain(attachment2);
     }
+
+    public void Dispose() => Directory.Delete(_testDirectory, true);
 }
