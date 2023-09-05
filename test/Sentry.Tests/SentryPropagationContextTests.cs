@@ -40,6 +40,26 @@ public class SentryPropagationContextTests
     }
 
     [Fact]
+    public void CreateFromHeaders_HeadersNull_CreatesPropagationContextWithTraceAndSpanId()
+    {
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, null, null);
+
+        Assert.NotEqual(propagationContext.TraceId, SentryId.Empty);
+        Assert.NotEqual(propagationContext.SpanId, SpanId.Empty);
+    }
+
+    [Fact]
+    public void CreateFromHeaders_TraceHeaderNotNull_CreatesPropagationContextFromTraceHeader()
+    {
+        var traceHeader = new SentryTraceHeader(SentryId.Create(), SpanId.Create(), null);
+
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, null);
+
+        Assert.Equal(traceHeader.TraceId, propagationContext.TraceId);
+        Assert.NotEqual(traceHeader.SpanId, propagationContext.SpanId);
+    }
+
+    [Fact]
     public void CreateFromHeaders_TraceHeaderNullButBaggageExists_CreatesPropagationContextWithoutDynamicSamplingContext()
     {
         var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
