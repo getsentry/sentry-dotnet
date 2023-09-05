@@ -98,6 +98,7 @@ public class ScopeTests
 
         var clone = sut.Clone();
 
+        Assert.NotSame(propagationContext, clone); // Sanity check that it really is a clone
         Assert.Equal(propagationContext.TraceId, clone.PropagationContext.TraceId);
         Assert.Equal(propagationContext.SpanId, clone.PropagationContext.SpanId);
     }
