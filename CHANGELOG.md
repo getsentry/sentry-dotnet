@@ -6,6 +6,10 @@
 
 - `Hints` now accept attachments provided as a file path via `AddAttachment` method ([#2585](https://github.com/getsentry/sentry-dotnet/pull/2585))
 
+### Fixes
+
+- Resolved an isse where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
+
 ### Dependencies
 
 - Bump CLI from v2.20.5 to v2.20.6 ([#2590](https://github.com/getsentry/sentry-dotnet/pull/2590))
