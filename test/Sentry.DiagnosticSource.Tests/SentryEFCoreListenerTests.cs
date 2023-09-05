@@ -194,7 +194,7 @@ public class SentryEFCoreListenerTests
         public class ConnectionInfo
         {
             public string Database { get; } = "rentals";
-            public string DataSource { get; } = "localhost";
+            public string DataSource { get; } = "127.0.0.1";
         }
         public ConnectionInfo Connection { get; } = new();
 
@@ -237,7 +237,7 @@ public class SentryEFCoreListenerTests
         var efConn = "db username : password";
         var expectedDbName = "rentals";
         var expectedDbSystem = "mssql";
-        var expectedDbAddress = "localhost";
+        var expectedDbAddress = "127.0.0.1";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
@@ -303,7 +303,7 @@ public class SentryEFCoreListenerTests
         var efConn = "db username : password";
         var expectedDbName = "rentals";
         var expectedDbSystem = "mssql";
-        var expectedDbAddress = "localhost";
+        var expectedDbAddress = "127.0.0.1";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
