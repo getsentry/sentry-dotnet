@@ -84,7 +84,7 @@ jobs:
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@243af859f8ca30903d9d7f7936897ca0358ba691 # pin@v2
+        uses: gradle/gradle-build-action@ef76a971e2fa3f867b617efd72f2fbd72cf6f8bc # pin@v2
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
