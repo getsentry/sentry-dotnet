@@ -29,11 +29,6 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
-        if (GetDatabaseName(diagnosticSourceValue) is { } databaseName)
-        {
-            span.SetExtra(OTelKeys.DbName, databaseName);
-        }
-
         if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
         {
             SetConnectionId(span, connectionId);

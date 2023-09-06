@@ -59,7 +59,9 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           Extra: {
             db.command_id: Guid_1,
             db.connection_id: Guid_2,
-            db.name: SqlListenerTests.verify_RecordsEfAsync
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
+            db.server: (LocalDb)\SqlListenerTests,
+            db.system: mssql
           }
         },
         {
@@ -73,7 +75,9 @@ FROM [TestEntities] AS [t],
           Extra: {
             db.command_id: Guid_3,
             db.connection_id: Guid_4,
-            db.name: SqlListenerTests.verify_RecordsEfAsync
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
+            db.server: (LocalDb)\SqlListenerTests,
+            db.system: mssql
           }
         }
       ],

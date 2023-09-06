@@ -45,6 +45,13 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         span.SetExtra(OTelKeys.DbName, databaseName);
     }
 
+    private static void SetDatabaseAddress(ISpan span, string databaseAddress)
+    {
+        Debug.Assert(databaseAddress != string.Empty);
+
+        span.SetExtra(OTelKeys.DbServer, databaseAddress);
+    }
+
     private static void SetConnectionId(ISpan span, Guid? connectionId)
     {
         Debug.Assert(connectionId != Guid.Empty);
@@ -73,6 +80,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
         var parent = transaction.GetDbParentSpan();
         var span = parent.StartChild(operation);
+        span.SetExtra(OTelKeys.DbSystem, "sql");
         SetOperationId(span, value?.GetGuidProperty("OperationId"));
         SetConnectionId(span, value?.GetGuidProperty("ConnectionId"));
     }
@@ -160,6 +168,11 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             {
                 connectionSpan.Description = dbName;
                 SetDatabaseName(connectionSpan, dbName);
+            }
+
+            if (value.GetStringProperty("Connection.DataSource") is { } dbSource)
+            {
+                SetDatabaseAddress(connectionSpan, dbSource);
             }
         }
     }
