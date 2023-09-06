@@ -1,6 +1,6 @@
 using OpenTelemetry;
-using OpenTelemetry.Trace;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.OpenTelemetry;
@@ -16,6 +16,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
+    private readonly List<Action<Activity, ISpan, SentryOptions?>> _enrichers;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -31,6 +32,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
         _hub = hub;
         _options = hub.GetSentryOptions();
+        _enrichers = new ()
+        {
+            Enrichers.CaptureGraphQlFailedRequests
+        };
 
         if (_options is not { })
         {
@@ -165,6 +170,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 
         var status = GetSpanStatus(data.Status, attributes);
+        _enrichers.ForEach(action => action(data, span, _options));
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
@@ -207,7 +213,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
          IDictionary<string, object?> attributes)
     {
         // This function should loosely match the JavaScript implementation at:
-        // https://github.com/getsentry/sentry-javascript/blob/develop/packages/opentelemetry-node/src/utils/parse-otel-span-description.ts
+        // https://github.com/getsentry/sentry-javascript/blob/3487fa3af7aa72ac7fdb0439047cb7367c591e77/packages/opentelemetry-node/src/utils/parseOtelSpanDescription.ts
         // However, it should also follow the OpenTelemetry semantic conventions specification, as indicated.
 
         // HTTP span

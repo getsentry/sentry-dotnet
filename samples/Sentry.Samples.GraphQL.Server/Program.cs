@@ -40,6 +40,7 @@ public static class Program
             // o.Dsn = "...Your DSN Here...";
             o.EnableTracing = true;
             o.Debug = true;
+            o.SendDefaultPii = true;
             o.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
         });
 

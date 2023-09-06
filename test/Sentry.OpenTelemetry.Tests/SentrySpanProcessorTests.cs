@@ -261,6 +261,51 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void OnEnd_BadRequest_CaptureGraphQlFailedRequests()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        var httpRequest = Tracer.StartActivity(name: "transaction", kind: ActivityKind.Internal,
+            parentContext: default,
+            new Dictionary<string, object> {
+                { "http.status_code", 400 }
+            })!;
+        sut.OnStart(httpRequest);
+
+        var document = "{ me { name } }";
+        var graphQlRequest = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal,
+            parentContext: default,
+            new Dictionary<string, object> {
+                { SemanticConventions.AttributeGraphQlDocument, document }
+            })!;
+        graphQlRequest.DisplayName = "test display name";
+        sut.OnStart(graphQlRequest);
+
+        sut._map.TryGetValue(httpRequest.SpanId, out var httpSpan);
+
+        // Act
+        sut.OnEnd(graphQlRequest);
+        sut.OnEnd(httpRequest);
+
+        // Assert
+        if (httpSpan is not TransactionTracer transactionTracer)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transactionTracer.Request.Data.Should().Be(document);
+            // Even though it's an error for the client, nothing went wrong on the server
+            transactionTracer.Status.Should().Be(SpanStatus.Ok);
+        }
+    }
+
+    [Fact]
     public void OnEnd_FinishesTransaction()
     {
         // Arrange
