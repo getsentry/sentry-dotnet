@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using GraphQL;
 using GraphQL.Client.Http;
@@ -58,6 +59,26 @@ public static class Program
                 .UseTelemetry(telemetryOptions =>
                 {
                     telemetryOptions.RecordDocument = true; // <-- Configure GraphQL to use OpenTelemetry
+                    telemetryOptions.EnrichWithExecutionResult = (activity, _, executionResult) =>
+                    {
+                        // An example of how you can capture additional information to send to Sentry
+                        if (executionResult.Errors is not { } errors)
+                        {
+                            return;
+                        }
+
+                        if (errors.Count == 1)
+                        {
+                            activity.AddTag("Error", executionResult.Errors[0].Message);
+                        }
+                        else
+                        {
+                            for (var i = 0; i < errors.Count; i++)
+                            {
+                                activity.AddTag($"Errors[{i}]", executionResult.Errors[i].Message);
+                            }
+                        }
+                    };
                 })
             );
 
