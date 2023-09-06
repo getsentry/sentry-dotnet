@@ -40,11 +40,6 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
-        if (GetDatabaseName(diagnosticSourceValue) is { } databaseName)
-        {
-            span.SetExtra(OTelKeys.DbName, databaseName);
-        }
-
         if (GetCommandId(diagnosticSourceValue) is { } commandId)
         {
             SetCommandId(span, commandId);

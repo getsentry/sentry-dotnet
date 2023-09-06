@@ -14,6 +14,25 @@ internal abstract class EFDiagnosticSourceHelper
     protected static string? GetDatabaseName(object? diagnosticSourceValue) =>
         diagnosticSourceValue?.GetStringProperty("Connection.Database");
 
+    protected static string? GetDatabaseSystem(object? diagnosticSourceValue)
+    {
+        var providerName = diagnosticSourceValue?.GetStringProperty("Context.Database.ProviderName");
+        if (providerName is null)
+        {
+            return null;
+        }
+
+        if (DatabaseProviderSystems.ProviderSystems.TryGetValue(providerName, out var dbSystem))
+        {
+            return dbSystem;
+        }
+
+        return null;
+    }
+
+    protected static string? GetDatabaseServerAddress(object? diagnosticSourceValue) =>
+        diagnosticSourceValue?.GetStringProperty("Connection.DataSource");
+
     internal EFDiagnosticSourceHelper(IHub hub, SentryOptions options)
     {
         Options = options;
@@ -46,6 +65,7 @@ internal abstract class EFDiagnosticSourceHelper
         var parent = Transaction.GetDbParentSpan();
         var child = parent.StartChild(Operation, GetDescription(diagnosticSourceValue));
 
+        SetDbData(child, diagnosticSourceValue);
         SetSpanReference(child, diagnosticSourceValue);
     }
 
@@ -67,6 +87,24 @@ internal abstract class EFDiagnosticSourceHelper
         }
 
         sourceSpan.Finish(status);
+    }
+
+    protected void SetDbData(ISpan span, object? diagnosticSourceValue)
+    {
+        if (GetDatabaseName(diagnosticSourceValue) is { } dataBaseName)
+        {
+            span.SetExtra(OTelKeys.DbName, dataBaseName);
+        }
+
+        if (GetDatabaseSystem(diagnosticSourceValue) is { } databaseProviderName)
+        {
+            span.SetExtra(OTelKeys.DbSystem, databaseProviderName);
+        }
+
+        if (GetDatabaseServerAddress(diagnosticSourceValue) is { } databaseServerAddress)
+        {
+            span.SetExtra(OTelKeys.DbServer, databaseServerAddress);
+        }
     }
 
     protected void LogTransactionSpans()
@@ -102,7 +140,7 @@ internal abstract class EFDiagnosticSourceHelper
         return str?[(str.IndexOf('\n') + 1)..];
     }
 
-    protected abstract void SetSpanReference(ISpan span, object? diagnosticSourceValue);
-
     protected abstract ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue);
+
+    protected abstract void SetSpanReference(ISpan span, object? diagnosticSourceValue);
 }

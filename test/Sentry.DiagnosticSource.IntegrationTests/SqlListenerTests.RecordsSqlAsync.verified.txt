@@ -56,6 +56,8 @@
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_2,
+            db.server: (LocalDb)\SqlListenerTests,
+            db.system: sql,
             rows_sent: 1
           }
         },
@@ -68,7 +70,8 @@
           Extra: {
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
-            db.operation_id: Guid_3
+            db.operation_id: Guid_3,
+            db.system: sql
           }
         },
         {
@@ -80,7 +83,8 @@
           Extra: {
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
-            db.operation_id: Guid_4
+            db.operation_id: Guid_4,
+            db.system: sql
           }
         }
       ],

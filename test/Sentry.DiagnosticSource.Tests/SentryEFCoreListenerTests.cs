@@ -194,8 +194,19 @@ public class SentryEFCoreListenerTests
         public class ConnectionInfo
         {
             public string Database { get; } = "rentals";
+            public string DataSource { get; } = "127.0.0.1";
         }
         public ConnectionInfo Connection { get; } = new();
+
+        public class ContextInfo
+        {
+            public class DatabaseInfo
+            {
+                public string ProviderName { get; } = "Microsoft.EntityFrameworkCore.SqlServer";
+            }
+            public DatabaseInfo Database { get; } = new();
+        }
+        public ContextInfo Context { get; } = new();
     }
 
     private class FakeDiagnosticConnectionEventData : FakeDiagnosticEventData
@@ -225,6 +236,8 @@ public class SentryEFCoreListenerTests
         var efSql = "ef Junk\r\nSELECT * FROM ...";
         var efConn = "db username : password";
         var expectedDbName = "rentals";
+        var expectedDbSystem = "mssql";
+        var expectedDbAddress = "127.0.0.1";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
@@ -257,12 +270,18 @@ public class SentryEFCoreListenerTests
         Assert.Equal(expectedSql, commandSpan.Description);
 
         // Check DB Name is stored correctly
-        var connectionDbName =
-            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
-        Assert.Equal(expectedDbName, connectionDbName);
-        var commandDbName =
-            commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
-        Assert.Equal(expectedDbName, commandDbName);
+        Assert.Equal(expectedDbName, compilerSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
+        Assert.Equal(expectedDbName, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
+        Assert.Equal(expectedDbName, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
+
+        // Check DB System is stored correctly
+        Assert.Equal(expectedDbSystem, compilerSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        Assert.Equal(expectedDbSystem, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        Assert.Equal(expectedDbSystem, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+
+        // Check DB Server is stored correctly. The compiler span does not have access to the connection so it gets to skip
+        Assert.Equal(expectedDbAddress, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer));
+        Assert.Equal(expectedDbAddress, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer));
 
         // Check connections between spans.
         Assert.Equal(_fixture.Tracer.SpanId, compilerSpan.ParentSpanId);
@@ -283,6 +302,8 @@ public class SentryEFCoreListenerTests
         var efSql = "ef Junk\r\nSELECT * FROM ...";
         var efConn = "db username : password";
         var expectedDbName = "rentals";
+        var expectedDbSystem = "mssql";
+        var expectedDbAddress = "127.0.0.1";
 
         var queryEventData = new FakeDiagnosticEventData(efSql);
         var connectionEventData = new FakeDiagnosticConnectionEventData(efConn);
@@ -317,9 +338,18 @@ public class SentryEFCoreListenerTests
         Assert.Equal(expectedSql, commandSpan.Description);
 
         // Check DB Name is stored correctly
-        var dbName =
-            connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName);
-        Assert.Equal(expectedDbName, dbName);
+        Assert.Equal(expectedDbName, compilerSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
+        Assert.Equal(expectedDbName, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
+        Assert.Equal(expectedDbName, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
+
+        // Check DB System is stored correctly
+        Assert.Equal(expectedDbSystem, compilerSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        Assert.Equal(expectedDbSystem, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        Assert.Equal(expectedDbSystem, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+
+        // Check DB Server is stored correctly. The compiler span does not have access to the connection so it gets to skip
+        Assert.Equal(expectedDbAddress, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer));
+        Assert.Equal(expectedDbAddress, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer));
 
         // Check connections between spans.
         Assert.Equal(childSpan.SpanId, compilerSpan.ParentSpanId);
