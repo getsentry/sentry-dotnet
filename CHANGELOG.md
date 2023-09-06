@@ -4,7 +4,6 @@
 
 ### Features
 
-- graphql-client integration ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
 - graphql-dotnet server integration ([#2572](https://github.com/getsentry/sentry-dotnet/pull/2572))
 - `Hints` now accept attachments provided as a file path via `AddAttachment` method ([#2585](https://github.com/getsentry/sentry-dotnet/pull/2585))
 
