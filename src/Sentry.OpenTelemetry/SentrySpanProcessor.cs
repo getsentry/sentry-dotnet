@@ -34,7 +34,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         _options = hub.GetSentryOptions();
         _enrichers = new ()
         {
-            // Enrichers.CaptureGraphQlFailedRequests
+            Enrichers.GraphQl
         };
 
         if (_options is not { })
