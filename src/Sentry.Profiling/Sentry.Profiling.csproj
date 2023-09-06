@@ -4,15 +4,15 @@
     <!-- TODO check and update the list of supported frameworks. -->
     <TargetFrameworks>net6.0</TargetFrameworks>
     <PackageTags>$(PackageTags);Profiling;Diagnostic</PackageTags>
-    <Description>Performance profiling support for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <!-- TODO: re-enable packing once we've resolved all dependencies for Sentry.Profiling -->
     <IsPackable>false</IsPackable>
+    <Description>Performance profiling support for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-
     <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
-    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.2" />
+    <ProjectReference Include="../../modules/perfview/src/TraceEvent/TraceEvent.csproj" />
   </ItemGroup>
 
   <ItemGroup>

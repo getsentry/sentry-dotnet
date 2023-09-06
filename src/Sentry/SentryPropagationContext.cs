@@ -8,21 +8,17 @@ internal class SentryPropagationContext
     public SpanId SpanId { get; }
     public SpanId? ParentSpanId { get; }
 
-    private DynamicSamplingContext? _dynamicSamplingContext;
-    public DynamicSamplingContext? DynamicSamplingContext
+    internal DynamicSamplingContext? _dynamicSamplingContext;
+
+    public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options)
     {
-        get => _dynamicSamplingContext;
-        set
+        if (_dynamicSamplingContext is null)
         {
-            if (_dynamicSamplingContext is null)
-            {
-                _dynamicSamplingContext = value;
-            }
-            else
-            {
-                throw new Exception("Attempted to set the DynamicSamplingContext but the context exists already.");
-            }
+            options.LogDebug("Creating the Dynamic Sampling Context from the Propagation Context");
+            _dynamicSamplingContext = this.CreateDynamicSamplingContext(options);
         }
+
+        return _dynamicSamplingContext;
     }
 
     internal SentryPropagationContext(
@@ -33,13 +29,22 @@ internal class SentryPropagationContext
         TraceId = traceId;
         SpanId = SpanId.Create();
         ParentSpanId = parentSpanId;
-        DynamicSamplingContext = dynamicSamplingContext;
+        _dynamicSamplingContext = dynamicSamplingContext;
     }
 
     public SentryPropagationContext()
     {
         TraceId = SentryId.Create();
         SpanId = SpanId.Create();
+    }
+
+    public SentryPropagationContext(SentryPropagationContext? other)
+    {
+        TraceId = other?.TraceId ?? SentryId.Create();
+        SpanId = other?.SpanId ?? SpanId.Create();
+        ParentSpanId = other?.ParentSpanId;
+
+        _dynamicSamplingContext = other?._dynamicSamplingContext;
     }
 
     public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader)

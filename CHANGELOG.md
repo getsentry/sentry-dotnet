@@ -6,6 +6,30 @@
 
 - graphql-client integration ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
 - graphql-dotnet server integration ([#2572](https://github.com/getsentry/sentry-dotnet/pull/2572))
+- `Hints` now accept attachments provided as a file path via `AddAttachment` method ([#2585](https://github.com/getsentry/sentry-dotnet/pull/2585))
+
+### Fixes
+
+- Resolved an isse where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
+
+### Dependencies
+
+- Bump CLI from v2.20.5 to v2.20.6 ([#2590](https://github.com/getsentry/sentry-dotnet/pull/2590))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2206)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.5...2.20.6)
+- Bump Cocoa SDK from v8.10.0 to v8.11.0 ([#2594](https://github.com/getsentry/sentry-dotnet/pull/2594))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8110)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.10.0...8.11.0)
+
+## 3.36.0
+
+### Features
+
+- Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
+
+###  Fixes
+
+- Android: Fix proguard/r8 mapping file upload ([#2574](https://github.com/getsentry/sentry-dotnet/pull/2574))
 
 ### Dependencies
 

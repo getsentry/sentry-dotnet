@@ -1,6 +1,6 @@
 <Project InitialTargets="RestoreSubmodule">
   <!-- Always restore, to apply changes when we change branches. If no changes happened, this is pretty quick so no need to optimize by adding a Condition -->
-  <Target Name="RestoreSubmodule"
+  <Target Name="RestoreSubmodule">
     <Exec Command="git submodule update --init --recursive" />
   </Target>
 </Project>

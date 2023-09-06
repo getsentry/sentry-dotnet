@@ -35,7 +35,7 @@
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
 
       <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
-      <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true' Or '$(SentryUploadSources)' == 'true')">true</UseSentryCLI>
+      <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true' Or '$(SentryUploadSources)' == 'true' Or $(SentryUploadAndroidProguardMapping) == 'true')">true</UseSentryCLI>
     </PropertyGroup>
   </Target>
 
@@ -85,8 +85,10 @@
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
-      <SentryCLIUploadCommand>$(SentryCLIBaseCommand) debug-files upload</SentryCLIUploadCommand>
-      <SentryCLIUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIUploadCommand>
+      <SentryCLIDebugFilesUploadCommand>$(SentryCLIBaseCommand) debug-files upload</SentryCLIDebugFilesUploadCommand>
+      <SentryCLIDebugFilesUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIDebugFilesUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIDebugFilesUploadCommand>
+      <SentryCLIProGuardMappingUploadCommand>$(SentryCLIBaseCommand) upload-proguard</SentryCLIProGuardMappingUploadCommand>
+      <SentryCLIProGuardMappingUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIProGuardMappingUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIProGuardMappingUploadCommand>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(SentryCLI)' != ''">
@@ -132,7 +134,7 @@
       <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
     </ItemGroup>
 
-    <Exec Command="$(SentryCLIUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(OutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+    <Exec Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(OutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
 
@@ -154,7 +156,7 @@
     </PropertyGroup>
 
     <Exec Command="&quot;$(SentryCLI)&quot; debug-files bundle-sources $(_SentryDebugInfoFile)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" />
-    <Exec Command="$(SentryCLIUploadCommand) $(_SentrySourceBundle)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" Condition="Exists('$(_SentrySourceBundle)')">
+    <Exec Command="$(SentryCLIDebugFilesUploadCommand) $(_SentrySourceBundle)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" Condition="Exists('$(_SentrySourceBundle)')">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
 
@@ -163,12 +165,15 @@
   </Target>
 
   <!-- Upload Android Proguard mapping file to Sentry after the build. -->
-  <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build;UploadSymbolsToSentry"
+  <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build"
           Condition="'$(SentryUploadAndroidProguardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
 
     <Message Importance="High" Text="Preparing to upload Android Proguard mapping to Sentry for '$(MSBuildProjectName)': $(AndroidProguardMappingFile))" />
 
-    <Exec Command="&quot;$(SentryCLI)&quot; upload-proguard $(AndroidProguardMappingFile)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" />
+    <Exec Command="$(SentryCLIProGuardMappingUploadCommand) $(AndroidProguardMappingFile)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+    </Exec>
+    <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload proguard mapping." />
 
   </Target>
 </Project>

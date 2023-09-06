@@ -8,3 +8,6 @@
 	path = modules/Carthage
 	url = https://github.com/Carthage/Carthage
 	branch = xcframework-catalyst
+[submodule "modules/perfview"]
+	path = modules/perfview
+	url = https://github.com/getsentry/perfview.git

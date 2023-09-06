@@ -1,6 +1,0 @@
-﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=F2486CC8_002DFAB7_002D4775_002D976F_002DC5A4CF97867F_002Fdl_003ABen_002EDemystifier_003A_002E_002E_003F_002E_002E_003Fmodules_003FBen_002EDemystifier_003Fsrc_003FBen_002EDemystifier/@EntryIndexedValue">ExplicitlyExcluded</s:String>
-	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=QL/@EntryIndexedValue">QL</s:String>
-	<s:Boolean x:Key="/Default/Housekeeping/ExcludedProjects/ProjectMasksToIgnore/=Ben_002EDemystifier/@EntryIndexedValue">True</s:Boolean>
-    <s:String x:Key="/Default/Environment/PackageChecker/IgnoredPackage/=Microsoft_002EAspNetCore/@EntryIndexedValue">2.1.7</s:String>
-</wpf:ResourceDictionary>

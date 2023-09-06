@@ -367,6 +367,30 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_BeforeSendAddsAttachment_EnvelopeContainsAttachment()
+    {
+        // Arrange
+        _fixture.SentryOptions.SetBeforeSend((e, h) =>
+        {
+            h.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
+            return e;
+        });
+
+        var sut = _fixture.GetSut();
+        Envelope envelope = null;
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        // Act
+        _ = sut.CaptureEvent(new SentryEvent());
+
+        // Assert
+        envelope.Should().NotBeNull();
+        envelope.Items.Count.Should().Be(2);
+        Assert.True(envelope.Items[1].Header.ContainsKey("filename"));
+        Assert.True((string)envelope.Items[1].Header["filename"] == "foo.txt");
+    }
+
+    [Fact]
     public void CaptureEvent_EventProcessor_Gets_Hint()
     {
         // Arrange

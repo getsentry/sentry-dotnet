@@ -242,7 +242,7 @@ public class Scope : IEventLike, IHasDistribution
     internal Scope(SentryOptions? options, SentryPropagationContext? propagationContext)
     {
         Options = options ?? new SentryOptions();
-        PropagationContext = propagationContext ?? new SentryPropagationContext();
+        PropagationContext = new SentryPropagationContext(propagationContext);
     }
 
     // For testing. Should explicitly require SentryOptions.

@@ -1,11 +1,11 @@
 {
   "solution": {
-    "path": "Sentry.Full.sln",
+    "path": "Sentry.sln",
     "projects": [
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
+      "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
-      "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AzureFunctions.Worker\\Sentry.AzureFunctions.Worker.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
