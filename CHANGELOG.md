@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
+
 ## 3.39.0
 
 ### Features
