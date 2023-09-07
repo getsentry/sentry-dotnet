@@ -80,7 +80,20 @@ public class DisabledHub : IHub, IDisposable
     public BaggageHeader? GetBaggage() => null;
 
     /// <summary>
-    /// Returns null.
+    /// Returns sampled out transaction context.
+    /// </summary>
+    public TransactionContext ContinueTrace(
+        string? traceHeader,
+        string? baggageHeader,
+        string? name = null,
+        string? operation = null)
+    {
+        // Transactions from DisabledHub are always sampled out
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
+    }
+
+    /// <summary>
+    /// Returns sampled out transaction context.
     /// </summary>
     public TransactionContext ContinueTrace(
         SentryTraceHeader? traceHeader,

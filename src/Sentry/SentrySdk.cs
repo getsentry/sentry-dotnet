@@ -625,6 +625,20 @@ public static partial class SentrySdk
         => CurrentHub.GetBaggage();
 
     /// <summary>
+    /// Continues a trace based on HTTP header values provided as strings.
+    /// </summary>
+    /// <remarks>
+    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static TransactionContext ContinueTrace(
+        string? traceHeader,
+        string? baggageHeader,
+        string? name = null,
+        string? operation = null)
+        => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
+
+    /// <summary>
     /// Continues a trace based on HTTP header values.
     /// </summary>
     /// <remarks>
