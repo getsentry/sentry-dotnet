@@ -57,7 +57,6 @@ public class SentryHttpMessageHandlerBuilderFilterTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes =>
                 {

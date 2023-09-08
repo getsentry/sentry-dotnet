@@ -13,9 +13,6 @@ builder.WebHost.UseSentry(options =>
 
 var app = builder.Build();
 
-// Enable Sentry performance monitoring
-app.UseSentryTracing();
-
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
