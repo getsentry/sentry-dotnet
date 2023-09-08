@@ -6,6 +6,7 @@
 
 - Added additional `DB` attributes to automatically generated spans like `name` and `provider` ([#2583](https://github.com/getsentry/sentry-dotnet/pull/2583))
 - `Hints` now accept attachments provided as a file path via `AddAttachment` method ([#2585](https://github.com/getsentry/sentry-dotnet/pull/2585))
+- Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
 
 ### Fixes
 

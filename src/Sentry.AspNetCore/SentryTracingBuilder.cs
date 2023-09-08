@@ -41,8 +41,8 @@ internal class SentryTracingBuilder : IApplicationBuilder
     {
         var builder = InnerBuilder.Use(middleware);
         return (Properties.ContainsKey(EndpointRouteBuilder) && !this.IsSentryTracingRegistered())
-            // UseRouting sets a property on the builder that we can to detect when UseRouting has been added... we then
-            // register SentryTracing immediately afterwards (the best place for it)
+            // UseRouting sets a property on the builder that we use to detect when UseRouting has been added and we
+            // register SentryTracing immediately afterwards
             // https://github.com/dotnet/aspnetcore/blob/8eaf4b51f73ae2b0ed079e4f8253afb53e96b703/src/Http/Routing/src/Builder/EndpointRoutingApplicationBuilderExtensions.cs#L58-L62
             ? builder.UseSentryTracing()
             : builder;
