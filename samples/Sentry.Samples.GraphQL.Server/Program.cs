@@ -1,8 +1,14 @@
+/*
+ * This sample demonstrates how to instrument graphql-dotnet via Open Telemetry and have that
+ * trace information sent to Sentry.
+ */
+
 using System.Text.Json;
 using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using GraphQL.MicrosoftDI;
+using GraphQL.Telemetry;
 using GraphQL.Types;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -26,11 +32,11 @@ public static class Program
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracerProviderBuilder =>
                 tracerProviderBuilder
-                    .AddSource(Telemetry.ActivitySource.Name)
-                    .ConfigureResource(resource => resource.AddService(Telemetry.ServiceName))
+                    .AddSource(GraphQLTelemetryProvider.SourceName)  // <-- Ensure telemetry is gathered from graphql
+                    .ConfigureResource(resource => resource.AddService("Sentry.Samples.GraphQL.Server"))
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
+                    .AddSentry() // <-- Ensure telemetry is sent to Sentry
                 );
 
         builder.WebHost.UseSentry(o =>
@@ -39,6 +45,7 @@ public static class Program
             // o.Dsn = "...Your DSN Here...";
             o.EnableTracing = true;
             o.Debug = true;
+            o.SendDefaultPii = true;
             o.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
         });
 
@@ -56,6 +63,29 @@ public static class Program
                 .UseTelemetry(telemetryOptions =>
                 {
                     telemetryOptions.RecordDocument = true; // <-- Configure GraphQL to use OpenTelemetry
+                    telemetryOptions.EnrichWithExecutionResult = (activity, _, executionResult) =>
+                    {
+                        // An example of how you can capture additional information to send to Sentry.
+                        // Here we show how to capture the errors that get returned to GraphQL clients
+                        // and add them as tags on the Activity, which will show in Sentry as `otel`
+                        // context.
+                        if (executionResult.Errors is not { } errors)
+                        {
+                            return;
+                        }
+
+                        if (errors.Count == 1)
+                        {
+                            activity.AddTag("Error", executionResult.Errors[0].Message);
+                        }
+                        else
+                        {
+                            for (var i = 0; i < errors.Count; i++)
+                            {
+                                activity.AddTag($"Errors[{i}]", executionResult.Errors[i].Message);
+                            }
+                        }
+                    };
                 })
             );
 
