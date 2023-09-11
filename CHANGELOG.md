@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Dependencies
+
+- Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2207)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.6...2.20.7)
+
+## 3.39.0
+
 ### Features
 
 - Added additional `DB` attributes to automatically generated spans like `name` and `provider` ([#2583](https://github.com/getsentry/sentry-dotnet/pull/2583))
@@ -20,6 +28,9 @@
 - Bump Cocoa SDK from v8.10.0 to v8.11.0 ([#2594](https://github.com/getsentry/sentry-dotnet/pull/2594))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8110)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.10.0...8.11.0)
+- Bump Java SDK from v6.28.0 to v6.29.0 ([#2599](https://github.com/getsentry/sentry-dotnet/pull/2599))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6290)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.28.0...6.29.0)
 
 ## 3.36.0
 
