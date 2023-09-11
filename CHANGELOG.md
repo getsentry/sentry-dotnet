@@ -7,9 +7,6 @@
 - Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2207)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.6...2.20.7)
-- Bumps [actions/checkout](https://github.com/actions/checkout) from 3 to 4 ([#2605](https://github.com/getsentry/sentry-dotnet/pull/2605))
-  - [changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md#v400)
-  - [diff](https://github.com/actions/checkout/compare/v3...v4)
 
 ## 3.39.0
 
