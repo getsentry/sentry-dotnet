@@ -10,7 +10,7 @@ jobs:
     name: DocFX
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: nikeee/docfx-action@b9c2cf92e3b4aa06878a1410833a8828b4bdcd26 # pin@v1.0.0
         name: Build Documentation
         with:
