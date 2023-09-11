@@ -1,4 +1,8 @@
-using System.Diagnostics;
+/*
+ * This sample demonstrates how to instrument graphql-dotnet via Open Telemetry and have that
+ * trace information sent to Sentry.
+ */
+
 using System.Text.Json;
 using GraphQL;
 using GraphQL.Client.Http;
@@ -61,7 +65,10 @@ public static class Program
                     telemetryOptions.RecordDocument = true; // <-- Configure GraphQL to use OpenTelemetry
                     telemetryOptions.EnrichWithExecutionResult = (activity, _, executionResult) =>
                     {
-                        // An example of how you can capture additional information to send to Sentry
+                        // An example of how you can capture additional information to send to Sentry.
+                        // Here we show how to capture the errors that get returned to GraphQL clients
+                        // and add them as tags on the Activity, which will show in Sentry as `otel`
+                        // context.
                         if (executionResult.Errors is not { } errors)
                         {
                             return;

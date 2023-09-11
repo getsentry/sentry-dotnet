@@ -1,6 +1,6 @@
 using OpenTelemetry;
+using OpenTelemetry.Trace;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.OpenTelemetry;
@@ -16,7 +16,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
-    private readonly List<Action<Activity, ISpan, SentryOptions?>> _enrichers;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -32,10 +31,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
         _hub = hub;
         _options = hub.GetSentryOptions();
-        _enrichers = new ()
-        {
-            Enrichers.GraphQl
-        };
 
         if (_options is not { })
         {
@@ -170,7 +165,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 
         var status = GetSpanStatus(data.Status, attributes);
-        _enrichers.ForEach(action => action(data, span, _options));
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);

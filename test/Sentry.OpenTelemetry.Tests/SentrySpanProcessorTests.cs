@@ -261,40 +261,6 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
-    public void OnEnd_GraphQlRequest_SetsApiTarget()
-    {
-        // Arrange
-        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        _fixture.Options.SendDefaultPii = true;
-        var sut = _fixture.GetSut();
-
-        var httpRequest = Tracer.StartActivity(name: "transaction")!;
-        sut.OnStart(httpRequest);
-
-        var graphQlRequest = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal,
-            parentContext: default,
-            new Dictionary<string, object> {
-                { SemanticConventions.AttributeGraphQlOperationType, "query" }
-            })!;
-        graphQlRequest.DisplayName = "test display name";
-        sut.OnStart(graphQlRequest);
-
-        sut._map.TryGetValue(httpRequest.SpanId, out var httpSpan);
-
-        // Act
-        sut.OnEnd(graphQlRequest);
-        sut.OnEnd(httpRequest);
-
-        // Assert
-        if (httpSpan is not TransactionTracer transactionTracer)
-        {
-            Assert.Fail("Span is not a transaction tracer");
-            return;
-        }
-        transactionTracer.Request.ApiTarget.Should().Be("graphql");
-    }
-
-    [Fact]
     public void OnEnd_FinishesTransaction()
     {
         // Arrange

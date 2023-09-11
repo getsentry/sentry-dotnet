@@ -76,10 +76,6 @@ internal static class SemanticConventions
     public const string AttributeDbRedisDatabaseIndex = "db.redis.database_index";
     public const string AttributeDbMongoDbCollection = "db.mongodb.collection";
 
-    public const string AttributeGraphQlDocument = "graphql.document";
-    public const string AttributeGraphQlOperationName = "graphql.operation.name";
-    public const string AttributeGraphQlOperationType = "graphql.operation.type";
-
     public const string AttributeRpcSystem = "rpc.system";
     public const string AttributeRpcService = "rpc.service";
     public const string AttributeRpcMethod = "rpc.method";
