@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Added Sentry.AspNet.csproj back to Sentry-CI-Build-macOS.slnf ([#2612](https://github.com/getsentry/sentry-dotnet/pull/2612))
+- Nuget package not being created for Sentry.AspNet ([#2613](https://github.com/getsentry/sentry-dotnet/pull/2613))
 
 ## 3.39.0
 
