@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Added Sentry.AspNet.csproj back to Sentry-CI-Build-macOS.slnf ([#2612](https://github.com/getsentry/sentry-dotnet/pull/2612))
+
 ## 3.39.0
 
 ### Features
