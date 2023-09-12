@@ -1,11 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### Fixes
-
-- Nuget package not being created for Sentry.AspNet ([#2613](https://github.com/getsentry/sentry-dotnet/pull/2613))
-
 ## 3.39.0
 
 ### Features
