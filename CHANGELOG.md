@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
+
 ### Dependencies
 
 - Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))

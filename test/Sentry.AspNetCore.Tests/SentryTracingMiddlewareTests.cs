@@ -33,7 +33,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes =>
                 {
@@ -83,7 +82,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes =>
                 {
@@ -127,7 +125,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes => routes.Map("/person/{id}", _ => Task.CompletedTask));
             }));
@@ -193,7 +190,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes => routes.Map("/person/{id}", async _ =>
                 {
@@ -299,7 +295,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes => routes.Map("/person/{id}", async _ =>
                 {
@@ -363,7 +358,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes =>
                 {
@@ -417,7 +411,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes =>
                 {
@@ -475,7 +468,6 @@ public class SentryTracingMiddlewareTests
             .Configure(app =>
             {
                 app.UseRouting();
-                app.UseSentryTracing();
 
                 app.UseEndpoints(routes => routes.Map("/person/{id}", context =>
                 {
@@ -522,7 +514,8 @@ public class SentryTracingMiddlewareTests
             })
             .Configure(app =>
             {
-                app.UseRouting();
+                // We have to do this before routing, otherwise it won't wrap our SentryTracingMiddleware, which is what
+                // binds the ExceptionToSpanMap
                 app.Use(async (_, c) =>
                 {
                     try
@@ -534,7 +527,7 @@ public class SentryTracingMiddlewareTests
                         // We just want to know if it got into Sentry's Hub
                     }
                 });
-                app.UseSentryTracing();
+                app.UseRouting();
 
                 app.UseEndpoints(routes => routes.Map("/person/{id}", _ => throw exception));
             }));
