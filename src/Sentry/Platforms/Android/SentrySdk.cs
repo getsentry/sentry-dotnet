@@ -220,7 +220,9 @@ public static partial class SentrySdk
             return null;
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         var packageInfo = AppContext.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+#pragma warning restore CS0618 // Type or member is obsolete
         return packageInfo == null ? null : $"{packageName}@{packageInfo.VersionName}+{packageInfo.GetVersionCode()}";
     }
 
@@ -234,7 +236,9 @@ public static partial class SentrySdk
             return null;
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         var packageInfo = AppContext.PackageManager?.GetPackageInfo(packageName, PackageInfoFlags.Permissions);
+#pragma warning restore CS0618 // Type or member is obsolete
         return packageInfo?.GetVersionCode();
     }
 
@@ -251,7 +255,10 @@ public static partial class SentrySdk
 
 #pragma warning disable CS0618
         // obsolete on Android >= P (28)
+#pragma warning disable CA1422
+        // obsoleted on: 'Android' 28.0 and later.
         return packageInfo.VersionCode;
+#pragma warning restore CA1422
 #pragma warning restore CS0618
     }
 }

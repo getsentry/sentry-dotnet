@@ -52,9 +52,11 @@ internal static class CollectionsExtensions
     public static IReadOnlyList<T> AsReadOnly<T>(this IList<T> list) =>
         list as IReadOnlyList<T> ?? new ReadOnlyCollection<T>(list);
 
+#if !NET7_0_OR_GREATER
     public static IReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
         where TKey : notnull =>
         new ReadOnlyDictionary<TKey, TValue>(dictionary);
+#endif
 
     public static IEnumerable<T> ExceptNulls<T>(this IEnumerable<T?> source) =>
         source.Where(x => x != null).Select(x => x!);
