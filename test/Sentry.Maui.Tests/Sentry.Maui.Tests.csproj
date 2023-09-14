@@ -5,9 +5,15 @@
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
-    <UseMaui>true</UseMaui>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net8.0'">
+    <UseMaui>true</UseMaui>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <!-- Floating version to avoid dealing with preview package changes: 8.0.0-rc.1.9171 -->
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.*" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
