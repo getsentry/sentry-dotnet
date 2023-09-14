@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
@@ -20,7 +21,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<ISentryEventProcessor, AspNetCoreEventProcessor>();
         services.AddSingleton<ISentryEventExceptionProcessor, AspNetCoreExceptionProcessor>();
+
+        services.AddHttpContextAccessor();
         services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
+        services.TryAddSingleton<ISentryUserFactory, DefaultUserFactory>();
 
         services
             .AddSingleton<IRequestPayloadExtractor, FormRequestPayloadExtractor>()

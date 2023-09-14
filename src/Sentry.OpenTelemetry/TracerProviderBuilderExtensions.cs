@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
@@ -29,6 +30,18 @@ public static class TracerProviderBuilderExtensions
     {
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
-        return tracerProviderBuilder.AddProcessor<SentrySpanProcessor>();
+        return tracerProviderBuilder.AddProcessor(services =>
+        {
+            List<IOpenTelemetryEnricher> enrichers = new();
+
+            // AspNetCoreEnricher
+            var userFactory = services.GetService<ISentryUserFactory>();
+            if (userFactory != null)
+            {
+                enrichers.Add(new AspNetCoreEnricher(userFactory));
+            }
+
+            return new SentrySpanProcessor(SentrySdk.CurrentHub, enrichers);
+        });
     }
 }
