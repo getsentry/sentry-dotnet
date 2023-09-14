@@ -27,6 +27,10 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.0'
+
       - name: Rebuild Solution Filters
         shell: pwsh
         run: scripts/generate-solution-filters.ps1
