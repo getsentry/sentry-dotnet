@@ -36,7 +36,7 @@ public static class TracerProviderBuilderExtensions
 
             // AspNetCoreEnricher
             var userFactory = services.GetService<ISentryUserFactory>();
-            if (userFactory != null)
+            if (userFactory is not null)
             {
                 enrichers.Add(new AspNetCoreEnricher(userFactory));
             }
