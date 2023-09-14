@@ -25,8 +25,14 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
         {
             if (options.HttpProxy != null)
             {
-                httpClientHandler.Proxy = options.HttpProxy;
-                options.LogInfo("Using Proxy: {0}", options.HttpProxy);
+                // [CA1416] This call site is reachable on: 'ios' 10.0 and later, 'maccatalyst' 10.0 and later. 'HttpClientHandler.Proxy' is unsupported on: 'ios' all versions, 'maccatalyst' all versions.
+#if NET6_0_OR_GREATER
+                if (!OperatingSystem.IsIOS() && !OperatingSystem.IsMacCatalyst())
+#endif
+                {
+                    httpClientHandler.Proxy = options.HttpProxy;
+                    options.LogInfo("Using Proxy: {0}", options.HttpProxy);
+                }
             }
 
             // If the platform supports automatic decompression
