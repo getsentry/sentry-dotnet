@@ -33,7 +33,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
     }
 
-    internal SentrySpanProcessor(IHub hub, List<IOpenTelemetryEnricher>? enrichers)
+    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
     {
         _hub = hub;
         _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
