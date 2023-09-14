@@ -34,11 +34,11 @@ runs:
       with:
         dotnet-version: '8.0.x'
 
-    # Workaround for Tizen issue
-    # See https://github.com/dotnet/sdk/issues/33192
-    - name: Pin to .NET SDK 7.0.203
-      run: dotnet new globaljson --sdk-version 7.0.203 --force
-      shell: bash
+#    # Workaround for Tizen issue
+#    # See https://github.com/dotnet/sdk/issues/33192
+#    - name: Pin to .NET SDK 7.0.203
+#      run: dotnet new globaljson --sdk-version 7.0.203 --force
+#      shell: bash
 
     - name: Dependency Caching
       uses: actions/cache@v3
