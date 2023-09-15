@@ -6,11 +6,11 @@
       Target net6.0 so we can run unit tests on platform-neutral code.
       Target other platforms so we can include platform-specific code, and bundle native SDKs.
     -->
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_WINDOWS)' == '' And !$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android;net7.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net7.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-maccatalyst;net7.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_WINDOWS)' == '' And !$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net8.0-windows10.0.19041.0;net7.0-windows10.0.19041.0</TargetFrameworks>
 
     <!-- Target Tizen only if the Tizen SDK workload pack is installed. -->
 <!--    <TargetFrameworks Condition="'$(NO_TIZEN)' == '' And Exists('$(MSBuildBinPath)\..\..\packs\Samsung.Tizen.Sdk')">$(TargetFrameworks);net7.0-tizen</TargetFrameworks>-->
@@ -23,15 +23,20 @@
 
     <!-- We'll need to package this only on OSX, so we get the iOS native support. -->
     <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
-
-    <!--
-      Imports MAUI dependencies.
-      Requires the MAUI .NET workload to be installed with:
-        dotnet workload install maui
-    -->
-    <UseMaui>true</UseMaui>
-
   </PropertyGroup>
+
+  <!--
+    Imports MAUI dependencies.
+    Requires the MAUI .NET workload to be installed with:
+      dotnet workload install maui
+  -->
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net8.0'))">
+    <UseMaui>true</UseMaui>
+  </PropertyGroup>
+  <!-- MA002: Starting with .NET 8, setting  <UseMaui>true</UseMaui>  does not automatically include NuGet package references in your project. -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8.0'))">
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.0-rc.1.9171" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
