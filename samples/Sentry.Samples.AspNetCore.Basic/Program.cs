@@ -31,9 +31,6 @@ public class Program
             {
                 app.UseRouting();
 
-                // Enable Sentry performance monitoring
-                app.UseSentryTracing();
-
                 // An example ASP.NET Core middleware that throws an
                 // exception when serving a request to path: /throw
                 app.UseEndpoints(endpoints =>

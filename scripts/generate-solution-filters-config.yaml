@@ -48,8 +48,6 @@ filterConfigs:
         - "modules/perfview/**/TraceEvent.csproj"
         - "modules/perfview/**/FastSerialization.csproj"
     exclude:
-      groups:
-        - "windowsOnly"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"

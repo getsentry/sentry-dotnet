@@ -30,7 +30,7 @@ public class HomeController : Controller
         {
             if (@params == null)
             {
-                _logger.LogWarning("Param is null!", @params);
+                _logger.LogWarning("Param {param} is null!", @params);
             }
 
             await _gameService.FetchNextPhaseDataAsync();

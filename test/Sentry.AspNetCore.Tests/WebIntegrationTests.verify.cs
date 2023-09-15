@@ -52,7 +52,6 @@ public class WebIntegrationTests
                 .Configure(app =>
                 {
                     app.UseRouting();
-                    app.UseSentryTracing();
                     app.UseEndpoints(routeBuilder => routeBuilder.MapControllers());
                 }));
 
@@ -119,7 +118,6 @@ public class WebIntegrationTests
                 .Configure(app =>
                 {
                     app.UseRouting();
-                    app.UseSentryTracing();
                     app.UseCors();
                     app.UseEndpoints(_ => _.MapControllers());
                 }));

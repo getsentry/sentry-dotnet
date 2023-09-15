@@ -207,7 +207,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
          IDictionary<string, object?> attributes)
     {
         // This function should loosely match the JavaScript implementation at:
-        // https://github.com/getsentry/sentry-javascript/blob/develop/packages/opentelemetry-node/src/utils/parse-otel-span-description.ts
+        // https://github.com/getsentry/sentry-javascript/blob/3487fa3af7aa72ac7fdb0439047cb7367c591e77/packages/opentelemetry-node/src/utils/parseOtelSpanDescription.ts
         // However, it should also follow the OpenTelemetry semantic conventions specification, as indicated.
 
         // HTTP span

@@ -5,6 +5,18 @@
 ### Features
 
 - The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
+- Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
+
+### Dependencies
+
+- Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2207)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.6...2.20.7)
+## 3.39.1
+
+### Fixes
+
+- Added Sentry.AspNet.csproj back to Sentry-CI-Build-macOS.slnf ([#2612](https://github.com/getsentry/sentry-dotnet/pull/2612))
 
 ## 3.39.0
 
