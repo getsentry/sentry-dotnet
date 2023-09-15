@@ -11,8 +11,7 @@
     <UseMaui>true</UseMaui>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <!-- Floating version to avoid dealing with preview package changes: 8.0.0-rc.1.9171 -->
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.*" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.0-rc.1.9171" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />

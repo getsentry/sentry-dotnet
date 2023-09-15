@@ -13,7 +13,7 @@
     <TargetFrameworks Condition="'$(NO_WINDOWS)' == '' And !$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
 
     <!-- Target Tizen only if the Tizen SDK workload pack is installed. -->
-    <TargetFrameworks Condition="'$(NO_TIZEN)' == '' And Exists('$(MSBuildBinPath)\..\..\packs\Samsung.Tizen.Sdk')">$(TargetFrameworks);net7.0-tizen</TargetFrameworks>
+<!--    <TargetFrameworks Condition="'$(NO_TIZEN)' == '' And Exists('$(MSBuildBinPath)\..\..\packs\Samsung.Tizen.Sdk')">$(TargetFrameworks);net7.0-tizen</TargetFrameworks>-->
 
     <!--
       This flag allows us to target Windows-specific code when building on OSX, so we can build and pack all platforms on a single machine.
