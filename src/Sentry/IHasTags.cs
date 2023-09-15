@@ -37,4 +37,19 @@ public static class HasTagsExtensions
             hasTags.SetTag(key, value);
         }
     }
+
+    /// <summary>
+    /// Get tags or null.
+    /// </summary>
+    /// <param name="hasTags"></param>
+    /// <returns></returns>
+    public static IReadOnlyDictionary<string, string>? GetTagsOrNull(this IHasTags hasTags)
+    {
+        if (hasTags is SpanTracer s)
+        {
+            return s.InternalTags;
+        }
+
+        return hasTags.Tags;
+    }
 }

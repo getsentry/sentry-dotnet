@@ -400,7 +400,7 @@ public static class SentryOptionsExtensions
     public static void ApplyDefaultTags(this SentryOptions options, IHasTags hasTags)
     {
         foreach (var defaultTag in options.DefaultTags
-            .Where(t => !hasTags.Tags.TryGetValue(t.Key, out _)))
+            .Where(t => hasTags.GetTagsOrNull()?.TryGetValue(t.Key, out _) is not true))
         {
             hasTags.SetTag(defaultTag.Key, defaultTag.Value);
         }

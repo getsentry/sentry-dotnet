@@ -258,7 +258,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         Fingerprint = tracer.Fingerprint;
         _breadcrumbs = tracer.Breadcrumbs.ToList();
         _extra = tracer.Extra.ToDictionary();
-        _tags = tracer.Tags.ToDictionary();
+        _tags = tracer.GetTagsOrNull()?.ToDictionary() ?? new Dictionary<string, string>();
         _spans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
             .Select(s => new Span(s)).ToArray();

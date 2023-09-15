@@ -52,6 +52,8 @@ public class SpanTracer : ISpan
 
     private ConcurrentDictionary<string, string>? _tags;
 
+    internal ConcurrentDictionary<string, string>? InternalTags => _tags;
+
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
 
