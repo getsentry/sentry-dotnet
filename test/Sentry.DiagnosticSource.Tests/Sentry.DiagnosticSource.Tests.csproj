@@ -4,6 +4,13 @@
     <TargetFrameworks>net8.0;net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
   </PropertyGroup>
 
+  <!-- Test EF Core 8 on .NET 8 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0-rc.1.23419.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0-rc.1.23419.6" />
+  </ItemGroup>
+
   <!-- Test EF Core 7 on .NET 7 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
