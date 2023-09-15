@@ -43,7 +43,7 @@ public static class HasTagsExtensions
     /// </summary>
     /// <param name="hasTags"></param>
     /// <returns></returns>
-    public static IReadOnlyDictionary<string, string>? GetTagsOrNull(this IHasTags hasTags)
+    internal static IReadOnlyDictionary<string, string>? GetTagsOrNull(this IHasTags hasTags)
     {
         if (hasTags is SpanTracer s)
         {
