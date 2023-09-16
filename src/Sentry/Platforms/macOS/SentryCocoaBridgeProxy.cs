@@ -63,46 +63,46 @@ internal static class SentryCocoaBridgeProxy
         return true;
     }
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeLoadLibrary")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeLoadLibrary")]
     private static extern int LoadLibrary();
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeOptionsNew")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeOptionsNew")]
     private static extern IntPtr OptionsNew();
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeOptionsSetString")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeOptionsSetString")]
     private static extern void OptionsSetString(IntPtr options, string name, string value);
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeOptionsSetInt")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeOptionsSetInt")]
     private static extern void OptionsSetInt(IntPtr options, string name, int value);
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeStartWithOptions")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeStartWithOptions")]
     private static extern void StartWithOptions(IntPtr options);
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeCrashedLastRun")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeCrashedLastRun")]
     public static extern int CrashedLastRun();
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeClose")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeClose")]
     public static extern void Close();
 
-    [DllImport("bridge")]
+    [DllImport("libBridge")]
     public static extern void SentryNativeBridgeAddBreadcrumb(string timestamp, string? message, string? type, string? category, int level);
 
-    [DllImport("bridge")]
+    [DllImport("libBridge")]
     public static extern void SentryNativeBridgeSetExtra(string key, string? value);
 
-    [DllImport("bridge")]
+    [DllImport("libBridge")]
     public static extern void SentryNativeBridgeSetTag(string key, string value);
 
-    [DllImport("bridge")]
+    [DllImport("libBridge")]
     public static extern void SentryNativeBridgeUnsetTag(string key);
 
-    [DllImport("bridge")]
+    [DllImport("libBridge")]
     public static extern void SentryNativeBridgeSetUser(string? email, string? userId, string? ipAddress, string? username);
 
-    [DllImport("bridge")]
+    [DllImport("libBridge")]
     public static extern void SentryNativeBridgeUnsetUser();
 
-    [DllImport("bridge", EntryPoint = "SentryNativeBridgeGetInstallationId")]
+    [DllImport("libBridge", EntryPoint = "SentryNativeBridgeGetInstallationId")]
     public static extern string GetInstallationId();
 
     // https://github.com/getsentry/sentry-cocoa/blob/881a95561aedd5bac232089866de9a476d18c85a/Sources/Sentry/SentrySDK.m#L414-L418
