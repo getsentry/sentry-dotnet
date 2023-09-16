@@ -9,3 +9,5 @@ Compiling the bridge code
 ```
 clang -shared -framework Foundation SentryNativeBridge.m -o bridge.dylib
 ```
+
+TODO: include dSYMs

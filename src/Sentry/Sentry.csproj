@@ -4,6 +4,8 @@
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
+   <!-- Condition above was used because all mobile targets have non empty string and also shouldn't be CLSCompliant. But ideally we find a better way to do this now-->
+    <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == 'macos'">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -12,6 +14,7 @@
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net6.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_NATIVE_MACOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-macos</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
@@ -21,6 +24,7 @@
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+  <Import Project="Platforms\Native\Sentry.Native.props" Condition="'$(TargetPlatformIdentifier)' == 'macos'" />
 
   <!--
     Ben.Demystifier is compiled directly into Sentry.

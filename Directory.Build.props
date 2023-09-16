@@ -18,12 +18,14 @@
   </PropertyGroup>
 
   <!-- NO_MOBILE can be passed in via an environment variable or a build property to disable all mobile targets -->
-  <PropertyGroup Condition="'$(NO_MOBILE)' == 'true'">
+  <PropertyGroup Condition="'$(NO_MOBILE)' == ''">
     <NO_ANDROID>true</NO_ANDROID>
     <NO_IOS>true</NO_IOS>
     <NO_MACCATALYST>true</NO_MACCATALYST>
     <NO_WINDOWS>true</NO_WINDOWS>
     <NO_TIZEN>true</NO_TIZEN>
+    <!-- Not really mobile so leaving it out -->
+    <!-- <NO_NATIVE_MACOS>true</NO_NATIVE_MACOS> -->
   </PropertyGroup>
 
   <!--
