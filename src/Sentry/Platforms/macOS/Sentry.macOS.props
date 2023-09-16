@@ -1,0 +1,20 @@
+<Project>
+
+<!-- TODO: Only add on AOT builds?-->
+  <ItemGroup>
+
+    <SentryNativeSdk Include="$(MSBuildThisFileDirectory)..\..\..\..\lib\sentry-native\macos\SentryNativeBridge.m" />
+    <SentryNativeSdk Include="$(MSBuildThisFileDirectory)..\..\..\..\lib\sentry-native\macos\bridge.dylib" />
+    <SentryNativeSdk Include="$(MSBuildThisFileDirectory)..\..\..\..\lib\sentry-native\macos\Sentry\Sentry.dylib" />
+    <SentryNativeSdk Include="$(MSBuildThisFileDirectory)..\..\..\..\lib\sentry-native\macos\Sentry\Sentry.dylib.dSYM" />
+
+    <None Include="@(SentryNativeSdk)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <Link>Platforms/macOS/Native/Sentry.dylib</Link>
+      <PackagePath>native\macOS\native</PackagePath>
+    </None>
+
+  </ItemGroup>
+
+</Project>

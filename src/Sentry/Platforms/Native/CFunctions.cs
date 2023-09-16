@@ -1,4 +1,4 @@
-namespace Sentry.Desktop;
+namespace Sentry.Native;
 
 // https://github.com/getsentry/sentry-unity/blob/3eb6eca6ed270c5ec023bf75ee53c1ca00bb7c82/src/Sentry.Unity/NativeUtils/CFunctions.cs
 

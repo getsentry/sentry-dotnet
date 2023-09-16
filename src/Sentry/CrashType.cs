@@ -29,9 +29,9 @@ public enum CrashType
         JavaBackgroundThread,
 #endif
 
-#if __MOBILE__
+#if __MOBILE__ || MACOS
         /// <summary>
-        /// A native operation that will crash the appliction will be performed by a C library.
+        /// A native operation that will crash the application will be performed by a C library.
         /// </summary>
         Native
 #endif

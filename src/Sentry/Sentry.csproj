@@ -24,8 +24,21 @@
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
-  <Import Project="Platforms\Native\Sentry.Native.props" Condition="'$(TargetPlatformIdentifier)' != 'android'
+  <!-- TODO: figure out why '$(TargetPlatformIdentifier)' == 'macos' isn't working-->
+  <Import Project="Platforms\macOS\Sentry.macOS.props" Condition="'$(TargetPlatformIdentifier)' != 'android'
     and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'" />
+
+  <!-- All code under Platform is conditionally included depending on the platform we're building-->
+  <ItemGroup>
+    <Compile Remove="Platforms/**/*.cs" />
+  </ItemGroup>
+  <!-- TODO: figure out why '$(TargetPlatformIdentifier)' == 'macos' isn't working-->
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'android'
+    and '$(TargetPlatformIdentifier)' != 'ios'
+    and '$(TargetPlatformIdentifier)' != 'maccatalyst'
+    and '$(TargetPlatformIdentifier)' != ''">
+    <Compile Include="Platforms/macOS/**/*.cs" />
+  </ItemGroup>
 
   <!--
     Ben.Demystifier is compiled directly into Sentry.

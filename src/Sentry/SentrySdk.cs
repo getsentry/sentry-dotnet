@@ -62,6 +62,9 @@ public static partial class SentrySdk
 #endif
         }
 #endif
+#if MACOS
+        Sentry.macOS.SentryCocoaBridge.Configure(options);
+#endif
         return new Hub(options);
     }
 
@@ -208,6 +211,9 @@ public static partial class SentrySdk
         var oldHub = Interlocked.Exchange(ref CurrentHub, DisabledHub.Instance);
         (oldHub as IDisposable)?.Dispose();
         ProcessInfo.Instance = null;
+#if MACOS
+        Sentry.macOS.SentryCocoaBridge.Close();
+#endif
     }
 
     private class DisposeHandle : IDisposable
@@ -697,6 +703,10 @@ public static partial class SentrySdk
 #elif __IOS__
             case CrashType.Native:
                 SentryCocoaSdk.Crash();
+                break;
+#elif MACOS
+            case CrashType.Native:
+                Sentry.macOS.SentryCocoaBridgeProxy.crash();
                 break;
 #endif
             default:

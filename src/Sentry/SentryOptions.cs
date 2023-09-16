@@ -22,7 +22,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry SDK options
 /// </summary>
-#if __MOBILE__
+#if __MOBILE__ || MACOS
 public partial class SentryOptions
 #else
 public class SentryOptions
