@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Mobile support changes
+
+.NET 6 on mobile is out of support since May 2023. With .NET 8 coming,
+it won't be possible to build .NET 6 Mobile specific targets.
+For that reason, we're moving the mobile specific TFMs from `net6.0-platform` to `net7.0-platform`.
+Mobile apps still on .NET 6 will pull the `Sentry` .NET 6, which offers the .NET-only features,
+without native/platform specific bindings and SDKs. See[this ticket for more details](https://github.com/getsentry/sentry-dotnet/issues/2623).
+
+- Drop .NET 6 Mobile in favor of .NET 7 ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2604))
+
 ### Features
 
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
@@ -11,6 +21,7 @@
 - Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2207)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.6...2.20.7)
+
 ## 3.39.1
 
 ### Fixes
