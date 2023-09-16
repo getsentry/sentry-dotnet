@@ -10,7 +10,8 @@
     <None Include="@(SentryNativeSdk)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>
-      <PackagePath>native</PackagePath>
+      <Link>Platforms/Native/macOS/Sentry.dylib</Link>
+      <PackagePath>native\macOS</PackagePath>
     </None>
 
   </ItemGroup>
