@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0-macos</TargetFramework>
     <ApplicationId>io.sentry.testing.crashable.app</ApplicationId>
-    <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+<!--    <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>-->
     <EnableCodeSigning>false</EnableCodeSigning>
 <!--    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>-->
 

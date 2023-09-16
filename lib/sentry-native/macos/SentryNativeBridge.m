@@ -336,3 +336,9 @@ void SentryNativeBridgeWriteScope( // clang-format off
                     withObject:@"unity"];
     });
 }
+
+void crashBridge()
+{
+    int *p = 0;
+    *p = 0;
+}

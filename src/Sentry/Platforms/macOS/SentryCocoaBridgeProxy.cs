@@ -105,7 +105,6 @@ internal static class SentryCocoaBridgeProxy
     [DllImport("libBridge", EntryPoint = "SentryNativeBridgeGetInstallationId")]
     public static extern string GetInstallationId();
 
-    // https://github.com/getsentry/sentry-cocoa/blob/881a95561aedd5bac232089866de9a476d18c85a/Sources/Sentry/SentrySDK.m#L414-L418
-    [DllImport("Sentry")]
-    public static extern void crash();
+    [DllImport("libBridge", EntryPoint = "crashBridge")]
+    public static extern void Crash();
 }

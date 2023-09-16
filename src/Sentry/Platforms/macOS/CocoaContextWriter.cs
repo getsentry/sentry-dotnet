@@ -68,7 +68,7 @@ internal class CocoaContextWriter
 
     // Note: we only forward information that's missing or significantly different in cocoa SDK events.
     // Additionally, there's currently no way to update existing contexts, so no more Device info for now...
-    [DllImport("__Internal")]
+    [DllImport("libBridge")]
     private static extern void SentryNativeBridgeWriteScope(
         // // string? AppStartTime,
         // string? AppBuildType,

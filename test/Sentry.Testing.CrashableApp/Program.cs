@@ -6,9 +6,12 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        Console.WriteLine("Hello world 2");
-        // Console.WriteLine($"Running CrashableApp with {args[0]}");
-        // var crashType = (CrashType)Enum.Parse(typeof(CrashType), args[0]);
-        // SentrySdk.CauseCrash(crashType);
+#if MACOS
+        Console.WriteLine("Running on a Mac target");
+#endif
+        Console.WriteLine($"Running CrashableApp with {args[0]}");
+        var crashType = (CrashType)Enum.Parse(typeof(CrashType), args[0]);
+        Console.WriteLine($"Crashing with {crashType}");
+        SentrySdk.CauseCrash(crashType);
     }
 }
