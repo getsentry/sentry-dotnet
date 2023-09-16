@@ -8,9 +8,9 @@
 it won't be possible to build .NET 6 Mobile specific targets.
 For that reason, we're moving the mobile specific TFMs from `net6.0-platform` to `net7.0-platform`.
 Mobile apps still on .NET 6 will pull the `Sentry` .NET 6, which offers the .NET-only features,
-without native/platform specific bindings and SDKs. See[this ticket for more details](https://github.com/getsentry/sentry-dotnet/issues/2623).
+without native/platform specific bindings and SDKs. See [this ticket for more details](https://github.com/getsentry/sentry-dotnet/issues/2623).
 
-- Drop .NET 6 Mobile in favor of .NET 7 ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2604))
+- Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
 
 ### Features
 
