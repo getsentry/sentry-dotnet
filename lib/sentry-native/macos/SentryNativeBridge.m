@@ -24,7 +24,7 @@ int SentryNativeBridgeLoadLibrary()
     if (loadStatus == -1) {
         loadStatus = 0; // init to "error"
         do {
-            void *dylib = dlopen("@executable_path/../PlugIns/Sentry.dylib", RTLD_LAZY);
+            void *dylib = dlopen("libSentry.dylib", RTLD_LAZY);
             if (!dylib) {
                 NSLog(@"Sentry (bridge): Couldn't load Sentry.dylib - dlopen() failed");
                 break;

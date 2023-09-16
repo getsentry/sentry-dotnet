@@ -63,7 +63,7 @@ public static partial class SentrySdk
         }
 #endif
 #if MACOS
-        // Sentry.macOS.SentryCocoaBridge.Configure(options);
+        Sentry.macOS.SentryCocoaBridge.Configure(options);
 #endif
         return new Hub(options);
     }
@@ -212,7 +212,7 @@ public static partial class SentrySdk
         (oldHub as IDisposable)?.Dispose();
         ProcessInfo.Instance = null;
 #if MACOS
-        // Sentry.macOS.SentryCocoaBridge.Close();
+        Sentry.macOS.SentryCocoaBridge.Close();
 #endif
     }
 
