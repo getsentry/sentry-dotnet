@@ -86,7 +86,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         if (requestData is null)
         {
             // not an HTTP trigger
-            return SentrySdk.ContinueTrace(null, null, transactionName, "function");
+            return SentrySdk.ContinueTrace((SentryTraceHeader?)null, (BaggageHeader?)null, transactionName, "function");
         }
 
         var httpMethod = requestData.Method.ToUpperInvariant();
