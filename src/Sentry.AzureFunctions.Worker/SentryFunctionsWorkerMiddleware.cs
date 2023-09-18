@@ -1,22 +1,25 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
+using Sentry.Extensibility;
 
 namespace Sentry.AzureFunctions.Worker;
 
 internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
     private readonly IHub _hub;
+    private readonly IDiagnosticLogger? _logger;
     private static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
 
     public SentryFunctionsWorkerMiddleware(IHub hub)
     {
         _hub = hub;
+        _logger = hub.GetSentryOptions()?.DiagnosticLogger;
     }
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        var transactionContext = await ContinueTraceAsync(context);
+        var transactionContext = await StartOrContinueTraceAsync(context);
         var transaction = _hub.StartTransaction(transactionContext);
         Exception? unhandledException = null;
 
@@ -74,7 +77,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
-    private static async Task<TransactionContext> ContinueTraceAsync(FunctionContext context)
+    private async Task<TransactionContext> StartOrContinueTraceAsync(FunctionContext context)
     {
         var transactionName = context.FunctionDefinition.Name;
 
@@ -110,8 +113,8 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
             TransactionNameCache.TryAdd(transactionNameKey, transactionName);
         }
 
-        var traceHeader = requestData.TryGetSentryTraceHeader(null);
-        var baggageHeader = requestData.TryGetBaggageHeader(null);
+        var traceHeader = requestData.TryGetSentryTraceHeader(_logger);
+        var baggageHeader = requestData.TryGetBaggageHeader(_logger);
 
         return SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, "function");
     }
