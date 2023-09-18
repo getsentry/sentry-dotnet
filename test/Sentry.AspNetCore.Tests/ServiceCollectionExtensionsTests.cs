@@ -68,6 +68,7 @@ public class ServiceCollectionExtensionsTests
         Assert.Same(typeof(DefaultRequestPayloadExtractor), last.ImplementationType);
     }
 
+#pragma warning disable CS0618
     [Fact]
     public void AddSentry_DefaultUserFactory_Registered()
     {
@@ -75,4 +76,5 @@ public class ServiceCollectionExtensionsTests
         _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(IUserFactory)
                                                            && d.ImplementationType == typeof(DefaultUserFactory)));
     }
+#pragma warning restore CS0618
 }

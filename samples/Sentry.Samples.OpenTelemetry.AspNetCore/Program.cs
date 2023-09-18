@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
@@ -22,11 +23,18 @@ builder.WebHost.UseSentry(options =>
 {
     //options.Dsn = "...Your DSN...";
     options.Debug = builder.Environment.IsDevelopment();
+    options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 
+builder.Services
+    .AddAuthorization()
+    .AddAuthentication(FakeAuthHandler.AuthenticationScheme)
+    .AddScheme<AuthenticationSchemeOptions, FakeAuthHandler>(FakeAuthHandler.AuthenticationScheme, _ => { });
+
 var app = builder.Build();
+app.UseAuthorization();
 
 var httpClient = new HttpClient();
 app.MapGet("/hello", async context =>
@@ -47,6 +55,13 @@ app.MapGet("/hello", async context =>
 });
 
 app.MapGet("/echo/{name}", (string name) => $"Hi {name}!");
+
+app.MapGet("/private", async context  =>
+{
+    var user = context.User;
+    var result = $"Hello {user.Identity?.Name}";
+    await context.Response.WriteAsync(result);
+}).RequireAuthorization();
 
 app.MapGet("/throw", _ => throw new Exception("test"));
 
