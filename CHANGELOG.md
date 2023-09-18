@@ -23,6 +23,7 @@ API Changes:
 
 ### Features
 
+- The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
 
 ### Dependencies
