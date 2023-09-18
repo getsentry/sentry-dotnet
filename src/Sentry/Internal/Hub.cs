@@ -226,7 +226,7 @@ internal class Hub : IHubEx, IDisposable
         string? operation = null)
     {
         SentryTraceHeader? sentryTraceHeader = null;
-        if (traceHeader != null)
+        if (traceHeader is not null)
         {
             sentryTraceHeader = SentryTraceHeader.Parse(traceHeader);
         }
