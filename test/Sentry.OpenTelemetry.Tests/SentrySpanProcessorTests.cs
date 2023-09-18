@@ -18,6 +18,8 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         public ISystemClock Clock { get; set; }
 
+        public List<IOpenTelemetryEnricher> Enrichers { get; set; } = new();
+
         public Fixture()
         {
             Options = new SentryOptions
@@ -36,7 +38,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         public SentrySpanProcessor GetSut()
         {
-            return new SentrySpanProcessor(GetHub());
+            return new SentrySpanProcessor(GetHub(), Enrichers);
         }
     }
 
@@ -258,6 +260,35 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
             spanTracer.Status.Should().Be(SpanStatus.Ok);
         }
+    }
+
+    [Fact]
+    public void OnEnd_SpansEnriched()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var mockEnricher = Substitute.For<IOpenTelemetryEnricher>();
+        mockEnricher.Enrich(Arg.Do<ISpan>(s => s.SetTag("foo", "bar")), Arg.Any<Activity>(), Arg.Any<IHub>(), Arg.Any<SentryOptions>());
+        _fixture.Enrichers.Add(mockEnricher);
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity(name: "transaction")!;
+        sut.OnStart(parent);
+
+        sut._map.TryGetValue(parent.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(parent);
+
+        // Assert
+        if (span is not TransactionTracer transactionTracer)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        transactionTracer.Tags.TryGetValue("foo", out var foo).Should().BeTrue();
+        foo.Should().Be("bar");
     }
 
     [Fact]
