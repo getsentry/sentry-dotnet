@@ -119,4 +119,10 @@ public class TransactionContext : SpanContext, ITransactionContext, IHasTransact
         : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, null, null, nameSource)
     {
     }
+
+    private TransactionContext(string name, SentryTraceHeader? traceHeader)
+        : base(SpanId.Empty, traceHeader?.SpanId ?? SpanId.Empty, traceHeader?.TraceId ?? SentryId.Empty, string.Empty, null, null, false)
+        => Name = name;
+
+    internal static TransactionContext CreateNoop(string name, SentryTraceHeader? traceHeader) => new(name, traceHeader);
 }

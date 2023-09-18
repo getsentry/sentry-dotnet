@@ -9,7 +9,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
-    private static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
+    internal static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
 
     public SentryFunctionsWorkerMiddleware(IHub hub)
     {
@@ -19,7 +19,10 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        var transactionContext = await StartOrContinueTraceAsync(context);
+        // Get the HTTP request data
+        var requestData = await context.GetHttpRequestDataAsync();
+
+        var transactionContext = StartOrContinueTrace(context, requestData);
         var transaction = _hub.StartTransaction(transactionContext);
         Exception? unhandledException = null;
 
@@ -77,12 +80,9 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
-    private async Task<TransactionContext> StartOrContinueTraceAsync(FunctionContext context)
+    internal TransactionContext StartOrContinueTrace(FunctionContext context, HttpRequestData? requestData)
     {
         var transactionName = context.FunctionDefinition.Name;
-
-        // Get the HTTP request data
-        var requestData = await context.GetHttpRequestDataAsync();
         if (requestData is null)
         {
             // not an HTTP trigger

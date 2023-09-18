@@ -134,4 +134,30 @@ public class SentryFunctionsWorkerMiddlewareTests
 
         functionInvoked.Should().BeFalse();
     }
+
+    [Fact]
+    public void StartOrContinueTraceAsync_HeadersPresentInContext_ContinuesTrace()
+    {
+        var transactionName = "test-name";
+        var traceId = SentryId.Parse("38cd75cb85944900b68b79d61b195606");
+        var spanId = SpanId.Parse("9f7dd7a8c909ff80");
+
+        var functionContext = Substitute.For<FunctionContext>();
+        var functionDefinition = Substitute.For<FunctionDefinition>();
+        functionContext.FunctionDefinition.Returns(functionDefinition);
+        functionDefinition.Name.Returns(nameof(HttpFunction));
+        var requestData = Substitute.For<HttpRequestData>(functionContext);
+        requestData.Method.Returns("GET");
+        requestData.Headers.Returns(new HttpHeadersCollection {{ "sentry-trace", $"{traceId}-{spanId}" }});
+        // To skip the whole loading of assembly shenanigans
+        SentryFunctionsWorkerMiddleware.TransactionNameCache.Add($"{functionDefinition.EntryPoint}-GET", transactionName);
+
+        var sut = _fixture.GetSut();
+
+        var transactionContext = sut.StartOrContinueTrace(functionContext, requestData);
+
+        transactionContext.Name.Should().Be(transactionName);
+        transactionContext.TraceId.Should().Be(traceId);
+        transactionContext.ParentSpanId.Should().Be(spanId);
+    }
 }
