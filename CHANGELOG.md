@@ -26,6 +26,10 @@ API Changes:
 - The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
 
+### Fixes
+
+- Resolved issue identifying users with OpenTelemetry ([#2618](https://github.com/getsentry/sentry-dotnet/pull/2618))
+
 ### Dependencies
 
 - Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
