@@ -8,6 +8,7 @@ namespace Sentry;
 /// </summary>
 public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
 {
+    private static readonly char[] HexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
 
     private readonly long _value;
@@ -54,24 +55,33 @@ public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
 #else
             stackalloc byte[8];
 #endif
-        long random;
-
-        do
-        {
-            Random.NextBytes(buf);
-            random = BitConverter.ToInt64(
+        Random.NextBytes(buf);
+        var random = BitConverter.ToInt64(
 #if NETSTANDARD2_0 || NET461
-                buf.ToArray(), 0);
+            buf.ToArray(), 0);
 #else
-                buf);
+            buf);
 #endif
-        } while (random == 0);
 
         return new SpanId(random);
     }
 
     /// <inheritdoc />
-    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _) => writer.WriteStringValue(ToString());
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? _)
+    {
+        Span<byte> convertedBytes = stackalloc byte[sizeof(long)];
+        Unsafe.As<byte, long>(ref convertedBytes[0]) = _value;
+
+        Span<char> output = stackalloc char[16];
+        for (var i = 0; i < convertedBytes.Length; i++)
+        {
+            var value = convertedBytes[i];
+            output[i * 2] = HexChars[value >> 4];
+            output[i * 2 + 1] = HexChars[value & 0xF];
+        }
+
+        writer.WriteStringValue(output);
+    }
 
     /// <summary>
     /// Parses from string.
