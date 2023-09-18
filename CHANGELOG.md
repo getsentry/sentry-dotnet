@@ -4,6 +4,7 @@
 
 ### Features
 
+- Added distributed tracing without performance for Azure Function Workers ([#2630](https://github.com/getsentry/sentry-dotnet/pull/2630))
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
 
 ### Dependencies
