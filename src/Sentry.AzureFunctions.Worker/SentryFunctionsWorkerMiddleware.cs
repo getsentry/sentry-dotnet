@@ -88,7 +88,8 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
         var httpMethod = requestData.Method.ToUpperInvariant();
         var transactionNameKey = $"{context.FunctionDefinition.EntryPoint}-{httpMethod}";
-        if (!TransactionNameCache.TryGetValue(transactionNameKey, out var value))
+
+        if (!TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
         {
             // Find the HTTP Trigger attribute via reflection
             var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);
