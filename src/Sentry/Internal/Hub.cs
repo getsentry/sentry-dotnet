@@ -232,7 +232,7 @@ internal class Hub : IHubEx, IDisposable
         }
 
         BaggageHeader? sentryBaggageHeader = null;
-        if (baggageHeader != null)
+        if (baggageHeader is not null)
         {
             sentryBaggageHeader = BaggageHeader.TryParse(baggageHeader, onlySentry: true);
         }
