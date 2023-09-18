@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-### Mobile support changes
+### Breaking changes
+
+Mobile support:
 
 .NET 6 on mobile is out of support since May 2023. With .NET 8 coming,
 it won't be possible to build .NET 6 Mobile specific targets.
