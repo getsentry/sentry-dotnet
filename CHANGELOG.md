@@ -8,7 +8,7 @@
 
 ### Fixes
 
-- Identifying Users with OpenTelemetry doesn't work ([#2618](https://github.com/getsentry/sentry-dotnet/pull/2618))
+- Resolved issue identifying users with OpenTelemetry ([#2618](https://github.com/getsentry/sentry-dotnet/pull/2618))
 
 ### Dependencies
 
