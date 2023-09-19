@@ -14,7 +14,7 @@
 
 ### Azure Functions Beta
 
-- Package name changed from `Sentry.AzureFunctions.Worker` to `Sentry.Azure.Functions.Worker`. Note AzureFunctions now is split by a `.`.
+- Package name changed from `Sentry.AzureFunctions.Worker` to `Sentry.Azure.Functions.Worker`. Note AzureFunctions now is split by a `.`. ([#2637](https://github.com/getsentry/sentry-dotnet/pull/2637))
 
 ### Dependencies
 
