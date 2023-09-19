@@ -93,10 +93,10 @@ filterConfigs:
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Tests.csproj"
 
-  - outputPath: SentryAzureFunctions.slnf
+  - outputPath: SentryAzure.Functions.slnf
     include:
       patterns:
-        - "**/*AzureFunctions*.csproj"
+        - "**/*Azure.Functions*.csproj"
         - "**/Sentry.Samples.Console.Basic.csproj"
         - "**/Sentry.Extensions.Logging.csproj"
         - "**/Sentry.csproj"

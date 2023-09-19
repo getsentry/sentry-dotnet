@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
-namespace Sentry.AzureFunctions.Worker;
+namespace Sentry.Azure.Functions.Worker;
 
 /// <summary>
 /// Sentry extension methods for Azure Functions with Isolated Worker SDK
@@ -18,7 +18,7 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
     /// Uses Sentry integration.
     /// </summary>
     public static IFunctionsWorkerApplicationBuilder UseSentry(this IFunctionsWorkerApplicationBuilder builder, HostBuilderContext context)
-        => UseSentry(builder, context, (Action<SentryAzureFunctionsOptions>?)null);
+        => UseSentry(builder, context, (Action<SentryAzure.FunctionsOptions>?)null);
 
     /// <summary>
     /// Uses Sentry integration.
@@ -32,12 +32,12 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
     public static IFunctionsWorkerApplicationBuilder UseSentry(
         this IFunctionsWorkerApplicationBuilder builder,
         HostBuilderContext context,
-        Action<SentryAzureFunctionsOptions>? optionsConfiguration)
+        Action<SentryAzure.FunctionsOptions>? optionsConfiguration)
     {
         builder.UseMiddleware<SentryFunctionsWorkerMiddleware>();
 
         var services = builder.Services;
-        services.Configure<SentryAzureFunctionsOptions>(options =>
+        services.Configure<SentryAzure.FunctionsOptions>(options =>
             context.Configuration.GetSection("Sentry").Bind(options));
 
         if (optionsConfiguration != null)
@@ -46,10 +46,10 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
         }
 
         services.AddLogging();
-        services.AddSingleton<ILoggerProvider, SentryAzureFunctionsLoggerProvider>();
-        services.AddSingleton<IConfigureOptions<SentryAzureFunctionsOptions>, SentryAzureFunctionsOptionsSetup>();
+        services.AddSingleton<ILoggerProvider, SentryAzure.FunctionsLoggerProvider>();
+        services.AddSingleton<IConfigureOptions<SentryAzure.FunctionsOptions>, SentryAzure.FunctionsOptionsSetup>();
 
-        services.AddSentry<SentryAzureFunctionsOptions>();
+        services.AddSentry<SentryAzure.FunctionsOptions>();
 
         return builder;
     }

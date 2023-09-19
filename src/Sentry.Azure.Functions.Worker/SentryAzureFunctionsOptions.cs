@@ -1,10 +1,10 @@
 using Sentry.Extensions.Logging;
 
-namespace Sentry.AzureFunctions.Worker;
+namespace Sentry.Azure.Functions.Worker;
 
 /// <summary>
 /// Sentry Azure Functions integration options
 /// </summary>
-public class SentryAzureFunctionsOptions : SentryLoggingOptions
+public class SentryAzure.FunctionsOptions : SentryLoggingOptions
 {
 }

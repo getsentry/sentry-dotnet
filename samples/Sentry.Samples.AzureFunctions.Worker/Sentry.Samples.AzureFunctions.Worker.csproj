@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <AzureFunctionsVersion>v4</AzureFunctionsVersion>
+        <Azure.FunctionsVersion>v4</Azure.FunctionsVersion>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
   
@@ -23,6 +23,6 @@
   
     <ItemGroup>
       <!-- TODO: Replace with a package reference -->
-      <ProjectReference Include="..\..\src\Sentry.AzureFunctions.Worker\Sentry.AzureFunctions.Worker.csproj" />
+      <ProjectReference Include="..\..\src\Sentry.Azure.Functions.Worker\Sentry.Azure.Functions.Worker.csproj" />
     </ItemGroup>
 </Project>

@@ -1,13 +1,13 @@
-﻿namespace Sentry.AzureFunctions.Worker
+﻿namespace Sentry.Azure.Functions.Worker
 {
-    public class SentryAzureFunctionsOptions : Sentry.Extensions.Logging.SentryLoggingOptions
+    public class SentryAzure.FunctionsOptions : Sentry.Extensions.Logging.SentryLoggingOptions
     {
-        public SentryAzureFunctionsOptions() { }
+        public SentryAzure.FunctionsOptions() { }
     }
     public static class SentryFunctionsWorkerApplicationBuilderExtensions
     {
         public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Hosting.HostBuilderContext context) { }
-        public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Hosting.HostBuilderContext context, System.Action<Sentry.AzureFunctions.Worker.SentryAzureFunctionsOptions>? optionsConfiguration) { }
+        public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Hosting.HostBuilderContext context, System.Action<Sentry.Azure.Functions.Worker.SentryAzure.FunctionsOptions>? optionsConfiguration) { }
         public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Hosting.HostBuilderContext context, string dsn) { }
     }
 }
