@@ -23,7 +23,6 @@ public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
     /// <summary>
     /// Creates a new instance of a Sentry span Id.
     /// </summary>
-    // TODO: mark as internal in version 4
     public SpanId(string value) => long.TryParse(value, NumberStyles.HexNumber, null, out _value);
 
     /// <summary>
@@ -33,7 +32,7 @@ public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
     public SpanId(long value) => _value = value;
 
     /// <inheritdoc />
-    public bool Equals(SpanId other) => GetValue() == other.GetValue();
+    public bool Equals(SpanId other) => GetValue().Equals(other.GetValue());
 
     /// <inheritdoc />
     public override bool Equals(object? obj) => obj is SpanId other && Equals(other);
