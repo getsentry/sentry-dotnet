@@ -3,13 +3,13 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Azure.Functions.Worker;
 
-internal class SentryAzure.FunctionsOptionsSetup : ConfigureFromConfigurationOptions<SentryAzure.FunctionsOptions>
+internal class SentryAzureFunctionsOptionsSetup : ConfigureFromConfigurationOptions<SentryAzureFunctionsOptions>
 {
-    public SentryAzure.FunctionsOptionsSetup(IConfiguration config) : base(config)
+    public SentryAzureFunctionsOptionsSetup(IConfiguration config) : base(config)
     {
     }
 
-    public override void Configure(SentryAzure.FunctionsOptions options)
+    public override void Configure(SentryAzureFunctionsOptions options)
     {
         // Mutable by user options
 
@@ -17,6 +17,6 @@ internal class SentryAzure.FunctionsOptionsSetup : ConfigureFromConfigurationOpt
 
         // Immutable by user options
 
-        options.TagFilters.Add("Azure.Functions_");
+        options.TagFilters.Add("AzureFunctions_");
     }
 }

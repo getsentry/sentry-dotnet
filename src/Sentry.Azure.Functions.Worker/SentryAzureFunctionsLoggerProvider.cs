@@ -7,7 +7,7 @@ namespace Sentry.Azure.Functions.Worker;
 [ProviderAlias("Sentry")]
 internal class SentryAzure.FunctionsLoggerProvider : SentryLoggerProvider
 {
-    public SentryAzure.FunctionsLoggerProvider(IOptions<SentryAzure.FunctionsOptions> options, IHub hub)
+    public SentryAzure.FunctionsLoggerProvider(IOptions<SentryAzureFunctionsOptions> options, IHub hub)
         : base(options, hub)
     {
     }

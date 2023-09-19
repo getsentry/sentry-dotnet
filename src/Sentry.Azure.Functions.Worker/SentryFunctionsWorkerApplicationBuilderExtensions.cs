@@ -18,7 +18,7 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
     /// Uses Sentry integration.
     /// </summary>
     public static IFunctionsWorkerApplicationBuilder UseSentry(this IFunctionsWorkerApplicationBuilder builder, HostBuilderContext context)
-        => UseSentry(builder, context, (Action<SentryAzure.FunctionsOptions>?)null);
+        => UseSentry(builder, context, (Action<SentryAzureFunctionsOptions>?)null);
 
     /// <summary>
     /// Uses Sentry integration.
@@ -32,12 +32,12 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
     public static IFunctionsWorkerApplicationBuilder UseSentry(
         this IFunctionsWorkerApplicationBuilder builder,
         HostBuilderContext context,
-        Action<SentryAzure.FunctionsOptions>? optionsConfiguration)
+        Action<SentryAzureFunctionsOptions>? optionsConfiguration)
     {
         builder.UseMiddleware<SentryFunctionsWorkerMiddleware>();
 
         var services = builder.Services;
-        services.Configure<SentryAzure.FunctionsOptions>(options =>
+        services.Configure<SentryAzureFunctionsOptions>(options =>
             context.Configuration.GetSection("Sentry").Bind(options));
 
         if (optionsConfiguration != null)
@@ -47,9 +47,9 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
 
         services.AddLogging();
         services.AddSingleton<ILoggerProvider, SentryAzure.FunctionsLoggerProvider>();
-        services.AddSingleton<IConfigureOptions<SentryAzure.FunctionsOptions>, SentryAzure.FunctionsOptionsSetup>();
+        services.AddSingleton<IConfigureOptions<SentryAzureFunctionsOptions>, SentryAzureFunctionsOptionsSetup>();
 
-        services.AddSentry<SentryAzure.FunctionsOptions>();
+        services.AddSentry<SentryAzureFunctionsOptions>();
 
         return builder;
     }

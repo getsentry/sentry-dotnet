@@ -599,13 +599,13 @@ public class ScopeTests
         var tags = new List<KeyValuePair<string, string>>
         {
             new("AzFunctions", "rule"),
-            new("Azure.Functions_FunctionName", "Func"),
-            new("Azure.Functions_InvocationId", "20a09c3b-e9dd-43fe-9a73-ebae1f90cab6"),
+            new("AzureFunctions_FunctionName", "Func"),
+            new("AzureFunctions_InvocationId", "20a09c3b-e9dd-43fe-9a73-ebae1f90cab6"),
         };
 
         var scope = new Scope(new SentryOptions
         {
-            TagFilters = new[] { new SubstringOrRegexPattern("Azure.Functions_") }
+            TagFilters = new[] { new SubstringOrRegexPattern("AzureFunctions_") }
         });
 
         foreach (var (key, value) in tags)
