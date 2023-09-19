@@ -1,0 +1,15 @@
+{
+  "solution": {
+    "path": "Sentry.sln",
+    "projects": [
+      "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
+      "src\\Sentry.Azure.Functions.Worker\\Sentry.Azure.Functions.Worker.csproj",
+      "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
+      "src\\Sentry\\Sentry.csproj",
+      "test\\Sentry.Azure.Functions.Worker.Tests\\Sentry.Azure.Functions.Worker.Tests.csproj",
+      "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
+      "test\\Sentry.Testing\\Sentry.Testing.csproj",
+      "test\\Sentry.Tests\\Sentry.Tests.csproj"
+    ]
+  }
+}
