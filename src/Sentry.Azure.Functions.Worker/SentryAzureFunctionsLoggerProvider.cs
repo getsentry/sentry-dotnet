@@ -5,9 +5,9 @@ using Sentry.Extensions.Logging;
 namespace Sentry.Azure.Functions.Worker;
 
 [ProviderAlias("Sentry")]
-internal class SentryAzure.FunctionsLoggerProvider : SentryLoggerProvider
+internal class SentryAzureFunctionsLoggerProvider : SentryLoggerProvider
 {
-    public SentryAzure.FunctionsLoggerProvider(IOptions<SentryAzureFunctionsOptions> options, IHub hub)
+    public SentryAzureFunctionsLoggerProvider(IOptions<SentryAzureFunctionsOptions> options, IHub hub)
         : base(options, hub)
     {
     }
