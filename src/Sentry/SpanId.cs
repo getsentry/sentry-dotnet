@@ -49,18 +49,19 @@ public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
     /// </summary>
     public static SpanId Create()
     {
-        Span<byte> buf =
-#if NETSTANDARD2_0 || NET461
-            new byte[8];
+#if NET6_0_OR_GREATER
+        Span<byte> buf = stackalloc byte[8];
 #else
-            stackalloc byte[8];
+        byte[] buf = new byte[8];
 #endif
+
         Random.NextBytes(buf);
-        var random = BitConverter.ToInt64(
+
+        var random = BitConverter.ToInt64(buf
 #if NETSTANDARD2_0 || NET461
-            buf.ToArray(), 0);
+            , 0);
 #else
-            buf);
+            );
 #endif
 
         return new SpanId(random);

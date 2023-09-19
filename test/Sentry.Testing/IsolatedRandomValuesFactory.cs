@@ -11,9 +11,8 @@ internal class IsolatedRandomValuesFactory : RandomValuesFactory
     public override double NextDouble() => _random.NextDouble();
 
     public override void NextBytes(byte[] bytes) => _random.NextBytes(bytes);
-    public override void NextBytes(Span<byte> bytes) => _random.NextBytes(bytes
-#if NETSTANDARD2_0 || NET48
-            .ToArray()
+#if NET6_0_OR_GREATER
+    public override void NextBytes(Span<byte> bytes) => _random.NextBytes(bytes);
 #endif
-    );
+
 }
