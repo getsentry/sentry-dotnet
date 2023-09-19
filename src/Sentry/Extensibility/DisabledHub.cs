@@ -99,9 +99,11 @@ public class DisabledHub : IHub, IDisposable
         SentryTraceHeader? traceHeader,
         BaggageHeader? baggageHeader,
         string? name = null,
-        string? operation = null) =>
+        string? operation = null)
+    {
         // Transactions from DisabledHub are always sampled out
-        TransactionContext.CreateNoop(name ?? string.Empty, traceHeader);
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
+    }
 
     /// <summary>
     /// No-Op.
