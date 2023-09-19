@@ -1,15 +1,10 @@
 # Overview
 
-This sample demonstrates how a MongoDB commands can be automatically instrumented using Sentry's OpenTelemetry package. 
+This sample demonstrates how a MongoDB commands can be automatically instrumented using Sentry's OpenTelemetry package.
 
-There are a few steps to get this working, but once it's configured it shouldn't require further attention:
-- Install relevant NuGet packages
-- Configure Sentry OpenTelemetry Tracing
-- Configure the OpenTelemetry Trace Provider to collect MongoDB diagnostic information
-- Configure the OpenTelemetry Trace Provider to send trace information to Sentry
-- Configure MongoDB Client to send diagnostic activity
+There are a few steps to get this working.
 
-## Install NuGet packages
+## 1. Install NuGet packages
 
 For this sample, we've used the following NuGet packages
 - `MongoDB.Driver`
@@ -18,7 +13,7 @@ For this sample, we've used the following NuGet packages
 - `Sentry`
 - `Sentry.OpenTelemetry`
 
-## Configure Sentry OpenTelemetry Tracing
+## 2. Configure Sentry OpenTelemetry Tracing
 
 In the SentryOptions builder:
 
@@ -27,7 +22,7 @@ In the SentryOptions builder:
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
 ```
 
-## Configure the OpenTelemetry Trace Provider to collect MongoDB diagnostic information
+## 3. Configure OpenTelemetry Trace to collect MongoDB diagnostics
 
 On the OpenTelemetry TraceProviderBuilder:
 
@@ -36,7 +31,7 @@ Sdk.CreateTracerProviderBuilder()
     .AddMongoDBInstrumentation() // <-- Adds the MongoDB OTel datasource
 ```
 
-## Configure the OpenTelemetry Trace Provider to send trace information to Sentry
+## 4. ConfigureOpenTelemetry to send traces to Sentry
 
 On the OpenTelemetry TraceProviderBuilder:
 
@@ -45,7 +40,7 @@ Sdk.CreateTracerProviderBuilder()
     .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
 ```
 
-## Configure MongoDB to send diagnostic activity
+## 5. Enable MongoDB diagnostic activity
 
 Technically, this is all that's required:
 
