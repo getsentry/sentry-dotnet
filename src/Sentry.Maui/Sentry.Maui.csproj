@@ -6,7 +6,7 @@
       Target net6.0 so we can run unit tests on platform-neutral code.
       Target other platforms so we can include platform-specific code, and bundle native SDKs.
     -->
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
