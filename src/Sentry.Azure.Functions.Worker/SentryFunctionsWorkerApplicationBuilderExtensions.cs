@@ -46,7 +46,7 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
         }
 
         services.AddLogging();
-        services.AddSingleton<ILoggerProvider, SentryAzure.FunctionsLoggerProvider>();
+        services.AddSingleton<ILoggerProvider, SentryAzureFunctionsLoggerProvider>();
         services.AddSingleton<IConfigureOptions<SentryAzureFunctionsOptions>, SentryAzureFunctionsOptionsSetup>();
 
         services.AddSentry<SentryAzureFunctionsOptions>();
