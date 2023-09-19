@@ -313,8 +313,15 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
+            _sortedSpanCache = null; // invalidate cache
         }
     }
+
+    private IOrderedEnumerable<ISpan>? _sortedSpanCache;
+    /// <inheritdoc />
+    public ISpan? GetLastActiveSpan() =>
+        // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
+        (_sortedSpanCache ??= Spans.OrderBy(x => x.StartTimestamp)).LastOrDefault(s => !s.IsFinished);
 
     /// <inheritdoc />
     public void Finish()
@@ -374,11 +381,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish(Exception exception) =>
         Finish(exception, SpanStatusConverter.FromException(exception));
-
-    /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() =>
-        // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
-        Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
