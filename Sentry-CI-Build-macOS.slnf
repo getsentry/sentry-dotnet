@@ -29,6 +29,7 @@
       "samples\\Sentry.Samples.NLog\\Sentry.Samples.NLog.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.Console\\Sentry.Samples.OpenTelemetry.Console.csproj",
+      "samples\\Sentry.Samples.OpenTelemetry.MongoDB\\Sentry.Samples.OpenTelemetry.MongoDB.csproj",
       "samples\\Sentry.Samples.Serilog\\Sentry.Samples.Serilog.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
