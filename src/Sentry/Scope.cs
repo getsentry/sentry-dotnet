@@ -421,9 +421,9 @@ public class Scope : IEventLike, IHasDistribution
             }
         }
 
-        foreach (var (key, value) in _tags)
+        foreach (var (key, value) in Tags)
         {
-            if(!other.Tags.ContainsKey(key))
+            if (!other.Tags.ContainsKey(key))
             {
                 other.SetTag(key, value);
             }
