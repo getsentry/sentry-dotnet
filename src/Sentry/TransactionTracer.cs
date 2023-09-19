@@ -321,7 +321,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public ISpan? GetLastActiveSpan() =>
         // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
-        (_sortedSpanCache ??= Spans.OrderBy(x => x.StartTimestamp)).LastOrDefault(s => !s.IsFinished);
+        (_sortedSpanCache ??= Spans.OrderBy(x => x.StartTimestamp)).FirstOrDefault(s => !s.IsFinished);
 
     /// <inheritdoc />
     public void Finish()
