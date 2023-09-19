@@ -14,6 +14,13 @@ using Sentry.OpenTelemetry;
 var serviceName = "Sentry.Samples.OpenTelemetry.Console";
 var serviceVersion = "1.0.0";
 
+SentrySdk.Init(options =>
+{
+    // options.Dsn = "... Your DSN ...";
+    options.TracesSampleRate = 1.0;
+    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+});
+
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource(serviceName)
     .ConfigureResource(resource =>
@@ -22,10 +29,3 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
             serviceVersion: serviceVersion))
     .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
     .Build();
-
-SentrySdk.Init(options =>
-{
-    // options.Dsn = "... Your DSN ...";
-    options.TracesSampleRate = 1.0;
-    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
-});
