@@ -7,6 +7,8 @@ namespace Sentry.AzureFunctions.Worker;
 
 internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
+    private const string Operation = "function";
+
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
     private static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
@@ -19,10 +21,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        // Get the HTTP request data
-        var requestData = await context.GetHttpRequestDataAsync();
-
-        var transactionContext = StartOrContinueTrace(context, requestData);
+        var transactionContext = await StartOrContinueTraceAsync(context);
         var transaction = _hub.StartTransaction(transactionContext);
         Exception? unhandledException = null;
 
@@ -80,13 +79,16 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
-    internal TransactionContext StartOrContinueTrace(FunctionContext context, HttpRequestData? requestData)
+    private async Task<TransactionContext> StartOrContinueTraceAsync(FunctionContext context)
     {
         var transactionName = context.FunctionDefinition.Name;
+
+        // Get the HTTP request data
+        var requestData = await context.GetHttpRequestDataAsync();
         if (requestData is null)
         {
             // not an HTTP trigger
-            return SentrySdk.ContinueTrace((SentryTraceHeader?)null, (BaggageHeader?)null, transactionName, "function");
+            return SentrySdk.ContinueTrace((SentryTraceHeader?)null, (BaggageHeader?)null, transactionName, Operation);
         }
 
         var httpMethod = requestData.Method.ToUpperInvariant();
@@ -116,6 +118,6 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         var traceHeader = requestData.TryGetSentryTraceHeader(_logger);
         var baggageHeader = requestData.TryGetBaggageHeader(_logger);
 
-        return SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, "function");
+        return SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, Operation);
     }
 }
