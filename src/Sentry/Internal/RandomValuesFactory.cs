@@ -7,7 +7,7 @@ internal abstract class RandomValuesFactory
     public abstract double NextDouble();
     public abstract void NextBytes(byte[] bytes);
 
-#if NET6_0_OR_GREATER
+#if !(NETSTANDARD2_0 || NET461)
     public abstract void NextBytes(Span<byte> bytes);
 #endif
 
