@@ -9,7 +9,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
-    internal static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
+    private static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
 
     public SentryFunctionsWorkerMiddleware(IHub hub)
     {
