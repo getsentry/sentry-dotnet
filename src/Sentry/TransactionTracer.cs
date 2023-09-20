@@ -313,7 +313,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
-            ActiveSpanTracker.Push(span);
+            _activeSpanTracker.Push(span);
         }
     }
 
@@ -358,10 +358,10 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
             }
         }
     }
-    private LastActiveSpanTracker ActiveSpanTracker => new LastActiveSpanTracker();
+    private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
 
     /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() => ActiveSpanTracker.Peek();
+    public ISpan? GetLastActiveSpan() => _activeSpanTracker.Peek();
 
     /// <inheritdoc />
     public void Finish()
