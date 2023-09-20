@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Aws.Lambda.AspNetCoreServer", "samples\Sentry.Samples.Aws.Lambda.AspNetCoreServer\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj", "{50116F9A-646D-4BF7-9760-66E37CB9C459}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AzureFunctions.Worker", "samples\Sentry.Samples.AzureFunctions.Worker\Sentry.Samples.AzureFunctions.Worker.csproj", "{1F44075F-ABD6-49A4-8EA1-DBB70304AD24}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Azure.Functions.Worker", "samples\Sentry.Samples.Azure.Functions.Worker\Sentry.Samples.Azure.Functions.Worker.csproj", "{1F44075F-ABD6-49A4-8EA1-DBB70304AD24}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Basic", "samples\Sentry.Samples.Console.Basic\Sentry.Samples.Console.Basic.csproj", "{B793249D-3E52-4B0D-964F-BC022CD8A753}"
 EndProject
@@ -71,7 +71,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Grpc", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore", "src\Sentry.AspNetCore\Sentry.AspNetCore.csproj", "{4B323BCC-0E8D-43CE-9AC2-4B708278C7C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker", "src\Sentry.AzureFunctions.Worker\Sentry.AzureFunctions.Worker.csproj", "{52262FBB-40D0-4F08-B00F-B298185FF6BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Azure.Functions.Worker", "src\Sentry.Azure.Functions.Worker\Sentry.Azure.Functions.Worker.csproj", "{52262FBB-40D0-4F08-B00F-B298185FF6BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Bindings.Android", "src\Sentry.Bindings.Android\Sentry.Bindings.Android.csproj", "{759D9E53-4717-491D-9970-B3A3367C65E7}"
 EndProject
@@ -121,7 +121,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.TestUtils
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Tests", "test\Sentry.AspNetCore.Tests\Sentry.AspNetCore.Tests.csproj", "{6D9EB590-CED1-47C2-87B1-E65EE0EEBB9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AzureFunctions.Worker.Tests", "test\Sentry.AzureFunctions.Worker.Tests\Sentry.AzureFunctions.Worker.Tests.csproj", "{39F7BB08-908B-49F9-A96B-E14C16B69090}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Azure.Functions.Worker.Tests", "test\Sentry.Azure.Functions.Worker.Tests\Sentry.Azure.Functions.Worker.Tests.csproj", "{39F7BB08-908B-49F9-A96B-E14C16B69090}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.DiagnosticSource.IntegrationTests", "test\Sentry.DiagnosticSource.IntegrationTests\Sentry.DiagnosticSource.IntegrationTests.csproj", "{59742E7E-4380-4B40-BCC8-5AB314290198}"
 EndProject

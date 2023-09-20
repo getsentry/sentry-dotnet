@@ -934,6 +934,7 @@ namespace Sentry
     public readonly struct SpanId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SpanId>
     {
         public static readonly Sentry.SpanId Empty;
+        public SpanId(long value) { }
         public SpanId(string value) { }
         public bool Equals(Sentry.SpanId other) { }
         public override bool Equals(object? obj) { }

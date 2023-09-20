@@ -8,7 +8,7 @@ public class Hint
 {
     private readonly SentryOptions? _options;
     private readonly List<Attachment> _attachments = new();
-    private readonly Dictionary<string, object?> _items = new();
+    private Dictionary<string, object?>? _items;
 
     /// <summary>
     /// Creates a new instance of <see cref="Hint"/>.
@@ -30,7 +30,7 @@ public class Hint
     public Hint(string key, object? value)
         : this()
     {
-        _items[key] = value;
+        Items[key] = value;
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public class Hint
     /// These are not sent to Sentry, but rather they are available during processing, such as when using
     /// BeforeSend and others.
     /// </remarks>
-    public IDictionary<string, object?> Items => _items;
+    public IDictionary<string, object?> Items => _items ??= new Dictionary<string, object?>();
 
     /// <summary>
     /// The Java SDK has some logic so that certain Hint types do not copy attachments from the Scope.

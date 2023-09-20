@@ -88,7 +88,7 @@ public class Span : ISpanData, IJsonSerializable
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
         _extra = tracer.Extra.ToDictionary();
-        _tags = tracer.Tags.ToDictionary();
+        _tags = tracer is SpanTracer s ? s.InternalTags?.ToDictionary() : tracer.Tags.ToDictionary();
     }
 
     /// <inheritdoc />

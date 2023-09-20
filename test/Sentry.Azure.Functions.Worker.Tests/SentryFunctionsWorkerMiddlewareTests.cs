@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 
-namespace Sentry.AzureFunctions.Worker.Tests;
+namespace Sentry.Azure.Functions.Worker.Tests;
 
 public class SentryFunctionsWorkerMiddlewareTests
 {

@@ -1,22 +1,28 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
+using Sentry.Extensibility;
 
-namespace Sentry.AzureFunctions.Worker;
+namespace Sentry.Azure.Functions.Worker;
 
 internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
+    private const string Operation = "function";
+
     private readonly IHub _hub;
+    private readonly IDiagnosticLogger? _logger;
     private static readonly ConcurrentDictionary<string, string> TransactionNameCache = new();
 
     public SentryFunctionsWorkerMiddleware(IHub hub)
     {
         _hub = hub;
+        _logger = hub.GetSentryOptions()?.DiagnosticLogger;
     }
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        var transactionName = await GetHttpTransactionNameAsync(context) ?? context.FunctionDefinition.Name;
-        var transaction = _hub.StartTransaction(transactionName, "function");
+        var transactionContext = await StartOrContinueTraceAsync(context);
+        var transaction = _hub.StartTransaction(transactionContext);
         Exception? unhandledException = null;
 
         try
@@ -73,42 +79,45 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
-    private static async Task<string?> GetHttpTransactionNameAsync(FunctionContext context)
+    private async Task<TransactionContext> StartOrContinueTraceAsync(FunctionContext context)
     {
+        var transactionName = context.FunctionDefinition.Name;
+
         // Get the HTTP request data
         var requestData = await context.GetHttpRequestDataAsync();
         if (requestData is null)
         {
             // not an HTTP trigger
-            return null;
+            return SentrySdk.ContinueTrace((SentryTraceHeader?)null, (BaggageHeader?)null, transactionName, Operation);
         }
 
         var httpMethod = requestData.Method.ToUpperInvariant();
-
         var transactionNameKey = $"{context.FunctionDefinition.EntryPoint}-{httpMethod}";
-        if (TransactionNameCache.TryGetValue(transactionNameKey, out var value))
+
+        if (!TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
         {
-            return value;
+            // Find the HTTP Trigger attribute via reflection
+            var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);
+            var entryPointName = context.FunctionDefinition.EntryPoint;
+
+            var typeName = entryPointName[..entryPointName.LastIndexOf('.')];
+            var methodName = entryPointName[(typeName.Length + 1)..];
+            var attribute = assembly.GetType(typeName)?.GetMethod(methodName)?.GetParameters()
+                .Select(p => p.GetCustomAttribute<HttpTriggerAttribute>())
+                .FirstOrDefault(a => a is not null);
+
+            transactionName = attribute?.Route is { } route
+                // Compose the transaction name from the method and route
+                ? $"{httpMethod} /{route.TrimStart('/')}"
+                // There's no route provided, so use the absolute path of the URL
+                : $"{httpMethod} {requestData.Url.AbsolutePath}";
+
+            TransactionNameCache.TryAdd(transactionNameKey, transactionName);
         }
 
-        // Find the HTTP Trigger attribute via reflection
-        var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);
-        var entryPointName = context.FunctionDefinition.EntryPoint;
+        var traceHeader = requestData.TryGetSentryTraceHeader(_logger);
+        var baggageHeader = requestData.TryGetBaggageHeader(_logger);
 
-        var typeName = entryPointName[..entryPointName.LastIndexOf('.')];
-        var methodName = entryPointName[(typeName.Length + 1)..];
-        var attribute = assembly.GetType(typeName)?.GetMethod(methodName)?.GetParameters()
-            .Select(p => p.GetCustomAttribute<HttpTriggerAttribute>())
-            .FirstOrDefault(a => a is not null);
-
-        var transactionName = attribute?.Route is { } route
-            // Compose the transaction name from the method and route
-            ? $"{httpMethod} /{route.TrimStart('/')}"
-            // There's no route provided, so use the absolute path of the URL
-            : $"{httpMethod} {requestData.Url.AbsolutePath}";
-
-        TransactionNameCache.TryAdd(transactionNameKey, transactionName);
-
-        return transactionName;
+        return SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, Operation);
     }
 }

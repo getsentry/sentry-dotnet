@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
-namespace Sentry.AzureFunctions.Worker;
+namespace Sentry.Azure.Functions.Worker;
 
 /// <summary>
 /// Sentry extension methods for Azure Functions with Isolated Worker SDK
