@@ -361,24 +361,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     private LastActiveSpanTracker ActiveSpanTracker => new LastActiveSpanTracker();
 
     /// <inheritdoc />
-    public ISpan? GetLastActiveSpan()
-    {
-        // Note we're deliberately not using Linq here... see https://github.com/getsentry/sentry-dotnet/pull/2633
-        return ActiveSpanTracker.Peek();
-        // ISpan? lastActiveSpan = null;
-        // foreach (var span in Spans)
-        // {
-        //     if (span.IsFinished)
-        //     {
-        //         continue;
-        //     }
-        //     if (lastActiveSpan is null || span.StartTimestamp > lastActiveSpan.StartTimestamp)
-        //     {
-        //             lastActiveSpan = span;
-        //     }
-        // }
-        // return lastActiveSpan;
-    }
+    public ISpan? GetLastActiveSpan() => ActiveSpanTracker.Peek();
 
     /// <inheritdoc />
     public void Finish()
