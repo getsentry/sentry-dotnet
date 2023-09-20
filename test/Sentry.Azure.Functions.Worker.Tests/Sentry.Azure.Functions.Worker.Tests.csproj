@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Sentry.AzureFunctions.Worker\Sentry.AzureFunctions.Worker.csproj" />
+      <ProjectReference Include="..\..\src\Sentry.Azure.Functions.Worker\Sentry.Azure.Functions.Worker.csproj" />
       <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
     </ItemGroup>
 

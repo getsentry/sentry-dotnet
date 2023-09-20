@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Hosting;
-using Sentry.AzureFunctions.Worker;
+using Sentry.Azure.Functions.Worker;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults((host, builder) =>

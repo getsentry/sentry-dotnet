@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <InternalsVisibleTo Include="Sentry.AzureFunctions.Worker.Tests" PublicKey="$(SentryPublicKey)" />
+      <InternalsVisibleTo Include="Sentry.Azure.Functions.Worker.Tests" PublicKey="$(SentryPublicKey)" />
     </ItemGroup>
 
 </Project>
