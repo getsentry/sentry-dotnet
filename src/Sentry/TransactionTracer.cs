@@ -313,26 +313,71 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
+            ActiveSpanTracker.Push(span);
         }
     }
+
+    class LastActiveSpanTracker
+    {
+        private Mutex mut = new Mutex();
+
+        private Stack<ISpan> trackedSpans = new();
+        public void Push(ISpan span)
+        {
+            mut.WaitOne();
+            try
+            {
+                trackedSpans.Push(span);
+            }
+            finally
+            {
+                mut.ReleaseMutex();
+            }
+        }
+
+        public ISpan? Peek()
+        {
+            mut.WaitOne();
+            try
+            {
+                while (trackedSpans.Count > 0)
+                {
+                    // Stop tracking inactive spans
+                    var span = trackedSpans.Peek();
+                    if (!span.IsFinished)
+                    {
+                        return span;
+                    }
+                    trackedSpans.Pop();
+                }
+                return null;
+            }
+            finally
+            {
+                mut.ReleaseMutex();
+            }
+        }
+    }
+    private LastActiveSpanTracker ActiveSpanTracker => new LastActiveSpanTracker();
 
     /// <inheritdoc />
     public ISpan? GetLastActiveSpan()
     {
         // Note we're deliberately not using Linq here... see https://github.com/getsentry/sentry-dotnet/pull/2633
-        ISpan? lastActiveSpan = null;
-        foreach (var span in Spans)
-        {
-            if (span.IsFinished)
-            {
-                continue;
-            }
-            if (lastActiveSpan is null || span.StartTimestamp > lastActiveSpan.StartTimestamp)
-            {
-                    lastActiveSpan = span;
-            }
-        }
-        return lastActiveSpan;
+        return ActiveSpanTracker.Peek();
+        // ISpan? lastActiveSpan = null;
+        // foreach (var span in Spans)
+        // {
+        //     if (span.IsFinished)
+        //     {
+        //         continue;
+        //     }
+        //     if (lastActiveSpan is null || span.StartTimestamp > lastActiveSpan.StartTimestamp)
+        //     {
+        //             lastActiveSpan = span;
+        //     }
+        // }
+        // return lastActiveSpan;
     }
 
     /// <inheritdoc />
