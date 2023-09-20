@@ -230,6 +230,7 @@ namespace Sentry
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
         Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null);
+        Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null);
         void EndSession(Sentry.SessionEndStatus status = 0);
         Sentry.BaggageHeader? GetBaggage();
         Sentry.ISpan? GetSpan();
@@ -759,6 +760,7 @@ namespace Sentry
         public static void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public static Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
+        public static Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public static void EndSession(Sentry.SessionEndStatus status = 0) { }
         public static void Flush() { }
         public static void Flush(System.TimeSpan timeout) { }
@@ -931,6 +933,7 @@ namespace Sentry
     public readonly struct SpanId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SpanId>
     {
         public static readonly Sentry.SpanId Empty;
+        public SpanId(long value) { }
         public SpanId(string value) { }
         public bool Equals(Sentry.SpanId other) { }
         public override bool Equals(object? obj) { }
@@ -1235,6 +1238,7 @@ namespace Sentry.Extensibility
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
+        public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public void Dispose() { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
@@ -1276,6 +1280,7 @@ namespace Sentry.Extensibility
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
+        public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
         public Sentry.BaggageHeader? GetBaggage() { }

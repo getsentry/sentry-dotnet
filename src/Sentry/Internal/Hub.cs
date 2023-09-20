@@ -220,6 +220,27 @@ internal class Hub : IHubEx, IDisposable
     }
 
     public TransactionContext ContinueTrace(
+        string? traceHeader,
+        string? baggageHeader,
+        string? name = null,
+        string? operation = null)
+    {
+        SentryTraceHeader? sentryTraceHeader = null;
+        if (traceHeader is not null)
+        {
+            sentryTraceHeader = SentryTraceHeader.Parse(traceHeader);
+        }
+
+        BaggageHeader? sentryBaggageHeader = null;
+        if (baggageHeader is not null)
+        {
+            sentryBaggageHeader = BaggageHeader.TryParse(baggageHeader, onlySentry: true);
+        }
+
+        return ContinueTrace(sentryTraceHeader, sentryBaggageHeader, name, operation);
+    }
+
+    public TransactionContext ContinueTrace(
         SentryTraceHeader? traceHeader,
         BaggageHeader? baggageHeader,
         string? name = null,

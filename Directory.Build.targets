@@ -43,7 +43,7 @@
 
   <Target Name="OnlyTargetInstalledWorkloads" BeforeTargets="BeforeBuild" Condition="'$(WorkloadList)' == ''">
 
-    <Exec Command="dotnet workload list" ConsoleToMSBuild="true" StandardOutputImportance="Low">
+    <Exec Command="dotnet workload list" ConsoleToMSBuild="true" StandardOutputImportance="Low" EchoOff="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="WorkloadList"/>
     </Exec>
 

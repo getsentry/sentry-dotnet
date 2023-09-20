@@ -9,7 +9,7 @@ targets:
       nuget:Sentry.AspNetCore:
       nuget:Sentry.AspNetCore.Grpc:
       nuget:Sentry.AspNet:
-      nuget:Sentry.AzureFunctions.Worker:
+      nuget:Sentry.Azure.Functions.Worker:
       nuget:Sentry.DiagnosticSource:
       nuget:Sentry.EntityFramework:
       nuget:Sentry.Extensions.Logging:
