@@ -313,8 +313,55 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
+            _activeSpanTracker.Push(span);
         }
     }
+
+    class LastActiveSpanTracker
+    {
+        private Mutex mut = new Mutex();
+
+        private Stack<ISpan> trackedSpans = new();
+        public void Push(ISpan span)
+        {
+            mut.WaitOne();
+            try
+            {
+                trackedSpans.Push(span);
+            }
+            finally
+            {
+                mut.ReleaseMutex();
+            }
+        }
+
+        public ISpan? Peek()
+        {
+            mut.WaitOne();
+            try
+            {
+                while (trackedSpans.Count > 0)
+                {
+                    // Stop tracking inactive spans
+                    var span = trackedSpans.Peek();
+                    if (!span.IsFinished)
+                    {
+                        return span;
+                    }
+                    trackedSpans.Pop();
+                }
+                return null;
+            }
+            finally
+            {
+                mut.ReleaseMutex();
+            }
+        }
+    }
+    private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
+
+    /// <inheritdoc />
+    public ISpan? GetLastActiveSpan() => _activeSpanTracker.Peek();
 
     /// <inheritdoc />
     public void Finish()
@@ -374,11 +421,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish(Exception exception) =>
         Finish(exception, SpanStatusConverter.FromException(exception));
-
-    /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() =>
-        // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
-        Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
