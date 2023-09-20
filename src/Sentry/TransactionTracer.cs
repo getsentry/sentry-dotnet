@@ -317,51 +317,43 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         }
     }
 
-    class LastActiveSpanTracker
+    private class LastActiveSpanTracker
     {
-        private Mutex mut = new Mutex();
+        private readonly object _lock = new object();
 
-        private Stack<ISpan> trackedSpans = new();
+        private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
+        private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
+
         public void Push(ISpan span)
         {
-            mut.WaitOne();
-            try
+            lock(_lock)
             {
-                trackedSpans.Push(span);
-            }
-            finally
-            {
-                mut.ReleaseMutex();
+                TrackedSpans.Push(span);
             }
         }
 
-        public ISpan? Peek()
+        public ISpan? PeekActive()
         {
-            mut.WaitOne();
-            try
+            lock(_lock)
             {
-                while (trackedSpans.Count > 0)
+                while (TrackedSpans.Count > 0)
                 {
                     // Stop tracking inactive spans
-                    var span = trackedSpans.Peek();
+                    var span = TrackedSpans.Peek();
                     if (!span.IsFinished)
                     {
                         return span;
                     }
-                    trackedSpans.Pop();
+                    TrackedSpans.Pop();
                 }
                 return null;
-            }
-            finally
-            {
-                mut.ReleaseMutex();
             }
         }
     }
     private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
 
     /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() => _activeSpanTracker.Peek();
+    public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
 
     /// <inheritdoc />
     public void Finish()
