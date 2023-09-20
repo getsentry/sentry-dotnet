@@ -32,6 +32,10 @@ API Changes:
 
 - Resolved issue identifying users with OpenTelemetry ([#2618](https://github.com/getsentry/sentry-dotnet/pull/2618))
 
+### Azure Functions Beta
+
+- Package name changed from `Sentry.AzureFunctions.Worker` to `Sentry.Azure.Functions.Worker`. Note AzureFunctions now is split by a `.`. ([#2637](https://github.com/getsentry/sentry-dotnet/pull/2637))
+
 ### Dependencies
 
 - Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
@@ -216,7 +220,7 @@ API Changes:
 
 - Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
   - Initial `beta.1` release.  Please give it a try and let us know how it goes!
-  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.AzureFunctions.Worker`.
+  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.Azure.Functions.Worker`.
 
 - Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
   - Currently, this allows you to manipulate attachments in the various "before" event delegates.

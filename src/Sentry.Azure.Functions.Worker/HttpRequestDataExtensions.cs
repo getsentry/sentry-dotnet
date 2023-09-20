@@ -1,7 +1,7 @@
 using Microsoft.Azure.Functions.Worker.Http;
 using Sentry.Extensibility;
 
-namespace Sentry.AzureFunctions.Worker;
+namespace Sentry.Azure.Functions.Worker;
 
 internal static class HttpRequestDataExtensions
 {

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace Sentry.AzureFunctions.Worker;
+namespace Sentry.Azure.Functions.Worker;
 
 internal class SentryAzureFunctionsOptionsSetup : ConfigureFromConfigurationOptions<SentryAzureFunctionsOptions>
 {
