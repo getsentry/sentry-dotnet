@@ -1,4 +1,4 @@
-﻿namespace Sentry.Samples.AzureFunctions.Worker;
+﻿namespace Sentry.Samples.Azure.Functions.Worker;
 
 internal static class BadApple
 {

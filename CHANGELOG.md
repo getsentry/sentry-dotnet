@@ -4,6 +4,8 @@
 
 ### Features
 
+- Reduced the memory footprint of `SpanTracer` by initializing the tags lazily ([2636](https://github.com/getsentry/sentry-dotnet/pull/2636))
+- Added distributed tracing without performance for Azure Function Workers ([#2630](https://github.com/getsentry/sentry-dotnet/pull/2630))
 - The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
 
@@ -11,11 +13,18 @@
 
 - Resolved issue identifying users with OpenTelemetry ([#2618](https://github.com/getsentry/sentry-dotnet/pull/2618))
 
+### Azure Functions Beta
+
+- Package name changed from `Sentry.AzureFunctions.Worker` to `Sentry.Azure.Functions.Worker`. Note AzureFunctions now is split by a `.`. ([#2637](https://github.com/getsentry/sentry-dotnet/pull/2637))
+
 ### Dependencies
 
 - Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2207)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.6...2.20.7)
+- Bump Cocoa SDK from v8.11.0 to v8.12.0 ([#2640](https://github.com/getsentry/sentry-dotnet/pull/2640))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8120)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.11.0...8.12.0)
 
 ## 3.39.1
 
@@ -195,7 +204,7 @@
 
 - Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
   - Initial `beta.1` release.  Please give it a try and let us know how it goes!
-  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.AzureFunctions.Worker`.
+  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.Azure.Functions.Worker`.
 
 - Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
   - Currently, this allows you to manipulate attachments in the various "before" event delegates.

@@ -17,3 +17,4 @@ targets:
       nuget:Sentry.NLog:
       nuget:Sentry.Google.Cloud.Functions:
       nuget:Sentry.Maui:
+      nuget:Sentry.Azure.Functions.Worker:

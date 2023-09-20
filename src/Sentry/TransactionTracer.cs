@@ -313,27 +313,55 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
+            _activeSpanTracker.Push(span);
         }
     }
 
-    /// <inheritdoc />
-    public ISpan? GetLastActiveSpan()
+    class LastActiveSpanTracker
     {
-        // Note we're deliberately not using Linq here... see https://github.com/getsentry/sentry-dotnet/pull/2633
-        ISpan? lastActiveSpan = null;
-        foreach (var span in Spans)
+        private Mutex mut = new Mutex();
+
+        private Stack<ISpan> trackedSpans = new();
+        public void Push(ISpan span)
         {
-            if (span.IsFinished)
+            mut.WaitOne();
+            try
             {
-                continue;
+                trackedSpans.Push(span);
             }
-            if (lastActiveSpan is null || span.StartTimestamp > lastActiveSpan.StartTimestamp)
+            finally
             {
-                    lastActiveSpan = span;
+                mut.ReleaseMutex();
             }
         }
-        return lastActiveSpan;
+
+        public ISpan? Peek()
+        {
+            mut.WaitOne();
+            try
+            {
+                while (trackedSpans.Count > 0)
+                {
+                    // Stop tracking inactive spans
+                    var span = trackedSpans.Peek();
+                    if (!span.IsFinished)
+                    {
+                        return span;
+                    }
+                    trackedSpans.Pop();
+                }
+                return null;
+            }
+            finally
+            {
+                mut.ReleaseMutex();
+            }
+        }
     }
+    private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
+
+    /// <inheritdoc />
+    public ISpan? GetLastActiveSpan() => _activeSpanTracker.Peek();
 
     /// <inheritdoc />
     public void Finish()
