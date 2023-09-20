@@ -4,6 +4,7 @@
 
 ### Features
 
+- Reduced the memory footprint of `SpanId` by refactoring the ID generation ([2619](https://github.com/getsentry/sentry-dotnet/pull/2619))
 - Reduced the memory footprint of `SpanTracer` by initializing the tags lazily ([2636](https://github.com/getsentry/sentry-dotnet/pull/2636))
 - Added distributed tracing without performance for Azure Function Workers ([#2630](https://github.com/getsentry/sentry-dotnet/pull/2630))
 - The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
