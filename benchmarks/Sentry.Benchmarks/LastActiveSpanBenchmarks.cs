@@ -22,7 +22,6 @@ public class LastActiveSpanBenchmarks
     [Benchmark(Description = "Create spans for scope access")]
     public void CreateScopedSpans()
     {
-        var rnd = new Random();
         var transaction = SentrySdk.StartTransaction(Name, Operation);
         SentrySdk.WithScope(scope =>
         {
@@ -31,24 +30,28 @@ public class LastActiveSpanBenchmarks
             {
                 // Simulates a scenario where TransactionTracer.GetLastActiveSpan will be called frequently
                 // See: https://github.com/getsentry/sentry-dotnet/blob/c2a31b4ead03da388c2db7fe07f290354aa51b9d/src/Sentry/Scope.cs#L567C1-L567C68
-                var span = transaction.StartChild(Operation);
-                if (rnd.Next(2) < 1)
-                {
-                    SetActiveSpanDescription(i);
-                    span.Finish();
-                }
-                else
-                {
-                    span.Finish();
-                    SetActiveSpanDescription(i);
-                }
+                CallOneFunction(i);
             }
         });
         transaction.Finish();
     }
 
-    private void SetActiveSpanDescription(int i)
+    private void CallOneFunction(int i)
     {
-        SentrySdk.GetSpan()!.Description = $"span {i}";
+        var span = SentrySdk.GetSpan()!.StartChild($"One Function {i}");
+        ThatCallsAnother(i);
+        span.Finish();
+    }
+
+    private void ThatCallsAnother(int i)
+    {
+        var span = SentrySdk.GetSpan()!.StartChild($"Another Function {i}");
+        AndAnother($"Alternate Description {i}");
+        span.Finish();
+    }
+
+    private void AndAnother(string description)
+    {
+        SentrySdk.ConfigureScope(scope => scope.Span!.Description = description);
     }
 }

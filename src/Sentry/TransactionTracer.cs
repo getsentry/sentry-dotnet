@@ -313,15 +313,27 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
-            _sortedSpanCache = null; // invalidate cache
         }
     }
 
-    private IOrderedEnumerable<ISpan>? _sortedSpanCache;
     /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() =>
-        // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
-        (_sortedSpanCache ??= Spans.OrderByDescending(x => x.StartTimestamp)).FirstOrDefault(s => !s.IsFinished);
+    public ISpan? GetLastActiveSpan()
+    {
+        // Note we're deliberately not using Linq here... see https://github.com/getsentry/sentry-dotnet/pull/2633
+        ISpan? lastActiveSpan = null;
+        foreach (var span in Spans)
+        {
+            if (span.IsFinished)
+            {
+                continue;
+            }
+            if (lastActiveSpan is null || span.StartTimestamp > lastActiveSpan.StartTimestamp)
+            {
+                    lastActiveSpan = span;
+            }
+        }
+        return lastActiveSpan;
+    }
 
     /// <inheritdoc />
     public void Finish()
