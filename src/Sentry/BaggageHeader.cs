@@ -72,7 +72,7 @@ public class BaggageHeader
     /// <returns>
     /// An object representing the members baggage header, or <c>null</c> if there are no members parsed.
     /// </returns>
-    internal static BaggageHeader? TryParse(string baggage, bool onlySentry = false)
+    internal static BaggageHeader? TryParse(string baggage, bool onlySentry)
     {
         // Example from W3C baggage spec:
         // "key1=value1;property1;property2, key2 = value2, key3=value3; propertyKey=propertyValue"

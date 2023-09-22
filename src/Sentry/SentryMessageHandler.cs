@@ -162,7 +162,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
 
             // Merge existing baggage headers with ours.
             var allBaggage = headers
-                .Select(s => BaggageHeader.TryParse(s)).ExceptNulls()
+                .Select(s => BaggageHeader.TryParse(s, false)).ExceptNulls()
                 .Append(baggage);
             baggage = BaggageHeader.Merge(allBaggage);
 
