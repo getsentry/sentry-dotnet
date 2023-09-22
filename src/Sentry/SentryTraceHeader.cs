@@ -5,7 +5,10 @@ namespace Sentry;
 /// </summary>
 public class SentryTraceHeader
 {
-    internal const string HttpHeaderName = "sentry-trace";
+    /// <summary>
+    /// The HTTP header name for SentryTrace
+    /// </summary>
+    public const string HttpHeaderName = "sentry-trace";
 
     internal static readonly SentryTraceHeader Empty = new(SentryId.Empty, SpanId.Empty, null);
 

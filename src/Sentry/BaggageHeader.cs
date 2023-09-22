@@ -10,7 +10,11 @@ namespace Sentry;
 /// <seealso href="https://www.w3.org/TR/baggage"/>
 public class BaggageHeader
 {
-    internal const string HttpHeaderName = "baggage";
+    /// <summary>
+    /// The HTTP header name for baggage
+    /// </summary>
+    public const string HttpHeaderName = "baggage";
+
     internal const string SentryKeyPrefix = "sentry-";
 
     internal static IDiagnosticLogger? Logger { get; set; } = SentrySdk.CurrentOptions?.DiagnosticLogger;
@@ -47,6 +51,15 @@ public class BaggageHeader
         // Whitespace after delimiter is optional by the spec, but typical by convention.
         return string.Join(", ", members);
     }
+
+    /// <summary>
+    /// Parses a baggage header string
+    /// </summary>
+    /// <param name="baggage">The string to parse.</param>
+    /// <returns>
+    /// An object representing the sentry baggage header, or <c>null</c> if there are no members parsed.
+    /// </returns>
+    public static BaggageHeader? TryParse(string baggage) => TryParse(baggage, true);
 
     /// <summary>
     /// Parses a baggage header string.
