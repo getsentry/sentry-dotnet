@@ -20,7 +20,8 @@ public partial class BaggageHeaderTests
             "other-vendor-value-1=foo," +
             "other-vendor-value-2=foo;bar;," +
             "dup-value=something, " +
-            "dup-value=something,");
+            "dup-value=something,"
+            , false);
 
         Assert.NotNull(header);
 
@@ -37,7 +38,8 @@ public partial class BaggageHeaderTests
             "sentry-public_key=49d0f7386ad645858ae85020e393bef3, " +
             "sentry-sample_rate=0.01337, " +
             "sentry-user_id=Am%C3%A9lie, " +
-            "other-vendor-value-2=foo;bar;");
+            "other-vendor-value-2=foo;bar;"
+            , false);
 
         return VerifyHeader(header);
     }
