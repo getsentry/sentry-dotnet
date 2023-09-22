@@ -21,7 +21,9 @@ namespace Sentry
     }
     public class BaggageHeader
     {
+        public const string HttpHeaderName = "baggage";
         public override string ToString() { }
+        public static Sentry.BaggageHeader? TryParse(string baggage) { }
     }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
     public sealed class Breadcrumb : Sentry.IJsonSerializable
@@ -837,6 +839,7 @@ namespace Sentry
     }
     public class SentryTraceHeader
     {
+        public const string HttpHeaderName = "sentry-trace";
         public SentryTraceHeader(Sentry.SentryId traceId, Sentry.SpanId spanSpanId, bool? isSampled) { }
         public bool? IsSampled { get; }
         public Sentry.SpanId SpanId { get; }
