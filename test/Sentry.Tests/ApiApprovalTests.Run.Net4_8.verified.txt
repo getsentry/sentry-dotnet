@@ -606,6 +606,7 @@ namespace Sentry
         protected abstract void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url);
         protected abstract Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url);
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
+        protected void SetSpanData(System.Net.Http.HttpResponseMessage response, Sentry.ISpan span, string method) { }
     }
     public class SentryOptions
     {

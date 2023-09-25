@@ -1,3 +1,5 @@
+using Sentry.Internal.OpenTelemetry;
+
 namespace Sentry.Tests;
 
 /*
@@ -235,6 +237,32 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
+    }
+
+    [Fact]
+    public void HandleResponse_SetsSpanData()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var status = HttpStatusCode.OK;
+        var response = new HttpResponseMessage(status);
+        var method = "POST";
+        var url = "https://example.com/";
+        var sut = new SentryHttpMessageHandler(hub, null, null, failedRequestHandler);
+
+        var transaction = new TransactionTracer(hub, "foo", "bar");
+        var span = transaction.StartChild("http.client");
+
+        // Act
+        sut.HandleResponse(response, span, method, url);
+
+        // Assert
+        span.Should().NotBeNull();
+        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
+        span.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be(method);
+        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
+        span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)status);
     }
 
 #if NET5_0_OR_GREATER

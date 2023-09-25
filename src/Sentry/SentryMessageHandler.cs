@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
 
@@ -74,6 +75,18 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// <param name="method">The request method (e.g. "GET")</param>
     /// <param name="url">The request URL</param>
     protected internal abstract void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url);
+
+    /// <summary>
+    /// Sets additional request and response data on the span used to trace a request
+    /// </summary>
+    /// <param name="response">The <see cref="HttpResponseMessage"/></param>
+    /// <param name="span">The <see cref="ISpan"/> created in <see cref="ProcessRequest"/></param>
+    /// <param name="method">The request method (e.g. "GET")</param>
+    protected internal void SetSpanData(HttpResponseMessage response, ISpan span, string method)
+    {
+        span.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
+    }
 
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(

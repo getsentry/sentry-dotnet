@@ -1,3 +1,5 @@
+using Sentry.Internal.OpenTelemetry;
+
 namespace Sentry.Tests;
 
 /*
@@ -112,15 +114,17 @@ public class SentryGraphQlHttpMessageHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_SetsSpanStatusAndDescription()
+    public void HandleResponse_SetsSpanData()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
-        var response = new HttpResponseMessage(HttpStatusCode.OK);
+        var status = HttpStatusCode.OK;
+        var response = new HttpResponseMessage(status);
         var method = "POST";
         var url = "http://example.com/graphql";
         var request = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, url);
         response.RequestMessage = request;
+        hub.GetSpan().Returns(new TransactionTracer(hub, "test", "test"));
         var sut = new SentryGraphQLHttpMessageHandler(hub, null);
 
         // Act
@@ -131,6 +135,9 @@ public class SentryGraphQlHttpMessageHandlerTests
         span.Should().NotBeNull();
         span!.Status.Should().Be(SpanStatus.Ok);
         span.Description.Should().Be("getAllNotes query 200");
+        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
+        span.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be("POST");
+        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
+        span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)status);
     }
-
 }

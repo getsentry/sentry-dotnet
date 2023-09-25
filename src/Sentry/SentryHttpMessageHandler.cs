@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
 
@@ -85,7 +86,11 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         _failedRequestHandler?.HandleResponse(response);
 
         // This will handle unsuccessful status codes as well
-        var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
-        span?.Finish(status);
+        if (span is not null)
+        {
+            SetSpanData(response, span, method);
+            var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
+            span.Finish(status);
+        }
     }
 }
