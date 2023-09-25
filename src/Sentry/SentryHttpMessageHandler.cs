@@ -88,7 +88,8 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         // This will handle unsuccessful status codes as well
         if (span is not null)
         {
-            SetSpanData(response, span, method);
+            span.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+            span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
             var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
             span.Finish(status);
         }

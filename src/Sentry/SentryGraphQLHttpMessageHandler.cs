@@ -88,7 +88,8 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
         // This will handle unsuccessful status codes as well
         if (span is not null)
         {
-            SetSpanData(response, span, method);
+            span.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+            span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
             span.Description = GetSpanDescriptionOrDefault(graphqlInfo, response.StatusCode) ?? span.Description;
             // TODO: See how we can determine the span status for a GraphQL request...
             var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);  // TODO: Don't do this if the span is errored
