@@ -1366,6 +1366,7 @@ public partial class HubTests
         hub.ConfigureScope(s =>
         {
             s.Request.Method = "POST";
+            s.Contexts.Response.StatusCode = 403;
         });
         Transaction transaction = null;
         _fixture.Client.CaptureTransaction(
@@ -1390,6 +1391,8 @@ public partial class HubTests
         {
             span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
             span.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be("POST");
+            span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
+            span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be(403);
         }
     }
 

@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.OpenTelemetry;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -383,11 +384,16 @@ public class Scope : IEventLike, IHasDistribution
 #endif
     }
 
-    internal void ApplySpanData(ISpanData spanData)
+    internal void ApplyToSpan(ISpanData spanData)
     {
         if (Request.Method is {} method)
         {
             spanData.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        }
+
+        if (Contexts.Response.StatusCode is {} statusCode)
+        {
+            spanData.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, statusCode);
         }
     }
 

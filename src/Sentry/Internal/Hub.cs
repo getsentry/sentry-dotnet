@@ -488,7 +488,7 @@ internal class Hub : IHubEx, IDisposable
             scope.Apply(transaction);
             foreach (var span in transaction.Spans)
             {
-                scope.ApplySpanData(span);
+                scope.ApplyToSpan(span);
             }
 
             // Apply enricher
