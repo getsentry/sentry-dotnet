@@ -101,7 +101,7 @@ Describe 'CLI-integration' {
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'Sentry.pdb',
             'Sentry.Samples.Console.Basic.pdb')
-        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: dotnet/samples/Sentry.Samples.Console.Basic/Program.cs'
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Console.Basic/Program.cs'
     }
 
     It "uploads symbols for a console app build" {
@@ -117,7 +117,7 @@ Describe 'CLI-integration' {
         $result = DotnetBuild 'Sentry.Samples.Console.Basic' $False $True
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
-        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: dotnet/samples/Sentry.Samples.Console.Basic/Program.cs'
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Console.Basic/Program.cs'
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
 
@@ -140,7 +140,7 @@ Describe 'CLI-integration' {
             'Sentry.pdb',
             'Sentry.Samples.Maui.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: dotnet/samples/Sentry.Samples.Maui/MauiProgram.cs'
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Maui/MauiProgram.cs'
     }
 
     if (![RuntimeInformation]::IsOSPlatform([OSPlatform]::OSX))
@@ -172,6 +172,6 @@ Describe 'CLI-integration' {
             'Sentry.Samples.Maui',
             'Sentry.Samples.Maui.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: dotnet/samples/Sentry.Samples.Maui/MauiProgram.cs'
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Maui/MauiProgram.cs'
     }
 }
