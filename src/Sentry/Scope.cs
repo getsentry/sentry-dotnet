@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
 
@@ -380,6 +381,14 @@ public class Scope : IEventLike, IHasDistribution
 #else
         _breadcrumbs.Clear();
 #endif
+    }
+
+    internal void ApplySpanData(ISpanData spanData)
+    {
+        if (Request.Method is {} method)
+        {
+            spanData.SetExtra(SemanticConventions.AttributeHttpRequestMethod, method);
+        }
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using Sentry.Internal.Http;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.Tests;
 
@@ -1355,6 +1356,41 @@ public partial class HubTests
         // Assert
         hint.Should().NotBeNull();
         hint.Attachments.Should().Contain(attachments);
+    }
+
+    [Fact]
+    public void CaptureTransaction_SetsSpanData()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        hub.ConfigureScope(s =>
+        {
+            s.Request.Method = "POST";
+        });
+        Transaction transaction = null;
+        _fixture.Client.CaptureTransaction(
+            Arg.Do<Transaction>(t => transaction = t),
+            Arg.Any<Hint>()
+        );
+
+        // Act
+        var transactionTracer = hub.StartTransaction("test", "test");
+        var spanTracer = transactionTracer.StartChild("test");
+        transactionTracer.Finish();
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction.Spans.Should().NotBeEmpty();
+        foreach (var span in transaction.Spans)
+        {
+            EnsureSpanDataApplied(span);
+        }
+
+        void EnsureSpanDataApplied(Span span)
+        {
+            span.Extra.Should().ContainKey(SemanticConventions.AttributeHttpRequestMethod);
+            span.Extra[SemanticConventions.AttributeHttpRequestMethod].Should().Be("POST");
+        }
     }
 
     [Fact]
