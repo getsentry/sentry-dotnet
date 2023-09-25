@@ -1388,8 +1388,8 @@ public partial class HubTests
 
         void EnsureSpanDataApplied(Span span)
         {
-            span.Extra.Should().ContainKey(SemanticConventions.AttributeHttpRequestMethod);
-            span.Extra[SemanticConventions.AttributeHttpRequestMethod].Should().Be("POST");
+            span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
+            span.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be("POST");
         }
     }
 

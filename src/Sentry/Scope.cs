@@ -387,7 +387,7 @@ public class Scope : IEventLike, IHasDistribution
     {
         if (Request.Method is {} method)
         {
-            spanData.SetExtra(SemanticConventions.AttributeHttpRequestMethod, method);
+            spanData.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
         }
     }
 

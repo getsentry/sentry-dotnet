@@ -25,7 +25,7 @@ namespace Sentry.Internal.OpenTelemetry;
 /// <see href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/README.md"/> and
 /// <see href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/semantic_conventions/README.md"/>.
 /// </summary>
-internal static class SemanticConventions
+internal static class OtelSemanticConventions
 {
     // The set of constants matches the specification as of this commit.
     // https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/trace/semantic_conventions
