@@ -7,7 +7,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasDistribution, IHasMeasurements
+public class TransactionTracer : ITransaction, IHasMeasurements
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;

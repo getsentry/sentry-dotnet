@@ -16,7 +16,8 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 API Changes:
 
-- Removed IHasTransactionNameSource ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
+- Removed IHasTransactionNameSource. Use ITransactionContext instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
+- Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
 
 ### Features
 

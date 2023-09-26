@@ -27,6 +27,12 @@ internal class NoOpTransaction : NoOpSpan, ITransaction
 
     public TransactionNameSource NameSource => TransactionNameSource.Custom;
 
+    public string? Distribution
+    {
+        get => string.Empty;
+        set { }
+    }
+
     public SentryLevel? Level
     {
         get => default;
