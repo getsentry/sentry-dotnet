@@ -16,6 +16,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// </summary>
     void AddBreadcrumb(Breadcrumb breadcrumb);
 
+    /// <summary>
     /// The release distribution of the application.
     /// </summary>
     public string? Distribution { get; set; }
