@@ -16,7 +16,8 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 API Changes:
 
-- Removed ISpanContext ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
+- ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
+- Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
 
 ### Features
 

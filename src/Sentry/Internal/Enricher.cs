@@ -61,7 +61,7 @@ internal class Enricher
         eventLike.Release ??= _options.SettingLocator.GetRelease();
 
         // Distribution
-        eventLike.WithDistribution(_ => _.Distribution ??= _options.Distribution);
+        eventLike.Distribution ??= _options.Distribution;
 
         // Environment
         eventLike.Environment ??= _options.SettingLocator.GetEnvironment();

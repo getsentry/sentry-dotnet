@@ -11,7 +11,7 @@ namespace Sentry;
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
 [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-public sealed class SentryEvent : IEventLike, IJsonSerializable, IHasDistribution
+public sealed class SentryEvent : IEventLike, IJsonSerializable
 {
     private IDictionary<string, string>? _modules;
 
