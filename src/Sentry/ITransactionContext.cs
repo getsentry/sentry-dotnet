@@ -1,9 +1,11 @@
+using Sentry.Protocol;
+
 namespace Sentry;
 
 /// <summary>
 /// Transaction metadata.
 /// </summary>
-public interface ITransactionContext : ISpanContext
+public interface ITransactionContext : ITraceContext
 {
     /// <summary>
     /// Transaction name.
