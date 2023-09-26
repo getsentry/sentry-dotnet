@@ -14,6 +14,10 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
 
+API Changes:
+
+- Removed IHasTransactionNameSource ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
+
 ### Features
 
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
