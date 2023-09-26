@@ -9,7 +9,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
+public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution, IHasTransactionNameSource
 {
     /// <summary>
     /// Transaction's event ID.
