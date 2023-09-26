@@ -43,7 +43,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasMeasurement
     /// <inheritdoc cref="ITransaction.Name" />
     public string Name { get; set; }
 
-    /// <inheritdoc cref="ITransaction.NameSource" />
+    /// <inheritdoc cref="ITransactionContext.NameSource" />
     public TransactionNameSource NameSource { get; set; }
 
     /// <inheritdoc cref="ITransaction.IsParentSampled" />
