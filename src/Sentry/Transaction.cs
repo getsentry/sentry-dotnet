@@ -9,7 +9,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution, IHasTransactionNameSource
+public class Transaction : ITransactionData, IJsonSerializable, IHasTransactionNameSource
 {
     /// <summary>
     /// Transaction's event ID.
@@ -244,7 +244,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasDistribution
         Operation = tracer.Operation;
         Platform = tracer.Platform;
         Release = tracer.Release;
-        Distribution = tracer.GetDistribution();
+        Distribution = tracer.Distribution;
         StartTimestamp = tracer.StartTimestamp;
         EndTimestamp = tracer.EndTimestamp;
         Description = tracer.Description;

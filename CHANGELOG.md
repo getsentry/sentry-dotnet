@@ -16,7 +16,8 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 API Changes:
 
-- Removed IHasMeasurements ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
+- IHasMeasurements was removed. Use ISpanData instead. ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
+- Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
 
 ### Features
 
