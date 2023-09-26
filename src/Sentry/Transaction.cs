@@ -68,6 +68,16 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasTransactionN
     /// <inheritdoc />
     public DateTimeOffset? EndTimestamp { get; internal set; } // internal for testing
 
+    // Not readonly because of deserialization
+    private Dictionary<string, Measurement> _measurements = new();
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
+
+    /// <inheritdoc />
+    public void SetMeasurement(string name, Measurement measurement) =>
+        _measurements[name] = measurement;
+
     /// <inheritdoc />
     public string Operation
     {
@@ -181,12 +191,6 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasTransactionN
     /// </summary>
     public IReadOnlyCollection<Span> Spans => _spans;
 
-    // Not readonly because of deserialization
-    private Dictionary<string, Measurement> _measurements = new();
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
-
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
 
@@ -288,11 +292,6 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasTransactionN
     /// <inheritdoc />
     public void UnsetTag(string key) =>
         _tags.Remove(key);
-
-    /// <inheritdoc />
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public void SetMeasurement(string name, Measurement measurement) =>
-        _measurements[name] = measurement;
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(

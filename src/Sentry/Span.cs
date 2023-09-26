@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -27,6 +28,16 @@ public class Span : ISpanData, IJsonSerializable
 
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
+
+    // Not readonly because of deserialization
+    private Dictionary<string, Measurement> _measurements = new();
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
+
+    /// <inheritdoc />
+    public void SetMeasurement(string name, Measurement measurement) =>
+        _measurements[name] = measurement;
 
     /// <inheritdoc />
     public string Operation { get; set; }

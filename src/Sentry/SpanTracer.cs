@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -29,6 +30,16 @@ public class SpanTracer : ISpan
 
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
+
+    // Not readonly because of deserialization
+    private readonly Dictionary<string, Measurement> _measurements = new();
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
+
+    /// <inheritdoc />
+    public void SetMeasurement(string name, Measurement measurement) =>
+        _measurements[name] = measurement;
 
     /// <inheritdoc cref="ISpan.Operation" />
     public string Operation { get; set; }

@@ -277,7 +277,6 @@ public class TransactionTracer : ITransaction, IHasTransactionNameSource
     public void UnsetTag(string key) => _tags.TryRemove(key, out _);
 
     /// <inheritdoc />
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />

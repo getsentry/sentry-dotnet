@@ -92,10 +92,4 @@ internal class NoOpTransaction : NoOpSpan, ITransaction
     public ISpan? GetLastActiveSpan() => default;
 
     public void AddBreadcrumb(Breadcrumb breadcrumb) { }
-
-    public IReadOnlyDictionary<string, Measurement> Measurements => ImmutableDictionary<string, Measurement>.Empty;
-
-    public void SetMeasurement(string name, Measurement measurement)
-    {
-    }
 }
