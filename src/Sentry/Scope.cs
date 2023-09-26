@@ -11,7 +11,7 @@ namespace Sentry;
 /// Scope data is sent together with any event captured
 /// during the lifetime of the scope.
 /// </remarks>
-public class Scope : IEventLike, IHasDistribution
+public class Scope : IEventLike
 {
     internal SentryOptions Options { get; }
 
@@ -435,7 +435,7 @@ public class Scope : IEventLike, IHasDistribution
 
         other.Platform ??= Platform;
         other.Release ??= Release;
-        other.WithDistribution(_ => _.Distribution ??= Distribution);
+        other.Distribution ??= Distribution;
         other.Environment ??= Environment;
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
