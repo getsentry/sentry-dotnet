@@ -101,7 +101,7 @@ public class SentryTracingMiddlewareTests
         // Assert
         transaction.Should().NotBeNull();
         transaction.Name.Should().Be("GET /person/{id}");
-        ((IHasTransactionNameSource)transaction).NameSource.Should().Be(TransactionNameSource.Route);
+        transaction.NameSource.Should().Be(TransactionNameSource.Route);
     }
 
     [Fact]

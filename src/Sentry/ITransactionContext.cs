@@ -16,4 +16,9 @@ public interface ITransactionContext : ITraceContext
     /// Whether the parent transaction of this transaction has been sampled.
     /// </summary>
     bool? IsParentSampled { get; }
+
+    /// <summary>
+    /// The source of the transaction name.
+    /// </summary>
+    TransactionNameSource NameSource { get; }
 }
