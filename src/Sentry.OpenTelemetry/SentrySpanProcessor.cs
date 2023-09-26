@@ -155,7 +155,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             transaction.EndTimestamp = data.StartTimeUtc + data.Duration;
 
             // Transactions set otel attributes (and resource attributes) as context.
-            ApplyOtelAttributes(transaction, attributes);
+            transaction.Contexts["otel"] = GetOtelContext(attributes);
         }
         else
         {
@@ -284,18 +284,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // Default - pass through unmodified.
         return (activity.OperationName, activity.DisplayName, TransactionNameSource.Custom);
-    }
-
-    private void ApplyOtelAttributes(TransactionTracer transaction, IDictionary<string, object?> attributes)
-    {
-        // Apply the OtelContext (all transactions get this)
-        transaction.Contexts["otel"] = GetOtelContext(attributes);
-
-        // // HttpAttributes
-        // if (attributes.TryGetOtelAttribute<string?>(SemanticConventions.AttributeHttpRequestMethod, SemanticConventions.AttributeHttpMethod) is { } httpMethod)
-        // {
-        //     transaction.Request.Method = httpMethod;
-        // }
     }
 
     private Dictionary<string, object?> GetOtelContext(IDictionary<string, object?> attributes)
