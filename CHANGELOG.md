@@ -16,7 +16,8 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 API Changes:
 
-- Removed IHasBreadcrumbs ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
+- IHasBreadcrumbs was removed. Use IEventLike instead. ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
+- Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
 
 ### Features
 
