@@ -6,6 +6,11 @@ namespace Sentry;
 public interface IEventLike : IHasBreadcrumbs, IHasTags, IHasExtra
 {
     /// <summary>
+    /// The release distribution of the application.
+    /// </summary>
+    public string? Distribution { get; set; }
+
+    /// <summary>
     /// Sentry level.
     /// </summary>
     SentryLevel? Level { get; set; }
