@@ -118,6 +118,9 @@ namespace Sentry
     }
     public static class EventLikeExtensions
     {
+        public static void AddBreadcrumb(this Sentry.IEventLike eventLike, string message, string? category, string? type, System.ValueTuple<string, string>? dataPair = default, Sentry.BreadcrumbLevel level = 0) { }
+        public static void AddBreadcrumb(this Sentry.IEventLike eventLike, string message, string? category = null, string? type = null, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
+        public static void AddBreadcrumb(this Sentry.IEventLike eventLike, System.DateTimeOffset? timestamp, string message, string? category = null, string? type = null, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static bool HasUser(this Sentry.IEventLike eventLike) { }
         public static void SetFingerprint(this Sentry.IEventLike eventLike, System.Collections.Generic.IEnumerable<string> fingerprint) { }
         public static void SetFingerprint(this Sentry.IEventLike eventLike, params string[] fingerprint) { }
@@ -127,12 +130,6 @@ namespace Sentry
         public FileAttachmentContent(string filePath) { }
         public FileAttachmentContent(string filePath, bool readFileAsynchronously) { }
         public System.IO.Stream GetStream() { }
-    }
-    public static class HasBreadcrumbsExtensions
-    {
-        public static void AddBreadcrumb(this Sentry.IHasBreadcrumbs hasBreadcrumbs, string message, string? category, string? type, System.ValueTuple<string, string>? dataPair = default, Sentry.BreadcrumbLevel level = 0) { }
-        public static void AddBreadcrumb(this Sentry.IHasBreadcrumbs hasBreadcrumbs, string message, string? category = null, string? type = null, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
-        public static void AddBreadcrumb(this Sentry.IHasBreadcrumbs hasBreadcrumbs, System.DateTimeOffset? timestamp, string message, string? category = null, string? type = null, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
     }
     public static class HasExtraExtensions
     {
@@ -192,8 +189,9 @@ namespace Sentry
     {
         System.IO.Stream GetStream();
     }
-    public interface IEventLike : Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags
+    public interface IEventLike : Sentry.IHasExtra, Sentry.IHasTags
     {
+        System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         Sentry.Contexts Contexts { get; set; }
         string? Environment { get; set; }
         System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
@@ -204,10 +202,6 @@ namespace Sentry
         Sentry.SdkVersion Sdk { get; }
         string? TransactionName { get; set; }
         Sentry.User User { get; set; }
-    }
-    public interface IHasBreadcrumbs
-    {
-        System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         void AddBreadcrumb(Sentry.Breadcrumb breadcrumb);
     }
     public interface IHasExtra
@@ -307,7 +301,7 @@ namespace Sentry
         System.DateTimeOffset StartTimestamp { get; }
         Sentry.SentryTraceHeader GetTraceHeader();
     }
-    public interface ITransaction : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
+    public interface ITransaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         new bool? IsParentSampled { get; set; }
         new string Name { get; set; }
@@ -319,7 +313,7 @@ namespace Sentry
         bool? IsParentSampled { get; }
         string Name { get; }
     }
-    public interface ITransactionData : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
+    public interface ITransactionData : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext { }
     public enum InstructionAddressAdjustment
     {
         Auto = 0,
@@ -419,7 +413,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Request FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class Scope : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags
+    public class Scope : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags
     {
         public Scope(Sentry.SentryOptions? options) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Attachment> Attachments { get; }
@@ -508,7 +502,7 @@ namespace Sentry
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
     }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
-    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable
+    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable
     {
         public SentryEvent() { }
         public SentryEvent(System.Exception? exception) { }
@@ -1026,7 +1020,7 @@ namespace Sentry
         public TracePropagationTarget(System.Text.RegularExpressions.Regex regex) { }
         public TracePropagationTarget(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
     }
-    public class Transaction : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.IJsonSerializable, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
+    public class Transaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.IJsonSerializable, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public Transaction(Sentry.ITransaction tracer) { }
         public Transaction(string name, string operation) { }
@@ -1099,7 +1093,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> CustomSamplingContext { get; }
         public Sentry.ITransactionContext TransactionContext { get; }
     }
-    public class TransactionTracer : Sentry.IEventLike, Sentry.IHasBreadcrumbs, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
+    public class TransactionTracer : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IHasTransactionNameSource, Sentry.ISpan, Sentry.ISpanContext, Sentry.ISpanData, Sentry.ITransaction, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
         public TransactionTracer(Sentry.IHub hub, string name, string operation) { }
