@@ -14,6 +14,10 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
 
+API Changes:
+
+- Removed IHasBreadcrumbs ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
+
 ### Features
 
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
