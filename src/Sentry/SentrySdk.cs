@@ -40,7 +40,7 @@ public static partial class SentrySdk
         // from anywhere else, return a disabled hub.
         if (Dsn.IsDisabled(dsnString))
         {
-            options.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+            options.LogWarning("Init called with Disabled DSN. Sentry SDK will be disabled.");
             return DisabledHub.Instance;
         }
 
