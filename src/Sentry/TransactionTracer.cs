@@ -7,7 +7,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
+public class TransactionTracer : ITransaction, IHasDistribution, IHasMeasurements
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
@@ -43,7 +43,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc cref="ITransaction.Name" />
     public string Name { get; set; }
 
-    /// <inheritdoc cref="IHasTransactionNameSource.NameSource" />
+    /// <inheritdoc cref="ITransaction.NameSource" />
     public TransactionNameSource NameSource { get; set; }
 
     /// <inheritdoc cref="ITransaction.IsParentSampled" />
@@ -229,7 +229,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         _hub = hub;
         _options = _hub.GetSentryOptions();
         Name = context.Name;
-        NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
+        NameSource = context.NameSource;
         Operation = context.Operation;
         SpanId = context.SpanId;
         ParentSpanId = context.ParentSpanId;

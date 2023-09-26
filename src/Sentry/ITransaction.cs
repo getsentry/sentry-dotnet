@@ -18,6 +18,11 @@ public interface ITransaction : ITransactionData, ISpan
     new bool? IsParentSampled { get; set; }
 
     /// <summary>
+    /// The source of the transaction name.
+    /// </summary>
+    TransactionNameSource NameSource { get; }
+
+    /// <summary>
     /// Flat list of spans within this transaction.
     /// </summary>
     IReadOnlyCollection<ISpan> Spans { get; }
