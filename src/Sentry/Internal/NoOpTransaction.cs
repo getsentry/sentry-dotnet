@@ -27,6 +27,8 @@ internal class NoOpTransaction : NoOpSpan, ITransaction
         set { }
     }
 
+    public TransactionNameSource NameSource => TransactionNameSource.Custom;
+
     public string? Distribution
     {
         get => string.Empty;
