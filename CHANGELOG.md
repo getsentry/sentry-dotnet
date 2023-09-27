@@ -4,9 +4,9 @@
 
 ### Dependencies
 
-- Bump CLI from v2.20.7 to v2.21.0 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2210)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.7...2.21.0)
+- Bump CLI from v2.20.7 to v2.21.1 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2211)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.7...2.21.1)
 
 ## 3.40.0-beta.0
 
@@ -17,6 +17,7 @@
 - Added distributed tracing without performance for Azure Function Workers ([#2630](https://github.com/getsentry/sentry-dotnet/pull/2630))
 - The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
+- Added memory optimisations for GetLastActiveSpan ([#2642](https://github.com/getsentry/sentry-dotnet/pull/2642))
 
 ### Fixes
 
