@@ -100,6 +100,7 @@ public class Span : ISpanData, IJsonSerializable
         IsSampled = tracer.IsSampled;
         _extra = tracer.Extra.ToDictionary();
         _tags = tracer.Tags.ToDictionary();
+        _measurements = tracer.Measurements.ToDictionary();
     }
 
     /// <inheritdoc />
@@ -123,6 +124,7 @@ public class Span : ISpanData, IJsonSerializable
         writer.WriteStringIfNotNull("timestamp", EndTimestamp);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
+        writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
 
         writer.WriteEndObject();
     }
@@ -142,6 +144,8 @@ public class Span : ISpanData, IJsonSerializable
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
         var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()?.ToDictionary();
+        var measurements = json.GetPropertyOrNull("measurements")?
+            .GetDictionaryOrNull(Measurement.FromJson) ?? new();
         var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDictionary();
 
         return new Span(parentSpanId, operation)
@@ -154,7 +158,8 @@ public class Span : ISpanData, IJsonSerializable
             Status = status,
             IsSampled = isSampled,
             _tags = tags!,
-            _extra = data!
+            _extra = data!,
+            _measurements = measurements
         };
     }
 
