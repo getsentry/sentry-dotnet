@@ -9,7 +9,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class Transaction : ITransactionData, IJsonSerializable, IHasTransactionNameSource, IHasMeasurements
+public class Transaction : ITransactionData, IJsonSerializable, IHasMeasurements
 {
     /// <summary>
     /// Transaction's event ID.
@@ -233,7 +233,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasTransactionN
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
     public Transaction(ITransaction tracer)
-        : this(tracer.Name, tracer is IHasTransactionNameSource t ? t.NameSource : TransactionNameSource.Custom)
+        : this(tracer.Name, tracer.NameSource)
     {
         // Contexts have to be set first because other fields use that
         Contexts = tracer.Contexts;

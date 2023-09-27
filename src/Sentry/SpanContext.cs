@@ -1,9 +1,11 @@
+using Sentry.Protocol;
+
 namespace Sentry;
 
 /// <summary>
 /// Span metadata used for sampling.
 /// </summary>
-public class SpanContext : ISpanContext
+public class SpanContext : ITraceContext
 {
     /// <inheritdoc />
     public SpanId SpanId { get; }
