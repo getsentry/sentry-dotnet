@@ -40,7 +40,8 @@ internal class SettingLocator
         if (_options.Dsn is null)
         {
             throw new ArgumentNullException(
-                "You must supply a DSN to use Sentry. ' +" +
+                "You must supply a DSN to use Sentry." +
+                "To disable Sentry, pass an empty string: \"\"." +
                 "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn"
                 );
         }
