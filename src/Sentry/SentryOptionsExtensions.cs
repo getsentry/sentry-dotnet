@@ -396,13 +396,13 @@ public static class SentryOptionsExtensions
     /// Applies the default tags to an event without resetting existing tags.
     /// </summary>
     /// <param name="options">The options to read the default tags from.</param>
-    /// <param name="hasTags">The event to apply the tags to.</param>
-    public static void ApplyDefaultTags(this SentryOptions options, IHasTags hasTags)
+    /// <param name="tagsAndData">The event to apply the tags to.</param>
+    public static void ApplyDefaultTags(this SentryOptions options, ITagsAndData tagsAndData)
     {
         foreach (var defaultTag in options.DefaultTags
-            .Where(t => !hasTags.Tags.TryGetValue(t.Key, out _)))
+            .Where(t => !tagsAndData.Tags.TryGetValue(t.Key, out _)))
         {
-            hasTags.SetTag(defaultTag.Key, defaultTag.Value);
+            tagsAndData.SetTag(defaultTag.Key, defaultTag.Value);
         }
     }
 

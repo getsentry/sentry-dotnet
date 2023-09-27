@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// Models members common between types that represent event-like data.
 /// </summary>
-public interface IEventLike : IHasTags, IHasExtra
+public interface IEventLike : ITagsAndData
 {
     /// <summary>
     /// A trail of events which happened prior to an issue.
