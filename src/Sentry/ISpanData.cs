@@ -1,9 +1,11 @@
+using Sentry.Protocol;
+
 namespace Sentry;
 
 /// <summary>
 /// Immutable data belonging to a span.
 /// </summary>
-public interface ISpanData : ISpanContext, IHasTags, IHasExtra
+public interface ISpanData : ITraceContext, IHasTags, IHasExtra
 {
     /// <summary>
     /// Start timestamp.
