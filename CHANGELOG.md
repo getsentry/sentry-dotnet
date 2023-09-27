@@ -15,7 +15,7 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
 
 API Changes:
-- If no DSN has been supplied when initializing Sentry, and ArgumentNullException is now thrown ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
+- If `null` has been supplied as DSN when initializing Sentry, and ArgumentNullException is now thrown ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
 
 ### Features
 
