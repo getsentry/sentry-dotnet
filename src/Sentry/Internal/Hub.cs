@@ -97,12 +97,20 @@ internal class Hub : IHubEx, IDisposable
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
 
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
 
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
 
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
 
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
