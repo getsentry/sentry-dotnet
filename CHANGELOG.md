@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.0.0 Unreleased
 
 ### Dependencies
 
@@ -28,6 +28,16 @@ API Changes:
 - ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
 - Removed IHasTransactionNameSource. Use ITransactionContext instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
 - Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
+
+## Unreleased
+
+### Dependencies
+
+- Bump CLI from v2.20.7 to v2.21.1 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2211)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.7...2.21.1)
+
+## 3.40.0-beta.0
 
 ### Features
 
