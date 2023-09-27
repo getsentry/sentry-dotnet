@@ -23,16 +23,15 @@ public class LastActiveSpanBenchmarks
     public void CreateScopedSpans()
     {
         var transaction = SentrySdk.StartTransaction(Name, Operation);
-        SentrySdk.WithScope(scope =>
+        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+
+        for (var i = 0; i < SpanCount; i++)
         {
-            scope.Transaction = transaction;
-            for (var i = 0; i < SpanCount; i++)
-            {
-                // Simulates a scenario where TransactionTracer.GetLastActiveSpan will be called frequently
-                // See: https://github.com/getsentry/sentry-dotnet/blob/c2a31b4ead03da388c2db7fe07f290354aa51b9d/src/Sentry/Scope.cs#L567C1-L567C68
-                CallOneFunction(i);
-            }
-        });
+            // Simulates a scenario where TransactionTracer.GetLastActiveSpan will be called frequently
+            // See: https://github.com/getsentry/sentry-dotnet/blob/c2a31b4ead03da388c2db7fe07f290354aa51b9d/src/Sentry/Scope.cs#L567C1-L567C68
+            CallOneFunction(i);
+        }
+
         transaction.Finish();
     }
 
