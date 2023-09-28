@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- `WithScope` has been marked Obsolete ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
+
 ### Dependencies
 
 - Bump CLI from v2.20.7 to v2.21.1 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647))
