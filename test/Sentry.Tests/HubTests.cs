@@ -304,7 +304,7 @@ public partial class HubTests
         var expectedMessage = Guid.NewGuid().ToString();
 
         var requests = new List<string>();
-        async Task VerifyAsync(HttpRequestMessage message)
+        async Task Verify(HttpRequestMessage message)
         {
             var payload = await message.Content!.ReadAsStringAsync();
             requests.Add(payload);
@@ -328,9 +328,9 @@ public partial class HubTests
             // To go through a round trip serialization of cached envelope
             CacheDirectoryPath = tempDirectory?.Path,
             FileSystem = fileSystem,
-            // So we don't need to deal with gzip'ed payload
+            // So we don't need to deal with gzip payloads
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
-            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(Verify),
             // Not to send some session envelope
             AutoSessionTracking = false,
             Debug = true,
@@ -845,9 +845,9 @@ public partial class HubTests
 
             // Assert
             header.Should().NotBeNull();
-            header?.SpanId.Should().Be(transaction.SpanId);
-            header?.TraceId.Should().Be(transaction.TraceId);
-            header?.IsSampled.Should().Be(transaction.IsSampled);
+            header.SpanId.Should().Be(transaction.SpanId);
+            header.TraceId.Should().Be(transaction.TraceId);
+            header.IsSampled.Should().Be(transaction.IsSampled);
         });
     }
 
@@ -1335,7 +1335,7 @@ public partial class HubTests
     {
         // Arrange
         var hub = _fixture.GetSut();
-        List<Attachment> attachments = new List<Attachment> {
+        var attachments = new List<Attachment> {
             AttachmentHelper.FakeAttachment("foo"),
             AttachmentHelper.FakeAttachment("bar")
         };
@@ -1422,7 +1422,7 @@ public partial class HubTests
         processor.Process(Arg.Any<Transaction>(), Arg.Do<Hint>(h => hint = h)).Returns(new Transaction("name", "operation"));
         _fixture.Options.AddTransactionProcessor(processor);
 
-        List<Attachment> attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
+        var attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
         var hub = _fixture.GetSut();
         hub.ConfigureScope(s => s.AddAttachment(attachments[0]));
 
