@@ -2153,13 +2153,17 @@ interface SentryTraceContext : SentrySerializable
     [NullAllowed, Export ("userSegment")]
     string UserSegment { get; }
 
-    // @property (nonatomic, strong) NSString * _Nullable sampleRate;
-    [NullAllowed, Export ("sampleRate", ArgumentSemantic.Strong)]
-    string SampleRate { get; set; }
+    // @property (readonly, nonatomic) NSString * _Nullable sampleRate;
+    [NullAllowed, Export ("sampleRate")]
+    string SampleRate { get; }
 
-    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction userSegment:(NSString * _Nullable)userSegment sampleRate:(NSString * _Nullable)sampleRate;
-    [Export ("initWithTraceId:publicKey:releaseName:environment:transaction:userSegment:sampleRate:")]
-    NativeHandle Constructor (SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string userSegment, [NullAllowed] string sampleRate);
+    // @property (readonly, nonatomic) NSString * _Nullable sampled;
+    [NullAllowed, Export ("sampled")]
+    string Sampled { get; }
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction userSegment:(NSString * _Nullable)userSegment sampleRate:(NSString * _Nullable)sampleRate sampled:(NSString * _Nullable)sampled;
+    [Export ("initWithTraceId:publicKey:releaseName:environment:transaction:userSegment:sampleRate:sampled:")]
+    NativeHandle Constructor (SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string userSegment, [NullAllowed] string sampleRate, [NullAllowed] string sampled);
 
     // -(instancetype _Nullable)initWithScope:(SentryScope * _Nonnull)scope options:(SentryOptions * _Nonnull)options;
     [Export ("initWithScope:options:")]
