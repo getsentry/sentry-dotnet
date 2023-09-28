@@ -69,14 +69,15 @@ public class Transaction : ITransactionData, IJsonSerializable
     public DateTimeOffset? EndTimestamp { get; internal set; } // internal for testing
 
     // Not readonly because of deserialization
-    private Dictionary<string, Measurement> _measurements = new();
+    private Dictionary<string, Measurement>? _measurements;
+    private Dictionary<string, Measurement> LazyMeasurements => _measurements ??= new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
+    public IReadOnlyDictionary<string, Measurement> Measurements => LazyMeasurements;
 
     /// <inheritdoc />
     public void SetMeasurement(string name, Measurement measurement) =>
-        _measurements[name] = measurement;
+        LazyMeasurements[name] = measurement;
 
     /// <inheritdoc />
     public string Operation
