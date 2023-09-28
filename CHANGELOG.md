@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-### Fixes
+### Obsoletion
 
-- `WithScope` has been marked Obsolete ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
+- `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are now deprecated in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
 
 ### Dependencies
 
