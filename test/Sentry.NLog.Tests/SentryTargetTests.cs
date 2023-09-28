@@ -454,7 +454,7 @@ public class SentryTargetTests
     [Fact]
     public void InitializeTarget_InitializesSdk()
     {
-        _fixture.Options.Dsn = null;
+        _fixture.Options.Dsn = Sentry.Constants.DisableSdkDsnValue;
         _fixture.SdkDisposeHandle = null;
         _fixture.Options.InitializeSdk = true;
 
@@ -468,7 +468,7 @@ public class SentryTargetTests
             _fixture.GetLoggerFactory();
 
             var logOutput = logWriter.ToString();
-            Assert.Contains("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.", logOutput);
+            Assert.Contains("Init called with an empty string as the DSN. Sentry SDK will be disabled.", logOutput);
         }
         finally
         {
