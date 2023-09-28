@@ -39,11 +39,9 @@ internal class SettingLocator
                          ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
         if (_options.Dsn is null)
         {
-            throw new ArgumentNullException(
-                "You must supply a DSN to use Sentry." +
-                "To disable Sentry, pass an empty string: \"\"." +
-                "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn"
-                );
+            throw new ArgumentNullException("You must supply a DSN to use Sentry." +
+                                            "To disable Sentry, pass an empty string: \"\"." +
+                                            "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn");
         }
         return _options.Dsn;
     }

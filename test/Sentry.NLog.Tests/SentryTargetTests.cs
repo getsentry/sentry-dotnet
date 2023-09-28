@@ -468,7 +468,7 @@ public class SentryTargetTests
             _fixture.GetLoggerFactory();
 
             var logOutput = logWriter.ToString();
-            Assert.Contains("Init called with Disabled DSN. Sentry SDK will be disabled.", logOutput);
+            Assert.Contains("Init called with an empty string as the DSN. Sentry SDK will be disabled.", logOutput);
         }
         finally
         {

@@ -149,7 +149,7 @@ public class SentrySdkTests : IDisposable
 
         using (SentrySdk.Init(options))
         {
-            _logger.Received(1).Log(SentryLevel.Warning, "Init called with Disabled DSN. Sentry SDK will be disabled.");
+            _logger.Received(1).Log(SentryLevel.Warning, "Init called with an empty string as the DSN. Sentry SDK will be disabled.");
         }
     }
 
