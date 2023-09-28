@@ -312,8 +312,47 @@ public class TransactionTracer : ITransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
+            _activeSpanTracker.Push(span);
         }
     }
+
+    private class LastActiveSpanTracker
+    {
+        private readonly object _lock = new object();
+
+        private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
+        private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
+
+        public void Push(ISpan span)
+        {
+            lock(_lock)
+            {
+                TrackedSpans.Push(span);
+            }
+        }
+
+        public ISpan? PeekActive()
+        {
+            lock(_lock)
+            {
+                while (TrackedSpans.Count > 0)
+                {
+                    // Stop tracking inactive spans
+                    var span = TrackedSpans.Peek();
+                    if (!span.IsFinished)
+                    {
+                        return span;
+                    }
+                    TrackedSpans.Pop();
+                }
+                return null;
+            }
+        }
+    }
+    private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
+
+    /// <inheritdoc />
+    public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
 
     /// <inheritdoc />
     public void Finish()
@@ -373,11 +412,6 @@ public class TransactionTracer : ITransaction
     /// <inheritdoc />
     public void Finish(Exception exception) =>
         Finish(exception, SpanStatusConverter.FromException(exception));
-
-    /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() =>
-        // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
-        Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);

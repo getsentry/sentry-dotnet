@@ -86,6 +86,16 @@ public class DefaultUserFactoryTests
     }
 
     [Fact]
+    public void Create_ContextAccessorNoClaims_IpAddress()
+    {
+        _ = HttpContext.User.Claims.Returns(Enumerable.Empty<Claim>());
+        var contextAccessor = Substitute.For<IHttpContextAccessor>();
+        contextAccessor.HttpContext.Returns(HttpContext);
+        var actual = new DefaultUserFactory(contextAccessor).Create();
+        Assert.Equal(IPAddress.IPv6Loopback.ToString(), actual?.IpAddress);
+    }
+
+    [Fact]
     public void Create_ClaimNameAndIdentityDontMatch_UsernameFromIdentity()
     {
         const string expected = "App configured to read it from a different claim";

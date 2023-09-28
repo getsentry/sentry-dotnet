@@ -2,8 +2,23 @@ using Microsoft.AspNetCore.Http;
 
 namespace Sentry.AspNetCore;
 
-internal class DefaultUserFactory : IUserFactory
+#pragma warning disable CS0618
+internal class DefaultUserFactory : IUserFactory, ISentryUserFactory
+#pragma warning restore CS0618
 {
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+
+    public DefaultUserFactory()
+    {
+    }
+
+    public DefaultUserFactory(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public User? Create() => _httpContextAccessor?.HttpContext is {} httpContext ? Create(httpContext) : null;
+
     public User? Create(HttpContext context)
     {
         var principal = context.User;
