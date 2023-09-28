@@ -78,6 +78,7 @@ public class HubAdapterTests : IDisposable
         Hub.Received(1).ConfigureScope(Expected);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_MockInvoked()
     {
@@ -86,6 +87,7 @@ public class HubAdapterTests : IDisposable
         Hub.Received(1).WithScope(Expected);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScopeT_MockInvoked()
     {
@@ -94,6 +96,7 @@ public class HubAdapterTests : IDisposable
         Hub.Received(1).WithScope(Expected);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsync_MockInvoked()
     {
@@ -102,6 +105,7 @@ public class HubAdapterTests : IDisposable
         await Hub.Received(1).WithScopeAsync(Expected);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsyncT_MockInvoked()
     {
