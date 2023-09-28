@@ -53,26 +53,26 @@ public static class SpanDataExtensions
     /// <param name="name">The name of the measurement.</param>
     /// <param name="value">The value of the measurement.</param>
     /// <param name="unit">The optional unit of the measurement.</param>
-    public static void SetMeasurement(this ISpanData transaction, string name, int value,
+    public static void SetMeasurement(this ISpanData spanData, string name, int value,
         MeasurementUnit unit = default) =>
-        transaction.SetMeasurement(name, new Measurement(value, unit));
+        spanData.SetMeasurement(name, new Measurement(value, unit));
 
     /// <inheritdoc cref="SetMeasurement(Sentry.ISpanData,string,int,Sentry.MeasurementUnit)" />
-    public static void SetMeasurement(this ISpanData transaction, string name, long value,
+    public static void SetMeasurement(this ISpanData spanData, string name, long value,
         MeasurementUnit unit = default) =>
-        transaction.SetMeasurement(name, new Measurement(value, unit));
+        spanData.SetMeasurement(name, new Measurement(value, unit));
 
     /// <inheritdoc cref="SetMeasurement(Sentry.ISpanData,string,int,Sentry.MeasurementUnit)" />
 #if !__MOBILE__
     // ulong parameter is not CLS compliant
     [CLSCompliant(false)]
 #endif
-    public static void SetMeasurement(this ISpanData transaction, string name, ulong value,
+    public static void SetMeasurement(this ISpanData spanData, string name, ulong value,
         MeasurementUnit unit = default) =>
-        transaction.SetMeasurement(name, new Measurement(value, unit));
+        spanData.SetMeasurement(name, new Measurement(value, unit));
 
     /// <inheritdoc cref="SetMeasurement(Sentry.ISpanData,string,int,Sentry.MeasurementUnit)" />
-    public static void SetMeasurement(this ISpanData transaction, string name, double value,
+    public static void SetMeasurement(this ISpanData spanData, string name, double value,
         MeasurementUnit unit = default) =>
-        transaction.SetMeasurement(name, new Measurement(value, unit));
+        spanData.SetMeasurement(name, new Measurement(value, unit));
 }
