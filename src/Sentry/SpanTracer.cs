@@ -50,20 +50,18 @@ public class SpanTracer : ISpan
     /// <inheritdoc />
     public bool? IsSampled { get; internal set; }
 
-    private ConcurrentDictionary<string, string>? _tags;
-
-    internal ConcurrentDictionary<string, string>? InternalTags => _tags;
+    internal ConcurrentDictionary<string, string>? InternalTags { get; private set; }
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
+    public IReadOnlyDictionary<string, string> Tags => InternalTags ??= new ConcurrentDictionary<string, string>();
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>
-        (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
+        (InternalTags ??= new ConcurrentDictionary<string, string>())[key] = value;
 
     /// <inheritdoc />
     public void UnsetTag(string key) =>
-        (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
+        (InternalTags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
     private readonly ConcurrentDictionary<string, object?> _data = new();
 
