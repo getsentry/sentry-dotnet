@@ -49,7 +49,7 @@ public static class SpanDataExtensions
     /// <summary>
     /// Sets a measurement on the transaction.
     /// </summary>
-    /// <param name="transaction">The transaction.</param>
+    /// <param name="spanData">The transaction.</param>
     /// <param name="name">The name of the measurement.</param>
     /// <param name="value">The value of the measurement.</param>
     /// <param name="unit">The optional unit of the measurement.</param>

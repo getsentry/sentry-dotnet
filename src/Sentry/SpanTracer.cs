@@ -32,14 +32,14 @@ public class SpanTracer : ISpan
     public bool IsFinished => EndTimestamp is not null;
 
     // Not readonly because of deserialization
-    private readonly Dictionary<string, Measurement> _measurements = new();
+    private readonly Lazy<Dictionary<string, Measurement>> _measurements = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements.Value;
 
     /// <inheritdoc />
     public void SetMeasurement(string name, Measurement measurement) =>
-        _measurements[name] = measurement;
+        _measurements.Value[name] = measurement;
 
     /// <inheritdoc cref="ISpan.Operation" />
     public string Operation { get; set; }
