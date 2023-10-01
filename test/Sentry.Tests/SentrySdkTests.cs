@@ -467,6 +467,7 @@ public class SentrySdkTests : IDisposable
         }
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
@@ -477,6 +478,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScopeT_DisabledSdk_CallbackNeverInvoked()
     {
@@ -484,6 +486,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsync_DisabledSdk_CallbackNeverInvoked()
     {
@@ -496,6 +499,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsyncT_DisabledSdk_CallbackNeverInvoked()
     {
@@ -503,6 +507,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_InvokedWithNewScope()
     {
@@ -529,6 +534,7 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
     }
 
+    [Obsolete]
     [Fact]
     public void WithScopeT_InvokedWithNewScope()
     {
@@ -553,6 +559,7 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsync_InvokedWithNewScope()
     {
@@ -582,6 +589,7 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsyncT_InvokedWithNewScope()
     {

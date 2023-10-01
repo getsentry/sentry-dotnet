@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-### Features
+### Obsoletion
 
-- Added attribute http.request.method to span data ([#2648](https://github.com/getsentry/sentry-dotnet/pull/2648))
+- `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are now deprecated in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
 
 ### Dependencies
 
@@ -14,6 +14,9 @@
 - Bump Cocoa SDK from v8.12.0 to v8.13.0 ([#2653](https://github.com/getsentry/sentry-dotnet/pull/2653))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8130)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.12.0...8.13.0)
+- Bump Java SDK from v6.29.0 to v6.30.0 ([#2685](https://github.com/getsentry/sentry-dotnet/pull/2685))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6300)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.29.0...6.30.0)
 
 ## 3.40.0-beta.0
 
