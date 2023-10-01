@@ -240,6 +240,33 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public void ProcessRequest_SetsSpanData()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var parentSpan = Substitute.For<ISpan>();
+        hub.GetSpan().Returns(parentSpan);
+        var childSpan = Substitute.For<ISpan>();
+        parentSpan.When(p => p.StartChild(Arg.Any<string>()))
+            .Do(op => childSpan.Operation = op.Arg<string>());
+        parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
+        var sut = new SentryHttpMessageHandler(hub, null);
+
+        var method = "GET";
+        var url = "http://example.com/graphql";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+        // Act
+        var returnedSpan = sut.ProcessRequest(request, method, url);
+
+        // Assert
+        returnedSpan.Should().NotBeNull();
+        returnedSpan!.Operation.Should().Be("http.client");
+        returnedSpan.Description.Should().Be($"{method} {url}");
+        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+    }
+
+    [Fact]
     public void HandleResponse_SetsSpanData()
     {
         // Arrange
@@ -259,8 +286,6 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         span.Should().NotBeNull();
-        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
-        span.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be(method);
         span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
         span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)status);
     }

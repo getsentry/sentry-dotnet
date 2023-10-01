@@ -486,10 +486,6 @@ internal class Hub : IHubEx, IDisposable
             var scope = currentScopeAndClient.Key;
             scope.Evaluate();
             scope.Apply(transaction);
-            foreach (var span in transaction.Spans)
-            {
-                scope.ApplyToSpan(span);
-            }
 
             // Apply enricher
             _enricher.Apply(transaction);

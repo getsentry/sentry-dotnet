@@ -44,7 +44,7 @@ public class SentryGraphQlHttpMessageHandlerTests
     }
 
     [Fact]
-    public void ProcessRequest_StartsSpan()
+    public void ProcessRequest_SetsSpanData()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -68,6 +68,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         returnedSpan.Should().NotBeNull();
         returnedSpan!.Operation.Should().Be("http.client");
         returnedSpan.Description.Should().Be($"{method} {url}");
+        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
     }
 
     // [Theory]
@@ -135,8 +136,6 @@ public class SentryGraphQlHttpMessageHandlerTests
         span.Should().NotBeNull();
         span!.Status.Should().Be(SpanStatus.Ok);
         span.Description.Should().Be("getAllNotes query 200");
-        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
-        span.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be("POST");
         span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
         span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)status);
     }

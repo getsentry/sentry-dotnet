@@ -1359,44 +1359,6 @@ public partial class HubTests
     }
 
     [Fact]
-    public void CaptureTransaction_SetsSpanData()
-    {
-        // Arrange
-        var hub = _fixture.GetSut();
-        hub.ConfigureScope(s =>
-        {
-            s.Request.Method = "POST";
-            s.Contexts.Response.StatusCode = 403;
-        });
-        Transaction transaction = null;
-        _fixture.Client.CaptureTransaction(
-            Arg.Do<Transaction>(t => transaction = t),
-            Arg.Any<Hint>()
-        );
-
-        // Act
-        var transactionTracer = hub.StartTransaction("test", "test");
-        var spanTracer = transactionTracer.StartChild("test");
-        transactionTracer.Finish();
-
-        // Assert
-        transaction.Should().NotBeNull();
-        transaction.Spans.Should().NotBeEmpty();
-        foreach (var span in transaction.Spans)
-        {
-            EnsureSpanDataApplied(span);
-        }
-
-        void EnsureSpanDataApplied(Span span)
-        {
-            span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
-            span.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be("POST");
-            span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
-            span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be(403);
-        }
-    }
-
-    [Fact]
     public void CaptureTransaction_EventProcessor_Gets_Hint()
     {
         // Arrange

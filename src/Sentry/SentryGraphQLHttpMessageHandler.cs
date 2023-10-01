@@ -50,10 +50,12 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
 
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        return _hub.GetSpan()?.StartChild(
+        var span = _hub.GetSpan()?.StartChild(
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
         );
+        span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        return span;
     }
 
     /// <inheritdoc />
@@ -88,7 +90,6 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
         // This will handle unsuccessful status codes as well
         if (span is not null)
         {
-            span.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
             span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
             span.Description = GetSpanDescriptionOrDefault(graphqlInfo, response.StatusCode) ?? span.Description;
             // TODO: See how we can determine the span status for a GraphQL request...

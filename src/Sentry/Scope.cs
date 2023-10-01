@@ -384,19 +384,6 @@ public class Scope : IEventLike, IHasDistribution
 #endif
     }
 
-    internal void ApplyToSpan(ISpanData spanData)
-    {
-        if (Request.Method is {} method)
-        {
-            spanData.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
-        }
-
-        if (Contexts.Response.StatusCode is {} statusCode)
-        {
-            spanData.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, statusCode);
-        }
-    }
-
     /// <summary>
     /// Applies the data from this scope to another event-like object.
     /// </summary>
