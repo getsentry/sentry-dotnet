@@ -30,15 +30,14 @@ public class Span : ISpanData, IJsonSerializable
     public bool IsFinished => EndTimestamp is not null;
 
     // Not readonly because of deserialization
-    private Dictionary<string, Measurement>? _measurements;
-    private Dictionary<string, Measurement> LazyMeasurements => _measurements ??= new();
+    private Lazy<Dictionary<string, Measurement>> _measurements;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, Measurement> Measurements => LazyMeasurements;
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements.Value;
 
     /// <inheritdoc />
     public void SetMeasurement(string name, Measurement measurement) =>
-        LazyMeasurements[name] = measurement;
+        _measurements.Value[name] = measurement;
 
     /// <inheritdoc />
     public string Operation { get; set; }
@@ -84,6 +83,7 @@ public class Span : ISpanData, IJsonSerializable
         ParentSpanId = parentSpanId;
         TraceId = SentryId.Create();
         Operation = operation;
+        _measurements = new Lazy<Dictionary<string, Measurement>>();
     }
 
     /// <summary>
@@ -100,7 +100,7 @@ public class Span : ISpanData, IJsonSerializable
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
         _extra = tracer.Extra.ToDictionary();
-        _measurements = tracer.Measurements.ToDictionary();
+        _measurements = new Lazy<Dictionary<string, Measurement>>(() => tracer.Measurements.ToDictionary());
         _tags = tracer is SpanTracer s ? s.InternalTags?.ToDictionary() : tracer.Tags.ToDictionary();
     }
 
@@ -125,7 +125,7 @@ public class Span : ISpanData, IJsonSerializable
         writer.WriteStringIfNotNull("timestamp", EndTimestamp);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
-        writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
+        writer.WriteDictionaryIfNotEmpty("measurements", Measurements, logger);
 
         writer.WriteEndObject();
     }
@@ -160,7 +160,7 @@ public class Span : ISpanData, IJsonSerializable
             IsSampled = isSampled,
             _tags = tags!,
             _extra = data!,
-            _measurements = measurements
+            _measurements = new Lazy<Dictionary<string, Measurement>>(() =>  measurements),
         };
     }
 

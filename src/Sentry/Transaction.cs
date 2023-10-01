@@ -69,15 +69,14 @@ public class Transaction : ITransactionData, IJsonSerializable
     public DateTimeOffset? EndTimestamp { get; internal set; } // internal for testing
 
     // Not readonly because of deserialization
-    private Dictionary<string, Measurement>? _measurements;
-    private Dictionary<string, Measurement> LazyMeasurements => _measurements ??= new();
+    private Lazy<Dictionary<string, Measurement>> _measurements;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, Measurement> Measurements => LazyMeasurements;
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements.Value;
 
     /// <inheritdoc />
     public void SetMeasurement(string name, Measurement measurement) =>
-        LazyMeasurements[name] = measurement;
+        _measurements.Value[name] = measurement;
 
     /// <inheritdoc />
     public string Operation
@@ -210,6 +209,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         EventId = SentryId.Create();
         Name = name;
         NameSource = nameSource;
+        _measurements = new Lazy<Dictionary<string, Measurement>>();
     }
 
     /// <summary>
@@ -267,6 +267,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         _spans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
             .Select(s => new Span(s)).ToArray();
+        _measurements = new Lazy<Dictionary<string, Measurement>>(() => tracer.Measurements.ToDictionary());
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
         if (tracer is TransactionTracer transactionTracer)
@@ -274,7 +275,6 @@ public class Transaction : ITransactionData, IJsonSerializable
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
             TransactionProfiler = transactionTracer.TransactionProfiler;
-            _measurements = transactionTracer.Measurements.ToDictionary();
         }
     }
 
@@ -348,7 +348,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
-        writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
+        writer.WriteDictionaryIfNotEmpty("measurements", Measurements, logger);
 
         writer.WriteEndObject();
     }
@@ -404,7 +404,7 @@ public class Transaction : ITransactionData, IJsonSerializable
             _breadcrumbs = breadcrumbs,
             _extra = extra,
             _tags = tags,
-            _measurements = measurements,
+            _measurements = new Lazy<Dictionary<string, Measurement>>(() =>  measurements),
             _spans = spans
         };
     }
