@@ -20,10 +20,6 @@ API Changes:
 - ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
 - Removed IHasTransactionNameSource. Use ITransactionContext instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
 - Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
-
-
-### Features
-
 - Enable `CaptureFailedRequests`` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 
 ## Unreleased
