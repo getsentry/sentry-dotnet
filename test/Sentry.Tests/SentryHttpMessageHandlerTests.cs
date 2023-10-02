@@ -1,3 +1,5 @@
+using Sentry.Internal.OpenTelemetry;
+
 namespace Sentry.Tests;
 
 /*
@@ -235,6 +237,57 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
+    }
+
+    [Fact]
+    public void ProcessRequest_SetsSpanData()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var parentSpan = Substitute.For<ISpan>();
+        hub.GetSpan().Returns(parentSpan);
+        var childSpan = Substitute.For<ISpan>();
+        parentSpan.When(p => p.StartChild(Arg.Any<string>()))
+            .Do(op => childSpan.Operation = op.Arg<string>());
+        parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
+        var sut = new SentryHttpMessageHandler(hub, null);
+
+        var method = "GET";
+        var url = "http://example.com/graphql";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+        // Act
+        var returnedSpan = sut.ProcessRequest(request, method, url);
+
+        // Assert
+        returnedSpan.Should().NotBeNull();
+        returnedSpan!.Operation.Should().Be("http.client");
+        returnedSpan.Description.Should().Be($"{method} {url}");
+        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+    }
+
+    [Fact]
+    public void HandleResponse_SetsSpanData()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var status = HttpStatusCode.OK;
+        var response = new HttpResponseMessage(status);
+        var method = "POST";
+        var url = "https://example.com/";
+        var sut = new SentryHttpMessageHandler(hub, null, null, failedRequestHandler);
+
+        var transaction = new TransactionTracer(hub, "foo", "bar");
+        var span = transaction.StartChild("http.client");
+
+        // Act
+        sut.HandleResponse(response, span, method, url);
+
+        // Assert
+        span.Should().NotBeNull();
+        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
+        span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)status);
     }
 
 #if NET5_0_OR_GREATER

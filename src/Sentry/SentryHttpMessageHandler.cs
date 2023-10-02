@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
 
@@ -64,10 +65,12 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     {
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        return _hub.GetSpan()?.StartChild(
+        var span = _hub.GetSpan()?.StartChild(
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
             );
+        span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        return span;
     }
 
     /// <inheritdoc />
@@ -85,7 +88,11 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         _failedRequestHandler?.HandleResponse(response);
 
         // This will handle unsuccessful status codes as well
-        var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
-        span?.Finish(status);
+        if (span is not null)
+        {
+            span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
+            var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
+            span.Finish(status);
+        }
     }
 }
