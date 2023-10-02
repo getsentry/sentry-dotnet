@@ -9,7 +9,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class Transaction : ITransactionData, IJsonSerializable, IHasMeasurements
+public class Transaction : ITransactionData, IJsonSerializable
 {
     /// <summary>
     /// Transaction's event ID.
@@ -67,6 +67,16 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasMeasurements
 
     /// <inheritdoc />
     public DateTimeOffset? EndTimestamp { get; internal set; } // internal for testing
+
+    // Not readonly because of deserialization
+    private Dictionary<string, Measurement>? _measurements;
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements ??= new Dictionary<string, Measurement>();
+
+    /// <inheritdoc />
+    public void SetMeasurement(string name, Measurement measurement) =>
+        (_measurements ??= new Dictionary<string, Measurement>())[name] = measurement;
 
     /// <inheritdoc />
     public string Operation
@@ -181,12 +191,6 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasMeasurements
     /// </summary>
     public IReadOnlyCollection<Span> Spans => _spans;
 
-    // Not readonly because of deserialization
-    private Dictionary<string, Measurement> _measurements = new();
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
-
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
 
@@ -262,6 +266,7 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasMeasurements
         _spans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
             .Select(s => new Span(s)).ToArray();
+        _measurements = tracer.Measurements.ToDictionary();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
         if (tracer is TransactionTracer transactionTracer)
@@ -269,7 +274,6 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasMeasurements
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
             TransactionProfiler = transactionTracer.TransactionProfiler;
-            _measurements = transactionTracer.Measurements.ToDictionary();
         }
     }
 
@@ -288,11 +292,6 @@ public class Transaction : ITransactionData, IJsonSerializable, IHasMeasurements
     /// <inheritdoc />
     public void UnsetTag(string key) =>
         _tags.Remove(key);
-
-    /// <inheritdoc />
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public void SetMeasurement(string name, Measurement measurement) =>
-        _measurements[name] = measurement;
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(

@@ -15,6 +15,8 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
 
 API Changes:
+
+- IHasMeasurements was removed. Use ISpanData instead. ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
 - If `null` has been supplied as DSN when initializing Sentry, and ArgumentNullException is now thrown ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
 - IHasBreadcrumbs was removed. Use IEventLike instead. ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
 - ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
