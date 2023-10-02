@@ -32,14 +32,14 @@ public class SpanTracer : ISpan
     public bool IsFinished => EndTimestamp is not null;
 
     // Not readonly because of deserialization
-    private readonly Lazy<Dictionary<string, Measurement>> _measurements = new();
+    internal Dictionary<string, Measurement>? InternalMeasurements { get; private set; }
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements.Value;
+    public IReadOnlyDictionary<string, Measurement> Measurements => InternalMeasurements ??= new Dictionary<string, Measurement>();
 
     /// <inheritdoc />
     public void SetMeasurement(string name, Measurement measurement) =>
-        _measurements.Value[name] = measurement;
+        (InternalMeasurements ??= new Dictionary<string, Measurement>())[name] = measurement;
 
     /// <inheritdoc cref="ISpan.Operation" />
     public string Operation { get; set; }
@@ -61,20 +61,18 @@ public class SpanTracer : ISpan
     /// <inheritdoc />
     public bool? IsSampled { get; internal set; }
 
-    private ConcurrentDictionary<string, string>? _tags;
-
-    internal ConcurrentDictionary<string, string>? InternalTags => _tags;
+    internal ConcurrentDictionary<string, string>? InternalTags { get; private set; }
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags ??= new ConcurrentDictionary<string, string>();
+    public IReadOnlyDictionary<string, string> Tags => InternalTags ??= new ConcurrentDictionary<string, string>();
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>
-        (_tags ??= new ConcurrentDictionary<string, string>())[key] = value;
+        (InternalTags ??= new ConcurrentDictionary<string, string>())[key] = value;
 
     /// <inheritdoc />
     public void UnsetTag(string key) =>
-        (_tags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
+        (InternalTags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
     private readonly ConcurrentDictionary<string, object?> _data = new();
 
