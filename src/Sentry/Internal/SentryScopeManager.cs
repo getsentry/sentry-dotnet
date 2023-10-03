@@ -30,10 +30,19 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
     }
 
+    private ConditionalWeakTable<object, KeyValuePair<Scope, ISentryClient>[]?> KeyedScopeStacks => new();
+
+    private KeyValuePair<Scope, ISentryClient>[] GetKeyedStack(object key)
+    {
+        return KeyedScopeStacks.GetValue(key, _ => NewStack())!;
+    }
+
     public KeyValuePair<Scope, ISentryClient> GetCurrent()
     {
-        var current = ScopeAndClientStack;
-        return current[^1];
+        var stack = _options.ScopeKeyResolver?.ScopeKey is { } key
+            ? GetKeyedStack(key)
+            : ScopeAndClientStack;
+        return stack[^1];
     }
 
     public void ConfigureScope(Action<Scope>? configureScope)
