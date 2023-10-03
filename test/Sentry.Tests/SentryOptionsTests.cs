@@ -175,10 +175,10 @@ public class SentryOptionsTests
     }
 
     [Fact]
-    public void CaptureFailedRequests_ByDefault_IsFalse()
+    public void CaptureFailedRequests_ByDefault_IsTrue()
     {
         var sut = new SentryOptions();
-        Assert.False(sut.CaptureFailedRequests, "CaptureFailedRequests should be false by default to protect potentially PII (Privately Identifiable Information)");
+        Assert.True(sut.CaptureFailedRequests);
     }
 
     [Fact]
