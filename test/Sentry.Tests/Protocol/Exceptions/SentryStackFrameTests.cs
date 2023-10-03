@@ -30,7 +30,9 @@ public class SentryStackFrameTests
             Platform = "Platform",
             ImageAddress = 3,
             SymbolAddress = 4,
+#pragma warning disable 0618
             InstructionOffset = 5,
+#pragma warning restore 0618
             InstructionAddress = "0xffffffff",
             AddressMode = "rel:0"
         };
