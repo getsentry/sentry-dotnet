@@ -9,10 +9,29 @@ internal sealed class SentryScopeManager : IInternalScopeManager
 
     private readonly SentryOptions _options;
 
-    private KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
+    private KeyValuePair<Scope, ISentryClient>[] DefaultScopeAndClientStack
     {
         get => ScopeStackContainer.Stack ??= NewStack();
         set => ScopeStackContainer.Stack = value;
+    }
+
+    private ConditionalWeakTable<object, KeyValuePair<Scope, ISentryClient>[]?> KeyedScopeAndClientStack => new();
+
+    private KeyValuePair<Scope, ISentryClient>[] GetKeyedScopeStack(object key)
+    {
+        return KeyedScopeAndClientStack.GetValue(key, _ => NewStack())!;
+    }
+
+    private void SetKeyedScopeStack(object key, KeyValuePair<Scope, ISentryClient>[]? value)
+    {
+        #if NETCOREAPP3_0_OR_GREATER
+        KeyedScopeAndClientStack.AddOrUpdate(key, value);
+        #else
+        // This would be a race condition, but it's only a problem for .NET Framework and the keyed scope stacks are
+        // currently only used in our ASP.NET Core integration with OpenTelemetry... so we're fine for now.
+        KeyedScopeAndClientStack.Remove(key);
+        KeyedScopeAndClientStack.Add(key, value);
+        #endif
     }
 
     private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
@@ -30,18 +49,39 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
     }
 
-    private ConditionalWeakTable<object, KeyValuePair<Scope, ISentryClient>[]?> KeyedScopeStacks => new();
-
-    private KeyValuePair<Scope, ISentryClient>[] GetKeyedStack(object key)
+    public KeyValuePair<Scope, ISentryClient> GetCurrentKeyed(object key)
     {
-        return KeyedScopeStacks.GetValue(key, _ => NewStack())!;
+        return GetKeyedScopeStack(key)[^1];
+    }
+
+    private KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
+    {
+        get
+        {
+            if (_options.ScopeKeyResolver?.ScopeKey is { } key)
+            {
+                return GetKeyedScopeStack(key);
+            }
+            return DefaultScopeAndClientStack;
+        }
+        set
+        {
+            if (_options.ScopeKeyResolver?.ScopeKey is { } key)
+            {
+                SetKeyedScopeStack(key, value);
+            }
+            else
+            {
+                DefaultScopeAndClientStack = value;
+            }
+        }
     }
 
     public KeyValuePair<Scope, ISentryClient> GetCurrent()
     {
         var stack = _options.ScopeKeyResolver?.ScopeKey is { } key
-            ? GetKeyedStack(key)
-            : ScopeAndClientStack;
+            ? GetKeyedScopeStack(key)
+            : DefaultScopeAndClientStack;
         return stack[^1];
     }
 

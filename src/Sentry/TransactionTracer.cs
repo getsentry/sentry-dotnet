@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.ScopeStack;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -393,7 +394,9 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
         // Client decides whether to discard this transaction based on sampling
-        _hub.CaptureTransaction(new Transaction(this));
+        var transaction = new Transaction(this);
+        this.PropagateScopeStackKey(transaction);
+        _hub.CaptureTransaction(transaction);
     }
 
     /// <inheritdoc />

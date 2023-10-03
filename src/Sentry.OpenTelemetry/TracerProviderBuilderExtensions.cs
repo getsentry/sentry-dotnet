@@ -2,6 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
+using Sentry.Internal;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.OpenTelemetry;
 
@@ -43,5 +45,19 @@ public static class TracerProviderBuilderExtensions
 
             return new SentrySpanProcessor(SentrySdk.CurrentHub, enrichers);
         });
+    }
+
+    /// <summary>
+    /// Ensures Sentry <see cref="Scope"/> data is applied to any OpenTelemetry events that get sent to Sentry. This
+    /// should be called inside the `AddAspNetCoreInstrumentation` callback on the <see cref="TracerProviderBuilder"/>
+    /// when initializing OpenTelemetry.
+    /// </summary>
+    /// <param name="activity">The activity</param>
+    /// <param name="request"></param>
+    /// <typeparam name="T"></typeparam>
+    public static void ApplySentryScope<T>(this Activity activity, T request)
+        where T: class
+    {
+        activity.SetScopeStackKey(request);
     }
 }

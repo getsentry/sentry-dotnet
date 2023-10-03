@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal;
 
@@ -486,8 +487,9 @@ internal class Hub : IHubEx, IDisposable
         try
         {
             // Apply scope data
-            var currentScopeAndClient = ScopeManager.GetCurrent();
-            var scope = currentScopeAndClient.Key;
+            var (scope, client) = (transaction.GetScopeStackKey() is {} key)
+                ? ScopeManager.GetCurrentKeyed(key)
+                : ScopeManager.GetCurrent();
             scope.Evaluate();
             scope.Apply(transaction);
 
@@ -513,7 +515,6 @@ internal class Hub : IHubEx, IDisposable
                 }
             }
 
-            var client = currentScopeAndClient.Value;
             client.CaptureTransaction(processedTransaction, hint);
         }
         catch (Exception e)

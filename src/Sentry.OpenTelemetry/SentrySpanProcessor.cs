@@ -1,8 +1,7 @@
 using OpenTelemetry;
-using OpenTelemetry.Trace;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.OpenTelemetry;
 
@@ -157,6 +156,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
+
+            data.PropagateScopeStackKey(transaction);
         }
         else
         {
