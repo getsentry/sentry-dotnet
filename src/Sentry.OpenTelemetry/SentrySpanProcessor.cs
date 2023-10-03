@@ -157,7 +157,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
 
-            data.PropagateScopeStackKey(transaction);
+            transaction.SetScopeStackKey(data.RootId);
         }
         else
         {

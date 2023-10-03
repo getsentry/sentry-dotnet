@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISentryEventExceptionProcessor, AspNetCoreExceptionProcessor>();
 
         services.AddHttpContextAccessor();
-        services.AddSingleton<IScopeStackKeyResolver, HttpRequestScopeKeyResolver>();
+        services.AddSingleton<IScopeStackKeyResolver, ActivityRootIdKeyResolver>();
 #pragma warning disable CS0618
         services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
 #pragma warning restore CS0618

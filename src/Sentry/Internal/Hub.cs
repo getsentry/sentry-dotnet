@@ -490,6 +490,8 @@ internal class Hub : IHubEx, IDisposable
             var (scope, client) = (transaction.GetScopeStackKey() is {} key)
                 ? ScopeManager.GetCurrentKeyed(key)
                 : ScopeManager.GetCurrent();
+            // TODO: The middleware pipeline finishes up before the Otel Activity.OnEnd callback is invoked so the scope has already been popped at this point :-(
+            // Need to figure out some way to evaluate and apply the scope earlier for Otel transactions...
             scope.Evaluate();
             scope.Apply(transaction);
 

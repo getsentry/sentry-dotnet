@@ -15,23 +15,14 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         set => ScopeStackContainer.Stack = value;
     }
 
-    private ConditionalWeakTable<object, KeyValuePair<Scope, ISentryClient>[]?> KeyedScopeAndClientStack => new();
+    private readonly ConcurrentDictionary<object, KeyValuePair<Scope, ISentryClient>[]> _keyedScopeAndClientStack = new();
 
-    private KeyValuePair<Scope, ISentryClient>[] GetKeyedScopeStack(object key)
-    {
-        return KeyedScopeAndClientStack.GetValue(key, _ => NewStack())!;
-    }
+    // TODO: Need to work out a mechanism to clean these up when the request finishes...
+    private KeyValuePair<Scope, ISentryClient>[] GetKeyedScopeStack(object key) => _keyedScopeAndClientStack.GetOrAdd(key, _ => NewStack())!;
 
-    private void SetKeyedScopeStack(object key, KeyValuePair<Scope, ISentryClient>[]? value)
+    private void SetKeyedScopeStack(object key, KeyValuePair<Scope, ISentryClient>[] value)
     {
-        #if NETCOREAPP3_0_OR_GREATER
-        KeyedScopeAndClientStack.AddOrUpdate(key, value);
-        #else
-        // This would be a race condition, but it's only a problem for .NET Framework and the keyed scope stacks are
-        // currently only used in our ASP.NET Core integration with OpenTelemetry... so we're fine for now.
-        KeyedScopeAndClientStack.Remove(key);
-        KeyedScopeAndClientStack.Add(key, value);
-        #endif
+        _keyedScopeAndClientStack[key] = value;
     }
 
     private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
@@ -77,24 +68,18 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         }
     }
 
-    public KeyValuePair<Scope, ISentryClient> GetCurrent()
-    {
-        var stack = _options.ScopeKeyResolver?.ScopeKey is { } key
-            ? GetKeyedScopeStack(key)
-            : DefaultScopeAndClientStack;
-        return stack[^1];
-    }
+    public KeyValuePair<Scope, ISentryClient> GetCurrent() => ScopeAndClientStack[^1];
 
     public void ConfigureScope(Action<Scope>? configureScope)
     {
-        var scope = GetCurrent();
-        configureScope?.Invoke(scope.Key);
+        var (scope, _) = GetCurrent();
+        configureScope?.Invoke(scope);
     }
 
     public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
     {
-        var scope = GetCurrent();
-        return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
+        var (scope, _) = GetCurrent();
+        return configureScope?.Invoke(scope) ?? Task.CompletedTask;
     }
 
     public IDisposable PushScope() => PushScope<object>(null);
@@ -145,8 +130,8 @@ internal sealed class SentryScopeManager : IInternalScopeManager
     {
         using (PushScope())
         {
-            var scope = GetCurrent();
-            scopeCallback.Invoke(scope.Key);
+            var (scope, _) = GetCurrent();
+            scopeCallback.Invoke(scope);
         }
     }
 
@@ -154,8 +139,8 @@ internal sealed class SentryScopeManager : IInternalScopeManager
     {
         using (PushScope())
         {
-            var scope = GetCurrent();
-            return scopeCallback.Invoke(scope.Key);
+            var (scope, _) = GetCurrent();
+            return scopeCallback.Invoke(scope);
         }
     }
 
@@ -163,8 +148,8 @@ internal sealed class SentryScopeManager : IInternalScopeManager
     {
         using (PushScope())
         {
-            var scope = GetCurrent();
-            await scopeCallback.Invoke(scope.Key).ConfigureAwait(false);
+            var (scope, _) = GetCurrent();
+            await scopeCallback.Invoke(scope).ConfigureAwait(false);
         }
     }
 
@@ -172,8 +157,8 @@ internal sealed class SentryScopeManager : IInternalScopeManager
     {
         using (PushScope())
         {
-            var scope = GetCurrent();
-            return await scopeCallback.Invoke(scope.Key).ConfigureAwait(false);
+            var (scope, _) = GetCurrent();
+            return await scopeCallback.Invoke(scope).ConfigureAwait(false);
         }
     }
 
