@@ -232,8 +232,7 @@ internal class DebugStackTrace : SentryStackTrace
                     // See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/cortokentype-enumeration
                     if (tokenType == 0x06000000) // CorTokenType.mdtMethodDef
                     {
-                        var recordId = token & 0x00ffffff;
-                        frame.FunctionId = $"0x{recordId:x}";
+                        frame.FunctionId = token & 0x00ffffff;
                     }
                 }
                 catch (InvalidOperationException)
@@ -261,7 +260,7 @@ internal class DebugStackTrace : SentryStackTrace
         var ilOffset = stackFrame.GetILOffset();
         if (ilOffset != StackFrame.OFFSET_UNKNOWN)
         {
-            frame.InstructionAddress = $"0x{ilOffset:x}";
+            frame.InstructionAddress = ilOffset;
         }
 
         var lineNo = stackFrame.GetFileLineNumber();
