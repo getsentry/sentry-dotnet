@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNetCore;
 
@@ -82,6 +83,8 @@ internal class SentryTracingMiddleware
                 "Started transaction with span ID '{0}' and trace ID '{1}'.",
                 transaction.SpanId,
                 transaction.TraceId);
+
+            transaction?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, context.Request.Method);
 
             return transaction;
         }
@@ -165,6 +168,7 @@ internal class SentryTracingMiddleware
                     transaction.Name = transactionName;
                 }
 
+                transaction.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, context.Response.StatusCode);
                 var status = SpanStatusConverter.FromHttpStatusCode(context.Response.StatusCode);
 
                 // If no Name was found for Transaction, then we don't have the route.

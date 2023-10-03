@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry.AspNetCore.TestUtils;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNetCore.Tests;
 
@@ -434,6 +435,10 @@ public class SentryTracingMiddlewareTests
         transaction.Request.Method.Should().Be("GET");
         transaction.Request.Url.Should().Be("http://localhost/person/13");
         transaction.Request.Headers.Should().Contain(new KeyValuePair<string, string>("foo", "bar"));
+        transaction.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpRequestMethod);
+        transaction.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be("GET");
+        transaction.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
+        transaction.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be(200);
     }
 
     [Fact]

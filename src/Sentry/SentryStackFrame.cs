@@ -128,6 +128,7 @@ public sealed class SentryStackFrame : IJsonSerializable
     /// The official docs refer to it as 'The difference between instruction address and symbol address in bytes.'
     /// In .NET this means the IL Offset within the assembly.
     /// </remarks>
+    [Obsolete("This property is unused and will be removed in the future.")]
     public long? InstructionOffset { get; set; }
 
     /// <summary>
@@ -168,7 +169,9 @@ public sealed class SentryStackFrame : IJsonSerializable
         writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress.NullIfDefault()?.ToHexString());
         writer.WriteStringIfNotWhiteSpace("symbol_addr", SymbolAddress?.ToHexString());
         writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
+#pragma warning disable 0618
         writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
+#pragma warning restore 0618
         writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
         writer.WriteStringIfNotWhiteSpace("function_id", FunctionId);
 
@@ -263,7 +266,9 @@ public sealed class SentryStackFrame : IJsonSerializable
             ImageAddress = imageAddress,
             SymbolAddress = symbolAddress,
             InstructionAddress = instructionAddress,
+#pragma warning disable 0618
             InstructionOffset = instructionOffset,
+#pragma warning restore 0618
             AddressMode = addressMode,
             FunctionId = functionId,
         };

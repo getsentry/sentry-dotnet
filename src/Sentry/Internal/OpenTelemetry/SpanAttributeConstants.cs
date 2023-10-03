@@ -18,12 +18,12 @@
 // </copyright>
 
 // ReSharper disable once CheckNamespace
-namespace Sentry.OpenTelemetry;
+namespace Sentry.Internal.OpenTelemetry;
 
 /// <summary>
 /// Defines well-known span attribute keys.
 /// </summary>
-internal static class SpanAttributeConstants
+internal static class OtelSpanAttributeConstants
 {
     public const string StatusCodeKey = "otel.status_code";
     public const string StatusDescriptionKey = "otel.status_description";

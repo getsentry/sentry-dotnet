@@ -271,6 +271,8 @@ namespace Sentry
         System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope);
         System.IDisposable PushScope();
         System.IDisposable PushScope<TState>(TState state);
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         void WithScope(System.Action<Sentry.Scope> scopeCallback);
     }
     public interface ISentryScopeStateProcessor
@@ -785,9 +787,17 @@ namespace Sentry
         public static Sentry.ITransaction StartTransaction(string name, string operation) { }
         public static Sentry.ITransaction StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransaction StartTransaction(string name, string operation, string? description) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public static void WithScope(System.Action<Sentry.Scope> scopeCallback) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public static T? WithScope<T>(System.Func<Sentry.Scope, T?> scopeCallback) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public static System.Threading.Tasks.Task WithScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> scopeCallback) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public static System.Threading.Tasks.Task<T?> WithScopeAsync<T>(System.Func<Sentry.Scope, System.Threading.Tasks.Task<T?>> scopeCallback) { }
     }
     public sealed class SentryStackFrame : Sentry.IJsonSerializable
@@ -804,6 +814,7 @@ namespace Sentry
         public long ImageAddress { get; set; }
         public bool? InApp { get; set; }
         public string? InstructionAddress { get; set; }
+        [System.Obsolete("This property is unused and will be removed in the future.")]
         public long? InstructionOffset { get; set; }
         public int? LineNumber { get; set; }
         public string? Module { get; set; }
@@ -1294,9 +1305,17 @@ namespace Sentry.Extensibility
         public void ResumeSession() { }
         public void StartSession() { }
         public Sentry.ITransaction StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public void WithScope(System.Action<Sentry.Scope> scopeCallback) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public T? WithScope<T>(System.Func<Sentry.Scope, T?> scopeCallback) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public System.Threading.Tasks.Task WithScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> scopeCallback) { }
+        [System.Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage a" +
+            "nd CaptureException that provide a callback to a configurable scope.")]
         public System.Threading.Tasks.Task<T?> WithScopeAsync<T>(System.Func<Sentry.Scope, System.Threading.Tasks.Task<T?>> scopeCallback) { }
     }
     public interface IBackgroundWorker
