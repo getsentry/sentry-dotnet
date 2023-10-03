@@ -808,12 +808,10 @@ namespace Sentry
         public string? FileName { get; set; }
         public System.Collections.Generic.IList<int> FramesOmitted { get; }
         public string? Function { get; set; }
-        public string? FunctionId { get; set; }
-        public long ImageAddress { get; set; }
+        public long? FunctionId { get; set; }
+        public long? ImageAddress  { get; set; }
         public bool? InApp { get; set; }
-        public string? InstructionAddress { get; set; }
-        [System.Obsolete("This property is unused and will be removed in the future.")]
-        public long? InstructionOffset { get; set; }
+        public long? InstructionAddress { get; set; }
         public int? LineNumber { get; set; }
         public string? Module { get; set; }
         public string? Package { get; set; }

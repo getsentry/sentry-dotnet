@@ -103,8 +103,8 @@ public static class VerifyExtensions
 
         public override void Write(VerifyJsonWriter writer, SentryStackFrame obj)
         {
-            obj.FunctionId = ScrubAlphaNum(obj.FunctionId);
-            obj.InstructionAddress = ScrubAlphaNum(obj.InstructionAddress);
+            obj.FunctionId = obj.FunctionId is null ? null : 1;
+            obj.InstructionAddress = obj.InstructionAddress is null ? null : 2;
             obj.Package = obj.Package.Replace(PackageRegex, "=SCRUBBED");
 
             if (RuntimeInfo.GetRuntime().IsMono())

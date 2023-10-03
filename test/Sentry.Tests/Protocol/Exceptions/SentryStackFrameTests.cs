@@ -30,10 +30,7 @@ public class SentryStackFrameTests
             Platform = "Platform",
             ImageAddress = 3,
             SymbolAddress = 4,
-#pragma warning disable 0618
-            InstructionOffset = 5,
-#pragma warning restore 0618
-            InstructionAddress = "0xffffffff",
+            InstructionAddress = 5,
             AddressMode = "rel:0"
         };
 
@@ -66,8 +63,7 @@ public class SentryStackFrameTests
               "platform": "Platform",
               "image_addr": "0x3",
               "symbol_addr": "0x4",
-              "instruction_addr": "0xffffffff",
-              "instruction_offset": 5,
+              "instruction_addr": "0x5",
               "addr_mode": "rel:0"
             }
             """,
