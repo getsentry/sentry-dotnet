@@ -11,6 +11,9 @@
 
 - Release of Azure Functions (Isolated Worker/Out-of-Process) support ([#2686](https://github.com/getsentry/sentry-dotnet/pull/2686))
 
+### Fixes
+- Scope is now correctly applied to Transactions when using OpenTelemetry on ASP.NET Core ([#2690](https://github.com/getsentry/sentry-dotnet/pull/2690))
+
 ### Dependencies
 
 - Bump CLI from v2.20.7 to v2.21.1 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647))
