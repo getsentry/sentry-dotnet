@@ -1,7 +1,7 @@
 using OpenTelemetry;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
-using Sentry.Internal.ScopeStack;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.OpenTelemetry;
