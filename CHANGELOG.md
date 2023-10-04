@@ -5,6 +5,11 @@
 ### Obsoletion
 
 - `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are now deprecated in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
+- `StackFrame.InstructionOffset` has not been used in the SDK and has been ignored on the server for years. ([#2689](https://github.com/getsentry/sentry-dotnet/pull/2689))
+
+### Features
+
+- Release of Azure Functions (Isolated Worker/Out-of-Process) support ([#2686](https://github.com/getsentry/sentry-dotnet/pull/2686))
 
 ### Dependencies
 

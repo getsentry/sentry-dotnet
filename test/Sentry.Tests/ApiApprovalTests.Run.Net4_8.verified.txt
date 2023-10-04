@@ -813,6 +813,7 @@ namespace Sentry
         public long ImageAddress { get; set; }
         public bool? InApp { get; set; }
         public string? InstructionAddress { get; set; }
+        [System.Obsolete("This property is unused and will be removed in the future.")]
         public long? InstructionOffset { get; set; }
         public int? LineNumber { get; set; }
         public string? Module { get; set; }
