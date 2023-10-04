@@ -1,5 +1,6 @@
 using OpenTelemetry;
 using OpenTelemetry.Trace;
+using Sentry.Internal.OpenTelemetry;
 using Sentry.PlatformAbstractions;
 
 namespace Sentry.OpenTelemetry.Tests;
@@ -98,7 +99,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Error, grpcAttributes)
                 .Should().Be(SpanStatus.PermissionDenied);
 
-            var errorAttributes = new Dictionary<string, object> { [SpanAttributeConstants.StatusCodeKey] = StatusTags.ErrorStatusCodeTagValue };
+            var errorAttributes = new Dictionary<string, object> { [OtelSpanAttributeConstants.StatusCodeKey] = OtelStatusTags.ErrorStatusCodeTagValue };
             SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Ok, errorAttributes).Should().Be(SpanStatus.UnknownError);
             SentrySpanProcessor.GetSpanStatus(ActivityStatusCode.Unset, errorAttributes).Should().Be(SpanStatus.UnknownError);
         }

@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
 
@@ -13,7 +14,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
 
     /// <summary>
-    /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
+    /// Constructs an instance of <see cref="SentryGraphQLHttpMessageHandler"/>.
     /// </summary>
     /// <param name="innerHandler">An inner message handler to delegate calls to.</param>
     /// <param name="hub">The Sentry hub.</param>
@@ -49,10 +50,12 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
 
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        return _hub.GetSpan()?.StartChild(
+        var span = _hub.GetSpan()?.StartChild(
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
         );
+        span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        return span;
     }
 
     /// <inheritdoc />
@@ -87,10 +90,11 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
         // This will handle unsuccessful status codes as well
         if (span is not null)
         {
-            // TODO: See how we can determine the span status for a GraphQL request...
-            span.Status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode); // TODO: Don't do this if the span is errored
+            span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
             span.Description = GetSpanDescriptionOrDefault(graphqlInfo, response.StatusCode) ?? span.Description;
-            span.Finish();
+            // TODO: See how we can determine the span status for a GraphQL request...
+            var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);  // TODO: Don't do this if the span is errored
+            span.Finish(status);
         }
     }
 

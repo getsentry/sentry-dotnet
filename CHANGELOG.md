@@ -15,20 +15,40 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
 
 API Changes:
+
+- IHasMeasurements was removed. Use ISpanData instead. ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
 - If `null` has been supplied as DSN when initializing Sentry, and ArgumentNullException is now thrown ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
 - IHasBreadcrumbs was removed. Use IEventLike instead. ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
 - ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
 - Removed IHasTransactionNameSource. Use ITransactionContext instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
 - Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
+- Removed unused `StackFrame.InstructionOffset`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
 
 ## Unreleased
+
+### Obsoletion
+
+- `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are now deprecated in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
+- `StackFrame.InstructionOffset` has not been used in the SDK and has been ignored on the server for years. ([#2689](https://github.com/getsentry/sentry-dotnet/pull/2689))
+
+### Features
+
+- Release of Azure Functions (Isolated Worker/Out-of-Process) support ([#2686](https://github.com/getsentry/sentry-dotnet/pull/2686))
 
 ### Dependencies
 
 - Bump CLI from v2.20.7 to v2.21.1 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2211)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.7...2.21.1)
+- Bump Cocoa SDK from v8.12.0 to v8.13.0 ([#2653](https://github.com/getsentry/sentry-dotnet/pull/2653))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8130)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.12.0...8.13.0)
+- Bump Java SDK from v6.29.0 to v6.30.0 ([#2685](https://github.com/getsentry/sentry-dotnet/pull/2685))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6300)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.29.0...6.30.0)
 
 ## 3.40.0-beta.0
 

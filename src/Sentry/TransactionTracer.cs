@@ -7,7 +7,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasMeasurements
+public class TransactionTracer : ITransaction
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
@@ -267,7 +267,6 @@ public class TransactionTracer : ITransaction, IHasMeasurements
     public void UnsetTag(string key) => _tags.TryRemove(key, out _);
 
     /// <inheritdoc />
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />

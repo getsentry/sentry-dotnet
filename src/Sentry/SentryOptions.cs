@@ -664,7 +664,7 @@ public class SentryOptions
     /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
     /// <para>Defaults to false due to PII reasons.</para>
     /// </summary>
-    public bool CaptureFailedRequests { get; set; }
+    public bool CaptureFailedRequests { get; set; } = true;
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.</para>
