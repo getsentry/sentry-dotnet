@@ -5,24 +5,6 @@ runs:
 
   steps:
 
-    - name: Get Carthage SHA
-      shell: bash
-      run: echo "CARTHAGE_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
-      working-directory: modules/Carthage
-
-    - name: Cache Carthage
-      id: cache-carthage
-      uses: actions/cache@v3
-      with:
-        path: modules/Carthage/.build/debug/carthage
-        key: carthage-${{ env.CARTHAGE_SHA }}
-
-    - name: Build Carthage
-      if: ${{ steps.cache-carthage.outputs.cache-hit != 'true' }}
-      shell: bash
-      run: make all
-      working-directory: modules/Carthage
-
     - name: Fetch version tags for Sentry Cocoa SDK
       shell: bash
       run: git fetch --tags --quiet

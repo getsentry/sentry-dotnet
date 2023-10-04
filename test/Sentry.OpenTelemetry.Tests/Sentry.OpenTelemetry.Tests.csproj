@@ -11,14 +11,12 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <!-- Use the netcoreapp3.1 target to test netstandard2.0 -->
-    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj"
-                      AdditionalProperties="TargetFramework=netstandard2.0" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <!-- Use the net6.0 target to test netstandard2.1 -->
-    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj"
-                      AdditionalProperties="TargetFramework=netstandard2.1" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" AdditionalProperties="TargetFramework=netstandard2.1" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.1' and '$(TargetFramework)' != 'net6.0'">

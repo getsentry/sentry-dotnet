@@ -62,6 +62,8 @@ public sealed class HubAdapter : IHub, IHubEx
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public void WithScope(Action<Scope> scopeCallback)
         => SentrySdk.WithScope(scopeCallback);
@@ -112,6 +114,17 @@ public sealed class HubAdapter : IHub, IHubEx
     [DebuggerStepThrough]
     public BaggageHeader? GetBaggage()
         => SentrySdk.GetBaggage();
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public TransactionContext ContinueTrace(
+        string? traceHeader,
+        string? baggageHeader,
+        string? name = null,
+        string? operation = null)
+        => SentrySdk.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -278,18 +291,24 @@ public sealed class HubAdapter : IHub, IHubEx
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     public T? WithScope<T>(Func<Scope, T?> scopeCallback)
         => SentrySdk.WithScope(scopeCallback);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     public Task WithScopeAsync(Func<Scope, Task> scopeCallback)
         => SentrySdk.WithScopeAsync(scopeCallback);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
         => SentrySdk.WithScopeAsync(scopeCallback);
 }

@@ -141,6 +141,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
+            Dsn = Constants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = true,
             InitNativeSdks = false
@@ -148,7 +149,7 @@ public class SentrySdkTests : IDisposable
 
         using (SentrySdk.Init(options))
         {
-            _logger.Received(1).Log(SentryLevel.Warning, "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+            _logger.Received(1).Log(SentryLevel.Warning, "Init called with an empty string as the DSN. Sentry SDK will be disabled.");
         }
     }
 
@@ -176,6 +177,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
+            Dsn = Constants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = false,
             InitNativeSdks = false,
@@ -467,6 +469,7 @@ public class SentrySdkTests : IDisposable
         }
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_DisabledSdk_CallbackNeverInvoked()
     {
@@ -477,6 +480,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScopeT_DisabledSdk_CallbackNeverInvoked()
     {
@@ -484,6 +488,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsync_DisabledSdk_CallbackNeverInvoked()
     {
@@ -496,6 +501,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsyncT_DisabledSdk_CallbackNeverInvoked()
     {
@@ -503,6 +509,7 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_InvokedWithNewScope()
     {
@@ -529,6 +536,7 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
     }
 
+    [Obsolete]
     [Fact]
     public void WithScopeT_InvokedWithNewScope()
     {
@@ -553,6 +561,7 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsync_InvokedWithNewScope()
     {
@@ -582,6 +591,7 @@ public class SentrySdkTests : IDisposable
         SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsyncT_InvokedWithNewScope()
     {
@@ -821,14 +831,14 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_NoDsn_DisposeDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions()) as IDisposable;
+        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue}) as IDisposable;
         sut?.Dispose();
     }
 
     [Fact]
     public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions());
+        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue});
         await sut.FlushAsync();
     }
 
