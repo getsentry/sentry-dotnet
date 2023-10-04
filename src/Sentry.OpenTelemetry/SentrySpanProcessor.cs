@@ -87,16 +87,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             bool? isSampled = data.HasRemoteParent ? data.Recorded : null;
 
             // No parent span found - start a new transaction
-            var transactionContext = new TransactionContext(
+            var transactionContext = new TransactionContext(data.DisplayName,
+                data.OperationName,
                 data.SpanId.AsSentrySpanId(),
                 data.ParentSpanId.AsSentrySpanId(),
                 data.TraceId.AsSentryId(),
-                data.DisplayName,
-                data.OperationName,
-                data.DisplayName,
-                null,
-                isSampled,
-                isSampled)
+                data.DisplayName, null, isSampled, isSampled)
             {
                 Instrumenter = Instrumenter.OpenTelemetry
             };

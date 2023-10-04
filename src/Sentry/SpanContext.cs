@@ -37,17 +37,17 @@ public class SpanContext : ITraceContext
     /// Initializes an instance of <see cref="SpanContext"/>.
     /// </summary>
     public SpanContext(
-        SpanId spanId,
+        SpanId? spanId,
         SpanId? parentSpanId,
-        SentryId traceId,
+        SentryId? traceId,
         string operation,
         string? description,
         SpanStatus? status,
         bool? isSampled)
     {
-        SpanId = spanId;
+        SpanId = spanId ?? SpanId.Create();
         ParentSpanId = parentSpanId;
-        TraceId = traceId;
+        TraceId = traceId ?? SentryId.Create();
         Operation = operation;
         Description = description;
         Status = status;
