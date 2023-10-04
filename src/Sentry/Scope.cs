@@ -138,9 +138,6 @@ public class Scope : IEventLike
     }
 
     /// <inheritdoc />
-    public string? Platform { get; set; }
-
-    /// <inheritdoc />
     public string? Release { get; set; }
 
     /// <inheritdoc />
@@ -345,7 +342,6 @@ public class Scope : IEventLike
         Request = new();
         Contexts.Clear();
         User = new();
-        Platform = default;
         Release = default;
         Distribution = default;
         Environment = default;
@@ -435,7 +431,6 @@ public class Scope : IEventLike
         Request.CopyTo(other.Request);
         User.CopyTo(other.User);
 
-        other.Platform ??= Platform;
         other.Release ??= Release;
         other.Distribution ??= Distribution;
         other.Environment ??= Environment;
