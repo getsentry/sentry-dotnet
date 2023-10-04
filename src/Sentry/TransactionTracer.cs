@@ -394,9 +394,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
         // Client decides whether to discard this transaction based on sampling
-        var transaction = new Transaction(this);
-        this.PropagateScopeStackKey(transaction);
-        _hub.CaptureTransaction(transaction);
+        _hub.CaptureTransaction(new Transaction(this));
     }
 
     /// <inheritdoc />

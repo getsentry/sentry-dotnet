@@ -2,8 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
-using Sentry.Internal;
-using Sentry.Internal.ScopeStack;
 
 namespace Sentry.OpenTelemetry;
 

@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sentry;
 using Sentry.AspNetCore;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
-using Sentry.Internal.ScopeStack;
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Microsoft.Extensions.DependencyInjection;
@@ -25,7 +23,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISentryEventExceptionProcessor, AspNetCoreExceptionProcessor>();
 
         services.AddHttpContextAccessor();
-        services.AddSingleton<IScopeStackKeyResolver, ActivityRootIdKeyResolver>();
 #pragma warning disable CS0618
         services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
 #pragma warning restore CS0618

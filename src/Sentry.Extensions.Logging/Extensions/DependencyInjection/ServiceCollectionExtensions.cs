@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 using Sentry.Extensibility;
-using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Extensions.Logging.Extensions.DependencyInjection;
 
@@ -29,10 +28,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<Func<IHub>>(c =>
         {
             var options = c.GetRequiredService<IOptions<TOptions>>().Value;
-            if (c.GetService<IScopeStackKeyResolver>() is { } keyResolver)
-            {
-                options.ScopeKeyResolver = keyResolver;
-            }
 
             if (options.InitializeSdk)
             {

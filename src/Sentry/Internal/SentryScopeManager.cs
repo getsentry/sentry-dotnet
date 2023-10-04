@@ -9,20 +9,10 @@ internal sealed class SentryScopeManager : IInternalScopeManager
 
     private readonly SentryOptions _options;
 
-    private KeyValuePair<Scope, ISentryClient>[] DefaultScopeAndClientStack
+    private KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
     {
         get => ScopeStackContainer.Stack ??= NewStack();
         set => ScopeStackContainer.Stack = value;
-    }
-
-    private readonly ConcurrentDictionary<object, KeyValuePair<Scope, ISentryClient>[]> _keyedScopeAndClientStack = new();
-
-    // TODO: Need to work out a mechanism to clean these up when the request finishes...
-    private KeyValuePair<Scope, ISentryClient>[] GetKeyedScopeStack(object key) => _keyedScopeAndClientStack.GetOrAdd(key, _ => NewStack())!;
-
-    private void SetKeyedScopeStack(object key, KeyValuePair<Scope, ISentryClient>[] value)
-    {
-        _keyedScopeAndClientStack[key] = value;
     }
 
     private Func<KeyValuePair<Scope, ISentryClient>[]> NewStack { get; }
@@ -38,34 +28,6 @@ internal sealed class SentryScopeManager : IInternalScopeManager
 
         _options = options;
         NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
-    }
-
-    public KeyValuePair<Scope, ISentryClient> GetCurrentKeyed(object key)
-    {
-        return GetKeyedScopeStack(key)[^1];
-    }
-
-    private KeyValuePair<Scope, ISentryClient>[] ScopeAndClientStack
-    {
-        get
-        {
-            if (_options.ScopeKeyResolver?.ScopeKey is { } key)
-            {
-                return GetKeyedScopeStack(key);
-            }
-            return DefaultScopeAndClientStack;
-        }
-        set
-        {
-            if (_options.ScopeKeyResolver?.ScopeKey is { } key)
-            {
-                SetKeyedScopeStack(key, value);
-            }
-            else
-            {
-                DefaultScopeAndClientStack = value;
-            }
-        }
     }
 
     public KeyValuePair<Scope, ISentryClient> GetCurrent() => ScopeAndClientStack[^1];

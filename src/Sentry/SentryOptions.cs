@@ -39,13 +39,6 @@ public class SentryOptions
     /// </remarks>
     internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
-    /// <summary>
-    /// When using a KeyedScopeStackContainer, a ScopeKeyResolver can be used to return a key that identifies the
-    /// ScopeStack to be used. For example, if we want to associate ScopeStacks with specific Http Requests, the resolver
-    /// can resolve to the current HttpContext.
-    /// </summary>
-    internal IScopeStackKeyResolver? ScopeKeyResolver { get; set; }
-
 #if __MOBILE__
     private bool _isGlobalModeEnabled = true;
     /// <summary>
