@@ -779,6 +779,7 @@ namespace Sentry
         public static void PauseSession() { }
         public static System.IDisposable PushScope() { }
         public static System.IDisposable PushScope<TState>(TState state) { }
+        public static void RestoreScope(Sentry.Scope savedScope) { }
         public static void ResumeSession() { }
         public static void StartSession() { }
         public static Sentry.ITransaction StartTransaction(Sentry.ITransactionContext context) { }
@@ -1301,6 +1302,7 @@ namespace Sentry.Extensibility
         public void PauseSession() { }
         public System.IDisposable PushScope() { }
         public System.IDisposable PushScope<TState>(TState state) { }
+        public void RestoreScope(Sentry.Scope savedScope) { }
         public void ResumeSession() { }
         public void StartSession() { }
         public Sentry.ITransaction StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }

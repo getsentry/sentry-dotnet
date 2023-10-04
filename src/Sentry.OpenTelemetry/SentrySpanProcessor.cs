@@ -159,7 +159,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             transaction.Contexts["otel"] = GetOtelContext(attributes);
 
             var activityScope = data.GetFused<Scope>();
-            if (activityScope is Scope savedScope && _hub is IHubEx hub)
+            if (activityScope is { } savedScope && _hub is IHubEx hub)
             {
                 hub.RestoreScope(savedScope);
             }
