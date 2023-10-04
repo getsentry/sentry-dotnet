@@ -211,6 +211,11 @@ public sealed class HubAdapter : IHub, IHubEx
         => SentrySdk.CaptureEventInternal(evt, hint, scope);
 
     /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>
+    /// </summary>
+    public void RestoreScope(Scope savedScope) => SentrySdk.RestoreScope(savedScope);
+
+    /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]

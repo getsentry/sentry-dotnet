@@ -125,6 +125,18 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         ScopeAndClientStack = newScopeAndClientStack;
         return scopeSnapshot;
     }
+    public void RestoreScope(Scope savedScope)
+    {
+        var currentScopeAndClientStack = ScopeAndClientStack;
+        var (previousScope, client) = currentScopeAndClientStack[^1];
+
+        _options.LogDebug("Scope restored");
+        var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length + 1];
+        Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
+        newScopeAndClientStack[^1] = new KeyValuePair<Scope, ISentryClient>(savedScope, client);
+
+        ScopeAndClientStack = newScopeAndClientStack;
+    }
 
     public void WithScope(Action<Scope> scopeCallback)
     {

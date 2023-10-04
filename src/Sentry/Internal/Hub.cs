@@ -98,6 +98,8 @@ internal class Hub : IHubEx, IDisposable
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
+    public void RestoreScope(Scope savedScope) => ScopeManager.RestoreScope(savedScope);
+
     [Obsolete]
     public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
 
@@ -487,11 +489,7 @@ internal class Hub : IHubEx, IDisposable
         try
         {
             // Apply scope data
-            var (scope, client) = (transaction.GetScopeStackKey() is {} key)
-                ? ScopeManager.GetCurrentKeyed(key)
-                : ScopeManager.GetCurrent();
-            // TODO: The middleware pipeline finishes up before the Otel Activity.OnEnd callback is invoked so the scope has already been popped at this point :-(
-            // Need to figure out some way to evaluate and apply the scope earlier for Otel transactions...
+            var (scope, client) = ScopeManager.GetCurrent();
             scope.Evaluate();
             scope.Apply(transaction);
 
@@ -546,8 +544,8 @@ internal class Hub : IHubEx, IDisposable
     {
         try
         {
-            var currentScope = ScopeManager.GetCurrent();
-            await currentScope.Value.FlushAsync(timeout).ConfigureAwait(false);
+            var (_, client) = ScopeManager.GetCurrent();
+            await client.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
         {

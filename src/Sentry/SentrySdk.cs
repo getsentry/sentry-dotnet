@@ -241,6 +241,17 @@ public static partial class SentrySdk
     public static IDisposable PushScope<TState>(TState state) => CurrentHub.PushScope(state);
 
     /// <summary>
+    /// Restores a previously saved/cloned scope to the top of the stack
+    /// </summary>
+    public static void RestoreScope(Scope savedScope)
+    {
+        if (CurrentHub is IHubEx hub)
+        {
+            hub.RestoreScope(savedScope);
+        }
+    }
+
+    /// <summary>
     /// Creates a new scope that will terminate when disposed.
     /// </summary>
     /// <returns>A disposable that when disposed, ends the created scope.</returns>

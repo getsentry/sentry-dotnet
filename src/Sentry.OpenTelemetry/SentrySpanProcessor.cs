@@ -1,5 +1,6 @@
 using OpenTelemetry;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.ScopeStack;
 
@@ -157,7 +158,11 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
 
-            transaction.SetScopeStackKey(data.RootId);
+            var activityScope = data.GetFused<Scope>();
+            if (activityScope is Scope savedScope && _hub is IHubEx hub)
+            {
+                hub.RestoreScope(savedScope);
+            }
         }
         else
         {
