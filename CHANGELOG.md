@@ -26,6 +26,7 @@ API Changes:
 - Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
+- Consolidated TransactionContext constructors. ([#2696](https://github.com/getsentry/sentry-dotnet/pull/2696))
 
 ## Unreleased
 
