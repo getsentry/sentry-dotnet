@@ -121,6 +121,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// </summary>
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
     {
+#if !IsTrimmable
         var frames = _options.StackTraceMode switch
         {
             StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => p as StackFrame),
@@ -130,7 +131,9 @@ internal class DebugStackTrace : SentryStackTrace
                 .Where(f => f is not null)
 #endif
         };
-
+#else
+        StackFrame[]? frames = null;
+#endif
         // Not to throw on code that ignores nullability warnings.
         if (frames.IsNull())
         {
@@ -185,7 +188,7 @@ internal class DebugStackTrace : SentryStackTrace
         {
             frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
             frame.Package = method.DeclaringType?.Assembly.FullName;
-
+#if !IsTrimmable
             if (_options.StackTraceMode == StackTraceMode.Enhanced &&
                 stackFrame is EnhancedStackFrame enhancedStackFrame)
             {
@@ -210,6 +213,9 @@ internal class DebugStackTrace : SentryStackTrace
             {
                 frame.Function = method.Name;
             }
+#else
+            frame.Function = method.Name;
+#endif
 
             // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
             if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)

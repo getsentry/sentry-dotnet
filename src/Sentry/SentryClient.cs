@@ -166,8 +166,10 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
+            #if !IsTrimmable
             // Attempt to demystify exceptions before adding them as breadcrumbs.
             e.Demystify();
+            #endif
 
             _options.LogError("The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.", e);
 
@@ -369,8 +371,10 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
+#if !IsTrimmable
             // Attempt to demystify exceptions before adding them as breadcrumbs.
             e.Demystify();
+#endif
 
             _options.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
             var data = new Dictionary<string, string>

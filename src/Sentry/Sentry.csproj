@@ -5,6 +5,8 @@
     <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsTrimmable>true</IsTrimmable>
+    <DefineConstants>$(DefineConstants);IsTrimmable</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
@@ -22,21 +24,23 @@
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 
-  <!--
-    Ben.Demystifier is compiled directly into Sentry.
-    Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
-  -->
-  <ItemGroup>
-    <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
-      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
-  </ItemGroup>
+  <Target Name="IncludeBenDemystifier" Condition="'$(IsTrimmable)' != 'true'">
+    <!--
+      Ben.Demystifier is compiled directly into Sentry.
+      Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
+    -->
+    <ItemGroup>
+      <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
+        <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      </Compile>
+      <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
+    </ItemGroup>
 
-  <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netcoreapp'))">
-    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
-  </ItemGroup>
+    <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
+    <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netcoreapp'))">
+      <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+    </ItemGroup>
+  </Target>
 
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
