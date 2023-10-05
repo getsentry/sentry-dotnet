@@ -180,6 +180,28 @@ public class DebugStackTraceTests
         }
     }
 
+    [Fact]
+    public void ParseNativeAOTToString()
+    {
+        var frame = DebugStackTrace.ParseNativeAOTToString(
+            "System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task) + 0x42 at offset 66 in file:line:column <filename unknown>:0:0");
+        Assert.Equal("System.Runtime.CompilerServices.TaskAwaiter", frame.Module);
+        Assert.Equal("HandleNonSuccessAndDebuggerNotification", frame.Function);
+        Assert.Null(frame.Package);
+
+        frame = DebugStackTrace.ParseNativeAOTToString(
+            "Program.<<Main>$>d__0.MoveNext() + 0xdd at offset 221 in file:line:column <filename unknown>:0:0");
+        Assert.Equal("Program.<<Main>$>d__0", frame.Module);
+        Assert.Equal("MoveNext", frame.Function);
+        Assert.Null(frame.Package);
+
+        frame = DebugStackTrace.ParseNativeAOTToString(
+            "Sentry.Samples.Console.Basic!<BaseAddress>+0x4abb3b at offset 283 in file:line:column <filename unknown>:0:0");
+        Assert.Null(frame.Module);
+        Assert.Null(frame.Function);
+        Assert.Null(frame.Package);
+    }
+
     private class InjectableDebugStackTrace : DebugStackTrace
     {
         public InjectableDebugStackTrace(SentryOptions options) : base(options) { }

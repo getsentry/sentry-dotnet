@@ -31,6 +31,9 @@ internal class DebugStackTrace : SentryStackTrace
     private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+    private static readonly Regex RegexNativeAOTInfo = new(@"^(.+)\.([^.]+)\(.*\) ?\+ ?0x",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     internal DebugStackTrace(SentryOptions options)
     {
         _options = options;
@@ -153,108 +156,177 @@ internal class DebugStackTrace : SentryStackTrace
 #endif
 
             // Remove the frames until the call for capture with the SDK
-            if (firstFrame
-                && isCurrentStackTrace
-                && stackFrame.GetMethod() is { } method
-                && method.DeclaringType?.AssemblyQualifiedName?.StartsWith("Sentry") == true)
+            if (firstFrame && isCurrentStackTrace)
             {
-                _options.LogDebug("Skipping initial stack frame '{0}'", method.Name);
-                continue;
+                string? frameInfo = null;
+                if (stackFrame.GetMethod() is { } method)
+                {
+                    frameInfo = method.DeclaringType?.AssemblyQualifiedName;
+                }
+#if NET5_0_OR_GREATER
+                // Native AOT currently only exposes some method info at runtime via ToString().
+                // See https://github.com/dotnet/runtime/issues/92869
+                if (frameInfo is null && stackFrame.HasNativeImage())
+                {
+                    frameInfo = stackFrame.ToString();
+                }
+#endif
+                if (frameInfo?.StartsWith("Sentry") is true)
+                {
+                    _options.LogDebug("Skipping initial stack frame '{0}'", frameInfo);
+                    continue;
+                }
             }
 
             firstFrame = false;
 
-            yield return CreateFrame(stackFrame);
+            if (CreateFrame(stackFrame) is { } frame)
+            {
+                yield return frame;
+            }
+            else
+            {
+                _options.LogDebug("Could not resolve stack frame '{0}'", stackFrame.ToString());
+            }
         }
     }
 
     /// <summary>
-    /// Create a <see cref="SentryStackFrame"/> from a <see cref="StackFrame"/>.
+    /// Native AOT implementation of CreateFrame.
+    /// Native frames have only limited method information at runtime (and even that can be disabled). 
+    ///  We try to parse that and also add addresses for server-side symbolication.
     /// </summary>
-    internal SentryStackFrame CreateFrame(StackFrame stackFrame) => InternalCreateFrame(stackFrame, true);
+    private SentryStackFrame? TryCreateNativeAOTFrame(StackFrame stackFrame)
+    {
+#if NET5_0_OR_GREATER
+        if (!stackFrame.HasNativeImage())
+        {
+            return null;
+        }
+
+        var frame = ParseNativeAOTToString(stackFrame.ToString());
+        frame.ImageAddress = (long)stackFrame.GetNativeImageBase();
+        frame.InstructionAddress = (long)stackFrame.GetNativeIP();
+        return frame;
+#else
+        return null;
+#endif
+    }
+
+    // Method info is currently only exposed by ToString(), see https://github.com/dotnet/runtime/issues/92869
+    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`): 
+    // https://github.com/dotnet/runtime/blob/254230253da143a082f47cfaf8711627c0bf2faf/src/coreclr/nativeaot/System.Private.CoreLib/src/Internal/DeveloperExperience/DeveloperExperience.cs#L42
+    internal static SentryStackFrame ParseNativeAOTToString(string info)
+    {
+        var frame = new SentryStackFrame();
+        var match = RegexNativeAOTInfo.Match(info);
+        if (match is { Success: true, Groups.Count: 3 })
+        {
+            frame.Module = match.Groups[1].Value;
+            frame.Function = match.Groups[2].Value;
+        }
+        return frame;
+    }
 
     /// <summary>
     /// Default the implementation of CreateFrame.
     /// </summary>
-    private SentryStackFrame InternalCreateFrame(StackFrame stackFrame, bool demangle)
+    private SentryStackFrame? TryCreateManagedFrame(StackFrame stackFrame)
     {
-        const string unknownRequiredField = "(unknown)";
-        string? projectPath = null;
-        var frame = new SentryStackFrame();
-        if (stackFrame.GetMethod() is { } method)
+        if (stackFrame.GetMethod() is not { } method)
         {
-            frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
-            frame.Package = method.DeclaringType?.Assembly.FullName;
+            return null;
+        }
 
-            if (_options.StackTraceMode == StackTraceMode.Enhanced &&
-                stackFrame is EnhancedStackFrame enhancedStackFrame)
+        const string unknownRequiredField = "(unknown)";
+        var frame = new SentryStackFrame
+        {
+            Module = method.DeclaringType?.FullName ?? unknownRequiredField,
+            Package = method.DeclaringType?.Assembly.FullName
+        };
+
+        if (_options.StackTraceMode == StackTraceMode.Enhanced &&
+            stackFrame is EnhancedStackFrame enhancedStackFrame)
+        {
+            var stringBuilder = new StringBuilder();
+            frame.Function = enhancedStackFrame.MethodInfo.Append(stringBuilder, false).ToString();
+
+            if (enhancedStackFrame.MethodInfo.DeclaringType is { } declaringType)
             {
-                var stringBuilder = new StringBuilder();
-                frame.Function = enhancedStackFrame.MethodInfo.Append(stringBuilder, false).ToString();
+                stringBuilder.Clear();
+                stringBuilder.AppendTypeDisplayName(declaringType);
 
-                if (enhancedStackFrame.MethodInfo.DeclaringType is { } declaringType)
+                // Ben.Demystifier doesn't always include the namespace, even when fullName==true.
+                // It's important that the module name always be fully qualified, so that in-app frame
+                // detection works correctly.
+                var module = stringBuilder.ToString();
+                frame.Module = declaringType.Namespace is { } ns && !module.StartsWith(ns)
+                    ? $"{ns}.{module}"
+                    : module;
+            }
+        }
+        else
+        {
+            frame.Function = method.Name;
+        }
+
+        // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
+        if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)
+        {
+            frame.InApp = false;
+        }
+
+        if (AddDebugImage(method.Module) is { } moduleIdx && moduleIdx != DebugImageMissing)
+        {
+            frame.AddressMode = GetRelativeAddressMode(moduleIdx);
+
+            try
+            {
+                var token = method.MetadataToken;
+                // The top byte is the token type, the lower three bytes are the record id.
+                // See: https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/ms404456(v=vs.100)#metadata-token-structure
+                var tokenType = token & 0xff000000;
+                // See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/cortokentype-enumeration
+                if (tokenType == 0x06000000) // CorTokenType.mdtMethodDef
                 {
-                    stringBuilder.Clear();
-                    stringBuilder.AppendTypeDisplayName(declaringType);
-
-                    // Ben.Demystifier doesn't always include the namespace, even when fullName==true.
-                    // It's important that the module name always be fully qualified, so that in-app frame
-                    // detection works correctly.
-                    var module = stringBuilder.ToString();
-                    frame.Module = declaringType.Namespace is { } ns && !module.StartsWith(ns)
-                        ? $"{ns}.{module}"
-                        : module;
+                    frame.FunctionId = token & 0x00ffffff;
                 }
             }
-            else
+            catch (InvalidOperationException)
             {
-                frame.Function = method.Name;
-            }
-
-            // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
-            if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)
-            {
-                frame.InApp = false;
-            }
-
-            AttributeReader.TryGetProjectDirectory(method.Module.Assembly, out projectPath);
-
-            if (AddDebugImage(method.Module) is { } moduleIdx && moduleIdx != DebugImageMissing)
-            {
-                frame.AddressMode = GetRelativeAddressMode(moduleIdx);
-
-                try
-                {
-                    var token = method.MetadataToken;
-                    // The top byte is the token type, the lower three bytes are the record id.
-                    // See: https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/ms404456(v=vs.100)#metadata-token-structure
-                    var tokenType = token & 0xff000000;
-                    // See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/cortokentype-enumeration
-                    if (tokenType == 0x06000000) // CorTokenType.mdtMethodDef
-                    {
-                        frame.FunctionId = token & 0x00ffffff;
-                    }
-                }
-                catch (InvalidOperationException)
-                {
-                    // method.MetadataToken may throw
-                    // see https://learn.microsoft.com/en-us/dotnet/api/system.reflection.memberinfo.metadatatoken?view=net-6.0
-                    _options.LogDebug("Could not get MetadataToken for stack frame {0} from {1}", frame.Function, method.Module.Name);
-                }
+                // method.MetadataToken may throw
+                // see https://learn.microsoft.com/en-us/dotnet/api/system.reflection.memberinfo.metadatatoken?view=net-6.0
+                _options.LogDebug("Could not get MetadataToken for stack frame {0} from {1}", frame.Function, method.Module.Name);
             }
         }
 
-        frame.ConfigureAppFrame(_options);
-
         if (stackFrame.GetFileName() is { } frameFileName)
         {
-            if (projectPath != null && frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
+            if (AttributeReader.TryGetProjectDirectory(method.Module.Assembly) is { } projectPath
+                && frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
             {
                 frame.AbsolutePath = frameFileName;
                 frameFileName = frameFileName[projectPath.Length..];
             }
             frame.FileName = frameFileName;
         }
+
+        return frame;
+    }
+
+    /// <summary>
+    /// Create a <see cref="SentryStackFrame"/> from a <see cref="StackFrame"/>.
+    /// </summary>
+    internal SentryStackFrame? CreateFrame(StackFrame stackFrame)
+    {
+        var frame = TryCreateManagedFrame(stackFrame);
+        frame ??= TryCreateNativeAOTFrame(stackFrame);
+        if (frame is null)
+        {
+            return null;
+        }
+
+        frame.ConfigureAppFrame(_options);
 
         // stackFrame.HasILOffset() throws NotImplemented on Mono 5.12
         var ilOffset = stackFrame.GetILOffset();
@@ -275,7 +347,7 @@ internal class DebugStackTrace : SentryStackTrace
             frame.ColumnNumber = colNo;
         }
 
-        if (demangle && _options.StackTraceMode != StackTraceMode.Enhanced)
+        if (_options.StackTraceMode != StackTraceMode.Enhanced)
         {
             DemangleAsyncFunctionName(frame);
             DemangleAnonymousFunction(frame);
