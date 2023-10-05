@@ -3,9 +3,9 @@ namespace Sentry.NLog.Tests;
 [UsesVerify]
 public class ApiApprovalTests
 {
-    [Fact]
+    [SkippableFact]
     public Task Run()
     {
-        return typeof(SentryTarget).Assembly.CheckApproval();
+        return typeof(SentryTarget).Assembly.CheckApproval();git s
     }
 }
