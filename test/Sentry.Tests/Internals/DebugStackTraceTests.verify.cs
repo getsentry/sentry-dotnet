@@ -1,6 +1,10 @@
+#nullable enable
 // ReSharper disable once CheckNamespace
 // Stack trace filters out Sentry frames by namespace
+
 namespace Other.Tests.Internals;
+
+[UsesVerify]
 
 public class DebugStackTraceTests
 {
@@ -11,7 +15,7 @@ public class DebugStackTraceTests
     }
 
     private readonly Fixture _fixture = new();
-    private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace;
+    private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace!;
 
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
@@ -19,9 +23,9 @@ public class DebugStackTraceTests
         var frame = new StackFrame();
         var sut = _fixture.GetSut();
 
-        var actual = sut.CreateFrame(frame);
+        var actual = sut.CreateFrame(new RealStackFrame(frame));
 
-        Assert.True(actual.InApp);
+        Assert.True(actual?.InApp);
     }
 
     [Fact]
@@ -31,9 +35,9 @@ public class DebugStackTraceTests
         var sut = _fixture.GetSut();
         var frame = new StackFrame();
 
-        var actual = sut.CreateFrame(frame);
+        var actual = sut.CreateFrame(new RealStackFrame(frame));
 
-        Assert.False(actual.InApp);
+        Assert.False(actual?.InApp);
     }
 
     [Theory]
@@ -52,10 +56,10 @@ public class DebugStackTraceTests
         Assert.Equal(typeof(Convert), frame.GetMethod()?.DeclaringType);
 
         // Act
-        var actual = sut.CreateFrame(frame);
+        var actual = sut.CreateFrame(new RealStackFrame(frame));
 
         // Assert
-        Assert.False(actual.InApp);
+        Assert.False(actual?.InApp);
     }
 
     [Fact]
@@ -66,9 +70,9 @@ public class DebugStackTraceTests
         var sut = _fixture.GetSut();
         var frame = new StackFrame();
 
-        var actual = sut.CreateFrame(frame);
+        var actual = sut.CreateFrame(new RealStackFrame(frame));
 
-        Assert.True(actual.InApp);
+        Assert.True(actual?.InApp);
     }
 
     // https://github.com/getsentry/sentry-dotnet/issues/64
@@ -186,13 +190,13 @@ public class DebugStackTraceTests
         var frame = DebugStackTrace.ParseNativeAOTToString(
             "System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task) + 0x42 at offset 66 in file:line:column <filename unknown>:0:0");
         Assert.Equal("System.Runtime.CompilerServices.TaskAwaiter", frame.Module);
-        Assert.Equal("HandleNonSuccessAndDebuggerNotification", frame.Function);
+        Assert.Equal("HandleNonSuccessAndDebuggerNotification(Task)", frame.Function);
         Assert.Null(frame.Package);
 
         frame = DebugStackTrace.ParseNativeAOTToString(
             "Program.<<Main>$>d__0.MoveNext() + 0xdd at offset 221 in file:line:column <filename unknown>:0:0");
         Assert.Equal("Program.<<Main>$>d__0", frame.Module);
-        Assert.Equal("MoveNext", frame.Function);
+        Assert.Equal("MoveNext()", frame.Function);
         Assert.Null(frame.Package);
 
         frame = DebugStackTrace.ParseNativeAOTToString(
@@ -200,6 +204,21 @@ public class DebugStackTraceTests
         Assert.Null(frame.Module);
         Assert.Null(frame.Function);
         Assert.Null(frame.Package);
+    }
+
+    [Fact]
+    public Task CreateFrame_ForNativeAOT()
+    {
+        var sut = _fixture.GetSut();
+        var frame = sut.CreateFrame(new StubNativeAOTStackFrame()
+        {
+            Function = "DoSomething(int, long)",
+            Module = "Foo.Bar",
+            ImageBase = 1,
+            IP = 2,
+        });
+
+        return VerifyJson(frame.ToJsonString());
     }
 
     private class InjectableDebugStackTrace : DebugStackTrace
@@ -213,6 +232,43 @@ public class DebugStackTraceTests
                 CodeFile = $"{identifier}.dll",
                 ModuleVersionId = new Guid($"00000000-0000-0000-0000-{identifier:D12}")
             });
+        }
+    }
+    internal class StubNativeAOTStackFrame : IStackFrame
+    {
+        internal string? Function;
+        internal string? Module;
+        internal nint ImageBase;
+        internal nint IP;
+
+        public StackFrame? Frame => null;
+
+        public int GetFileColumnNumber() => 0;
+
+        public int GetFileLineNumber() => 0;
+
+        public string? GetFileName() => null;
+
+        public int GetILOffset() => StackFrame.OFFSET_UNKNOWN;
+
+        public MethodBase? GetMethod() => null;
+
+        public nint GetNativeImageBase() => ImageBase;
+
+        public nint GetNativeIP() => IP;
+
+        public bool HasNativeImage() => true;
+
+        public override string ToString()
+        {
+            if (Function is not null && Module is not null)
+            {
+                return $"{Module}.{Function} + 0x{ImageBase:x} at offset 0x{IP - ImageBase:x} in file:line:column <filename unknown>:0:0";
+            }
+            else
+            {
+                return "<unknown>";
+            }
         }
     }
 }

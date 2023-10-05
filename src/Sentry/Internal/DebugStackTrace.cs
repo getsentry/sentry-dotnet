@@ -31,7 +31,7 @@ internal class DebugStackTrace : SentryStackTrace
     private static readonly Regex RegexAsyncReturn = new(@"^(.+`[0-9]+)\[\[",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    private static readonly Regex RegexNativeAOTInfo = new(@"^(.+)\.([^.]+)\(.*\) ?\+ ?0x",
+    private static readonly Regex RegexNativeAOTInfo = new(@"^(.+)\.([^.]+\(.*\)) ?\+ ?0x",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     internal DebugStackTrace(SentryOptions options)
@@ -126,11 +126,14 @@ internal class DebugStackTrace : SentryStackTrace
     {
         var frames = _options.StackTraceMode switch
         {
-            StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => p as StackFrame),
+            StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p)),
             _ => stackTrace.GetFrames()
             // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
 #if NETCOREAPP3_0
                 .Where(f => f is not null)
+                .Select(p => new RealStackFrame(p!))
+#else
+                .Select(p => new RealStackFrame(p))
 #endif
         };
 
@@ -163,14 +166,14 @@ internal class DebugStackTrace : SentryStackTrace
                 {
                     frameInfo = method.DeclaringType?.AssemblyQualifiedName;
                 }
-#if NET5_0_OR_GREATER
+
                 // Native AOT currently only exposes some method info at runtime via ToString().
                 // See https://github.com/dotnet/runtime/issues/92869
                 if (frameInfo is null && stackFrame.HasNativeImage())
                 {
                     frameInfo = stackFrame.ToString();
                 }
-#endif
+
                 if (frameInfo?.StartsWith("Sentry") is true)
                 {
                     _options.LogDebug("Skipping initial stack frame '{0}'", frameInfo);
@@ -196,21 +199,17 @@ internal class DebugStackTrace : SentryStackTrace
     /// Native frames have only limited method information at runtime (and even that can be disabled). 
     ///  We try to parse that and also add addresses for server-side symbolication.
     /// </summary>
-    private SentryStackFrame? TryCreateNativeAOTFrame(StackFrame stackFrame)
+    private SentryStackFrame? TryCreateNativeAOTFrame(IStackFrame stackFrame)
     {
-#if NET5_0_OR_GREATER
         if (!stackFrame.HasNativeImage())
         {
             return null;
         }
 
         var frame = ParseNativeAOTToString(stackFrame.ToString());
-        frame.ImageAddress = (long)stackFrame.GetNativeImageBase();
-        frame.InstructionAddress = (long)stackFrame.GetNativeIP();
+        frame.ImageAddress = stackFrame.GetNativeImageBase();
+        frame.InstructionAddress = stackFrame.GetNativeIP();
         return frame;
-#else
-        return null;
-#endif
     }
 
     // Method info is currently only exposed by ToString(), see https://github.com/dotnet/runtime/issues/92869
@@ -231,7 +230,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// <summary>
     /// Default the implementation of CreateFrame.
     /// </summary>
-    private SentryStackFrame? TryCreateManagedFrame(StackFrame stackFrame)
+    private SentryStackFrame? TryCreateManagedFrame(IStackFrame stackFrame)
     {
         if (stackFrame.GetMethod() is not { } method)
         {
@@ -245,8 +244,7 @@ internal class DebugStackTrace : SentryStackTrace
             Package = method.DeclaringType?.Assembly.FullName
         };
 
-        if (_options.StackTraceMode == StackTraceMode.Enhanced &&
-            stackFrame is EnhancedStackFrame enhancedStackFrame)
+        if (stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
         {
             var stringBuilder = new StringBuilder();
             frame.Function = enhancedStackFrame.MethodInfo.Append(stringBuilder, false).ToString();
@@ -317,7 +315,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// <summary>
     /// Create a <see cref="SentryStackFrame"/> from a <see cref="StackFrame"/>.
     /// </summary>
-    internal SentryStackFrame? CreateFrame(StackFrame stackFrame)
+    internal SentryStackFrame? CreateFrame(IStackFrame stackFrame)
     {
         var frame = TryCreateManagedFrame(stackFrame);
         frame ??= TryCreateNativeAOTFrame(stackFrame);
@@ -342,19 +340,19 @@ internal class DebugStackTrace : SentryStackTrace
         }
 
         var colNo = stackFrame.GetFileColumnNumber();
-        if (lineNo > 0)
+        if (colNo > 0)
         {
             frame.ColumnNumber = colNo;
         }
 
-        if (_options.StackTraceMode != StackTraceMode.Enhanced)
+        if (stackFrame.Frame is not EnhancedStackFrame)
         {
             DemangleAsyncFunctionName(frame);
             DemangleAnonymousFunction(frame);
             DemangleLambdaReturnType(frame);
         }
 
-        if (_options.StackTraceMode == StackTraceMode.Enhanced)
+        if (stackFrame.Frame is EnhancedStackFrame)
         {
             // In Enhanced mode, Module (which in this case is the Namespace)
             // is already prepended to the function, after return type.
