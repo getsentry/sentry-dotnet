@@ -1,3 +1,4 @@
 {
-    "omnisharp.useModernNet": true
+  "omnisharp.useModernNet": true,
+  "dotnet.defaultSolution": "Sentry.sln"
 }
