@@ -1,4 +1,5 @@
 using Sentry.Internal.Http;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.Tests;
 
@@ -836,7 +837,7 @@ public partial class HubTests
         var transaction = hub.StartTransaction("foo", "bar");
 
         // Act
-        hub.WithScope(scope =>
+        hub.ConfigureScope(scope =>
         {
             scope.Transaction = transaction;
 
@@ -878,7 +879,7 @@ public partial class HubTests
         var transaction = hub.StartTransaction("test-name", "_");
 
         // Act
-        hub.WithScope(scope =>
+        hub.ConfigureScope(scope =>
         {
             scope.Transaction = transaction;
 
@@ -977,13 +978,13 @@ public partial class HubTests
         var hub = _fixture.GetSut();
         var transaction = hub.StartTransaction("foo", "bar");
 
-        hub.WithScope(scope => scope.Transaction = transaction);
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
         transaction.Finish();
 
         // Assert
-        hub.WithScope(scope => scope.Transaction.Should().BeNull());
+        hub.ConfigureScope(scope => scope.Transaction.Should().BeNull());
     }
 
     [Fact]
@@ -1434,6 +1435,7 @@ public partial class HubTests
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
 
+    [Obsolete]
     [Fact]
     public void WithScope_Works()
     {
@@ -1452,6 +1454,7 @@ public partial class HubTests
         Assert.Same(originalScope, finalScope);
     }
 
+    [Obsolete]
     [Fact]
     public void WithScopeT_Works()
     {
@@ -1474,6 +1477,7 @@ public partial class HubTests
         Assert.Same(originalScope, finalScope);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsync_Works()
     {
@@ -1494,6 +1498,7 @@ public partial class HubTests
         Assert.Same(originalScope, finalScope);
     }
 
+    [Obsolete]
     [Fact]
     public async Task WithScopeAsyncT_Works()
     {

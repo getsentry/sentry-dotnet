@@ -4,7 +4,6 @@
       <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
       <PackageTags>$(PackageTags);Azure;Functions;Worker</PackageTags>
       <Description>Official Azure Functions Worker SDK integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
-      <Version>$(Version)-beta.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

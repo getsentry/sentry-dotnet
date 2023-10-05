@@ -29,9 +29,9 @@ internal static class JsonExtensions
             .AddDefaultConverters();
 
         AltSerializerOptions = new JsonSerializerOptions
-            {
-                ReferenceHandler = ReferenceHandler.Preserve
-            }
+        {
+            ReferenceHandler = ReferenceHandler.Preserve
+        }
             .AddDefaultConverters();
     }
 
@@ -183,7 +183,7 @@ internal static class JsonExtensions
         return double.Parse(json.ToString()!, CultureInfo.InvariantCulture);
     }
 
-    public static long? GetAddressAsLong(this JsonElement json)
+    public static long? GetHexAsLong(this JsonElement json)
     {
         // If the address is in json as a number, we can just use it.
         if (json.ValueKind == JsonValueKind.Number)

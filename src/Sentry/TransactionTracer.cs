@@ -7,7 +7,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasMeasurements
+public class TransactionTracer : ITransaction
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
@@ -189,20 +189,17 @@ public class TransactionTracer : ITransaction, IHasMeasurements
     /// </summary>
     internal bool IsSentryRequest { get; set; }
 
-    // TODO: mark as internal in version 4
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation)
-        : this(hub, name, operation, TransactionNameSource.Custom)
+    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
     {
     }
 
-    // TODO: mark as internal in version 4
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
+    internal TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
     {
         _hub = hub;
         _options = _hub.GetSentryOptions();
@@ -212,13 +209,6 @@ public class TransactionTracer : ITransaction, IHasMeasurements
         TraceId = SentryId.Create();
         Operation = operation;
         StartTimestamp = _stopwatch.StartDateTimeOffset;
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionTracer"/>.
-    /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
-    {
     }
 
     /// <summary>
@@ -277,7 +267,6 @@ public class TransactionTracer : ITransaction, IHasMeasurements
     public void UnsetTag(string key) => _tags.TryRemove(key, out _);
 
     /// <inheritdoc />
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />

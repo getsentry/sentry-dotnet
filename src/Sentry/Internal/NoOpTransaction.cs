@@ -1,3 +1,5 @@
+using Sentry.Protocol;
+
 namespace Sentry.Internal;
 
 /// <summary>
@@ -86,8 +88,10 @@ internal class NoOpTransaction : NoOpSpan, ITransaction
     }
 
     public IReadOnlyCollection<ISpan> Spans => ImmutableList<ISpan>.Empty;
+
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => ImmutableList<Breadcrumb>.Empty;
 
     public ISpan? GetLastActiveSpan() => default;
+
     public void AddBreadcrumb(Breadcrumb breadcrumb) { }
 }

@@ -1,7 +1,7 @@
 // ReSharper disable once CheckNamespace
-namespace Sentry.OpenTelemetry;
+namespace Sentry.Internal.OpenTelemetry;
 
-internal static class StatusTags
+internal static class OtelStatusTags
 {
     // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/dacc532d51ca0f3775160b84fa6d7d9403a8ccde/src/Shared/StatusHelper.cs#L26
     public const string UnsetStatusCodeTagValue = "UNSET";
