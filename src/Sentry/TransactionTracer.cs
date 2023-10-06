@@ -7,7 +7,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
+public class TransactionTracer : ITransaction
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
@@ -43,7 +43,7 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc cref="ITransaction.Name" />
     public string Name { get; set; }
 
-    /// <inheritdoc cref="IHasTransactionNameSource.NameSource" />
+    /// <inheritdoc cref="ITransactionContext.NameSource" />
     public TransactionNameSource NameSource { get; set; }
 
     /// <inheritdoc cref="ITransaction.IsParentSampled" />
@@ -189,20 +189,17 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// </summary>
     internal bool IsSentryRequest { get; set; }
 
-    // TODO: mark as internal in version 4
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation)
-        : this(hub, name, operation, TransactionNameSource.Custom)
+    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
     {
     }
 
-    // TODO: mark as internal in version 4
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
+    internal TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
     {
         _hub = hub;
         _options = _hub.GetSentryOptions();
@@ -217,19 +214,12 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <summary>
     /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionTracer"/>.
-    /// </summary>
     internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
     {
         _hub = hub;
         _options = _hub.GetSentryOptions();
         Name = context.Name;
-        NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
+        NameSource = context.NameSource;
         Operation = context.Operation;
         SpanId = context.SpanId;
         ParentSpanId = context.ParentSpanId;
@@ -277,7 +267,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public void UnsetTag(string key) => _tags.TryRemove(key, out _);
 
     /// <inheritdoc />
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />
@@ -313,8 +302,47 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         if (!isOutOfLimit)
         {
             _spans.Add(span);
+            _activeSpanTracker.Push(span);
         }
     }
+
+    private class LastActiveSpanTracker
+    {
+        private readonly object _lock = new object();
+
+        private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
+        private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
+
+        public void Push(ISpan span)
+        {
+            lock(_lock)
+            {
+                TrackedSpans.Push(span);
+            }
+        }
+
+        public ISpan? PeekActive()
+        {
+            lock(_lock)
+            {
+                while (TrackedSpans.Count > 0)
+                {
+                    // Stop tracking inactive spans
+                    var span = TrackedSpans.Peek();
+                    if (!span.IsFinished)
+                    {
+                        return span;
+                    }
+                    TrackedSpans.Pop();
+                }
+                return null;
+            }
+        }
+    }
+    private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
+
+    /// <inheritdoc />
+    public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
 
     /// <inheritdoc />
     public void Finish()
@@ -374,11 +402,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <inheritdoc />
     public void Finish(Exception exception) =>
         Finish(exception, SpanStatusConverter.FromException(exception));
-
-    /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() =>
-        // We need to sort by timestamp because the order of ConcurrentBag<T> is not deterministic
-        Spans.OrderByDescending(x => x.StartTimestamp).FirstOrDefault(s => !s.IsFinished);
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);

@@ -38,8 +38,10 @@ public static class ScopeExtensions
 
         if (options.SendDefaultPii && !scope.HasUser())
         {
+#pragma warning disable CS0618
             var userFactory = context.RequestServices.GetService<IUserFactory>();
             var user = userFactory?.Create(context);
+#pragma warning restore CS0618
 
             if (user != null)
             {

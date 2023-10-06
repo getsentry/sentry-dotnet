@@ -97,12 +97,16 @@ internal class Hub : IHubEx, IDisposable
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
+    [Obsolete]
     public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
 
+    [Obsolete]
     public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
 
+    [Obsolete]
     public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
 
+    [Obsolete]
     public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
 
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
@@ -217,6 +221,27 @@ internal class Hub : IHubEx, IDisposable
 
         var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
         return propagationContext.GetOrCreateDynamicSamplingContext(_options).ToBaggageHeader();
+    }
+
+    public TransactionContext ContinueTrace(
+        string? traceHeader,
+        string? baggageHeader,
+        string? name = null,
+        string? operation = null)
+    {
+        SentryTraceHeader? sentryTraceHeader = null;
+        if (traceHeader is not null)
+        {
+            sentryTraceHeader = SentryTraceHeader.Parse(traceHeader);
+        }
+
+        BaggageHeader? sentryBaggageHeader = null;
+        if (baggageHeader is not null)
+        {
+            sentryBaggageHeader = BaggageHeader.TryParse(baggageHeader, onlySentry: true);
+        }
+
+        return ContinueTrace(sentryTraceHeader, sentryBaggageHeader, name, operation);
     }
 
     public TransactionContext ContinueTrace(

@@ -54,14 +54,11 @@ internal class Enricher
             eventLike.Sdk.AddPackage("nuget:" + SdkVersion.Instance.Name, SdkVersion.Instance.Version);
         }
 
-        // Platform
-        eventLike.Platform ??= Sentry.Constants.Platform;
-
         // Release
         eventLike.Release ??= _options.SettingLocator.GetRelease();
 
         // Distribution
-        eventLike.WithDistribution(_ => _.Distribution ??= _options.Distribution);
+        eventLike.Distribution ??= _options.Distribution;
 
         // Environment
         eventLike.Environment ??= _options.SettingLocator.GetEnvironment();

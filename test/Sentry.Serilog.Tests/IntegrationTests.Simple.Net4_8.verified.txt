@@ -207,12 +207,11 @@
                       InApp: false,
                       Package: Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,
                       Platform: null,
-                      ImageAddress: 0,
+                      ImageAddress: null,
                       SymbolAddress: null,
-                      InstructionAddress: ____,
-                      InstructionOffset: null,
+                      InstructionAddress: 2,
                       AddressMode: rel:0,
-                      FunctionId: ____
+                      FunctionId: 1
                     }
                   ]
                 },

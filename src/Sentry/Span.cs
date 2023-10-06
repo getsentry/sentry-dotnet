@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -27,6 +28,16 @@ public class Span : ISpanData, IJsonSerializable
 
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
+
+    // Not readonly because of deserialization
+    private Dictionary<string, Measurement>? _measurements;
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, Measurement> Measurements => _measurements ??= new Dictionary<string, Measurement>();
+
+    /// <inheritdoc />
+    public void SetMeasurement(string name, Measurement measurement) =>
+        (_measurements ??= new Dictionary<string, Measurement>())[name] = measurement;
 
     /// <inheritdoc />
     public string Operation { get; set; }
@@ -88,7 +99,17 @@ public class Span : ISpanData, IJsonSerializable
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
         _extra = tracer.Extra.ToDictionary();
-        _tags = tracer.Tags.ToDictionary();
+
+        if (tracer is SpanTracer spanTracer)
+        {
+            _measurements = spanTracer.InternalMeasurements?.ToDictionary();
+            _tags = spanTracer.InternalTags?.ToDictionary();
+        }
+        else
+        {
+            _measurements = tracer.Measurements.ToDictionary();
+            _tags = tracer.Tags.ToDictionary();
+        }
     }
 
     /// <inheritdoc />
@@ -112,6 +133,7 @@ public class Span : ISpanData, IJsonSerializable
         writer.WriteStringIfNotNull("timestamp", EndTimestamp);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
+        writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
 
         writer.WriteEndObject();
     }
@@ -131,6 +153,7 @@ public class Span : ISpanData, IJsonSerializable
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
         var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()?.ToDictionary();
+        var measurements = json.GetPropertyOrNull("measurements")?.GetDictionaryOrNull(Measurement.FromJson);
         var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDictionary();
 
         return new Span(parentSpanId, operation)
@@ -143,7 +166,8 @@ public class Span : ISpanData, IJsonSerializable
             Status = status,
             IsSampled = isSampled,
             _tags = tags!,
-            _extra = data!
+            _extra = data!,
+            _measurements = measurements,
         };
     }
 

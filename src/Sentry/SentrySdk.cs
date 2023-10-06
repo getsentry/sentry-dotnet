@@ -40,7 +40,7 @@ public static partial class SentrySdk
         // from anywhere else, return a disabled hub.
         if (Dsn.IsDisabled(dsnString))
         {
-            options.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+            options.LogWarning("Init called with an empty string as the DSN. Sentry SDK will be disabled.");
             return DisabledHub.Instance;
         }
 
@@ -337,6 +337,8 @@ public static partial class SentrySdk
     /// </remarks>
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public static void WithScope(Action<Scope> scopeCallback)
         => CurrentHub.WithScope(scopeCallback);
@@ -352,6 +354,8 @@ public static partial class SentrySdk
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
     /// <returns>The result from the callback.</returns>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public static T? WithScope<T>(Func<Scope, T?> scopeCallback)
         => CurrentHub is IHubEx hub ? hub.WithScope(scopeCallback) : default;
@@ -368,6 +372,8 @@ public static partial class SentrySdk
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
     /// <returns>An async task to await the callback.</returns>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public static Task WithScopeAsync(Func<Scope, Task> scopeCallback)
         => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.CompletedTask;
@@ -384,6 +390,8 @@ public static partial class SentrySdk
     /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
     /// <param name="scopeCallback">The callback to run with the one time scope.</param>
     /// <returns>An async task to await the result of the callback.</returns>
+    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
+              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
     public static Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
         => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.FromResult(default(T));
@@ -629,6 +637,20 @@ public static partial class SentrySdk
     [DebuggerStepThrough]
     public static BaggageHeader? GetBaggage()
         => CurrentHub.GetBaggage();
+
+    /// <summary>
+    /// Continues a trace based on HTTP header values provided as strings.
+    /// </summary>
+    /// <remarks>
+    /// If no "sentry-trace" header is provided a random trace ID and span ID is created.
+    /// </remarks>
+    [DebuggerStepThrough]
+    public static TransactionContext ContinueTrace(
+        string? traceHeader,
+        string? baggageHeader,
+        string? name = null,
+        string? operation = null)
+        => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
     /// <summary>
     /// Continues a trace based on HTTP header values.

@@ -6,7 +6,7 @@
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
-      "src\\Sentry.AzureFunctions.Worker\\Sentry.AzureFunctions.Worker.csproj",
+      "src\\Sentry.Azure.Functions.Worker\\Sentry.Azure.Functions.Worker.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",

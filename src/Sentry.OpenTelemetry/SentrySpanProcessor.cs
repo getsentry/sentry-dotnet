@@ -1,7 +1,8 @@
 using OpenTelemetry;
-using OpenTelemetry.Trace;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.OpenTelemetry;
 
@@ -11,6 +12,7 @@ namespace Sentry.OpenTelemetry;
 public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
+    private readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
@@ -27,9 +29,14 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
     /// </summary>
-    public SentrySpanProcessor(IHub hub)
+    public SentrySpanProcessor(IHub hub) : this(hub, null)
+    {
+    }
+
+    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
     {
         _hub = hub;
+        _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
         _options = hub.GetSentryOptions();
 
         if (_options is not { })
@@ -165,6 +172,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 
         var status = GetSpanStatus(data.Status, attributes);
+        foreach (var enricher in _enrichers)
+        {
+            enricher.Enrich(span, data, _hub, _options);
+        }
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
@@ -173,8 +184,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes)
     {
         // See https://github.com/open-telemetry/opentelemetry-dotnet/discussions/4703
-        if (attributes.TryGetValue(SpanAttributeConstants.StatusCodeKey, out var statusCode)
-            && statusCode is StatusTags.ErrorStatusCodeTagValue
+        if (attributes.TryGetValue(OtelSpanAttributeConstants.StatusCodeKey, out var statusCode)
+            && statusCode is OtelStatusTags.ErrorStatusCodeTagValue
            )
         {
             return GetErrorSpanStatus(attributes);
@@ -212,7 +223,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // HTTP span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/http/
-        if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpMethod, out string httpMethod))
+        if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpMethod, out string httpMethod))
         {
             if (activity.Kind == ActivityKind.Client)
             {
@@ -220,13 +231,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 return ("http.client", httpMethod, TransactionNameSource.Custom);
             }
 
-            if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpRoute, out string httpRoute))
+            if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpRoute, out string httpRoute))
             {
                 // A route exists.  Use the method and route.
                 return ("http.server", $"{httpMethod} {httpRoute}", TransactionNameSource.Route);
             }
 
-            if (attributes.TryGetTypedValue(SemanticConventions.AttributeHttpTarget, out string httpTarget))
+            if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpTarget, out string httpTarget))
             {
                 // A target exists.  Use the method and target.  If the target is "/" we can treat it like a route.
                 var source = httpTarget == "/" ? TransactionNameSource.Route : TransactionNameSource.Url;
@@ -239,9 +250,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // DB span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/database/
-        if (attributes.ContainsKey(SemanticConventions.AttributeDbSystem))
+        if (attributes.ContainsKey(OtelSemanticConventions.AttributeDbSystem))
         {
-            if (attributes.TryGetTypedValue(SemanticConventions.AttributeDbStatement, out string dbStatement))
+            if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeDbStatement, out string dbStatement))
             {
                 // We have a database statement.  Use it.
                 return ("db", dbStatement, TransactionNameSource.Task);
@@ -253,21 +264,21 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // RPC span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/rpc/
-        if (attributes.ContainsKey(SemanticConventions.AttributeRpcService))
+        if (attributes.ContainsKey(OtelSemanticConventions.AttributeRpcService))
         {
             return ("rpc", activity.DisplayName, TransactionNameSource.Route);
         }
 
         // Messaging span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/messaging/
-        if (attributes.ContainsKey(SemanticConventions.AttributeMessagingSystem))
+        if (attributes.ContainsKey(OtelSemanticConventions.AttributeMessagingSystem))
         {
             return ("message", activity.DisplayName, TransactionNameSource.Route);
         }
 
         // FaaS (Functions/Lambda) span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/faas/
-        if (attributes.TryGetTypedValue(SemanticConventions.AttributeFaasTrigger, out string faasTrigger))
+        if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeFaasTrigger, out string faasTrigger))
         {
             return (faasTrigger, activity.DisplayName, TransactionNameSource.Route);
         }
@@ -297,7 +308,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
         // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
-        foreach (var @event in activity.Events.Where(e => e.Name == SemanticConventions.AttributeExceptionEventName))
+        foreach (var @event in activity.Events.Where(e => e.Name == OtelSemanticConventions.AttributeExceptionEventName))
         {
             var eventAttributes = @event.Tags.ToDictionary();
             // This would be where we would ideally implement full exception capture. That's not possible at the
@@ -310,12 +321,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             // At the moment, OTEL only gives us `exception.type`, `exception.message`, and `exception.stacktrace`...
             // So the best we can do is a poor man's exception (no accurate symbolication or anything)
-            if (!eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionType, out string exceptionType))
+            if (!eventAttributes.TryGetTypedValue(OtelSemanticConventions.AttributeExceptionType, out string exceptionType))
             {
                 continue;
             }
-            eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionMessage, out string message);
-            eventAttributes.TryGetTypedValue(SemanticConventions.AttributeExceptionStacktrace, out string stackTrace);
+            eventAttributes.TryGetTypedValue(OtelSemanticConventions.AttributeExceptionMessage, out string message);
+            eventAttributes.TryGetTypedValue(OtelSemanticConventions.AttributeExceptionStacktrace, out string stackTrace);
 
             Exception exception;
             try

@@ -1,16 +1,84 @@
 # Changelog
 
+## Unreleased (version Four)
+
+### Breaking changes
+
+Mobile support:
+
+.NET 6 on mobile is out of support since May 2023. With .NET 8 coming,
+it won't be possible to build .NET 6 Mobile specific targets.
+For that reason, we're moving the mobile specific TFMs from `net6.0-platform` to `net7.0-platform`.
+Mobile apps still on .NET 6 will pull the `Sentry` .NET 6, which offers the .NET-only features,
+without native/platform specific bindings and SDKs. See [this ticket for more details](https://github.com/getsentry/sentry-dotnet/issues/2623).
+
+- Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
+
+API Changes:
+
+- IHasMeasurements was removed. Use ISpanData instead. ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
+- If `null` has been supplied as DSN when initializing Sentry, and ArgumentNullException is now thrown ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
+- IHasBreadcrumbs was removed. Use IEventLike instead. ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
+- ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
+- Removed IHasTransactionNameSource. Use ITransactionContext instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
+- Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
+- Removed unused `StackFrame.InstructionOffset`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
+- Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
+- Removed the `Scope.Platform` property as it was never applied ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
+
 ## Unreleased
+
+### Obsoletion
+
+- `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are now deprecated in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
+- `StackFrame.InstructionOffset` has not been used in the SDK and has been ignored on the server for years. ([#2689](https://github.com/getsentry/sentry-dotnet/pull/2689))
 
 ### Features
 
+- Release of Azure Functions (Isolated Worker/Out-of-Process) support ([#2686](https://github.com/getsentry/sentry-dotnet/pull/2686))
+
+### Dependencies
+
+- Bump CLI from v2.20.7 to v2.21.1 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2211)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.7...2.21.1)
+- Bump Cocoa SDK from v8.12.0 to v8.13.0 ([#2653](https://github.com/getsentry/sentry-dotnet/pull/2653))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8130)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.12.0...8.13.0)
+- Bump Java SDK from v6.29.0 to v6.30.0 ([#2685](https://github.com/getsentry/sentry-dotnet/pull/2685))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6300)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.29.0...6.30.0)
+
+## 3.40.0-beta.0
+
+### Features
+
+- Reduced the memory footprint of `SpanId` by refactoring the ID generation ([2619](https://github.com/getsentry/sentry-dotnet/pull/2619))
+- Reduced the memory footprint of `SpanTracer` by initializing the tags lazily ([2636](https://github.com/getsentry/sentry-dotnet/pull/2636))
+- Added distributed tracing without performance for Azure Function Workers ([#2630](https://github.com/getsentry/sentry-dotnet/pull/2630))
+- The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
+- Added memory optimisations for GetLastActiveSpan ([#2642](https://github.com/getsentry/sentry-dotnet/pull/2642))
+
+### Fixes
+
+- Resolved issue identifying users with OpenTelemetry ([#2618](https://github.com/getsentry/sentry-dotnet/pull/2618))
+
+### Azure Functions Beta
+
+- Package name changed from `Sentry.AzureFunctions.Worker` to `Sentry.Azure.Functions.Worker`. Note AzureFunctions now is split by a `.`. ([#2637](https://github.com/getsentry/sentry-dotnet/pull/2637))
 
 ### Dependencies
 
 - Bump CLI from v2.20.6 to v2.20.7 ([#2604](https://github.com/getsentry/sentry-dotnet/pull/2604))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2207)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.6...2.20.7)
+- Bump Cocoa SDK from v8.11.0 to v8.12.0 ([#2640](https://github.com/getsentry/sentry-dotnet/pull/2640))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8120)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.11.0...8.12.0)
+
 ## 3.39.1
 
 ### Fixes
@@ -189,7 +257,7 @@
 
 - Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
   - Initial `beta.1` release.  Please give it a try and let us know how it goes!
-  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.AzureFunctions.Worker`.
+  - Documentation is TBD.  For now, see `/samples/Sentry.Samples.Azure.Functions.Worker`.
 
 - Add `Hint` support  ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
   - Currently, this allows you to manipulate attachments in the various "before" event delegates.
