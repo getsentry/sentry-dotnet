@@ -2,12 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0-macos</TargetFramework>
-    <ApplicationId>io.sentry.testing.crashable.app</ApplicationId>
-<!--    <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>-->
+    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
     <EnableCodeSigning>false</EnableCodeSigning>
-<!--    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>-->
-
   </PropertyGroup>
 
   <ItemGroup>

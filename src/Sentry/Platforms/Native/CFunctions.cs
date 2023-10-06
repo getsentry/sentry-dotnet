@@ -188,7 +188,7 @@ internal static class C
         catch (Exception e)
         {
             // Adding the Sentry logger tag ensures we don't send this error to Sentry.
-            Console.WriteLine(e);
+            Console.WriteLine(e); // TODO proper logging
             // Debug.unityLogger.Log(LogType.Error, UnityLogger.LogTag, $"Error loading the list of debug images: {e}");
         }
         return result;

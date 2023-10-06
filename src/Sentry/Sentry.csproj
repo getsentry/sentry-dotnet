@@ -4,7 +4,7 @@
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
-   <!-- Condition above was used because all mobile targets have non empty string and also shouldn't be CLSCompliant. But ideally we find a better way to do this now-->
+    <!-- Condition above was used because all mobile targets have non empty string and also shouldn't be CLSCompliant. But ideally we find a better way to do this now-->
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == 'macos'">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -24,19 +24,13 @@
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
-  <!-- TODO: figure out why '$(TargetPlatformIdentifier)' == 'macos' isn't working-->
-  <Import Project="Platforms\macOS\Sentry.macOS.props" Condition="'$(TargetPlatformIdentifier)' != 'android'
-    and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'" />
+  <Import Project="Platforms\macOS\Sentry.macOS.props" Condition="'$(TargetPlatformIdentifier)' == 'macos'" />
 
   <!-- All code under Platform is conditionally included depending on the platform we're building-->
   <ItemGroup>
     <Compile Remove="Platforms/**/*.cs" />
   </ItemGroup>
-  <!-- TODO: figure out why '$(TargetPlatformIdentifier)' == 'macos' isn't working-->
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'android'
-    and '$(TargetPlatformIdentifier)' != 'ios'
-    and '$(TargetPlatformIdentifier)' != 'maccatalyst'
-    and '$(TargetPlatformIdentifier)' != ''">
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'macos'">
     <Compile Include="Platforms/macOS/**/*.cs" />
   </ItemGroup>
 
