@@ -24,11 +24,6 @@
     <Compile Remove="**\iOS\**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'macos'">
-    <Compile Remove="**\*.macOS.cs" />
-    <Compile Remove="**\macOS\**\*.cs" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'windows'">
     <Compile Remove="**\*.Windows.cs" />
     <Compile Remove="**\Windows\**\*.cs" />

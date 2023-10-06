@@ -4,8 +4,6 @@
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
-    <!-- Condition above was used because all mobile targets have non empty string and also shouldn't be CLSCompliant. But ideally we find a better way to do this now-->
-    <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == 'macos'">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
