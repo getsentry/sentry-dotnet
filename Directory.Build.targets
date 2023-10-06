@@ -24,6 +24,11 @@
     <Compile Remove="**\iOS\**\*.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'macos'">
+    <Compile Remove="**\*.macOS.cs" />
+    <Compile Remove="**\macOS\**\*.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'windows'">
     <Compile Remove="**\*.Windows.cs" />
     <Compile Remove="**\Windows\**\*.cs" />
@@ -74,14 +79,9 @@
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
-  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems"
-    BeforeTargets="_ComputePublishLocation"
-    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
+  <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation" Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
     <ItemGroup>
-    <ResolvedFileToPublish
-      Update="@(ResolvedFileToPublish)"
-      Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
-      PublishFolderType="None" />
+      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''" PublishFolderType="None" />
     </ItemGroup>
   </Target>
 
@@ -90,7 +90,6 @@
   In an app that uses our nuget packages, they will come through the nuget packages automatically.
   -->
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry\buildTransitive\Sentry.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
-    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets" Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
 
 </Project>

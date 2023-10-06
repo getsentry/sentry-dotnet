@@ -1,9 +1,9 @@
 namespace Sentry.Native;
-using CWUtil = ContextWriter;
+using CWUtil = BaseContextWriter;
 
 // https://github.com/getsentry/sentry-unity/blob/3eb6eca6ed270c5ec023bf75ee53c1ca00bb7c82/src/Sentry.Unity.Native/NativeContextWriter.cs
 
-internal class NativeContextWriter : ContextWriter
+internal class NativeContextWriter : BaseContextWriter
 {
     protected override void WriteScope(
         string? AppStartTime,

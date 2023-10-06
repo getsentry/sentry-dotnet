@@ -26,14 +26,6 @@
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
   <Import Project="Platforms\macOS\Sentry.macOS.props" Condition="'$(TargetPlatformIdentifier)' == 'macos'" />
 
-  <!-- All code under Platform is conditionally included depending on the platform we're building-->
-  <ItemGroup>
-    <Compile Remove="Platforms/**/*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'macos'">
-    <Compile Include="Platforms/macOS/**/*.cs" />
-  </ItemGroup>
-
   <!--
     Ben.Demystifier is compiled directly into Sentry.
     Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
