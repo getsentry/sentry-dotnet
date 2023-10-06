@@ -14,7 +14,6 @@
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_NATIVE_MACOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-macos</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
@@ -24,7 +23,6 @@
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
-  <Import Project="Platforms\macOS\Sentry.macOS.props" Condition="'$(TargetPlatformIdentifier)' == 'macos'" />
 
   <!--
     Ben.Demystifier is compiled directly into Sentry.
