@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>.NET Bindings for the Sentry Native SDK</Description>
+    <TargetFramework>net7.0</TargetFramework>
+    <SentryNativeSourceDirectory>..\..\modules\sentry-native\</SentryNativeSourceDirectory>
+    <SentryNativeOutputDirectory-Windows>$(BaseIntermediateOutputPath)sdks\Sentry\Native\Windows\</SentryNativeOutputDirectory-Windows>
+    <!-- TODO conditional
+    <SentryNativeEnabled>false</SentryNativeEnabled>
+    <SentryNativeEnabled Condition="'$(TargetPlatformIdentifier)' == 'windows'">true</SentryNativeEnabled> -->
+    <SentryNativeEnabled>true</SentryNativeEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(SentryNativeEnabled)">
+    <!-- Use a separate readme file in the nuget. -->
+    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md"
+      Pack="true"
+      PackagePath="" />
+
+    <!-- Don't add the changelog to the nuget. -->
+    <PackageReference Remove="SIL.ReleaseTasks" />
+  </ItemGroup>
+
+  <!-- Build the Sentry Native SDK -->
+  <Target Name="_BuildSentryNativeSDK-Windows"
+    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
+    Condition="$(SentryNativeEnabled) and $([MSBuild]::IsOsPlatform('Windows'))"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD"
+    Outputs="$(SentryNativeOutputDirectory-Windows)sentry-native.dll;$(SentryNativeOutputDirectory-Windows)sentry-native.pdb">
+    <MSBuild Projects="$(MSBuildProjectFile)"
+      Targets="_InnerBuildSentryNativeSDK-Windows"
+      Properties="TargetFramework=once" />
+  </Target>
+
+  <Target Name="_InnerBuildSentryNativeSDK-Windows">
+    <Message Importance="High"
+      Text="Building artifacts of Sentry Native SDK for Windows. Revision: $(SentryNativeSdkVersion)" />
+
+    <RemoveDir Directories="$(SentryNativeSourceDirectory)build;$(SentryNativeOutputDirectory-Windows)" />
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
+      Command="cmake -B build -D SENTRY_BACKEND=breakpad -D SENTRY_SDK_NAME=sentry.native.dotnet -S ."></Exec>
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
+      Command="cmake --build build --target sentry --config RelWithDebInfo --parallel"></Exec>
+
+    <ItemGroup>
+      <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/RelWithDebInfo/sentry.dll" />
+      <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/RelWithDebInfo/sentry.pdb" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(NativeSdkArtifacts)"
+      DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-Windows)%(Filename)-native%(Extension)')" />
+  </Target>
+
+</Project>
