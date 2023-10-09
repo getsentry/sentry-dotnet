@@ -1,3 +1,4 @@
+using Ben.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETSTANDARD2_0
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -36,6 +37,11 @@ internal class SentryMiddleware : IMiddleware
 
     private static readonly string ProtocolPackageName = "nuget:" + NameAndVersion.Name;
 
+    // Ben.BlockingDetector
+    private readonly BlockingMonitor? _monitor;
+    private readonly DetectBlockingSynchronizationContext? _detectBlockingSyncCtx;
+    private readonly TaskBlockingListener? _listener;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="SentryMiddleware"/> class.
     /// </summary>
@@ -67,6 +73,13 @@ internal class SentryMiddleware : IMiddleware
         _eventExceptionProcessors = eventExceptionProcessors;
         _eventProcessors = eventProcessors;
         _transactionProcessors = transactionProcessors;
+
+        if (_options.CaptureBlockingCalls)
+        {
+            _monitor = new BlockingMonitor(_getHub, _options);
+            _detectBlockingSyncCtx = new DetectBlockingSynchronizationContext(_monitor);
+            _listener = new TaskBlockingListener(_monitor);
+        }
     }
 
     /// <summary>
@@ -132,7 +145,24 @@ internal class SentryMiddleware : IMiddleware
             try
             {
                 var originalMethod = context.Request.Method;
-                await next(context).ConfigureAwait(false);
+                if (_options.CaptureBlockingCalls && _monitor is not null)
+                {
+                    var syncCtx = SynchronizationContext.Current;
+                    SynchronizationContext.SetSynchronizationContext(syncCtx == null ? _detectBlockingSyncCtx : new DetectBlockingSynchronizationContext(_monitor, syncCtx));
+                    try
+                    {
+                        // For detection to work we need ConfigureAwait=true
+                        await next(context).ConfigureAwait(true);
+                    }
+                    finally
+                    {
+                        SynchronizationContext.SetSynchronizationContext(syncCtx);
+                    }
+                }
+                else
+                {
+                    await next(context).ConfigureAwait(false);
+                }
                 if (_options.Instrumenter == Instrumenter.OpenTelemetry && Activity.Current is {} activity)
                 {
                     // The middleware pipeline finishes up before the Otel Activity.OnEnd callback is invoked so we need

@@ -22,6 +22,16 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet]
+    public string Block()
+    {
+        _logger.LogInformation("\ud83d\ude31 Calling a blocking API on an async method \ud83d\ude31");
+
+        Task.Delay(0);
+
+        return "Blocking call that could cause ThreadPool starvation";
+    }
+
     // Example: An exception that goes unhandled by the app will be captured by Sentry:
     [HttpPost]
     public async Task PostIndex(string @params)
