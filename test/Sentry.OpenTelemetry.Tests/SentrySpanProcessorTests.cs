@@ -264,6 +264,28 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void OnEnd_RestoresSavedScope()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var sut = _fixture.GetSut();
+
+        var scope = new Scope();
+        var data = Tracer.StartActivity("transaction")!;
+        data.SetFused(scope);
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        _fixture.ScopeManager.Received(1).RestoreScope(scope);
+    }
+
+    [Fact]
     public void OnEnd_SpansEnriched()
     {
         // Arrange

@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
+using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal;
 
@@ -96,6 +97,8 @@ internal class Hub : IHubEx, IDisposable
     public IDisposable PushScope() => ScopeManager.PushScope();
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
+
+    public void RestoreScope(Scope savedScope) => ScopeManager.RestoreScope(savedScope);
 
     [Obsolete]
     public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
@@ -486,8 +489,7 @@ internal class Hub : IHubEx, IDisposable
         try
         {
             // Apply scope data
-            var currentScopeAndClient = ScopeManager.GetCurrent();
-            var scope = currentScopeAndClient.Key;
+            var (scope, client) = ScopeManager.GetCurrent();
             scope.Evaluate();
             scope.Apply(transaction);
 
@@ -513,7 +515,6 @@ internal class Hub : IHubEx, IDisposable
                 }
             }
 
-            var client = currentScopeAndClient.Value;
             client.CaptureTransaction(processedTransaction, hint);
         }
         catch (Exception e)
@@ -543,8 +544,8 @@ internal class Hub : IHubEx, IDisposable
     {
         try
         {
-            var currentScope = ScopeManager.GetCurrent();
-            await currentScope.Value.FlushAsync(timeout).ConfigureAwait(false);
+            var (_, client) = ScopeManager.GetCurrent();
+            await client.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
         {

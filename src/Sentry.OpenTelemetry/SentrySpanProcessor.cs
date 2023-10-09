@@ -1,5 +1,6 @@
 using OpenTelemetry;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.OpenTelemetry;
 
@@ -156,6 +157,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
+            // Events are received/processed in a different AsyncLocal context. Restoring the scope that started it.
+            var activityScope = data.GetFused<Scope>();
+            if (activityScope is { } savedScope && _hub is Hub hub)
+            {
+                hub.RestoreScope(savedScope);
+            }
         }
         else
         {
