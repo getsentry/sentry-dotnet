@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.2.2" />
+    <PackageReference Include="NLog" Version="5.2.4" />
     <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
 

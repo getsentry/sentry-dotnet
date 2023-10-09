@@ -58,7 +58,6 @@ public sealed class SentryTarget : TargetWithContext
     /// <summary>
     /// Options for both the <see cref="SentryTarget"/> and the sentry sdk itself.
     /// </summary>
-    [Advanced]
     public SentryNLogOptions Options { get; }
 
     /// <summary>
