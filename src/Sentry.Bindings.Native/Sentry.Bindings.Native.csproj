@@ -21,7 +21,12 @@
     <!-- Don't add the changelog to the nuget. -->
     <PackageReference Remove="SIL.ReleaseTasks" />
   </ItemGroup>
-
+  
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean">
+    <Message Text="Inside Custom Clean" Importance="high"/>
+    <RemoveDir Directories="$(BaseIntermediateOutputPath)sdks" />
+  </Target>
+  
   <!-- Build the Sentry Native SDK -->
   <Target Name="_BuildSentryNativeSDK-Windows"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
@@ -35,7 +40,7 @@
 
   <Target Name="_InnerBuildSentryNativeSDK-Windows">
     <Message Importance="High"
-      Text="Building artifacts of Sentry Native SDK for Windows. Revision: $(SentryNativeSdkVersion)" />
+      Text="Building artifacts of Sentry Native SDK for Windows." />
 
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build;$(SentryNativeOutputDirectory-Windows)" />
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
