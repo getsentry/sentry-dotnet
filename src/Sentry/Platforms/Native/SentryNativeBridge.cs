@@ -101,38 +101,38 @@ internal static class SentryNativeBridge
     }
 
     // libsentry.so
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern IntPtr sentry_options_new();
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_dsn(IntPtr options, string dsn);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_release(IntPtr options, string release);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_debug(IntPtr options, int debug);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_environment(IntPtr options, string environment);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_sample_rate(IntPtr options, double rate);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_database_path(IntPtr options, string path);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_database_pathw(IntPtr options, [MarshalAs(UnmanagedType.LPWStr)] string path);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern void sentry_options_set_auto_session_tracking(IntPtr options, int debug);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl, SetLastError = true)]
     private delegate void sentry_logger_function_t(int level, IntPtr message, IntPtr argsAddress, IntPtr userData);
 
-    [DllImport("sentry")]
-    private static extern void sentry_options_set_logger(IntPtr options, [MarshalAs(UnmanagedType.FunctionPtr)]sentry_logger_function_t logger, IntPtr userData);
+    [DllImport("sentry-native")]
+    private static extern void sentry_options_set_logger(IntPtr options, [MarshalAs(UnmanagedType.FunctionPtr)] sentry_logger_function_t logger, IntPtr userData);
 
     // The logger we should forward native messages to. This is referenced by nativeLog() which in turn for.
     private static IDiagnosticLogger? _logger;
@@ -262,15 +262,15 @@ internal static class SentryNativeBridge
             action(ptr);
         });
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern int sentry_init(IntPtr options);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern int sentry_close();
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern int sentry_get_crashed_last_run();
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern int sentry_clear_crashed_last_run();
 }

@@ -1,0 +1,15 @@
+<Project>
+  <ItemGroup Condition="'$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'win-x64'">
+    <!-- Generate direct PInvokes for Dependency -->
+    <DirectPInvoke Include="sentry-native" />
+    
+    <!-- Link statically -->
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\sentry-native.lib" />
+    
+    <!-- Copy the PDB to the app output directory so that it can get uploaded by Sentry CLI. -->
+    <Content Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\sentry-native.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>%(FileName)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
+</Project>

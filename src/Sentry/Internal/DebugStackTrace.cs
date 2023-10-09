@@ -1,6 +1,7 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal.ILSpy;
+using Sentry.Native;
 
 namespace Sentry.Internal;
 
@@ -58,6 +59,9 @@ internal class DebugStackTrace : SentryStackTrace
 
     internal void MergeDebugImagesInto(SentryEvent @event)
     {
+        // xxx
+        var DebugImages = C.DebugImages.Value;
+
         // This operation may only be run once because it is destructive to the object state;
         // Frame indexes may be changed as well as _debugImageIndexByModule becoming invalid.
         if (_debugImagesMerged)
