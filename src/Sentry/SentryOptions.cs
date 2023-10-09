@@ -1085,7 +1085,7 @@ public class SentryOptions
 #endif
         };
 
-#if NET5_0_OR_GREATER
+#if NET5_0_OR_GREATER && !TRIMMABLE
         if (WinUIUnhandledExceptionIntegration.IsApplicable)
         {
             this.AddIntegration(new WinUIUnhandledExceptionIntegration());

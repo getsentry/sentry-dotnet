@@ -47,8 +47,10 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         _hub = hub;
         _options = options;
 
+#if !TRIMMABLE
         // Hook the main event handler
         AttachEventHandler();
+#endif
 
         // First part of workaround for https://github.com/microsoft/microsoft-ui-xaml/issues/7160
         AppDomain.CurrentDomain.FirstChanceException += (_, e) => _lastFirstChanceException = e.Exception;
@@ -73,6 +75,11 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         });
     }
 
+#if !TRIMMABLE
+    /// <summary>
+    /// This method uses reflection to hook up an UnhandledExceptionHandler. When <IsTrimmed> is true, users will have
+    /// follow our guidance to perform this initialization manually.
+    /// </summary>
     private void AttachEventHandler()
     {
         try
@@ -92,6 +99,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
             _options.LogError("Could not attach WinUIUnhandledExceptionHandler.", ex);
         }
     }
+#endif
 
     private void WinUIUnhandledExceptionHandler(object sender, object e)
     {
