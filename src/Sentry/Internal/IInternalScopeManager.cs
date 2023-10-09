@@ -5,6 +5,8 @@ namespace Sentry.Internal;
 internal interface IInternalScopeManager : ISentryScopeManager, IDisposable
 {
     KeyValuePair<Scope, ISentryClient> GetCurrent();
+    void RestoreScope(Scope savedScope);
+
     IScopeStackContainer ScopeStackContainer { get; }
 
     // TODO: Move The following to ISentryScopeManager in a future major version.

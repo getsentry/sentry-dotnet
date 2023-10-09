@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Reflection;
 
 namespace Sentry.AspNetCore;
@@ -132,6 +133,12 @@ internal class SentryMiddleware : IMiddleware
             {
                 var originalMethod = context.Request.Method;
                 await next(context).ConfigureAwait(false);
+                if (_options.Instrumenter == Instrumenter.OpenTelemetry && Activity.Current is {} activity)
+                {
+                    // The middleware pipeline finishes up before the Otel Activity.OnEnd callback is invoked so we need
+                    // so save a copy of the scope that can be restored by our SentrySpanProcessor
+                    hub.ConfigureScope(scope => activity.SetFused(scope));
+                }
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).
                 var exceptionFeature = context.Features.Get<IExceptionHandlerFeature?>();
