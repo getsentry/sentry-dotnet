@@ -137,7 +137,7 @@ internal class SentryMiddleware : IMiddleware
                 {
                     // The middleware pipeline finishes up before the Otel Activity.OnEnd callback is invoked so we need
                     // so save a copy of the scope that can be restored by our SentrySpanProcessor
-                    hub.ConfigureScope(scope => activity.SetFused(scope.Clone()));
+                    hub.ConfigureScope(scope => activity.SetFused(scope));
                 }
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).

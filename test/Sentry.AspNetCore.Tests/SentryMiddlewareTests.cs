@@ -675,7 +675,7 @@ public class SentryMiddlewareTests
             await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
             // Assert
-            activity.GetFused<Scope>().Should().NotBeNull();
+            activity.GetFused<Scope>().Should().Be(scope);
         }
         finally
         {
