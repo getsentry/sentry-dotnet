@@ -87,8 +87,15 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         ScopeAndClientStack = newScopeAndClientStack;
         return scopeSnapshot;
     }
+
     public void RestoreScope(Scope savedScope)
     {
+        if (IsGlobalMode)
+        {
+            _options.LogWarning("RestoreScope called in global mode, returning.");
+            return;
+        }
+
         var currentScopeAndClientStack = ScopeAndClientStack;
         var (previousScope, client) = currentScopeAndClientStack[^1];
 
