@@ -166,7 +166,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            #if !IsTrimmable
+            #if !TRIMMABLE
             // Attempt to demystify exceptions before adding them as breadcrumbs.
             e.Demystify();
             #endif
@@ -371,7 +371,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-#if !IsTrimmable
+#if !TRIMMABLE
             // Attempt to demystify exceptions before adding them as breadcrumbs.
             e.Demystify();
 #endif

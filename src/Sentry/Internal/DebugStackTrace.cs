@@ -121,7 +121,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// </summary>
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
     {
-#if !IsTrimmable
+#if !TRIMMABLE
         var frames = _options.StackTraceMode switch
         {
             StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => p as StackFrame),
@@ -132,7 +132,7 @@ internal class DebugStackTrace : SentryStackTrace
 #endif
         };
 #else
-        StackFrame[]? frames = null;
+        var frames = stackTrace.GetFrames();
 #endif
         // Not to throw on code that ignores nullability warnings.
         if (frames.IsNull())
@@ -188,7 +188,7 @@ internal class DebugStackTrace : SentryStackTrace
         {
             frame.Module = method.DeclaringType?.FullName ?? unknownRequiredField;
             frame.Package = method.DeclaringType?.Assembly.FullName;
-#if !IsTrimmable
+#if !TRIMMABLE
             if (_options.StackTraceMode == StackTraceMode.Enhanced &&
                 stackFrame is EnhancedStackFrame enhancedStackFrame)
             {

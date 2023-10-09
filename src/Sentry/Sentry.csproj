@@ -6,7 +6,7 @@
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsTrimmable>true</IsTrimmable>
-    <DefineConstants>$(DefineConstants);IsTrimmable</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
