@@ -4,7 +4,11 @@
     <Description>.NET Bindings for the Sentry Native SDK</Description>
     <TargetFramework>net7.0</TargetFramework>
     <SentryNativeSourceDirectory>..\..\modules\sentry-native\</SentryNativeSourceDirectory>
-    <SentryNativeOutputDirectory-Windows>$(BaseIntermediateOutputPath)sdks\Sentry\Native\Windows\</SentryNativeOutputDirectory-Windows>
+    <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
+    <SentryNativeOutputDirectory>$(BaseIntermediateOutputPath)$(SentryNativeLibraryName)\</SentryNativeOutputDirectory>
+    <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
+    <NativeLibRelativePath-win-x64>runtimes\win-x64\native\</NativeLibRelativePath-win-x64>
+    <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)</SentryNativeOutputDirectory-win-x64>
     <!-- TODO conditional
     <SentryNativeEnabled>false</SentryNativeEnabled>
     <SentryNativeEnabled Condition="'$(TargetPlatformIdentifier)' == 'windows'">true</SentryNativeEnabled> -->
@@ -20,29 +24,37 @@
 
     <!-- Don't add the changelog to the nuget. -->
     <PackageReference Remove="SIL.ReleaseTasks" />
+    
+    <NativeLibs Include="$(SentryNativeOutputDirectory-win-x64)\$(SentryNativeLibraryName).dll" />
+    <NativeLibs Include="$(SentryNativeOutputDirectory-win-x64)\$(SentryNativeLibraryName).pdb" />
+    <None Include="@(NativeLibs)">
+      <Pack>true</Pack>
+      <PackagePath>\$(NativeLibRelativePath-win-x64)</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   
   <Target Name="CleanNativeSDK" BeforeTargets="CoreClean">
     <Message Text="Inside Custom Clean" Importance="high"/>
-    <RemoveDir Directories="$(BaseIntermediateOutputPath)sdks" />
+    <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
+    <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
   </Target>
   
   <!-- Build the Sentry Native SDK -->
-  <Target Name="_BuildSentryNativeSDK-Windows"
+  <Target Name="_BuildSentryNativeSDK-win-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$(SentryNativeEnabled) and $([MSBuild]::IsOsPlatform('Windows'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD"
-    Outputs="$(SentryNativeOutputDirectory-Windows)sentry-native.dll;$(SentryNativeOutputDirectory-Windows)sentry-native.pdb">
+    Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).dll;$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).pdb">
     <MSBuild Projects="$(MSBuildProjectFile)"
-      Targets="_InnerBuildSentryNativeSDK-Windows"
+      Targets="_InnerBuildSentryNativeSDK-win-x64"
       Properties="TargetFramework=once" />
   </Target>
 
-  <Target Name="_InnerBuildSentryNativeSDK-Windows">
+  <Target Name="_InnerBuildSentryNativeSDK-win-x64">
     <Message Importance="High"
-      Text="Building artifacts of Sentry Native SDK for Windows." />
+      Text="Building artifacts of Sentry Native SDK for win-x64." />
 
-    <RemoveDir Directories="$(SentryNativeSourceDirectory)build;$(SentryNativeOutputDirectory-Windows)" />
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
       Command="cmake -B build -D SENTRY_BACKEND=breakpad -D SENTRY_SDK_NAME=sentry.native.dotnet -S ."></Exec>
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
@@ -54,7 +66,7 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(NativeSdkArtifacts)"
-      DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-Windows)%(Filename)-native%(Extension)')" />
+      DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-win-x64)%(Filename)-native%(Extension)')" />
   </Target>
 
 </Project>
