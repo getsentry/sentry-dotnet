@@ -83,7 +83,7 @@ public static class ConfigurationExtensions
 
         optionsConfig?.Invoke(options);
 
-        Target.Register<SentryTarget>("Sentry");
+        LogManager.Setup().SetupExtensions(e => e.RegisterTarget<SentryTarget>("Sentry"));
 
         var target = new SentryTarget(options)
         {

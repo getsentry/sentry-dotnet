@@ -22,6 +22,7 @@ API Changes:
 - ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
 - Removed IHasTransactionNameSource. Use ITransactionContext instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
 - Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
+- Upgraded to NLog version 5 ([#2697](https://github.com/getsentry/sentry-dotnet/pull/2697))
 - Removed unused `StackFrame.InstructionOffset`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
