@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.40.0
 
 ### Obsoletion
 
