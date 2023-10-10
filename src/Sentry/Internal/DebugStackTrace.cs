@@ -16,6 +16,8 @@ internal class DebugStackTrace : SentryStackTrace
     private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
     private const int DebugImageMissing = -1;
     private bool _debugImagesMerged;
+    private Dictionary<long, DebugImage>? _nativeDebugImages;
+    private HashSet<long> _usedNativeDebugImages = new();
 
     /*
      *  NOTE: While we could improve these regexes, doing so might break exception grouping on the backend.
@@ -59,9 +61,6 @@ internal class DebugStackTrace : SentryStackTrace
 
     internal void MergeDebugImagesInto(SentryEvent @event)
     {
-        // xxx
-        var DebugImages = C.DebugImages.Value;
-
         // This operation may only be run once because it is destructive to the object state;
         // Frame indexes may be changed as well as _debugImageIndexByModule becoming invalid.
         if (_debugImagesMerged)
@@ -92,25 +91,54 @@ internal class DebugStackTrace : SentryStackTrace
         Dictionary<string, string> relocations = new();
         for (var i = 0; i < DebugImages.Count; i++)
         {
-            // First check if the image is already present on the event. Simple lookup should be faster than
-            // constructing a map first, assuming there are normally just a few debug images affected.
-            var found = false;
-            for (var j = 0; j < originalCount; j++)
+            // Managed debug images
+            if (DebugImages[i].ModuleVersionId is not null)
             {
-                if (DebugImages[i].ModuleVersionId == @event.DebugImages[j].ModuleVersionId)
+                // First check if the image is already present on the event. Simple lookup should be faster than
+                // constructing a map first, assuming there are normally just a few debug images affected.
+                var found = false;
+                for (var j = 0; j < originalCount; j++)
                 {
-                    if (i != j)
+                    if (DebugImages[i].ModuleVersionId == @event.DebugImages[j].ModuleVersionId)
                     {
-                        relocations.Add(GetRelativeAddressMode(i), GetRelativeAddressMode(j));
+                        if (i != j)
+                        {
+                            relocations.Add(GetRelativeAddressMode(i), GetRelativeAddressMode(j));
+                        }
+                        found = true;
+                        break;
                     }
-                    found = true;
+                }
+
+                if (!found)
+                {
+                    relocations.Add(GetRelativeAddressMode(i), GetRelativeAddressMode(@event.DebugImages.Count));
+                    @event.DebugImages.Add(DebugImages[i]);
                 }
             }
-
-            if (!found)
+            // Native debug images
+            else if (DebugImages[i].ImageAddress is not null)
             {
-                relocations.Add(GetRelativeAddressMode(i), GetRelativeAddressMode(@event.DebugImages.Count));
-                @event.DebugImages.Add(DebugImages[i]);
+                // First check if the image is already present on the event. Simple lookup should be faster than
+                // constructing a map first, assuming there are normally just a few debug images affected.
+                var found = false;
+                for (var j = 0; j < originalCount; j++)
+                {
+                    if (DebugImages[i].ImageAddress == @event.DebugImages[j].ImageAddress)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    @event.DebugImages.Add(DebugImages[i]);
+                }
+            }
+            else
+            {
+                _options.LogWarning("Unexpected debug image: neither ModuleVersionId nor ImageAddress is defined: {0}", DebugImages[i].ToString());
             }
         }
 
@@ -210,9 +238,18 @@ internal class DebugStackTrace : SentryStackTrace
             return null;
         }
 
+        var imageAddress = stackFrame.GetNativeImageBase();
         var frame = ParseNativeAOTToString(stackFrame.ToString());
-        frame.ImageAddress = stackFrame.GetNativeImageBase();
+        frame.ImageAddress = imageAddress;
         frame.InstructionAddress = stackFrame.GetNativeIP();
+
+        _nativeDebugImages ??= C.LoadDebugImages(_options.DiagnosticLogger);
+        if (!_usedNativeDebugImages.Contains(imageAddress) && _nativeDebugImages.TryGetValue(imageAddress, out var debugImage))
+        {
+            _usedNativeDebugImages.Add(imageAddress);
+            DebugImages.Add(debugImage);
+        }
+
         return frame;
     }
 
@@ -278,7 +315,7 @@ internal class DebugStackTrace : SentryStackTrace
             frame.InApp = false;
         }
 
-        if (AddDebugImage(method.Module) is { } moduleIdx && moduleIdx != DebugImageMissing)
+        if (AddManagedModuleDebugImage(method.Module) is { } moduleIdx && moduleIdx != DebugImageMissing)
         {
             frame.AddressMode = GetRelativeAddressMode(moduleIdx);
 
@@ -470,7 +507,7 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
-    private int? AddDebugImage(Module module)
+    private int? AddManagedModuleDebugImage(Module module)
     {
         var id = module.ModuleVersionId;
         if (_debugImageIndexByModule.TryGetValue(id, out var idx))
@@ -478,7 +515,7 @@ internal class DebugStackTrace : SentryStackTrace
             return idx;
         }
 
-        var debugImage = GetDebugImage(module, _options);
+        var debugImage = GetManagedModuleDebugImage(module, _options);
         if (debugImage == null)
         {
             // don't try to resolve again
@@ -493,7 +530,7 @@ internal class DebugStackTrace : SentryStackTrace
         return idx;
     }
 
-    internal static DebugImage? GetDebugImage(Module module, SentryOptions options)
+    internal static DebugImage? GetManagedModuleDebugImage(Module module, SentryOptions options)
     {
         // Try to get it from disk (most common use case)
         var moduleName = module.GetNameOrScopeName();

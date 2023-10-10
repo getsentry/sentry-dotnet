@@ -1,3 +1,5 @@
+using Sentry.Extensibility;
+
 namespace Sentry.Native;
 
 // https://github.com/getsentry/sentry-unity/blob/3eb6eca6ed270c5ec023bf75ee53c1ca00bb7c82/src/Sentry.Unity/NativeUtils/CFunctions.cs
@@ -40,6 +42,25 @@ internal static class C
     {
         var cValue = sentry_value_get_by_key(obj, key);
         return sentry_value_is_null(cValue) == 0 ? cValue : null;
+    }
+
+    internal static long? GetValueHex(sentry_value_t obj, string key)
+    {
+        if (GetValueString(obj, key) is { } s && s.Length > 0)
+        {
+            // It should be in hex format, such as "0x7fff5bf346c0"
+            if (s.StartsWith("0x") &&
+                long.TryParse(s[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
+            {
+                return result;
+            }
+            else if (long.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out result))
+            {
+                return result;
+            }
+            throw new FormatException($"GetValueHex() cannot parse '{s}'");
+        }
+        return null;
     }
 
     internal static string? GetValueString(sentry_value_t obj, string key)
@@ -144,11 +165,9 @@ internal static class C
     [DllImport("sentry-native")]
     internal static extern void sentry_remove_extra(string key);
 
-    internal static readonly Lazy<List<DebugImage>> DebugImages = new(LoadDebugImages);
-
-    private static List<DebugImage> LoadDebugImages()
+    internal static Dictionary<long, DebugImage> LoadDebugImages(IDiagnosticLogger? logger)
     {
-        var result = new List<DebugImage>();
+        var result = new Dictionary<long, DebugImage>();
         try
         {
             var cList = sentry_get_modules_list();
@@ -166,16 +185,19 @@ internal static class C
                             // * https://github.com/getsentry/sentry-native/blob/8faa78298da68d68043f0c3bd694f756c0e95dfa/src/modulefinder/sentry_modulefinder_windows.c#L81
                             // * https://github.com/getsentry/sentry-native/blob/8faa78298da68d68043f0c3bd694f756c0e95dfa/src/modulefinder/sentry_modulefinder_windows.c#L24
                             // * https://github.com/getsentry/sentry-native/blob/c5c31e56d36bed37fa5422750a591f44502edb41/src/modulefinder/sentry_modulefinder_linux.c#L465
-                            result.Add(new DebugImage()
+                            if (GetValueHex(cItem, "image_addr") is { } imageAddress)
                             {
-                                CodeFile = GetValueString(cItem, "code_file"),
-                                ImageAddress = GetValueString(cItem, "image_addr"),
-                                ImageSize = GetValueInt(cItem, "image_size"),
-                                DebugFile = GetValueString(cItem, "debug_file"),
-                                DebugId = GetValueString(cItem, "debug_id"),
-                                CodeId = GetValueString(cItem, "code_id"),
-                                Type = GetValueString(cItem, "type"),
-                            });
+                                result.Add(imageAddress, new DebugImage()
+                                {
+                                    CodeFile = GetValueString(cItem, "code_file"),
+                                    ImageAddress = imageAddress,
+                                    ImageSize = GetValueInt(cItem, "image_size"),
+                                    DebugFile = GetValueString(cItem, "debug_file"),
+                                    DebugId = GetValueString(cItem, "debug_id"),
+                                    CodeId = GetValueString(cItem, "code_id"),
+                                    Type = GetValueString(cItem, "type"),
+                                });
+                            }
                         }
                     }
                 }
@@ -188,8 +210,7 @@ internal static class C
         catch (Exception e)
         {
             // Adding the Sentry logger tag ensures we don't send this error to Sentry.
-            Console.WriteLine(e); // TODO proper logging
-            // Debug.unityLogger.Log(LogType.Error, UnityLogger.LogTag, $"Error loading the list of debug images: {e}");
+            logger?.LogWarning("Error loading the list of debug images", e);
         }
         return result;
     }

@@ -54,7 +54,7 @@
   <Target Name="_BuildSentryNativeSDK-win-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$(SentryNativeEnabled) and $([MSBuild]::IsOsPlatform('Windows'))"
-    Inputs="..\..\.git\modules\modules\sentry-native\HEAD"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
     Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib;$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).pdb">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-win-x64"
@@ -66,9 +66,14 @@
       Text="Building artifacts of Sentry Native SDK for win-x64." />
 
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
-      Command="cmake -B build -D SENTRY_BACKEND=breakpad -D SENTRY_SDK_NAME=sentry.native.dotnet -D SENTRY_BUILD_SHARED_LIBS=false -S ."></Exec>
+      Command="cmake -B build -S . ^
+        -D SENTRY_SDK_NAME=sentry.native.dotnet ^
+        -D SENTRY_BUILD_SHARED_LIBS=0 ^
+        -D SENTRY_BUILD_RUNTIMESTATIC=1 ^
+        -D SENTRY_BACKEND=none ^
+        -D SENTRY_TRANSPORT=none " />
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
-      Command="cmake --build build --target sentry --config RelWithDebInfo --parallel"></Exec>
+      Command="cmake --build build --target sentry --config RelWithDebInfo --parallel" />
 
     <ItemGroup>
       <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/RelWithDebInfo/sentry.lib" />
@@ -77,6 +82,8 @@
 
     <Copy SourceFiles="@(NativeSdkArtifacts)"
       DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-win-x64)%(Filename)-native%(Extension)')" />
+      
+    <!-- Explicitly update timestamp on output files so that this target doesn't run again even if the CMake build reused previously built artifacts. -->
+    <Touch Files="@(NativeSdkArtifacts)" />
   </Target>
-
 </Project>

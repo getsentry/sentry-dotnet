@@ -5,6 +5,7 @@
     
     <!-- Link statically -->
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\sentry-native.lib" />
+    <NativeLibrary Include="dbghelp.lib" />
     
     <!-- Copy the PDB to the app output directory so that it can get uploaded by Sentry CLI. -->
     <Content Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\sentry-native.pdb">
