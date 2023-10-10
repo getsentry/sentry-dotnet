@@ -23,6 +23,10 @@ internal class GraphQLRequestContent
             return;
         }
 
+#if TRIMMABLE
+        // TODO: Work out how to make this trimmable
+        throw new NotImplementedException();
+#else
         try
         {
             var deserialized = JsonSerializer.Deserialize<Dictionary<string, object>>(requestContent, SerializerOptions);
@@ -59,6 +63,7 @@ internal class GraphQLRequestContent
         {
             OperationType = "query";
         }
+#endif
     }
 
     internal string? RequestContent { get; }
