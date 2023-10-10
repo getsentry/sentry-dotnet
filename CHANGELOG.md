@@ -24,6 +24,7 @@ API Changes:
 - Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
 - Removed unused `StackFrame.InstructionOffset`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- Change `DebugImage.ImageAddress` to `long?`. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
 - Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
 - Removed the `Scope.Platform` property as it was never applied ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))

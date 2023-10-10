@@ -8,7 +8,7 @@
   debug_meta: {
     images: [
       {
-        image_addr: 0xABCDEF
+        image_addr: 0x5
       }
     ]
   },
