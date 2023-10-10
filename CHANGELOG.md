@@ -32,6 +32,7 @@ API Changes:
 - The `DiagnosticLogger` signature for `LogError` and `LogFatal` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. The `DiagnosticLogger` now also received an overload for `LogError` and `LogFatal` that accepts a message only. ([#2715](https://github.com/getsentry/sentry-dotnet/pull/2715))
 
 ## Unreleased
+## 3.40.0
 
 ### Obsoletion
 
