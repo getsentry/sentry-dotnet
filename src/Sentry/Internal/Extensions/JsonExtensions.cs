@@ -14,31 +14,18 @@ internal static class JsonExtensions
         new UIntPtrNullableJsonConverter()
     };
 
-    delegate object? UserDefinedReader(ref Utf8JsonReader reader, JsonSerializerOptions options);
-    delegate void UserDefinedWriter(Utf8JsonWriter writer, object value, JsonSerializerOptions options);
-
-    private class JsonConverterWrapper
-    {
-        public required UserDefinedReader Read { get; set; }
-        public required UserDefinedWriter Write { get; set; }
-    }
-
-    private static readonly ConcurrentDictionary<Type, JsonConverterWrapper> UserDefinedConverters = new ();
-    public static void AddUserDefinedJsonConverter<T>(JsonConverter<T> converter)
-    {
-        Type typeToConvert = typeof(T);
-        var wrapper = new JsonConverterWrapper()
-        {
-            Read = (ref Utf8JsonReader reader, JsonSerializerOptions options) =>
-                converter.Read(ref reader, typeToConvert, options),
-            Write = (writer, value, options) => converter.Write(writer, (T)value, options)
-        };
-        UserDefinedConverters[typeof(T)] = wrapper;
-    }
-
     internal static bool JsonPreserveReferences { get; set; } = true;
     private static JsonSerializerOptions SerializerOptions = null!;
     private static JsonSerializerOptions AltSerializerOptions = null!;
+
+#if NET6_0_OR_GREATER
+    private static JsonSerializerContext? CustomSerializerContext;
+
+    internal static void AddJsonSerializerContext(JsonSerializerContext context)
+    {
+        CustomSerializerContext = context;
+    }
+#endif
 
     static JsonExtensions()
     {
@@ -47,6 +34,9 @@ internal static class JsonExtensions
 
     internal static void ResetSerializerOptions()
     {
+#if NET6_0_OR_GREATER
+        CustomSerializerContext = null;
+#endif
         SerializerOptions = new JsonSerializerOptions()
             .AddDefaultConverters();
 
@@ -56,6 +46,7 @@ internal static class JsonExtensions
         }
             .AddDefaultConverters();
     }
+
 
     internal static void AddJsonConverter(JsonConverter converter)
     {
@@ -501,28 +492,38 @@ internal static class JsonExtensions
         }
         else
         {
-            if (UserDefinedConverters.TryGetValue(value.GetType(), out var converter))
+#if !TRIMMABLE
+            if (!JsonPreserveReferences)
             {
-                var options = JsonPreserveReferences ? AltSerializerOptions : SerializerOptions;
-                converter.Write(writer, value, SerializerOptions);
+                JsonSerializer.Serialize(writer, value, SerializerOptions);
                 return;
             }
 
-            // TODO: Understand why this code was added previously and what the impact of removing it would be
-            // try
-            // {
-            //     // Use an intermediate temporary stream, so we can retry if serialization fails.
-            //     using var tempStream = new MemoryStream();
-            //     using var tempWriter = new Utf8JsonWriter(tempStream, writer.Options);
-            //     JsonSerializer.Serialize(tempWriter, value, SerializerOptions);
-            //     tempWriter.Flush();
-            //     writer.WriteRawValue(tempStream.ToArray());
-            // }
-            // catch (JsonException)
-            // {
-            // }
-
-            Debug.WriteLine("Failed to serialize object of type '{0}'.", value.GetType());
+            try
+            {
+                // Use an intermediate temporary stream, so we can retry if serialization fails.
+                using var tempStream = new MemoryStream();
+                using var tempWriter = new Utf8JsonWriter(tempStream, writer.Options);
+                JsonSerializer.Serialize(tempWriter, value, SerializerOptions);
+                tempWriter.Flush();
+                writer.WriteRawValue(tempStream.ToArray());
+            }
+            catch (JsonException)
+            {
+                // Retry, preserving references to avoid cyclical dependency.
+                JsonSerializer.Serialize(writer, value, AltSerializerOptions);
+            }
+#else
+            var valueType = value.GetType();
+            #if NET6_0_OR_GREATER
+            if (CustomSerializerContext is { } jsonSerializerContext)
+            {
+                JsonSerializer.Serialize(writer, value, valueType, jsonSerializerContext);
+                return;
+            }
+            #endif
+            throw new Exception($"No JsonSerializerContext configured for {valueType}");
+#endif
         }
     }
 
