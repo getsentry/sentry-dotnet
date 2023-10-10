@@ -16,9 +16,8 @@ public sealed class DebugImage : IJsonSerializable
 
     /// <summary>
     /// Memory address, at which the image is mounted in the virtual address space of the process.
-    /// Should be a string in hex representation prefixed with "0x".
     /// </summary>
-    public string? ImageAddress { get; set; }
+    public long? ImageAddress { get; set; }
 
     /// <summary>
     /// The size of the image in virtual memory.
@@ -60,7 +59,7 @@ public sealed class DebugImage : IJsonSerializable
         writer.WriteStartObject();
 
         writer.WriteStringIfNotWhiteSpace("type", Type);
-        writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress);
+        writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress?.NullIfDefault()?.ToHexString());
         writer.WriteNumberIfNotNull("image_size", ImageSize);
         writer.WriteStringIfNotWhiteSpace("debug_id", DebugId);
         writer.WriteStringIfNotWhiteSpace("debug_checksum", DebugChecksum);
@@ -77,7 +76,7 @@ public sealed class DebugImage : IJsonSerializable
     public static DebugImage FromJson(JsonElement json)
     {
         var type = json.GetPropertyOrNull("type")?.GetString();
-        var imageAddress = json.GetPropertyOrNull("image_addr")?.GetString();
+        var imageAddress = json.GetPropertyOrNull("image_addr")?.GetHexAsLong();
         var imageSize = json.GetPropertyOrNull("image_size")?.GetInt64();
         var debugId = json.GetPropertyOrNull("debug_id")?.GetString();
         var debugChecksum = json.GetPropertyOrNull("debug_checksum")?.GetString();
