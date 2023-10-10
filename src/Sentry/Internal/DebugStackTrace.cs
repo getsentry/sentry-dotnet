@@ -124,10 +124,11 @@ internal class DebugStackTrace : SentryStackTrace
     /// </summary>
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
     {
-#if !TRIMMABLE
         var frames = _options.StackTraceMode switch
         {
+#if !TRIMMABLE
             StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p)),
+#endif
             _ => stackTrace.GetFrames()
             // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
 #if NETCOREAPP3_0
@@ -137,9 +138,7 @@ internal class DebugStackTrace : SentryStackTrace
                 .Select(p => new RealStackFrame(p))
 #endif
         };
-#else
-        var frames = stackTrace.GetFrames();
-#endif
+
         // Not to throw on code that ignores nullability warnings.
         if (frames.IsNull())
         {
@@ -199,7 +198,7 @@ internal class DebugStackTrace : SentryStackTrace
 
     /// <summary>
     /// Native AOT implementation of CreateFrame.
-    /// Native frames have only limited method information at runtime (and even that can be disabled). 
+    /// Native frames have only limited method information at runtime (and even that can be disabled).
     ///  We try to parse that and also add addresses for server-side symbolication.
     /// </summary>
     private SentryStackFrame? TryCreateNativeAOTFrame(IStackFrame stackFrame)
@@ -216,7 +215,7 @@ internal class DebugStackTrace : SentryStackTrace
     }
 
     // Method info is currently only exposed by ToString(), see https://github.com/dotnet/runtime/issues/92869
-    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`): 
+    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`):
     // https://github.com/dotnet/runtime/blob/254230253da143a082f47cfaf8711627c0bf2faf/src/coreclr/nativeaot/System.Private.CoreLib/src/Internal/DeveloperExperience/DeveloperExperience.cs#L42
     internal static SentryStackFrame ParseNativeAOTToString(string info)
     {
@@ -246,7 +245,6 @@ internal class DebugStackTrace : SentryStackTrace
             Module = method.DeclaringType?.FullName ?? unknownRequiredField,
             Package = method.DeclaringType?.Assembly.FullName
         };
-
 #if !TRIMMABLE
         if (stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
         {
@@ -352,13 +350,7 @@ internal class DebugStackTrace : SentryStackTrace
             frame.ColumnNumber = colNo;
         }
 
-        if (stackFrame.Frame is not EnhancedStackFrame)
-        {
-            DemangleAsyncFunctionName(frame);
-            DemangleAnonymousFunction(frame);
-            DemangleLambdaReturnType(frame);
-        }
-
+#if !TRIMMABLE
         if (stackFrame.Frame is EnhancedStackFrame)
         {
             // In Enhanced mode, Module (which in this case is the Namespace)
@@ -366,8 +358,13 @@ internal class DebugStackTrace : SentryStackTrace
             // Removing here at the end because this is used to resolve InApp=true/false
             // TODO what is this really about? we have already run ConfigureAppFrame() at this time...
             frame.Module = null;
+            return frame;
         }
+#endif
 
+        DemangleAsyncFunctionName(frame);
+        DemangleAnonymousFunction(frame);
+        DemangleLambdaReturnType(frame);
         return frame;
     }
 
