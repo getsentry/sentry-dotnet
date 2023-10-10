@@ -170,7 +170,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         }
 
         // Events are received/processed in a different AsyncLocal context. Restoring the scope that started it.
-        var activityScope = data.GetFused<Scope>();
+        var activityScope = GetSavedScope(data);
         if (activityScope is { } savedScope && _hub is Hub hub)
         {
             hub.RestoreScope(savedScope);
@@ -185,6 +185,19 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
+    }
+
+    private static Scope? GetSavedScope(Activity? activity)
+    {
+        while (activity is not null)
+        {
+            if (activity.GetFused<Scope>() is {} savedScope)
+            {
+                return savedScope;
+            }
+            activity = activity.Parent;
+        }
+        return null;
     }
 
     internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes)
