@@ -157,12 +157,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
-            // Events are received/processed in a different AsyncLocal context. Restoring the scope that started it.
-            var activityScope = data.GetFused<Scope>();
-            if (activityScope is { } savedScope && _hub is Hub hub)
-            {
-                hub.RestoreScope(savedScope);
-            }
         }
         else
         {
@@ -175,6 +169,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             span.SetExtra("otel.kind", data.Kind);
         }
 
+        // Events are received/processed in a different AsyncLocal context. Restoring the scope that started it.
+        var activityScope = GetSavedScope(data);
+        if (activityScope is { } savedScope && _hub is Hub hub)
+        {
+            hub.RestoreScope(savedScope);
+        }
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 
         var status = GetSpanStatus(data.Status, attributes);
@@ -185,6 +185,19 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
+    }
+
+    private static Scope? GetSavedScope(Activity? activity)
+    {
+        while (activity is not null)
+        {
+            if (activity.GetFused<Scope>() is {} savedScope)
+            {
+                return savedScope;
+            }
+            activity = activity.Parent;
+        }
+        return null;
     }
 
     internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes)
