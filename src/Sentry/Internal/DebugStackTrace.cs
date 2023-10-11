@@ -243,7 +243,8 @@ internal class DebugStackTrace : SentryStackTrace
         var frame = new SentryStackFrame
         {
             Module = method.DeclaringType?.FullName ?? unknownRequiredField,
-            Package = method.DeclaringType?.Assembly.FullName
+            Package = method.DeclaringType?.Assembly.FullName,
+            Function = method.Name
         };
 #if !TRIMMABLE
         if (stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
@@ -265,12 +266,6 @@ internal class DebugStackTrace : SentryStackTrace
                     : module;
             }
         }
-        else
-        {
-            frame.Function = method.Name;
-        }
-#else
-        frame.Function = method.Name;
 #endif
 
         // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
