@@ -31,7 +31,7 @@ public class TransactionContext : SpanContext, ITransactionContext
         bool? isParentSampled = null,
         TransactionNameSource nameSource = TransactionNameSource.Custom
     )
-        : base(spanId, parentSpanId, traceId, operation, description, status, isSampled)
+        : base(operation, spanId, parentSpanId, traceId, description, status, isSampled)
     {
         Name = name;
         IsParentSampled = isParentSampled;

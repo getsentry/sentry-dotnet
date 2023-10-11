@@ -66,10 +66,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             // We can find the parent span - start a child span.
             var context = new SpanContext(
+                data.OperationName,
                 data.SpanId.AsSentrySpanId(),
                 data.ParentSpanId.AsSentrySpanId(),
                 data.TraceId.AsSentryId(),
-                data.OperationName,
                 data.DisplayName,
                 null,
                 null)
