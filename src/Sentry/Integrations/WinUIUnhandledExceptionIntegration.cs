@@ -77,7 +77,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
 
 #if !TRIMMABLE
     /// <summary>
-    /// This method uses reflection to hook up an UnhandledExceptionHandler. When <IsTrimmed> is true, users will have
+    /// This method uses reflection to hook up an UnhandledExceptionHandler. When IsTrimmed is true, users will have
     /// follow our guidance to perform this initialization manually.
     /// </summary>
     private void AttachEventHandler()
