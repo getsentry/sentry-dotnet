@@ -43,23 +43,30 @@ internal static class JsonExtensions
     }
 
 #if NET6_0_OR_GREATER
-    private static JsonSerializerContext SerializerContext = null!;
-    private static JsonSerializerContext AltSerializerContext = null!;
+    private static List<JsonSerializerContext> DefaultSerializerContexts = new();
+    private static List<JsonSerializerContext> ReferencePreservingSerializerContexts = new();
 
-    private static Func<JsonSerializerOptions, JsonSerializerContext> ContextBuilder = options
-        => new SentryJsonContext(options);
+    private static List<Func<JsonSerializerOptions, JsonSerializerContext>> JsonSerializerContextBuilders = new()
+    {
+        options => new SentryJsonContext(options)
+    };
 
     internal static void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> jsonSerializerContextBuilder)
         where T: JsonSerializerContext
     {
-        ContextBuilder = jsonSerializerContextBuilder;
+        JsonSerializerContextBuilders.Add(jsonSerializerContextBuilder);
         ResetSerializerOptions();
     }
 
     internal static void ResetSerializerOptions()
     {
-        SerializerContext = ContextBuilder(BuildOptions(false));
-        AltSerializerContext = ContextBuilder(BuildOptions(true));
+        DefaultSerializerContexts.Clear();
+        ReferencePreservingSerializerContexts.Clear();
+        foreach (var builder in JsonSerializerContextBuilders)
+        {
+            DefaultSerializerContexts.Add(builder(BuildOptions(false)));
+            ReferencePreservingSerializerContexts.Add(builder(BuildOptions(true)));
+        }
     }
 
 #else
@@ -527,12 +534,23 @@ internal static class JsonExtensions
     }
 
 #if NET6_0_OR_GREATER
-    private static byte[] InternalSerializeToUtf8Bytes(object value) =>
-        JsonSerializer.SerializeToUtf8Bytes(value, value.GetType(), SerializerContext);
+
+    private static JsonSerializerContext GetSerializerContext(Type type, bool preserveReferences = false)
+    {
+        var contexts = preserveReferences ? ReferencePreservingSerializerContexts : DefaultSerializerContexts;
+        return contexts.FirstOrDefault(c => c.GetTypeInfo(type) != null)
+            ?? contexts[0]; // If none of the contexts has type info, this gives us a proper exception message
+    }
+
+    private static byte[] InternalSerializeToUtf8Bytes(object value)
+    {
+        var context = GetSerializerContext(value.GetType());
+        return JsonSerializer.SerializeToUtf8Bytes(value, value.GetType(), context);
+    }
 
     private static void InternalSerialize(Utf8JsonWriter writer, object value, bool preserveReferences = false)
     {
-        var context = preserveReferences ? AltSerializerContext : SerializerContext;
+        var context = GetSerializerContext(value.GetType(), preserveReferences);
         JsonSerializer.Serialize(writer, value, value.GetType(), context);
     }
 #else
@@ -837,7 +855,7 @@ internal static class JsonExtensions
 }
 
 #if NET6_0_OR_GREATER
-[JsonSerializable(typeof(BreadcrumbLevel))]
+[JsonSerializable(typeof(Internal.GrowableArray<int>))]
 internal partial class SentryJsonContext : JsonSerializerContext
 {
 }
