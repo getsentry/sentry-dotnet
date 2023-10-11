@@ -6,15 +6,16 @@ targets:
   - name: registry
     sdks:
       nuget:Sentry:
-      nuget:Sentry.Extensions.Logging:
       nuget:Sentry.AspNetCore:
       nuget:Sentry.AspNetCore.Grpc:
       nuget:Sentry.AspNet:
-      nuget:Sentry.EntityFramework:
-      nuget:Sentry.DiagnosticSource:
-      nuget:Sentry.Log4Net:
-      nuget:Sentry.Serilog:
-      nuget:Sentry.NLog:
-      nuget:Sentry.Google.Cloud.Functions:
-      nuget:Sentry.Maui:
       nuget:Sentry.Azure.Functions.Worker:
+      nuget:Sentry.DiagnosticSource:
+      nuget:Sentry.EntityFramework:
+      nuget:Sentry.Extensions.Logging:
+      nuget:Sentry.Google.Cloud.Functions:
+      nuget:Sentry.Log4Net:
+      nuget:Sentry.Maui:
+      nuget:Sentry.NLog:
+      nuget:Sentry.OpenTelemetry:
+      nuget:Sentry.Serilog:
