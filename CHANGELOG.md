@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- ISentryUserFactory is now public so users can register their own implementations via DI ([#2719](https://github.com/getsentry/sentry-dotnet/pull/2719))
+
 ## 3.40.0
 
 ### Obsoletion
@@ -12,6 +18,7 @@
 - Release of Azure Functions (Isolated Worker/Out-of-Process) support ([#2686](https://github.com/getsentry/sentry-dotnet/pull/2686))
 
 ### Fixes
+
 - Scope is now correctly applied to Transactions when using OpenTelemetry on ASP.NET Core ([#2690](https://github.com/getsentry/sentry-dotnet/pull/2690))
 
 ### Dependencies
