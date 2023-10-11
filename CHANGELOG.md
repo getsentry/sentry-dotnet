@@ -28,6 +28,7 @@ API Changes:
 - Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
 - Removed the `Scope.Platform` property as it was never applied ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
+- Reordered parameters for ther TransactionContext and SpanContext constructors. If you're constructing instances of these classes, you will need to adjust the order in which you pass parameters to these. ([#2696](https://github.com/getsentry/sentry-dotnet/pull/2696))
 
 ## Unreleased
 
