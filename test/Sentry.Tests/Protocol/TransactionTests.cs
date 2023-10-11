@@ -38,18 +38,13 @@ public class TransactionTests
             Debug = true
         };
         var hub = new Hub(options, client);
-        var context = new TransactionContext(
+        var context = new TransactionContext("my name",
+            "my operation",
             SpanId.Create(),
             SpanId.Create(),
             SentryId.Create(),
-            "my name",
-            "my operation",
             "description",
-            SpanStatus.Ok,
-            null,
-            true,
-            TransactionNameSource.Component
-        );
+            SpanStatus.Ok, null, true, TransactionNameSource.Component);
 
         var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2));
 
@@ -75,18 +70,13 @@ public class TransactionTests
         var breadcrumbMessage = "message https://user@sentry.io"; // should be redacted
         var breadcrumbDataValue = "data-value https://user@sentry.io"; // should be redacted
         var tagValue = "tag_value https://user@not.redacted";
-        var context = new TransactionContext(
+        var context = new TransactionContext(name,
+            operation,
             SpanId.Create(),
             SpanId.Create(),
             SentryId.Create(),
-            name,
-            operation,
             description,
-            SpanStatus.AlreadyExists,
-            null,
-            true,
-            TransactionNameSource.Component
-            );
+            SpanStatus.AlreadyExists, null, true, TransactionNameSource.Component);
 
         var txTracer = new TransactionTracer(DisabledHub.Instance, context)
         {
@@ -172,18 +162,14 @@ public class TransactionTests
     {
         // Arrange
         var timestamp = DateTimeOffset.MaxValue;
-        var context = new TransactionContext(
-            SpanId.Create(),
-            SpanId.Create(),
-            SentryId.Create(),
-            "name123",
+        var context = new TransactionContext("name123",
             "op123",
-            "desc",
-            SpanStatus.AlreadyExists,
-            null, // sampling isn't serialized and getting FluentAssertions
+            SpanId.Create(),
+            SpanId.Create(),
+            SentryId.Create(), // sampling isn't serialized and getting FluentAssertions
                   // to ignore that on Spans and contexts isn't really straight forward
-            true,
-            TransactionNameSource.Component);
+            "desc",
+            SpanStatus.AlreadyExists, null, true, TransactionNameSource.Component);
 
         var transaction = new TransactionTracer(DisabledHub.Instance, context)
         {
@@ -449,18 +435,13 @@ public class TransactionTests
             Dsn = ValidDsn,
         };
         var hub = new Hub(options, client);
-        var context = new TransactionContext(
+        var context = new TransactionContext("my name",
+            "my operation",
             SpanId.Create(),
             SpanId.Create(),
             SentryId.Create(),
-            "my name",
-            "my operation",
             "description",
-            SpanStatus.Ok,
-            null,
-            true,
-            TransactionNameSource.Component
-        );
+            SpanStatus.Ok, null, true, TransactionNameSource.Component);
 
         var transaction = new TransactionTracer(hub, context, TimeSpan.FromMilliseconds(2))
         {
