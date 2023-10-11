@@ -46,17 +46,20 @@ internal static class JsonExtensions
     private static JsonSerializerContext SerializerContext = null!;
     private static JsonSerializerContext AltSerializerContext = null!;
 
-    internal static void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> jsonSerializerContextFactory)
+    private static Func<JsonSerializerOptions, JsonSerializerContext> ContextBuilder = options
+        => new SentryJsonContext(options);
+
+    internal static void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> jsonSerializerContextBuilder)
         where T: JsonSerializerContext
     {
-        SerializerContext = jsonSerializerContextFactory(BuildOptions(false));
-        AltSerializerContext = jsonSerializerContextFactory(BuildOptions(true));
+        ContextBuilder = jsonSerializerContextBuilder;
+        ResetSerializerOptions();
     }
 
     internal static void ResetSerializerOptions()
     {
-        SerializerContext = new SentryJsonContext(BuildOptions(false));
-        AltSerializerContext = new SentryJsonContext(BuildOptions(true));
+        SerializerContext = ContextBuilder(BuildOptions(false));
+        AltSerializerContext = ContextBuilder(BuildOptions(true));
     }
 
 #else
