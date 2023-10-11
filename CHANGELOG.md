@@ -28,6 +28,7 @@ API Changes:
 - Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
 - Removed the `Scope.Platform` property as it was never applied ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
+- `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are have been removed in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
 
 ## Unreleased
 
