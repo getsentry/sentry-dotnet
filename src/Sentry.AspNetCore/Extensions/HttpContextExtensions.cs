@@ -64,7 +64,7 @@ internal static class HttpContextExtensions
         }
         catch (Exception ex)
         {
-            options?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+            options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
             return null;
         }
     }
@@ -88,7 +88,7 @@ internal static class HttpContextExtensions
         }
         catch (Exception ex)
         {
-            options?.LogError("Invalid baggage header '{0}'.", ex, value);
+            options?.LogError(ex, "Invalid baggage header '{0}'.", value);
             return null;
         }
     }

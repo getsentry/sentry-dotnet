@@ -143,7 +143,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             catch (Exception ex)
             {
                 // Don't throw if we can't bind the event handler
-                _options.DiagnosticLogger?.LogError("Couldn't bind to {0}.{1}", ex, type.Name, eventInfo.Name);
+                _options.DiagnosticLogger?.LogError(ex, "Couldn't bind to {0}.{1}", type.Name, eventInfo.Name);
             }
         }
     }

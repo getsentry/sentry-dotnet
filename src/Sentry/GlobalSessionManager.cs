@@ -85,7 +85,7 @@ internal class GlobalSessionManager : ISessionManager
         // and let the next installation id strategy kick in
         catch (Exception ex)
         {
-            _options.LogError("Failed to resolve persistent installation ID.", ex);
+            _options.LogError(ex, "Failed to resolve persistent installation ID.");
             return null;
         }
     }
@@ -113,7 +113,7 @@ internal class GlobalSessionManager : ISessionManager
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to resolve hardware installation ID.", ex);
+            _options.LogError(ex, "Failed to resolve hardware installation ID.");
             return null;
         }
     }
@@ -187,7 +187,7 @@ internal class GlobalSessionManager : ISessionManager
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to persist session on the file system.", ex);
+            _options.LogError(ex, "Failed to persist session on the file system.");
         }
     }
 
@@ -212,7 +212,7 @@ internal class GlobalSessionManager : ISessionManager
                 }
                 catch (Exception ex)
                 {
-                    _options.LogError("Failed to read the contents of persisted session file '{0}'.", ex, filePath);
+                    _options.LogError(ex, "Failed to read the contents of persisted session file '{0}'.", filePath);
                 }
             }
 
@@ -222,7 +222,7 @@ internal class GlobalSessionManager : ISessionManager
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to delete persisted session from the file system: '{0}'", ex, filePath);
+            _options.LogError(ex, "Failed to delete persisted session from the file system: '{0}'", filePath);
         }
     }
 
@@ -256,7 +256,7 @@ internal class GlobalSessionManager : ISessionManager
             }
             catch (Exception e)
             {
-                _options.LogError("Invoking CrashedLastRun failed.", e);
+                _options.LogError(e, "Invoking CrashedLastRun failed.");
             }
 
             // Create a session update to end the recovered session
@@ -285,7 +285,7 @@ internal class GlobalSessionManager : ISessionManager
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to recover persisted session from the file system '{0}'.", ex, filePath);
+            _options.LogError(ex, "Failed to recover persisted session from the file system '{0}'.", filePath);
 
             return null;
         }

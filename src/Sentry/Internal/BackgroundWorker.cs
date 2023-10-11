@@ -167,11 +167,9 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
                     }
                     catch (Exception exception)
                     {
-                        _options.LogError(
+                        _options.LogError(exception,
                             "Error while processing envelope (event ID: '{0}'). {1} items in queue.",
-                            exception,
-                            eventId,
-                            _queue.Count);
+                            eventId, _queue.Count);
                     }
                     finally
                     {
@@ -193,7 +191,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogFatal("Exception in the background worker.", e);
+            _options.LogFatal(e, "Exception in the background worker.");
             throw;
         }
     }
@@ -314,8 +312,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
             }
             catch (Exception exception)
             {
-                _options.LogError("Error while sending final client report (event ID: '{0}').",
-                    exception, envelope.TryGetEventId(_options.DiagnosticLogger));
+                _options.LogError(exception, "Error while sending final client report (event ID: '{0}').", envelope.TryGetEventId(_options.DiagnosticLogger));
             }
         }
     }
@@ -358,7 +355,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         }
         catch (Exception exception)
         {
-            _options.LogError("Stopping the background worker threw an exception.", exception);
+            _options.LogError(exception, "Stopping the background worker threw an exception.");
         }
         finally
         {

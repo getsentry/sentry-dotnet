@@ -25,7 +25,7 @@ internal static class HttpRequestDataExtensions
         }
         catch (Exception ex)
         {
-            logger?.LogError("Invalid Sentry trace header '{0}'.", ex, traceHeaderValue);
+            logger?.LogError(ex, "Invalid Sentry trace header '{0}'.", traceHeaderValue);
             return null;
         }
     }
@@ -53,7 +53,7 @@ internal static class HttpRequestDataExtensions
         }
         catch (Exception ex)
         {
-            logger?.LogError("Invalid baggage header '{0}'.", ex, baggageValue);
+            logger?.LogError(ex, "Invalid baggage header '{0}'.", baggageValue);
             return null;
         }
     }

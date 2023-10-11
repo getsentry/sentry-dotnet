@@ -527,7 +527,7 @@ public class Scope : IEventLike
             }
             catch (Exception ex)
             {
-                Options.DiagnosticLogger?.LogError("Failed invoking event handler.", ex);
+                Options.DiagnosticLogger?.LogError(ex, "Failed invoking event handler.");
             }
             finally
             {

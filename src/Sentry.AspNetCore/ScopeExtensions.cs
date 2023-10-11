@@ -64,7 +64,7 @@ public static class ScopeExtensions
         }
         catch (Exception e)
         {
-            options.LogError("Failed to extract body.", e);
+            options.LogError(e, "Failed to extract body.");
         }
 
         SetEnv(scope, context, options);
