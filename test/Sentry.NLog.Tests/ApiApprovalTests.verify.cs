@@ -3,7 +3,7 @@ namespace Sentry.NLog.Tests;
 [UsesVerify]
 public class ApiApprovalTests
 {
-    [SkippableFact]
+    [Fact]
     public Task Run()
     {
         return typeof(SentryTarget).Assembly.CheckApproval();
