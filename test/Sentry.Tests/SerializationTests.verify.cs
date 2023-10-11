@@ -73,16 +73,12 @@ public class SerializationTests
 
     public class CustomObject
     {
-        public CustomObject()
-        {
-        }
-
         public CustomObject(string value)
         {
             Value = value;
         }
 
-        public string Value { get; set;  }
+        internal string Value { get; }
     }
 
     public class CustomObjectConverter : JsonConverter<CustomObject>
