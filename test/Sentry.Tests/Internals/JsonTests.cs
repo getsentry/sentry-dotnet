@@ -21,7 +21,7 @@ public class JsonTests
         }
     }
 
-    private class DataAndNonSerializableObject<T>
+    internal class DataAndNonSerializableObject<T>
     {
         /// <summary>
         /// A class containing two objects that can be serialized and a third one that will have issues if serialized.
@@ -60,7 +60,7 @@ public class JsonTests
         public int? HResult { get; set; }
     }
 
-    private class DataWithSerializableObject<T> : DataAndNonSerializableObject<T>
+    internal class DataWithSerializableObject<T> : DataAndNonSerializableObject<T>
     {
         /// <summary>
         /// A class containing three objects that can be serialized.
@@ -72,6 +72,9 @@ public class JsonTests
     [Fact]
     public void WriteDynamicValue_ExceptionParameter_SerializedException()
     {
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
         // Arrange
         var ex = GenerateException("Test");
         ex.Data.Add("a", "b");
@@ -107,6 +110,9 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithException()
     {
         // Arrange
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
         var expectedMessage = "T est";
         var expectedData = new KeyValuePair<string, string>("a", "b");
         var ex = GenerateException(expectedMessage);
@@ -135,7 +141,11 @@ public class JsonTests
     [Fact]
     public void WriteDynamicValue_TypeParameter_FullNameTypeOutput()
     {
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
         // Arrange
+        // TODO: Fix "Metadata for type 'System.RuntimeType' was not provided by TypeInfoResolver"...
         var type = typeof(Exception);
         var expectedValue = "\"System.Exception\"";
 
@@ -150,6 +160,9 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithTypeParameter_ClassFormatted()
     {
         // Arrange
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
         var type = typeof(List<>).GetGenericArguments()[0];
         var data = new DataWithSerializableObject<Type>(type);
 
@@ -165,6 +178,9 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
     {
         // Arrange
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
         var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
 
         // Act
@@ -205,6 +221,9 @@ public class JsonTests
     {
         // Arrange
         JsonExtensions.JsonPreserveReferences = true;
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
         var testObject = new SelfReferencedObject();
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))
@@ -242,3 +261,15 @@ public class JsonTests
         public SelfReferencedObject Object => this;
     }
 }
+
+#if NET6_0_OR_GREATER
+[JsonSerializable(typeof(AccessViolationException))]
+[JsonSerializable(typeof(Exception))]
+[JsonSerializable(typeof(JsonTests.SelfReferencedObject))]
+[JsonSerializable(typeof(JsonTests.DataAndNonSerializableObject<Assembly>))]
+[JsonSerializable(typeof(JsonTests.DataWithSerializableObject<Exception>))]
+[JsonSerializable(typeof(JsonTests.DataWithSerializableObject<Type>))]
+internal partial class JsonTestsJsonContext : JsonSerializerContext
+{
+}
+#endif
