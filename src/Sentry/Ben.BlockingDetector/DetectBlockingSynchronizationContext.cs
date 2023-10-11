@@ -1,4 +1,5 @@
-namespace Ben.Diagnostics
+// Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
+namespace Sentry.Ben.Diagnostics
 {
     // Tips of the Toub
     internal sealed class DetectBlockingSynchronizationContext : SynchronizationContext

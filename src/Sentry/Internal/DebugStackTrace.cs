@@ -38,11 +38,11 @@ internal class DebugStackTrace : SentryStackTrace
 
     protected List<DebugImage> DebugImages { get; } = new();
 
-    internal static DebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace)
+    internal static DebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace, int skipFrames = 0)
     {
         var result = new DebugStackTrace(options);
 
-        var frames = result.CreateFrames(stackTrace, isCurrentStackTrace)
+        var frames = result.CreateFrames(stackTrace, isCurrentStackTrace, skipFrames)
             .Reverse(); // Sentry expects the frames to be sent in reversed order
 
         foreach (var frame in frames)
@@ -59,7 +59,8 @@ internal class DebugStackTrace : SentryStackTrace
         // Frame indexes may be changed as well as _debugImageIndexByModule becoming invalid.
         if (_debugImagesMerged)
         {
-            throw new InvalidOperationException("Cannot call MergeDebugImagesInto multiple times");
+            return;
+            // throw new InvalidOperationException("Cannot call MergeDebugImagesInto multiple times");
         }
         _debugImagesMerged = true;
 
@@ -119,7 +120,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// <summary>
     /// Creates an enumerator of <see cref="SentryStackFrame"/> from a <see cref="StackTrace"/>.
     /// </summary>
-    private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
+    private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace, int skipFrames)
     {
         var frames = _options.StackTraceMode switch
         {
@@ -153,13 +154,19 @@ internal class DebugStackTrace : SentryStackTrace
 #endif
 
             // Remove the frames until the call for capture with the SDK
-            if (firstFrame
-                && isCurrentStackTrace
-                && stackFrame.GetMethod() is { } method
-                && method.DeclaringType?.AssemblyQualifiedName?.StartsWith("Sentry") == true)
+            if (firstFrame && isCurrentStackTrace)
             {
-                _options.LogDebug("Skipping initial stack frame '{0}'", method.Name);
-                continue;
+                if (stackFrame.GetMethod() is { } method
+                    && method.DeclaringType?.AssemblyQualifiedName?.StartsWith("Sentry") == true)
+                {
+                    _options.LogDebug("Skipping initial stack frame '{0}'", method.Name);
+                    continue;
+                }
+                if (skipFrames > 0)
+                {
+                    skipFrames--;
+                    continue;
+                }
             }
 
             firstFrame = false;

@@ -1,4 +1,4 @@
-using Ben.Diagnostics;
+using Sentry.Ben.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 #if NETSTANDARD2_0
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;

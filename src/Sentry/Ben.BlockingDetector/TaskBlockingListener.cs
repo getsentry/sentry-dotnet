@@ -1,6 +1,7 @@
 using System.Diagnostics.Tracing;
 
-namespace Ben.Diagnostics
+// Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
+namespace Sentry.Ben.Diagnostics
 {
     // Tips of the Toub
     internal sealed class TaskBlockingListener : EventListener
