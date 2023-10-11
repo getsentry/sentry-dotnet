@@ -1,3 +1,7 @@
+#if NET7_0_OR_GREATER
+using System.Text.Json.Serialization.Metadata;
+#endif
+
 namespace Sentry.Tests;
 
 [UsesVerify]

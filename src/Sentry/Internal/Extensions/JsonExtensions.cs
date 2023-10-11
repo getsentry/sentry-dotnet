@@ -14,6 +14,8 @@ internal static class JsonExtensions
         new UIntPtrNullableJsonConverter()
     };
 
+    private static List<JsonConverter> CustomConverters = new List<JsonConverter>();
+
     internal static bool JsonPreserveReferences { get; set; } = true;
 
     static JsonExtensions()
@@ -21,11 +23,24 @@ internal static class JsonExtensions
         ResetSerializerOptions();
     }
 
-    private static JsonSerializerOptions DefaultOptions(bool preserveReferences) =>
-        preserveReferences
-            ? new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve }
-                .AddDefaultConverters()
-            : new JsonSerializerOptions().AddDefaultConverters();
+    private static JsonSerializerOptions BuildOptions(bool preserveReferences)
+    {
+        var options = new JsonSerializerOptions();
+        if (preserveReferences)
+        {
+            options.ReferenceHandler = ReferenceHandler.Preserve;
+        }
+        foreach (var converter in DefaultConverters)
+        {
+            options.Converters.Add(converter);
+        }
+        foreach (var converter in CustomConverters)
+        {
+            options.Converters.Add(converter);
+        }
+
+        return options;
+    }
 
 #if NET6_0_OR_GREATER
     private static JsonSerializerContext SerializerContext = null!;
@@ -34,48 +49,39 @@ internal static class JsonExtensions
     internal static void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> jsonSerializerContextFactory)
         where T: JsonSerializerContext
     {
-        SerializerContext = jsonSerializerContextFactory(DefaultOptions(false));
-        AltSerializerContext = jsonSerializerContextFactory(DefaultOptions(true));
+        SerializerContext = jsonSerializerContextFactory(BuildOptions(false));
+        AltSerializerContext = jsonSerializerContextFactory(BuildOptions(true));
     }
 
     internal static void ResetSerializerOptions()
     {
-        SerializerContext = new SentryJsonContext(DefaultOptions(false));
-        AltSerializerContext = new SentryJsonContext(DefaultOptions(true));
+        SerializerContext = new SentryJsonContext(BuildOptions(false));
+        AltSerializerContext = new SentryJsonContext(BuildOptions(true));
     }
+
 #else
     private static JsonSerializerOptions SerializerOptions = null!;
     private static JsonSerializerOptions AltSerializerOptions = null!;
 
     internal static void ResetSerializerOptions()
     {
-        SerializerOptions = DefaultOptions(false);
-        AltSerializerOptions = DefaultOptions(true);
+        SerializerOptions = BuildOptions(false);
+        AltSerializerOptions = BuildOptions(true);
     }
 #endif
 
     internal static void AddJsonConverter(JsonConverter converter)
     {
         // only add if we don't have this instance already
-#if NET6_0_OR_GREATER
-        var converters = SerializerContext.Options.Converters;
-#else
-        var converters = SerializerOptions.Converters;
-#endif
-        if (converters.Contains(converter))
+        if (CustomConverters.Contains(converter))
         {
             return;
         }
 
         try
         {
-#if NET6_0_OR_GREATER
-            SerializerContext.Options.Converters.Add(converter);
-            AltSerializerContext.Options.Converters.Add(converter);
-#else
-            SerializerOptions.Converters.Add(converter);
-            AltSerializerOptions.Converters.Add(converter);
-#endif
+            CustomConverters.Add(converter);
+            ResetSerializerOptions();
         }
         catch (InvalidOperationException)
         {
@@ -88,16 +94,6 @@ internal static class JsonExtensions
             // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
             // See https://github.com/dotnet/runtime/pull/74431
         }
-    }
-
-    private static JsonSerializerOptions AddDefaultConverters(this JsonSerializerOptions options)
-    {
-        foreach (var converter in DefaultConverters)
-        {
-            options.Converters.Add(converter);
-        }
-
-        return options;
     }
 
     public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
