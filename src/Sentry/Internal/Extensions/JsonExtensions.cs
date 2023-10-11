@@ -54,7 +54,6 @@ internal static class JsonExtensions
     }
 #endif
 
-
     internal static void AddJsonConverter(JsonConverter converter)
     {
         // only add if we don't have this instance already
