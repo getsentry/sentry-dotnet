@@ -244,7 +244,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to intercept SQL event.", ex);
+            _options.LogError(ex, "Failed to intercept SQL event.");
         }
     }
 

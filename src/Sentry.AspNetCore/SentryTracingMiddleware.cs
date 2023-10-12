@@ -90,7 +90,7 @@ internal class SentryTracingMiddleware
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to start transaction.", ex);
+            _options.LogError(ex, "Failed to start transaction.");
             return null;
         }
     }

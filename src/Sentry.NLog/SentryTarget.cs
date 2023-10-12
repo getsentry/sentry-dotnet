@@ -303,7 +303,7 @@ public sealed class SentryTarget : TargetWithContext
         }
         catch (Exception exception)
         {
-            Options.DiagnosticLogger?.LogError("Failed to write log event", exception);
+            Options.DiagnosticLogger?.LogError(exception, "Failed to write log event");
             throw;
         }
         finally

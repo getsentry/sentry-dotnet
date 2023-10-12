@@ -147,7 +147,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
             }
             catch (Exception ex)
             {
-                _options.LogError("Exception in CachingTransport worker.", ex);
+                _options.LogError(ex, "Exception in CachingTransport worker.");
 
                 try
                 {
@@ -209,9 +209,8 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
                     }
                     else
                     {
-                        _options.LogError(
-                            "Failed to move unprocessed file back to cache (attempt {0}, done.): {1}", ex,
-                            attempt, filePath);
+                        _options.LogError(ex,
+                            "Failed to move unprocessed file back to cache (attempt {0}, done.): {1}", attempt, filePath);
                     }
 
                     // note: we do *not* want to re-throw the exception
@@ -321,7 +320,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
                     catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException
                                                    or IOException)
                     {
-                        _options.LogError("Failed to send cached envelope: {0}, retrying after a delay.", ex, file);
+                        _options.LogError(ex, "Failed to send cached envelope: {0}, retrying after a delay.", file);
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
@@ -367,11 +366,11 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
 
         if (envelopeContents == null)
         {
-            _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope.", ex, file);
+            _options.LogError(ex, "Failed to send cached envelope: {0}, discarding cached envelope.", file);
         }
         else
         {
-            _options.LogError("Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", ex, file, envelopeContents);
+            _options.LogError(ex, "Failed to send cached envelope: {0}, discarding cached envelope. Envelope contents: {1}", file, envelopeContents);
         }
     }
 
@@ -502,9 +501,7 @@ internal class CachingTransport : ITransport, IAsyncDisposable, IDisposable
         catch (Exception ex)
         {
             // Don't throw inside dispose
-            _options.LogError(
-                "Error stopping worker during dispose.",
-                ex);
+            _options.LogError(ex, "Error stopping worker during dispose.");
         }
 
         _workerSignal.Dispose();
