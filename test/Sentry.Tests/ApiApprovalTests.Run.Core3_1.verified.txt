@@ -269,6 +269,10 @@ namespace Sentry
     {
         void Apply(Sentry.Scope scope, object state);
     }
+    public interface ISentryUserFactory
+    {
+        Sentry.User? Create();
+    }
     public interface ISession
     {
         string? DistinctId { get; }
