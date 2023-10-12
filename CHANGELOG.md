@@ -33,6 +33,7 @@ API Changes:
 
 ## Unreleased
 ## Unreleased
+## 3.40.1
 
 ### Fixes
 
