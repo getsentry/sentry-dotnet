@@ -47,7 +47,7 @@ public partial class SentryStackTraceFactoryTests
 
     [Theory]
     [InlineData(StackTraceMode.Original, "AsyncWithWait_StackTrace { <lambda> }")]
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
     [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
 #endif
     public void AsyncWithWait_StackTrace(StackTraceMode mode, string method)
@@ -71,7 +71,7 @@ public partial class SentryStackTraceFactoryTests
 
     [Theory]
     [InlineData(StackTraceMode.Original, "MoveNext")] // Should be "AsyncWithAwait_StackTrace { <lambda> }", but see note in SentryStackTraceFactory
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
     [InlineData(StackTraceMode.Enhanced, "async Task SentryStackTraceFactoryTests.AsyncWithAwait_StackTrace(StackTraceMode mode, string method)+(?) => { }")]
 #endif
     public async Task AsyncWithAwait_StackTrace(StackTraceMode mode, string method)
@@ -91,7 +91,7 @@ public partial class SentryStackTraceFactoryTests
         Assert.Equal(method, stackTrace.Frames.Last().Function);
     }
 
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace()
     {
@@ -191,7 +191,7 @@ public partial class SentryStackTraceFactoryTests
 
     [Theory]
     [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
     [InlineData(StackTraceMode.Enhanced, "(Fixture f, int b) SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
 #endif
     public void Create_InlineCase_IncludesAmpersandAfterParameterType(StackTraceMode mode, string method)

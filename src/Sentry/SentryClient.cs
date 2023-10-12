@@ -166,10 +166,10 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            #if !TRIMMABLE
+#if !TRIMMABLE
             // Attempt to demystify exceptions before adding them as breadcrumbs.
             e.Demystify();
-            #endif
+#endif
 
             _options.LogError("The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.", e);
 

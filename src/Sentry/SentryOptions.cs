@@ -986,7 +986,7 @@ public class SentryOptions
         JsonExtensions.AddJsonConverter(converter);
     }
 
-#if NET6_0_OR_GREATER
+#if TRIMMABLE
     /// <summary>
     /// Configures a custom <see cref="JsonSerializerContext"/> to be used when serializing or deserializing
     /// objects to JSON with this SDK.

@@ -1,16 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
-    <NoWarn>$(NoWarn);SYSLIB0012;SYSLIB0005</NoWarn>
     <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <DefineConstants>$(DefineConstants);TEST_TRIMMABLE</DefineConstants>
+    <NoWarn>$(NoWarn);SYSLIB0012;SYSLIB0005</NoWarn>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <!-- Use the net7.0 target to test net6.0 -->
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" AdditionalProperties="TargetFramework=net6.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <!-- Use the net6.0 target to test net5.0 -->
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" AdditionalProperties="TargetFramework=net5.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'net6.0' And '$(TargetFramework)' != 'net7.0'">
+    <!-- Use the net6.0 target to test net5.0 -->
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 

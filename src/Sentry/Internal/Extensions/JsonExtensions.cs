@@ -42,7 +42,7 @@ internal static class JsonExtensions
         return options;
     }
 
-#if NET6_0_OR_GREATER
+#if TRIMMABLE
     private static List<JsonSerializerContext> DefaultSerializerContexts = new();
     private static List<JsonSerializerContext> ReferencePreservingSerializerContexts = new();
 
@@ -533,7 +533,7 @@ internal static class JsonExtensions
         }
     }
 
-#if NET6_0_OR_GREATER
+#if TRIMMABLE
 
     private static JsonSerializerContext GetSerializerContext(Type type, bool preserveReferences = false)
     {
@@ -854,7 +854,7 @@ internal static class JsonExtensions
     }
 }
 
-#if NET6_0_OR_GREATER
+#if TRIMMABLE
 [JsonSerializable(typeof(Internal.GrowableArray<int>))]
 internal partial class SentryJsonContext : JsonSerializerContext
 {

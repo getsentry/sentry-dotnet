@@ -72,7 +72,7 @@ public class JsonTests
     [Fact]
     public void WriteDynamicValue_ExceptionParameter_SerializedException()
     {
-#if NET6_0_OR_GREATER
+#if NET7_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
         // Arrange
@@ -110,7 +110,7 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithException()
     {
         // Arrange
-#if NET6_0_OR_GREATER
+#if NET7_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
         var expectedMessage = "T est";
@@ -141,7 +141,7 @@ public class JsonTests
     [Fact]
     public void WriteDynamicValue_TypeParameter_FullNameTypeOutput()
     {
-#if NET6_0_OR_GREATER
+#if NET7_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
         // Arrange
@@ -160,7 +160,7 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithTypeParameter_ClassFormatted()
     {
         // Arrange
-#if NET6_0_OR_GREATER
+#if NET7_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
         var type = typeof(List<>).GetGenericArguments()[0];
@@ -178,7 +178,7 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
     {
         // Arrange
-#if NET6_0_OR_GREATER
+#if NET7_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
         var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
@@ -221,7 +221,7 @@ public class JsonTests
     {
         // Arrange
         JsonExtensions.JsonPreserveReferences = true;
-#if NET6_0_OR_GREATER
+#if NET7_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
         var testObject = new SelfReferencedObject();
@@ -262,7 +262,7 @@ public class JsonTests
     }
 }
 
-#if NET6_0_OR_GREATER
+#if NET7_0_OR_GREATER
 [JsonSerializable(typeof(AccessViolationException))]
 [JsonSerializable(typeof(Exception))]
 [JsonSerializable(typeof(JsonTests.SelfReferencedObject))]

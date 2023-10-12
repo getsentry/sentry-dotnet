@@ -137,7 +137,7 @@ public class ContextsTests
         Assert.Equal("""{"runtime":{"type":"runtime","version":"2.1.1.100"}}""", actualString);
     }
 
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
     [Fact]
     public void SerializeObject_AnonymousObject_SerializedCorrectly()
     {

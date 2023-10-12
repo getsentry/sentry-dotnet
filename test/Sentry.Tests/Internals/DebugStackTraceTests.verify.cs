@@ -40,7 +40,7 @@ public class DebugStackTraceTests
         Assert.False(actual?.InApp);
     }
 
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -54,7 +54,7 @@ public class DebugStackTraceTests
         var sut = _fixture.GetSut();
         var exception = Assert.ThrowsAny<Exception>(() => _ = Convert.FromBase64String("This will throw."));
         var stackTrace = new StackTrace(exception);
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
         var frame = useEnhancedStackTrace ? EnhancedStackTrace.GetFrames(stackTrace)[0] : stackTrace.GetFrame(0);
 #else
         var frame = stackTrace.GetFrame(0);

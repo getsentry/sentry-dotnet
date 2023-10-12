@@ -5,8 +5,6 @@
     <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
     <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsTrimmable>true</IsTrimmable>
-    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
@@ -24,7 +22,11 @@
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 
-  <Target Name="IncludeBenDemystifier" Condition="'$(IsTrimmable)' != 'true'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <IsTrimmable>true</IsTrimmable>
+    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
+  </PropertyGroup>
+  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="'$(IsTrimmable)' != 'true'">
     <!--
       Ben.Demystifier is compiled directly into Sentry.
       Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.

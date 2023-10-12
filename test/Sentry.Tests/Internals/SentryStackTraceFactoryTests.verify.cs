@@ -9,7 +9,7 @@ public partial class SentryStackTraceFactoryTests
 {
     [SkippableTheory]
     [InlineData(StackTraceMode.Original)]
-#if !TRIMMABLE
+#if !TEST_TRIMMABLE
     [InlineData(StackTraceMode.Enhanced)]
 #endif
     public Task MethodGeneric(StackTraceMode mode)
