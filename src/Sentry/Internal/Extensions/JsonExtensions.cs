@@ -511,6 +511,10 @@ internal static class JsonExtensions
         {
             writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
         }
+        else if (value.GetType().ToString() == "System.RuntimeType")
+        {
+            writer.WriteStringValue(value.ToString());
+        }
         else
         {
             if (!JsonPreserveReferences)
@@ -855,7 +859,7 @@ internal static class JsonExtensions
 }
 
 #if TRIMMABLE
-[JsonSerializable(typeof(Internal.GrowableArray<int>))]
+[JsonSerializable(typeof(GrowableArray<int>))]
 [JsonSerializable(typeof(Dictionary<string, bool>))]
 internal partial class SentryJsonContext : JsonSerializerContext
 {
