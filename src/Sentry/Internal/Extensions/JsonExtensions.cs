@@ -856,6 +856,7 @@ internal static class JsonExtensions
 
 #if TRIMMABLE
 [JsonSerializable(typeof(Internal.GrowableArray<int>))]
+[JsonSerializable(typeof(Dictionary<string, bool>))]
 internal partial class SentryJsonContext : JsonSerializerContext
 {
 }

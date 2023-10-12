@@ -72,10 +72,10 @@ public class JsonTests
     [Fact]
     public void WriteDynamicValue_ExceptionParameter_SerializedException()
     {
+        // Arrange
 #if NET7_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
-        // Arrange
         var ex = GenerateException("Test");
         ex.Data.Add("a", "b");
 
