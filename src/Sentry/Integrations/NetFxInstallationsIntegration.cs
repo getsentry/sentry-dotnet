@@ -17,7 +17,7 @@ internal class NetFxInstallationsIntegration : ISdkIntegration
         }
         catch (Exception ex)
         {
-            options.LogError("Failed to register NetFxInstallations.", ex);
+            options.LogError(ex, "Failed to register NetFxInstallations.");
         }
     }
 }
