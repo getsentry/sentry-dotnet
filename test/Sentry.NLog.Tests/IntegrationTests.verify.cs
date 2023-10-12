@@ -3,7 +3,7 @@
 [UsesVerify]
 public class IntegrationTests
 {
-    [SkippableFact]
+    [Fact]
     public Task Simple()
     {
         var transport = new RecordingTransport();
@@ -60,7 +60,7 @@ public class IntegrationTests
             .IgnoreStandardSentryMembers();
     }
 
-    [SkippableFact]
+    [Fact]
     public Task LoggingInsideTheContextOfLogging()
     {
         var transport = new RecordingTransport();
