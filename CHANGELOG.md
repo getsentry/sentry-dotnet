@@ -16,19 +16,43 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 API Changes:
 
-- IHasMeasurements was removed. Use ISpanData instead. ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
+- IHasMeasurements was removed. Use ISpanData instead ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
 - If `null` has been supplied as DSN when initializing Sentry, and ArgumentNullException is now thrown ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
-- IHasBreadcrumbs was removed. Use IEventLike instead. ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
-- ISpanContext was removed. Use ITraceContext instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
-- Removed IHasTransactionNameSource. Use ITransactionContext instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
+- IHasBreadcrumbs was removed. Use IEventLike instead ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
+- ISpanContext was removed. Use ITraceContext instead ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
+- Removed IHasTransactionNameSource. Use ITransactionContext instead ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
 - Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
 - Upgraded to NLog version 5 ([#2697](https://github.com/getsentry/sentry-dotnet/pull/2697))
-- Removed unused `StackFrame.InstructionOffset`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
-- Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- Removed unused `StackFrame.InstructionOffset` ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?` ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
-- Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
+- Additional constructors removed from `TransactionTracer` ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
 - Removed the `Scope.Platform` property as it was never applied ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
-- `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are have been removed in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
+- Reordered parameters for ther TransactionContext and SpanContext constructors. If you're constructing instances of these classes, you will need to adjust the order in which you pass parameters to these ([#2696](https://github.com/getsentry/sentry-dotnet/pull/2696))
+- The `DiagnosticLogger` signature for `LogError` and `LogFatal` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. The `DiagnosticLogger` now also received an overload for `LogError` and `LogFatal` that accepts a message only ([#2715](https://github.com/getsentry/sentry-dotnet/pull/2715))
+- The methods `WithScope` and `WithScopeAsync` have been removed. We discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
+  Replace your usage of `WithScope` with the overloads of the `Capture` methods:
+    - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
+    - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
+    - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
+  
+  #### Before
+  ```
+  SentrySdk.WithScope(scope =>
+  {
+      // Configure your scope here
+      scope.SetTag("key", "value");
+      SentrySdk.CaptureEvent(new SentryEvent()); // Capture the event with the configured scope
+  });
+  ```
+  #### After
+  ```
+  SentrySdk.CaptureEvent(new SentryEvent(), scope =>
+  {
+      // Configure your scope here
+      scope.SetTag("key", "value");
+  });
+  ```
 
 ## Unreleased
 

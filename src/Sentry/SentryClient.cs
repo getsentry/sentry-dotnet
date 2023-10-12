@@ -77,7 +77,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("An error occurred when capturing the event {0}.", e, @event.EventId);
+            _options.LogError(e, "An error occurred when capturing the event {0}.", @event.EventId);
             return SentryId.Empty;
         }
     }
@@ -169,7 +169,7 @@ public class SentryClient : ISentryClient, IDisposable
             // Attempt to demystify exceptions before adding them as breadcrumbs.
             e.Demystify();
 
-            _options.LogError("The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.", e);
+            _options.LogError(e, "The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.");
 
             var data = new Dictionary<string, string>
             {
@@ -372,7 +372,7 @@ public class SentryClient : ISentryClient, IDisposable
             // Attempt to demystify exceptions before adding them as breadcrumbs.
             e.Demystify();
 
-            _options.LogError("The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.", e);
+            _options.LogError(e, "The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.");
             var data = new Dictionary<string, string>
             {
                 {"message", e.Message}

@@ -77,7 +77,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to ConfigureScope", e);
+            _options.LogError(e, "Failure to ConfigureScope");
         }
     }
 
@@ -89,7 +89,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to ConfigureScopeAsync", e);
+            _options.LogError(e, "Failure to ConfigureScopeAsync");
         }
     }
 
@@ -264,7 +264,7 @@ internal class Hub : IHubEx, IDisposable
             }
             catch (Exception ex)
             {
-                _options.LogError("Failed to recover persisted session.", ex);
+                _options.LogError(ex, "Failed to recover persisted session.");
             }
         }
 
@@ -279,7 +279,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to start a session.", ex);
+            _options.LogError(ex, "Failed to start a session.");
         }
     }
 
@@ -293,7 +293,7 @@ internal class Hub : IHubEx, IDisposable
             }
             catch (Exception ex)
             {
-                _options.LogError("Failed to pause a session.", ex);
+                _options.LogError(ex, "Failed to pause a session.");
             }
         }
     }
@@ -311,7 +311,7 @@ internal class Hub : IHubEx, IDisposable
             }
             catch (Exception ex)
             {
-                _options.LogError("Failed to resume a session.", ex);
+                _options.LogError(ex, "Failed to resume a session.");
             }
         }
     }
@@ -328,7 +328,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to end a session.", ex);
+            _options.LogError(ex, "Failed to end a session.");
         }
     }
 
@@ -386,7 +386,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+            _options.LogError(e, "Failure to capture event: {0}", evt.EventId);
             return SentryId.Empty;
         }
     }
@@ -436,7 +436,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+            _options.LogError(e, "Failure to capture event: {0}", evt.EventId);
             return SentryId.Empty;
         }
     }
@@ -454,7 +454,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+            _options.LogError(e, "Failure to capture user feedback: {0}", userFeedback.EventId);
         }
     }
 
@@ -506,7 +506,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+            _options.LogError(e, "Failure to capture transaction: {0}", transaction.SpanId);
         }
     }
 
@@ -523,7 +523,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
+            _options.LogError(e, "Failure to capture session update: {0}", sessionUpdate.Id);
         }
     }
 
@@ -536,7 +536,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to Flush events", e);
+            _options.LogError(e, "Failure to Flush events");
         }
     }
 

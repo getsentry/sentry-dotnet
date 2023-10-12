@@ -82,7 +82,7 @@ public class DisabledHub : IHub, IDisposable
         string? operation = null)
     {
         // Transactions from DisabledHub are always sampled out
-        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, isSampled: false);
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class DisabledHub : IHub, IDisposable
         string? operation = null)
     {
         // Transactions from DisabledHub are always sampled out
-        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, isSampled: false);
     }
 
     /// <summary>

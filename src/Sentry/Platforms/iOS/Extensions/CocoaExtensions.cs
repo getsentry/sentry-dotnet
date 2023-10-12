@@ -46,7 +46,7 @@ internal static class CocoaExtensions
         }
         catch (Exception ex)
         {
-            logger?.LogError("Error serializing {0} to JSON", ex, obj.GetType().Name);
+            logger?.LogError(ex, "Error serializing {0} to JSON", obj.GetType().Name);
             return null;
         }
     }

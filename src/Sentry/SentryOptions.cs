@@ -868,7 +868,7 @@ public class SentryOptions
             catch (Exception ex)
             {
                 _stackTraceMode = StackTraceMode.Enhanced;
-                DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
+                DiagnosticLogger?.LogError(ex, "Failed to get runtime, setting {0} to {1} ", nameof(StackTraceMode), _stackTraceMode);
             }
 
             return _stackTraceMode.Value;
