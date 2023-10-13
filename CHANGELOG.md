@@ -6,6 +6,12 @@
 
 - ISentryUserFactory is now public so users can register their own implementations via DI ([#2719](https://github.com/getsentry/sentry-dotnet/pull/2719))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.13.0 to v8.13.1 ([#2722](https://github.com/getsentry/sentry-dotnet/pull/2722))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8131)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.13.0...8.13.1)
+
 ## 3.40.0
 
 ### Obsoletion
