@@ -1,10 +1,6 @@
 # Changelog
 
-## 3.40.1
-
-### Fixes
-
-- ISentryUserFactory is now public so users can register their own implementations via DI ([#2719](https://github.com/getsentry/sentry-dotnet/pull/2719))
+## Unreleased
 
 ### Dependencies
 
@@ -14,6 +10,12 @@
 - Bump Java SDK from v6.30.0 to v6.31.0 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6310)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.31.0)
+
+## 3.40.1
+
+### Fixes
+
+- ISentryUserFactory is now public so users can register their own implementations via DI ([#2719](https://github.com/getsentry/sentry-dotnet/pull/2719))
 
 ## 3.40.0
 
