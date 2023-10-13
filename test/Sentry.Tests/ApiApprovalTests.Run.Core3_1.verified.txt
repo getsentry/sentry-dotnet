@@ -892,7 +892,7 @@ namespace Sentry
     }
     public class SpanContext : Sentry.Protocol.ITraceContext
     {
-        public SpanContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled) { }
+        public SpanContext(string operation, Sentry.SpanId? spanId = default, Sentry.SpanId? parentSpanId = default, Sentry.SentryId? traceId = default, string? description = null, Sentry.SpanStatus? status = default, bool? isSampled = default) { }
         public string? Description { get; }
         public Sentry.Instrumenter Instrumenter { get; }
         public bool? IsSampled { get; }
@@ -1057,14 +1057,7 @@ namespace Sentry
     }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
-        public TransactionContext(string name, string operation) { }
-        public TransactionContext(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
-        public TransactionContext(string name, string operation, Sentry.TransactionNameSource nameSource) { }
-        public TransactionContext(string name, string operation, bool? isSampled) { }
-        public TransactionContext(string name, string operation, Sentry.SentryTraceHeader traceHeader, Sentry.TransactionNameSource nameSource) { }
-        public TransactionContext(Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, bool? isParentSampled) { }
-        public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled) { }
-        public TransactionContext(Sentry.SpanId spanId, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string name, string operation, string? description, Sentry.SpanStatus? status, bool? isSampled, bool? isParentSampled, Sentry.TransactionNameSource nameSource) { }
+        public TransactionContext(string name, string operation, Sentry.SpanId? spanId = default, Sentry.SpanId? parentSpanId = default, Sentry.SentryId? traceId = default, string? description = "", Sentry.SpanStatus? status = default, bool? isSampled = default, bool? isParentSampled = default, Sentry.TransactionNameSource nameSource = 0) { }
         public bool? IsParentSampled { get; }
         public string Name { get; set; }
         public Sentry.TransactionNameSource NameSource { get; set; }
@@ -1192,12 +1185,14 @@ namespace Sentry.Extensibility
         public static void LogDebug(this Sentry.Extensibility.IDiagnosticLogger logger, string message) { }
         public static void LogDebug<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg) { }
         public static void LogDebug<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg, TArg2 arg2) { }
-        public static void LogError(this Sentry.Extensibility.IDiagnosticLogger logger, string message, System.Exception? exception = null) { }
-        public static void LogError<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, System.Exception exception, TArg arg) { }
-        public static void LogError<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, System.Exception exception, TArg arg, TArg2 arg2) { }
+        public static void LogError(this Sentry.Extensibility.IDiagnosticLogger logger, string message) { }
+        public static void LogError(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message) { }
+        public static void LogError<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message, TArg arg) { }
+        public static void LogError<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message, TArg arg, TArg2 arg2) { }
         public static void LogError<TArg, TArg2, TArg3>(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message, TArg arg, TArg2 arg2, TArg3 arg3) { }
-        public static void LogError<TArg, TArg2, TArg3, TArg4>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, System.Exception exception, TArg arg, TArg2 arg2, TArg3 arg3, TArg4 arg4) { }
-        public static void LogFatal(this Sentry.Extensibility.IDiagnosticLogger logger, string message, System.Exception? exception = null) { }
+        public static void LogError<TArg, TArg2, TArg3, TArg4>(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message, TArg arg, TArg2 arg2, TArg3 arg3, TArg4 arg4) { }
+        public static void LogFatal(this Sentry.Extensibility.IDiagnosticLogger logger, string message) { }
+        public static void LogFatal(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message) { }
         public static void LogInfo(this Sentry.Extensibility.IDiagnosticLogger logger, string message) { }
         public static void LogInfo<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg) { }
         public static void LogInfo<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg, TArg2 arg2) { }
