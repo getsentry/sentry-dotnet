@@ -224,7 +224,7 @@ public sealed class SentryStackFrame : IJsonSerializable
         var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
         var package = json.GetPropertyOrNull("package")?.GetString();
         var platform = json.GetPropertyOrNull("platform")?.GetString();
-        var imageAddress = json.GetPropertyOrNull("image_addr")?.GetHexAsLong() ?? 0;
+        var imageAddress = json.GetPropertyOrNull("image_addr")?.GetHexAsLong();
         var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetHexAsLong();
         var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetHexAsLong();
         var addressMode = json.GetPropertyOrNull("addr_mode")?.GetString();
