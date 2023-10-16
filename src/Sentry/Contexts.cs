@@ -11,22 +11,24 @@ namespace Sentry;
 /// Represents Sentry's structured Context.
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
-public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerializable
+public sealed class Contexts : IDictionary<string, object>, IJsonSerializable
 {
+    private readonly ConcurrentDictionary<string, object> _innerDictionary = new(StringComparer.Ordinal);
+
     /// <summary>
     /// Describes the application.
     /// </summary>
-    public App App => this.GetOrCreate<App>(App.Type);
+    public App App => _innerDictionary.GetOrCreate<App>(App.Type);
 
     /// <summary>
     /// Describes the browser.
     /// </summary>
-    public Browser Browser => this.GetOrCreate<Browser>(Browser.Type);
+    public Browser Browser => _innerDictionary.GetOrCreate<Browser>(Browser.Type);
 
     /// <summary>
     /// Describes the device.
     /// </summary>
-    public Device Device => this.GetOrCreate<Device>(Device.Type);
+    public Device Device => _innerDictionary.GetOrCreate<Device>(Device.Type);
 
     /// <summary>
     /// Defines the operating system.
@@ -34,32 +36,32 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
     /// <remarks>
     /// In web contexts, this is the operating system of the browser (normally pulled from the User-Agent string).
     /// </remarks>
-    public OperatingSystem OperatingSystem => this.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
+    public OperatingSystem OperatingSystem => _innerDictionary.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
 
     /// <summary>
     /// Response interface that contains information on any HTTP response related to the event.
     /// </summary>
-    public Response Response => this.GetOrCreate<Response>(Response.Type);
+    public Response Response => _innerDictionary.GetOrCreate<Response>(Response.Type);
 
     /// <summary>
     /// This describes a runtime in more detail.
     /// </summary>
-    public Runtime Runtime => this.GetOrCreate<Runtime>(Runtime.Type);
+    public Runtime Runtime => _innerDictionary.GetOrCreate<Runtime>(Runtime.Type);
 
     /// <summary>
     /// This describes a GPU of the device.
     /// </summary>
-    public Gpu Gpu => this.GetOrCreate<Gpu>(Gpu.Type);
+    public Gpu Gpu => _innerDictionary.GetOrCreate<Gpu>(Gpu.Type);
 
     /// <summary>
     /// This describes trace information.
     /// </summary>
-    public Trace Trace => this.GetOrCreate<Trace>(Trace.Type);
+    public Trace Trace => _innerDictionary.GetOrCreate<Trace>(Trace.Type);
 
     /// <summary>
     /// Initializes an instance of <see cref="Contexts"/>.
     /// </summary>
-    public Contexts() : base(StringComparer.Ordinal) { }
+    public Contexts() { }
 
     /// <summary>
     /// Creates a deep clone of this context.
@@ -80,7 +82,7 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
     {
         foreach (var kv in this)
         {
-            to.AddOrUpdate(kv.Key,
+            to._innerDictionary.AddOrUpdate(kv.Key,
 
                 addValueFactory: _ =>
                     kv.Value is ICloneable<object> cloneable
@@ -194,5 +196,96 @@ public sealed class Contexts : ConcurrentDictionary<string, object>, IJsonSerial
         }
     }
 
-    internal Contexts? NullIfEmpty() => IsEmpty ? null : this;
+    internal Contexts? NullIfEmpty() => _innerDictionary.IsEmpty ? null : this;
+
+    /// <inheritdoc/>
+    public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+    {
+        return _innerDictionary.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return ((IEnumerable)_innerDictionary).GetEnumerator();
+    }
+
+    /// <inheritdoc/>
+    public void Add(KeyValuePair<string, object> item)
+    {
+        ((ICollection<KeyValuePair<string, object>>)_innerDictionary).Add(item);
+    }
+
+    /// <inheritdoc/>
+    public void Clear()
+    {
+        _innerDictionary.Clear();
+    }
+
+    /// <inheritdoc/>
+    public bool Contains(KeyValuePair<string, object> item)
+    {
+        return _innerDictionary.Contains(item);
+    }
+
+    /// <inheritdoc/>
+    public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
+    {
+        ((ICollection<KeyValuePair<string, object>>)_innerDictionary).CopyTo(array, arrayIndex);
+    }
+
+    /// <inheritdoc/>
+    public bool Remove(KeyValuePair<string, object> item)
+    {
+        return ((ICollection<KeyValuePair<string, object>>)_innerDictionary).Remove(item);
+    }
+
+    /// <inheritdoc/>
+    public int Count => _innerDictionary.Count;
+
+    /// <inheritdoc/>
+    public bool IsReadOnly => ((ICollection<KeyValuePair<string, object>>)_innerDictionary).IsReadOnly;
+
+    /// <inheritdoc/>
+    public void Add(string key, object value)
+    {
+        _innerDictionary.Add(key, value);
+    }
+
+    /// <inheritdoc/>
+    public bool ContainsKey(string key)
+    {
+        return _innerDictionary.ContainsKey(key);
+    }
+
+    /// <inheritdoc/>
+    public bool Remove(string key)
+    {
+        return ((IDictionary<string, object>)_innerDictionary).Remove(key);
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetValue(string key, out object value)
+    {
+        if (_innerDictionary.TryGetValue(key, out var innerValue))
+        {
+            value = innerValue;
+            return true;
+        }
+
+        value = default!;
+        return false;
+    }
+
+    /// <inheritdoc/>
+    public object this[string key]
+    {
+        get => _innerDictionary[key];
+        set => _innerDictionary[key] = value;
+    }
+
+    /// <inheritdoc/>
+    public ICollection<string> Keys => _innerDictionary.Keys;
+
+    /// <inheritdoc/>
+    public ICollection<object> Values => _innerDictionary.Values;
 }
