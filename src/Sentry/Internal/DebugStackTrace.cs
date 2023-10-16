@@ -138,7 +138,8 @@ internal class DebugStackTrace : SentryStackTrace
             }
             else
             {
-                _options.LogWarning("Unexpected debug image: neither ModuleVersionId nor ImageAddress is defined: {0}", DebugImages[i].ToString());
+                _options.LogWarning("Unexpected debug image: neither ModuleVersionId nor ImageAddress is defined");
+                Debug.Assert(false, "This indicates an error in DebugStackTrace code.");
             }
         }
 
