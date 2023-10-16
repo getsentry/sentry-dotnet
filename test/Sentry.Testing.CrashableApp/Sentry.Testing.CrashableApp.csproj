@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
-    <EnableCodeSigning>false</EnableCodeSigning>
   </PropertyGroup>
 
   <ItemGroup>
