@@ -23,7 +23,7 @@ runs:
         dotnet-version: |
           3.1.x
           7.0.x
-          8.0.100-rc.2.23502.2
+          8.0.x
         
     - name: Dependency Caching
       uses: actions/cache@v3
@@ -52,6 +52,14 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: "curl -sSL https://raw.githubusercontent.com/Samsung/Tizen.NET/main/workload/scripts/workload-install.sh | sudo bash"
+
+    - name: Restore workloads
+      shell: bash
+      run: dotnet workload restore
+
+    - name: Update workloads
+      shell: bash
+      run: dotnet workload update
 
     - name: Log what we have in dotnet
       shell: bash
