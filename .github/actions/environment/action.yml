@@ -45,6 +45,14 @@ runs:
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
 
+    - name: Log what we have in dotnet
+      shell: bash
+      run: dotnet --info
+
+    - name: Log what we have in the workloads
+      shell: bash
+      run: dotnet workload list
+          
     # We build Sentry.Maui for every supported MAUI target so we can access platform-specific features.
     # That includes Tizen. We don't need the entire Tizen SDK, but we do need the base Tizen workload.
     # Though we could install it on all runners, we really only need it when building and packing for NuGet, which we do on macOS only.
