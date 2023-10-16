@@ -41,7 +41,7 @@ runs:
       run: >
         dotnet workload install \
           maui-android \
-          ${{ runner.os == 'macOS' && 'ios maui-ios maui-maccatalyst maui-windows' || '' }} \
+          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
 
@@ -49,6 +49,11 @@ runs:
       shell: bash
       run: dotnet workload restore
 
+    - name: Update workloads
+      shell: bash
+      run: dotnet workload update
+
     - name: Log what we have in the workloads
       shell: bash
       run: dotnet workload update
+      
