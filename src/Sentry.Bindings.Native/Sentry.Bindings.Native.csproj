@@ -11,14 +11,10 @@
     <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)</SentryNativeOutputDirectory-win-x64>
     <NativeLibRelativePath-linux-x64>linux-x64\native\</NativeLibRelativePath-linux-x64>
     <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)</SentryNativeOutputDirectory-linux-x64>
-    <!-- TODO conditional
-    <SentryNativeEnabled>false</SentryNativeEnabled>
-    <SentryNativeEnabled Condition="'$(TargetPlatformIdentifier)' == 'windows'">true</SentryNativeEnabled> -->
-    <SentryNativeEnabled>true</SentryNativeEnabled>
   </PropertyGroup>
 
   <!-- Packaging -->
-  <ItemGroup Condition="$(SentryNativeEnabled)">
+  <ItemGroup>
     <!-- Use a separate readme file in the nuget. -->
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md"
@@ -63,7 +59,7 @@
   <!-- Build the Sentry Native SDK -->
   <Target Name="_BuildSentryNativeSDK-win-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="$(SentryNativeEnabled) and $([MSBuild]::IsOsPlatform('Windows'))"
+    Condition="$([MSBuild]::IsOsPlatform('Windows'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
     Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib;$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).pdb">
     <MSBuild Projects="$(MSBuildProjectFile)"
@@ -99,7 +95,7 @@
 
   <Target Name="_BuildSentryNativeSDK-linux-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="$(SentryNativeEnabled) and $([MSBuild]::IsOsPlatform('Linux'))"
+    Condition="$([MSBuild]::IsOsPlatform('Linux'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
     Outputs="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
     <MSBuild Projects="$(MSBuildProjectFile)"
