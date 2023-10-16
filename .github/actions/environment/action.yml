@@ -23,7 +23,7 @@ runs:
         dotnet-version: |
           3.1.x
           7.0.x
-          8.0.x
+          8.0.100-rc.2.23502.2
         
     - name: Dependency Caching
       uses: actions/cache@v3
@@ -43,20 +43,4 @@ runs:
           maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows maui-tizen' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
-          --temp-dir "${{ runner.temp }}"
-
-    - name: Restore workloads
-      shell: bash
-      run: dotnet workload restore
-
-    - name: Update workloads
-      shell: bash
-      run: dotnet workload update
-
-    - name: Log what we have in dotnet
-      shell: bash
-      run: dotnet --info
-
-    - name: Log what we have in the workloads
-      shell: bash
-      run: dotnet workload list
+          --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
