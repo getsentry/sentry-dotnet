@@ -44,14 +44,6 @@ runs:
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows maui-tizen' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}"
-          
-    # We build Sentry.Maui for every supported MAUI target so we can access platform-specific features.
-    # That includes Tizen. We don't need the entire Tizen SDK, but we do need the base Tizen workload.
-    # Though we could install it on all runners, we really only need it when building and packing for NuGet, which we do on macOS only.
-    - name: Install Tizen Workload
-      if: runner.os == 'macOS'
-      shell: bash
-      run: "curl -sSL https://raw.githubusercontent.com/Samsung/Tizen.NET/main/workload/scripts/workload-install.sh | sudo bash"
 
     - name: Restore workloads
       shell: bash
