@@ -90,7 +90,7 @@ namespace Sentry
         public string? DebugChecksum { get; set; }
         public string? DebugFile { get; set; }
         public string? DebugId { get; set; }
-        public string? ImageAddress { get; set; }
+        public long? ImageAddress { get; set; }
         public long? ImageSize { get; set; }
         public string? Type { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
@@ -264,6 +264,10 @@ namespace Sentry
     public interface ISentryScopeStateProcessor
     {
         void Apply(Sentry.Scope scope, object state);
+    }
+    public interface ISentryUserFactory
+    {
+        Sentry.User? Create();
     }
     public interface ISession
     {

@@ -23,6 +23,7 @@ API Changes:
 - Removed IHasTransactionNameSource. Use ITransactionContext instead ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
 - Adding `Distribution` to `IEventLike` ([#2660](https://github.com/getsentry/sentry-dotnet/pull/2660))
 - Upgraded to NLog version 5 ([#2697](https://github.com/getsentry/sentry-dotnet/pull/2697))
+- Change `DebugImage.ImageAddress` to `long?` ([#2725](https://github.com/getsentry/sentry-dotnet/pull/2725))
 - Removed unused `StackFrame.InstructionOffset` ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?` ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
@@ -56,6 +57,23 @@ API Changes:
 
 ## Unreleased
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.13.0 to v8.13.1 ([#2722](https://github.com/getsentry/sentry-dotnet/pull/2722))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8131)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.13.0...8.13.1)
+- Bump Java SDK from v6.30.0 to v6.31.0 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6310)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.31.0)
+
+## 3.40.1
+
+### Fixes
+
+- ISentryUserFactory is now public so users can register their own implementations via DI ([#2719](https://github.com/getsentry/sentry-dotnet/pull/2719))
+
+## 3.40.0
+
 ### Obsoletion
 
 - `WithScope` and `WithScopeAsync` have been proven to not work correctly in desktop contexts when using a global scope. They are now deprecated in favor of the overloads of `CaptureEvent`, `CaptureMessage`, and `CaptureException`. Those methods provide a callback to a configurable scope. ([#2677](https://github.com/getsentry/sentry-dotnet/pull/2677))
@@ -65,11 +83,15 @@ API Changes:
 
 - Release of Azure Functions (Isolated Worker/Out-of-Process) support ([#2686](https://github.com/getsentry/sentry-dotnet/pull/2686))
 
+### Fixes
+
+- Scope is now correctly applied to Transactions when using OpenTelemetry on ASP.NET Core ([#2690](https://github.com/getsentry/sentry-dotnet/pull/2690))
+
 ### Dependencies
 
-- Bump CLI from v2.20.7 to v2.21.1 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2211)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.7...2.21.1)
+- Bump CLI from v2.20.7 to v2.21.2 ([#2645](https://github.com/getsentry/sentry-dotnet/pull/2645), [#2647](https://github.com/getsentry/sentry-dotnet/pull/2647), [#2698](https://github.com/getsentry/sentry-dotnet/pull/2698))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2212)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.7...2.21.2)
 - Bump Cocoa SDK from v8.12.0 to v8.13.0 ([#2653](https://github.com/getsentry/sentry-dotnet/pull/2653))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8130)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.12.0...8.13.0)

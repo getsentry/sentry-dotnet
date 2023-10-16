@@ -30,22 +30,18 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
     }
 
-    public KeyValuePair<Scope, ISentryClient> GetCurrent()
-    {
-        var current = ScopeAndClientStack;
-        return current[^1];
-    }
+    public KeyValuePair<Scope, ISentryClient> GetCurrent() => ScopeAndClientStack[^1];
 
     public void ConfigureScope(Action<Scope>? configureScope)
     {
-        var scope = GetCurrent();
-        configureScope?.Invoke(scope.Key);
+        var (scope, _) = GetCurrent();
+        configureScope?.Invoke(scope);
     }
 
     public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
     {
-        var scope = GetCurrent();
-        return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
+        var (scope, _) = GetCurrent();
+        return configureScope?.Invoke(scope) ?? Task.CompletedTask;
     }
 
     public IDisposable PushScope() => PushScope<object>(null);
