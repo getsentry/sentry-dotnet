@@ -23,17 +23,17 @@ runs:
         dotnet-version: |
           3.1.x
           7.0.x
-          8.0.x
+          8.0.100-rc.2.23502.2
         
-    # - name: Dependency Caching
-    #   uses: actions/cache@v3
-    #   # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
-    #   if: runner.os != 'Windows'
-    #   with:
-    #     path: ~/.nuget/packages
-    #     # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.
-    #     key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
-    #     restore-keys: ${{ runner.os }}-nuget
+    - name: Dependency Caching
+      uses: actions/cache@v3
+      # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
+      if: runner.os != 'Windows'
+      with:
+        path: ~/.nuget/packages
+        # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.*proj', '**/*.props') }}
+        restore-keys: ${{ runner.os }}-nuget
 
     # TODO: Figure out how to cache workloads, as they're not quite the same as nuget packages.
     - name: Install .NET Workloads
@@ -44,14 +44,6 @@ runs:
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows maui-tizen' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
-
-    - name: Log what we have in dotnet
-      shell: bash
-      run: dotnet --info
-
-    - name: Log what we have in the workloads
-      shell: bash
-      run: dotnet workload list
           
     # We build Sentry.Maui for every supported MAUI target so we can access platform-specific features.
     # That includes Tizen. We don't need the entire Tizen SDK, but we do need the base Tizen workload.
@@ -60,3 +52,11 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: "curl -sSL https://raw.githubusercontent.com/Samsung/Tizen.NET/main/workload/scripts/workload-install.sh | sudo bash"
+
+    - name: Log what we have in dotnet
+      shell: bash
+      run: dotnet --info
+
+    - name: Log what we have in the workloads
+      shell: bash
+      run: dotnet workload list
