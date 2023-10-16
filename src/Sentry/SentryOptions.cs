@@ -665,7 +665,7 @@ public class SentryOptions
     /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
     /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
     /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
-    /// <para>Defaults to false due to PII reasons.</para>
+    /// <para>Defaults to true.</para>
     /// </summary>
     public bool CaptureFailedRequests { get; set; } = true;
 
@@ -872,7 +872,7 @@ public class SentryOptions
             catch (Exception ex)
             {
                 _stackTraceMode = StackTraceMode.Enhanced;
-                DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
+                DiagnosticLogger?.LogError(ex, "Failed to get runtime, setting {0} to {1} ", nameof(StackTraceMode), _stackTraceMode);
             }
 
             return _stackTraceMode.Value;

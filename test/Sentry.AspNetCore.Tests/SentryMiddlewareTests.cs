@@ -660,6 +660,30 @@ public class SentryMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_InstrumenterOpenTelemetry_SavesScope()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var scope = new Scope();
+        _fixture.Hub.ConfigureScope(Arg.Do<Action<Scope>>(action => action.Invoke(scope)));
+        var sut = _fixture.GetSut();
+        var activity = new Activity("test").Start();
+
+        try
+        {
+            // Act
+            await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+
+            // Assert
+            activity.GetFused<Scope>().Should().Be(scope);
+        }
+        finally
+        {
+            activity.Stop();
+        }
+    }
+
+    [Fact]
     public async Task InvokeAsync_RequestContainsSentryHeaders_ContinuesTrace()
     {
         SentryTraceHeader capturedTraceHeader = null;

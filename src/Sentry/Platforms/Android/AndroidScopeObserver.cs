@@ -53,7 +53,7 @@ internal sealed class AndroidScopeObserver : IScopeObserver
             }
             catch (Exception ex)
             {
-                _options.LogError("Extra with key '{0}' could not be serialized.", ex, key);
+                _options.LogError(ex, "Extra with key '{0}' could not be serialized.", key);
             }
         }
         finally

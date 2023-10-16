@@ -66,10 +66,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             // We can find the parent span - start a child span.
             var context = new SpanContext(
+                data.OperationName,
                 data.SpanId.AsSentrySpanId(),
                 data.ParentSpanId.AsSentrySpanId(),
                 data.TraceId.AsSentryId(),
-                data.OperationName,
                 data.DisplayName,
                 null,
                 null)
@@ -87,16 +87,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             bool? isSampled = data.HasRemoteParent ? data.Recorded : null;
 
             // No parent span found - start a new transaction
-            var transactionContext = new TransactionContext(
+            var transactionContext = new TransactionContext(data.DisplayName,
+                data.OperationName,
                 data.SpanId.AsSentrySpanId(),
                 data.ParentSpanId.AsSentrySpanId(),
                 data.TraceId.AsSentryId(),
-                data.DisplayName,
-                data.OperationName,
-                data.DisplayName,
-                null,
-                isSampled,
-                isSampled)
+                data.DisplayName, null, isSampled, isSampled)
             {
                 Instrumenter = Instrumenter.OpenTelemetry
             };
@@ -169,6 +165,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             span.SetExtra("otel.kind", data.Kind);
         }
 
+        // Events are received/processed in a different AsyncLocal context. Restoring the scope that started it.
+        var activityScope = GetSavedScope(data);
+        if (activityScope is { } savedScope && _hub is Hub hub)
+        {
+            hub.RestoreScope(savedScope);
+        }
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 
         var status = GetSpanStatus(data.Status, attributes);
@@ -179,6 +181,19 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
+    }
+
+    private static Scope? GetSavedScope(Activity? activity)
+    {
+        while (activity is not null)
+        {
+            if (activity.GetFused<Scope>() is {} savedScope)
+            {
+                return savedScope;
+            }
+            activity = activity.Parent;
+        }
+        return null;
     }
 
     internal static SpanStatus GetSpanStatus(ActivityStatusCode status, IDictionary<string, object?> attributes)
