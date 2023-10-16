@@ -521,7 +521,7 @@ internal static class JsonExtensions
             logger?.LogError(e, "Failed to serialize object for property '{0}'. Original depth: {1}, current depth: {2}",
                 propertyName, originalPropertyDepth, writer.CurrentDepth);
 
-            // The only location in the protocol we allow dynamic objects are Extra and Contexts.
+            // The only location in the protocol we allow dynamic objects are DataData and Contexts.
             // Render an empty JSON object instead of null. This allows a round trip where this property name is the
             // key to a map which would otherwise not be set and result in a different object.
             // This affects envelope size which isn't recomputed after a roundtrip.

@@ -17,7 +17,7 @@ public class MainActivity : Activity
         SentrySdk.ConfigureScope(scope =>
         {
             scope.AddBreadcrumb("Custom Breadcrumb");
-            scope.SetExtra("Test", "Custom Extra Data");
+            scope.SetData("Test", "Custom Extra Data");
             scope.User = new User
             {
                 Username = "SomeUser",

@@ -653,7 +653,7 @@ public class EnvelopeTests
             TransactionName = "transaction",
         };
 
-        @event.SetExtra("extra_key", "extra_value");
+        @event.SetData("extra_key", "extra_value");
         @event.Fingerprint = new[] { "fingerprint" };
         @event.SetTag("tag_key", "tag_value");
 
@@ -967,7 +967,7 @@ public class EnvelopeTests
             Name = "test",
             Version = "0.0.0"
         };
-        evt.SetExtra("foo", dto);
+        evt.SetData("foo", dto);
         var envelope = Envelope.FromEvent(evt);
 
         // Act

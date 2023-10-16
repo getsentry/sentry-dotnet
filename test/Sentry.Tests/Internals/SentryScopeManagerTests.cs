@@ -85,14 +85,14 @@ public class SentryScopeManagerTests
 
         var scope1 = sut.PushScope(1);
         var scope2 = sut.PushScope(2);
-        Assert.Equal(2, sut.GetCurrent().Key.Extra["state"]);
+        Assert.Equal(2, sut.GetCurrent().Key.Data["state"]);
 
         sut.BindClient(Substitute.For<ISentryClient>());
 
-        Assert.Equal(2, sut.GetCurrent().Key.Extra["state"]);
+        Assert.Equal(2, sut.GetCurrent().Key.Data["state"]);
 
         scope2.Dispose();
-        Assert.Equal(1, sut.GetCurrent().Key.Extra["state"]);
+        Assert.Equal(1, sut.GetCurrent().Key.Data["state"]);
     }
 
     [Fact]

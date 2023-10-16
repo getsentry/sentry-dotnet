@@ -3,33 +3,33 @@ namespace Sentry;
 /// <summary>
 /// Implemented by objects that contain a map of untyped extra data.
 /// </summary>
-public interface IHasExtra
+public interface IHasData
 {
     /// <summary>
     /// An arbitrary mapping of additional metadata to store with the event.
     /// </summary>
-    IReadOnlyDictionary<string, object?> Extra { get; }
+    IReadOnlyDictionary<string, object?> Data { get; }
 
     /// <summary>
-    /// Sets an extra.
+    /// Sets a data value.
     /// </summary>
-    void SetExtra(string key, object? value);
+    void SetData(string key, object? value);
 }
 
 /// <summary>
-/// Extensions for <see cref="IHasExtra"/>.
+/// Extensions for <see cref="IHasData"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class HasExtraExtensions
 {
     /// <summary>
-    /// Sets the extra key-value pairs to the object.
+    /// Sets the data key-value pairs on the object.
     /// </summary>
-    public static void SetExtras(this IHasExtra hasExtra, IEnumerable<KeyValuePair<string, object?>> values)
+    public static void SetExtras(this IHasData hasData, IEnumerable<KeyValuePair<string, object?>> values)
     {
         foreach (var (key, value) in values)
         {
-            hasExtra.SetExtra(key, value);
+            hasData.SetData(key, value);
         }
     }
 }

@@ -50,7 +50,7 @@ public class Program
                         {
                             // More data can be added to the scope like this:
                             s.SetTag("Sample", "ASP.NET Core"); // indexed by Sentry
-                            s.SetExtra("Extra!", "Some extra information");
+                            s.SetData("DataData!", "Some additional data");
                         });
 
                         log.LogInformation("Logging info...");

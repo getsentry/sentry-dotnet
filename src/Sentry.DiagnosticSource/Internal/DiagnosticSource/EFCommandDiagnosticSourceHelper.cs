@@ -19,10 +19,10 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
     {
         Debug.Assert(commandId != Guid.Empty);
 
-        span.SetExtra(EFKeys.DbCommandId, commandId);
+        span.SetData(EFKeys.DbCommandId, commandId);
     }
 
-    private static Guid? TryGetCommandId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbCommandId);
+    private static Guid? TryGetCommandId(ISpan span) => span.Data.TryGetValue<string, Guid?>(EFKeys.DbCommandId);
 
     protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
     {

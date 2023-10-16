@@ -13,7 +13,7 @@ internal static class Program
             // Never executed:
             // This could be any async I/O operation, like a DB query
             await Task.Yield();
-            scope.SetExtra("Key", "Value");
+            scope.SetData("Key", "Value");
         });
 
         // Enable the SDK
@@ -124,7 +124,7 @@ internal static class Program
 
                 // This could be any async I/O operation, like a DB query
                 await Task.Yield();
-                scope.SetExtra("SomeExtraInfo",
+                scope.SetData("SomeExtraInfo",
                     new
                     {
                         Data = "Value fetched asynchronously",

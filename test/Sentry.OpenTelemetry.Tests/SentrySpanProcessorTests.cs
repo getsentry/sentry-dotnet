@@ -253,10 +253,10 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             spanTracer.Operation.Should().Be(data.OperationName);
             spanTracer.Description.Should().Be(data.DisplayName);
             spanTracer.EndTimestamp.Should().NotBeNull();
-            spanTracer.Extra["otel.kind"].Should().Be(data.Kind);
+            spanTracer.Data["otel.kind"].Should().Be(data.Kind);
             foreach (var keyValuePair in tags)
             {
-                span.Extra[keyValuePair.Key].Should().Be(keyValuePair.Value);
+                span.Data[keyValuePair.Key].Should().Be(keyValuePair.Value);
             }
 
             spanTracer.Status.Should().Be(SpanStatus.Ok);

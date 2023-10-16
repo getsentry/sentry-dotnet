@@ -328,7 +328,7 @@ public class SentryTargetTests
         sut.Error("Something happened: {IPAddress}", expectedIp);
 
         _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra["IPAddress"].ToString() == expectedIp));
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Data["IPAddress"].ToString() == expectedIp));
     }
 
     [Fact]
@@ -349,7 +349,7 @@ public class SentryTargetTests
 
         var actualSentryEvent = default(SentryEvent);
         _fixture.Hub.When(h => h.CaptureEvent(Arg.Is<SentryEvent>(
-                e => e.Extra[SentryTarget.AdditionalGroupingKeyProperty].ToString() == expectedGroupingKey)))
+                e => e.Data[SentryTarget.AdditionalGroupingKeyProperty].ToString() == expectedGroupingKey)))
             .Do(c => actualSentryEvent = c.Arg<SentryEvent>());
 
         logger.Log(evt);

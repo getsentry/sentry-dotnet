@@ -169,10 +169,10 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs ??= new List<Breadcrumb>();
 
-    private Dictionary<string, object?>? _extra;
+    private Dictionary<string, object?>? _data;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
+    public IReadOnlyDictionary<string, object?> Data => _data ??= new Dictionary<string, object?>();
 
     private Dictionary<string, string>? _tags;
 
@@ -231,8 +231,8 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
         (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) =>
-        (_extra ??= new Dictionary<string, object?>())[key] = value;
+    public void SetData(string key, object? value) =>
+        (_data ??= new Dictionary<string, object?>())[key] = value;
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>
@@ -275,7 +275,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
         writer.WriteSerializable("sdk", Sdk, logger);
         writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
         writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
-        writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
+        writer.WriteDictionaryIfNotEmpty("data", _data, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteSerializableIfNotNull("debug_meta", _debugMeta, logger);
 
@@ -309,7 +309,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
         var fingerprint = json.GetPropertyOrNull("fingerprint")?.EnumerateArray().Select(j => j.GetString()).ToArray();
         var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
-        var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
+        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull();
         var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
 
         var debugMeta = json.GetPropertyOrNull("debug_meta")?.Pipe(DebugMeta.FromJson);
@@ -335,7 +335,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
             Sdk = sdk,
             _fingerprint = fingerprint!,
             _breadcrumbs = breadcrumbs,
-            _extra = extra?.ToDictionary(),
+            _data = data?.ToDictionary(),
             _tags = tags?.WhereNotNullValue().ToDictionary()
         };
     }

@@ -65,14 +65,14 @@ public class Span : ISpanData, IJsonSerializable
         (_tags ??= new Dictionary<string, string>()).Remove(key);
 
     // Aka 'data'
-    private Dictionary<string, object?>? _extra;
+    private Dictionary<string, object?>? _data;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
+    public IReadOnlyDictionary<string, object?> Data => _data ??= new Dictionary<string, object?>();
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) =>
-        (_extra ??= new Dictionary<string, object?>())[key] = value;
+    public void SetData(string key, object? value) =>
+        (_data ??= new Dictionary<string, object?>())[key] = value;
 
     /// <summary>
     /// Initializes an instance of <see cref="Span"/>.
@@ -98,7 +98,7 @@ public class Span : ISpanData, IJsonSerializable
         Description = tracer.Description;
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
-        _extra = tracer.Extra.ToDictionary();
+        _data = tracer.Data.ToDictionary();
 
         if (tracer is SpanTracer spanTracer)
         {
@@ -132,7 +132,7 @@ public class Span : ISpanData, IJsonSerializable
         writer.WriteString("start_timestamp", StartTimestamp);
         writer.WriteStringIfNotNull("timestamp", EndTimestamp);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
-        writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
+        writer.WriteDictionaryIfNotEmpty("data", _data!, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
 
         writer.WriteEndObject();
@@ -166,7 +166,7 @@ public class Span : ISpanData, IJsonSerializable
             Status = status,
             IsSampled = isSampled,
             _tags = tags!,
-            _extra = data!,
+            _data = data!,
             _measurements = measurements,
         };
     }

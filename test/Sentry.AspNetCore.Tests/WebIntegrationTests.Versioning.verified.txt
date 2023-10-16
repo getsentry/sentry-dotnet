@@ -69,7 +69,7 @@
             Category: Microsoft.AspNetCore.Routing.EndpointMiddleware
           }
         ],
-        Extra: {
+        Data: {
           http.request.method: GET,
           http.response.status_code: 200
         },

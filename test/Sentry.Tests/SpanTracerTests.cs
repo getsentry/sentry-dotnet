@@ -27,7 +27,7 @@ public class SpanTracerTests
 
                 for (var i = 0; i < amount; i++)
                 {
-                    transaction.SetExtra(Guid.NewGuid().ToString(), Guid.NewGuid());
+                    transaction.SetData(Guid.NewGuid().ToString(), Guid.NewGuid());
                 }
             })).ToList();
             ready.WaitOne();
@@ -36,7 +36,7 @@ public class SpanTracerTests
 
             // Arrange
             // 4 tasks testing X amount should be the same amount as Extras.
-            Assert.Equal(4 * amount, transaction.Extra.Count);
+            Assert.Equal(4 * amount, transaction.Data.Count);
         }
     }
 }

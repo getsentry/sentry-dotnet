@@ -260,10 +260,10 @@ public class SentryAppenderTests
 
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Is<SentryEvent>(e =>
-                e.Extra["ClassName"].ToString() == expectedClass
-                && e.Extra["FileName"].ToString() == expectedFileName
-                && e.Extra["MethodName"].ToString() == expectedMethod
-                && (int)e.Extra["LineNumber"] == expectedLineNumber));
+                e.Data["ClassName"].ToString() == expectedClass
+                && e.Data["FileName"].ToString() == expectedFileName
+                && e.Data["MethodName"].ToString() == expectedMethod
+                && (int)e.Data["LineNumber"] == expectedLineNumber));
     }
 
     [Fact]
@@ -280,7 +280,7 @@ public class SentryAppenderTests
         sut.DoAppend(evt);
 
         _ = _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra[id] == expected));
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Data[id] == expected));
     }
 
     [Fact]

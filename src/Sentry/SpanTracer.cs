@@ -77,10 +77,10 @@ public class SpanTracer : ISpan
     private readonly ConcurrentDictionary<string, object?> _data = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _data;
+    public IReadOnlyDictionary<string, object?> Data => _data;
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) => _data[key] = value;
+    public void SetData(string key, object? value) => _data[key] = value;
 
     /// <summary>
     /// Initializes an instance of <see cref="SpanTracer"/>.

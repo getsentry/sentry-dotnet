@@ -30,13 +30,13 @@ internal sealed class IosScopeObserver : IScopeObserver
         }
     }
 
-    public void SetExtra(string key, object? value)
+    public void SetData(string key, object? value)
     {
         try
         {
             if (value is null)
             {
-                _options.LogDebug("Extra with key '{0}' was null.", key);
+                _options.LogDebug("DataData with key '{0}' was null.", key);
                 return;
             }
 
@@ -55,12 +55,12 @@ internal sealed class IosScopeObserver : IScopeObserver
             }
             catch (Exception ex)
             {
-                _options.LogError(ex, "Extra with key '{0}' could not be serialized.", key);
+                _options.LogError(ex, "DataData with key '{0}' could not be serialized.", key);
             }
         }
         finally
         {
-            _innerObserver?.SetExtra(key, value);
+            _innerObserver?.SetData(key, value);
         }
     }
 

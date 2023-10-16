@@ -28,7 +28,7 @@ public class ErrorProcessorTests
             var evt = new SentryEvent();
             processor.Process(e, evt);
 
-            Assert.True(evt.Extra.TryGetValue("EntityValidationErrors", out var errors));
+            Assert.True(evt.Data.TryGetValue("EntityValidationErrors", out var errors));
             var entityValidationErrors = errors as Dictionary<string, List<string>>;
             Assert.NotNull(entityValidationErrors);
             Assert.NotEmpty(entityValidationErrors);
@@ -66,7 +66,7 @@ public class ErrorProcessorTests
                     // We use a try-catch here as we cannot assert directly since SentryClient itself would catch the thrown assertion errors
                     try
                     {
-                        Assert.True(evt.Extra.TryGetValue("EntityValidationErrors", out var errors));
+                        Assert.True(evt.Data.TryGetValue("EntityValidationErrors", out var errors));
                         var entityValidationErrors = errors as Dictionary<string, List<string>>;
                         Assert.NotNull(entityValidationErrors);
                         Assert.NotEmpty(entityValidationErrors);

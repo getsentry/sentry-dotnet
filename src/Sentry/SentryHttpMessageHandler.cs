@@ -69,7 +69,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
             );
-        span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        span?.SetData(OtelSemanticConventions.AttributeHttpRequestMethod, method);
         return span;
     }
 
@@ -90,7 +90,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         // This will handle unsuccessful status codes as well
         if (span is not null)
         {
-            span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
+            span.SetData(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
             var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);
             span.Finish(status);
         }

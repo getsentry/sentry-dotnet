@@ -104,7 +104,7 @@ public class SentrySqlListenerTests
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         if (addConnectionSpan)
         {
-            _fixture.Tracer.StartChild("abc").SetExtra(SqlKeys.DbConnectionId, Guid.Empty);
+            _fixture.Tracer.StartChild("abc").SetData(SqlKeys.DbConnectionId, Guid.Empty);
         }
 
         // Act
@@ -242,17 +242,17 @@ public class SentrySqlListenerTests
 
         // Validate descriptions and extra data is set correctly
         Assert.Equal(query, commandSpan.Description);
-        Assert.Equal(queryOperationId, commandSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
-        Assert.Equal(connectionId, commandSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
-        Assert.Equal(dbName, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
-        Assert.Equal("sql", commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        Assert.Equal(queryOperationId, commandSpan.Data.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
+        Assert.Equal(connectionId, commandSpan.Data.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
+        Assert.Equal(dbName, commandSpan.Data.TryGetValue<string, string>(OTelKeys.DbName));
+        Assert.Equal("sql", commandSpan.Data.TryGetValue<string, string>(OTelKeys.DbSystem));
 
         Assert.Equal(dbName, connectionSpan.Description);
-        Assert.Equal(connectionOperationId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
-        Assert.Equal(connectionId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
-        Assert.Equal(dbName, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
-        Assert.Equal(dbSource, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer));
-        Assert.Equal("sql", connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        Assert.Equal(connectionOperationId, connectionSpan.Data.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
+        Assert.Equal(connectionId, connectionSpan.Data.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
+        Assert.Equal(dbName, connectionSpan.Data.TryGetValue<string, string>(OTelKeys.DbName));
+        Assert.Equal(dbSource, connectionSpan.Data.TryGetValue<string, string>(OTelKeys.DbServer));
+        Assert.Equal("sql", connectionSpan.Data.TryGetValue<string, string>(OTelKeys.DbSystem));
     }
 
     [Theory]
@@ -388,7 +388,7 @@ public class SentrySqlListenerTests
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
-            Assert.Equal(connectionId, (Guid)span.Extra[SqlKeys.DbConnectionId]!);
+            Assert.Equal(connectionId, (Guid)span.Data[SqlKeys.DbConnectionId]!);
         });
     }
 
@@ -555,15 +555,15 @@ public class SentrySqlListenerTests
         querySpans.Should().HaveCount(2 * maxItems);
 
         // Open Spans should not have any Connection key.
-        Assert.All(openSpans, span => Assert.False(span.Extra.ContainsKey(SqlKeys.DbConnectionId)));
+        Assert.All(openSpans, span => Assert.False(span.Data.ContainsKey(SqlKeys.DbConnectionId)));
         Assert.All(closedSpans, span => Assert.Equal(SpanStatus.Ok, span.Status));
 
         // Assert that all connectionIds is set and ParentId set to Trace.
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.All(closedConnectionSpans, connectionSpan =>
         {
-            Assert.NotNull(connectionSpan.Extra[SqlKeys.DbConnectionId]);
-            Assert.NotNull(connectionSpan.Extra[SqlKeys.DbOperationId]);
+            Assert.NotNull(connectionSpan.Data[SqlKeys.DbConnectionId]);
+            Assert.NotNull(connectionSpan.Data[SqlKeys.DbOperationId]);
             Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
         });
 
@@ -573,7 +573,7 @@ public class SentrySqlListenerTests
             Assert.True(querySpan.IsFinished);
             Assert.Equal(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
 
-            var queryConnectionId = querySpan.Extra.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
+            var queryConnectionId = querySpan.Data.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
             queryConnectionId.Should().NotBeNull();
         });
 

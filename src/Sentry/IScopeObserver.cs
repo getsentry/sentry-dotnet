@@ -11,9 +11,9 @@ public interface IScopeObserver
     void AddBreadcrumb(Breadcrumb breadcrumb);
 
     /// <summary>
-    /// Sets an extra.
+    /// Sets an data value
     /// </summary>
-    void SetExtra(string key, object? value);
+    void SetData(string key, object? value);
 
     /// <summary>
     /// Sets a tag.

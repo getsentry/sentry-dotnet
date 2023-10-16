@@ -41,7 +41,7 @@ public class DefaultSentryScopeStateProcessor : ISentryScopeStateProcessor
                 break;
 #endif
             default:
-                scope.SetExtra("state", state);
+                scope.SetData("state", state);
                 break;
         }
     }

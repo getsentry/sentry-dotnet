@@ -564,10 +564,10 @@ public class ScopeTests
         var expectedCount = observerEnable ? 1 : 0;
 
         // Act
-        scope.SetExtra(expectedKey, expectedValue);
+        scope.SetData(expectedKey, expectedValue);
 
         // Assert
-        observer.Received(expectedCount).SetExtra(Arg.Is(expectedKey), Arg.Is(expectedValue));
+        observer.Received(expectedCount).SetData(Arg.Is(expectedKey), Arg.Is(expectedValue));
     }
 
     [Theory]
@@ -631,7 +631,7 @@ public static class ScopeTestExtensions
         scope.Transaction = Substitute.For<ITransaction>();
         scope.Fingerprint = new[] { $"{salt} fingerprint" };
         scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
-        scope.SetExtra("extra", $"{salt} extra");
+        scope.SetData("data", $"{salt} data");
         scope.SetTag("tag", $"{salt} tag");
         scope.AddAttachment(new Attachment(default, default, default, $"{salt} attachment"));
     }
@@ -649,7 +649,7 @@ public static class ScopeTestExtensions
         source.Transaction.Should().Be(target.Transaction);
         source.Fingerprint.Should().BeEquivalentTo(target.Fingerprint);
         source.Breadcrumbs.Should().BeEquivalentTo(target.Breadcrumbs);
-        source.Extra.Should().BeEquivalentTo(target.Extra);
+        source.Data.Should().BeEquivalentTo(target.Data);
         source.Tags.Should().BeEquivalentTo(target.Tags);
         source.Attachments.Should().BeEquivalentTo(target.Attachments);
     }

@@ -42,33 +42,33 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
     {
         Debug.Assert(databaseName != string.Empty);
 
-        span.SetExtra(OTelKeys.DbName, databaseName);
+        span.SetData(OTelKeys.DbName, databaseName);
     }
 
     private static void SetDatabaseAddress(ISpan span, string databaseAddress)
     {
         Debug.Assert(databaseAddress != string.Empty);
 
-        span.SetExtra(OTelKeys.DbServer, databaseAddress);
+        span.SetData(OTelKeys.DbServer, databaseAddress);
     }
 
     private static void SetConnectionId(ISpan span, Guid? connectionId)
     {
         Debug.Assert(connectionId != Guid.Empty);
 
-        span.SetExtra(SqlKeys.DbConnectionId, connectionId);
+        span.SetData(SqlKeys.DbConnectionId, connectionId);
     }
 
     private static void SetOperationId(ISpan span, Guid? operationId)
     {
         Debug.Assert(operationId != Guid.Empty);
 
-        span.SetExtra(SqlKeys.DbOperationId, operationId);
+        span.SetData(SqlKeys.DbOperationId, operationId);
     }
 
-    private static Guid? TryGetOperationId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(SqlKeys.DbOperationId);
+    private static Guid? TryGetOperationId(ISpan span) => span.Data.TryGetValue<string, Guid?>(SqlKeys.DbOperationId);
 
-    private static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
+    private static Guid? TryGetConnectionId(ISpan span) => span.Data.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
 
     private void AddSpan(string operation, object? value)
     {
@@ -80,7 +80,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
         var parent = transaction.GetDbParentSpan();
         var span = parent.StartChild(operation);
-        span.SetExtra(OTelKeys.DbSystem, "sql");
+        span.SetData(OTelKeys.DbSystem, "sql");
         SetOperationId(span, value?.GetGuidProperty("OperationId"));
         SetConnectionId(span, value?.GetGuidProperty("ConnectionId"));
     }
@@ -197,7 +197,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         var transaction = _hub.GetTransactionIfSampled();
         if (TryGetConnectionSpan(transaction!, connectionId) is { } connectionSpan)
         {
-            if (connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName) is { } dbName)
+            if (connectionSpan.Data.TryGetValue<string, string>(OTelKeys.DbName) is { } dbName)
             {
                 SetDatabaseName(commandSpan, dbName);
             }
@@ -257,17 +257,17 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
         if (statistics["SelectRows"] is long selectRows)
         {
-            span.SetExtra("rows_sent", selectRows);
+            span.SetData("rows_sent", selectRows);
         }
 
         if (statistics["BytesReceived"] is long bytesReceived)
         {
-            span.SetExtra("bytes_received", bytesReceived);
+            span.SetData("bytes_received", bytesReceived);
         }
 
         if (statistics["BytesSent"] is long bytesSent)
         {
-            span.SetExtra("bytes_sent ", bytesSent);
+            span.SetData("bytes_sent ", bytesSent);
         }
     }
 }

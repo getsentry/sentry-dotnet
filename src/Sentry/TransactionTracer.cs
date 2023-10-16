@@ -155,10 +155,10 @@ public class TransactionTracer : ITransaction
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _extra = new();
+    private readonly ConcurrentDictionary<string, object?> _data = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    public IReadOnlyDictionary<string, object?> Data => _data;
 
     private readonly ConcurrentDictionary<string, string> _tags = new();
 
@@ -259,7 +259,7 @@ public class TransactionTracer : ITransaction
     public void AddBreadcrumb(Breadcrumb breadcrumb) => _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) => _extra[key] = value;
+    public void SetData(string key, object? value) => _data[key] = value;
 
     /// <inheritdoc />
     public void SetTag(string key, string value) => _tags[key] = value;

@@ -172,10 +172,10 @@ public class Transaction : ITransactionData, IJsonSerializable
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
     // Not readonly because of deserialization
-    private Dictionary<string, object?> _extra = new();
+    private Dictionary<string, object?> _data = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    public IReadOnlyDictionary<string, object?> Data => _data;
 
     // Not readonly because of deserialization
     private Dictionary<string, string> _tags = new();
@@ -261,7 +261,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         Sdk = tracer.Sdk;
         Fingerprint = tracer.Fingerprint;
         _breadcrumbs = tracer.Breadcrumbs.ToList();
-        _extra = tracer.Extra.ToDictionary();
+        _data = tracer.Data.ToDictionary();
         _tags = tracer.Tags.ToDictionary();
         _spans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
@@ -282,8 +282,8 @@ public class Transaction : ITransactionData, IJsonSerializable
         _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) =>
-        _extra[key] = value;
+    public void SetData(string key, object? value) =>
+        _data[key] = value;
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>
@@ -344,7 +344,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         writer.WriteSerializable("sdk", Sdk, logger);
         writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
         writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
-        writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
+        writer.WriteDictionaryIfNotEmpty("data", _data, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
@@ -376,7 +376,7 @@ public class Transaction : ITransactionData, IJsonSerializable
             .EnumerateArray().Select(j => j.GetString()!).ToArray();
         var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?
             .EnumerateArray().Select(Breadcrumb.FromJson).ToList() ?? new();
-        var extra = json.GetPropertyOrNull("extra")?
+        var data = json.GetPropertyOrNull("data")?
             .GetDictionaryOrNull() ?? new();
         var tags = json.GetPropertyOrNull("tags")?
             .GetStringDictionaryOrNull()?.WhereNotNullValue().ToDictionary() ?? new();
@@ -401,7 +401,7 @@ public class Transaction : ITransactionData, IJsonSerializable
             Sdk = sdk,
             _fingerprint = fingerprint,
             _breadcrumbs = breadcrumbs,
-            _extra = extra,
+            _data = data,
             _tags = tags,
             _measurements = measurements,
             _spans = spans

@@ -209,10 +209,10 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _extra = new();
+    private readonly ConcurrentDictionary<string, object?> _data = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    public IReadOnlyDictionary<string, object?> Data => _data;
 
     private readonly ConcurrentDictionary<string, string> _tags = new();
 
@@ -294,12 +294,12 @@ public class Scope : IEventLike
     }
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value)
+    public void SetData(string key, object? value)
     {
-        _extra[key] = value;
+        _data[key] = value;
         if (Options.EnableScopeSync)
         {
-            Options.ScopeObserver?.SetExtra(key, value);
+            Options.ScopeObserver?.SetData(key, value);
         }
     }
 
@@ -349,7 +349,7 @@ public class Scope : IEventLike
         Transaction = default;
         Fingerprint = Array.Empty<string>();
         ClearBreadcrumbs();
-        _extra.Clear();
+        _data.Clear();
         _tags.Clear();
         ClearAttachments();
         PropagationContext = new();
@@ -411,11 +411,11 @@ public class Scope : IEventLike
             other.AddBreadcrumb(breadcrumb);
         }
 
-        foreach (var (key, value) in Extra)
+        foreach (var (key, value) in Data)
         {
-            if (!other.Extra.ContainsKey(key))
+            if (!other.Data.ContainsKey(key))
             {
-                other.SetExtra(key, value);
+                other.SetData(key, value);
             }
         }
 

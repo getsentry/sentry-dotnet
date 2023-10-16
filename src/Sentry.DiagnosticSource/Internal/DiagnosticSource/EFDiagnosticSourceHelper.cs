@@ -39,7 +39,7 @@ internal abstract class EFDiagnosticSourceHelper
         Transaction = hub.GetTransactionIfSampled();
     }
 
-    protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
+    protected static Guid? TryGetConnectionId(ISpan span) => span.Data.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
 
     protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
 
@@ -47,7 +47,7 @@ internal abstract class EFDiagnosticSourceHelper
     {
         Debug.Assert(connectionId != Guid.Empty);
 
-        span.SetExtra(EFKeys.DbConnectionId, connectionId);
+        span.SetData(EFKeys.DbConnectionId, connectionId);
     }
 
     internal void AddSpan(object? diagnosticSourceValue)
@@ -93,17 +93,17 @@ internal abstract class EFDiagnosticSourceHelper
     {
         if (GetDatabaseName(diagnosticSourceValue) is { } dataBaseName)
         {
-            span.SetExtra(OTelKeys.DbName, dataBaseName);
+            span.SetData(OTelKeys.DbName, dataBaseName);
         }
 
         if (GetDatabaseSystem(diagnosticSourceValue) is { } databaseProviderName)
         {
-            span.SetExtra(OTelKeys.DbSystem, databaseProviderName);
+            span.SetData(OTelKeys.DbSystem, databaseProviderName);
         }
 
         if (GetDatabaseServerAddress(diagnosticSourceValue) is { } databaseServerAddress)
         {
-            span.SetExtra(OTelKeys.DbServer, databaseServerAddress);
+            span.SetData(OTelKeys.DbServer, databaseServerAddress);
         }
     }
 
