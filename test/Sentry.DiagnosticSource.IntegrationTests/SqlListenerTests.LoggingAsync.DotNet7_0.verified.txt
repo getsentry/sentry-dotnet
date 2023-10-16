@@ -74,7 +74,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           Description: SqlListenerTests.verify_LoggingAsync,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             bytes_sent : 510,
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_LoggingAsync,
@@ -98,7 +98,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 ,
           Status: InternalError,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_LoggingAsync,
             db.operation_id: Guid_3,

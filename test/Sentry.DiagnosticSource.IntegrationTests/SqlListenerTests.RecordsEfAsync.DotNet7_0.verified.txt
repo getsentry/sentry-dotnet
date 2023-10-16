@@ -50,7 +50,7 @@
           Description: SqlListenerTests.verify_RecordsEfAsync,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             bytes_received: 304,
             bytes_sent : 704,
             db.connection_id: Guid_1,
@@ -75,7 +75,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 ,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.operation_id: Guid_3,
@@ -97,7 +97,7 @@ SELECT [t].[Id], [t].[Property]
 FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.operation_id: Guid_4,
