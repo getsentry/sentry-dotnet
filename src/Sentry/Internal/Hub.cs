@@ -98,6 +98,8 @@ internal class Hub : IHubEx, IDisposable
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
 
+    public void RestoreScope(Scope savedScope) => ScopeManager.RestoreScope(savedScope);
+
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
     public ITransaction StartTransaction(
