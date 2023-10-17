@@ -538,6 +538,14 @@ internal static class JsonExtensions
     }
 
 #if TRIMMABLE
+    internal static string ToUtf8Json(this object value, bool preserveReferences = false)
+    {
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+        InternalSerialize(writer, value, preserveReferences);
+        writer.Flush();
+        return Encoding.UTF8.GetString(stream.ToArray());
+    }
 
     private static JsonSerializerContext GetSerializerContext(Type type, bool preserveReferences = false)
     {
