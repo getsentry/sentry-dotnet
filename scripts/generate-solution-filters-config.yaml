@@ -50,6 +50,7 @@ filterConfigs:
         - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
         - "**/Sentry.Samples.Android.csproj"
+        - "**/Sentry.Bindings.Native.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -132,7 +133,8 @@ filterConfigs:
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
         - "src/**/*Android*.csproj"
-        - "src/**/*Bindings*.csproj"
+        - "src/**/*Bindings.Android.csproj"
+        - "src/**/*Bindings.Cocoa.csproj"
         - "src/**/Sentry.Extensions.Logging.csproj"
         - "src/**/Sentry.Maui.csproj"
         - "test/**/Sentry.Android.AssemblyReader.Tests.csproj"

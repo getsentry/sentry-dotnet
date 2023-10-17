@@ -15,7 +15,7 @@ namespace Sentry;
 #if __MOBILE__
 public static partial class SentrySdk
 #else
-    public static class SentrySdk
+public static class SentrySdk
 #endif
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
