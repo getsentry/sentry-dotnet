@@ -4,7 +4,7 @@
 
 ### Breaking changes
 
-Mobile support:
+Support Changes:
 
 .NET 6 on mobile is out of support since May 2023. With .NET 8 coming,
 it won't be possible to build .NET 6 Mobile specific targets.
@@ -13,6 +13,7 @@ Mobile apps still on .NET 6 will pull the `Sentry` .NET 6, which offers the .NET
 without native/platform specific bindings and SDKs. See [this ticket for more details](https://github.com/getsentry/sentry-dotnet/issues/2623).
 
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
+- Drop support for `Tizen` ([#2734](https://github.com/getsentry/sentry-dotnet/pull/2734))
 
 API Changes:
 
