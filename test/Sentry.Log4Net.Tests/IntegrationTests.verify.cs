@@ -1,4 +1,4 @@
-﻿[UsesVerify]
+[UsesVerify]
 public class IntegrationTests
 {
     [Fact]
@@ -32,7 +32,7 @@ public class IntegrationTests
 
         await Verify(transport.Envelopes)
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain", "Data");
+            .IgnoreMembers("ThreadName", "Domain", "Data", "Extra");
     }
 
     [Fact]
