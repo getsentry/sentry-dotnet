@@ -35,7 +35,9 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Install .NET Workloads
-        run: dotnet workload install maui-ios ios macos --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
+        run: |
+          dotnet workload install maui-ios macos --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
+          dotnet workload list
 
       - name: Restore .NET Dependencies
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
