@@ -6,12 +6,13 @@
       On Mac, we'll also build for iOS and MacCatalyst.
       On Windows, we'll also build for Windows 10.
     -->
-    <TargetFrameworks>net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+    <TargetFramework>net7.0-android</TargetFramework>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFramework);net7.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFramework);net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Samples.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
+    <SelfContained>true</SelfContained>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishReadyToRun>false</PublishReadyToRun>
@@ -31,7 +32,7 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion   Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 
     <!--
       This avoids attaching a debugger when we crash the app when targeting Windows while running in Visual Studio.
@@ -55,6 +56,7 @@
   <PropertyGroup>
     <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android' And '$(OSArchitecture)' == 'Arm64' And ('$(_AndroidRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == '')">android-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios' And '$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And '$(OSArchitecture)' == 'Arm64' And ('$(_MacCatalystRuntimeIdentifier)' == 'maccatalyst-x64' Or ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">maccatalyst-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And '$(OSArchitecture)' == 'x64' And ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == '')">maccatalyst-x64</RuntimeIdentifier>
