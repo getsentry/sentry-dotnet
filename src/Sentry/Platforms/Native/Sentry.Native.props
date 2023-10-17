@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry.Bindings.Native\Sentry.Bindings.Native.csproj" />
+  </ItemGroup>
+</Project>

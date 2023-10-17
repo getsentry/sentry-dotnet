@@ -78,10 +78,10 @@
     BeforeTargets="_ComputePublishLocation"
     Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
     <ItemGroup>
-    <ResolvedFileToPublish
-      Update="@(ResolvedFileToPublish)"
-      Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
-      PublishFolderType="None" />
+      <ResolvedFileToPublish
+        Update="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+        PublishFolderType="None" />
     </ItemGroup>
   </Target>
 
@@ -92,5 +92,6 @@
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry\buildTransitive\Sentry.targets" />
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
     Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Native\buildTransitive\Sentry.Bindings.Native.targets" />
 
 </Project>
