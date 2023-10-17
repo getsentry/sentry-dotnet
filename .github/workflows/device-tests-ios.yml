@@ -25,6 +25,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install .NET 8
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            8.0.100-rc.2.23502.2
+
       - name: Build Cocoa SDK
         uses: ./.github/actions/buildcocoasdk
 
