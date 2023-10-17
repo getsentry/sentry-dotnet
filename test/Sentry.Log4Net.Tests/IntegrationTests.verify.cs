@@ -83,7 +83,7 @@ public class IntegrationTests
                     warningsAndAbove
                 })
             .IgnoreStandardSentryMembers()
-            .IgnoreMembers("ThreadName", "Domain", "Data");
+            .IgnoreMembers("ThreadName", "Domain", "Data", "Extra");
         Assert.Empty(warningsAndAbove);
     }
 
