@@ -41,6 +41,14 @@ jobs:
       - name: Build Android Test App
         run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net7.0-android --no-restore --nologo
 
+      - name: Install tree
+        run: |
+          sudo apt-get update
+          sudo apt-get install tree
+  
+      - name: Print Folder Structure
+        run: tree test/Sentry.Maui.Device.TestApp/bin/
+
       - name: Upload Android Test App
         uses: actions/upload-artifact@v3
         with:
