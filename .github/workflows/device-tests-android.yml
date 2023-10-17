@@ -29,6 +29,12 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
+      - name: Install .NET 8
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            8.0.100-rc.2.23502.2
+
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
