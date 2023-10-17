@@ -37,7 +37,7 @@
               Extra: {
                 ClassName: IntegrationTests+<>c__DisplayClass1_0,
                 FileName: {ProjectDirectory}IntegrationTests.verify.cs,
-                LineNumber: 66,
+                LineNumber: 67,
                 log4net-level: ERROR,
                 MethodName: <LoggingInsideTheContextOfLogging>b__1
               }
@@ -83,7 +83,7 @@
               Extra: {
                 ClassName: IntegrationTests+<LoggingInsideTheContextOfLogging>d__1,
                 FileName: {ProjectDirectory}IntegrationTests.verify.cs,
-                LineNumber: 69,
+                LineNumber: 71,
                 log4net-level: ERROR,
                 MethodName: MoveNext
               }

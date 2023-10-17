@@ -34,9 +34,8 @@
             User: {},
             Environment: production,
             Extra: {
+              1854a567-564b-4e18-b6da-9e194af8fd59: {},
               ClassName: IntegrationTests+<Simple>d__0,
-              FileName: {ProjectDirectory}IntegrationTests.verify.cs,
-              LineNumber: 26,
               log4net-level: ERROR,
               MethodName: MoveNext
             }
