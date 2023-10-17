@@ -48,13 +48,3 @@ runs:
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}"
-
-    # # TODO: Figure out how we can not having to do this. 
-    # - name: Restore workloads
-    #   shell: bash
-    #   run: dotnet workload restore
-
-    # - name: Update workloads
-    #   shell: bash
-    #   run: dotnet workload update
-      
