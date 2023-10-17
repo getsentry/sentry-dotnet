@@ -56,6 +56,7 @@
   <PropertyGroup>
     <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android' And '$(OSArchitecture)' == 'Arm64' And ('$(_AndroidRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == '')">android-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios' And '$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And '$(OSArchitecture)' == 'Arm64' And ('$(_MacCatalystRuntimeIdentifier)' == 'maccatalyst-x64' Or ('$(_MacCatalystRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">maccatalyst-arm64</RuntimeIdentifier>
