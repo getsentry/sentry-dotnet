@@ -9,7 +9,9 @@ public partial class SentryStackTraceFactoryTests
 {
     [SkippableTheory]
     [InlineData(StackTraceMode.Original)]
+#if !TRIMMABLE
     [InlineData(StackTraceMode.Enhanced)]
+#endif
     public Task MethodGeneric(StackTraceMode mode)
     {
         // TODO: Mono gives different results.  Investigate why.

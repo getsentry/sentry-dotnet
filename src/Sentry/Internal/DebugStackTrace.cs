@@ -126,7 +126,9 @@ internal class DebugStackTrace : SentryStackTrace
     {
         var frames = _options.StackTraceMode switch
         {
+#if !TRIMMABLE
             StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p)),
+#endif
             _ => stackTrace.GetFrames()
             // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
 #if NETCOREAPP3_0
@@ -196,7 +198,7 @@ internal class DebugStackTrace : SentryStackTrace
 
     /// <summary>
     /// Native AOT implementation of CreateFrame.
-    /// Native frames have only limited method information at runtime (and even that can be disabled). 
+    /// Native frames have only limited method information at runtime (and even that can be disabled).
     ///  We try to parse that and also add addresses for server-side symbolication.
     /// </summary>
     private SentryStackFrame? TryCreateNativeAOTFrame(IStackFrame stackFrame)
@@ -213,7 +215,7 @@ internal class DebugStackTrace : SentryStackTrace
     }
 
     // Method info is currently only exposed by ToString(), see https://github.com/dotnet/runtime/issues/92869
-    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`): 
+    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`):
     // https://github.com/dotnet/runtime/blob/254230253da143a082f47cfaf8711627c0bf2faf/src/coreclr/nativeaot/System.Private.CoreLib/src/Internal/DeveloperExperience/DeveloperExperience.cs#L42
     internal static SentryStackFrame ParseNativeAOTToString(string info)
     {
@@ -244,6 +246,8 @@ internal class DebugStackTrace : SentryStackTrace
             Package = method.DeclaringType?.Assembly.FullName
         };
 
+        frame.Function = method.Name;
+#if !TRIMMABLE
         if (stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
         {
             var stringBuilder = new StringBuilder();
@@ -263,10 +267,7 @@ internal class DebugStackTrace : SentryStackTrace
                     : module;
             }
         }
-        else
-        {
-            frame.Function = method.Name;
-        }
+#endif
 
         // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
         if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)
@@ -345,6 +346,11 @@ internal class DebugStackTrace : SentryStackTrace
             frame.ColumnNumber = colNo;
         }
 
+#if TRIMMABLE
+        DemangleAsyncFunctionName(frame);
+        DemangleAnonymousFunction(frame);
+        DemangleLambdaReturnType(frame);
+#else
         if (stackFrame.Frame is not EnhancedStackFrame)
         {
             DemangleAsyncFunctionName(frame);
@@ -360,6 +366,7 @@ internal class DebugStackTrace : SentryStackTrace
             // TODO what is this really about? we have already run ConfigureAppFrame() at this time...
             frame.Module = null;
         }
+#endif
 
         return frame;
     }

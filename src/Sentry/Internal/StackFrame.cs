@@ -113,7 +113,12 @@ internal class RealStackFrame : IStackFrame
 
     public int GetILOffset() => _frame.GetILOffset();
 
-    public MethodBase? GetMethod() => _frame.GetMethod();
+    public MethodBase? GetMethod() =>
+#if TRIMMABLE
+        null;
+#else
+        _frame.GetMethod();
+#endif
 
 #if NET5_0_OR_GREATER
     public nint GetNativeImageBase() => _frame.GetNativeImageBase();

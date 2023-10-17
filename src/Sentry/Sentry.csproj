@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
@@ -22,21 +22,27 @@
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 
-  <!--
-    Ben.Demystifier is compiled directly into Sentry.
-    Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
-  -->
-  <ItemGroup>
-    <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
-      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
-  </ItemGroup>
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net8'))">
+    <IsTrimmable>true</IsTrimmable>
+    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
+  </PropertyGroup>
+  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="!$(TargetFramework.StartsWith('net8'))">
+    <!--
+      Ben.Demystifier is compiled directly into Sentry.
+      Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
+    -->
+    <ItemGroup>
+      <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
+        <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+      </Compile>
+      <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
+    </ItemGroup>
 
-  <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netcoreapp'))">
-    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
-  </ItemGroup>
+    <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
+    <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netcoreapp'))">
+      <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+    </ItemGroup>
+  </Target>
 
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
