@@ -161,7 +161,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             // Spans set otel attributes in extras (passed to Sentry as "data" on the span).
             // Resource attributes do not need to be set, as they would be identical as those set on the transaction.
-            span.SetExtras(attributes);
+            span.SetData(attributes);
             span.SetData("otel.kind", data.Kind);
         }
 

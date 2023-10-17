@@ -124,7 +124,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
                 }
                 else if (key.StartsWith(ExceptionDataKeyPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    sentryEvent.SetData($"Exception[{i}][{key}]", value);
+                    sentryEvent.SetExtra($"Exception[{i}][{key}]", value);
                     keysToRemove.Add(key);
                 }
             }

@@ -13,7 +13,7 @@ public class ExampleEventProcessor : ISentryEventProcessor
     {
         // Here I can modify the event, while taking dependencies via DI
 
-        @event.SetData("Response:HasStarted", _httpContext.HttpContext?.Response.HasStarted);
+        @event.SetExtra("Response:HasStarted", _httpContext.HttpContext?.Response.HasStarted);
         return @event;
     }
 }

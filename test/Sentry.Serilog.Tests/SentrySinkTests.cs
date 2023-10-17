@@ -202,7 +202,7 @@ public class SentrySinkTests
         sut.Emit(evt);
 
         _fixture.Hub.Received(1)
-            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Data["IPAddress"].ToString() == expectedIp));
+            .CaptureEvent(Arg.Is<SentryEvent>(e => e.Extra["IPAddress"].ToString() == expectedIp));
     }
 
     [Fact]

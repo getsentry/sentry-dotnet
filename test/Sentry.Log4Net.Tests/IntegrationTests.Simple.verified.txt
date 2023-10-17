@@ -1,4 +1,4 @@
-[
+﻿[
   {
     Header: {
       event_id: Guid_1,
@@ -32,7 +32,14 @@
               }
             },
             User: {},
-            Environment: production
+            Environment: production,
+            Extra: {
+              ClassName: IntegrationTests+<Simple>d__0,
+              FileName: {ProjectDirectory}IntegrationTests.verify.cs,
+              LineNumber: 26,
+              log4net-level: ERROR,
+              MethodName: MoveNext
+            }
           }
         }
       }

@@ -189,9 +189,9 @@ public partial class MainExceptionProcessorTests
         sut.Process(ex, evt);
 
         //Assert
-        Assert.Single(evt.Data, expectedTag1);
-        Assert.Single(evt.Data, expectedTag2);
-        Assert.Single(evt.Data, expectedTag3);
+        Assert.Single(evt.Extra, expectedTag1);
+        Assert.Single(evt.Extra, expectedTag2);
+        Assert.Single(evt.Extra, expectedTag3);
     }
 
     [Fact]
@@ -248,8 +248,8 @@ public partial class MainExceptionProcessorTests
         sut.Process(ex, evt);
 
         //Assert
-        Assert.Single(evt.Data, expectedContext);
-        Assert.Single(evt.Data, expectedContext2);
+        Assert.Single(evt.Extra, expectedContext);
+        Assert.Single(evt.Extra, expectedContext2);
     }
 
     [Fact]
@@ -272,8 +272,8 @@ public partial class MainExceptionProcessorTests
         sut.Process(ex, evt);
 
         //Assert
-        Assert.Single(evt.Data, expectedData);
-        Assert.Single(evt.Data, expectedData2);
+        Assert.Single(evt.Extra, expectedData);
+        Assert.Single(evt.Extra, expectedData2);
     }
 
     private Exception GetHandledException()

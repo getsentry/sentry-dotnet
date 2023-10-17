@@ -24,6 +24,6 @@ public class DbEntityValidationExceptionProcessor : SentryEventExceptionProcesso
             }
         }
 
-        sentryEvent.SetData("EntityValidationErrors", errorList);
+        sentryEvent.SetExtra("EntityValidationErrors", errorList);
     }
 }

@@ -76,7 +76,7 @@
       level: warning
     }
   ],
-  data: {
+  extra: {
     extra_key: extra_value
   },
   tags: {

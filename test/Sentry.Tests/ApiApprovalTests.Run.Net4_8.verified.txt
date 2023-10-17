@@ -132,7 +132,7 @@ namespace Sentry
     }
     public static class HasExtraExtensions
     {
-        public static void SetExtras(this Sentry.IHasData hasData, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object?>> values) { }
+        public static void SetData(this Sentry.IHasData hasData, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object?>> values) { }
     }
     public static class HasTagsExtensions
     {
@@ -188,7 +188,7 @@ namespace Sentry
     {
         System.IO.Stream GetStream();
     }
-    public interface IEventLike : Sentry.IHasData, Sentry.IHasTags
+    public interface IEventLike : Sentry.IHasTags
     {
         System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         Sentry.Contexts Contexts { get; set; }
@@ -433,8 +433,9 @@ namespace Sentry
         public void AddAttachment(Sentry.Attachment attachment) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.Hint hint) { }
-        public void Apply(Sentry.IEventLike other) { }
         public void Apply(Sentry.Scope other) { }
+        public void Apply(Sentry.SentryEvent other) { }
+        public void Apply(Sentry.Transaction other) { }
         public void Apply(object state) { }
         public void Clear() { }
         public void ClearAttachments() { }
@@ -499,18 +500,18 @@ namespace Sentry
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
     }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
-    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasTags, Sentry.IJsonSerializable
+    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasTags, Sentry.IJsonSerializable
     {
         public SentryEvent() { }
         public SentryEvent(System.Exception? exception) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Data { get; }
         public System.Collections.Generic.List<Sentry.DebugImage>? DebugImages { get; set; }
         public string? Distribution { get; set; }
         public string? Environment { get; set; }
         public Sentry.SentryId EventId { get; }
         public System.Exception? Exception { get; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public Sentry.SentryLevel? Level { get; set; }
         public string? Logger { get; set; }
@@ -528,7 +529,8 @@ namespace Sentry
         public string? TransactionName { get; set; }
         public Sentry.User User { get; set; }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
-        public void SetData(string key, object? value) { }
+        public void SetExtra(string key, object? value) { }
+        public void SetExtras(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object?>> values) { }
         public void SetTag(string key, string value) { }
         public void UnsetTag(string key) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }

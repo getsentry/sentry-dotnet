@@ -25,7 +25,7 @@ public static class HasExtraExtensions
     /// <summary>
     /// Sets the data key-value pairs on the object.
     /// </summary>
-    public static void SetExtras(this IHasData hasData, IEnumerable<KeyValuePair<string, object?>> values)
+    public static void SetData(this IHasData hasData, IEnumerable<KeyValuePair<string, object?>> values)
     {
         foreach (var (key, value) in values)
         {

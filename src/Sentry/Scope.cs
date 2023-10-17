@@ -13,7 +13,7 @@ namespace Sentry;
 /// Scope data is sent together with any event captured
 /// during the lifetime of the scope.
 /// </remarks>
-public class Scope : IEventLike
+public class Scope : IEventLike, IHasData
 {
     internal SentryOptions Options { get; }
 
@@ -381,16 +381,37 @@ public class Scope : IEventLike
     }
 
     /// <summary>
-    /// Applies the data from this scope to another event-like object.
+    /// Applies the data from this scope to a Transaction
     /// </summary>
-    /// <param name="other">The scope to copy data to.</param>
+    /// <param name="other">The transaction to copy data to.</param>
     /// <remarks>
     /// Applies the data of 'from' into 'to'.
     /// If data in 'from' is null, 'to' is unmodified.
     /// Conflicting keys are not overriden.
     /// This is a shallow copy.
     /// </remarks>
-    public void Apply(IEventLike other)
+    public void Apply(Transaction other)
+    {
+        // Not to throw on code that ignores nullability warnings.
+        if (other.IsNull())
+        {
+            return;
+        }
+        ApplyEventLike(other);
+        ApplyHasData(other);
+    }
+
+    /// <summary>
+    /// Applies the data from this scope to a SentryEvent
+    /// </summary>
+    /// <param name="other">The event to copy data to.</param>
+    /// <remarks>
+    /// Applies the data of 'from' into 'to'.
+    /// If data in 'from' is null, 'to' is unmodified.
+    /// Conflicting keys are not overriden.
+    /// This is a shallow copy.
+    /// </remarks>
+    public void Apply(SentryEvent other)
     {
         // Not to throw on code that ignores nullability warnings.
         if (other.IsNull())
@@ -398,6 +419,30 @@ public class Scope : IEventLike
             return;
         }
 
+        ApplyEventLike(other);
+
+        foreach (var (key, value) in Data)
+        {
+            if (!other.Extra.ContainsKey(key))
+            {
+                other.SetExtra(key, value);
+            }
+        }
+    }
+
+    private void ApplyHasData(IHasData other)
+    {
+        foreach (var (key, value) in Data)
+        {
+            if (!other.Data.ContainsKey(key))
+            {
+                other.SetData(key, value);
+            }
+        }
+    }
+
+    private void ApplyEventLike(IEventLike other)
+    {
         // Fingerprint isn't combined. It's absolute.
         // One set explicitly on target (i.e: event)
         // takes precedence and is not overwritten
@@ -409,14 +454,6 @@ public class Scope : IEventLike
         foreach (var breadcrumb in Breadcrumbs)
         {
             other.AddBreadcrumb(breadcrumb);
-        }
-
-        foreach (var (key, value) in Data)
-        {
-            if (!other.Data.ContainsKey(key))
-            {
-                other.SetData(key, value);
-            }
         }
 
         foreach (var (key, value) in Tags)
@@ -460,7 +497,16 @@ public class Scope : IEventLike
             return;
         }
 
-        Apply((IEventLike)other);
+        ApplyEventLike(other);
+        ApplyHasData(other);
+
+        foreach (var (key, value) in Data)
+        {
+            if (!other.Data.ContainsKey(key))
+            {
+                other.SetData(key, value);
+            }
+        }
 
         other.Transaction ??= Transaction;
         other.SessionUpdate ??= SessionUpdate;

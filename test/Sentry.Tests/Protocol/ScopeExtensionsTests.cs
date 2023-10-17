@@ -168,7 +168,7 @@ public class ScopeExtensionsTests
             {"expected Data", new object()}
         };
 
-        sut.SetExtras(expectedExtra);
+        sut.SetData(expectedExtra);
 
         Assert.Equal(expectedExtra, sut.Data);
     }
@@ -184,7 +184,7 @@ public class ScopeExtensionsTests
             {"another", "bar"}
         };
 
-        sut.SetExtras(expectedExtra);
+        sut.SetData(expectedExtra);
 
         sut.Data.Should().BeEquivalentTo(new Dictionary<string, object>
         {
@@ -205,7 +205,7 @@ public class ScopeExtensionsTests
             new("expected", "data 2"),
         };
 
-        sut.SetExtras(expectedData);
+        sut.SetData(expectedData);
 
         Assert.Equal(expectedData.Last(), sut.Data.Single());
     }
@@ -570,7 +570,8 @@ public class ScopeExtensionsTests
     public void Apply_Null_Target_DoesNotThrow()
     {
         var sut = _fixture.GetSut();
-        sut.Apply(null!);
+        sut.Apply((Transaction)null!);
+        sut.Apply((SentryEvent)null!);
     }
 
     [Fact]

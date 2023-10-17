@@ -61,7 +61,7 @@ public partial class SentryEventTests
             "category",
             BreadcrumbLevel.Warning));
 
-        sut.SetData("extra_key", "extra_value");
+        sut.SetExtra("extra_key", "extra_value");
         sut.Fingerprint = new[] { "fingerprint" };
         sut.SetTag("tag_key", "tag_value");
 

@@ -1,4 +1,4 @@
-{
+﻿{
   Envelopes: [
     {
       Header: {
@@ -33,7 +33,14 @@
                 }
               },
               User: {},
-              Environment: production
+              Environment: production,
+              Extra: {
+                ClassName: IntegrationTests+<>c__DisplayClass1_0,
+                FileName: {ProjectDirectory}IntegrationTests.verify.cs,
+                LineNumber: 66,
+                log4net-level: ERROR,
+                MethodName: <LoggingInsideTheContextOfLogging>b__1
+              }
             }
           }
         }
@@ -72,7 +79,14 @@
                 }
               },
               User: {},
-              Environment: production
+              Environment: production,
+              Extra: {
+                ClassName: IntegrationTests+<LoggingInsideTheContextOfLogging>d__1,
+                FileName: {ProjectDirectory}IntegrationTests.verify.cs,
+                LineNumber: 69,
+                log4net-level: ERROR,
+                MethodName: MoveNext
+              }
             }
           }
         }

@@ -37,7 +37,7 @@
               IpAddress: {{auto}}
             },
             Environment: production,
-            Data: {
+            Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
             }
@@ -90,7 +90,7 @@
                 Level: debug
               }
             ],
-            Data: {
+            Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 65
             }
@@ -147,7 +147,7 @@
                 Level: debug
               }
             ],
-            Data: {
+            Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
             }
@@ -264,7 +264,7 @@
                 Level: error
               }
             ],
-            Data: {
+            Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
             }

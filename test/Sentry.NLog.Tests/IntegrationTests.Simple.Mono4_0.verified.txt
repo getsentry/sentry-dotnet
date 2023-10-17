@@ -93,7 +93,7 @@
               }
             },
             Environment: production,
-            Data: {
+            Extra: {
               arg: arg value
             },
             Tags: {
