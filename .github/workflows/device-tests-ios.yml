@@ -36,7 +36,8 @@ jobs:
 
       - name: Install .NET Workloads
         run: |
-          dotnet workload install maui-ios macos --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
+           dotnet workload restore test/Sentry.Maui.Device.TestApp --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
+#          dotnet workload install ios maui-ios macos --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
           dotnet workload list
 
       - name: Restore .NET Dependencies
