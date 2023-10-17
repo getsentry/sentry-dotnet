@@ -22,7 +22,7 @@ public interface IHub :
     /// <summary>
     /// Starts a transaction.
     /// </summary>
-    ITransaction StartTransaction(
+    ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext);
 
@@ -32,12 +32,12 @@ public interface IHub :
     /// <remarks>
     /// This method is used internally and is not meant for public use.
     /// </remarks>
-    void BindException(Exception exception, ISpan span);
+    void BindException(Exception exception, ISpanTracer span);
 
     /// <summary>
     /// Gets the currently ongoing (not finished) span or <code>null</code> if none available.
     /// </summary>
-    ISpan? GetSpan();
+    ISpanTracer? GetSpan();
 
     /// <summary>
     /// Gets the Sentry trace header that allows tracing across services

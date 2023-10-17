@@ -3,9 +3,9 @@ using Sentry.Internal;
 namespace Sentry;
 
 /// <summary>
-/// Span.
+/// SpanTracer interface
 /// </summary>
-public interface ISpan : ISpanData
+public interface ISpanTracer : ISpanData
 {
     /// <summary>
     /// Span description.
@@ -28,7 +28,7 @@ public interface ISpan : ISpanData
     /// <summary>
     /// Starts a child span.
     /// </summary>
-    ISpan StartChild(string operation);
+    ISpanTracer StartChild(string operation);
 
     /// <summary>
     /// Finishes the span.
@@ -52,7 +52,7 @@ public interface ISpan : ISpanData
 }
 
 /// <summary>
-/// Extensions for <see cref="ISpan"/>.
+/// Extensions for <see cref="ISpanTracer"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SpanExtensions
@@ -60,7 +60,7 @@ public static class SpanExtensions
     /// <summary>
     /// Starts a child span.
     /// </summary>
-    public static ISpan StartChild(this ISpan span, string operation, string? description)
+    public static ISpanTracer StartChild(this ISpanTracer span, string operation, string? description)
     {
         var child = span.StartChild(operation);
         child.Description = description;
@@ -68,7 +68,7 @@ public static class SpanExtensions
         return child;
     }
 
-    internal static ISpan StartChild(this ISpan span, SpanContext context)
+    internal static ISpanTracer StartChild(this ISpanTracer span, SpanContext context)
     {
         var transaction = span.GetTransaction() as TransactionTracer;
         if (transaction?.StartChild(context.SpanId, span.SpanId, context.Operation, context.Instrumenter)
@@ -84,10 +84,10 @@ public static class SpanExtensions
     /// <summary>
     /// Gets the transaction that this span belongs to.
     /// </summary>
-    public static ITransaction GetTransaction(this ISpan span) =>
+    public static ITransactionTracer GetTransaction(this ISpanTracer span) =>
         span switch
         {
-            ITransaction transaction => transaction,
+            ITransactionTracer transaction => transaction,
             SpanTracer tracer => tracer.Transaction,
             _ => throw new ArgumentOutOfRangeException(nameof(span), span, null)
         };
@@ -99,7 +99,7 @@ public static class SpanExtensions
     /// <remarks>
     /// Used by EF, EF Core, and SQLClient integrations.
     /// </remarks>
-    internal static ISpan GetDbParentSpan(this ISpan span)
+    internal static ISpanTracer GetDbParentSpan(this ISpanTracer span)
     {
         var transaction = span.GetTransaction();
         return transaction.Spans

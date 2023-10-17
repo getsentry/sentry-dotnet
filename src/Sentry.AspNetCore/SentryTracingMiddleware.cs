@@ -27,7 +27,7 @@ internal class SentryTracingMiddleware
         _options = options.Value;
     }
 
-    private ITransaction? TryStartTransaction(HttpContext context)
+    private ITransactionTracer? TryStartTransaction(HttpContext context)
     {
         if (context.Request.Method == HttpMethod.Options.Method)
         {
