@@ -1,0 +1,125 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>.NET Bindings for the Sentry Native SDK</Description>
+    <TargetFramework>net7.0</TargetFramework>
+    <SentryNativeSourceDirectory>..\..\modules\sentry-native\</SentryNativeSourceDirectory>
+    <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
+    <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)runtimes\</SentryNativeOutputDirectory>
+    <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
+    <NativeLibRelativePath-win-x64>win-x64\native\</NativeLibRelativePath-win-x64>
+    <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)</SentryNativeOutputDirectory-win-x64>
+    <NativeLibRelativePath-linux-x64>linux-x64\native\</NativeLibRelativePath-linux-x64>
+    <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)</SentryNativeOutputDirectory-linux-x64>
+  </PropertyGroup>
+
+  <!-- Packaging -->
+  <ItemGroup>
+    <!-- Use a separate readme file in the nuget. -->
+    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md"
+      Pack="true"
+      PackagePath="" />
+
+    <!-- Don't add the changelog to the nuget. -->
+    <PackageReference Remove="SIL.ReleaseTasks" />
+
+    <!-- Include our transitive build targets in the nuget. -->
+    <None Include="buildTransitive\Sentry.Bindings.Native.targets">
+      <Pack>true</Pack>
+      <PackagePath>buildTransitive\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <!-- Packaging the native library -->
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Windows'))">
+    <NativeLibs Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib" />
+    <NativeLibs Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).pdb" />
+    <None Include="@(NativeLibs)">
+      <Pack>true</Pack>
+      <PackagePath>\runtimes\$(NativeLibRelativePath-win-x64)</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Linux'))">
+    <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
+      <Pack>true</Pack>
+      <PackagePath>\runtimes\$(NativeLibRelativePath-linux-x64)</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean">
+    <Message Text="Inside Custom Clean" Importance="high"/>
+    <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
+    <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
+  </Target>
+
+  <!-- Build the Sentry Native SDK -->
+  <Target Name="_BuildSentryNativeSDK-win-x64"
+    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
+    Condition="$([MSBuild]::IsOsPlatform('Windows'))"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib;$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).pdb">
+    <MSBuild Projects="$(MSBuildProjectFile)"
+      Targets="_InnerBuildSentryNativeSDK-win-x64"
+      Properties="TargetFramework=once" />
+  </Target>
+
+  <Target Name="_InnerBuildSentryNativeSDK-win-x64">
+    <Message Importance="High"
+      Text="Building artifacts of Sentry Native SDK for win-x64." />
+
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
+      Command="cmake -B build -S . ^
+        -D SENTRY_SDK_NAME=sentry.native.dotnet ^
+        -D SENTRY_BUILD_SHARED_LIBS=0 ^
+        -D SENTRY_BUILD_RUNTIMESTATIC=1 ^
+        -D SENTRY_BACKEND=none ^
+        -D SENTRY_TRANSPORT=none " />
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
+      Command="cmake --build build --target sentry --config RelWithDebInfo --parallel" />
+
+    <ItemGroup>
+      <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/RelWithDebInfo/sentry.lib" />
+      <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/RelWithDebInfo/sentry.pdb" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(NativeSdkArtifacts)"
+      DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-win-x64)%(Filename)-native%(Extension)')" />
+
+    <!-- Explicitly update timestamp on output files so that this target doesn't run again even if the CMake build reused previously built artifacts. -->
+    <Touch Files="@(NativeSdkArtifacts)" />
+  </Target>
+
+  <Target Name="_BuildSentryNativeSDK-linux-x64"
+    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
+    Condition="$([MSBuild]::IsOsPlatform('Linux'))"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Outputs="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
+    <MSBuild Projects="$(MSBuildProjectFile)"
+      Targets="_InnerBuildSentryNativeSDK-linux-x64"
+      Properties="TargetFramework=once" />
+  </Target>
+
+  <Target Name="_InnerBuildSentryNativeSDK-linux-x64">
+    <Message Importance="High"
+      Text="Building artifacts of Sentry Native SDK for linux-x64." />
+
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
+      Command="cmake -B build -S . \
+        -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+        -D SENTRY_SDK_NAME=sentry.native.dotnet \
+        -D SENTRY_BUILD_SHARED_LIBS=0 \
+        -D SENTRY_BACKEND=none \
+        -D SENTRY_TRANSPORT=none " />
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)" Command="cmake --build build --target sentry --parallel" />
+
+    <ItemGroup>
+      <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/libsentry.a" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NativeSdkArtifacts)"
+      DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-linux-x64)%(Filename)-native%(Extension)')" />
+  </Target>
+</Project>
