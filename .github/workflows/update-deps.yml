@@ -3,7 +3,7 @@ name: Update Dependencies
 on:
   # Run every day.
   schedule:
-    - cron: '0 3 * * *'
+    - cron: "0 3 * * *"
   # Allow a manual trigger to be able to run the update when there are new dependencies or after a PR merge to resolve CHANGELOG conflicts.
   workflow_dispatch:
 
@@ -18,6 +18,8 @@ jobs:
             path: modules/sentry-cocoa
           - name: Java SDK
             path: scripts/update-java.ps1
+          - name: Native SDK
+            path: modules/sentry-native
           - name: CLI
             path: scripts/update-cli.ps1
     uses: getsentry/github-workflows/.github/workflows/updater.yml@v2
