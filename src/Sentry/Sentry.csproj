@@ -23,17 +23,19 @@
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net8'))">
+<!--    TODO: Come up with a better way to enable/disable trimming... this is just for testing-->
     <IsTrimmable>true</IsTrimmable>
     <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
   </PropertyGroup>
-  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="!$(TargetFramework.StartsWith('net8'))">
+  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="'$(IsTrimmable)' != 'true'">
     <!--
       Ben.Demystifier is compiled directly into Sentry.
       Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
     -->
     <ItemGroup>
       <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
-        <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+<!-- TODO: Work out why we get ' Error NETSDK1022 : Duplicate 'Compile' items were included.' if we uncomment this -->
+<!--        <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>-->
       </Compile>
       <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
     </ItemGroup>
