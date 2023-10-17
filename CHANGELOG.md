@@ -33,7 +33,6 @@ API Changes:
 - The `DiagnosticLogger` signature for `LogError` and `LogFatal` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. The `DiagnosticLogger` now also received an overload for `LogError` and `LogFatal` that accepts a message only. ([#2715](https://github.com/getsentry/sentry-dotnet/pull/2715))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
 - The methods `WithScope` and `WithScopeAsync` have been removed. We discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
-- Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
   Replace your usage of `WithScope` with the overloads of the `Capture` methods:
     - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
