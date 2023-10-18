@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <SupportedOSPlatformVersion>14.2</SupportedOSPlatformVersion>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <!--

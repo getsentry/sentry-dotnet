@@ -17,13 +17,16 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.NoMobile'">
+    <NO_MOBILE>true</NO_MOBILE>
+  </PropertyGroup>
+
   <!-- NO_MOBILE can be passed in via an environment variable or a build property to disable all mobile targets -->
   <PropertyGroup Condition="'$(NO_MOBILE)' == 'true'">
     <NO_ANDROID>true</NO_ANDROID>
     <NO_IOS>true</NO_IOS>
     <NO_MACCATALYST>true</NO_MACCATALYST>
     <NO_WINDOWS>true</NO_WINDOWS>
-    <NO_TIZEN>true</NO_TIZEN>
   </PropertyGroup>
 
   <!--
@@ -61,7 +64,6 @@
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">10.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'tizen'">6.5</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>

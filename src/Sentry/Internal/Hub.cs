@@ -19,7 +19,7 @@ internal class Hub : IHubEx, IDisposable
     private int _isPersistedSessionRecovered;
 
     // Internal for testability
-    internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
+    internal ConditionalWeakTable<Exception, ISpanTracer> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
 
@@ -100,26 +100,14 @@ internal class Hub : IHubEx, IDisposable
 
     public void RestoreScope(Scope savedScope) => ScopeManager.RestoreScope(savedScope);
 
-    [Obsolete]
-    public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
-
-    [Obsolete]
-    public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
-
-    [Obsolete]
-    public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
-
-    [Obsolete]
-    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
-
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-    public ITransaction StartTransaction(
+    public ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => StartTransaction(context, customSamplingContext, null);
 
-    internal ITransaction StartTransaction(
+    internal ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
@@ -188,7 +176,7 @@ internal class Hub : IHubEx, IDisposable
         return transaction;
     }
 
-    public void BindException(Exception exception, ISpan span)
+    public void BindException(Exception exception, ISpanTracer span)
     {
         // Don't bind on sampled out spans
         if (span.IsSampled == false)
@@ -200,7 +188,7 @@ internal class Hub : IHubEx, IDisposable
         _ = ExceptionToSpanMap.GetValue(exception, _ => span);
     }
 
-    public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
+    public ISpanTracer? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
     public SentryTraceHeader GetTraceHeader()
     {
@@ -350,7 +338,7 @@ internal class Hub : IHubEx, IDisposable
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
         EndSession(_clock.GetUtcNow(), status);
 
-    private ISpan? GetLinkedSpan(SentryEvent evt)
+    private ISpanTracer? GetLinkedSpan(SentryEvent evt)
     {
         // Find the span which is bound to the same exception
         if (evt.Exception is { } exception &&
@@ -362,7 +350,7 @@ internal class Hub : IHubEx, IDisposable
         return null;
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, ISpan span)
+    private void ApplyTraceContextToEvent(SentryEvent evt, ISpanTracer span)
     {
         evt.Contexts.Trace.SpanId = span.SpanId;
         evt.Contexts.Trace.TraceId = span.TraceId;

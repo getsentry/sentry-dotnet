@@ -322,75 +322,6 @@ public static class SentrySdk
         => CurrentHub.AddBreadcrumb(breadcrumb, hint);
 
     /// <summary>
-    /// Runs the callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static void WithScope(Action<Scope> scopeCallback)
-        => CurrentHub.WithScope(scopeCallback);
-
-    /// <summary>
-    /// Runs the callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    /// <returns>The result from the callback.</returns>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static T? WithScope<T>(Func<Scope, T?> scopeCallback)
-        => CurrentHub is IHubEx hub ? hub.WithScope(scopeCallback) : default;
-
-    /// <summary>
-    /// Runs the asynchronous callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    /// <returns>An async task to await the callback.</returns>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static Task WithScopeAsync(Func<Scope, Task> scopeCallback)
-        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.CompletedTask;
-
-    /// <summary>
-    /// Runs the asynchronous callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    /// <returns>An async task to await the result of the callback.</returns>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
-        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.FromResult(default(T));
-
-    /// <summary>
     /// Configures the scope through the callback.
     /// </summary>
     /// <param name="configureScope">The configure scope callback.</param>
@@ -528,7 +459,7 @@ public static class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -540,7 +471,7 @@ public static class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -558,7 +489,7 @@ public static class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(
+    public static ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => CurrentHub.StartTransaction(context, customSamplingContext);
@@ -567,7 +498,7 @@ public static class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    internal static ITransaction StartTransaction(
+    internal static ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
@@ -577,28 +508,28 @@ public static class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(ITransactionContext context)
+    public static ITransactionTracer StartTransaction(ITransactionContext context)
         => CurrentHub.StartTransaction(context);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation)
+    public static ITransactionTracer StartTransaction(string name, string operation)
         => CurrentHub.StartTransaction(name, operation);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation, string? description)
+    public static ITransactionTracer StartTransaction(string name, string operation, string? description)
         => CurrentHub.StartTransaction(name, operation, description);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
+    public static ITransactionTracer StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
         => CurrentHub.StartTransaction(name, operation, traceHeader);
 
     /// <summary>
@@ -608,14 +539,14 @@ public static class SentrySdk
     /// This method is used internally and is not meant for public use.
     /// </remarks>
     [DebuggerStepThrough]
-    public static void BindException(Exception exception, ISpan span)
+    public static void BindException(Exception exception, ISpanTracer span)
         => CurrentHub.BindException(exception, span);
 
     /// <summary>
     /// Gets the last active span.
     /// </summary>
     [DebuggerStepThrough]
-    public static ISpan? GetSpan()
+    public static ISpanTracer? GetSpan()
         => CurrentHub.GetSpan();
 
     /// <summary>

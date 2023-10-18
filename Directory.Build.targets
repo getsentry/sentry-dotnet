@@ -9,7 +9,6 @@
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">10.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'tizen'">6.5</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>
@@ -27,11 +26,6 @@
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'windows'">
     <Compile Remove="**\*.Windows.cs" />
     <Compile Remove="**\Windows\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'tizen'">
-    <Compile Remove="**\*.Tizen.cs" />
-    <Compile Remove="**\Tizen\**\*.cs" />
   </ItemGroup>
 
   <!-- Allow setting CLSCompliant via property in any csproj -->
@@ -66,9 +60,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(MauiWorkloadVersion)' == ''">
       <NO_WINDOWS>true</NO_WINDOWS>
-    </PropertyGroup>
-    <PropertyGroup Condition="!Exists('$(MSBuildBinPath)\..\..\packs\Samsung.Tizen.Sdk')">
-      <NO_TIZEN>true</NO_TIZEN>
     </PropertyGroup>
 
   </Target>
