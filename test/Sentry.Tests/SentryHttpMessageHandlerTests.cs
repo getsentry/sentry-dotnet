@@ -171,7 +171,7 @@ public class SentryHttpMessageHandlerTests
         await Assert.ThrowsAsync<Exception>(() => client.GetAsync("https://localhost/"));
 
         // Assert
-        hub.Received(1).BindException(exception, Arg.Any<ISpan>()); // second argument is an implicitly created span
+        hub.Received(1).BindException(exception, Arg.Any<ISpanTracer>()); // second argument is an implicitly created span
     }
 
     [Fact]
@@ -244,9 +244,9 @@ public class SentryHttpMessageHandlerTests
     {
         // Arrange
         var hub = Substitute.For<IHub>();
-        var parentSpan = Substitute.For<ISpan>();
+        var parentSpan = Substitute.For<ISpanTracer>();
         hub.GetSpan().Returns(parentSpan);
-        var childSpan = Substitute.For<ISpan>();
+        var childSpan = Substitute.For<ISpanTracer>();
         parentSpan.When(p => p.StartChild(Arg.Any<string>()))
             .Do(op => childSpan.Operation = op.Arg<string>());
         parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
@@ -453,7 +453,7 @@ public class SentryHttpMessageHandlerTests
         Assert.Throws<Exception>(() => client.Get("https://localhost/"));
 
         // Assert
-        hub.Received(1).BindException(exception, Arg.Any<ISpan>()); // second argument is an implicitly created span
+        hub.Received(1).BindException(exception, Arg.Any<ISpanTracer>()); // second argument is an implicitly created span
     }
 
     [Fact]

@@ -61,7 +61,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     }
 
     /// <inheritdoc />
-    protected internal override ISpan? ProcessRequest(HttpRequestMessage request, string method, string url)
+    protected internal override ISpanTracer? ProcessRequest(HttpRequestMessage request, string method, string url)
     {
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
@@ -74,7 +74,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     }
 
     /// <inheritdoc />
-    protected internal override void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url)
+    protected internal override void HandleResponse(HttpResponseMessage response, ISpanTracer? span, string method, string url)
     {
         var breadcrumbData = new Dictionary<string, string>
         {

@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <!--
@@ -24,7 +25,16 @@
   -->
   <PropertyGroup>
     <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <!-- Switch to this when running on an actual device -->
+<!--    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64'">ios-arm64</RuntimeIdentifier>-->
     <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <!--
+    To run on a device, you need to set the CodesignEntitlements property.
+  -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
 
   <!--
@@ -35,5 +45,4 @@
     <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
   </PropertyGroup>
-
 </Project>

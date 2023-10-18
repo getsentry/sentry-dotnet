@@ -63,7 +63,7 @@ public sealed class HubAdapter : IHub, IHubEx
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public ITransaction StartTransaction(
+    public ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => SentrySdk.StartTransaction(context, customSamplingContext);
@@ -72,7 +72,7 @@ public sealed class HubAdapter : IHub, IHubEx
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    internal ITransaction StartTransaction(
+    internal ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
@@ -82,14 +82,14 @@ public sealed class HubAdapter : IHub, IHubEx
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public void BindException(Exception exception, ISpan span) =>
+    public void BindException(Exception exception, ISpanTracer span) =>
         SentrySdk.BindException(exception, span);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public ISpan? GetSpan()
+    public ISpanTracer? GetSpan()
         => SentrySdk.GetSpan();
 
     /// <summary>
