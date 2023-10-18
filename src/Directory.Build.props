@@ -35,6 +35,12 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and $(TargetFramework.StartsWith('net8'))">
+    <!-- TODO: Replace with <PublishAot>true</PublishAot> once we've merged with the other AOT PRs -->
+    <IsTrimmable>true</IsTrimmable>
+    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup>
     <!-- Used by SIL.ReleaseTasks below -->
     <ChangelogFile>$(MSBuildThisFileDirectory)..\CHANGELOG.md</ChangelogFile>

@@ -14,6 +14,13 @@
     <UseSentryCLI>false</UseSentryCLI>
   </PropertyGroup>
 
+  <!-- Currently we're only testing AOT on net8. -->
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and $(TargetFramework.StartsWith('net8'))">
+    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
+    <!-- Ignore warnings for generated code -->
+    <NoWarn>$(NoWarn);SYSLIB0005;SYSLIB0012</NoWarn>
+  </PropertyGroup>
+
   <!--
     Workaround for Verify issue with scrubbing when running in Rider on Windows.
     Ensures that the volume label is upper cased ("C:" instead of "c:"), which is read

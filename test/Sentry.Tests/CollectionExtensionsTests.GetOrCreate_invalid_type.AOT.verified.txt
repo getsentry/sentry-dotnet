@@ -1,0 +1,4 @@
+﻿{
+  Type: Exception,
+  Message: Expected a type of Sentry.Tests.Internals.CollectionExtensionsTests+Value to exist for the key 'key'. Instead found a System.Int32. The likely cause of this is that the value for 'key' has been incorrectly set to an instance of a different type.
+}

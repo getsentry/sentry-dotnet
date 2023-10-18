@@ -7,6 +7,9 @@ public class JsonTests
     public JsonTests(ITestOutputHelper output)
     {
         _testOutputLogger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
+#if TRIMMABLE
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
     }
 
     public static Exception GenerateException(string description)
@@ -73,9 +76,6 @@ public class JsonTests
     public void WriteDynamicValue_ExceptionParameter_SerializedException()
     {
         // Arrange
-#if TRIMMABLE
-        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
-#endif
         var ex = GenerateException("Test");
         ex.Data.Add("a", "b");
 
@@ -110,9 +110,6 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithException()
     {
         // Arrange
-#if TRIMMABLE
-        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
-#endif
         var expectedMessage = "T est";
         var expectedData = new KeyValuePair<string, string>("a", "b");
         var ex = GenerateException(expectedMessage);
@@ -141,9 +138,6 @@ public class JsonTests
     [Fact]
     public void WriteDynamicValue_TypeParameter_FullNameTypeOutput()
     {
-#if TRIMMABLE
-        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
-#endif
         // Arrange
         var type = typeof(Exception);
         var expectedValue = "\"System.Exception\"";
@@ -159,9 +153,6 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithTypeParameter_ClassFormatted()
     {
         // Arrange
-#if TRIMMABLE
-        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
-#endif
         var type = typeof(List<>).GetGenericArguments()[0];
         var data = new DataWithSerializableObject<Type>(type);
 
@@ -177,9 +168,6 @@ public class JsonTests
     public void WriteDynamicValue_ClassWithAssembly_SerializedClassWithNullAssembly()
     {
         // Arrange
-#if TRIMMABLE
-        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
-#endif
         var data = new DataAndNonSerializableObject<Assembly>(AppDomain.CurrentDomain.GetAssemblies()[0]);
 
         // Act
@@ -220,9 +208,6 @@ public class JsonTests
     {
         // Arrange
         JsonExtensions.JsonPreserveReferences = true;
-#if TRIMMABLE
-        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
-#endif
         var testObject = new SelfReferencedObject();
         using var stream = new MemoryStream();
         using (var writer = new Utf8JsonWriter(stream))

@@ -1,0 +1,50 @@
+﻿{
+  thread_metadata: {
+    0: {
+      name: Thread 1
+    },
+    1: {
+      name: Thread 5
+    }
+  },
+  stacks: [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      2,
+      2,
+      0
+    ],
+    [
+      1,
+      0,
+      2
+    ]
+  ],
+  frames: [
+    {
+      function: Frame0
+    },
+    {
+      function: Frame1
+    },
+    {
+      function: Frame2
+    }
+  ],
+  samples: [
+    {
+      elapsed_since_start_ns: 6,
+      thread_id: 1,
+      stack_id: 4
+    },
+    {
+      elapsed_since_start_ns: 3,
+      thread_id: 0,
+      stack_id: 1
+    }
+  ]
+}

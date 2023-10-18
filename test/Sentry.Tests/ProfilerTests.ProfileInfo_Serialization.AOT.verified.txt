@@ -1,0 +1,83 @@
+﻿{
+  version: 1,
+  event_id: Guid_1,
+  timestamp: DateTimeOffset_1,
+  platform: csharp,
+  release: 1.0 (123),
+  environment: env name,
+  debug_meta: {
+    images: [
+      {
+        image_addr: 0x5
+      }
+    ]
+  },
+  device: {
+    architecture: arch,
+    manufacturer: device make,
+    model: device model
+  },
+  os: {
+    name: Windows,
+    version: 6.3.9600
+  },
+  runtime: {
+    type: runtime
+  },
+  transaction: {
+    active_thread_id: 0,
+    id: Guid_2,
+    name: tx name,
+    trace_id: Guid_3
+  },
+  profile: {
+    thread_metadata: {
+      0: {
+        name: Thread 1
+      },
+      1: {
+        name: Thread 5
+      }
+    },
+    stacks: [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        1,
+        0,
+        2
+      ]
+    ],
+    frames: [
+      {
+        function: Frame0
+      },
+      {
+        function: Frame1
+      },
+      {
+        function: Frame2
+      }
+    ],
+    samples: [
+      {
+        elapsed_since_start_ns: 6,
+        thread_id: 1,
+        stack_id: 4
+      },
+      {
+        elapsed_since_start_ns: 3,
+        thread_id: 0,
+        stack_id: 1
+      }
+    ]
+  }
+}

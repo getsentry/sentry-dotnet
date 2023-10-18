@@ -1,0 +1,14 @@
+﻿{
+  app: {
+    Name: Test,
+    Version: 1.2.3
+  },
+  Custom: {
+    A: Foo1,
+    B: Bar1
+  },
+  os: {
+    Name: Android,
+    Version: 999
+  }
+}
