@@ -33,6 +33,7 @@ API Changes:
 - Reordered parameters for ther TransactionContext and SpanContext constructors. If you're constructing instances of these classes, you will need to adjust the order in which you pass parameters to these. ([#2696](https://github.com/getsentry/sentry-dotnet/pull/2696))
 - The `DiagnosticLogger` signature for `LogError` and `LogFatal` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. The `DiagnosticLogger` now also received an overload for `LogError` and `LogFatal` that accepts a message only. ([#2715](https://github.com/getsentry/sentry-dotnet/pull/2715))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
+- Contexts now inherits from `IDictionary` rather than `ConcurrentDictionary`. The specific dictionary being used is an implementation detail. ([#2729](https://github.com/getsentry/sentry-dotnet/pull/2729))
 - The methods `WithScope` and `WithScopeAsync` have been removed. We discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
   Replace your usage of `WithScope` with the overloads of the `Capture` methods:
     - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
