@@ -199,9 +199,9 @@ public sealed class Contexts : IDictionary<string, object>, IJsonSerializable
     internal Contexts? NullIfEmpty() => _innerDictionary.IsEmpty ? null : this;
 
     /// <inheritdoc/>
-    public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => return _innerDictionary.GetEnumerator();
+    public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _innerDictionary.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator() => return ((IEnumerable)_innerDictionary).GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_innerDictionary).GetEnumerator();
 
     /// <inheritdoc/>
     public void Add(KeyValuePair<string, object> item)
@@ -211,7 +211,7 @@ public sealed class Contexts : IDictionary<string, object>, IJsonSerializable
     public void Clear() => _innerDictionary.Clear();
 
     /// <inheritdoc/>
-    public bool Contains(KeyValuePair<string, object> item) => return _innerDictionary.Contains(item);
+    public bool Contains(KeyValuePair<string, object> item) => _innerDictionary.Contains(item);
 
     /// <inheritdoc/>
     public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
@@ -219,7 +219,7 @@ public sealed class Contexts : IDictionary<string, object>, IJsonSerializable
 
     /// <inheritdoc/>
     public bool Remove(KeyValuePair<string, object> item)
-        => return ((ICollection<KeyValuePair<string, object>>)_innerDictionary).Remove(item);
+        => ((ICollection<KeyValuePair<string, object>>)_innerDictionary).Remove(item);
 
     /// <inheritdoc/>
     public int Count => _innerDictionary.Count;
@@ -231,10 +231,10 @@ public sealed class Contexts : IDictionary<string, object>, IJsonSerializable
     public void Add(string key, object value) => _innerDictionary.Add(key, value);
 
     /// <inheritdoc/>
-    public bool ContainsKey(string key) => return _innerDictionary.ContainsKey(key);
+    public bool ContainsKey(string key) => _innerDictionary.ContainsKey(key);
 
     /// <inheritdoc/>
-    public bool Remove(string key) => return ((IDictionary<string, object>)_innerDictionary).Remove(key);
+    public bool Remove(string key) => ((IDictionary<string, object>)_innerDictionary).Remove(key);
 
     /// <inheritdoc/>
     public bool TryGetValue(string key, out object value)
