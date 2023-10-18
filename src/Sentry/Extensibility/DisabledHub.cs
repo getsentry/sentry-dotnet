@@ -42,13 +42,6 @@ public class DisabledHub : IHub, IDisposable
     public IDisposable PushScope<TState>(TState state) => this;
 
     /// <summary>
-    /// No-Op.
-    /// </summary>
-    public void WithScope(Action<Scope> scopeCallback)
-    {
-    }
-
-    /// <summary>
     /// Returns a dummy transaction.
     /// </summary>
     public ITransactionTracer StartTransaction(

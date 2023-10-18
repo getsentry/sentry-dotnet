@@ -107,42 +107,6 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         ScopeAndClientStack = newScopeAndClientStack;
     }
 
-    public void WithScope(Action<Scope> scopeCallback)
-    {
-        using (PushScope())
-        {
-            var (scope, _) = GetCurrent();
-            scopeCallback.Invoke(scope);
-        }
-    }
-
-    public T? WithScope<T>(Func<Scope, T?> scopeCallback)
-    {
-        using (PushScope())
-        {
-            var (scope, _) = GetCurrent();
-            return scopeCallback.Invoke(scope);
-        }
-    }
-
-    public async Task WithScopeAsync(Func<Scope, Task> scopeCallback)
-    {
-        using (PushScope())
-        {
-            var (scope, _) = GetCurrent();
-            await scopeCallback.Invoke(scope).ConfigureAwait(false);
-        }
-    }
-
-    public async Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
-    {
-        using (PushScope())
-        {
-            var (scope, _) = GetCurrent();
-            return await scopeCallback.Invoke(scope).ConfigureAwait(false);
-        }
-    }
-
     public void BindClient(ISentryClient? client)
     {
         _options.LogDebug("Binding a new client to the current scope.");

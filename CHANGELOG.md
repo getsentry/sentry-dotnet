@@ -4,7 +4,7 @@
 
 ### Breaking changes
 
-Mobile support:
+Support Changes:
 
 .NET 6 on mobile is out of support since May 2023. With .NET 8 coming,
 it won't be possible to build .NET 6 Mobile specific targets.
@@ -13,6 +13,7 @@ Mobile apps still on .NET 6 will pull the `Sentry` .NET 6, which offers the .NET
 without native/platform specific bindings and SDKs. See [this ticket for more details](https://github.com/getsentry/sentry-dotnet/issues/2623).
 
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
+- Drop support for `Tizen` ([#2734](https://github.com/getsentry/sentry-dotnet/pull/2734))
 
 API Changes:
 
@@ -32,6 +33,29 @@ API Changes:
 - Reordered parameters for ther TransactionContext and SpanContext constructors. If you're constructing instances of these classes, you will need to adjust the order in which you pass parameters to these. ([#2696](https://github.com/getsentry/sentry-dotnet/pull/2696))
 - The `DiagnosticLogger` signature for `LogError` and `LogFatal` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. The `DiagnosticLogger` now also received an overload for `LogError` and `LogFatal` that accepts a message only. ([#2715](https://github.com/getsentry/sentry-dotnet/pull/2715))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
+- The methods `WithScope` and `WithScopeAsync` have been removed. We discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
+  Replace your usage of `WithScope` with the overloads of the `Capture` methods:
+    - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
+    - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
+    - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
+  
+  #### Before
+  ```
+  SentrySdk.WithScope(scope =>
+  {
+      // Configure your scope here
+      scope.SetTag("key", "value");
+      SentrySdk.CaptureEvent(new SentryEvent()); // Capture the event with the configured scope
+  });
+  ```
+  #### After
+  ```
+  SentrySdk.CaptureEvent(new SentryEvent(), scope =>
+  {
+      // Configure your scope here
+      scope.SetTag("key", "value");
+  });
+  ```
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
 
 ## Unreleased

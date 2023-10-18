@@ -9,7 +9,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
+    runs-on: macos-13
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -35,10 +36,7 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Install .NET Workloads
-        run: |
-           dotnet workload restore test/Sentry.Maui.Device.TestApp --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
-#          dotnet workload install ios maui-ios macos --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
-          dotnet workload list
+        run: dotnet workload install maui-ios --temp-dir "${{ runner.temp }}"
 
       - name: Restore .NET Dependencies
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo

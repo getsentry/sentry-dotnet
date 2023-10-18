@@ -100,18 +100,6 @@ internal class Hub : IHubEx, IDisposable
 
     public void RestoreScope(Scope savedScope) => ScopeManager.RestoreScope(savedScope);
 
-    [Obsolete]
-    public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
-
-    [Obsolete]
-    public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
-
-    [Obsolete]
-    public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
-
-    [Obsolete]
-    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
-
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
     public ITransactionTracer StartTransaction(
