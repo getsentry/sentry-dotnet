@@ -4,14 +4,6 @@
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <!-- Remove after switching to .NET 8 SDK -->
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <TargetFramework>net6.0</TargetFramework>
-    <PublishAot>false</PublishAot>
-  </PropertyGroup>
-  <PropertyGroup Condition="!$([MSBuild]::IsOSPlatform('OSX'))">
     <TargetFramework>net7.0</TargetFramework>
     <PublishAot>true</PublishAot>
   </PropertyGroup>
