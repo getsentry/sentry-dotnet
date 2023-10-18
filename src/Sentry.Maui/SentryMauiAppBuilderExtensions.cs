@@ -93,9 +93,6 @@ public static class SentryMauiAppBuilderExtensions
 #elif WINDOWS
             events.AddWindows(lifecycle => lifecycle.OnLaunching((application, _) =>
                 (application as IPlatformApplication)?.BindMauiEvents()));
-#elif TIZEN
-            events.AddTizen(lifecycle => lifecycle.OnCreate(application =>
-                (application as IPlatformApplication)?.BindMauiEvents()));
 #endif
         });
     }
