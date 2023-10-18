@@ -178,7 +178,7 @@ Describe 'Console apps - native AOT publish' {
 }
 
 Describe 'MAUI' {
-    It "uploads symbols and sources" {
+    It "uploads symbols and sources for an Android build" {
         $result = RunDotnet 'build' 'Sentry.Samples.Maui' $True $True 'net7.0-android'
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'Sentry.Android.AssemblyReader.pdb',
@@ -191,7 +191,7 @@ Describe 'MAUI' {
         $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Maui/MauiProgram.cs'
     }
     
-    It "uploads symbols and sources" -Skip:(!$IsMacOS) {
+    It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
         $result = RunDotnet 'build' 'Sentry.Samples.Maui' $True $True 'net7.0-ios'
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
