@@ -628,7 +628,7 @@ public static class ScopeTestExtensions
         scope.Distribution = $"{salt} distribution";
         scope.Environment = $"{salt} environment";
         scope.TransactionName = $"{salt} transaction";
-        scope.Transaction = Substitute.For<ITransaction>();
+        scope.Transaction = Substitute.For<ITransactionTracer>();
         scope.Fingerprint = new[] { $"{salt} fingerprint" };
         scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
         scope.SetData("data", $"{salt} data");

@@ -179,12 +179,12 @@ public class Scope : IEventLike, IHasData
         }
     }
 
-    private ITransaction? _transaction;
+    private ITransactionTracer? _transaction;
 
     /// <summary>
     /// Transaction.
     /// </summary>
-    public ITransaction? Transaction
+    public ITransactionTracer? Transaction
     {
         get => _transaction;
         set => _transaction = value;
@@ -586,9 +586,9 @@ public class Scope : IEventLike, IHasData
     /// Obsolete.  Use the <see cref="Span"/> property instead.
     /// </summary>
     [Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
-    public ISpan? GetSpan() => Span;
+    public ISpanTracer? GetSpan() => Span;
 
-    private ISpan? _span;
+    private ISpanTracer? _span;
 
     /// <summary>
     /// Gets or sets the active span, or <c>null</c> if none available.
@@ -598,7 +598,7 @@ public class Scope : IEventLike, IHasData
     /// Otherwise, the active span is the latest unfinished span on the transaction, presuming a transaction
     /// was set on the scope via the <see cref="Transaction"/> property.
     /// </remarks>
-    public ISpan? Span
+    public ISpanTracer? Span
     {
         get
         {
@@ -612,6 +612,6 @@ public class Scope : IEventLike, IHasData
         set => _span = value;
     }
 
-    internal void ResetTransaction(ITransaction? expectedCurrentTransaction) =>
+    internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction) =>
         Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
 }

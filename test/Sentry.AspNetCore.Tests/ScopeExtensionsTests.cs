@@ -42,7 +42,7 @@ public partial class ScopeExtensionsTests
         {
             if (addTransaction)
             {
-                Scope.Transaction = Substitute.For<ITransaction>();
+                Scope.Transaction = Substitute.For<ITransactionTracer>();
             }
 
             var routeFeature = new RoutingFeature
@@ -67,7 +67,7 @@ public partial class ScopeExtensionsTests
         {
             if (addTransaction)
             {
-                Scope.Transaction = Substitute.For<ITransaction>();
+                Scope.Transaction = Substitute.For<ITransactionTracer>();
             }
             var routeFeature = new RoutingFeature
             {

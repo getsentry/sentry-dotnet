@@ -209,6 +209,6 @@ public static class ScopeExtensions
     /// </summary>
     /// <param name="scope">The scope.</param>
     /// <returns>The last span not finished or null.</returns>
-    internal static ISpan? LastCreatedSpan(this Scope scope)
+    internal static ISpanTracer? LastCreatedSpan(this Scope scope)
         => scope.Transaction?.Spans.LastOrDefault(s => !s.IsFinished);
 }

@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction span tracer.
 /// </summary>
-public class SpanTracer : ISpan
+public class SpanTracer : ISpanTracer
 {
     private readonly IHub _hub;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
@@ -41,13 +41,13 @@ public class SpanTracer : ISpan
     public void SetMeasurement(string name, Measurement measurement) =>
         (InternalMeasurements ??= new Dictionary<string, Measurement>())[name] = measurement;
 
-    /// <inheritdoc cref="ISpan.Operation" />
+    /// <inheritdoc cref="ISpanTracer.Operation" />
     public string Operation { get; set; }
 
-    /// <inheritdoc cref="ISpan.Description" />
+    /// <inheritdoc cref="ISpanTracer.Description" />
     public string? Description { get; set; }
 
-    /// <inheritdoc cref="ISpan.Status" />
+    /// <inheritdoc cref="ISpanTracer.Status" />
     public SpanStatus? Status { get; set; }
 
     /// <summary>
@@ -119,7 +119,7 @@ public class SpanTracer : ISpan
     }
 
     /// <inheritdoc />
-    public ISpan StartChild(string operation) => Transaction.StartChild(null, parentSpanId:SpanId, operation: operation);
+    public ISpanTracer StartChild(string operation) => Transaction.StartChild(null, parentSpanId:SpanId, operation: operation);
 
     /// <summary>
     /// Used to mark a span as unfinished when it was previously marked as finished. This allows us to reuse spans for

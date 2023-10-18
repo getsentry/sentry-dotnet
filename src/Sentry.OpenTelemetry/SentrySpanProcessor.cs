@@ -15,7 +15,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     private readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
-    internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
+    internal readonly ConcurrentDictionary<ActivitySpanId, ISpanTracer> _map = new();
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
