@@ -33,7 +33,7 @@ jobs:
 
       - name: Ensure Solution Filters are up to date
         shell: pwsh
-        run: scripts/dirty-check.ps1 -PathToCheck ./*.slnf -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
+        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
