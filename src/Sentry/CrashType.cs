@@ -7,15 +7,15 @@ namespace Sentry;
 [Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a real application.")]
 public enum CrashType
 {
-    /// <summary>
-    /// A managed <see cref="ApplicationException"/> will be thrown from .NET.
-    /// </summary>
-    Managed,
+        /// <summary>
+        /// A managed <see cref="ApplicationException"/> will be thrown from .NET.
+        /// </summary>
+        Managed,
 
-    /// <summary>
-    /// A managed <see cref="ApplicationException"/> will be thrown from .NET on a background thread.
-    /// </summary>
-    ManagedBackgroundThread,
+        /// <summary>
+        /// A managed <see cref="ApplicationException"/> will be thrown from .NET on a background thread.
+        /// </summary>
+        ManagedBackgroundThread,
 
 #if ANDROID
         /// <summary>
@@ -31,7 +31,7 @@ public enum CrashType
 
 #if __MOBILE__
         /// <summary>
-        /// A native operation that will crash the appliction will be performed by a C library.
+        /// A native operation that will crash the application will be performed by a C library.
         /// </summary>
         Native
 #endif

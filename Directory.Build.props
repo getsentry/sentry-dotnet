@@ -17,6 +17,10 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.NoMobile'">
+    <NO_MOBILE>true</NO_MOBILE>
+  </PropertyGroup>
+
   <!-- NO_MOBILE can be passed in via an environment variable or a build property to disable all mobile targets -->
   <PropertyGroup Condition="'$(NO_MOBILE)' == 'true'">
     <NO_ANDROID>true</NO_ANDROID>

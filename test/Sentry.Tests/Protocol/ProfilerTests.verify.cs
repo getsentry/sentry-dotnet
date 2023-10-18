@@ -82,7 +82,7 @@ public class ProfilerTests
         sut.StartTimestamp = DateTimeOffset.UtcNow;
         sut.DebugMeta.Images = new List<DebugImage> {
             new () {
-                ImageAddress = "0xABCDEF"
+                ImageAddress = 5
             }
         };
         sut.Profile = CreateSampleProfile();

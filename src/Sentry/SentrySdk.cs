@@ -15,7 +15,7 @@ namespace Sentry;
 #if __MOBILE__
 public static partial class SentrySdk
 #else
-    public static class SentrySdk
+public static class SentrySdk
 #endif
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
@@ -528,7 +528,7 @@ public static partial class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -540,7 +540,7 @@ public static partial class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -558,7 +558,7 @@ public static partial class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(
+    public static ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => CurrentHub.StartTransaction(context, customSamplingContext);
@@ -567,7 +567,7 @@ public static partial class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    internal static ITransaction StartTransaction(
+    internal static ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
@@ -577,28 +577,28 @@ public static partial class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(ITransactionContext context)
+    public static ITransactionTracer StartTransaction(ITransactionContext context)
         => CurrentHub.StartTransaction(context);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation)
+    public static ITransactionTracer StartTransaction(string name, string operation)
         => CurrentHub.StartTransaction(name, operation);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation, string? description)
+    public static ITransactionTracer StartTransaction(string name, string operation, string? description)
         => CurrentHub.StartTransaction(name, operation, description);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
+    public static ITransactionTracer StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
         => CurrentHub.StartTransaction(name, operation, traceHeader);
 
     /// <summary>
@@ -608,14 +608,14 @@ public static partial class SentrySdk
     /// This method is used internally and is not meant for public use.
     /// </remarks>
     [DebuggerStepThrough]
-    public static void BindException(Exception exception, ISpan span)
+    public static void BindException(Exception exception, ISpanTracer span)
         => CurrentHub.BindException(exception, span);
 
     /// <summary>
     /// Gets the last active span.
     /// </summary>
     [DebuggerStepThrough]
-    public static ISpan? GetSpan()
+    public static ISpanTracer? GetSpan()
         => CurrentHub.GetSpan();
 
     /// <summary>

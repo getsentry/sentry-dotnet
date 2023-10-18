@@ -64,17 +64,17 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// <param name="request">The <see cref="HttpRequestMessage"/></param>
     /// <param name="method">The request method (e.g. "GET")</param>
     /// <param name="url">The request URL</param>
-    /// <returns>An <see cref="ISpan"/></returns>
-    protected internal abstract ISpan? ProcessRequest(HttpRequestMessage request, string method, string url);
+    /// <returns>An <see cref="ISpanTracer"/></returns>
+    protected internal abstract ISpanTracer? ProcessRequest(HttpRequestMessage request, string method, string url);
 
     /// <summary>
     /// Provides an opportunity for further processing of the span once a response is received.
     /// </summary>
     /// <param name="response">The <see cref="HttpResponseMessage"/></param>
-    /// <param name="span">The <see cref="ISpan"/> created in <see cref="ProcessRequest"/></param>
+    /// <param name="span">The <see cref="ISpanTracer"/> created in <see cref="ProcessRequest"/></param>
     /// <param name="method">The request method (e.g. "GET")</param>
     /// <param name="url">The request URL</param>
-    protected internal abstract void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url);
+    protected internal abstract void HandleResponse(HttpResponseMessage response, ISpanTracer? span, string method, string url);
 
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(

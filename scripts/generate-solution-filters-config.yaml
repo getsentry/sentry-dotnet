@@ -3,7 +3,7 @@
 # the *.slnf solution filters for the Sentry solution.
 ################################################################
 
-solution: Sentry.sln
+defaultSolution: Sentry.sln
 
 groupConfigs:
   allProjects:
@@ -50,6 +50,7 @@ filterConfigs:
         - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
         - "**/Sentry.Samples.Android.csproj"
+        - "**/Sentry.Bindings.Native.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -78,6 +79,7 @@ filterConfigs:
         - "test/**/*.csproj"
 
   - outputPath: SentryAspNetCore.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
@@ -101,6 +103,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryCore.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
@@ -114,6 +117,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/*DiagnosticSource*.csproj"
@@ -132,7 +136,8 @@ filterConfigs:
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
         - "src/**/*Android*.csproj"
-        - "src/**/*Bindings*.csproj"
+        - "src/**/*Bindings.Android.csproj"
+        - "src/**/*Bindings.Cocoa.csproj"
         - "src/**/Sentry.Extensions.Logging.csproj"
         - "src/**/Sentry.Maui.csproj"
         - "test/**/Sentry.Android.AssemblyReader.Tests.csproj"
@@ -144,6 +149,7 @@ filterConfigs:
         - "test/MauiTestUtils/**/*.csproj"
 
   - outputPath: SentryNoMobile.slnf
+    solution: Sentry.NoMobile.sln
     include:
       groups:
         - "allProjects"
