@@ -46,9 +46,9 @@ public class SentryDiagnosticListenerTests
         }
         public ItemsContext NewContext() => new(_database.ContextOptions);
 
-        public ISpan GetSpan() => ScopeManager.GetCurrent().Key.Span;
+        public ISpanTracer GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
-        public ITransaction StartTransaction(IHub hub, ITransactionContext context)
+        public ITransactionTracer StartTransaction(IHub hub, ITransactionContext context)
         {
             var transaction = new TransactionTracer(hub, context)
             {
