@@ -3,7 +3,7 @@
 # the *.slnf solution filters for the Sentry solution.
 ################################################################
 
-solution: Sentry.sln
+defaultSolution: Sentry.sln
 
 groupConfigs:
   allProjects:
@@ -78,6 +78,7 @@ filterConfigs:
         - "test/**/*.csproj"
 
   - outputPath: SentryAspNetCore.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
@@ -101,6 +102,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryCore.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
@@ -114,6 +116,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/*DiagnosticSource*.csproj"
@@ -144,6 +147,7 @@ filterConfigs:
         - "test/MauiTestUtils/**/*.csproj"
 
   - outputPath: SentryNoMobile.slnf
+    solution: Sentry.NoMobile.sln
     include:
       groups:
         - "allProjects"
