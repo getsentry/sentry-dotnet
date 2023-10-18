@@ -59,7 +59,7 @@ BeforeAll {
         $result = Invoke-SentryServer {
             Param([string]$url)
             Write-Host "Building $Sample"
-            dotnet $action "samples/$sample/$sample.csproj" -c Release -f $TargetFramework --no-restore --nologo -v d `
+            dotnet $action "samples/$sample/$sample.csproj" -c Release -f $TargetFramework --no-restore --nologo `
                 /p:UseSentryCLI=true `
                 /p:SentryUploadSymbols=$Symbols `
                 /p:SentryUploadSources=$Sources `
