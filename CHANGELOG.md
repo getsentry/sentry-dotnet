@@ -36,6 +36,10 @@ API Changes:
 
 ## Unreleased
 
+### Fixes
+
+- Fixed chaining on the IApplicationBuilder for methods like UseRouting and UseEndpoints ([#2726](https://github.com/getsentry/sentry-dotnet/pull/2726))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.13.0 to v8.13.1 ([#2722](https://github.com/getsentry/sentry-dotnet/pull/2722))

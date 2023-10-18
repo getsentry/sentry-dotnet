@@ -101,9 +101,14 @@ foreach($filter in $config.filterConfigs){
     Write-Debug "Writing filter matching $($includedProjects.Count) projects"
 
     # Start filter file
+    $solution = if ($filter.ContainsKey('solution')) {
+      $filter.solution
+    } else {
+      $config.defaultSolution
+    }
     $content = "{
   `"solution`": {
-    `"path`": `"$($config.solution)`",
+    `"path`": `"$($solution)`",
     `"projects`": ["
 
     # Add all the projects we want to include
@@ -132,3 +137,8 @@ foreach($filter in $config.filterConfigs){
   $content | Set-Content $outputPath
   Write-Debug "Created $outputPath"
 }
+
+# Update solution files from Sentry.sln
+$source = Join-Path $repoRoot "Sentry.sln"
+$destination = Join-Path $repoRoot "Sentry.NoMobile.sln"
+Copy-Item -Path $source -Destination $destination -Force
