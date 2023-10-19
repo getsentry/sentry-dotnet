@@ -36,8 +36,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and $(TargetFramework.StartsWith('net8'))">
-    <!-- TODO: Replace with <PublishAot>true</PublishAot> once we've merged with the other AOT PRs -->
-    <IsTrimmable>true</IsTrimmable>
+    <PublishAot>true</PublishAot>
     <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
   </PropertyGroup>
 

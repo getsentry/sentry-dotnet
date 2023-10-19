@@ -1,7 +1,7 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
-using Sentry.Internal.ILSpy;
 using Sentry.Native;
+using Sentry.Internal.ILSpy;
 
 namespace Sentry.Internal;
 
@@ -337,7 +337,7 @@ internal class DebugStackTrace : SentryStackTrace
             {
                 // method.MetadataToken may throw
                 // see https://learn.microsoft.com/en-us/dotnet/api/system.reflection.memberinfo.metadatatoken?view=net-6.0
-                _options.LogDebug("Could not get MetadataToken for stack frame {0} from {1}", frame.Function, method.Module.Name);
+                _options.LogDebug("Could not get MetadataToken for stack frame {0} from {1}", frame.Function, method.Module.GetNameOrScopeName());
             }
         }
 
@@ -496,6 +496,13 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
+#if TRIMMABLE
+    private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
+    {
+        assemblyName = null;
+        return null;
+    }
+#else
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
         assemblyName = module.FullyQualifiedName;
@@ -514,6 +521,7 @@ internal class DebugStackTrace : SentryStackTrace
             return null;
         }
     }
+#endif
 
     private int? AddManagedModuleDebugImage(Module module)
     {

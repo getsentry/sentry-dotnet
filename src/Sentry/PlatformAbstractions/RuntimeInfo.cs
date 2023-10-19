@@ -82,6 +82,8 @@ internal static class RuntimeInfo
                 version = frameworkInstallation?.Version?.ToString();
             }
         }
+#elif TRIMMABLE
+    private static string? GetNetCoreVersion(Runtime runtime) => null; // There is no runtime for AOT apps
 #else
     // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
     private static string? GetNetCoreVersion(Runtime runtime)
@@ -96,7 +98,7 @@ internal static class RuntimeInfo
 #if NETCOREAPP3_0_OR_GREATER
         var assemblyPath = assembly.Location;
 #else
-            var assemblyPath = assembly.CodeBase;
+        var assemblyPath = assembly.CodeBase;
 #endif
         var parts = assemblyPath.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
         var netCoreAppIndex = Array.IndexOf(parts, "Microsoft.NETCore.App");
