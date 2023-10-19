@@ -155,6 +155,10 @@ Describe 'Console apps - normal build' {
 }
 
 Describe 'Console apps - native AOT publish' {
+    BeforeAll {
+        dotnet workload restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj --use-current-runtime
+    }
+    
     BeforeEach {
         Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -Recurse -Verbose 
     }
@@ -163,7 +167,7 @@ Describe 'Console apps - native AOT publish' {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'Sentry.pdb',
-            'Sentry.Samples.Console.Basic.pdb')
+            ($IsWindows ? 'Sentry.Samples.Console.Basic.pdb' : 'Sentry.Samples.Console.Basic'))
         $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
         $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 0 debug information files'
     }
@@ -172,14 +176,14 @@ Describe 'Console apps - native AOT publish' {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $False
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'Sentry.pdb',
-            'Sentry.Samples.Console.Basic.pdb')
+            ($IsWindows ? 'Sentry.Samples.Console.Basic.pdb' : 'Sentry.Samples.Console.Basic'))
         $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
     }
  
     It "uploads sources" {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            'Sentry.Samples.Console.Basic.src.zip')
+            $IsWindows ? 'Sentry.Samples.Console.Basic.src.zip' : 'Sentry.Samples.Console.src.zip')
     }
 
     It "uploads nothing when disabled" {
