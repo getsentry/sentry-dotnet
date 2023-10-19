@@ -35,6 +35,10 @@ function ShouldAnyElementMatch ($ActualValue, [string]$ExpectedValue, [switch] $
             $failureMessage = "Expected string '$ExpectedValue' to match any element in collection @($($ActualValue -join ', '))$(if($Because) { " because $Because"})."
         }
     }
+    else
+    {
+        $failureMessage = $null
+    }
 
     return [pscustomobject]@{
         Succeeded      = $succeeded
@@ -58,34 +62,41 @@ BeforeAll {
 
         $result = Invoke-SentryServer {
             Param([string]$url)
-            Write-Host "Building $Sample"
-            dotnet $action "samples/$sample/$sample.csproj" -c Release -f $TargetFramework --no-restore --nologo `
-                /p:UseSentryCLI=true `
-                /p:SentryUploadSymbols=$Symbols `
-                /p:SentryUploadSources=$Sources `
-                /p:SentryOrg=org `
-                /p:SentryProject=project `
-                /p:SentryUrl=$url `
-                /p:SentryAuthToken=dummy `
-            | ForEach-Object {
-                if ($_ -match "^Time Elapsed ")
-                {
-                    "Time Elapsed [value removed]"
+            Write-Host "::group::Building $Sample"
+            try
+            {
+                dotnet $action "samples/$sample/$sample.csproj" -c Release -f $TargetFramework --no-restore --nologo `
+                    /p:UseSentryCLI=true `
+                    /p:SentryUploadSymbols=$Symbols `
+                    /p:SentryUploadSources=$Sources `
+                    /p:SentryOrg=org `
+                    /p:SentryProject=project `
+                    /p:SentryUrl=$url `
+                    /p:SentryAuthToken=dummy `
+                | ForEach-Object {
+                    if ($_ -match "^Time Elapsed ")
+                    {
+                        "Time Elapsed [value removed]"
+                    }
+                    elseif ($_ -match "\[[0-9/]+\]")
+                    {
+                        # Skip lines like `[102/103] Sentry.Samples.Maui.dll -> Sentry.Samples.Maui.dll.so`
+                    }
+                    else
+                    {
+                        "$_". `
+                            Replace($rootDir, '').  `
+                            Replace('\', '/')
+                    }
                 }
-                elseif ($_ -match "\[[0-9/]+\]")
-                {
-                    # Skip lines like `[102/103] Sentry.Samples.Maui.dll -> Sentry.Samples.Maui.dll.so`
-                }
-                else
-                {
-                    "$_". `
-                        Replace($rootDir, '').  `
-                        Replace('\', '/')
+                | ForEach-Object {
+                    Write-Host "  $_"
+                    $_
                 }
             }
-            | ForEach-Object {
-                Write-Host "  $_"
-                $_
+            finally
+            {
+                Write-Host "::endgroup::"
             }
         }
         
