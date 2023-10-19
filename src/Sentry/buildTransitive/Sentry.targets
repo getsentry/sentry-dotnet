@@ -149,9 +149,11 @@
     <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
   </ItemGroup>
 
-  <!-- Upload symbols to Sentry after the build. -->
+  <!-- Upload symbols to Sentry after the build. 
+       We're explicitly skipping uploads for Sentry project because it would interfere with integration tests. 
+       Also, it only ever gets triggered for Sentry within this repository. -->
   <Target Name="UploadDebugInfoToSentry" AfterTargets="$(SentryCLIUploadAfterTargets)" DependsOnTargets="PrepareSentryCLI"
-    Condition="'$(SentryCLI)' != '' and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true')">
+    Condition="'$(MSBuildProjectName)' != 'Sentry' and '$(SentryCLI)' != '' and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true')">
 
     <!-- if (UploadSymbols && UploadSources) { -->
       <Message Importance="High"
@@ -175,8 +177,10 @@
       </Exec>
     <!-- } else if (!UploadSymbols && UploadSources) { -->
       <PropertyGroup>
-        <SentryCLIDebugInfoFile>@(IntermediateAssembly->'$(SentryCLIUploadDirectory)%(FileName).pdb')</SentryCLIDebugInfoFile>
+        <SentryCLIDebugInfoFile Condition="'$(NativeBinary)' != ''">$(NativeBinary)$(NativeSymbolExt)</SentryCLIDebugInfoFile>
+        <SentryCLIDebugInfoFile Condition="'$(NativeBinary)' == '' or !Exists('$(SentryCLIDebugInfoFile)')">@(IntermediateAssembly->'$(SentryCLIUploadDirectory)%(FileName).pdb')</SentryCLIDebugInfoFile>
         <SentryCLIDebugInfoFile Condition="!Exists('$(SentryCLIDebugInfoFile)')">@(IntermediateAssembly->'$(SentryCLIUploadDirectory)%(FileName)%(Extension)')</SentryCLIDebugInfoFile>
+        <SentryCLIUploadSourcesDirectory>$([System.IO.Path]::GetDirectoryName('$(SentryCLIDebugInfoFile)'))</SentryCLIUploadSourcesDirectory>
       </PropertyGroup>
       <Message Importance="High"
         Condition="'$(SentryUploadSymbols)' != 'true' and '$(SentryUploadSources)' == 'true'"
@@ -189,7 +193,7 @@
       <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload debug files." />
       <Exec
         Condition="'$(SentryUploadSymbols)' != 'true' and '$(SentryUploadSources)' == 'true' and '$(_SentryCLIExitCode)' == '0'"
-        Command="$(SentryCLIDebugFilesUploadCommand) -t sourcebundle $(SentryCLIUploadDirectory)"
+        Command="$(SentryCLIDebugFilesUploadCommand) -t sourcebundle $(SentryCLIUploadSourcesDirectory)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
