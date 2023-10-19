@@ -48,7 +48,7 @@ runs:
     # TODO: Figure out how to cache workloads, as they're not quite the same as nuget packages.
     - name: Install .NET Workloads
       shell: pwsh
-      run: ./scripts/dotnet-workload-restore.ps1 Sentry-CI-Build-${{ runner.os }}.slnf
+      run: ./scripts/dotnet-workload-restore.ps1
 
     # We build Sentry.Maui for every supported MAUI target so we can access platform-specific features.
     # That includes Tizen. We don't need the entire Tizen SDK, but we do need the base Tizen workload.
