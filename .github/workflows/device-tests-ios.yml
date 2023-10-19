@@ -29,8 +29,8 @@ jobs:
       - name: Build Cocoa SDK
         uses: ./.github/actions/buildcocoasdk
 
-      - name: Install .NET Workloads
-        run: dotnet workload install maui-ios --temp-dir "${{ runner.temp }}"
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Restore .NET Dependencies
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
@@ -55,7 +55,6 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -64,6 +63,9 @@ jobs:
         with:
           name: device-test-ios
           path: bin/Sentry.Maui.Device.TestApp.app
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Install XHarness
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
