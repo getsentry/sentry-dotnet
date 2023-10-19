@@ -5,8 +5,8 @@
     Data: {
       message: Exception message!,
       stackTrace:
-at Sentry.Tests.SentryClientTests.<>c__DisplayClass72_0.<CaptureTransaction_BeforeSendTransactionThrows_ErrorToEventBreadcrumb>b__0(...)
-at Sentry.SentryClient.BeforeSendTransaction(...)
+at Task Sentry.Tests.SentryClientTests.CaptureTransaction_BeforeSendTransactionThrows_ErrorToEventBreadcrumb()
+at Transaction Sentry.SentryClient.BeforeSendTransaction(...)
     },
     Category: SentryClient,
     Level: error
