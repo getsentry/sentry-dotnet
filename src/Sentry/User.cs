@@ -167,7 +167,7 @@ public sealed class User : IJsonSerializable
             Email = email,
             IpAddress = ip,
             Segment = segment,
-            _other = other?.WhereNotNullValue().ToDictionary()
+            _other = other?.WhereNotNullValue().ToDict()
         };
     }
 }

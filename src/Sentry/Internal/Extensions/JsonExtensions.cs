@@ -780,7 +780,7 @@ internal static class JsonExtensions
         IEnumerable<KeyValuePair<string, object?>>? dic,
         IDiagnosticLogger? logger)
     {
-        var dictionary = dic as IReadOnlyDictionary<string, object?> ?? dic?.ToDictionary();
+        var dictionary = dic as IReadOnlyDictionary<string, object?> ?? dic?.ToDict();
         if (dictionary is not null && dictionary.Count > 0)
         {
             writer.WriteDictionary(propertyName, dictionary, logger);
@@ -794,7 +794,7 @@ internal static class JsonExtensions
         IDiagnosticLogger? logger)
         where TValue : IJsonSerializable?
     {
-        var dictionary = dic as IReadOnlyDictionary<string, TValue> ?? dic?.ToDictionary();
+        var dictionary = dic as IReadOnlyDictionary<string, TValue> ?? dic?.ToDict();
         if (dictionary is not null && dictionary.Count > 0)
         {
             writer.WriteDictionary(propertyName, dictionary, logger);
@@ -806,7 +806,7 @@ internal static class JsonExtensions
         string propertyName,
         IEnumerable<KeyValuePair<string, string?>>? dic)
     {
-        var dictionary = dic as IReadOnlyDictionary<string, string?> ?? dic?.ToDictionary();
+        var dictionary = dic as IReadOnlyDictionary<string, string?> ?? dic?.ToDict();
         if (dictionary is not null && dictionary.Count > 0)
         {
             writer.WriteStringDictionary(propertyName, dictionary);

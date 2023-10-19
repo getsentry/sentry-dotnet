@@ -76,7 +76,7 @@ public class SentryPropagatorTests
         {
             carrier.Should().ContainKey("baggage");
             var baggageDictionary = (BaggageHeader.TryParse(carrier["baggage"])?.Members is {} members)
-                ? members.ToDictionary()
+                ? members.ToDict()
                 : new Dictionary<string, string>();
             baggageDictionary.Should().Equal(new Dictionary<string, string>()
             {

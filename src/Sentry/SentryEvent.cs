@@ -316,7 +316,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
 
         return new SentryEvent(exception, timestamp, eventId)
         {
-            _modules = modules?.WhereNotNullValue().ToDictionary(),
+            _modules = modules?.WhereNotNullValue().ToDict(),
             Message = message,
             Logger = logger,
             Platform = platform,
@@ -335,8 +335,8 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
             Sdk = sdk,
             _fingerprint = fingerprint!,
             _breadcrumbs = breadcrumbs,
-            _extra = extra?.ToDictionary(),
-            _tags = tags?.WhereNotNullValue().ToDictionary()
+            _extra = extra?.ToDict(),
+            _tags = tags?.WhereNotNullValue().ToDict()
         };
     }
 }

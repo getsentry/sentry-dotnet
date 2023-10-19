@@ -261,12 +261,12 @@ public class Transaction : ITransactionData, IJsonSerializable
         Sdk = tracer.Sdk;
         Fingerprint = tracer.Fingerprint;
         _breadcrumbs = tracer.Breadcrumbs.ToList();
-        _extra = tracer.Extra.ToDictionary();
-        _tags = tracer.Tags.ToDictionary();
+        _extra = tracer.Extra.ToDict();
+        _tags = tracer.Tags.ToDict();
         _spans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
             .Select(s => new Span(s)).ToArray();
-        _measurements = tracer.Measurements.ToDictionary();
+        _measurements = tracer.Measurements.ToDict();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
         if (tracer is TransactionTracer transactionTracer)
@@ -379,7 +379,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         var extra = json.GetPropertyOrNull("extra")?
             .GetDictionaryOrNull() ?? new();
         var tags = json.GetPropertyOrNull("tags")?
-            .GetStringDictionaryOrNull()?.WhereNotNullValue().ToDictionary() ?? new();
+            .GetStringDictionaryOrNull()?.WhereNotNullValue().ToDict() ?? new();
         var measurements = json.GetPropertyOrNull("measurements")?
             .GetDictionaryOrNull(Measurement.FromJson) ?? new();
         var spans = json.GetPropertyOrNull("spans")?

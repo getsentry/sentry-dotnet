@@ -56,7 +56,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Resource attributes are consistent between spans, but not available during construction.
         // Thus, get a single instance lazily.
         _resourceAttributes = new Lazy<IDictionary<string, object>>(() =>
-            ParentProvider?.GetResource().Attributes.ToDictionary() ?? new Dictionary<string, object>(0));
+            ParentProvider?.GetResource().Attributes.ToDict() ?? new Dictionary<string, object>(0));
     }
 
     /// <inheritdoc />
@@ -111,7 +111,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     public override void OnEnd(Activity data)
     {
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
-        var attributes = data.TagObjects.ToDictionary();
+        var attributes = data.TagObjects.ToDict();
 
         if (attributes.TryGetTypedValue("http.url", out string? url) && (_options?.IsSentryRequest(url) ?? false))
         {
@@ -325,7 +325,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
         foreach (var @event in activity.Events.Where(e => e.Name == OtelSemanticConventions.AttributeExceptionEventName))
         {
-            var eventAttributes = @event.Tags.ToDictionary();
+            var eventAttributes = @event.Tags.ToDict();
             // This would be where we would ideally implement full exception capture. That's not possible at the
             // moment since the full exception isn't yet available via the OpenTelemetry API.
             // See https://github.com/open-telemetry/opentelemetry-dotnet/issues/2439#issuecomment-1577314568

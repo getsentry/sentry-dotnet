@@ -76,7 +76,7 @@ public static class VerifyExtensions
                             _.Key != "Memory Info" &&
                             _.Key != "Dynamic Code")
                 .OrderBy(x => x.Key)
-                .ToDictionary();
+                .ToDict();
             writer.Serialize(items);
         }
     }
