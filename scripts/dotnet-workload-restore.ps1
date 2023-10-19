@@ -11,7 +11,7 @@ $dotnetWorkloadRestore = {
     $matchText = "Successfully installed workload\(s\) "
     Write-Host "Restoring $ProjectOrSolution"
     $tempArg = (Test-Path env:RUNNER_TEMP) ? @("--temp-dir", $env:RUNNER_TEMP) : ''
-    dotnet workload restore $ProjectOrSolution --from-rollback-file rollback.json $tempArg | ForEach-Object {
+    dotnet workload restore $ProjectOrSolution --from-rollback-file rollback.json $tempArg --nologo | ForEach-Object {
         Write-Host "  $_"
         if ($_ -match $matchText)
         {
