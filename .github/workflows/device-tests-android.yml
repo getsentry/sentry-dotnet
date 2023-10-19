@@ -29,11 +29,11 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
-
-      - name: Install .NET Workloads
-        run: dotnet workload install maui-android --temp-dir "${{ runner.temp }}"
 
       - name: Restore .NET Dependencies
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo

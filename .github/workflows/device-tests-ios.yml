@@ -29,8 +29,8 @@ jobs:
       - name: Build Cocoa SDK
         uses: ./.github/actions/buildcocoasdk
 
-      - name: Install .NET Workloads
-        run: dotnet workload install maui-ios --temp-dir "${{ runner.temp }}"
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Restore .NET Dependencies
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
