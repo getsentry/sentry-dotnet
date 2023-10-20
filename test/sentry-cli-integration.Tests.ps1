@@ -118,7 +118,10 @@ BeforeAll {
 
 Describe 'Console apps - normal build' {
     BeforeAll {
-        Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/' -Recurse -Verbose
+        # Make sure we start with a clean project so that we get the same builds as in CI.
+        git clean -ffxd samples/Sentry.Samples.Console.Basic
+        Write-Host "Running dotnet restore for Sentry.Samples.Console.Basic"
+        dotnet restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj
     }
 
     BeforeEach {
@@ -162,13 +165,18 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
+        # Make sure we start with a clean project so that we get the same builds as in CI.
+        git clean -ffxd samples/Sentry.Samples.Console.Basic
         $runtime = $IsWindows ? 'win-x64' : $IsLinux ? 'linux-x64' : "osx-$(uname -m)"
         Write-Host "Running dotnet restore for Sentry.Samples.Console.Basic, runtime: $runtime"
         dotnet restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj --runtime $runtime
     }
 
     BeforeEach {
-        Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -Recurse -Verbose
+        if (Get-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -ErrorAction SilentlyContinue)
+        {
+            Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -Recurse -Verbose
+        }
     }
 
     It "uploads symbols and sources (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
