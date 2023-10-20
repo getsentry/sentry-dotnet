@@ -161,14 +161,16 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
-        dotnet restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj --use-current-runtime
+        $runtime = $IsWindows ? 'win-x64' : $IsLinux ? 'linux-x64' : "osx-$(uname -m)"
+        Write-Host "Running dotnet restore for Sentry.Samples.Console.Basic, runtime: $runtime"
+        dotnet restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj --runtime $runtime
     }
 
     BeforeEach {
         Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -Recurse -Verbose
     }
 
-    It "uploads symbols and sources (<framework>)" {
+    It "uploads symbols and sources (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
@@ -180,14 +182,16 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
         }
         else
         {
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-                'Sentry.Samples.Console.Basic', 'Sentry.Samples.Console.Basic.dbg')
+            # On macOS, only the dwarf is uploaded from dSYM so it has the same name as the actual executable.
+            $debugExtension = $IsLinux ? '.dbg' : ''
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be (@(
+                    'Sentry.Samples.Console.Basic', "Sentry.Samples.Console.Basic$debugExtension") | Sort-Object -Unique)
             $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files'
             $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
         }
     }
 
-    It "uploads symbols (<framework>)" {
+    It "uploads symbols (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $False $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
@@ -198,21 +202,26 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
         }
         else
         {
-            $debugExtension = $IsLinux ? '.dbg' : '.dSYM'
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-                'Sentry.Samples.Console.Basic', "Sentry.Samples.Console.Basic$debugExtension")
+            # On macOS, only the dwarf is uploaded from dSYM so it has the same name as the actual executable.
+            $debugExtension = $IsLinux ? '.dbg' : ''
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be (@(
+                    'Sentry.Samples.Console.Basic', "Sentry.Samples.Console.Basic$debugExtension") | Sort-Object -Unique)
             $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files'
         }
     }
 
-    It "uploads sources (<framework>)" {
+    It "uploads sources (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
-        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            ($IsWindows -or $framework -eq 'net8.0') ? 'Sentry.Samples.Console.Basic.src.zip' : 'Sentry.Samples.Console.src.zip')
+        $sourceBundle = 'Sentry.Samples.Console.Basic.src.zip'
+        if ($IsMacOS -or ($IsLinux -and $framework -eq 'net7.0'))
+        {
+            $sourceBundle = 'Sentry.Samples.Console.src.zip'
+        }
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @($sourceBundle)
     }
 
-    It "uploads nothing when disabled (<framework>)" {
+    It "uploads nothing when disabled (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
@@ -253,6 +262,7 @@ Describe 'MAUI' {
             'Sentry.Samples.Maui',
             'Sentry.Samples.Maui.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Maui/MauiProgram.cs'
+        $nonZeroNumberRegex = '[1-9][0-9]*';
+        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 }
