@@ -68,7 +68,6 @@ BeforeAll {
             try
             {
                 dotnet $action "samples/$sample/$sample.csproj" -c Release -f $TargetFramework --no-restore --nologo `
-                    /p:UseSentryCLI=true `
                     /p:SentryUploadSymbols=$Symbols `
                     /p:SentryUploadSources=$Sources `
                     /p:SentryOrg=org `
@@ -101,7 +100,7 @@ BeforeAll {
                 Write-Host "::endgroup::"
             }
         }
-        
+
         if ($action -eq "build")
         {
             $result.ScriptOutput | Should -Contain 'Build succeeded.'
@@ -109,7 +108,7 @@ BeforeAll {
         elseif ($action -eq "publish")
         {
             $result.ScriptOutput | Should -AnyElementMatch "$sample -> .*samples/$sample/bin/Release/$TargetFramework/.*/publish"
-        } 
+        }
         $result.ScriptOutput | Should -Not -AnyElementMatch "Preparing upload to Sentry for project 'Sentry'"
         $result.HasErrors() | Should -BeFalse
         $result
@@ -118,16 +117,16 @@ BeforeAll {
 
 Describe 'Console apps - normal build' {
     BeforeAll {
-        Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/' -Recurse -Verbose 
+        Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/' -Recurse -Verbose
     }
-    
+
     BeforeEach {
         if (Get-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*.src.zip' -ErrorAction SilentlyContinue)
         {
             Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*.src.zip'
         }
     }
-    
+
     It "uploads symbols and sources" {
         $result = RunDotnet 'build' 'Sentry.Samples.Console.Basic' $True $True
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
@@ -164,11 +163,11 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     BeforeAll {
         dotnet restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj --use-current-runtime
     }
-    
+
     BeforeEach {
-        Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -Recurse -Verbose 
+        Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -Recurse -Verbose
     }
-    
+
     It "uploads symbols and sources (<framework>)" {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
@@ -184,7 +183,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
                 'Sentry.Samples.Console.Basic', 'Sentry.Samples.Console.Basic.dbg')
             $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files'
-            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'            
+            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
         }
     }
 
@@ -202,10 +201,10 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
             $debugExtension = $IsLinux ? '.dbg' : '.dSYM'
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
                 'Sentry.Samples.Console.Basic', "Sentry.Samples.Console.Basic$debugExtension")
-            $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files' 
+            $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files'
         }
     }
- 
+
     It "uploads sources (<framework>)" {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
@@ -230,9 +229,9 @@ Describe 'MAUI' {
             'Sentry.pdb',
             'Sentry.Samples.Maui.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Maui/MauiProgram.cs'
+        $result.ScriptOutput | Should -AnyElementMatch 'Found 6 debug information files \(6 with embedded sources\)'
     }
-    
+
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
         $result = RunDotnet 'build' 'Sentry.Samples.Maui' $True $True 'net7.0-ios'
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(

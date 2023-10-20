@@ -34,8 +34,13 @@
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
 
-      <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
-      <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true' Or '$(SentryUploadSources)' == 'true' Or $(SentryUploadAndroidProguardMapping) == 'true')">true</UseSentryCLI>
+      <!-- This property controls if the Sentry CLI is to be used at all. Setting false will disable all Sentry CLI usage.
+           We're explicitly skipping uploads for Sentry projects (except samples) because they interfere with CLI integration test asserts. -->
+      <UseSentryCLI Condition="
+        '$(UseSentryCLI)' == ''
+        and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true')
+        and ('$(MSBuildProjectName)' != 'Sentry')
+        and ($(MSBuildProjectName.StartsWith('Sentry.Samples')) or !$(MSBuildProjectName.StartsWith('Sentry.')))">true</UseSentryCLI>
     </PropertyGroup>
   </Target>
 
@@ -126,7 +131,7 @@
   <PropertyGroup Condition="'$(PublishDir)' != '' and '$(PublishAot)' == 'true' and '$(_IsPublishing)' == 'true'">
     <SentryCLIUploadNativeAOT>true</SentryCLIUploadNativeAOT>
     <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
-    <!-- We must run after "CopyNativeBinary" (not "Publish"), 
+    <!-- We must run after "CopyNativeBinary" (not "Publish"),
          because that is the one that actually copies native AOT symbols to the publish directory. -->
     <SentryCLIUploadAfterTargets>CopyNativeBinary</SentryCLIUploadAfterTargets>
   </PropertyGroup>
@@ -149,11 +154,9 @@
     <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
   </ItemGroup>
 
-  <!-- Upload symbols to Sentry after the build. 
-       We're explicitly skipping uploads for Sentry project because it would interfere with integration tests. 
-       Also, it only ever gets triggered for Sentry within this repository. -->
+  <!-- Upload symbols to Sentry after the build. -->
   <Target Name="UploadDebugInfoToSentry" AfterTargets="$(SentryCLIUploadAfterTargets)" DependsOnTargets="PrepareSentryCLI"
-    Condition="'$(MSBuildProjectName)' != 'Sentry' and '$(SentryCLI)' != '' and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true')">
+    Condition="'$(SentryCLI)' != '' and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true')">
 
     <!-- if (UploadSymbols && UploadSources) { -->
       <Message Importance="High"
@@ -202,7 +205,7 @@
   </Target>
 
   <!-- Upload Android Proguard mapping file to Sentry after the build. -->
-  <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build"
+  <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build" DependsOnTargets="PrepareSentryCLI"
           Condition="'$(SentryUploadAndroidProguardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
 
     <Message Importance="High" Text="Preparing to upload Android Proguard mapping to Sentry for '$(MSBuildProjectName)': $(AndroidProguardMappingFile))" />
