@@ -170,6 +170,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
         git clean -ffxd samples/Sentry.Samples.Console.Basic
         $runtime = $IsWindows ? 'win-x64' : $IsLinux ? 'linux-x64' : "osx-$(uname -m)"
         Write-Host "Running dotnet restore for Sentry.Samples.Console.Basic, runtime: $runtime"
+        dotnet restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj
         dotnet restore samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj --runtime $runtime
     }
 
