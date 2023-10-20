@@ -68,6 +68,7 @@ BeforeAll {
             try
             {
                 dotnet $action "samples/$sample/$sample.csproj" -c Release -f $TargetFramework --no-restore --nologo `
+                    /p:SentryCLIIntegrationTestProject=$sample `
                     /p:SentryUploadSymbols=$Symbols `
                     /p:SentryUploadSources=$Sources `
                     /p:SentryOrg=org `

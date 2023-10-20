@@ -9,11 +9,6 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-  <!-- Never use Sentry CLI for test projects. -->
-  <PropertyGroup>
-    <UseSentryCLI>false</UseSentryCLI>
-  </PropertyGroup>
-
   <!--
     Workaround for Verify issue with scrubbing when running in Rider on Windows.
     Ensures that the volume label is upper cased ("C:" instead of "c:"), which is read

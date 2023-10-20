@@ -50,11 +50,6 @@
     <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
 
-  <!-- If running in CI and auth token is not set, disable SentryCLI completely (to avoid logging warnings). -->
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' And '$(SENTRY_AUTH_TOKEN)' == ''">
-    <UseSentryCLI>false</UseSentryCLI>
-  </PropertyGroup>
-
   <!--
     Note: The following platform-specific properties need to be set in both Directory.Build.props and DirectoryBuild.targets.
     TODO: Figure out how to consolidate to a single location.

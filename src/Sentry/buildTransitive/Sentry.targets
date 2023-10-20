@@ -40,7 +40,7 @@
         '$(UseSentryCLI)' == ''
         and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true')
         and ('$(MSBuildProjectName)' != 'Sentry')
-        and ($(MSBuildProjectName.StartsWith('Sentry.Samples')) or !$(MSBuildProjectName.StartsWith('Sentry.')))">true</UseSentryCLI>
+        and (!$(MSBuildProjectName.StartsWith('Sentry.')) or '$(MSBuildProjectName)' == '$(SentryCLIIntegrationTestProject)')">true</UseSentryCLI>
     </PropertyGroup>
   </Target>
 
@@ -206,7 +206,7 @@
 
   <!-- Upload Android Proguard mapping file to Sentry after the build. -->
   <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build" DependsOnTargets="PrepareSentryCLI"
-          Condition="'$(SentryUploadAndroidProguardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
+          Condition="'$(SentryCLI)' != '' and '$(SentryUploadAndroidProguardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
 
     <Message Importance="High" Text="Preparing to upload Android Proguard mapping to Sentry for '$(MSBuildProjectName)': $(AndroidProguardMappingFile))" />
 
