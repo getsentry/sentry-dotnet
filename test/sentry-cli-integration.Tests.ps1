@@ -3,6 +3,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# So that this works in VS Code testing integration. Otherwise the script is run within its directory.
 Push-Location $PSScriptRoot/../
 
 # In CI, the module is loaded automatically
