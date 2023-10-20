@@ -170,17 +170,12 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     }
     
     It "uploads symbols and sources (<framework>)" {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True 'net7.0'
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
-        if ($IsWindows) 
+        if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
         {
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic.pdb')
-            $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
-            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
-        }
-        elseif ($IsLinux -and $framework -eq 'net7.0')
-        {
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic')
+            $extension = $IsLinux ? '' : '.pdb'
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("Sentry.Samples.Console.Basic$extension")
             $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
             $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
         }
@@ -194,38 +189,32 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     }
 
     It "uploads symbols (<framework>)" {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $False 'net7.0'
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $False $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
-        if ($IsWindows)
+        if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
         {
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic.pdb')
+            $extension = $IsLinux ? '' : '.pdb'
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("Sentry.Samples.Console.Basic$extension")
             $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
-        }
-        elseif ($IsLinux -and $framework -eq 'net7.0')
-        {         
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic')
-            $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
-            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
         }
         else
         {
             $debugExtension = $IsLinux ? '.dbg' : '.dSYM'
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
                 'Sentry.Samples.Console.Basic', "Sentry.Samples.Console.Basic$debugExtension")
-            $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files'
-            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'   
+            $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files' 
         }
     }
  
     It "uploads sources (<framework>)" {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True 'net7.0'
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            $IsWindows ? 'Sentry.Samples.Console.Basic.src.zip' : 'Sentry.Samples.Console.src.zip')
+            ($IsWindows -or $framework -eq 'net8.0') ? 'Sentry.Samples.Console.Basic.src.zip' : 'Sentry.Samples.Console.src.zip')
     }
 
     It "uploads nothing when disabled (<framework>)" {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $False 'net7.0'
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
 }
