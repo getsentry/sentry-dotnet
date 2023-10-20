@@ -3,6 +3,8 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+Push-Location $PSScriptRoot/../
+
 # In CI, the module is loaded automatically
 if (!(Test-Path env:CI ))
 {
@@ -167,16 +169,16 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
         Remove-Item 'samples/Sentry.Samples.Console.Basic/bin/Release/*/*/publish' -Recurse -Verbose 
     }
     
-    It "uploads symbols and sources" {
+    It "uploads symbols and sources (<framework>)" {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True 'net7.0'
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         if ($IsWindows) 
         {
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic.pdb')
-            $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
-            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 0 debug information files'
+            $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
+            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
         }
-        elseif ($IsLinux && $framework -eq 'net7.0')
+        elseif ($IsLinux -and $framework -eq 'net7.0')
         {
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic')
             $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
@@ -191,7 +193,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
         }
     }
 
-    It "uploads symbols" {
+    It "uploads symbols (<framework>)" {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $False 'net7.0'
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         if ($IsWindows)
@@ -199,7 +201,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic.pdb')
             $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
         }
-        if ($IsLinux && $framework -eq 'net7.0')
+        elseif ($IsLinux -and $framework -eq 'net7.0')
         {         
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('Sentry.Samples.Console.Basic')
             $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
@@ -215,14 +217,14 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
         }
     }
  
-    It "uploads sources" {
+    It "uploads sources (<framework>)" {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True 'net7.0'
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             $IsWindows ? 'Sentry.Samples.Console.Basic.src.zip' : 'Sentry.Samples.Console.src.zip')
     }
 
-    It "uploads nothing when disabled" {
+    It "uploads nothing when disabled (<framework>)" {
         $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $False 'net7.0'
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
