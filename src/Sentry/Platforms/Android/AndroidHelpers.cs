@@ -45,7 +45,7 @@ internal static class AndroidHelpers
         }
         catch (Exception ex)
         {
-            logger?.LogError("Cannot create assembly reader.", ex);
+            logger?.LogError(ex, "Cannot create assembly reader.");
             return null;
         }
     }

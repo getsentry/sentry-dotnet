@@ -1,3 +1,5 @@
+using Sentry.Extensibility;
+
 namespace Sentry.Native;
 
 // https://github.com/getsentry/sentry-unity/blob/3eb6eca6ed270c5ec023bf75ee53c1ca00bb7c82/src/Sentry.Unity/NativeUtils/CFunctions.cs
@@ -42,6 +44,25 @@ internal static class C
         return sentry_value_is_null(cValue) == 0 ? cValue : null;
     }
 
+    internal static long? GetValueHex(sentry_value_t obj, string key)
+    {
+        if (GetValueString(obj, key) is { } s && s.Length > 0)
+        {
+            // It should be in hex format, such as "0x7fff5bf346c0"
+            if (s.StartsWith("0x") &&
+                long.TryParse(s[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
+            {
+                return result;
+            }
+            else if (long.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out result))
+            {
+                return result;
+            }
+            throw new FormatException($"GetValueHex() cannot parse '{s}'");
+        }
+        return null;
+    }
+
     internal static string? GetValueString(sentry_value_t obj, string key)
     {
         if (GetValueOrNul(obj, key) is { } cValue)
@@ -73,82 +94,80 @@ internal static class C
         return null;
     }
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_new_object();
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_new_null();
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_new_bool(int value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_new_double(double value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_new_int32(int value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_new_string(string value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_new_breadcrumb(string? type, string? message);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern int sentry_value_set_by_key(sentry_value_t value, string k, sentry_value_t v);
 
     internal static bool IsNull(sentry_value_t value) => sentry_value_is_null(value) != 0;
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern int sentry_value_is_null(sentry_value_t value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern int sentry_value_as_int32(sentry_value_t value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern double sentry_value_as_double(sentry_value_t value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern IntPtr sentry_value_as_string(sentry_value_t value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern UIntPtr sentry_value_get_length(sentry_value_t value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_get_by_index(sentry_value_t value, UIntPtr index);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern sentry_value_t sentry_value_get_by_key(sentry_value_t value, string key);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_set_context(string key, sentry_value_t value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_add_breadcrumb(sentry_value_t breadcrumb);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_set_tag(string key, string value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_remove_tag(string key);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_set_user(sentry_value_t user);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_remove_user();
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_set_extra(string key, sentry_value_t value);
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_remove_extra(string key);
 
-    internal static readonly Lazy<IEnumerable<DebugImage>> DebugImages = new(LoadDebugImages);
-
-    private static IEnumerable<DebugImage> LoadDebugImages()
+    internal static Dictionary<long, DebugImage> LoadDebugImages(IDiagnosticLogger? logger)
     {
-        var result = new List<DebugImage>();
+        var result = new Dictionary<long, DebugImage>();
         try
         {
             var cList = sentry_get_modules_list();
@@ -166,16 +185,19 @@ internal static class C
                             // * https://github.com/getsentry/sentry-native/blob/8faa78298da68d68043f0c3bd694f756c0e95dfa/src/modulefinder/sentry_modulefinder_windows.c#L81
                             // * https://github.com/getsentry/sentry-native/blob/8faa78298da68d68043f0c3bd694f756c0e95dfa/src/modulefinder/sentry_modulefinder_windows.c#L24
                             // * https://github.com/getsentry/sentry-native/blob/c5c31e56d36bed37fa5422750a591f44502edb41/src/modulefinder/sentry_modulefinder_linux.c#L465
-                            result.Add(new DebugImage()
+                            if (GetValueHex(cItem, "image_addr") is { } imageAddress)
                             {
-                                CodeFile = GetValueString(cItem, "code_file"),
-                                ImageAddress = GetValueString(cItem, "image_addr"),
-                                ImageSize = GetValueInt(cItem, "image_size"),
-                                DebugFile = GetValueString(cItem, "debug_file"),
-                                DebugId = GetValueString(cItem, "debug_id"),
-                                CodeId = GetValueString(cItem, "code_id"),
-                                Type = GetValueString(cItem, "type"),
-                            });
+                                result.Add(imageAddress, new DebugImage()
+                                {
+                                    CodeFile = GetValueString(cItem, "code_file"),
+                                    ImageAddress = imageAddress,
+                                    ImageSize = GetValueInt(cItem, "image_size"),
+                                    DebugFile = GetValueString(cItem, "debug_file"),
+                                    DebugId = GetValueString(cItem, "debug_id"),
+                                    CodeId = GetValueString(cItem, "code_id"),
+                                    Type = GetValueString(cItem, "type"),
+                                });
+                            }
                         }
                     }
                 }
@@ -188,18 +210,17 @@ internal static class C
         catch (Exception e)
         {
             // Adding the Sentry logger tag ensures we don't send this error to Sentry.
-            Console.WriteLine(e); // TODO proper logging
-            // Debug.unityLogger.Log(LogType.Error, UnityLogger.LogTag, $"Error loading the list of debug images: {e}");
+            logger?.LogWarning("Error loading the list of debug images", e);
         }
         return result;
     }
 
     // Returns a new reference to an immutable, frozen list.
     // The reference must be released with `sentry_value_decref`.
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     private static extern sentry_value_t sentry_get_modules_list();
 
-    [DllImport("sentry")]
+    [DllImport("sentry-native")]
     internal static extern void sentry_value_decref(sentry_value_t value);
 
     // native union sentry_value_u/t

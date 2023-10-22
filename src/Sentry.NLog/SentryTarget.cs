@@ -58,7 +58,6 @@ public sealed class SentryTarget : TargetWithContext
     /// <summary>
     /// Options for both the <see cref="SentryTarget"/> and the sentry sdk itself.
     /// </summary>
-    [Advanced]
     public SentryNLogOptions Options { get; }
 
     /// <summary>
@@ -304,7 +303,7 @@ public sealed class SentryTarget : TargetWithContext
         }
         catch (Exception exception)
         {
-            Options.DiagnosticLogger?.LogError("Failed to write log event", exception);
+            Options.DiagnosticLogger?.LogError(exception, "Failed to write log event");
             throw;
         }
         finally

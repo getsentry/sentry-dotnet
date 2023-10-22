@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.ScopeStack;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -7,7 +8,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction
+public class TransactionTracer : ITransactionTracer
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
@@ -40,13 +41,13 @@ public class TransactionTracer : ITransaction
         private set => Contexts.Trace.TraceId = value;
     }
 
-    /// <inheritdoc cref="ITransaction.Name" />
+    /// <inheritdoc cref="ITransactionTracer.Name" />
     public string Name { get; set; }
 
     /// <inheritdoc cref="ITransactionContext.NameSource" />
     public TransactionNameSource NameSource { get; set; }
 
-    /// <inheritdoc cref="ITransaction.IsParentSampled" />
+    /// <inheritdoc cref="ITransactionTracer.IsParentSampled" />
     public bool? IsParentSampled { get; set; }
 
     /// <inheritdoc />
@@ -64,17 +65,17 @@ public class TransactionTracer : ITransaction
     /// <inheritdoc />
     public DateTimeOffset? EndTimestamp { get; internal set; }
 
-    /// <inheritdoc cref="ISpan.Operation" />
+    /// <inheritdoc cref="ISpanTracer.Operation" />
     public string Operation
     {
         get => Contexts.Trace.Operation;
         set => Contexts.Trace.Operation = value;
     }
 
-    /// <inheritdoc cref="ISpan.Description" />
+    /// <inheritdoc cref="ISpanTracer.Description" />
     public string? Description { get; set; }
 
-    /// <inheritdoc cref="ISpan.Status" />
+    /// <inheritdoc cref="ISpanTracer.Status" />
     public SpanStatus? Status
     {
         get => Contexts.Trace.Status;
@@ -167,7 +168,7 @@ public class TransactionTracer : ITransaction
     private readonly ConcurrentBag<SpanTracer> _spans = new();
 
     /// <inheritdoc />
-    public IReadOnlyCollection<ISpan> Spans => _spans;
+    public IReadOnlyCollection<ISpanTracer> Spans => _spans;
 
     private readonly ConcurrentDictionary<string, Measurement> _measurements = new();
 
@@ -270,9 +271,9 @@ public class TransactionTracer : ITransaction
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />
-    public ISpan StartChild(string operation) => StartChild(spanId: null, parentSpanId: SpanId, operation);
+    public ISpanTracer StartChild(string operation) => StartChild(spanId: null, parentSpanId: SpanId, operation);
 
-    internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
+    internal ISpanTracer StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
         Instrumenter instrumenter = Instrumenter.Sentry)
     {
         if (instrumenter != _instrumenter)
@@ -310,10 +311,10 @@ public class TransactionTracer : ITransaction
     {
         private readonly object _lock = new object();
 
-        private readonly Lazy<Stack<ISpan>> _trackedSpans = new();
-        private Stack<ISpan> TrackedSpans => _trackedSpans.Value;
+        private readonly Lazy<Stack<ISpanTracer>> _trackedSpans = new();
+        private Stack<ISpanTracer> TrackedSpans => _trackedSpans.Value;
 
-        public void Push(ISpan span)
+        public void Push(ISpanTracer span)
         {
             lock(_lock)
             {
@@ -321,7 +322,7 @@ public class TransactionTracer : ITransaction
             }
         }
 
-        public ISpan? PeekActive()
+        public ISpanTracer? PeekActive()
         {
             lock(_lock)
             {
@@ -342,7 +343,7 @@ public class TransactionTracer : ITransaction
     private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
 
     /// <inheritdoc />
-    public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
+    public ISpanTracer? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
 
     /// <inheritdoc />
     public void Finish()

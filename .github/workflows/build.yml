@@ -15,12 +15,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
+        os: [ubuntu-latest, windows-latest, macos-13]
 
     steps:
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@b173b6ec0100793626c2d9e6b90435061f4fc3e5 # Tag: 0.11.0
+        uses: styfle/cancel-workflow-action@01ce38bf961b4e243a6342cbade0dbc8ba3f0432 # Tag: 0.12.0
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +34,7 @@ jobs:
 
       - name: Ensure Solution Filters are up to date
         shell: pwsh
-        run: scripts/dirty-check.ps1 -PathToCheck ./*.slnf -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
+        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables

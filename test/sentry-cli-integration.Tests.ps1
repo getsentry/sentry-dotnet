@@ -9,7 +9,49 @@ if (!(Test-Path env:CI ))
     Import-Module $PSScriptRoot/../../github-workflows/sentry-cli/integration-test/action.psm1 -Force
 }
 
+function Should-AnyElementMatch ($ActualValue, [string]$ExpectedValue, [switch] $Negate, [string] $Because)
+{
+    <#
+    .SYNOPSIS
+        Asserts whether any item in the collection matches the expected value
+    .EXAMPLE
+        'foo','bar','foobar' | Should -AnyElementMatch 'oob'
+
+        This should pass because 'oob' is a substring of 'foobar'.
+    #>
+
+    $filtered = $ActualValue | Where-Object { $_ -match $ExpectedValue }
+    [bool] $succeeded = @($filtered).Count -gt 0
+    if ($Negate) { $succeeded = -not $succeeded }
+
+    if (-not $succeeded)
+    {
+        if ($Negate)
+        {
+            $failureMessage = "Expected string '$ExpectedValue' to match no elements in collection @($($ActualValue -join ', '))$(if($Because) { " because $Because"})."
+        }
+        else
+        {
+            $failureMessage = "Expected string '$ExpectedValue' to match any element in collection @($($ActualValue -join ', '))$(if($Because) { " because $Because"})."
+        }
+    }
+
+    return [pscustomobject]@{
+        Succeeded      = $succeeded
+        FailureMessage = $failureMessage
+    }
+}
+
+BeforeDiscovery {
+    Add-ShouldOperator -Name AnyElementMatch `
+        -InternalName 'Should-AnyElementMatch' `
+        -Test ${function:Should-AnyElementMatch} `
+        -SupportsArrayInput
+}
+
 BeforeAll {
+    $env:SENTRY_LOG_LEVEL = 'debug';
+
     function DotnetBuild([string]$Sample, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = '')
     {
         $rootDir = "$(Get-Item $PSScriptRoot/../../)"
@@ -58,8 +100,8 @@ Describe 'CLI-integration' {
         $result.HasErrors() | Should -BeFalse
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'Sentry.pdb',
-            'Sentry.Samples.Console.Basic.pdb',
-            'Sentry.Samples.Console.Basic.src.zip')
+            'Sentry.Samples.Console.Basic.pdb')
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Console.Basic/Program.cs'
     }
 
     It "uploads symbols for a console app build" {
@@ -75,8 +117,8 @@ Describe 'CLI-integration' {
         $result = DotnetBuild 'Sentry.Samples.Console.Basic' $False $True
         $result.ScriptOutput | Should -Contain 'Build succeeded.'
         $result.HasErrors() | Should -BeFalse
-        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
-            'Sentry.Samples.Console.Basic.src.zip')
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Console.Basic/Program.cs'
+        $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
 
     It "uploads nothing for a console app build when disabled" {
@@ -96,12 +138,13 @@ Describe 'CLI-integration' {
             'Sentry.Extensions.Logging.pdb',
             'Sentry.Maui.pdb',
             'Sentry.pdb',
-            'Sentry.Samples.Maui.pdb',
-            'Sentry.Samples.Maui.src.zip'
+            'Sentry.Samples.Maui.pdb'
         )
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Maui/MauiProgram.cs'
     }
 
-    if (![RuntimeInformation]::IsOSPlatform([OSPlatform]::OSX)) {
+    if (![RuntimeInformation]::IsOSPlatform([OSPlatform]::OSX))
+    {
         # Remaining tests run on macOS only
         return
     }
@@ -127,8 +170,8 @@ Describe 'CLI-integration' {
             'Sentry.Maui.pdb',
             'Sentry.pdb',
             'Sentry.Samples.Maui',
-            'Sentry.Samples.Maui.pdb',
-            'Sentry.Samples.Maui.src.zip'
+            'Sentry.Samples.Maui.pdb'
         )
+        $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/samples/Sentry.Samples.Maui/MauiProgram.cs'
     }
 }

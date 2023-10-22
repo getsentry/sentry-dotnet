@@ -64,7 +64,7 @@ public static class ScopeExtensions
         }
         catch (Exception e)
         {
-            options.LogError("Failed to extract body.", e);
+            options.LogError(e, "Failed to extract body.");
         }
 
         SetEnv(scope, context, options);
@@ -169,7 +169,9 @@ public static class ScopeExtensions
 
     private static void SetBody(Scope scope, HttpContext context, SentryAspNetCoreOptions options)
     {
-        var extractors = context.RequestServices.GetService<IEnumerable<IRequestPayloadExtractor>>();
+        // Resharper says this can't be null, but actually it can if SetBody is called multiple times in a single request
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        var extractors = context.RequestServices?.GetService<IEnumerable<IRequestPayloadExtractor>>();
         if (extractors == null)
         {
             return;

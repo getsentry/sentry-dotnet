@@ -17,24 +17,18 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
-    # .NET 3.1 has been removed from all OS due to EOL
     # https://github.com/actions/runner-images/issues/7667
-    - name: Install .NET 3.1 SDK
+    # .NET 3.1 has been removed from all OS due to EOL
+    # .NET 6 and .NET 8 are not built-in with macos-13
+    - name: Install .NET SDK
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 3.1.x
-
-    - name: Install .NET 7 SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 7.0.203   # switch back to 7.x.x after resolving the below Tizen issue.
-
-    # Workaround for Tizen issue
-    # See https://github.com/dotnet/sdk/issues/33192
-    - name: Pin to .NET SDK 7.0.203
-      run: dotnet new globaljson --sdk-version 7.0.203 --force
-      shell: bash
-
+        dotnet-version: |
+          3.1.x
+          6.0.x 
+          7.0.x
+          8.0.x
+        
     - name: Dependency Caching
       uses: actions/cache@v3
       # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
@@ -51,14 +45,6 @@ runs:
       run: >
         dotnet workload install \
           maui-android \
-          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows maui-tizen' || '' }} \
+          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
-          --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
-
-    # We build Sentry.Maui for every supported MAUI target so we can access platform-specific features.
-    # That includes Tizen. We don't need the entire Tizen SDK, but we do need the base Tizen workload.
-    # Though we could install it on all runners, we really only need it when building and packing for NuGet, which we do on macOS only.
-    - name: Install Tizen Workload
-      if: runner.os == 'macOS'
-      shell: bash
-      run: "curl -sSL https://raw.githubusercontent.com/Samsung/Tizen.NET/main/workload/scripts/workload-install.sh | sudo bash"
+          --temp-dir "${{ runner.temp }}"

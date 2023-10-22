@@ -6,7 +6,7 @@ namespace Sentry.Internal.DiagnosticSource;
 internal abstract class EFDiagnosticSourceHelper
 {
     protected SentryOptions Options { get; }
-    protected ITransaction? Transaction { get; }
+    protected ITransactionTracer? Transaction { get; }
     protected abstract string Operation { get; }
 
     protected abstract string? GetDescription(object? diagnosticSourceValue);
@@ -39,11 +39,11 @@ internal abstract class EFDiagnosticSourceHelper
         Transaction = hub.GetTransactionIfSampled();
     }
 
-    protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
+    protected static Guid? TryGetConnectionId(ISpanTracer span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
 
     protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
 
-    protected static void SetConnectionId(ISpan span, Guid? connectionId)
+    protected static void SetConnectionId(ISpanTracer span, Guid? connectionId)
     {
         Debug.Assert(connectionId != Guid.Empty);
 
@@ -89,7 +89,7 @@ internal abstract class EFDiagnosticSourceHelper
         sourceSpan.Finish(status);
     }
 
-    protected void SetDbData(ISpan span, object? diagnosticSourceValue)
+    protected void SetDbData(ISpanTracer span, object? diagnosticSourceValue)
     {
         if (GetDatabaseName(diagnosticSourceValue) is { } dataBaseName)
         {
@@ -140,7 +140,7 @@ internal abstract class EFDiagnosticSourceHelper
         return str?[(str.IndexOf('\n') + 1)..];
     }
 
-    protected abstract ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue);
+    protected abstract ISpanTracer? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue);
 
-    protected abstract void SetSpanReference(ISpan span, object? diagnosticSourceValue);
+    protected abstract void SetSpanReference(ISpanTracer span, object? diagnosticSourceValue);
 }

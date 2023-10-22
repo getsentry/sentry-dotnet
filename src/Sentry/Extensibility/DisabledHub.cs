@@ -42,16 +42,9 @@ public class DisabledHub : IHub, IDisposable
     public IDisposable PushScope<TState>(TState state) => this;
 
     /// <summary>
-    /// No-Op.
-    /// </summary>
-    public void WithScope(Action<Scope> scopeCallback)
-    {
-    }
-
-    /// <summary>
     /// Returns a dummy transaction.
     /// </summary>
-    public ITransaction StartTransaction(
+    public ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext) =>
         // Transactions from DisabledHub are always sampled out
@@ -60,14 +53,14 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void BindException(Exception exception, ISpan span)
+    public void BindException(Exception exception, ISpanTracer span)
     {
     }
 
     /// <summary>
     /// Returns null.
     /// </summary>
-    public ISpan? GetSpan() => null;
+    public ISpanTracer? GetSpan() => null;
 
     /// <summary>
     /// Returns null.
@@ -89,7 +82,7 @@ public class DisabledHub : IHub, IDisposable
         string? operation = null)
     {
         // Transactions from DisabledHub are always sampled out
-        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, isSampled: false);
     }
 
     /// <summary>
@@ -102,7 +95,7 @@ public class DisabledHub : IHub, IDisposable
         string? operation = null)
     {
         // Transactions from DisabledHub are always sampled out
-        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, false);
+        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, isSampled: false);
     }
 
     /// <summary>

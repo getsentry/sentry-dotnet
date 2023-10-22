@@ -9,7 +9,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
+    runs-on: macos-13
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -18,7 +19,7 @@ jobs:
     steps:
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@b173b6ec0100793626c2d9e6b90435061f4fc3e5 # Tag: 0.11.0
+        uses: styfle/cancel-workflow-action@01ce38bf961b4e243a6342cbade0dbc8ba3f0432 # Tag: 0.12.0
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,8 +29,8 @@ jobs:
       - name: Build Cocoa SDK
         uses: ./.github/actions/buildcocoasdk
 
-      - name: Install .NET Workloads
-        run: dotnet workload install maui-ios --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Restore .NET Dependencies
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
@@ -54,7 +55,6 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -63,6 +63,9 @@ jobs:
         with:
           name: device-test-ios
           path: bin/Sentry.Maui.Device.TestApp.app
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Install XHarness
         run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"

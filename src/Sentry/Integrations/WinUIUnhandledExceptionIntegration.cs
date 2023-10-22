@@ -89,7 +89,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         }
         catch (Exception ex)
         {
-            _options.LogError("Could not attach WinUIUnhandledExceptionHandler.", ex);
+            _options.LogError(ex, "Could not attach WinUIUnhandledExceptionHandler.");
         }
     }
 
@@ -105,7 +105,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         }
         catch (Exception ex)
         {
-            _options.LogError("Could not get exception details in WinUIUnhandledExceptionHandler.", ex);
+            _options.LogError(ex, "Could not get exception details in WinUIUnhandledExceptionHandler.");
             return;
         }
 

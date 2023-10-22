@@ -236,7 +236,7 @@ public class Transaction : ITransactionData, IJsonSerializable
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public Transaction(ITransaction tracer)
+    public Transaction(ITransactionTracer tracer)
         : this(tracer.Name, tracer.NameSource)
     {
         // Contexts have to be set first because other fields use that

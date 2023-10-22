@@ -78,42 +78,6 @@ public class HubAdapterTests : IDisposable
         Hub.Received(1).ConfigureScope(Expected);
     }
 
-    [Obsolete]
-    [Fact]
-    public void WithScope_MockInvoked()
-    {
-        void Expected(Scope _) { }
-        HubAdapter.Instance.WithScope(Expected);
-        Hub.Received(1).WithScope(Expected);
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScopeT_MockInvoked()
-    {
-        object Expected(Scope _) => null;
-        HubAdapter.Instance.WithScope(Expected);
-        Hub.Received(1).WithScope(Expected);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsync_MockInvoked()
-    {
-        Task Expected(Scope _) => Task.CompletedTask;
-        await HubAdapter.Instance.WithScopeAsync(Expected);
-        await Hub.Received(1).WithScopeAsync(Expected);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsyncT_MockInvoked()
-    {
-        Task<object> Expected(Scope _) => Task.FromResult<object>(null);
-        await HubAdapter.Instance.WithScopeAsync(Expected);
-        await Hub.Received(1).WithScopeAsync(Expected);
-    }
-
     [Fact]
     public void PushScope_MockInvoked()
     {

@@ -305,7 +305,8 @@ public class SentryOptions
     /// <summary>
     /// The Data Source Name of a given project in Sentry.
     /// </summary>
-    public string? Dsn {
+    public string? Dsn
+    {
         get => _dsn;
         set
         {
@@ -319,7 +320,7 @@ public class SentryOptions
 
     private readonly Lazy<string> _sentryBaseUrl;
 
-    internal bool IsSentryRequest(string? requestUri)=>
+    internal bool IsSentryRequest(string? requestUri) =>
         !string.IsNullOrEmpty(requestUri) && IsSentryRequest(new Uri(requestUri));
 
     internal bool IsSentryRequest(Uri? requestUri)
@@ -387,7 +388,8 @@ public class SentryOptions
     /// should not be sent at all, return null from the callback.
     /// </remarks>
     [Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction instead.")]
-    public Func<Transaction, Transaction?>? BeforeSendTransaction {
+    public Func<Transaction, Transaction?>? BeforeSendTransaction
+    {
         get => null;
         set => _beforeSendTransaction = value is null ? null : (e, _) => value(e);
     }
@@ -419,7 +421,8 @@ public class SentryOptions
     /// </summary>
     /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
     [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
-    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb {
+    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb
+    {
         get => null;
         set => _beforeBreadcrumb = value is null ? null : (e, _) => value(e);
     }
@@ -662,7 +665,7 @@ public class SentryOptions
     /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
     /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
     /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
-    /// <para>Defaults to false due to PII reasons.</para>
+    /// <para>Defaults to true.</para>
     /// </summary>
     public bool CaptureFailedRequests { get; set; } = true;
 
@@ -674,14 +677,15 @@ public class SentryOptions
 
     // The default failed request target list will match anything, but adding to the list should clear that.
     private IList<SubstringOrRegexPattern> _failedRequestTargets = new AutoClearingList<SubstringOrRegexPattern>(
-        new[] {new SubstringOrRegexPattern(".*")}, clearOnNextAdd: true);
+        new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true);
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
     /// <para>Targets may be URLs or Regular expressions.</para>
     /// <para>Matches "*." by default.</para>
     /// </summary>
-    public IList<SubstringOrRegexPattern> FailedRequestTargets {
+    public IList<SubstringOrRegexPattern> FailedRequestTargets
+    {
         get => _failedRequestTargets;
         set => _failedRequestTargets = value.SetWithConfigBinding();
     }
@@ -868,7 +872,7 @@ public class SentryOptions
             catch (Exception ex)
             {
                 _stackTraceMode = StackTraceMode.Enhanced;
-                DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
+                DiagnosticLogger?.LogError(ex, "Failed to get runtime, setting {0} to {1} ", nameof(StackTraceMode), _stackTraceMode);
             }
 
             return _stackTraceMode.Value;

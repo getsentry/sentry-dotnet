@@ -9,7 +9,6 @@
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">10.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'tizen'">6.5</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>
@@ -32,11 +31,6 @@
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'windows'">
     <Compile Remove="**\*.Windows.cs" />
     <Compile Remove="**\Windows\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'tizen'">
-    <Compile Remove="**\*.Tizen.cs" />
-    <Compile Remove="**\Tizen\**\*.cs" />
   </ItemGroup>
 
   <!-- Allow setting CLSCompliant via property in any csproj -->
@@ -72,16 +66,16 @@
     <PropertyGroup Condition="'$(MauiWorkloadVersion)' == ''">
       <NO_WINDOWS>true</NO_WINDOWS>
     </PropertyGroup>
-    <PropertyGroup Condition="!Exists('$(MSBuildBinPath)\..\..\packs\Samsung.Tizen.Sdk')">
-      <NO_TIZEN>true</NO_TIZEN>
-    </PropertyGroup>
 
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
   <Target Name="_SetPublishFolderTypeNoneOnDocFileItems" BeforeTargets="_ComputePublishLocation" Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
     <ItemGroup>
-      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''" PublishFolderType="None" />
+      <ResolvedFileToPublish
+        Update="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.xml' And '%(ResolvedFileToPublish.PublishFolderType)' == ''"
+        PublishFolderType="None" />
     </ItemGroup>
   </Target>
 
@@ -90,6 +84,8 @@
   In an app that uses our nuget packages, they will come through the nuget packages automatically.
   -->
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry\buildTransitive\Sentry.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets" Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
+    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Native\buildTransitive\Sentry.Bindings.Native.targets" />
 
 </Project>

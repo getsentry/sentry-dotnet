@@ -269,7 +269,7 @@ public sealed class Envelope : ISerializable, IDisposable
                 }
                 catch (Exception exception)
                 {
-                    logger?.LogError("Failed to add attachment: {0}.", exception, attachment.FileName);
+                    logger?.LogError(exception, "Failed to add attachment: {0}.", attachment.FileName);
                 }
             }
         }

@@ -30,22 +30,18 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         NewStack = () => new[] { new KeyValuePair<Scope, ISentryClient>(new Scope(options), rootClient) };
     }
 
-    public KeyValuePair<Scope, ISentryClient> GetCurrent()
-    {
-        var current = ScopeAndClientStack;
-        return current[^1];
-    }
+    public KeyValuePair<Scope, ISentryClient> GetCurrent() => ScopeAndClientStack[^1];
 
     public void ConfigureScope(Action<Scope>? configureScope)
     {
-        var scope = GetCurrent();
-        configureScope?.Invoke(scope.Key);
+        var (scope, _) = GetCurrent();
+        configureScope?.Invoke(scope);
     }
 
     public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
     {
-        var scope = GetCurrent();
-        return configureScope?.Invoke(scope.Key) ?? Task.CompletedTask;
+        var (scope, _) = GetCurrent();
+        return configureScope?.Invoke(scope) ?? Task.CompletedTask;
     }
 
     public IDisposable PushScope() => PushScope<object>(null);
@@ -92,40 +88,23 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         return scopeSnapshot;
     }
 
-    public void WithScope(Action<Scope> scopeCallback)
+    public void RestoreScope(Scope savedScope)
     {
-        using (PushScope())
+        if (IsGlobalMode)
         {
-            var scope = GetCurrent();
-            scopeCallback.Invoke(scope.Key);
+            _options.LogWarning("RestoreScope called in global mode, returning.");
+            return;
         }
-    }
 
-    public T? WithScope<T>(Func<Scope, T?> scopeCallback)
-    {
-        using (PushScope())
-        {
-            var scope = GetCurrent();
-            return scopeCallback.Invoke(scope.Key);
-        }
-    }
+        var currentScopeAndClientStack = ScopeAndClientStack;
+        var (previousScope, client) = currentScopeAndClientStack[^1];
 
-    public async Task WithScopeAsync(Func<Scope, Task> scopeCallback)
-    {
-        using (PushScope())
-        {
-            var scope = GetCurrent();
-            await scopeCallback.Invoke(scope.Key).ConfigureAwait(false);
-        }
-    }
+        _options.LogDebug("Scope restored");
+        var newScopeAndClientStack = new KeyValuePair<Scope, ISentryClient>[currentScopeAndClientStack.Length + 1];
+        Array.Copy(currentScopeAndClientStack, newScopeAndClientStack, currentScopeAndClientStack.Length);
+        newScopeAndClientStack[^1] = new KeyValuePair<Scope, ISentryClient>(savedScope, client);
 
-    public async Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
-    {
-        using (PushScope())
-        {
-            var scope = GetCurrent();
-            return await scopeCallback.Invoke(scope.Key).ConfigureAwait(false);
-        }
+        ScopeAndClientStack = newScopeAndClientStack;
     }
 
     public void BindClient(ISentryClient? client)
