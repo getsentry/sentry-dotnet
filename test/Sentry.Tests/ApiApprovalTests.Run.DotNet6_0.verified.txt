@@ -61,17 +61,32 @@ namespace Sentry
         public const string Platform = "csharp";
         public const int ProtocolVersion = 7;
     }
-    public sealed class Contexts : System.Collections.Concurrent.ConcurrentDictionary<string, object>, Sentry.IJsonSerializable
+    public sealed class Contexts : Sentry.IJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
     {
         public Contexts() { }
         public Sentry.Protocol.App App { get; }
         public Sentry.Protocol.Browser Browser { get; }
+        public int Count { get; }
         public Sentry.Protocol.Device Device { get; }
         public Sentry.Protocol.Gpu Gpu { get; }
+        public bool IsReadOnly { get; }
+        public object this[string key] { get; set; }
+        public System.Collections.Generic.ICollection<string> Keys { get; }
         public Sentry.Protocol.OperatingSystem OperatingSystem { get; }
         public Sentry.Protocol.Response Response { get; }
         public Sentry.Protocol.Runtime Runtime { get; }
         public Sentry.Protocol.Trace Trace { get; }
+        public System.Collections.Generic.ICollection<object> Values { get; }
+        public void Add(System.Collections.Generic.KeyValuePair<string, object> item) { }
+        public void Add(string key, object value) { }
+        public void Clear() { }
+        public bool Contains(System.Collections.Generic.KeyValuePair<string, object> item) { }
+        public bool ContainsKey(string key) { }
+        public void CopyTo(System.Collections.Generic.KeyValuePair<string, object>[] array, int arrayIndex) { }
+        public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, object>> GetEnumerator() { }
+        public bool Remove(System.Collections.Generic.KeyValuePair<string, object> item) { }
+        public bool Remove(string key) { }
+        public bool TryGetValue(string key, out object value) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Contexts FromJson(System.Text.Json.JsonElement json) { }
     }
