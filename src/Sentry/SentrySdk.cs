@@ -342,12 +342,12 @@ public static class SentrySdk
     /// Captures the event, passing a hint, using the specified scope.
     /// </summary>
     /// <param name="evt">The event.</param>
-    /// <param name="hint">a hint for the event.</param>
     /// <param name="scope">The scope.</param>
+    /// <param name="hint">a hint for the event.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint = null, Scope? scope = null)
+    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
         => CurrentHub.CaptureEvent(evt, scope, hint);
 
     /// <summary>

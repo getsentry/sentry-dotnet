@@ -208,7 +208,7 @@ public sealed class HubAdapter : IHub
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
-        => SentrySdk.CaptureEvent(evt, null, scope);
+        => SentrySdk.CaptureEvent(evt, scope, null);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -216,7 +216,7 @@ public sealed class HubAdapter : IHub
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope, Hint? hint = null)
-        => SentrySdk.CaptureEvent(evt, hint, scope);
+        => SentrySdk.CaptureEvent(evt, scope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
