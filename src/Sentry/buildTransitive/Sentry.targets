@@ -151,6 +151,7 @@
     <SentryCLIUploadSymbolType Include="pdb" />
     <SentryCLIUploadSymbolType Include="portablepdb" />
     <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
+    <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'macos'" />
     <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
   </ItemGroup>
 

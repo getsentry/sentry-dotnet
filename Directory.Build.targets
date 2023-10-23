@@ -7,6 +7,7 @@
   <PropertyGroup>
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">10.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'macos'">13.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
@@ -18,7 +19,7 @@
     <Compile Remove="**\Android\**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'ios' And '$(TargetPlatformIdentifier)' != 'maccatalyst'">
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'ios' And '$(TargetPlatformIdentifier)' != 'macos' And '$(TargetPlatformIdentifier)' != 'maccatalyst'">
     <Compile Remove="**\*.iOS.cs" />
     <Compile Remove="**\iOS\**\*.cs" />
   </ItemGroup>
@@ -67,7 +68,8 @@
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15897 -->
   <Target Name="_SetPublishFolderTypeNoneOnDocFileItems"
     BeforeTargets="_ComputePublishLocation"
-    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
+    Condition="'$(OutputType)' == 'Exe'
+               and ('$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'macos' or '$(TargetPlatformIdentifier)' == 'maccatalyst')">
     <ItemGroup>
       <ResolvedFileToPublish
         Update="@(ResolvedFileToPublish)"
@@ -82,7 +84,8 @@
   -->
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry\buildTransitive\Sentry.targets" />
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
-    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+    Condition="'$(OutputType)' == 'Exe'
+               and ('$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'macos' or '$(TargetPlatformIdentifier)' == 'maccatalyst')"></Import>
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Native\buildTransitive\Sentry.Bindings.Native.targets" />
 
 </Project>

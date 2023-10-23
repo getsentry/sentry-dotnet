@@ -12,7 +12,7 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-#if __MOBILE__
+#if __MOBILE__ || MACOS
 public static partial class SentrySdk
 #else
 public static class SentrySdk
@@ -52,15 +52,10 @@ public static class SentrySdk
         }
 
         // Initialize native platform SDKs here
-#if __MOBILE__
-        if (options.InitNativeSdks)
-        {
-#if __IOS__
-            InitSentryCocoaSdk(options);
+#if __IOS__ || MACOS
+        if (options.InitNativeSdks) InitSentryCocoaSdk(options);
 #elif ANDROID
-            InitSentryAndroidSdk(options);
-#endif
-        }
+        if (options.InitNativeSdks) InitSentryAndroidSdk(options);
 #endif
         return new Hub(options);
     }
@@ -637,7 +632,7 @@ public static class SentrySdk
                 case CrashType.Native:
                     NativeCrash();
                     break;
-#elif __IOS__
+#elif __IOS__ || MACOS
             case CrashType.Native:
                 SentryCocoaSdk.Crash();
                 break;

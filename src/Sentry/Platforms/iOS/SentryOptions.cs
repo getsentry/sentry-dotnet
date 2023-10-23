@@ -281,6 +281,10 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://github.com/getsentry/sentry-cocoa/issues/1168
         /// </remarks>
+#if MACOS
+        // NSUrlSessionDelegate is not CLS compliant
+        [CLSCompliant(false)]
+#endif
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
 

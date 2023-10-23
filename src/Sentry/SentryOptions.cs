@@ -22,7 +22,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry SDK options
 /// </summary>
-#if __MOBILE__
+#if __MOBILE__ || MACOS
 public partial class SentryOptions
 #else
 public class SentryOptions
@@ -1102,8 +1102,8 @@ public class SentryOptions
         var reader = new Lazy<IAndroidAssemblyReader?>(() => AndroidHelpers.GetAndroidAssemblyReader(DiagnosticLogger));
         AssemblyReader = name => reader.Value?.TryReadAssembly(name);
 
-#elif __IOS__
-        iOS = new IosOptions(this);
+#elif __IOS__ || MACOS
+        iOS = new IosOptions(this); // TODO rename to CocoaOptions
 #endif
 
         InAppExclude = new() {

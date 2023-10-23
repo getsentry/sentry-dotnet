@@ -7,6 +7,7 @@
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
     <IsTestProject>false</IsTestProject>
+    <ApplicationId Condition="$(TargetFramework.EndsWith('macos'))">io.sentry.dotnet.test.sentry-testing</ApplicationId>
   </PropertyGroup>
 
   <ItemGroup>

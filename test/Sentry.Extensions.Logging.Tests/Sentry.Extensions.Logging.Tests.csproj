@@ -24,7 +24,7 @@
     <None Remove="appsettings.json" />
     <AndroidAsset Include="appsettings.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
     <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" PublishFolderType="Resource"
-             Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+             Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'macos' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
   </ItemGroup>
 
 </Project>
