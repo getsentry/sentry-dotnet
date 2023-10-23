@@ -46,16 +46,17 @@
 
   <!-- Build the Sentry Cocoa SDK -->
   <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
-    Inputs="..\..\.git\modules\modules\sentry-cocoa\HEAD" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
+    Inputs="../../.git/modules/modules/sentry-cocoa/HEAD" Outputs="../../modules/sentry-cocoa/Carthage/.built-from-sha">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerBuildSentryCocoaSDK">
     <Exec Command="../../scripts/build-sentry-cocoa.sh" />
+    <Copy SourceFiles="../../.git/modules/modules/sentry-cocoa/HEAD" DestinationFolder="../../modules/sentry-cocoa/Carthage/.built-from-sha"/>
   </Target>
 
   <!-- Generate bindings -->
   <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
-          Inputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha" Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
+          Inputs="../../modules/sentry-cocoa/Carthage/.built-from-sha" Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerGenerateSentryCocoaBindings">
