@@ -14,7 +14,7 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == ''">
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'macos'">
     <ProjectReference Include="..\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj" />
   </ItemGroup>
 

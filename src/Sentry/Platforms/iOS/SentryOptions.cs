@@ -25,6 +25,7 @@ public partial class SentryOptions
 
         // ---------- From Cocoa's SentryOptions.h ----------
 
+#if SENTRY_UIKIT_AVAILABLE
         /// <summary>
         /// Automatically attaches a screenshot when capturing an error or exception.
         /// The default value is <c>false</c> (disabled).
@@ -33,6 +34,7 @@ public partial class SentryOptions
         /// See https://docs.sentry.io/platforms/apple/guides/ios/configuration/options/#attach-screenshot
         /// </remarks>
         public bool AttachScreenshot { get; set; } = false;
+#endif
 
         /// <summary>
         /// The minimum amount of time an app should be unresponsive to be classified as an App Hanging.
@@ -46,6 +48,7 @@ public partial class SentryOptions
         /// </remarks>
         public TimeSpan AppHangTimeoutInterval { get; set; } = TimeSpan.FromSeconds(2);
 
+#if SENTRY_UIKIT_AVAILABLE
         /// <summary>
         /// How long an idle transaction waits for new children after all its child spans finished.
         /// Only UI event transactions are idle transactions.
@@ -55,6 +58,7 @@ public partial class SentryOptions
         /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#user-interaction-instrumentation
         /// </remarks>
         public TimeSpan IdleTimeout { get; set; } = TimeSpan.FromSeconds(3);
+#endif
 
         /// <summary>
         /// The distribution of the application, associated with the release set in <see cref="Release"/>.
@@ -86,7 +90,7 @@ public partial class SentryOptions
         public bool EnableAutoBreadcrumbTracking { get; set; } = true;
 
         /// <summary>
-        /// When enabled, the SDK tracks performance for <see cref="UIViewController"/> subclasses and HTTP requests
+        /// When enabled, the SDK tracks performance for UIViewController subclasses and HTTP requests
         /// automatically. It also measures the app start and slow and frozen frames.
         /// The default value is <c>true</c> (enabled).
         /// </summary>
@@ -98,7 +102,7 @@ public partial class SentryOptions
         public bool EnableAutoPerformanceTracing { get; set; } = true;
 
         /// <summary>
-        /// When enabled, the SDK tracks performance for <see cref="UIViewController"/> subclasses and HTTP requests
+        /// When enabled, the SDK tracks performance for UIViewController subclasses and HTTP requests
         /// automatically. It also measures the app start and slow and frozen frames.
         /// The default value is <c>true</c> (enabled).
         /// </summary>
@@ -210,15 +214,10 @@ public partial class SentryOptions
         /// Whether the SDK should use swizzling or not.
         /// The default value is <c>true</c> (enabled).
         /// </summary>
-        /// <remarks>
-        /// When turned off the following features are disabled: breadcrumbs for touch events and
-        /// navigation with <see cref="UIViewController"/>, automatic instrumentation for <see cref="UIViewController"/>,
-        /// automatic instrumentation for HTTP requests, automatic instrumentation for file IO with <see cref="NSData"/>,
-        /// and automatically added sentry-trace header to HTTP requests for distributed tracing.
-        /// See https://docs.sentry.io/platforms/apple/configuration/swizzling/
-        /// </remarks>
+        /// <see href="https://docs.sentry.io/platforms/apple/configuration/swizzling/"/>
         public bool EnableSwizzling { get; set; } = true;
 
+#if SENTRY_UIKIT_AVAILABLE
         /// <summary>
         /// When enabled, the SDK tracks performance for <see cref="UIViewController"/> subclasses.
         /// The default value is <c>true</c> (enabled).
@@ -251,6 +250,7 @@ public partial class SentryOptions
         /// See https://docs.sentry.io/platforms/apple/performance/instrumentation/automatic-instrumentation/#user-interaction-instrumentation
         /// </remarks>
         public bool EnableUserInteractionTracing { get; set; } = false;
+#endif
 
         /// <summary>
         /// This feature is no longer available.  This option does nothing and will be removed in a future release.

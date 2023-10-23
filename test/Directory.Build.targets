@@ -9,6 +9,10 @@
   <!-- platform-specific targets cannot currently run snapshot verification tests -->
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''">
     <Compile Remove="**\*.verify.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)Sentry.Tests/ModuleInit.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)Sentry.Testing/VerifyExtensions.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)Sentry.Testing/ApiExtensions.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)CommonModuleInit.cs" />
   </ItemGroup>
 
   <!-- common module init for all test projects -->

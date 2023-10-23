@@ -117,9 +117,7 @@ public static partial class SentrySdk
         // }
 
         // These options are from Cocoa's SentryOptions
-        cocoaOptions.AttachScreenshot = options.iOS.AttachScreenshot;
         cocoaOptions.AppHangTimeoutInterval = options.iOS.AppHangTimeoutInterval.TotalSeconds;
-        cocoaOptions.IdleTimeout = options.iOS.IdleTimeout.TotalSeconds;
         cocoaOptions.Dist = options.Distribution;
         cocoaOptions.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
         cocoaOptions.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
@@ -130,8 +128,12 @@ public static partial class SentrySdk
         cocoaOptions.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
         cocoaOptions.EnableWatchdogTerminationTracking = options.iOS.EnableWatchdogTerminationTracking;
         cocoaOptions.EnableSwizzling = options.iOS.EnableSwizzling;
+#if SENTRY_UIKIT_AVAILABLE
+        cocoaOptions.IdleTimeout = options.iOS.IdleTimeout.TotalSeconds;
+        cocoaOptions.AttachScreenshot = options.iOS.AttachScreenshot;
         cocoaOptions.EnableUIViewControllerTracing = options.iOS.EnableUIViewControllerTracing;
         cocoaOptions.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
+#endif
         cocoaOptions.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
 
         // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973

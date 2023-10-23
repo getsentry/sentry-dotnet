@@ -1,4 +1,3 @@
-#if !__MOBILE__
 using System.Runtime.Versioning;
 using PublicApiGenerator;
 
@@ -30,4 +29,3 @@ public static class ApiExtensions
             .ScrubEmptyLines();
     }
 }
-#endif

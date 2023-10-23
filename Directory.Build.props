@@ -67,6 +67,8 @@
   <!-- This is helpful in code to distinguish neutral targets. -->
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetPlatformIdentifier)' == ''">$(DefineConstants);PLATFORM_NEUTRAL</DefineConstants>
+    <DefineConstants Condition="'$(TargetPlatformIdentifier)' == 'ios'">$(DefineConstants);SENTRY_UIKIT_AVAILABLE</DefineConstants>
+    <DefineConstants Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">$(DefineConstants);SENTRY_UIKIT_AVAILABLE</DefineConstants>
   </PropertyGroup>
 
   <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->

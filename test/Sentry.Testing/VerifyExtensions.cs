@@ -1,4 +1,3 @@
-#if !__MOBILE__
 using Argon;
 using Sentry.PlatformAbstractions;
 
@@ -129,4 +128,3 @@ public static class VerifyExtensions
 
     private static string ScrubAlphaNum(string str) => str?.Replace(AlphaNumRegex, "_");
 }
-#endif
