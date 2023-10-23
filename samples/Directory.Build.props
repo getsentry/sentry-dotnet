@@ -6,11 +6,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <!-- Never use Sentry CLI for sample projects when building in CI. -->
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-    <UseSentryCLI>false</UseSentryCLI>
-  </PropertyGroup>
-
   <!--
     This sets the default DSN for all sample projects.  Sentry employees and contractors
     can view events at https://sentry-sdks.sentry.io/projects/sentry-dotnet.
