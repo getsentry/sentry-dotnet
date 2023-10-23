@@ -119,9 +119,7 @@ public class SentryHttpFailedRequestHandlerTests
         // Assert
         _hub.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>()
-            );
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -140,7 +138,7 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), Arg.Any<Hint>());
+        ((ISentryClient)_hub).CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<Hint>());
         sut.HandleResponse(response);
 
         // Assert
@@ -170,9 +168,9 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        _hub.CaptureEvent(
+        ((ISentryClient)_hub).CaptureEvent(
             Arg.Do<SentryEvent>(e => @event = e),
-            Arg.Any<Hint>()
+            hint: Arg.Any<Hint>()
             );
         sut.HandleResponse(response);
 
@@ -220,9 +218,9 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        _hub.CaptureEvent(
+        ((ISentryClient)_hub).CaptureEvent(
             Arg.Do<SentryEvent>(e => @event = e),
-            Arg.Any<Hint>()
+            hint: Arg.Any<Hint>()
             );
         sut.HandleResponse(response);
 
@@ -252,9 +250,9 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         Hint hint = null;
-        _hub.CaptureEvent(
+        ((ISentryClient)_hub).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Do<Hint>(h => hint = h)
+            hint: Arg.Do<Hint>(h => hint = h)
             );
         sut.HandleResponse(response);
 

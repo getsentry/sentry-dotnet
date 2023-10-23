@@ -136,12 +136,7 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) => SentryId.Empty;
-
-    /// <summary>
-    /// No-Op.
-    /// </summary>
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) => SentryId.Empty;
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null) => SentryId.Empty;
 
     /// <summary>
     /// No-Op.

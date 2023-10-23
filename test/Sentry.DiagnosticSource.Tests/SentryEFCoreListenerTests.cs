@@ -56,7 +56,7 @@ public class SentryEFCoreListenerTests
             };
 
             Hub.GetSpan().ReturnsForAnyArgs(_ => Spans?.LastOrDefault(s => !s.IsFinished) ?? Tracer);
-            Hub.CaptureEvent(Arg.Any<SentryEvent>(), scope: Arg.Any<Scope>()).Returns(_ =>
+            Hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()).Returns(_ =>
             {
                 Spans.LastOrDefault(s => !s.IsFinished)?.Finish(SpanStatus.InternalError);
                 return SentryId.Empty;

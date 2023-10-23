@@ -348,7 +348,7 @@ public static class SentrySdk
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static SentryId CaptureEvent(SentryEvent evt, Hint? hint = null, Scope? scope = null)
-        => CurrentHub.CaptureEvent(evt, hint, scope);
+        => CurrentHub.CaptureEvent(evt, scope, hint);
 
     /// <summary>
     /// Captures an event with a configurable scope.

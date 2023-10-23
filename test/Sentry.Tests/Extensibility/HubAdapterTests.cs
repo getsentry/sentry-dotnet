@@ -25,7 +25,7 @@ public class HubAdapterTests : IDisposable
         var expectedEvent = new SentryEvent();
         var expectedScope = new Scope();
         HubAdapter.Instance.CaptureEvent(expectedEvent, expectedScope);
-        Hub.Received(1).CaptureEvent(expectedEvent, scope: expectedScope);
+        Hub.Received(1).CaptureEvent(expectedEvent, expectedScope);
     }
 
     [Fact]

@@ -385,7 +385,7 @@ internal class Hub : IHub, IDisposable
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, hint, clonedScope);
+            return CaptureEvent(evt, clonedScope, hint);
         }
         catch (Exception e)
         {
@@ -394,7 +394,7 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint = null, Scope? scope = null)
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
     {
         if (!IsEnabled)
         {
@@ -422,7 +422,7 @@ internal class Hub : IHub, IDisposable
             }
 
             // Now capture the event with the Sentry client on the current scope.
-            var id = sentryClient.CaptureEvent(evt, hint, actualScope);
+            var id = sentryClient.CaptureEvent(evt, actualScope, hint);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 

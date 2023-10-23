@@ -338,7 +338,7 @@ public partial class SentryClientTests
         var hint = new Hint();
 
         var sut = _fixture.GetSut();
-        _ = sut.CaptureEvent(@event, hint);
+        _ = sut.CaptureEvent(@event, hint: hint);
 
         Assert.Same(hint, received);
     }

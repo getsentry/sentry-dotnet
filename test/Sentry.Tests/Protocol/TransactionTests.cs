@@ -498,9 +498,7 @@ public class TransactionTests
                 e.Contexts.Trace.SpanId == transaction.SpanId &&
                 e.Contexts.Trace.ParentSpanId == transaction.ParentSpanId
             ),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>()
-            );
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
