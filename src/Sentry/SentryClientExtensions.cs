@@ -16,7 +16,7 @@ public static class SentryClientExtensions
     /// <param name="ex">The exception.</param>
     /// <returns>The Id of the event</returns>
     public static SentryId CaptureException(this ISentryClient client, Exception ex) =>
-        client.IsEnabled ? client.CaptureEventInternal(new SentryEvent(ex)) : SentryId.Empty;
+        client.IsEnabled ? client.CaptureEvent(new SentryEvent(ex)) : SentryId.Empty;
 
     /// <summary>
     /// Captures a message.
@@ -30,7 +30,7 @@ public static class SentryClientExtensions
     {
         if (client.IsEnabled && !string.IsNullOrWhiteSpace(message))
         {
-            return client.CaptureEventInternal(new SentryEvent
+            return client.CaptureEvent(new SentryEvent
             {
                 Message = message,
                 Level = level
@@ -58,13 +58,6 @@ public static class SentryClientExtensions
 
         client.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
     }
-
-    private static SentryId CaptureEventInternal(this ISentryClient client, SentryEvent sentryEvent) =>
-        client switch
-        {
-            IHubEx hub => hub.CaptureEventInternal(sentryEvent),
-            _ => client.CaptureEvent(sentryEvent)
-        };
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>

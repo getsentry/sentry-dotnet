@@ -267,7 +267,7 @@ public partial class HubTests
         var child = scope.Transaction.StartChild("child", "child");
 
         // Act
-        hub.CaptureEvent(evt, scope);
+        hub.CaptureEvent(evt, scope: scope);
 
         // Assert
         Assert.Equal(child.SpanId, evt.Contexts.Trace.SpanId);
@@ -1224,7 +1224,7 @@ public partial class HubTests
         var child = scope.Transaction.StartChild("child", "child");
 
         // Act
-        hub.CaptureEvent(evt, scope);
+        hub.CaptureEvent(evt, scope: scope);
 
         // Assert
         Assert.Equal(child.SpanId, evt.Contexts.Trace.SpanId);

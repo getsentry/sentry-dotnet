@@ -35,7 +35,7 @@ public class SentryMiddlewareTests
             Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(callback => callback.Arg<Action<Scope>>().Invoke(Scope));
 
-            Hub.When(hub => hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
+            Hub.When(hub => hub.CaptureEvent(Arg.Any<SentryEvent>(), scope: Arg.Any<Scope>()))
                 .Do(_ => Scope.Evaluate());
 
             HubAccessor = () => Hub;

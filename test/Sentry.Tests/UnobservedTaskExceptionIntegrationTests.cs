@@ -4,7 +4,7 @@ public class UnobservedTaskExceptionIntegrationTests
 {
     private class Fixture
     {
-        public IHubEx Hub { get; set; } = Substitute.For<IHubEx, IDisposable>();
+        public IHub Hub { get; set; } = Substitute.For<IHub, IDisposable>();
         public IAppDomain AppDomain { get; set; } = Substitute.For<IAppDomain>();
 
         public Fixture() => Hub.IsEnabled.Returns(true);
@@ -24,7 +24,7 @@ public class UnobservedTaskExceptionIntegrationTests
 
         sut.Handle(this, new UnobservedTaskExceptionEventArgs(new AggregateException()));
 
-        _ = _fixture.Hub.Received(1).CaptureEventInternal(Arg.Any<SentryEvent>());
+        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     // Test is flaky on mobile in CI.
@@ -35,7 +35,7 @@ public class UnobservedTaskExceptionIntegrationTests
         _fixture.AppDomain = AppDomainAdapter.Instance;
         var captureCalledEvent = new ManualResetEvent(false);
         SentryEvent capturedEvent = null;
-        _fixture.Hub.When(x => x.CaptureEventInternal(Arg.Any<SentryEvent>()))
+        _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
             .Do(callInfo =>
             {
                 capturedEvent = callInfo.Arg<SentryEvent>();

@@ -106,4 +106,16 @@ public interface IHub :
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns></returns>
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope);
+
+    /// <summary>
+    /// Captures an event with a configurable scope.
+    /// </summary>
+    /// <remarks>
+    /// This allows modifying a scope without affecting other events.
+    /// </remarks>
+    /// <param name="evt">The event to be captured.</param>
+    /// <param name="hint">An optional hint to be provided with the event</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <returns></returns>
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope);
 }

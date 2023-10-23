@@ -151,6 +151,11 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope) => SentryId.Empty;
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
     public void CaptureTransaction(Transaction transaction)
     {
     }

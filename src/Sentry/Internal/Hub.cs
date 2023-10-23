@@ -5,7 +5,7 @@ using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHubEx, IDisposable
+internal class Hub : IHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -370,8 +370,8 @@ internal class Hub : IHubEx, IDisposable
         evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options);
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
-        CaptureEvent(evt, null, configureScope);
+    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+        => CaptureEvent(evt, null, configureScope);
 
     public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
     {
@@ -394,14 +394,13 @@ internal class Hub : IHubEx, IDisposable
         }
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
-        CaptureEvent(evt, null, scope);
-
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) =>
-        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, hint, scope) : SentryId.Empty;
-
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint = null, Scope? scope = null)
     {
+        if (!IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
         try
         {
             ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
