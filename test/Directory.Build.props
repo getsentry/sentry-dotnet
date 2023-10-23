@@ -50,7 +50,7 @@
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.29" />
   </ItemGroup>
 
-  <!-- only non-platform-specific projects (and net*.0-macos) should include these packages -->
+  <!-- only non-platform-specific projects should include these packages -->
   <ItemGroup Condition="'$(TargetPlatformIdentifier)'==''">
     <PackageReference Include="Verify.Xunit" Version="20.0.0" />
     <PackageReference Include="Verify.DiffPlex" Version="2.2.1" />
