@@ -12,7 +12,7 @@ namespace Sentry.Extensibility;
 /// </remarks>
 /// <inheritdoc cref="IHub" />
 [DebuggerStepThrough]
-public sealed class HubAdapter : IHub, IHubEx
+public sealed class HubAdapter : IHub
 {
     /// <summary>
     /// The single instance which forwards all calls to <see cref="SentrySdk"/>
@@ -196,12 +196,6 @@ public sealed class HubAdapter : IHub, IHubEx
             level);
 
     /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
-        => SentrySdk.CaptureEventInternal(evt, hint, scope);
-
-    /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
@@ -214,15 +208,15 @@ public sealed class HubAdapter : IHub, IHubEx
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
-        => SentrySdk.CaptureEvent(evt, scope);
+        => SentrySdk.CaptureEvent(evt, scope, null);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
-        => SentrySdk.CaptureEvent(evt, hint, scope);
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope, Hint? hint = null)
+        => SentrySdk.CaptureEvent(evt, scope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -231,6 +225,12 @@ public sealed class HubAdapter : IHub, IHubEx
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => SentrySdk.CaptureEvent(evt, configureScope);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+        => SentrySdk.CaptureEvent(evt, hint, configureScope);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
