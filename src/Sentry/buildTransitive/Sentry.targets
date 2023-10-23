@@ -35,7 +35,7 @@
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
 
       <!-- This property controls if the Sentry CLI is to be used at all. Setting false will disable all Sentry CLI usage.
-           We're explicitly skipping uploads for Sentry projects (except samples) because they interfere with CLI integration test asserts. -->
+           We're explicitly skipping uploads for Sentry projects because they interfere with CLI integration test asserts. -->
       <UseSentryCLI Condition="
         '$(UseSentryCLI)' == ''
         and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true')
