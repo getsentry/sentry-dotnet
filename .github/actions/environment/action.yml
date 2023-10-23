@@ -25,10 +25,10 @@ runs:
       with:
         dotnet-version: |
           3.1.x
-          6.0.x 
+          6.0.x
           7.0.x
           8.0.x
-        
+
     - name: Dependency Caching
       uses: actions/cache@v3
       # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
@@ -45,6 +45,6 @@ runs:
       run: >
         dotnet workload install \
           maui-android \
-          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
+          ${{ runner.os == 'macOS' && 'macos maui-ios maui-maccatalyst maui-windows' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}"
