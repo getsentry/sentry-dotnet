@@ -39,6 +39,9 @@ API Changes:
     - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
+- `ISentryClient.CaptureEvent` overloads have been replaced by a single method accepting optional `Hint` and `Scope`
+  parameters. You will need to pass `hint` as a named parameter from code that calls `CaptureEvent` without passing a
+  `scope` argument. ([#2749](https://github.com/getsentry/sentry-dotnet/pull/2749))
   
   #### Before
   ```
