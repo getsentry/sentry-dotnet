@@ -1,7 +1,9 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal.ILSpy;
+#if SENTRY_NATIVE
 using Sentry.Native;
+#endif
 
 namespace Sentry.Internal;
 
@@ -229,7 +231,7 @@ internal class DebugStackTrace : SentryStackTrace
 
     /// <summary>
     /// Native AOT implementation of CreateFrame.
-    /// Native frames have only limited method information at runtime (and even that can be disabled). 
+    /// Native frames have only limited method information at runtime (and even that can be disabled).
     ///  We try to parse that and also add addresses for server-side symbolication.
     /// </summary>
     private SentryStackFrame? TryCreateNativeAOTFrame(IStackFrame stackFrame)
@@ -244,7 +246,13 @@ internal class DebugStackTrace : SentryStackTrace
         frame.ImageAddress = imageAddress;
         frame.InstructionAddress = stackFrame.GetNativeIP();
 
+#if SENTRY_NATIVE
         _nativeDebugImages ??= C.LoadDebugImages(_options.DiagnosticLogger);
+#elif MACOS
+        _nativeDebugImages ??= SentrySdk.LoadDebugImages(_options.DiagnosticLogger);
+#else
+        _nativeDebugImages ??= new();
+#endif
         if (!_usedNativeDebugImages.Contains(imageAddress) && _nativeDebugImages.TryGetValue(imageAddress, out var debugImage))
         {
             _usedNativeDebugImages.Add(imageAddress);
@@ -255,7 +263,7 @@ internal class DebugStackTrace : SentryStackTrace
     }
 
     // Method info is currently only exposed by ToString(), see https://github.com/dotnet/runtime/issues/92869
-    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`): 
+    // We only care about the case where the method is available (`StackTraceSupport` property is the default `true`):
     // https://github.com/dotnet/runtime/blob/254230253da143a082f47cfaf8711627c0bf2faf/src/coreclr/nativeaot/System.Private.CoreLib/src/Internal/DeveloperExperience/DeveloperExperience.cs#L42
     internal static SentryStackFrame ParseNativeAOTToString(string info)
     {

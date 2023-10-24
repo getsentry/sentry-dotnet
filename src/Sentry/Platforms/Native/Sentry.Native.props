@@ -2,4 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Bindings.Native\Sentry.Bindings.Native.csproj" />
   </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);SENTRY_NATIVE</DefineConstants>
+  </PropertyGroup>
 </Project>

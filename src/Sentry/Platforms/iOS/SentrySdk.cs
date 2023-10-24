@@ -1,5 +1,7 @@
 using Sentry.iOS;
 using Sentry.iOS.Extensions;
+using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -27,14 +29,14 @@ public static partial class SentrySdk
         cocoaOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
         cocoaOptions.Dsn = options.Dsn;
         cocoaOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
-        cocoaOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
-        cocoaOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
-        cocoaOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
+        cocoaOptions.MaxAttachmentSize = (nuint)options.MaxAttachmentSize;
+        cocoaOptions.MaxBreadcrumbs = (nuint)options.MaxBreadcrumbs;
+        cocoaOptions.MaxCacheItems = (nuint)options.MaxCacheItems;
         cocoaOptions.ReleaseName = options.Release;
         cocoaOptions.SampleRate = options.SampleRate;
         cocoaOptions.SendClientReports = options.SendClientReports;
         cocoaOptions.SendDefaultPii = options.SendDefaultPii;
-        cocoaOptions.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
+        cocoaOptions.SessionTrackingIntervalMillis = (nuint)options.AutoSessionTrackingInterval.TotalMilliseconds;
 
         if (options.Environment is { } environment)
         {
@@ -69,7 +71,7 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options is {IsPerformanceMonitoringEnabled: true, iOS.EnableCocoaSdkTracing: true})
+        if (options is { IsPerformanceMonitoringEnabled: true, iOS.EnableCocoaSdkTracing: true })
         {
             if (options.EnableTracing != null)
             {
@@ -203,4 +205,35 @@ public static partial class SentrySdk
     private static string GetDefaultDistributionString() => GetBundleValue("CFBundleVersion");
 
     private static string GetBundleValue(string key) => NSBundle.MainBundle.ObjectForInfoDictionary(key).ToString();
+
+    internal static Dictionary<long, DebugImage> LoadDebugImages(IDiagnosticLogger? logger)
+    {
+        logger?.LogDebug("Collecting a list of native debug images.");
+        var result = new Dictionary<long, DebugImage>();
+        try
+        {
+            var cList = SentryCocoaHybridSdk.DebugImages;
+            logger?.LogDebug("There are {0} native debug images, parsing the information.", cList.Length);
+            foreach (var cItem in cList)
+            {
+                if (cItem.ImageAddress?.ParseHexAsLong() is { } imageAddress)
+                {
+                    result.Add(imageAddress, new DebugImage()
+                    {
+                        CodeFile = cItem.CodeFile,
+                        ImageAddress = imageAddress,
+                        // TODO check imageVmAddress
+                        ImageSize = cItem.ImageSize?.LongValue,
+                        DebugId = cItem.DebugID,
+                        Type = cItem.Type,
+                    });
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger?.LogWarning("Error loading the list of debug images", e);
+        }
+        return result;
+    }
 }

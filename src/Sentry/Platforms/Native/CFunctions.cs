@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Native;
 
@@ -42,25 +43,6 @@ internal static class C
     {
         var cValue = sentry_value_get_by_key(obj, key);
         return sentry_value_is_null(cValue) == 0 ? cValue : null;
-    }
-
-    internal static long? GetValueHex(sentry_value_t obj, string key)
-    {
-        if (GetValueString(obj, key) is { } s && s.Length > 0)
-        {
-            // It should be in hex format, such as "0x7fff5bf346c0"
-            if (s.StartsWith("0x") &&
-                long.TryParse(s[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
-            {
-                return result;
-            }
-            else if (long.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out result))
-            {
-                return result;
-            }
-            throw new FormatException($"GetValueHex() cannot parse '{s}'");
-        }
-        return null;
     }
 
     internal static string? GetValueString(sentry_value_t obj, string key)
@@ -167,6 +149,7 @@ internal static class C
 
     internal static Dictionary<long, DebugImage> LoadDebugImages(IDiagnosticLogger? logger)
     {
+        logger?.LogDebug("Collecting a list of native debug images.");
         var result = new Dictionary<long, DebugImage>();
         try
         {
@@ -176,6 +159,7 @@ internal static class C
                 if (!IsNull(cList))
                 {
                     var len = sentry_value_get_length(cList).ToUInt32();
+                    logger?.LogDebug("There are {0} native debug images, parsing the information.", len);
                     for (uint i = 0; i < len; i++)
                     {
                         var cItem = sentry_value_get_by_index(cList, (UIntPtr)i);
@@ -185,8 +169,9 @@ internal static class C
                             // * https://github.com/getsentry/sentry-native/blob/8faa78298da68d68043f0c3bd694f756c0e95dfa/src/modulefinder/sentry_modulefinder_windows.c#L81
                             // * https://github.com/getsentry/sentry-native/blob/8faa78298da68d68043f0c3bd694f756c0e95dfa/src/modulefinder/sentry_modulefinder_windows.c#L24
                             // * https://github.com/getsentry/sentry-native/blob/c5c31e56d36bed37fa5422750a591f44502edb41/src/modulefinder/sentry_modulefinder_linux.c#L465
-                            if (GetValueHex(cItem, "image_addr") is { } imageAddress)
+                            if (GetValueString(cItem, "image_addr") is { } imageAddr && imageAddr.Length > 0)
                             {
+                                var imageAddress = imageAddr.ParseHexAsLong();
                                 result.Add(imageAddress, new DebugImage()
                                 {
                                     CodeFile = GetValueString(cItem, "code_file"),
@@ -209,7 +194,6 @@ internal static class C
         }
         catch (Exception e)
         {
-            // Adding the Sentry logger tag ensures we don't send this error to Sentry.
             logger?.LogWarning("Error loading the list of debug images", e);
         }
         return result;
