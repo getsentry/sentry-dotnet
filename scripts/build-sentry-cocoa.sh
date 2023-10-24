@@ -18,6 +18,7 @@ macos_sdk=$(echo "$sdks" | awk '/macOS SDKs/{getline; print $NF}')
 # to use the package on Windows with "Pair to Mac".
 
 # Build for iOS and iOS simulator.
+echo "::group::Building sentry-cocoa for iOS and iOS simulator"
 xcodebuild -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
@@ -32,8 +33,10 @@ xcodebuild -create-xcframework \
     -framework ./Carthage/output-ios/Build/Products/Release-iphoneos/Sentry.framework \
     -framework ./Carthage/output-ios/Build/Products/Release-iphonesimulator/Sentry.framework \
     -output ./Carthage/Build-ios/Sentry.xcframework
+echo "::endgroup::"
 
 # Build for macOS.
+echo "::group::Building sentry-cocoa for macOS"
 xcodebuild -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
@@ -42,8 +45,10 @@ xcodebuild -project Sentry.xcodeproj \
 xcodebuild -create-xcframework \
     -framework ./Carthage/output-macos/Build/Products/Release/Sentry.framework \
     -output ./Carthage/Build-macos/Sentry.xcframework
+echo "::endgroup::"
 
 # Separately, build for Mac Catalyst
+echo "::group::Building sentry-cocoa for Mac Catalyst"
 xcodebuild -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
@@ -52,6 +57,7 @@ xcodebuild -project Sentry.xcodeproj \
 xcodebuild -create-xcframework \
     -framework ./Carthage/output-maccatalyst/Build/Products/Release-maccatalyst/Sentry.framework \
     -output ./Carthage/Build-maccatalyst/Sentry.xcframework
+echo "::endgroup::"
 
 # Copy headers - used for generating bindings
 mkdir Carthage/Headers
