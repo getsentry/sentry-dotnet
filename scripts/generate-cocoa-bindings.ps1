@@ -23,13 +23,17 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
 }
 
 # Get iPhone SDK version
+sharpie xcode -sdks -verbose
 $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
+
+Write-Output '*** Objective Sharpie Parameters ***'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
+Write-Output "CocoaSdkPath: $CocoaSdkPath"
+Write-Output "BindingsPath: $BindingsPath"
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
-#sharpie bind -sdk $iPhoneSdkVersion -quiet `
-sharpie bind -sdk $iPhoneSdkVersion `
+sharpie bind -sdk $iPhoneSdkVersion -quiet `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
