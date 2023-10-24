@@ -105,9 +105,10 @@ $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
 
 # Workaround for https://github.com/xamarin/xamarin-macios/issues/19310
-$Text = $Text -replace 'NSHTTPURL', 'NSHttpUrl'
-$Text = $Text -replace 'NSURL', 'NSUrl'
-$Text = $Text -replace 'NSUUID', 'NSUuid'
+# The regex on each of these means we only make replacements for non-commented lines
+$Text = $Text -replace '(?m)^[^#//\s]+.*NSHTTPURL', '$&' -replace '(?m)^[^#//\s]+.*NSHttpUrl', '$&'
+$Text = $Text -replace '(?m)^[^#//\s]+.*NSURL', '$&' -replace '(?m)^[^#//\s]+.*NSUrl', '$&'
+$Text = $Text -replace '(?m)^[^#//\s]+.*NSUUID', '$&' -replace '(?m)^[^#//\s]+.*NSUuid', '$&'
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
