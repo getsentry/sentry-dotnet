@@ -25,6 +25,11 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
 # Get iPhone SDK version
 $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
 
+ls -la /Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll
+md5 /Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll
+ls -la /Library/Frameworks/Xamarin.iOS.framework/Versions
+/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/bin/mtouch --version
+
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion -quiet `
