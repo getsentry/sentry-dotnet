@@ -28,7 +28,8 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
-sharpie bind -sdk $iPhoneSdkVersion -quiet `
+#sharpie bind -sdk $iPhoneSdkVersion -quiet `
+sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
