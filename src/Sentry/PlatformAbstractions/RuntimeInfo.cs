@@ -83,7 +83,24 @@ internal static class RuntimeInfo
             }
         }
 #elif TRIMMABLE
-    private static string? GetNetCoreVersion(Runtime runtime) => null; // There is no runtime for AOT apps
+    private static string? GetNetCoreVersion(Runtime runtime)
+    {
+        if (!runtime.IsNetCore())
+        {
+            return null;
+        }
+
+        string? RemovePrefixOrNull(string? value, string prefix)
+            => value?.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) == true
+                ? value.Substring(prefix.Length)
+                : null;
+
+        var description = RuntimeInformation.FrameworkDescription;
+        return RemovePrefixOrNull(description, ".NET")
+           ?? RemovePrefixOrNull(description, ".NET Core")
+           ?? RemovePrefixOrNull(description, ".NET Framework")
+           ?? RemovePrefixOrNull(description, ".NET Native");
+    }
 #else
     // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
     private static string? GetNetCoreVersion(Runtime runtime)

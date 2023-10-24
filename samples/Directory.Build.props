@@ -33,4 +33,11 @@
     <MtouchUseLlvm>false</MtouchUseLlvm>
   </PropertyGroup>
 
+  <!-- When running samples from the SentryAot.slnf solution filter, enable AOT compilation (.NET 8 currently)  -->
+  <!-- AOT not supported for osx-arm64 on .NET 7 -->
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and $(TargetFramework.StartsWith('net8'))">
+    <PublishAot>true</PublishAot>
+    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
+  </PropertyGroup>
+
 </Project>
