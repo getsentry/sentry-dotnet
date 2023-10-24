@@ -25,11 +25,7 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
 # Get iPhone SDK version
 sharpie xcode -sdks -verbose
 $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
-
-Write-Output '*** Objective Sharpie Parameters ***'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
-Write-Output "CocoaSdkPath: $CocoaSdkPath"
-Write-Output "BindingsPath: $BindingsPath"
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
@@ -107,6 +103,11 @@ $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 
 # Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
+
+# Workaround for https://github.com/xamarin/xamarin-macios/issues/19310
+$Text = $Text -replace 'NSHTTPURL', 'NSHttpUrl'
+$Text = $Text -replace 'NSURL', 'NSUrl'
+$Text = $Text -replace 'NSUUID', 'NSUuid'
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
