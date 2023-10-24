@@ -73,7 +73,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
             @event.Request = sentryRequest;
             @event.Contexts[Response.Type] = responseContext;
 
-            Hub.CaptureEvent(@event, hint);
+            Hub.CaptureEvent(@event, hint: hint);
         }
     }
 }

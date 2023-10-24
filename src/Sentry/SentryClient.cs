@@ -60,11 +60,7 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null)
-        => CaptureEvent(@event, null, scope);
-
-    /// <inheritdoc />
-    public SentryId CaptureEvent(SentryEvent? @event, Hint? hint, Scope? scope = null)
+    public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null, Hint? hint = null)
     {
         if (@event == null)
         {

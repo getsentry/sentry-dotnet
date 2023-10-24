@@ -3,11 +3,11 @@ namespace Sentry.Tests.Extensibility;
 [Collection(nameof(SentrySdkCollection))]
 public class HubAdapterTests : IDisposable
 {
-    private IHubEx Hub { get; }
+    private IHub Hub { get; }
 
     public HubAdapterTests()
     {
-        Hub = Substitute.For<IHubEx>();
+        Hub = Substitute.For<IHub>();
         SentrySdk.UseHub(Hub);
     }
 
@@ -34,7 +34,7 @@ public class HubAdapterTests : IDisposable
         var expected = new Exception();
         Hub.IsEnabled.Returns(true);
         HubAdapter.Instance.CaptureException(expected);
-        Hub.Received(1).CaptureEventInternal(Arg.Is<SentryEvent>(s => s.Exception == expected));
+        Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(s => s.Exception == expected));
     }
 
     [Fact]

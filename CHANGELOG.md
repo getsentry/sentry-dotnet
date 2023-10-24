@@ -34,6 +34,7 @@ API Changes:
 - The `DiagnosticLogger` signature for `LogError` and `LogFatal` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. The `DiagnosticLogger` now also received an overload for `LogError` and `LogFatal` that accepts a message only. ([#2715](https://github.com/getsentry/sentry-dotnet/pull/2715))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
 - Contexts now inherits from `IDictionary` rather than `ConcurrentDictionary`. The specific dictionary being used is an implementation detail. ([#2729](https://github.com/getsentry/sentry-dotnet/pull/2729))
+- `ISentryClient.CaptureEvent` overloads have been replaced by a single method accepting optional `Hint` and `Scope` parameters. You will need to pass `hint` as a named parameter from code that calls `CaptureEvent` without passing a `scope` argument. ([#2749](https://github.com/getsentry/sentry-dotnet/pull/2749))
 - The methods `WithScope` and `WithScopeAsync` have been removed. We discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
   Replace your usage of `WithScope` with the overloads of the `Capture` methods:
     - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
@@ -67,12 +68,12 @@ API Changes:
 
 ### Dependencies
 
-- Bump Cocoa SDK from v8.13.0 to v8.13.1 ([#2722](https://github.com/getsentry/sentry-dotnet/pull/2722))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8131)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.13.0...8.13.1)
-- Bump Java SDK from v6.30.0 to v6.31.0 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6310)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.31.0)
+- Bump Cocoa SDK from v8.13.0 to v8.14.2 ([#2722](https://github.com/getsentry/sentry-dotnet/pull/2722), [#2740](https://github.com/getsentry/sentry-dotnet/pull/2740), [#2746](https://github.com/getsentry/sentry-dotnet/pull/2746))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8142)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.13.0...8.14.2)
+- Bump Java SDK from v6.30.0 to v6.32.0 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723), [#2741](https://github.com/getsentry/sentry-dotnet/pull/2741))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6320)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.32.0)
 
 ## 3.40.1
 

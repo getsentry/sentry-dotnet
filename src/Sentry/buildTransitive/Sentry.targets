@@ -34,8 +34,13 @@
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
 
-      <!-- This property controls if the Sentry CLI is to be used at all.  Setting false will disable all Sentry CLI usage. -->
-      <UseSentryCLI Condition="'$(UseSentryCLI)' == '' And ('$(SentryUploadSymbols)' == 'true' Or '$(SentryUploadSources)' == 'true' Or $(SentryUploadAndroidProguardMapping) == 'true')">true</UseSentryCLI>
+      <!-- This property controls if the Sentry CLI is to be used at all. Setting false will disable all Sentry CLI usage.
+           We're explicitly skipping uploads for Sentry projects because they interfere with CLI integration test asserts. -->
+      <UseSentryCLI Condition="
+        '$(UseSentryCLI)' == ''
+        and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true')
+        and ('$(MSBuildProjectName)' != 'Sentry')
+        and (!$(MSBuildProjectName.StartsWith('Sentry.')) or '$(MSBuildProjectName)' == '$(SentryCLIIntegrationTestProject)')">true</UseSentryCLI>
     </PropertyGroup>
   </Target>
 
@@ -120,53 +125,88 @@
 
   </Target>
 
+  <!-- Native AOT publishing
+       While '_IsPublishing' looks a bit "private", it's also OK if it suddenly stops working and this step runs anyway.
+       See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993 -->
+  <PropertyGroup Condition="'$(PublishDir)' != '' and '$(PublishAot)' == 'true' and '$(_IsPublishing)' == 'true'">
+    <SentryCLIUploadNativeAOT>true</SentryCLIUploadNativeAOT>
+    <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
+    <!-- We must run after "CopyNativeBinary" (not "Publish"),
+         because that is the one that actually copies native AOT symbols to the publish directory. -->
+    <SentryCLIUploadAfterTargets>CopyNativeBinary</SentryCLIUploadAfterTargets>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
+    <SentryCLIUploadSymbolType Include="pdb" />
+    <SentryCLIUploadSymbolType Include="dsym" />
+    <SentryCLIUploadSymbolType Include="elf" />
+  </ItemGroup>
+
+  <!-- "Standard" managed build -->
+  <PropertyGroup Condition="'$(SentryCLIUploadNativeAOT)' != 'true'">
+    <SentryCLIUploadNativeAOT>false</SentryCLIUploadNativeAOT>
+    <SentryCLIUploadDirectory>$(OutputPath)</SentryCLIUploadDirectory>
+    <SentryCLIUploadAfterTargets>Build</SentryCLIUploadAfterTargets>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' != 'true'">
+    <SentryCLIUploadSymbolType Include="pdb" />
+    <SentryCLIUploadSymbolType Include="portablepdb" />
+    <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
+    <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
+  </ItemGroup>
+
   <!-- Upload symbols to Sentry after the build. -->
-  <Target Name="UploadSymbolsToSentry" AfterTargets="Build;Publish" DependsOnTargets="PrepareSentryCLI"
-    Condition="'$(SentryUploadSymbols)' == 'true' And '$(SentryCLI)' != ''">
+  <Target Name="UploadDebugInfoToSentry" AfterTargets="$(SentryCLIUploadAfterTargets)" DependsOnTargets="PrepareSentryCLI"
+    Condition="'$(SentryCLI)' != '' and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true')">
 
-    <Message Importance="High"
-      Text="Preparing to upload debug symbols to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-
-    <ItemGroup>
-      <SentryCLIUploadSymbolType Include="pdb" />
-      <SentryCLIUploadSymbolType Include="portablepdb" />
-      <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
-      <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
-    </ItemGroup>
-
-    <Exec Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(OutputPath)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
-      <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
-    </Exec>
-
+    <!-- if (UploadSymbols && UploadSources) { -->
+      <Message Importance="High"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadDirectory)" />
+      <Exec
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
+        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') --include-sources $(SentryCLIUploadDirectory)"
+        IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+        <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+      </Exec>
+    <!-- } else if (UploadSymbols && !UploadSources) { -->
+      <Message Importance="High"
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadDirectory)" />
+      <Exec
+        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
+        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(SentryCLIUploadDirectory)"
+        IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+        <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+      </Exec>
+    <!-- } else if (!UploadSymbols && UploadSources) { -->
+      <PropertyGroup>
+        <SentryCLIDebugInfoFile Condition="'$(NativeBinary)' != ''">$(NativeBinary)$(NativeSymbolExt)</SentryCLIDebugInfoFile>
+        <SentryCLIDebugInfoFile Condition="'$(NativeBinary)' == '' or !Exists('$(SentryCLIDebugInfoFile)')">@(IntermediateAssembly->'$(SentryCLIUploadDirectory)%(FileName).pdb')</SentryCLIDebugInfoFile>
+        <SentryCLIDebugInfoFile Condition="!Exists('$(SentryCLIDebugInfoFile)')">@(IntermediateAssembly->'$(SentryCLIUploadDirectory)%(FileName)%(Extension)')</SentryCLIDebugInfoFile>
+        <SentryCLIUploadSourcesDirectory>$([System.IO.Path]::GetDirectoryName('$(SentryCLIDebugInfoFile)'))</SentryCLIUploadSourcesDirectory>
+      </PropertyGroup>
+      <Message Importance="High"
+        Condition="'$(SentryUploadSymbols)' != 'true' and '$(SentryUploadSources)' == 'true'"
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting source code referenced by $(SentryCLIDebugInfoFile)" />
+      <Exec
+        Condition="'$(SentryUploadSymbols)' != 'true' and '$(SentryUploadSources)' == 'true'"
+        Command="&quot;$(SentryCLI)&quot; debug-files bundle-sources $(SentryCLIDebugInfoFile) " IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+        <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+      </Exec>
+      <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload debug files." />
+      <Exec
+        Condition="'$(SentryUploadSymbols)' != 'true' and '$(SentryUploadSources)' == 'true' and '$(_SentryCLIExitCode)' == '0'"
+        Command="$(SentryCLIDebugFilesUploadCommand) -t sourcebundle $(SentryCLIUploadSourcesDirectory)"
+        IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+        <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+      </Exec>
+    <!-- } -->
     <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload debug files." />
-
-  </Target>
-
-  <!-- Upload sources to Sentry after the build. -->
-  <Target Name="UploadSourcesToSentry" AfterTargets="Build;UploadSymbolsToSentry" DependsOnTargets="PrepareSentryCLI"
-    Condition="'$(SentryUploadSources)' == 'true' And '$(SentryCLI)' != ''">
-
-    <Message Importance="High" Condition="'$(SentryUploadSources)' == 'true'"
-      Text="Preparing to upload sources to Sentry for $(MSBuildProjectName) ($(Configuration)/$(TargetFramework))" />
-
-    <PropertyGroup>
-      <_SentryDebugInfoFile>@(IntermediateAssembly->'$(IntermediateOutputPath)%(FileName).pdb')</_SentryDebugInfoFile>
-      <_SentryDebugInfoFile Condition="!Exists('$(_SentryDebugInfoFile)')">@(IntermediateAssembly->'$(IntermediateOutputPath)%(FileName)%(Extension)')</_SentryDebugInfoFile>
-      <_SentrySourceBundle>@(IntermediateAssembly->'$(IntermediateOutputPath)%(FileName).src.zip')</_SentrySourceBundle>
-    </PropertyGroup>
-
-    <Exec Command="&quot;$(SentryCLI)&quot; debug-files bundle-sources $(_SentryDebugInfoFile)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" />
-    <Exec Command="$(SentryCLIDebugFilesUploadCommand) $(_SentrySourceBundle)" IgnoreExitCode="true" ContinueOnError="WarnAndContinue" Condition="Exists('$(_SentrySourceBundle)')">
-      <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
-    </Exec>
-
-    <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload sources." />
-
   </Target>
 
   <!-- Upload Android Proguard mapping file to Sentry after the build. -->
-  <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build"
-          Condition="'$(SentryUploadAndroidProguardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
+  <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build" DependsOnTargets="PrepareSentryCLI"
+          Condition="'$(SentryCLI)' != '' and '$(SentryUploadAndroidProguardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
 
     <Message Importance="High" Text="Preparing to upload Android Proguard mapping to Sentry for '$(MSBuildProjectName)': $(AndroidProguardMappingFile))" />
 

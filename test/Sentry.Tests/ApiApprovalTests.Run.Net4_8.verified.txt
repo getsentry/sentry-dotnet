@@ -234,6 +234,7 @@ namespace Sentry
         Sentry.SentryId LastEventId { get; }
         void BindException(System.Exception exception, Sentry.ISpanTracer span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
+        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope);
         Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null);
         Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null);
         void EndSession(Sentry.SessionEndStatus status = 0);
@@ -260,8 +261,7 @@ namespace Sentry
     public interface ISentryClient
     {
         bool IsEnabled { get; }
-        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null);
-        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope = null);
+        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.Transaction transaction);
         void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint);
@@ -490,8 +490,7 @@ namespace Sentry
     {
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Hint? hint, Sentry.Scope? scope = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
         public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
@@ -738,10 +737,9 @@ namespace Sentry
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void BindClient(Sentry.ISentryClient client) { }
         public static void BindException(System.Exception exception, Sentry.ISpanTracer span) { }
-        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
-        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
-        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope) { }
+        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
+        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
         public static Sentry.SentryId CaptureException(System.Exception exception) { }
         public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureMessage(string message, Sentry.SentryLevel level = 1) { }
@@ -1226,9 +1224,9 @@ namespace Sentry.Extensibility
         public Sentry.SentryId LastEventId { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpanTracer span) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
         public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
@@ -1268,7 +1266,8 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, Sentry.Scope? scope) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope, Sentry.Hint? hint = null) { }
         public Sentry.SentryId CaptureException(System.Exception exception) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }

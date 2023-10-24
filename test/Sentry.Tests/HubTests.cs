@@ -128,8 +128,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -151,8 +150,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -191,8 +189,7 @@ public partial class HubTests
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.DynamicSamplingContext == dsc),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -214,8 +211,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -234,8 +230,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == scope.PropagationContext.TraceId &&
                 evt.Contexts.Trace.SpanId == scope.PropagationContext.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -445,14 +440,12 @@ public partial class HubTests
         var hub = _fixture.GetSut();
 
         // Act
-        hub.CaptureEvent(@event, hint);
+        hub.CaptureEvent(@event, hint: hint);
 
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Is<Hint>(h => h == hint),
-            Arg.Any<Scope>()
-            );
+            Arg.Any<Scope>(), Arg.Is<Hint>(h => h == hint));
     }
 
     [Fact]
@@ -1255,7 +1248,7 @@ public partial class HubTests
         hub.CaptureEvent(evt);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Hint>(), Arg.Any<Scope>());
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Theory]

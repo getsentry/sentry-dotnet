@@ -339,41 +339,16 @@ public static class SentrySdk
         => CurrentHub.ConfigureScopeAsync(configureScope);
 
     /// <summary>
-    /// Captures the event.
-    /// </summary>
-    /// <param name="evt">The event.</param>
-    /// <returns>The Id of the event.</returns>
-    [DebuggerStepThrough]
-    public static SentryId CaptureEvent(SentryEvent evt)
-        => CurrentHub.CaptureEvent(evt);
-
-    /// <summary>
-    /// Captures the event using the specified scope.
-    /// </summary>
-    /// <param name="evt">The event.</param>
-    /// <param name="scope">The scope.</param>
-    /// <returns>The Id of the event.</returns>
-    [DebuggerStepThrough]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
-        => CurrentHub.CaptureEvent(evt, scope);
-
-    /// <summary>
     /// Captures the event, passing a hint, using the specified scope.
     /// </summary>
     /// <param name="evt">The event.</param>
-    /// <param name="hint">a hint for the event.</param>
     /// <param name="scope">The scope.</param>
+    /// <param name="hint">a hint for the event.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
-        => CurrentHub.CaptureEvent(evt, hint, scope);
-
-    internal static SentryId CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
-        => CurrentHub is IHubEx hub
-            ? hub.CaptureEventInternal(evt, hint, scope)
-            : CurrentHub.CaptureEvent(evt, hint, scope);
+    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
+        => CurrentHub.CaptureEvent(evt, scope, hint);
 
     /// <summary>
     /// Captures an event with a configurable scope.
@@ -387,7 +362,22 @@ public static class SentrySdk
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
-        => CurrentHub.CaptureEvent(evt, configureScope);
+        => CurrentHub.CaptureEvent(evt, null, configureScope);
+
+    /// <summary>
+    /// Captures an event with a configurable scope.
+    /// </summary>
+    /// <remarks>
+    /// This allows modifying a scope without affecting other events.
+    /// </remarks>
+    /// <param name="evt">The event.</param>
+    /// <param name="hint">An optional hint to be provided with the event</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+        => CurrentHub.CaptureEvent(evt, hint, configureScope);
 
     /// <summary>
     /// Captures the exception.
