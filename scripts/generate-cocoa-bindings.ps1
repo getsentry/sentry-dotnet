@@ -23,7 +23,6 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
 }
 
 # Get iPhone SDK version
-sharpie xcode -sdks -verbose
 $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
