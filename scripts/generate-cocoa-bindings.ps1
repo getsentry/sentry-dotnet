@@ -106,9 +106,43 @@ $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
 
 # Workaround for https://github.com/xamarin/xamarin-macios/issues/19310
 # The regex on each of these means we only make replacements for non-commented lines
-$Text = $Text -replace '(?m)^[^#//\s]+.*NSHTTPURL', '$&' -replace '(?m)^[^#//\s]+.*NSHttpUrl', '$&'
-$Text = $Text -replace '(?m)^[^#//\s]+.*NSURL', '$&' -replace '(?m)^[^#//\s]+.*NSUrl', '$&'
-$Text = $Text -replace '(?m)^[^#//\s]+.*NSUUID', '$&' -replace '(?m)^[^#//\s]+.*NSUuid', '$&'
+function ReplaceOutsideComments {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$Text,
+
+        [Parameter(Mandatory=$true)]
+        [hashtable]$Replacements
+    )
+
+    # Split the content by lines
+    $lines = $Text -split "`n"
+
+    # Process each line and replace as needed
+    $updatedLines = $lines | ForEach-Object {
+        $line = $_
+
+        # Check if the line is not commented out
+        if ($line -notmatch "^\s*//") {
+            # Perform all the replacements
+            foreach ($key in $Replacements.Keys) {
+                $line = $line -replace $key, $Replacements[$key]
+            }
+        }
+        $line
+    }
+
+    # Join the lines back together
+    return ($updatedLines -join "`n")
+}
+
+$replacements = @{
+    "NSHTTPURL" = "NSHttpUrl";
+    "NSURL" = "NSUrl";
+    "NSUUID" = "NSUuid";
+}
+
+$Text = ReplaceOutsideComments -Text $Text -Replacements $replacements
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
