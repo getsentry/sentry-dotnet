@@ -80,7 +80,6 @@ internal interface IStackFrame
     /// <returns>
     /// The method in which the frame is executing.
     /// </returns>
-
     public MethodBase? GetMethod();
 
     /// <summary>

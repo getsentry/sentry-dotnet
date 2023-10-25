@@ -843,7 +843,9 @@ public class SentryOptions
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
+#if !TRIMMABLE
     private StackTraceMode? _stackTraceMode;
+#endif
 
     /// <summary>
     /// ATTENTION: This option will change how issues are grouped in Sentry!
@@ -854,6 +856,10 @@ public class SentryOptions
     /// </remarks>
     public StackTraceMode StackTraceMode
     {
+#if TRIMMABLE
+        // Enhanced stack traces not supported by AOT as they rely heavily on reflection
+        get { return StackTraceMode.Original; }
+#else
         get
         {
             if (_stackTraceMode is not null)
@@ -878,6 +884,7 @@ public class SentryOptions
             return _stackTraceMode.Value;
         }
         set => _stackTraceMode = value;
+#endif
     }
 
     /// <summary>

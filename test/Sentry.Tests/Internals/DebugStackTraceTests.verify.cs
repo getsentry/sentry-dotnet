@@ -17,6 +17,9 @@ public class DebugStackTraceTests
     private readonly Fixture _fixture = new();
     private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace!;
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+#if !TRIMMABLE
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
     {
@@ -40,25 +43,16 @@ public class DebugStackTraceTests
         Assert.False(actual?.InApp);
     }
 
-#if !TRIMMABLE
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public void CreateSentryStackFrame_SystemType_NotInAppFrame(bool useEnhancedStackTrace)
-#else
-    [Fact]
-    public void CreateSentryStackFrame_SystemType_NotInAppFrame()
-#endif
     {
         // Arrange
         var sut = _fixture.GetSut();
         var exception = Assert.ThrowsAny<Exception>(() => _ = Convert.FromBase64String("This will throw."));
         var stackTrace = new StackTrace(exception);
-#if !TRIMMABLE
         var frame = useEnhancedStackTrace ? EnhancedStackTrace.GetFrames(stackTrace)[0] : stackTrace.GetFrame(0);
-#else
-        var frame = stackTrace.GetFrame(0);
-#endif
 
         // Sanity Check
         Assert.NotNull(frame);
@@ -83,6 +77,7 @@ public class DebugStackTraceTests
 
         Assert.True(actual?.InApp);
     }
+#endif
 
     // https://github.com/getsentry/sentry-dotnet/issues/64
     [Fact]

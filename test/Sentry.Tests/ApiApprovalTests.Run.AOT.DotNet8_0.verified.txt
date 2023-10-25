@@ -676,7 +676,7 @@ namespace Sentry
         public Sentry.ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }
         public string? ServerName { get; set; }
         public System.TimeSpan ShutdownTimeout { get; set; }
-        public Sentry.StackTraceMode StackTraceMode { get; set; }
+        public Sentry.StackTraceMode StackTraceMode { get; }
         public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.TracePropagationTarget> TracePropagationTargets { get; set; }
         public double? TracesSampleRate { get; set; }

@@ -23,6 +23,9 @@ public partial class SentryStackTraceFactoryTests
         Assert.Null(sut.Create());
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+#if !TRIMMABLE
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionOnWithOriginalMode_CurrentStackTrace()
     {
@@ -47,13 +50,11 @@ public partial class SentryStackTraceFactoryTests
 
     [Theory]
     [InlineData(StackTraceMode.Original, "AsyncWithWait_StackTrace { <lambda> }")]
-#if !TRIMMABLE
     [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
-#endif
     public void AsyncWithWait_StackTrace(StackTraceMode mode, string method)
     {
-        _fixture.SentryOptions.AttachStacktrace = true;
         _fixture.SentryOptions.StackTraceMode = mode;
+        _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
 
         SentryStackTrace stackTrace = null!;
@@ -71,13 +72,11 @@ public partial class SentryStackTraceFactoryTests
 
     [Theory]
     [InlineData(StackTraceMode.Original, "MoveNext")] // Should be "AsyncWithAwait_StackTrace { <lambda> }", but see note in SentryStackTraceFactory
-#if !TRIMMABLE
     [InlineData(StackTraceMode.Enhanced, "async Task SentryStackTraceFactoryTests.AsyncWithAwait_StackTrace(StackTraceMode mode, string method)+(?) => { }")]
-#endif
     public async Task AsyncWithAwait_StackTrace(StackTraceMode mode, string method)
     {
-        _fixture.SentryOptions.AttachStacktrace = true;
         _fixture.SentryOptions.StackTraceMode = mode;
+        _fixture.SentryOptions.AttachStacktrace = true;
         var sut = _fixture.GetSut();
 
         var stackTrace = await Task.Run(async () =>
@@ -91,7 +90,6 @@ public partial class SentryStackTraceFactoryTests
         Assert.Equal(method, stackTrace.Frames.Last().Function);
     }
 
-#if !TRIMMABLE
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace()
     {
@@ -113,7 +111,6 @@ public partial class SentryStackTraceFactoryTests
                 StringComparison.Ordinal
             ) == true);
     }
-#endif
 
     [Fact]
     public void Create_WithExceptionAndDefaultAttachStackTraceOption_HasStackTrace()
@@ -191,9 +188,7 @@ public partial class SentryStackTraceFactoryTests
 
     [Theory]
     [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
-#if !TRIMMABLE
     [InlineData(StackTraceMode.Enhanced, "(Fixture f, int b) SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
-#endif
     public void Create_InlineCase_IncludesAmpersandAfterParameterType(StackTraceMode mode, string method)
     {
         _fixture.SentryOptions.StackTraceMode = mode;
@@ -212,6 +207,7 @@ public partial class SentryStackTraceFactoryTests
         var frame = stackTrace!.Frames.Last();
         frame.Function.Should().Be(method);
     }
+#endif
 
     // ReSharper disable UnusedParameter.Local
     [MethodImpl(MethodImplOptions.NoInlining)]

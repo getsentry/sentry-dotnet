@@ -4,19 +4,19 @@ using Sentry.PlatformAbstractions;
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+#if !TRIMMABLE
 [UsesVerify]
 public partial class SentryStackTraceFactoryTests
 {
     [SkippableTheory]
     [InlineData(StackTraceMode.Original)]
-#if !TRIMMABLE
     [InlineData(StackTraceMode.Enhanced)]
-#endif
     public Task MethodGeneric(StackTraceMode mode)
     {
         // TODO: Mono gives different results.  Investigate why.
         Skip.If(RuntimeInfo.GetRuntime().IsMono(), "Not supported on Mono");
-
         _fixture.SentryOptions.StackTraceMode = mode;
 
         // Arrange
@@ -42,3 +42,4 @@ public partial class SentryStackTraceFactoryTests
             .UseParameters(mode);
     }
 }
+#endif
