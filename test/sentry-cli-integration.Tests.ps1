@@ -109,7 +109,7 @@ BeforeAll {
         }
         elseif ($action -eq "publish")
         {
-            $result.ScriptOutput | Should -AnyElementMatch "$sample -> .*samples/$sample/bin/Release/$TargetFramework/.*/publish"
+            $result.ScriptOutput | Should -AnyElementMatch "$sample -> .*samples/$sample/bin/Release/$TargetFramework/(.*/)?publish"
         }
         $result.ScriptOutput | Should -Not -AnyElementMatch "Preparing upload to Sentry for project 'Sentry'"
         $result.HasErrors() | Should -BeFalse
