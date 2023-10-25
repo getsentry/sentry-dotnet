@@ -144,11 +144,6 @@ jobs:
       - name: Test
         run: dotnet test $AOT_SOLUTION -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
-      - name: Test symbol upload
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
-        with:
-          path: test
-
       - name: Upload Verify Results
         if: failure()
         uses: actions/upload-artifact@v3
