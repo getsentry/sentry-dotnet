@@ -818,11 +818,11 @@ public class SentryOptions
     public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
     // The default propagation list will match anything, but adding to the list should clear that.
-    private IList<TracePropagationTarget> _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
-        (new[] { new TracePropagationTarget(".*") }, clearOnNextAdd: true);
+    private IList<SubstringOrRegexPattern> _tracePropagationTargets = new AutoClearingList<SubstringOrRegexPattern>
+        (new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true);
 
     /// <summary>
-    /// A customizable list of <see cref="TracePropagationTarget"/> objects, each containing either a
+    /// A customizable list of <see cref="SubstringOrRegexPattern"/> objects, each containing either a
     /// substring or regular expression pattern that can be used to control which outgoing HTTP requests
     /// will have the <c>sentry-trace</c> and <c>baggage</c> headers propagated, for purposes of distributed tracing.
     /// The default value contains a single value of <c>.*</c>, which matches everything.
@@ -832,7 +832,7 @@ public class SentryOptions
     /// <remarks>
     /// Adding an item to the default list will clear the <c>.*</c> value automatically.
     /// </remarks>
-    public IList<TracePropagationTarget> TracePropagationTargets
+    public IList<SubstringOrRegexPattern> TracePropagationTargets
     {
         // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
