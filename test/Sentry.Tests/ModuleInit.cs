@@ -5,14 +5,6 @@ public static class ModuleInit
     [SuppressMessage("Usage", "CA2255:The \'ModuleInitializer\' attribute should not be used in libraries")]
     public static void Init()
     {
-#if TRIMMABLE
-        Verifier.DerivePathInfo((sourceFile, projectDirectory, type, method) => new(
-            directory: projectDirectory,
-            typeName: type.Name,
-            // This ensures a unique name for our verify files when trimming is enabled
-            methodName: method.Name + ".AOT"
-            ));
-#endif
         VerifierSettings.IgnoreMembers<SentryException>(_ => _.Module, _ => _.ThreadId);
 
         VerifierSettings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(
