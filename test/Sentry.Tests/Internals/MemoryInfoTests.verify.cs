@@ -14,6 +14,7 @@ public class MemoryInfoTests
     }
 
     [Fact]
+    [UniqueForAot]
     public Task WriteTo()
     {
 #if NET5_0_OR_GREATER

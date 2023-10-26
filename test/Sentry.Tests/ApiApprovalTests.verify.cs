@@ -4,6 +4,7 @@ namespace Sentry.Tests;
 public class ApiApprovalTests
 {
     [Fact]
+    [UniqueForAot]
     public Task Run()
     {
         return typeof(SentrySdk).Assembly.CheckApproval();

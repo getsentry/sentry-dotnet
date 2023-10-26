@@ -1,6 +1,7 @@
 namespace Sentry.Tests.Protocol;
 
 [UsesVerify]
+[UniqueForAot]
 public class ProfilerTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;

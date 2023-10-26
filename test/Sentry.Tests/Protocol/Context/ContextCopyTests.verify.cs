@@ -1,6 +1,7 @@
 namespace Sentry.Tests.Protocol.Context;
 
 [UsesVerify]
+[UniqueForAot]
 public class ContextCopyTests
 {
     [Fact]

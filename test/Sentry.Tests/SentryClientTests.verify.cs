@@ -4,6 +4,7 @@ namespace Sentry.Tests;
 public partial class SentryClientTests
 {
     [Fact]
+    [UniqueForAot]
     public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
     {
         var error = new Exception("Exception message!");
@@ -18,6 +19,7 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    [UniqueForAot]
     public Task CaptureTransaction_BeforeSendTransactionThrows_ErrorToEventBreadcrumb()
     {
         var error = new Exception("Exception message!");

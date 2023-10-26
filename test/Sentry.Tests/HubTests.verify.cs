@@ -4,6 +4,7 @@ namespace Sentry.Tests;
 public partial class HubTests
 {
     [Fact]
+    [UniqueForAot]
     public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
     {
         // Arrange

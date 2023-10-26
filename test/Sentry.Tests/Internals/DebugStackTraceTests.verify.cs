@@ -210,6 +210,7 @@ public class DebugStackTraceTests
         Assert.Null(frame.Package);
     }
 
+#if !TRIMMABLE
     [Fact]
     public Task CreateFrame_ForNativeAOT()
     {
@@ -224,6 +225,7 @@ public class DebugStackTraceTests
 
         return VerifyJson(frame.ToJsonString());
     }
+#endif
 
     private class InjectableDebugStackTrace : DebugStackTrace
     {

@@ -3,8 +3,8 @@ namespace Sentry.Tests.Protocol;
 [UsesVerify]
 public partial class SentryEventTests
 {
-
     [Fact]
+    [UniqueForAot]
     public async Task SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
         var ex = new Exception("exception message");
