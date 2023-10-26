@@ -496,15 +496,12 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
-#if TRIMMABLE
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
+#if TRIMMABLE
         assemblyName = null;
         return null;
-    }
 #else
-    private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
-    {
         assemblyName = module.FullyQualifiedName;
         if (options.AssemblyReader is { } reader)
         {
@@ -520,8 +517,8 @@ internal class DebugStackTrace : SentryStackTrace
         {
             return null;
         }
-    }
 #endif
+    }
 
     private int? AddManagedModuleDebugImage(Module module)
     {
