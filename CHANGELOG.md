@@ -40,7 +40,6 @@ API Changes:
     - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
-- Removed obsolete setter from Sentry.PlatformAbstractions.Runtime.Identifier ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
   
   #### Before
   ```
@@ -60,6 +59,7 @@ API Changes:
   });
   ```
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
+- Removed obsolete setter from `Sentry.PlatformAbstractions.Runtime.Identifier` ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
 
 ## Unreleased
 
