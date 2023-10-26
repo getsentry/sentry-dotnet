@@ -40,6 +40,7 @@ API Changes:
     - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
+- Removed obsolete setter from Sentry.PlatformAbstractions.Runtime.Identifier, so this is readonly now ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
   
   #### Before
   ```
