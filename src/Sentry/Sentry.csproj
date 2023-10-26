@@ -23,6 +23,10 @@
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
   <Import Project="Platforms\Native\Sentry.Native.props" Condition="('$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net8.0') And ($([MSBuild]::IsOSPlatform('Linux')) Or $([MSBuild]::IsOSPlatform('Windows')))" />
 
+  <PropertyGroup>
+    <!-- Adding directly in the Link tag results in a NETSDK1022 error due to the order or evaluation -->
+    <BenDemystifierLink Condition="'$(PublishAot)' != 'true'">%(RecursiveDir)\%(Filename)%(Extension)</BenDemystifierLink>
+  </PropertyGroup>
   <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="'$(PublishAot)' != 'true'">
     <!--
       Ben.Demystifier is compiled directly into Sentry.
@@ -30,8 +34,7 @@
     -->
     <ItemGroup>
       <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
-<!-- TODO: Work out why we get ' Error NETSDK1022 : Duplicate 'Compile' items were included.' if we uncomment this -->
-<!--        <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>-->
+        <Link>$(BenDemystifierLink)</Link>
       </Compile>
       <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
     </ItemGroup>
