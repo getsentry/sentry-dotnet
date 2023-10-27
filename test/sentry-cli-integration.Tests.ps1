@@ -59,7 +59,7 @@ BeforeDiscovery {
 BeforeAll {
     $env:SENTRY_LOG_LEVEL = 'debug';
 
-    function RunDotnet([string] $action, [string]$Sample, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0', [bool]$Aot = $False)
+    function RunDotnet([string] $action, [string]$Sample, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0')
     {
         $rootDir = "$(Get-Item $PSScriptRoot/../../)"
 
@@ -185,7 +185,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     }
 
     It "uploads symbols and sources (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True $framework $True
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
         {
@@ -206,7 +206,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     }
 
     It "uploads symbols (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $False $framework $True
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $True $False $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
         {
@@ -225,7 +225,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     }
 
     It "uploads sources (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True $framework $True
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'Sentry.Samples.Console.Basic'"
         $sourceBundle = 'Sentry.Samples.Console.Basic.src.zip'
         if ($IsMacOS -or ($IsLinux -and $framework -eq 'net7.0'))
@@ -236,7 +236,7 @@ Describe 'Console apps - native AOT publish (<framework>)' -ForEach @(
     }
 
     It "uploads nothing when disabled (<framework>)" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $False $framework $True
+        $result = RunDotnet 'publish' 'Sentry.Samples.Console.Basic' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
 }
