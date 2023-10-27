@@ -34,12 +34,7 @@
   </PropertyGroup>
 
   <!-- AOT not supported for osx-arm64 on .NET 7 -->
-  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and $(TargetFramework.StartsWith('net8'))">
+  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and (!$([MSBuild]::IsOSPlatform('OSX')) or '$(TargetFramework)' == 'net8.0')">
     <PublishAot>true</PublishAot>
   </PropertyGroup>
-  <!-- Kept separate in case PublishAot is passed in as a build parameter from the command line -->
-  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
-    <DefineConstants>$(DefineConstants);TRIMMABLE</DefineConstants>
-  </PropertyGroup>
-
 </Project>

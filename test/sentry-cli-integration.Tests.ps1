@@ -68,24 +68,19 @@ BeforeAll {
             Write-Host "::group::Building $Sample"
             try
             {
-                $dotnetArgs = @(
-                    "samples/$sample/$sample.csproj", 
-                    "-c", "Release", 
-                    "-f", $TargetFramework, 
-                    "--no-restore", 
-                    "--nologo",
-                    "/p:SentryCLIIntegrationTestProject=$sample",
-                    "/p:SentryUploadSymbols=$Symbols",
-                    "/p:SentryUploadSources=$Sources",
-                    "/p:SentryOrg=org",
-                    "/p:SentryProject=project",
-                    "/p:SentryUrl=$url",
-                    "/p:SentryAuthToken=dummy"
-                    )
-                if ($Aot -and $action -eq "publish") {
-                    $dotnetArgs += "/p:PublishAot=true"
-                }
-                dotnet $action $dotnetArgs | ForEach-Object {
+                dotnet $action "samples/$sample/$sample.csproj" `
+                    -c Release `
+                    --no-restore `
+                    --nologo `
+                    --framework $TargetFramework `
+                    /p:SentryCLIIntegrationTestProject=$sample `
+                    /p:SentryUploadSymbols=$Symbols `
+                    /p:SentryUploadSources=$Sources `
+                    /p:SentryOrg=org `
+                    /p:SentryProject=project `
+                    /p:SentryUrl=$url `
+                    /p:SentryAuthToken=dummy `
+                | ForEach-Object {
                     if ($_ -match "^Time Elapsed ")
                     {
                         "Time Elapsed [value removed]"
