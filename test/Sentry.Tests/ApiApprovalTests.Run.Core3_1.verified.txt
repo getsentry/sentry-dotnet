@@ -1462,8 +1462,7 @@ namespace Sentry.PlatformAbstractions
     public class Runtime : System.IEquatable<Sentry.PlatformAbstractions.Runtime>
     {
         public Runtime(string? name = null, string? version = null, string? raw = null, string? identifier = null) { }
-        [set: System.Obsolete("This setter is nonfunctional, and will be removed in a future version.")]
-        public string? Identifier { get; set; }
+        public string? Identifier { get; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }

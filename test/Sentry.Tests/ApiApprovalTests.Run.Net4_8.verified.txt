@@ -1462,8 +1462,7 @@ namespace Sentry.PlatformAbstractions
     {
         public Runtime(string? name = null, string? version = null, Sentry.PlatformAbstractions.FrameworkInstallation? frameworkInstallation = null, string? raw = null) { }
         public Sentry.PlatformAbstractions.FrameworkInstallation? FrameworkInstallation { get; }
-        [set: System.Obsolete("This setter is nonfunctional, and will be removed in a future version.")]
-        public string? Identifier { get; set; }
+        public string? Identifier { get; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }

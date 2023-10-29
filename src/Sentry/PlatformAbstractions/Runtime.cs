@@ -54,18 +54,7 @@ public class Runtime : IEquatable<Runtime>
     /// <remarks>
     /// This property will be populated for .NET 5 and newer, or <c>null</c> otherwise.
     /// </remarks>
-    public string? Identifier
-    {
-        get => _identifier;
-
-        [Obsolete("This setter is nonfunctional, and will be removed in a future version.")]
-        // ReSharper disable ValueParameterNotUsed
-        set { }
-        // ReSharper restore ValueParameterNotUsed
-    }
-
-    // TODO: Convert to get-only auto-property in next major version
-    private readonly string? _identifier;
+    public string? Identifier { get; }
 
     /// <summary>
     /// Creates a new Runtime instance
@@ -81,7 +70,7 @@ public class Runtime : IEquatable<Runtime>
             Version = version;
             FrameworkInstallation = frameworkInstallation;
             Raw = raw;
-            _identifier = null;
+            Identifier = null;
         }
 #else
     public Runtime(
@@ -93,7 +82,7 @@ public class Runtime : IEquatable<Runtime>
         Name = name;
         Version = version;
         Raw = raw;
-        _identifier = identifier;
+        Identifier = identifier;
     }
 #endif
 
@@ -183,7 +172,7 @@ public class Runtime : IEquatable<Runtime>
 #if NETFRAMEWORK
                 hashCode = (hashCode * 397) ^ (FrameworkInstallation?.GetHashCode() ?? 0);
 #else
-            hashCode = (hashCode * 397) ^ (_identifier?.GetHashCode() ?? 0);
+            hashCode = (hashCode * 397) ^ (Identifier?.GetHashCode() ?? 0);
 #endif
             return hashCode;
         }
