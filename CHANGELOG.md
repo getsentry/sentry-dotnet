@@ -40,7 +40,6 @@ API Changes:
     - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
-- The TracePropagationTarget class has been removed. Use the SubstringOrRegexPattern class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
   
   #### Before
   ```
@@ -60,6 +59,7 @@ API Changes:
   });
   ```
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
+- The TracePropagationTarget class has been removed. Use the SubstringOrRegexPattern class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
 
 ## Unreleased
 
