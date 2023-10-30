@@ -33,9 +33,7 @@
 
   <!-- Packaging the native library -->
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Windows'))">
-    <NativeLibs Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib" />
-    <NativeLibs Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).pdb" />
-    <None Include="@(NativeLibs)">
+    <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-win-x64)</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -61,7 +59,7 @@
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$([MSBuild]::IsOsPlatform('Windows'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
-    Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib;$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).pdb">
+    Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-win-x64"
       Properties="TargetFramework=once" />
@@ -77,13 +75,13 @@
         -D SENTRY_BUILD_SHARED_LIBS=0 ^
         -D SENTRY_BUILD_RUNTIMESTATIC=1 ^
         -D SENTRY_BACKEND=none ^
-        -D SENTRY_TRANSPORT=none " />
+        -D SENTRY_TRANSPORT=none ^
+        -C $(MSBuildThisFileDirectory)windows-config.cmake" />
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
       Command="cmake --build build --target sentry --config RelWithDebInfo --parallel" />
 
     <ItemGroup>
       <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/RelWithDebInfo/sentry.lib" />
-      <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/RelWithDebInfo/sentry.pdb" />
     </ItemGroup>
 
     <Copy SourceFiles="@(NativeSdkArtifacts)"
