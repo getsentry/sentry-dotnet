@@ -45,6 +45,7 @@
     </ItemGroup>
   </Target>
 
+
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
@@ -76,13 +77,10 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
-  <!-- System.Text.Json is already included with .NET 5 and higher. Add a direct reference for other targets. -->
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net8'))">
+  <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net6')) and !$(TargetFramework.StartsWith('net7')) and !$(TargetFramework.StartsWith('net8'))">
     <PackageReference Include="System.Text.Json" Version="6.0.8" />
   </ItemGroup>
-<!--  <ItemGroup Condition="!$(TargetFramework.StartsWith('net5')) and !$(TargetFramework.StartsWith('net6'))">-->
-<!--    <PackageReference Include="System.Text.Json" Version="5.0.2" />-->
-<!--  </ItemGroup>-->
 
   <!--
     Include Sentry's custom targets file in the nuget package.
