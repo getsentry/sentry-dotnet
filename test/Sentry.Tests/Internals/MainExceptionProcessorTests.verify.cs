@@ -4,7 +4,6 @@ namespace Sentry.Tests.Internals;
 public partial class MainExceptionProcessorTests
 {
     [Fact]
-    [UniqueForAot]
     public Task CreateSentryException_Aggregate()
     {
         var sut = _fixture.GetSut();

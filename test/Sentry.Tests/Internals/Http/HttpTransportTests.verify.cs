@@ -6,7 +6,6 @@ namespace Sentry.Tests.Internals.Http;
 public partial class HttpTransportTests
 {
     [Fact]
-    [UniqueForAot]
     public Task ProcessEnvelope_ShouldAttachClientReport()
     {
         var options = new SentryOptions();

@@ -4,7 +4,6 @@ namespace Sentry.Tests.Protocol;
 public partial class MeasurementTests
 {
     [Fact]
-    [UniqueForAot]
     public Task Transaction_Serializes_Measurements()
     {
         var transaction = new Transaction("name", "operation");
