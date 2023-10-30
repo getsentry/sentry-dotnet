@@ -11,6 +11,8 @@
     <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)</SentryNativeOutputDirectory-win-x64>
     <NativeLibRelativePath-linux-x64>linux-x64\native\</NativeLibRelativePath-linux-x64>
     <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)</SentryNativeOutputDirectory-linux-x64>
+    <NativeLibRelativePath-osx>osx\native\</NativeLibRelativePath-osx>
+    <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)</SentryNativeOutputDirectory-osx>
   </PropertyGroup>
 
   <!-- Packaging -->
@@ -46,6 +48,14 @@
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-linux-x64)</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
+    <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
+      <Pack>true</Pack>
+      <PackagePath>\runtimes\$(NativeLibRelativePath-osx)</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -121,5 +131,36 @@
     </ItemGroup>
     <Copy SourceFiles="@(NativeSdkArtifacts)"
       DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-linux-x64)%(Filename)-native%(Extension)')" />
+  </Target>
+
+  <Target Name="_BuildSentryNativeSDK-osx"
+    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
+    Condition="$([MSBuild]::IsOsPlatform('OSX'))"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Outputs="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
+    <MSBuild Projects="$(MSBuildProjectFile)"
+      Targets="_InnerBuildSentryNativeSDK-osx"
+      Properties="TargetFramework=once" />
+  </Target>
+
+  <Target Name="_InnerBuildSentryNativeSDK-osx">
+    <Message Importance="High"
+      Text="Building artifacts of Sentry Native SDK for osx." />
+
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
+      Command="cmake -B build -S . \
+        -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+        -D SENTRY_SDK_NAME=sentry.native.dotnet \
+        -D SENTRY_BUILD_SHARED_LIBS=0 \
+        -D SENTRY_BACKEND=none \
+        -D SENTRY_TRANSPORT=none \
+        -DCMAKE_OSX_ARCHITECTURES=&quot;arm64;x86_64&quot;" />
+    <Exec WorkingDirectory="$(SentryNativeSourceDirectory)" Command="cmake --build build --target sentry --parallel" />
+
+    <ItemGroup>
+      <NativeSdkArtifacts Include="$(SentryNativeSourceDirectory)build/libsentry.a" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NativeSdkArtifacts)"
+      DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-osx)%(Filename)-native%(Extension)')" />
   </Target>
 </Project>
