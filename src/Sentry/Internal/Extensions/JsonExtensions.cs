@@ -42,7 +42,9 @@ internal static class JsonExtensions
         return options;
     }
 
-#if TRIMMABLE
+    private static JsonSerializerOptions SerializerOptions = null!;
+    private static JsonSerializerOptions AltSerializerOptions = null!;
+
     private static List<JsonSerializerContext> DefaultSerializerContexts = new();
     private static List<JsonSerializerContext> ReferencePreservingSerializerContexts = new();
 
@@ -60,6 +62,11 @@ internal static class JsonExtensions
 
     internal static void ResetSerializerOptions()
     {
+        // For our classic reflection based serialization
+        SerializerOptions = BuildOptions(false);
+        AltSerializerOptions = BuildOptions(true);
+
+        // For the new AOT serialization
         DefaultSerializerContexts.Clear();
         ReferencePreservingSerializerContexts.Clear();
         foreach (var builder in JsonSerializerContextBuilders)
@@ -68,17 +75,6 @@ internal static class JsonExtensions
             ReferencePreservingSerializerContexts.Add(builder(BuildOptions(true)));
         }
     }
-
-#else
-    private static JsonSerializerOptions SerializerOptions = null!;
-    private static JsonSerializerOptions AltSerializerOptions = null!;
-
-    internal static void ResetSerializerOptions()
-    {
-        SerializerOptions = BuildOptions(false);
-        AltSerializerOptions = BuildOptions(true);
-    }
-#endif
 
     internal static void AddJsonConverter(JsonConverter converter)
     {
@@ -529,6 +525,14 @@ internal static class JsonExtensions
                 var bytes = InternalSerializeToUtf8Bytes(value);
                 writer.WriteRawValue(bytes);
             }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerExceptions.Any(e => e is JsonException))
+                {
+                    // Retry, preserving references to avoid cyclical dependency.
+                    InternalSerialize(writer, value, preserveReferences: true);
+                }
+            }
             catch (JsonException)
             {
                 // Retry, preserving references to avoid cyclical dependency.
@@ -537,7 +541,6 @@ internal static class JsonExtensions
         }
     }
 
-#if TRIMMABLE
     internal static string ToUtf8Json(this object value, bool preserveReferences = false)
     {
         using var stream = new MemoryStream();
@@ -556,25 +559,47 @@ internal static class JsonExtensions
 
     private static byte[] InternalSerializeToUtf8Bytes(object value)
     {
-        var context = GetSerializerContext(value.GetType());
-        return JsonSerializer.SerializeToUtf8Bytes(value, value.GetType(), context);
+        return AotHelper.IsAot
+            ? AotSerializeToUtf8Bytes()
+            : JitSerializeToUtf8Bytes();
+
+        byte[] AotSerializeToUtf8Bytes()
+        {
+            var context = GetSerializerContext(value.GetType());
+            return JsonSerializer.SerializeToUtf8Bytes(value, value.GetType(), context);
+        }
+
+        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
+        byte[] JitSerializeToUtf8Bytes() => JsonSerializer.SerializeToUtf8Bytes(value, SerializerOptions);
     }
 
     private static void InternalSerialize(Utf8JsonWriter writer, object value, bool preserveReferences = false)
     {
-        var context = GetSerializerContext(value.GetType(), preserveReferences);
-        JsonSerializer.Serialize(writer, value, value.GetType(), context);
-    }
-#else
-    private static byte[] InternalSerializeToUtf8Bytes(object value) =>
-        JsonSerializer.SerializeToUtf8Bytes(value, SerializerOptions);
+        if (AotHelper.IsAot)
+        {
+            AotSerialize();
+        }
+        else
+        {
+            JitSerialize();
+        }
+        return;
 
-    private static void InternalSerialize(Utf8JsonWriter writer, object value, bool preserveReferences = false)
-    {
-        var options = preserveReferences ? AltSerializerOptions : SerializerOptions;
-        JsonSerializer.Serialize(writer, value, options);
+        void AotSerialize()
+        {
+            var context = GetSerializerContext(value.GetType(), preserveReferences);
+            JsonSerializer.Serialize(writer, value, value.GetType(), context);
+        }
+
+        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+        void JitSerialize()
+        {
+         var options = preserveReferences ? AltSerializerOptions : SerializerOptions;
+         JsonSerializer.Serialize(writer, value, options);
+        }
     }
-#endif
 
     public static void WriteDynamic(
         this Utf8JsonWriter writer,
@@ -866,10 +891,8 @@ internal static class JsonExtensions
     }
 }
 
-#if TRIMMABLE
 [JsonSerializable(typeof(GrowableArray<int>))]
 [JsonSerializable(typeof(Dictionary<string, bool>))]
 internal partial class SentryJsonContext : JsonSerializerContext
 {
 }
-#endif

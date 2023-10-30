@@ -164,7 +164,7 @@ internal class DebugStackTrace : SentryStackTrace
 #endif
             _ => stackTrace.GetFrames()
             // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
                 .Where(f => f is not null)
                 .Select(p => new RealStackFrame(p!))
 #else

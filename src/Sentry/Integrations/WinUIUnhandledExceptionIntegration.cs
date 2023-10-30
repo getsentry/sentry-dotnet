@@ -1,5 +1,6 @@
 #if NET5_0_OR_GREATER
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Integrations;
 
@@ -48,17 +49,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         _options = options;
 
         // Hook the main event handler
-        try
-        {
-            AttachEventHandler();
-        }
-        catch
-        {
-            // When compiling AOT applications an exception will be thrown, in which case we log a message to let the
-            // SDK user know how they can resolve the issue and then we ignore...
-            // TODO: We need to create a mechanism for users to wire this up manually and document this in a separate PR
-            _options.LogDebug("Could not attach UnhandledExceptionHandler automatically. You'll need to do this manually: TODO - link to docs");
-        }
+        AttachEventHandler();
 
         // First part of workaround for https://github.com/microsoft/microsoft-ui-xaml/issues/7160
         AppDomain.CurrentDomain.FirstChanceException += (_, e) => _lastFirstChanceException = e.Exception;
@@ -87,10 +78,8 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
     /// This method uses reflection to hook up an UnhandledExceptionHandler. When IsTrimmed is true, users will have
     /// follow our guidance to perform this initialization manually.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = "This code is only intended to work for JIT compilation and exceptions will be swallowed")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.",
-        Justification = "This code is only intended to work for JIT compilation and exceptions will be swallowed")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.", Justification = AotHelper.SuppressionJustification)]
     private void AttachEventHandler()
     {
         try
@@ -107,6 +96,8 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         }
         catch (Exception ex)
         {
+            // If we get an exception we should let the user know how they can manually wire up the event handler.
+            // TODO: We need to create a mechanism for users to wire this up manually and document this in a separate PR
             _options.LogError(ex, "Could not attach WinUIUnhandledExceptionHandler.");
         }
     }

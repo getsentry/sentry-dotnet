@@ -7,7 +7,7 @@ public class JsonTests
     public JsonTests(ITestOutputHelper output)
     {
         _testOutputLogger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
-#if TRIMMABLE
+#if NET6_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
 #endif
     }
@@ -246,12 +246,12 @@ public class JsonTests
     }
 }
 
-#if TRIMMABLE
+#if NET6_0_OR_GREATER
 [JsonSerializable(typeof(AccessViolationException))]
 [JsonSerializable(typeof(Exception))]
-[JsonSerializable(typeof(JsonTests.SelfReferencedObject))]
 [JsonSerializable(typeof(JsonTests.DataAndNonSerializableObject<Assembly>))]
 [JsonSerializable(typeof(JsonTests.DataWithSerializableObject<Exception>))]
+[JsonSerializable(typeof(JsonTests.SelfReferencedObject))]
 [JsonSerializable(typeof(JsonTests.DataWithSerializableObject<Type>))]
 internal partial class JsonTestsJsonContext : JsonSerializerContext
 {

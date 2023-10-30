@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <TargetFrameworks>net8.0;net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;net5.0;netcoreapp3.1;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
@@ -77,9 +77,12 @@
   </ItemGroup>
 
   <!-- System.Text.Json is already included with .NET 5 and higher. Add a direct reference for other targets. -->
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net5')) and !$(TargetFramework.StartsWith('net6'))">
-    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net8'))">
+    <PackageReference Include="System.Text.Json" Version="6.0.8" />
   </ItemGroup>
+<!--  <ItemGroup Condition="!$(TargetFramework.StartsWith('net5')) and !$(TargetFramework.StartsWith('net6'))">-->
+<!--    <PackageReference Include="System.Text.Json" Version="5.0.2" />-->
+<!--  </ItemGroup>-->
 
   <!--
     Include Sentry's custom targets file in the nuget package.

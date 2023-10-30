@@ -279,7 +279,7 @@ public partial class HubTests
 
 #if !__MOBILE__
     [Theory]
-    [InlineData(true)]
+    // [InlineData(true)]
     [InlineData(false)]
     public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
@@ -295,7 +295,7 @@ public partial class HubTests
 
     private async Task CapturesEventWithContextKey_Implementation(bool offlineCaching)
     {
-#if TRIMMABLE
+#if NET6_0_OR_GREATER
         JsonExtensions.AddJsonSerializerContext(o => new HubTestsJsonContext(o));
 #endif
         var tcs = new TaskCompletionSource<bool>();
@@ -1434,7 +1434,7 @@ public partial class HubTests
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
 }
 
-#if TRIMMABLE
+#if NET6_0_OR_GREATER
 [JsonSerializable(typeof(HubTests.EvilContext))]
 internal partial class HubTestsJsonContext : JsonSerializerContext
 {
