@@ -279,7 +279,7 @@ public partial class HubTests
 
 #if !__MOBILE__
     [Theory]
-    // [InlineData(true)]
+    [InlineData(true)]
     [InlineData(false)]
     public async Task CaptureEvent_NonSerializableContextAndOfflineCaching_CapturesEventWithContextKey(bool offlineCaching)
     {
