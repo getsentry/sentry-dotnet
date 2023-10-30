@@ -96,10 +96,10 @@ internal static class RuntimeInfo
                 : null;
 
         var description = RuntimeInformation.FrameworkDescription;
-        return RemovePrefixOrNull(description, ".NET")
-           ?? RemovePrefixOrNull(description, ".NET Core")
+        return RemovePrefixOrNull(description, ".NET Core")
            ?? RemovePrefixOrNull(description, ".NET Framework")
-           ?? RemovePrefixOrNull(description, ".NET Native");
+           ?? RemovePrefixOrNull(description, ".NET Native")
+           ?? RemovePrefixOrNull(description, ".NET");
     }
 #else
     // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977

@@ -843,9 +843,7 @@ public class SentryOptions
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
-#if !TRIMMABLE
     private StackTraceMode? _stackTraceMode;
-#endif
 
     /// <summary>
     /// ATTENTION: This option will change how issues are grouped in Sentry!
@@ -856,10 +854,6 @@ public class SentryOptions
     /// </remarks>
     public StackTraceMode StackTraceMode
     {
-#if TRIMMABLE
-        // Enhanced stack traces not supported by AOT as they rely heavily on reflection
-        get { return StackTraceMode.Original; }
-#else
         get
         {
             if (_stackTraceMode is not null)
@@ -884,7 +878,6 @@ public class SentryOptions
             return _stackTraceMode.Value;
         }
         set => _stackTraceMode = value;
-#endif
     }
 
     /// <summary>
@@ -997,7 +990,6 @@ public class SentryOptions
         JsonExtensions.AddJsonConverter(converter);
     }
 
-#if TRIMMABLE
     /// <summary>
     /// Configures a custom <see cref="JsonSerializerContext"/> to be used when serializing or deserializing
     /// objects to JSON with this SDK.
@@ -1021,7 +1013,6 @@ public class SentryOptions
 
         JsonExtensions.AddJsonSerializerContext(contextBuilder);
     }
-#endif
 
     /// <summary>
     /// When <c>true</c>, if an object being serialized to JSON contains references to other objects, and the
@@ -1122,7 +1113,7 @@ public class SentryOptions
 #endif
         };
 
-#if NET5_0_OR_GREATER && !TRIMMABLE
+#if NET5_0_OR_GREATER
         if (WinUIUnhandledExceptionIntegration.IsApplicable)
         {
             this.AddIntegration(new WinUIUnhandledExceptionIntegration());
