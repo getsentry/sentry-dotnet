@@ -25,10 +25,10 @@ runs:
       with:
         dotnet-version: |
           3.1.x
-          6.0.x 
+          6.0.x
           7.0.x
           8.0.x
-        
+
     - name: Dependency Caching
       uses: actions/cache@v3
       # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
