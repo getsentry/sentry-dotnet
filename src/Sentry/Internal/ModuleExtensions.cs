@@ -8,12 +8,14 @@ internal static class ModuleExtensions
     /// </summary>
     /// <param name="module">A Module instance</param>
     /// <returns>module.Name, if this is available. module.ScopeName otherwise</returns>
-    public static string? GetNameOrScopeName(this Module module) =>
-#if TRIMMABLE
-        module?.ScopeName;
-#else
-        (module?.Name is null || module.Name.Equals("<Unknown>"))
+    public static string? GetNameOrScopeName(this Module module){
+        if (AotHelper.IsAot)
+        {
+            return module?.ScopeName;
+        }
+
+        return (module?.Name is null || module.Name.Equals("<Unknown>"))
             ? module?.ScopeName
             : module?.Name;
-#endif
+    }
 }

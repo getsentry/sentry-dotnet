@@ -157,20 +157,16 @@ internal class DebugStackTrace : SentryStackTrace
     /// </summary>
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
     {
-        var frames = _options.StackTraceMode switch
-        {
-#if !TRIMMABLE
-            StackTraceMode.Enhanced => EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p)),
-#endif
-            _ => stackTrace.GetFrames()
-            // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
+        var frames = (!AotHelper.IsAot && _options.StackTraceMode == StackTraceMode.Enhanced)
+            ? EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p))
+            : stackTrace.GetFrames()
+                // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
 #if NETCOREAPP3_1
                 .Where(f => f is not null)
-                .Select(p => new RealStackFrame(p!))
+                .Select(p => new RealStackFrame(p!));
 #else
-                .Select(p => new RealStackFrame(p))
+                .Select(p => new RealStackFrame(p));
 #endif
-        };
 
         // Not to throw on code that ignores nullability warnings.
         if (frames.IsNull())
@@ -289,8 +285,8 @@ internal class DebugStackTrace : SentryStackTrace
         };
 
         frame.Function = method.Name;
-#if !TRIMMABLE
-        if (stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
+
+        if (!AotHelper.IsAot && stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
         {
             var stringBuilder = new StringBuilder();
             frame.Function = enhancedStackFrame.MethodInfo.Append(stringBuilder, false).ToString();
@@ -309,7 +305,6 @@ internal class DebugStackTrace : SentryStackTrace
                     : module;
             }
         }
-#endif
 
         // Originally we didn't skip methods from dynamic assemblies, so not to break compatibility:
         if (_options.StackTraceMode != StackTraceMode.Original && method.Module.Assembly.IsDynamic)
@@ -388,19 +383,13 @@ internal class DebugStackTrace : SentryStackTrace
             frame.ColumnNumber = colNo;
         }
 
-#if TRIMMABLE
-        DemangleAsyncFunctionName(frame);
-        DemangleAnonymousFunction(frame);
-        DemangleLambdaReturnType(frame);
-#else
-        if (stackFrame.Frame is not EnhancedStackFrame)
+        if (AotHelper.IsAot || stackFrame.Frame is not EnhancedStackFrame)
         {
             DemangleAsyncFunctionName(frame);
             DemangleAnonymousFunction(frame);
             DemangleLambdaReturnType(frame);
         }
-
-        if (stackFrame.Frame is EnhancedStackFrame)
+        else
         {
             // In Enhanced mode, Module (which in this case is the Namespace)
             // is already prepended to the function, after return type.
@@ -408,7 +397,6 @@ internal class DebugStackTrace : SentryStackTrace
             // TODO what is this really about? we have already run ConfigureAppFrame() at this time...
             frame.Module = null;
         }
-#endif
 
         return frame;
     }
@@ -498,10 +486,12 @@ internal class DebugStackTrace : SentryStackTrace
 
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
-#if TRIMMABLE
-        assemblyName = null;
-        return null;
-#else
+        if (AotHelper.IsAot)
+        {
+            assemblyName = null;
+            return null;
+        }
+
         assemblyName = module.FullyQualifiedName;
         if (options.AssemblyReader is { } reader)
         {
@@ -517,7 +507,6 @@ internal class DebugStackTrace : SentryStackTrace
         {
             return null;
         }
-#endif
     }
 
     private int? AddManagedModuleDebugImage(Module module)

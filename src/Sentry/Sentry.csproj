@@ -24,10 +24,10 @@
   <Import Project="Platforms\Native\Sentry.Native.props" Condition="('$(TargetFramework)' == 'net7.0' Or '$(TargetFramework)' == 'net8.0') And ($([MSBuild]::IsOSPlatform('Linux')) Or $([MSBuild]::IsOSPlatform('Windows')))" />
 
   <PropertyGroup>
-    <!-- Adding directly in the Link tag results in a NETSDK1022 error due to the order or evaluation -->
-    <BenDemystifierLink Condition="'$(PublishAot)' != 'true'">%(RecursiveDir)\%(Filename)%(Extension)</BenDemystifierLink>
+    <!-- Adding a condition directly in the Link tag results in a NETSDK1022 error due to the order or evaluation -->
+    <BenDemystifierLink Condition="'$(IsAotCompatible)' != 'true'">%(RecursiveDir)\%(Filename)%(Extension)</BenDemystifierLink>
   </PropertyGroup>
-  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="'$(PublishAot)' != 'true'">
+  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="'$(IsAotCompatible)' != 'true'">
     <!--
       Ben.Demystifier is compiled directly into Sentry.
       Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
