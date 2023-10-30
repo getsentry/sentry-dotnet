@@ -137,7 +137,6 @@ public class ContextsTests
         Assert.Equal("""{"runtime":{"type":"runtime","version":"2.1.1.100"}}""", actualString);
     }
 
-#if !TRIMMABLE
     [Fact]
     public void SerializeObject_AnonymousObject_SerializedCorrectly()
     {
@@ -160,7 +159,6 @@ public class ContextsTests
             ["Baz"] = "kek"
         });
     }
-#endif
 
     [Fact]
     public void SerializeObject_SortsContextKeys()

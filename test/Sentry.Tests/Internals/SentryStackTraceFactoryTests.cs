@@ -25,7 +25,6 @@ public partial class SentryStackTraceFactoryTests
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
 // See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
-#if !TRIMMABLE
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionOnWithOriginalMode_CurrentStackTrace()
     {
@@ -48,6 +47,8 @@ public partial class SentryStackTraceFactoryTests
             ) == true);
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Theory]
     [InlineData(StackTraceMode.Original, "AsyncWithWait_StackTrace { <lambda> }")]
     [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
@@ -70,6 +71,8 @@ public partial class SentryStackTraceFactoryTests
         }
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Theory]
     [InlineData(StackTraceMode.Original, "MoveNext")] // Should be "AsyncWithAwait_StackTrace { <lambda> }", but see note in SentryStackTraceFactory
     [InlineData(StackTraceMode.Enhanced, "async Task SentryStackTraceFactoryTests.AsyncWithAwait_StackTrace(StackTraceMode mode, string method)+(?) => { }")]
@@ -90,6 +93,8 @@ public partial class SentryStackTraceFactoryTests
         Assert.Equal(method, stackTrace.Frames.Last().Function);
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Fact]
     public void Create_NoExceptionAndAttachStackTraceOptionOnWithEnhancedMode_CurrentStackTrace()
     {
@@ -112,6 +117,8 @@ public partial class SentryStackTraceFactoryTests
             ) == true);
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Fact]
     public void Create_WithExceptionAndDefaultAttachStackTraceOption_HasStackTrace()
     {
@@ -128,6 +135,8 @@ public partial class SentryStackTraceFactoryTests
         Assert.NotNull(sut.Create(exception));
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Fact]
     public void Create_WithExceptionAndAttachStackTraceOptionOn_HasStackTrace()
     {
@@ -147,6 +156,8 @@ public partial class SentryStackTraceFactoryTests
         Assert.Equal(new StackTrace(exception, true).FrameCount, stackTrace?.Frames.Count);
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [SkippableFact]
     public void FileNameShouldBeRelative()
     {
@@ -186,6 +197,8 @@ public partial class SentryStackTraceFactoryTests
 
     private static string GetThisFilePath([CallerFilePath] string path = null) => path;
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Theory]
     [InlineData(StackTraceMode.Original, "ByRefMethodThatThrows")]
     [InlineData(StackTraceMode.Enhanced, "(Fixture f, int b) SentryStackTraceFactoryTests.ByRefMethodThatThrows(int value, in int valueIn, ref int valueRef, out int valueOut)")]
@@ -207,7 +220,6 @@ public partial class SentryStackTraceFactoryTests
         var frame = stackTrace!.Frames.Last();
         frame.Function.Should().Be(method);
     }
-#endif
 
     // ReSharper disable UnusedParameter.Local
     [MethodImpl(MethodImplOptions.NoInlining)]

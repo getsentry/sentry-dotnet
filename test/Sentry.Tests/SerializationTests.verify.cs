@@ -1,4 +1,4 @@
-#if TRIMMABLE
+#if NET7_0_OR_GREATER
 using System.Text.Json.Serialization.Metadata;
 #endif
 
@@ -22,7 +22,7 @@ public class SerializationTests
         await Verify(json).UseParameters(name);
     }
 
-#if TRIMMABLE
+#if NET7_0_OR_GREATER
     internal class NestedStringClass { public string Value { get; set; } }
     internal class NestedIntClass { public int Value { get; set; } }
     internal class NestedNIntClass { public nint Value { get; set; } }
@@ -95,7 +95,7 @@ public class SerializationTests
     }
 }
 
-#if TRIMMABLE
+#if NET7_0_OR_GREATER
 [JsonSerializable(typeof(SerializationTests.CustomObject))]
 [JsonSerializable(typeof(SerializationTests.NestedStringClass))]
 [JsonSerializable(typeof(SerializationTests.NestedIntClass))]

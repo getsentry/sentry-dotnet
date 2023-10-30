@@ -6,7 +6,6 @@ namespace Other.Tests.Internals;
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
 // See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
-#if !TRIMMABLE
 [UsesVerify]
 public partial class SentryStackTraceFactoryTests
 {
@@ -42,4 +41,3 @@ public partial class SentryStackTraceFactoryTests
             .UseParameters(mode);
     }
 }
-#endif

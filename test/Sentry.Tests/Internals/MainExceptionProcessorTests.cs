@@ -119,9 +119,7 @@ public partial class MainExceptionProcessorTests
         var last = evt.SentryExceptions!.Last();
 // TODO: Create integration test to test this behaviour when publishing AOT apps
 // See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
-#if !TRIMMABLE
         Assert.NotNull(last.Stacktrace);
-#endif
         var mechanism = last.Mechanism;
         Assert.NotNull(mechanism);
         Assert.False(mechanism.Handled);

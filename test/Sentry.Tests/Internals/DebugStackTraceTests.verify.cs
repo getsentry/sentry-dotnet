@@ -19,7 +19,6 @@ public class DebugStackTraceTests
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
 // See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
-#if !TRIMMABLE
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
     {
@@ -31,6 +30,8 @@ public class DebugStackTraceTests
         Assert.True(actual?.InApp);
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Fact]
     public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
     {
@@ -43,6 +44,8 @@ public class DebugStackTraceTests
         Assert.False(actual?.InApp);
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -65,6 +68,8 @@ public class DebugStackTraceTests
         Assert.False(actual?.InApp);
     }
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Fact]
     public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
     {
@@ -77,7 +82,6 @@ public class DebugStackTraceTests
 
         Assert.True(actual?.InApp);
     }
-#endif
 
     // https://github.com/getsentry/sentry-dotnet/issues/64
     [Fact]
@@ -210,7 +214,8 @@ public class DebugStackTraceTests
         Assert.Null(frame.Package);
     }
 
-#if !TRIMMABLE
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Fact]
     public Task CreateFrame_ForNativeAOT()
     {
@@ -225,7 +230,6 @@ public class DebugStackTraceTests
 
         return VerifyJson(frame.ToJsonString());
     }
-#endif
 
     private class InjectableDebugStackTrace : DebugStackTrace
     {
