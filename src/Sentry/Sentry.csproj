@@ -25,9 +25,9 @@
 
   <PropertyGroup>
     <!-- Adding a condition directly in the Link tag results in a NETSDK1022 error due to the order or evaluation -->
-    <BenDemystifierLink Condition="'$(IsAotCompatible)' != 'true'">%(RecursiveDir)\%(Filename)%(Extension)</BenDemystifierLink>
+    <BenDemystifierLink>%(RecursiveDir)\%(Filename)%(Extension)</BenDemystifierLink>
   </PropertyGroup>
-  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild" Condition="'$(IsAotCompatible)' != 'true'">
+  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild">
     <!--
       Ben.Demystifier is compiled directly into Sentry.
       Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.

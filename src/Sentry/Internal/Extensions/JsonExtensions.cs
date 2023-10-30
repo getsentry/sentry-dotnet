@@ -525,14 +525,6 @@ internal static class JsonExtensions
                 var bytes = InternalSerializeToUtf8Bytes(value);
                 writer.WriteRawValue(bytes);
             }
-            catch (AggregateException ex)
-            {
-                if (ex.InnerExceptions.Any(e => e is JsonException))
-                {
-                    // Retry, preserving references to avoid cyclical dependency.
-                    InternalSerialize(writer, value, preserveReferences: true);
-                }
-            }
             catch (JsonException)
             {
                 // Retry, preserving references to avoid cyclical dependency.

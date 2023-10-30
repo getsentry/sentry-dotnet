@@ -286,7 +286,7 @@ internal class DebugStackTrace : SentryStackTrace
 
         frame.Function = method.Name;
 
-        if (!AotHelper.IsAot && stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
+        if (stackFrame.Frame is EnhancedStackFrame enhancedStackFrame)
         {
             var stringBuilder = new StringBuilder();
             frame.Function = enhancedStackFrame.MethodInfo.Append(stringBuilder, false).ToString();
@@ -383,7 +383,7 @@ internal class DebugStackTrace : SentryStackTrace
             frame.ColumnNumber = colNo;
         }
 
-        if (AotHelper.IsAot || stackFrame.Frame is not EnhancedStackFrame)
+        if (stackFrame.Frame is not EnhancedStackFrame)
         {
             DemangleAsyncFunctionName(frame);
             DemangleAnonymousFunction(frame);
