@@ -94,3 +94,59 @@ jobs:
           path: |
             ${{ github.workspace }}/src/**/Release/*.nupkg
             ${{ github.workspace }}/src/**/Release/*.snupkg
+
+  build-aot:
+    name: ${{ matrix.os }} AOT
+    runs-on: ${{ matrix.os }}
+    env:
+      AOT_SOLUTION: SentryAot.slnf
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
+        os: [macos-13] # just macos at the moment
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      - name: Set Environment Variables
+        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Build Cocoa SDK
+        if: runner.os == 'macOS'
+        uses: ./.github/actions/buildcocoasdk
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore $AOT_SOLUTION --nologo
+
+      - name: Build (for non-release branch)
+        if: env.CI_PUBLISHING_BUILD != 'true'
+        run: dotnet build $AOT_SOLUTION -c Release --no-restore --nologo
+
+      - name: Build (for release branch)
+        if: env.CI_PUBLISHING_BUILD == 'true'
+        run: dotnet build $AOT_SOLUTION -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Test
+        run: dotnet test $AOT_SOLUTION -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+
+      - name: Upload Verify Results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: verify-test-results
+          path: '**/*.received.*'
