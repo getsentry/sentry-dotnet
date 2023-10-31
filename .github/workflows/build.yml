@@ -53,13 +53,6 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Save nuget package cache
-        uses: actions/cache/save@v3
-        if: runner.os != 'Windows'
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('package-references.txt') }}
-
       - name: Build (for non-release branch)
         if: env.CI_PUBLISHING_BUILD != 'true'
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo

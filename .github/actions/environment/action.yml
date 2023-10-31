@@ -42,10 +42,8 @@ runs:
         grep -hr "<PackageReference " --include="*proj" --include="*.props" . | sort -u  > package-references.txt
         cat package-references.txt
 
-    - name: Restore nuget package cache
-      uses: actions/cache/restore@v3
-      # Cache is too slow on Windows to be useful.  See https://github.com/actions/cache/issues/752
-      if: runner.os != 'Windows'
+    - name: NuGet package cache
+      uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('package-references.txt') }}
