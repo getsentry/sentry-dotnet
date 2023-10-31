@@ -36,8 +36,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and ($(TargetFramework.StartsWith('net6')) or $(TargetFramework.StartsWith('net7')) or $(TargetFramework.StartsWith('net8')))">
-    <!-- TODO: Uncomment this once we've resolved the issues with Ben.Demystifier -->
-<!--    <IsAotCompatible>true</IsAotCompatible>-->
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <PropertyGroup>
