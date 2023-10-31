@@ -53,6 +53,13 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
+      - name: Restore nuget package cache
+        uses: actions/cache/save@v3
+        if: runner.os != 'Windows'
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('package-references.txt') }}
+
       - name: Build (for non-release branch)
         if: env.CI_PUBLISHING_BUILD != 'true'
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo
@@ -76,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: verify-test-results
-          path: '**/*.received.*'
+          path: "**/*.received.*"
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
 
