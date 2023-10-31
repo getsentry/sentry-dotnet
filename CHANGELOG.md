@@ -60,6 +60,7 @@ API Changes:
   ```
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
 - Removed obsolete setter from `Sentry.PlatformAbstractions.Runtime.Identifier` ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
+- `Sentry.Values<T>` is now internal as it is never exposed in the public API ([2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
 
 ## Unreleased
 
