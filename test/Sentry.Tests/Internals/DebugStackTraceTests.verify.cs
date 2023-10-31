@@ -18,7 +18,7 @@ public class DebugStackTraceTests
     private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace!;
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+// See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
     {
@@ -31,7 +31,7 @@ public class DebugStackTraceTests
     }
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+// See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
     {
@@ -45,7 +45,7 @@ public class DebugStackTraceTests
     }
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+// See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -69,7 +69,7 @@ public class DebugStackTraceTests
     }
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+// See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
     {
@@ -215,7 +215,7 @@ public class DebugStackTraceTests
     }
 
 // TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+// See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public Task CreateFrame_ForNativeAOT()
     {
