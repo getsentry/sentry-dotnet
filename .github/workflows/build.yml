@@ -53,7 +53,7 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Restore nuget package cache
+      - name: Save nuget package cache
         uses: actions/cache/save@v3
         if: runner.os != 'Windows'
         with:
