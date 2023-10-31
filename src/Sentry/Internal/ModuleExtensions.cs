@@ -8,6 +8,7 @@ internal static class ModuleExtensions
     /// </summary>
     /// <param name="module">A Module instance</param>
     /// <returns>module.Name, if this is available. module.ScopeName otherwise</returns>
+    [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
     public static string? GetNameOrScopeName(this Module module){
         if (AotHelper.IsAot)
         {

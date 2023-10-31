@@ -484,6 +484,7 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
+    [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
         if (AotHelper.IsAot)
