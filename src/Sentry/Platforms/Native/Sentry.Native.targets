@@ -25,9 +25,9 @@
     <PackageReference Remove="SIL.ReleaseTasks" />
 
     <!-- Include our transitive build targets in the nuget. -->
-    <None Include="buildTransitive\Sentry.Bindings.Native.targets">
+    <None Include="buildTransitive.targets">
       <Pack>true</Pack>
-      <PackagePath>buildTransitive\</PackagePath>
+      <PackagePath>buildTransitive\Sentry.Native.targets</PackagePath>
     </None>
   </ItemGroup>
 
