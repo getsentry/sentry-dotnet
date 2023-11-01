@@ -33,8 +33,4 @@
     <MtouchUseLlvm>false</MtouchUseLlvm>
   </PropertyGroup>
 
-  <!-- AOT not supported for osx-arm64 on .NET 7 -->
-  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and (!$([MSBuild]::IsOSPlatform('OSX')) or '$(TargetFramework)' == 'net8.0')">
-    <PublishAot>true</PublishAot>
-  </PropertyGroup>
 </Project>
