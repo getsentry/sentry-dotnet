@@ -112,6 +112,7 @@ internal class RealStackFrame : IStackFrame
 
     public int GetILOffset() => _frame.GetILOffset();
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     public MethodBase? GetMethod() => AotHelper.IsAot
         ? null
         : _frame.GetMethod();

@@ -5,11 +5,10 @@
 
 coreSolution: Sentry.sln
 # We don't maintain the buildSolutions manually... these are just
-# copies of Sentry.sln that are used to set certain build 
+# copies of Sentry.sln that are used to set certain build
 # properties when using solution filters that are based on these
 buildSolutions:
   - Sentry.NoMobile.sln
-  - Sentry.Aot.sln
 
 groupConfigs:
   allProjects:
@@ -176,13 +175,3 @@ filterConfigs:
         - "**/*Bindings*"
         - "**/*DeviceTests*"
         - "**/*TestApp*"
-
-  - outputPath: SentryAot.slnf
-    solution: Sentry.Aot.sln
-    include:
-      patterns:
-        - "**/Sentry.Samples.Console.Basic.csproj"
-        - "**/Sentry.csproj"
-        - "**/Sentry.Testing.csproj"
-        - "**/Sentry.Testing.CrashableApp.csproj"
-        - "**/Sentry.Tests.csproj"

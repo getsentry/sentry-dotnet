@@ -35,8 +35,9 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Aot' and ($(TargetFramework.StartsWith('net6')) or $(TargetFramework.StartsWith('net7')) or $(TargetFramework.StartsWith('net8')))">
-    <IsAotCompatible>true</IsAotCompatible>
+  <!-- We can only compile with IsAotCompatible on .NET 6.0 and later -->
+  <PropertyGroup Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(TargetFramework)', '^(?!net5\.|net4\d{2}|netcoreapp|netstandard)net\d+'))">
+    <FrameworkSupportsAot>true</FrameworkSupportsAot>
   </PropertyGroup>
 
   <PropertyGroup>
