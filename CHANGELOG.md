@@ -27,12 +27,12 @@ API Changes:
 - Removed unused `StackFrame.InstructionOffset`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Change `StackFrame`'s `ImageAddress`, `InstructionAddress` and `FunctionId` to `long?`. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Change `DebugImage.ImageAddress` to `long?`. ([#2725](https://github.com/getsentry/sentry-dotnet/pull/2725))
-- Enable `CaptureFailedRequests` by default ([2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
+- Enable `CaptureFailedRequests` by default ([#2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Additional constructors removed from `TransactionTracer`. ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
 - Removed the `Scope.Platform` property as it was never applied. ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
 - Reordered parameters for ther TransactionContext and SpanContext constructors. If you're constructing instances of these classes, you will need to adjust the order in which you pass parameters to these. ([#2696](https://github.com/getsentry/sentry-dotnet/pull/2696))
 - The `DiagnosticLogger` signature for `LogError` and `LogFatal` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. The `DiagnosticLogger` now also received an overload for `LogError` and `LogFatal` that accepts a message only. ([#2715](https://github.com/getsentry/sentry-dotnet/pull/2715))
-- Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
+- Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
 - Contexts now inherits from `IDictionary` rather than `ConcurrentDictionary`. The specific dictionary being used is an implementation detail. ([#2729](https://github.com/getsentry/sentry-dotnet/pull/2729))
 - `ISentryClient.CaptureEvent` overloads have been replaced by a single method accepting optional `Hint` and `Scope` parameters. You will need to pass `hint` as a named parameter from code that calls `CaptureEvent` without passing a `scope` argument. ([#2749](https://github.com/getsentry/sentry-dotnet/pull/2749))
 - The methods `WithScope` and `WithScopeAsync` have been removed. We discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
@@ -59,7 +59,8 @@ API Changes:
   });
   ```
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
-- Removed obsolete setter from `Sentry.PlatformAbstractions.Runtime.Identifier` ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
+- Removed obsolete setter from `Sentry.PlatformAbstractions.Runtime.Identifier` ([#2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
+- `Sentry.Values<T>` is now internal as it is never exposed in the public API ([#2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
 
 ## Unreleased
 
@@ -113,8 +114,8 @@ API Changes:
 
 ### Features
 
-- Reduced the memory footprint of `SpanId` by refactoring the ID generation ([2619](https://github.com/getsentry/sentry-dotnet/pull/2619))
-- Reduced the memory footprint of `SpanTracer` by initializing the tags lazily ([2636](https://github.com/getsentry/sentry-dotnet/pull/2636))
+- Reduced the memory footprint of `SpanId` by refactoring the ID generation ([#2619](https://github.com/getsentry/sentry-dotnet/pull/2619))
+- Reduced the memory footprint of `SpanTracer` by initializing the tags lazily ([#2636](https://github.com/getsentry/sentry-dotnet/pull/2636))
 - Added distributed tracing without performance for Azure Function Workers ([#2630](https://github.com/getsentry/sentry-dotnet/pull/2630))
 - The SDK now provides and overload of `ContinueTrace` that accepts headers as `string` ([#2601](https://github.com/getsentry/sentry-dotnet/pull/2601))
 - Sentry tracing middleware now gets configured automatically ([#2602](https://github.com/getsentry/sentry-dotnet/pull/2602))
@@ -181,7 +182,7 @@ API Changes:
 - Bump Cocoa SDK from v8.9.5 to v8.10.0 ([#2546](https://github.com/getsentry/sentry-dotnet/pull/2546), [#2550](https://github.com/getsentry/sentry-dotnet/pull/2550))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8100)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.9.5...8.10.0)
-- Bump gradle/gradle-build-action from 2.7.0 to 2.7.1 ([2564](https://github.com/getsentry/sentry-dotnet/pull/2564))
+- Bump gradle/gradle-build-action from 2.7.0 to 2.7.1 ([#2564](https://github.com/getsentry/sentry-dotnet/pull/2564))
   - [diff](https://github.com/gradle/gradle-build-action/compare/v2.7.0...v2.7.1)
 
 ## 3.35.1
