@@ -68,12 +68,6 @@
     Condition="$([MSBuild]::IsOsPlatform('Windows'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
-    <MSBuild Projects="$(MSBuildProjectFile)"
-      Targets="_InnerBuildSentryNativeSDK-win-x64"
-      Properties="TargetFramework=once" />
-  </Target>
-
-  <Target Name="_InnerBuildSentryNativeSDK-win-x64">
     <Message Importance="High"
       Text="Building artifacts of Sentry Native SDK for win-x64." />
 
@@ -104,12 +98,6 @@
     Condition="$([MSBuild]::IsOsPlatform('Linux'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
-    <MSBuild Projects="$(MSBuildProjectFile)"
-      Targets="_InnerBuildSentryNativeSDK-linux-x64"
-      Properties="TargetFramework=once" />
-  </Target>
-
-  <Target Name="_InnerBuildSentryNativeSDK-linux-x64">
     <Message Importance="High"
       Text="Building artifacts of Sentry Native SDK for linux-x64." />
 
@@ -134,12 +122,6 @@
     Condition="$([MSBuild]::IsOsPlatform('OSX'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
-    <MSBuild Projects="$(MSBuildProjectFile)"
-      Targets="_InnerBuildSentryNativeSDK-osx"
-      Properties="TargetFramework=once" />
-  </Target>
-
-  <Target Name="_InnerBuildSentryNativeSDK-osx">
     <Message Importance="High"
       Text="Building artifacts of Sentry Native SDK for osx." />
 
