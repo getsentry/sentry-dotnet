@@ -1,8 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
 
   <PropertyGroup>
-    <Description>.NET Bindings for the Sentry Native SDK</Description>
-    <TargetFramework>net7.0</TargetFramework>
     <SentryNativeSourceDirectory>..\..\modules\sentry-native\</SentryNativeSourceDirectory>
     <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
     <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)runtimes\</SentryNativeOutputDirectory>
@@ -68,7 +66,7 @@
   <Target Name="_BuildSentryNativeSDK-win-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$([MSBuild]::IsOsPlatform('Windows'))"
-    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-win-x64"
@@ -104,7 +102,7 @@
   <Target Name="_BuildSentryNativeSDK-linux-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$([MSBuild]::IsOsPlatform('Linux'))"
-    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-linux-x64"
@@ -134,7 +132,7 @@
   <Target Name="_BuildSentryNativeSDK-osx"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$([MSBuild]::IsOsPlatform('OSX'))"
-    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-osx"
