@@ -1,8 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
 
   <PropertyGroup>
-    <Description>.NET Bindings for the Sentry Native SDK</Description>
-    <TargetFramework>net7.0</TargetFramework>
     <SentryNativeSourceDirectory>..\..\modules\sentry-native\</SentryNativeSourceDirectory>
     <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
     <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)runtimes\</SentryNativeOutputDirectory>
@@ -17,19 +15,10 @@
 
   <!-- Packaging -->
   <ItemGroup>
-    <!-- Use a separate readme file in the nuget. -->
-    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
-    <None Include="$(MSBuildThisFileDirectory)README.md"
-      Pack="true"
-      PackagePath="" />
-
-    <!-- Don't add the changelog to the nuget. -->
-    <PackageReference Remove="SIL.ReleaseTasks" />
-
     <!-- Include our transitive build targets in the nuget. -->
-    <None Include="buildTransitive\Sentry.Bindings.Native.targets">
+    <None Include="buildTransitive.targets">
       <Pack>true</Pack>
-      <PackagePath>buildTransitive\</PackagePath>
+      <PackagePath>buildTransitive\Sentry.Native.targets</PackagePath>
     </None>
   </ItemGroup>
 
@@ -38,7 +27,6 @@
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-win-x64)</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -46,7 +34,6 @@
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-linux-x64)</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -54,7 +41,6 @@
     <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-osx)</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -68,11 +54,11 @@
   <Target Name="_BuildSentryNativeSDK-win-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$([MSBuild]::IsOsPlatform('Windows'))"
-    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-win-x64"
-      Properties="TargetFramework=once" />
+      Properties="TargetFramework=net6.0" />
   </Target>
 
   <Target Name="_InnerBuildSentryNativeSDK-win-x64">
@@ -104,11 +90,11 @@
   <Target Name="_BuildSentryNativeSDK-linux-x64"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$([MSBuild]::IsOsPlatform('Linux'))"
-    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-linux-x64"
-      Properties="TargetFramework=once" />
+      Properties="TargetFramework=net6.0" />
   </Target>
 
   <Target Name="_InnerBuildSentryNativeSDK-linux-x64">
@@ -129,20 +115,22 @@
     </ItemGroup>
     <Copy SourceFiles="@(NativeSdkArtifacts)"
       DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-linux-x64)%(Filename)-native%(Extension)')" />
+
+    <!-- Explicitly update timestamp on output files so that this target doesn't run again even if the CMake build reused previously built artifacts. -->
+    <Touch Files="@(NativeSdkArtifacts)" />
   </Target>
 
   <Target Name="_BuildSentryNativeSDK-osx"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="$([MSBuild]::IsOsPlatform('OSX'))"
-    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Bindings.Native.csproj"
+    Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
     <MSBuild Projects="$(MSBuildProjectFile)"
       Targets="_InnerBuildSentryNativeSDK-osx"
-      Properties="TargetFramework=once" />
+      Properties="TargetFramework=net6.0" />
   </Target>
 
-  <Target Name="_InnerBuildSentryNativeSDK-osx">
-    <Message Importance="High"
+  <Target Name="_InnerBuildSentryNativeSDK-osx">    <Message Importance="High"
       Text="Building artifacts of Sentry Native SDK for osx." />
 
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
@@ -160,5 +148,8 @@
     </ItemGroup>
     <Copy SourceFiles="@(NativeSdkArtifacts)"
       DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-osx)%(Filename)-native%(Extension)')" />
+
+    <!-- Explicitly update timestamp on output files so that this target doesn't run again even if the CMake build reused previously built artifacts. -->
+    <Touch Files="@(NativeSdkArtifacts)" />
   </Target>
 </Project>

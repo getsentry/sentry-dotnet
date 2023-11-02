@@ -77,8 +77,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Bindings.Android", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Bindings.Cocoa", "src\Sentry.Bindings.Cocoa\Sentry.Bindings.Cocoa.csproj", "{33336B98-A69E-4F28-A71A-1D8753F3BA24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Bindings.Native", "src\Sentry.Bindings.Native\Sentry.Bindings.Native.csproj", "{BDBE4B77-DC2F-4EBE-AB5C-6507DDE7650C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.DiagnosticSource", "src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj", "{22E4E3F5-8D6E-433D-9456-F60DFB1EFC82}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.EntityFramework", "src\Sentry.EntityFramework\Sentry.EntityFramework.csproj", "{2AEC3A6E-886F-43DA-8EA6-82EBF916E89A}"
@@ -464,10 +462,6 @@ Global
 		{8032310D-3C06-442C-A318-F365BCC4C804}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8032310D-3C06-442C-A318-F365BCC4C804}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8032310D-3C06-442C-A318-F365BCC4C804}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BDBE4B77-DC2F-4EBE-AB5C-6507DDE7650C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BDBE4B77-DC2F-4EBE-AB5C-6507DDE7650C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BDBE4B77-DC2F-4EBE-AB5C-6507DDE7650C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BDBE4B77-DC2F-4EBE-AB5C-6507DDE7650C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8328B70C-B808-4ED1-BB16-8555B2752CB6} = {7D4D7A6A-3F5C-4B4C-A198-AC51F9220231}
@@ -544,6 +538,5 @@ Global
 		{162A1CAE-ACEE-45CA-A6D0-7702ADE4D3DE} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{67269916-C417-4CEE-BD7D-CA66C3830AEE} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{8032310D-3C06-442C-A318-F365BCC4C804} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
-		{BDBE4B77-DC2F-4EBE-AB5C-6507DDE7650C} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 	EndGlobalSection
 EndGlobal

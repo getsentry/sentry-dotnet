@@ -37,7 +37,6 @@
       "src\\Sentry.Azure.Functions.Worker\\Sentry.Azure.Functions.Worker.csproj",
       "src\\Sentry.Bindings.Android\\Sentry.Bindings.Android.csproj",
       "src\\Sentry.Bindings.Cocoa\\Sentry.Bindings.Cocoa.csproj",
-      "src\\Sentry.Bindings.Native\\Sentry.Bindings.Native.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",

@@ -83,6 +83,6 @@
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry\buildTransitive\Sentry.targets" />
   <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
     Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
-  <Import Project="$(MSBuildThisFileDirectory)src\Sentry.Bindings.Native\buildTransitive\Sentry.Bindings.Native.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)src\Sentry\Platforms\Native\buildTransitive.targets" />
 
 </Project>
