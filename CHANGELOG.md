@@ -41,7 +41,7 @@ API Changes:
     - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
     - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
   
-  #### Before
+  ##### Before
   ```
   SentrySdk.WithScope(scope =>
   {
@@ -50,7 +50,7 @@ API Changes:
       SentrySdk.CaptureEvent(new SentryEvent()); // Capture the event with the configured scope
   });
   ```
-  #### After
+  ##### After
   ```
   SentrySdk.CaptureEvent(new SentryEvent(), scope =>
   {
@@ -60,6 +60,10 @@ API Changes:
   ```
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
 - Removed obsolete setter from `Sentry.PlatformAbstractions.Runtime.Identifier` ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
+- The Sentry core package now supports AOT compilation for .NET 7+. There are some functional differences when compiling AOT:
+  - Reflection cannot be leveraged for JSON Serialization and you may need to supply a `JsonSerializationContext` for types that you'd like to send to Sentry (e.g. in the Span.Context). You can use `SentryOptions.AddJsonSerializerContext` to supply your own context when initializing Sentry.
+  - When compiling AOT, Sentry isn't able to automatically register an unhandled exception handler in WinUI applications, since that also relies on reflection. If you're using Sentry with a WinUI application and you want to use AOT compilation, you'll need to take care of registering the unhandled event handler yourself. TODO *** Fill in the gaps here when https://github.com/getsentry/sentry-dotnet/issues/2778 has been completed ***
+  - ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732))
 
 ## Unreleased
 
