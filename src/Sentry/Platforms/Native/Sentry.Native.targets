@@ -68,6 +68,12 @@
     Condition="$([MSBuild]::IsOsPlatform('Windows'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
+    <MSBuild Projects="$(MSBuildProjectFile)"
+      Targets="_InnerBuildSentryNativeSDK-win-x64"
+      Properties="TargetFramework=net6.0" />
+  </Target>
+
+  <Target Name="_InnerBuildSentryNativeSDK-win-x64">
     <Message Importance="High"
       Text="Building artifacts of Sentry Native SDK for win-x64." />
 
@@ -98,6 +104,12 @@
     Condition="$([MSBuild]::IsOsPlatform('Linux'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
+    <MSBuild Projects="$(MSBuildProjectFile)"
+      Targets="_InnerBuildSentryNativeSDK-linux-x64"
+      Properties="TargetFramework=net6.0" />
+  </Target>
+
+  <Target Name="_InnerBuildSentryNativeSDK-linux-x64">
     <Message Importance="High"
       Text="Building artifacts of Sentry Native SDK for linux-x64." />
 
@@ -115,6 +127,9 @@
     </ItemGroup>
     <Copy SourceFiles="@(NativeSdkArtifacts)"
       DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-linux-x64)%(Filename)-native%(Extension)')" />
+
+    <!-- Explicitly update timestamp on output files so that this target doesn't run again even if the CMake build reused previously built artifacts. -->
+    <Touch Files="@(NativeSdkArtifacts)" />
   </Target>
 
   <Target Name="_BuildSentryNativeSDK-osx"
@@ -122,7 +137,12 @@
     Condition="$([MSBuild]::IsOsPlatform('OSX'))"
     Inputs="..\..\.git\modules\modules\sentry-native\HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets"
     Outputs="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
-    <Message Importance="High"
+    <MSBuild Projects="$(MSBuildProjectFile)"
+      Targets="_InnerBuildSentryNativeSDK-osx"
+      Properties="TargetFramework=net6.0" />
+  </Target>
+
+  <Target Name="_InnerBuildSentryNativeSDK-osx">    <Message Importance="High"
       Text="Building artifacts of Sentry Native SDK for osx." />
 
     <Exec WorkingDirectory="$(SentryNativeSourceDirectory)"
@@ -140,5 +160,8 @@
     </ItemGroup>
     <Copy SourceFiles="@(NativeSdkArtifacts)"
       DestinationFiles="@(NativeSdkArtifacts->'$(SentryNativeOutputDirectory-osx)%(Filename)-native%(Extension)')" />
+
+    <!-- Explicitly update timestamp on output files so that this target doesn't run again even if the CMake build reused previously built artifacts. -->
+    <Touch Files="@(NativeSdkArtifacts)" />
   </Target>
 </Project>
