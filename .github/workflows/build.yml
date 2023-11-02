@@ -56,11 +56,11 @@ jobs:
 
       - name: Build (for non-release branch)
         if: env.CI_PUBLISHING_BUILD != 'true'
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log
 
       - name: Build (for release branch)
         if: env.CI_PUBLISHING_BUILD == 'true'
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
@@ -72,12 +72,14 @@ jobs:
         with:
           path: test
 
-      - name: Upload Verify Results
+      - name: Upload build and test outputs
         if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: verify-test-results
-          path: '**/*.received.*'
+          name: logs-${{ matrix.os }}
+          path: |
+            **/*.received.*
+            *.log
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
 
