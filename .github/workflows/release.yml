@@ -6,6 +6,9 @@ on:
       version:
         description: Version to release
         required: true
+      merge_target:
+        description: Target branch to merge into. Uses the default branch as a fallback (optional)
+        required: false
       force:
         description: Force a release even when there are release-blockers (optional)
         required: false
