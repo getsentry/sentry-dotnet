@@ -5,18 +5,18 @@
     <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
     <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)runtimes\</SentryNativeOutputDirectory>
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
-    <NativeLibRelativePath-win-x64>win-x64\native\</NativeLibRelativePath-win-x64>
-    <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)</SentryNativeOutputDirectory-win-x64>
-    <NativeLibRelativePath-linux-x64>linux-x64\native\</NativeLibRelativePath-linux-x64>
-    <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)</SentryNativeOutputDirectory-linux-x64>
-    <NativeLibRelativePath-osx>osx\native\</NativeLibRelativePath-osx>
-    <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)</SentryNativeOutputDirectory-osx>
+    <NativeLibRelativePath-win-x64>win-x64\native</NativeLibRelativePath-win-x64>
+    <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)\</SentryNativeOutputDirectory-win-x64>
+    <NativeLibRelativePath-linux-x64>linux-x64\native</NativeLibRelativePath-linux-x64>
+    <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)\</SentryNativeOutputDirectory-linux-x64>
+    <NativeLibRelativePath-osx>osx\native</NativeLibRelativePath-osx>
+    <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
   </PropertyGroup>
 
   <!-- Packaging -->
   <ItemGroup>
     <!-- Include our transitive build targets in the nuget. -->
-    <None Include="buildTransitive.targets">
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive.targets">
       <Pack>true</Pack>
       <PackagePath>buildTransitive\Sentry.Native.targets</PackagePath>
     </None>
