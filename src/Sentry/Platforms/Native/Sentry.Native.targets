@@ -15,15 +15,6 @@
 
   <!-- Packaging -->
   <ItemGroup>
-    <!-- Use a separate readme file in the nuget. -->
-    <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
-    <None Include="$(MSBuildThisFileDirectory)README.md"
-      Pack="true"
-      PackagePath="" />
-
-    <!-- Don't add the changelog to the nuget. -->
-    <PackageReference Remove="SIL.ReleaseTasks" />
-
     <!-- Include our transitive build targets in the nuget. -->
     <None Include="buildTransitive.targets">
       <Pack>true</Pack>
@@ -36,7 +27,6 @@
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-win-x64)</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -44,7 +34,6 @@
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-linux-x64)</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -52,7 +41,6 @@
     <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\runtimes\$(NativeLibRelativePath-osx)</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
