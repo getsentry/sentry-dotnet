@@ -39,15 +39,15 @@ public class RuntimeInfoTests
         var actual = RuntimeInfo.GetRuntime();
         Assert.NotNull(actual);
 
-        #if NET8_0
+#if NET8_0
         Assert.StartsWith("8.0", actual.Version);
-        #elif NET7_0
+#elif NET7_0
         Assert.StartsWith("7.0", actual.Version);
-        #elif NET6_0
+#elif NET6_0
         Assert.StartsWith("6.0", actual.Version);
-        #elif NETCOREAPP3
+#elif NETCOREAPP3
         Assert.StartsWith("3", actual.Version);
-        #endif
+#endif
     }
 
     [Theory]
