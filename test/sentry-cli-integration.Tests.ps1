@@ -68,7 +68,11 @@ BeforeAll {
             Write-Host "::group::Building $Sample"
             try
             {
-                dotnet $action "samples/$sample/$sample.csproj" -c Release -f $TargetFramework --no-restore --nologo `
+                dotnet $action "samples/$sample/$sample.csproj" `
+                    -c Release `
+                    --no-restore `
+                    --nologo `
+                    --framework $TargetFramework `
                     /p:SentryCLIIntegrationTestProject=$sample `
                     /p:SentryUploadSymbols=$Symbols `
                     /p:SentryUploadSources=$Sources `

@@ -14,40 +14,80 @@ internal static class JsonExtensions
         new UIntPtrNullableJsonConverter()
     };
 
+    private static List<JsonConverter> CustomConverters = new List<JsonConverter>();
+
     internal static bool JsonPreserveReferences { get; set; } = true;
-    private static JsonSerializerOptions SerializerOptions = null!;
-    private static JsonSerializerOptions AltSerializerOptions = null!;
 
     static JsonExtensions()
     {
         ResetSerializerOptions();
     }
 
+    private static JsonSerializerOptions BuildOptions(bool preserveReferences)
+    {
+        var options = new JsonSerializerOptions();
+        if (preserveReferences)
+        {
+            options.ReferenceHandler = ReferenceHandler.Preserve;
+        }
+        foreach (var converter in DefaultConverters)
+        {
+            options.Converters.Add(converter);
+        }
+        foreach (var converter in CustomConverters)
+        {
+            options.Converters.Add(converter);
+        }
+
+        return options;
+    }
+
+    private static JsonSerializerOptions SerializerOptions = null!;
+    private static JsonSerializerOptions AltSerializerOptions = null!;
+
+    private static List<JsonSerializerContext> DefaultSerializerContexts = new();
+    private static List<JsonSerializerContext> ReferencePreservingSerializerContexts = new();
+
+    private static List<Func<JsonSerializerOptions, JsonSerializerContext>> JsonSerializerContextBuilders = new()
+    {
+        options => new SentryJsonContext(options)
+    };
+
+    internal static void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> jsonSerializerContextBuilder)
+        where T: JsonSerializerContext
+    {
+        JsonSerializerContextBuilders.Add(jsonSerializerContextBuilder);
+        ResetSerializerOptions();
+    }
+
     internal static void ResetSerializerOptions()
     {
-        SerializerOptions = new JsonSerializerOptions()
-            .AddDefaultConverters();
+        // For our classic reflection based serialization
+        SerializerOptions = BuildOptions(false);
+        AltSerializerOptions = BuildOptions(true);
 
-        AltSerializerOptions = new JsonSerializerOptions
+        // For the new AOT serialization
+        DefaultSerializerContexts.Clear();
+        ReferencePreservingSerializerContexts.Clear();
+        foreach (var builder in JsonSerializerContextBuilders)
         {
-            ReferenceHandler = ReferenceHandler.Preserve
+            DefaultSerializerContexts.Add(builder(BuildOptions(false)));
+            ReferencePreservingSerializerContexts.Add(builder(BuildOptions(true)));
         }
-            .AddDefaultConverters();
     }
 
     internal static void AddJsonConverter(JsonConverter converter)
     {
         // only add if we don't have this instance already
-        var converters = SerializerOptions.Converters;
-        if (converters.Contains(converter))
+        if (CustomConverters.Contains(converter))
         {
             return;
         }
 
         try
         {
-            SerializerOptions.Converters.Add(converter);
-            AltSerializerOptions.Converters.Add(converter);
+            CustomConverters.Add(converter);
+            ResetSerializerOptions();
         }
         catch (InvalidOperationException)
         {
@@ -60,16 +100,6 @@ internal static class JsonExtensions
             // TODO: .NET 8 is getting an IsReadOnly flag we could check instead of catching
             // See https://github.com/dotnet/runtime/pull/74431
         }
-    }
-
-    private static JsonSerializerOptions AddDefaultConverters(this JsonSerializerOptions options)
-    {
-        foreach (var converter in DefaultConverters)
-        {
-            options.Converters.Add(converter);
-        }
-
-        return options;
     }
 
     public static void Deconstruct(this JsonProperty jsonProperty, out string name, out JsonElement value)
@@ -477,28 +507,89 @@ internal static class JsonExtensions
         {
             writer.WriteStringValue(formattable.ToString(null, CultureInfo.InvariantCulture));
         }
+        else if (value.GetType().ToString() == "System.RuntimeType")
+        {
+            writer.WriteStringValue(value.ToString());
+        }
         else
         {
             if (!JsonPreserveReferences)
             {
-                JsonSerializer.Serialize(writer, value, SerializerOptions);
+                InternalSerialize(writer, value, preserveReferences: false);
                 return;
             }
 
             try
             {
-                // Use an intermediate temporary stream, so we can retry if serialization fails.
-                using var tempStream = new MemoryStream();
-                using var tempWriter = new Utf8JsonWriter(tempStream, writer.Options);
-                JsonSerializer.Serialize(tempWriter, value, SerializerOptions);
-                tempWriter.Flush();
-                writer.WriteRawValue(tempStream.ToArray());
+                // Use an intermediate byte array, so we can retry if serialization fails.
+                var bytes = InternalSerializeToUtf8Bytes(value);
+                writer.WriteRawValue(bytes);
             }
             catch (JsonException)
             {
                 // Retry, preserving references to avoid cyclical dependency.
-                JsonSerializer.Serialize(writer, value, AltSerializerOptions);
+                InternalSerialize(writer, value, preserveReferences: true);
             }
+        }
+    }
+
+    internal static string ToUtf8Json(this object value, bool preserveReferences = false)
+    {
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+        InternalSerialize(writer, value, preserveReferences);
+        writer.Flush();
+        return Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static JsonSerializerContext GetSerializerContext(Type type, bool preserveReferences = false)
+    {
+        var contexts = preserveReferences ? ReferencePreservingSerializerContexts : DefaultSerializerContexts;
+        return contexts.FirstOrDefault(c => c.GetTypeInfo(type) != null)
+            ?? contexts[0]; // If none of the contexts has type info, this gives us a proper exception message
+    }
+
+    private static byte[] InternalSerializeToUtf8Bytes(object value)
+    {
+        return AotHelper.IsAot
+            ? AotSerializeToUtf8Bytes()
+            : JitSerializeToUtf8Bytes();
+
+        byte[] AotSerializeToUtf8Bytes()
+        {
+            var context = GetSerializerContext(value.GetType());
+            return JsonSerializer.SerializeToUtf8Bytes(value, value.GetType(), context);
+        }
+
+        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
+        byte[] JitSerializeToUtf8Bytes() => JsonSerializer.SerializeToUtf8Bytes(value, SerializerOptions);
+    }
+
+    private static void InternalSerialize(Utf8JsonWriter writer, object value, bool preserveReferences = false)
+    {
+        if (AotHelper.IsAot)
+        {
+            AotSerialize();
+        }
+        else
+        {
+            JitSerialize();
+        }
+        return;
+
+        void AotSerialize()
+        {
+            var context = GetSerializerContext(value.GetType(), preserveReferences);
+            JsonSerializer.Serialize(writer, value, value.GetType(), context);
+        }
+
+        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+        void JitSerialize()
+        {
+         var options = preserveReferences ? AltSerializerOptions : SerializerOptions;
+         JsonSerializer.Serialize(writer, value, options);
         }
     }
 
@@ -706,7 +797,7 @@ internal static class JsonExtensions
         IEnumerable<KeyValuePair<string, object?>>? dic,
         IDiagnosticLogger? logger)
     {
-        var dictionary = dic as IReadOnlyDictionary<string, object?> ?? dic?.ToDictionary();
+        var dictionary = dic as IReadOnlyDictionary<string, object?> ?? dic?.ToDict();
         if (dictionary is not null && dictionary.Count > 0)
         {
             writer.WriteDictionary(propertyName, dictionary, logger);
@@ -720,7 +811,7 @@ internal static class JsonExtensions
         IDiagnosticLogger? logger)
         where TValue : IJsonSerializable?
     {
-        var dictionary = dic as IReadOnlyDictionary<string, TValue> ?? dic?.ToDictionary();
+        var dictionary = dic as IReadOnlyDictionary<string, TValue> ?? dic?.ToDict();
         if (dictionary is not null && dictionary.Count > 0)
         {
             writer.WriteDictionary(propertyName, dictionary, logger);
@@ -732,7 +823,7 @@ internal static class JsonExtensions
         string propertyName,
         IEnumerable<KeyValuePair<string, string?>>? dic)
     {
-        var dictionary = dic as IReadOnlyDictionary<string, string?> ?? dic?.ToDictionary();
+        var dictionary = dic as IReadOnlyDictionary<string, string?> ?? dic?.ToDict();
         if (dictionary is not null && dictionary.Count > 0)
         {
             writer.WriteStringDictionary(propertyName, dictionary);
@@ -790,4 +881,10 @@ internal static class JsonExtensions
             writer.WriteString(propertyName, value.Value);
         }
     }
+}
+
+[JsonSerializable(typeof(GrowableArray<int>))]
+[JsonSerializable(typeof(Dictionary<string, bool>))]
+internal partial class SentryJsonContext : JsonSerializerContext
+{
 }

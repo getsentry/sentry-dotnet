@@ -5,10 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
 
+  <PropertyGroup Condition="!$([MSBuild]::IsOSPlatform('OSX')) or '$(TargetFramework)' == 'net8.0'">
     <!-- AOT not supported for osx-arm64 on .NET 7 -->
-	<!-- TODO, consider updating after changes from #2732 come into effect -->
-    <PublishAot Condition="!$([MSBuild]::IsOSPlatform('OSX')) or '$(TargetFramework)' == 'net8.0'">true</PublishAot>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,11 +28,10 @@
     <!--
     After the above properties are configured, you can use the following features.
     Uploading sources to Sentry during the build will enable Source Context in the Sentry issue details page.
-    Uploading symbols to Sentry will enable server-side symbolication.  However, that is not necessary here
-    because the PDB file is present at runtime. Thus, .NET will symbolicate stack traces client-side.
+    Uploading symbols to Sentry will enable server-side symbolication (i.e. when the PDB is not present at runtime, or for AOT published programs).
     -->
     <SentryUploadSources>true</SentryUploadSources>
-    <SentryUploadSymbols>false</SentryUploadSymbols>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
   </PropertyGroup>
 
 

@@ -7,6 +7,8 @@
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- Ignore warnings for JSON generated code -->
+    <NoWarn>$(NoWarn);SYSLIB0005;SYSLIB0012</NoWarn>
   </PropertyGroup>
 
   <!--

@@ -1,0 +1,26 @@
+<Project>
+  <ItemGroup Condition="'$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'win-x64'">
+    <!-- Generate direct PInvokes for Dependency -->
+    <DirectPInvoke Include="sentry-native" />
+
+    <!-- Link statically -->
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)runtimes\win-x64\native\sentry-native.lib" />
+    <NativeLibrary Include="dbghelp.lib" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'linux-x64'">
+    <!-- Generate direct PInvokes for Dependency -->
+    <DirectPInvoke Include="sentry-native" />
+
+    <!-- Link statically -->
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)runtimes\linux-x64\native\libsentry-native.a" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OutputType)' == 'Exe' And ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
+    <!-- Generate direct PInvokes for Dependency -->
+    <DirectPInvoke Include="sentry-native" />
+
+    <!-- Link statically -->
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)runtimes\osx\native\libsentry-native.a" />
+  </ItemGroup>
+</Project>

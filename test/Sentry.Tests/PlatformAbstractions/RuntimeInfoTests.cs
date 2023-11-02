@@ -33,6 +33,23 @@ public class RuntimeInfoTests
 #endif
     }
 
+    [Fact]
+    public void GetRuntime_NetCoreVersion()
+    {
+        var actual = RuntimeInfo.GetRuntime();
+        Assert.NotNull(actual);
+
+        #if NET8_0
+        Assert.StartsWith("8.0", actual.Version);
+        #elif NET7_0
+        Assert.StartsWith("7.0", actual.Version);
+        #elif NET6_0
+        Assert.StartsWith("6.0", actual.Version);
+        #elif NETCOREAPP3
+        Assert.StartsWith("3", actual.Version);
+        #endif
+    }
+
     [Theory]
     [MemberData(nameof(ParseTestCases))]
     public void Parse_TestCases(ParseTestCase parseTestCase)

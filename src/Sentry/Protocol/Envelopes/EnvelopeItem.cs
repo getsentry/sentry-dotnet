@@ -150,7 +150,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             // Write to the outbound stream asynchronously. It's likely either an HttpRequestStream or a FileStream.
 
             // Header
-            var headerWithLength = Header.ToDictionary();
+            var headerWithLength = Header.ToDict();
             headerWithLength[LengthKey] = payloadBuffer.Length;
             await SerializeHeaderAsync(stream, headerWithLength, logger, cancellationToken).ConfigureAwait(false);
             await stream.WriteNewlineAsync(cancellationToken).ConfigureAwait(false);
@@ -170,7 +170,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         using var payloadBuffer = BufferPayload(logger);
 
         // Header
-        var headerWithLength = Header.ToDictionary();
+        var headerWithLength = Header.ToDict();
         headerWithLength[LengthKey] = payloadBuffer.Length;
         SerializeHeader(stream, headerWithLength, logger);
         stream.WriteNewline();

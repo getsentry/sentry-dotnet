@@ -234,7 +234,7 @@ public sealed class SentryStackFrame : IJsonSerializable
         {
             InternalPreContext = preContext!,
             InternalPostContext = postContext!,
-            InternalVars = vars?.WhereNotNullValue().ToDictionary(),
+            InternalVars = vars?.WhereNotNullValue().ToDict(),
             InternalFramesOmitted = framesOmitted,
             FileName = filename,
             Function = function,

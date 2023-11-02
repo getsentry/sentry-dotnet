@@ -98,17 +98,17 @@ public class Span : ISpanData, IJsonSerializable
         Description = tracer.Description;
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
-        _extra = tracer.Extra.ToDictionary();
+        _extra = tracer.Extra.ToDict();
 
         if (tracer is SpanTracer spanTracer)
         {
-            _measurements = spanTracer.InternalMeasurements?.ToDictionary();
-            _tags = spanTracer.InternalTags?.ToDictionary();
+            _measurements = spanTracer.InternalMeasurements?.ToDict();
+            _tags = spanTracer.InternalTags?.ToDict();
         }
         else
         {
-            _measurements = tracer.Measurements.ToDictionary();
-            _tags = tracer.Tags.ToDictionary();
+            _measurements = tracer.Measurements.ToDict();
+            _tags = tracer.Tags.ToDict();
         }
     }
 
@@ -152,9 +152,9 @@ public class Span : ISpanData, IJsonSerializable
         var description = json.GetPropertyOrNull("description")?.GetString();
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
-        var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()?.ToDictionary();
+        var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull()?.ToDict();
         var measurements = json.GetPropertyOrNull("measurements")?.GetDictionaryOrNull(Measurement.FromJson);
-        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDictionary();
+        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDict();
 
         return new Span(parentSpanId, operation)
         {

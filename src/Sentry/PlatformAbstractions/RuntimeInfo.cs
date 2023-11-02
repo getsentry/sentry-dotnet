@@ -1,3 +1,5 @@
+using System;
+
 namespace Sentry.PlatformAbstractions;
 
 // https://github.com/dotnet/corefx/issues/17452
@@ -83,29 +85,18 @@ internal static class RuntimeInfo
             }
         }
 #else
-    // Known issue on Docker: https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-361027977
     private static string? GetNetCoreVersion(Runtime runtime)
     {
-        if (!runtime.IsNetCore())
-        {
-            return null;
-        }
+        var description = RuntimeInformation.FrameworkDescription;
+        return RemovePrefixOrNull(description, ".NET Core")
+           ?? RemovePrefixOrNull(description, ".NET Framework")
+           ?? RemovePrefixOrNull(description, ".NET Native")
+           ?? RemovePrefixOrNull(description, ".NET");
 
-        // https://github.com/dotnet/BenchmarkDotNet/issues/448#issuecomment-308424100
-        var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
-#if NETCOREAPP3_0_OR_GREATER
-        var assemblyPath = assembly.Location;
-#else
-            var assemblyPath = assembly.CodeBase;
-#endif
-        var parts = assemblyPath.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
-        var netCoreAppIndex = Array.IndexOf(parts, "Microsoft.NETCore.App");
-        if (netCoreAppIndex > 0 && netCoreAppIndex < parts.Length - 2)
-        {
-            return parts[netCoreAppIndex + 1];
-        }
-
-        return null;
+        static string? RemovePrefixOrNull(string? value, string prefix)
+            => value?.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) == true
+                ? value.Substring(prefix.Length)
+                : null;
     }
 #endif
 

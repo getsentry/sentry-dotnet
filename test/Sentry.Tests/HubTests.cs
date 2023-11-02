@@ -270,7 +270,7 @@ public partial class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
-    private class EvilContext
+    internal class EvilContext
     {
         // This property will throw an exception during serialization.
         // ReSharper disable once UnusedMember.Local
@@ -295,6 +295,9 @@ public partial class HubTests
 
     private async Task CapturesEventWithContextKey_Implementation(bool offlineCaching)
     {
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new HubTestsJsonContext(o));
+#endif
         var tcs = new TaskCompletionSource<bool>();
         var expectedMessage = Guid.NewGuid().ToString();
 
@@ -1430,3 +1433,10 @@ public partial class HubTests
 
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
 }
+
+#if NET6_0_OR_GREATER
+[JsonSerializable(typeof(HubTests.EvilContext))]
+internal partial class HubTestsJsonContext : JsonSerializerContext
+{
+}
+#endif

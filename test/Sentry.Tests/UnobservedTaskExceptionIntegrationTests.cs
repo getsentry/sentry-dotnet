@@ -86,6 +86,8 @@ public class UnobservedTaskExceptionIntegrationTests
 
         // The first should be the actual exception that was unobserved.
         var actualException = exceptions[0];
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
         Assert.NotNull(actualException.Stacktrace);
         Assert.NotNull(actualException.Mechanism);
         Assert.Equal("chained", actualException.Mechanism.Type);
@@ -97,6 +99,8 @@ public class UnobservedTaskExceptionIntegrationTests
 
         // The last should be the aggregate exception that raised the UnobservedTaskException event.
         var aggregateException = exceptions[1];
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
         Assert.Null(aggregateException.Stacktrace);
         Assert.NotNull(aggregateException.Mechanism);
         Assert.Equal("UnobservedTaskException", aggregateException.Mechanism.Type);

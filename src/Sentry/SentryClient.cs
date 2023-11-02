@@ -162,8 +162,11 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            // Attempt to demystify exceptions before adding them as breadcrumbs.
-            e.Demystify();
+            if (!AotHelper.IsAot)
+            {
+                // Attempt to demystify exceptions before adding them as breadcrumbs.
+                e.Demystify();
+            }
 
             _options.LogError(e, "The BeforeSendTransaction callback threw an exception. It will be added as breadcrumb and continue.");
 
@@ -365,8 +368,11 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            // Attempt to demystify exceptions before adding them as breadcrumbs.
-            e.Demystify();
+            if (!AotHelper.IsAot)
+            {
+                // Attempt to demystify exceptions before adding them as breadcrumbs.
+                e.Demystify();
+            }
 
             _options.LogError(e, "The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.");
             var data = new Dictionary<string, string>
