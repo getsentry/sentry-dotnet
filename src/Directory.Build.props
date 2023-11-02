@@ -35,6 +35,11 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
+  <!-- Only compile with IsAotCompatible on .NET 6.0 and later. Our Device Tests fail for net7.0-android with this enabled as well -->
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net7.0-android' AND $([System.Text.RegularExpressions.Regex]::IsMatch('$(TargetFramework)', '^(?!net5\.|net4\d{2}|netcoreapp|netstandard)net\d+'))">
+    <FrameworkSupportsAot>true</FrameworkSupportsAot>
+  </PropertyGroup>
+
   <PropertyGroup>
     <!-- Used by SIL.ReleaseTasks below -->
     <ChangelogFile>$(MSBuildThisFileDirectory)..\CHANGELOG.md</ChangelogFile>

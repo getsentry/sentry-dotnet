@@ -29,9 +29,14 @@ internal static class CollectionsExtensions
         }
     }
 
-#if !NET8_0_OR_GREATER
-    public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+    // Note this was renamed from ToDictionary to ToDict to avoid conflicts with System.Linq.Enumerable.ToDictionary.
+    // on .NET 8 and later. Previously this code was simply omitted for .NET 8 targets and later, which compiles fine
+    // but breaks at runtime (where it's still looking for  CollectionExtensions.ToDictionary method).
+    internal static Dictionary<TKey, TValue> ToDict<TKey, TValue>(
         this IEnumerable<KeyValuePair<TKey, TValue>> source) where TKey : notnull =>
+#if NET8_0_OR_GREATER
+        source.ToDictionary();
+#else
         source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 #endif
 

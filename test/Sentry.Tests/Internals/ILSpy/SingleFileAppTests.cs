@@ -1,8 +1,7 @@
+#if NET5_0_OR_GREATER && PLATFORM_NEUTRAL
 using Sentry.Internal.ILSpy;
 
 namespace Sentry.Tests.Internals.ILSpy;
-
-#if NET5_0_OR_GREATER && PLATFORM_NEUTRAL
 
 /// <summary>
 /// Note the tests in this class rely on the SingleFileTestApp having being built. This will be done automatically if
@@ -31,7 +30,9 @@ public class SingleFileAppTests
         InValidBundleFile = Path.Combine(testRoot, invalidBundle);
     }
 
-#if NET7_0
+#if NET8_0
+    private static string TargetFramework => "net8.0";
+#elif NET7_0
     private static string TargetFramework => "net7.0";
 #elif NET6_0
     private static string TargetFramework => "net6.0";

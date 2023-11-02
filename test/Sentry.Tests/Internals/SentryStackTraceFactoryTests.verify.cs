@@ -4,6 +4,8 @@ using Sentry.PlatformAbstractions;
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
 
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
 [UsesVerify]
 public partial class SentryStackTraceFactoryTests
 {
@@ -14,7 +16,6 @@ public partial class SentryStackTraceFactoryTests
     {
         // TODO: Mono gives different results.  Investigate why.
         Skip.If(RuntimeInfo.GetRuntime().IsMono(), "Not supported on Mono");
-
         _fixture.SentryOptions.StackTraceMode = mode;
 
         // Arrange

@@ -80,7 +80,6 @@ internal interface IStackFrame
     /// <returns>
     /// The method in which the frame is executing.
     /// </returns>
-
     public MethodBase? GetMethod();
 
     /// <summary>
@@ -113,7 +112,10 @@ internal class RealStackFrame : IStackFrame
 
     public int GetILOffset() => _frame.GetILOffset();
 
-    public MethodBase? GetMethod() => _frame.GetMethod();
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+    public MethodBase? GetMethod() => AotHelper.IsAot
+        ? null
+        : _frame.GetMethod();
 
 #if NET5_0_OR_GREATER
     public nint GetNativeImageBase() => _frame.GetNativeImageBase();

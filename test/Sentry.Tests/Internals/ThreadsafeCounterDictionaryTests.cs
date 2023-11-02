@@ -142,8 +142,8 @@ public class ThreadsafeCounterDictionaryTests
         counters.Increment("bar");
         counters.Increment("bar");
 
-        var actual1 = counters.ToDictionary();
-        var actual2 = counters.ToDictionary();
+        var actual1 = counters.ToDict();
+        var actual2 = counters.ToDict();
 
         var expected = new Dictionary<string, int> {{"foo", 1}, {"bar", 2}};
         Assert.Equal(expected, actual1);
@@ -159,7 +159,7 @@ public class ThreadsafeCounterDictionaryTests
         counters.Increment("bar");
 
         var actual1 = counters.ReadAllAndReset();
-        var actual2 = counters.ToDictionary();
+        var actual2 = counters.ToDict();
 
         var expected1 = new Dictionary<string, int> {{"foo", 1}, {"bar", 2}};
         var expected2 = new Dictionary<string, int> {{"foo", 0}, {"bar", 0}};

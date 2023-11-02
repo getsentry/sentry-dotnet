@@ -1,5 +1,6 @@
 using Sentry.iOS.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.iOS;
 
@@ -50,7 +51,7 @@ internal sealed class IosScopeObserver : IScopeObserver
 
             try
             {
-                var json = JsonSerializer.Serialize(value);
+                var json = value.ToUtf8Json();
                 SentryCocoaSdk.ConfigureScope(scope => scope.SetExtraValue(NSObject.FromObject(json), key));
             }
             catch (Exception ex)

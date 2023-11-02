@@ -3,7 +3,12 @@
 # the *.slnf solution filters for the Sentry solution.
 ################################################################
 
-defaultSolution: Sentry.sln
+coreSolution: Sentry.sln
+# We don't maintain the buildSolutions manually... these are just
+# copies of Sentry.sln that are used to set certain build
+# properties when using solution filters that are based on these
+buildSolutions:
+  - Sentry.NoMobile.sln
 
 groupConfigs:
   allProjects:

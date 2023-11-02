@@ -991,6 +991,30 @@ public class SentryOptions
     }
 
     /// <summary>
+    /// Configures a custom <see cref="JsonSerializerContext"/> to be used when serializing or deserializing
+    /// objects to JSON with this SDK.
+    /// </summary>
+    /// <param name="contextBuilder">
+    /// A builder that takes <see cref="JsonSerializerOptions"/> and returns a <see cref="JsonSerializerContext"/>
+    /// </param>
+    /// <remarks>
+    /// This currently modifies a static list, so will affect any instance of the Sentry SDK.
+    /// If that becomes problematic, we will have to refactor all serialization code to be
+    /// able to accept an instance of <see cref="SentryOptions"/>.
+    /// </remarks>
+    public void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> contextBuilder)
+        where T: JsonSerializerContext
+    {
+        // protect against null because user may not have nullability annotations enabled
+        if (contextBuilder == null!)
+        {
+            throw new ArgumentNullException(nameof(contextBuilder));
+        }
+
+        JsonExtensions.AddJsonSerializerContext(contextBuilder);
+    }
+
+    /// <summary>
     /// When <c>true</c>, if an object being serialized to JSON contains references to other objects, and the
     /// serialized object graph exceed the maximum allowable depth, the object will instead be serialized using
     /// <see cref="ReferenceHandler.Preserve"/> (from System.Text.Json) - which adds <c>$id</c> and <c>$ref</c>
