@@ -837,12 +837,6 @@ namespace Sentry
         public override string ToString() { }
         public static Sentry.SentryTraceHeader Parse(string value) { }
     }
-    public sealed class SentryValues<T> : Sentry.IJsonSerializable
-    {
-        public SentryValues(System.Collections.Generic.IEnumerable<T>? values) { }
-        public System.Collections.Generic.IEnumerable<T> Values { get; }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-    }
     public class Session : Sentry.ISession
     {
         public Session(string? distinctId, string release, string? environment) { }
