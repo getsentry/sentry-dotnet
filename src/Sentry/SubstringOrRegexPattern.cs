@@ -8,7 +8,7 @@ namespace Sentry;
 [TypeConverter(typeof(SubstringOrRegexPatternTypeConverter))]
 public class SubstringOrRegexPattern
 {
-    private readonly Lazy<Regex?> _regex;
+    private readonly Regex? _regex;
     private readonly string? _substring;
     private readonly StringComparison _stringComparison;
 
@@ -23,7 +23,7 @@ public class SubstringOrRegexPattern
     {
         _substring = substringOrRegexPattern;
         _stringComparison = comparison;
-        _regex = new Lazy<Regex?>(() => TryParseRegex(substringOrRegexPattern, comparison));
+        _regex = TryParseRegex(substringOrRegexPattern, comparison);
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public class SubstringOrRegexPattern
     /// <see cref="RegexOptions.CultureInvariant"/> (unless you have culture-specific matching needs).
     /// The <see cref="SubstringOrRegexPattern(string, StringComparison)"/> constructor sets these by default.
     /// </remarks>
-    public SubstringOrRegexPattern(Regex regex) => _regex = new Lazy<Regex?>(() => regex);
+    public SubstringOrRegexPattern(Regex regex) => _regex = regex;
 
     /// <summary>
     /// Implicitly converts a <see cref="string"/> to a <see cref="SubstringOrRegexPattern"/>.
@@ -67,7 +67,7 @@ public class SubstringOrRegexPattern
     internal bool IsMatch(string str) =>
         _substring == ".*" || // perf shortcut
         (_substring != null && str.Contains(_substring, _stringComparison)) ||
-        _regex.Value?.IsMatch(str) == true;
+        _regex?.IsMatch(str) == true;
 
     private static Regex? TryParseRegex(string pattern, StringComparison comparison)
     {

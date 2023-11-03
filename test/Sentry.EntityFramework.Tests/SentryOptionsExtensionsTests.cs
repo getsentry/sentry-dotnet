@@ -10,7 +10,7 @@ public class SentryOptionsExtensionsTests
         options.AddEntityFramework();
         options.AddEntityFramework();
 
-        Assert.Single(options.ExceptionProcessors!, x => x.Value.Value is DbEntityValidationExceptionProcessor);
+        Assert.Single(options.ExceptionProcessors!, x => x.Lazy.Value is DbEntityValidationExceptionProcessor);
     }
 
     [Fact]

@@ -15,7 +15,7 @@ public static class SentryAspNetOptionsExtensions
     /// </summary>
     public static SentryOptions AddAspNet(this SentryOptions options, RequestSize maxRequestBodySize = RequestSize.None)
     {
-        if (options.EventProcessors.ContainsKey(typeof(SystemWebRequestEventProcessor)))
+        if (options.EventProcessors.Any(processor => processor.Type == typeof(SystemWebRequestEventProcessor)))
         {
             options.LogWarning($"{nameof(AddAspNet)} has already been called. Subsequent call will be ignored.");
 

@@ -99,7 +99,7 @@ public static class SentryOptionsExtensions
     /// <param name="integration">The integration.</param>
     public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
     {
-        options.Integrations[integration.GetType()] = new Lazy<ISdkIntegration>(() => integration);
+        options.Integrations.Add((integration.GetType(), new Lazy<ISdkIntegration>(() => integration)));
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
     public static void RemoveIntegration<TIntegration>(this SentryOptions options)
         where TIntegration : ISdkIntegration
-        => options.Integrations.Remove(typeof(TIntegration));
+        => options.Integrations.RemoveAll(integration => integration.Type == typeof(TIntegration));
 
     /// <summary>
     /// Add an exception filter.
@@ -203,7 +203,7 @@ public static class SentryOptionsExtensions
     /// <param name="processor">The exception processor.</param>
     public static void AddExceptionProcessor(this SentryOptions options, ISentryEventExceptionProcessor processor)
     {
-        options.ExceptionProcessors[processor.GetType()] = new Lazy<ISentryEventExceptionProcessor>(() => processor);
+        options.ExceptionProcessors.Add((processor.GetType(), new Lazy<ISentryEventExceptionProcessor>(() => processor)));
     }
 
     /// <summary>
@@ -226,7 +226,7 @@ public static class SentryOptionsExtensions
     /// <param name="processor">The event processor.</param>
     public static void AddEventProcessor(this SentryOptions options, ISentryEventProcessor processor)
     {
-        options.EventProcessors[processor.GetType()] = new Lazy<ISentryEventProcessor>(() => processor);
+        options.EventProcessors.Add((processor.GetType(), new Lazy<ISentryEventProcessor>(() => processor)));
     }
 
     /// <summary>
@@ -249,7 +249,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to remove the processor(s) from.</param>
     public static void RemoveEventProcessor<TProcessor>(this SentryOptions options)
         where TProcessor : ISentryEventProcessor
-        => options.EventProcessors.Remove(typeof(TProcessor));
+        => options.EventProcessors.RemoveAll(processor => processor.Type == typeof(TProcessor));
 
     /// <summary>
     /// Adds an event processor provider which is invoked when creating a <see cref="SentryEvent"/>.
@@ -356,7 +356,7 @@ public static class SentryOptionsExtensions
             throw new ArgumentNullException(nameof(sentryStackTraceFactory));
         }
 
-        options.SentryStackTraceFactory = new(() => sentryStackTraceFactory);
+        options.SentryStackTraceFactory = sentryStackTraceFactory;
 
         return options;
     }

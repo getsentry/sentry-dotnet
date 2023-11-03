@@ -102,14 +102,20 @@ public class SentryOptions
         set => _clientReportRecorder = new Lazy<IClientReportRecorder>(() => value);
     }
 
-    internal Lazy<ISentryStackTraceFactory> SentryStackTraceFactory { get; set; }
+    private Lazy<ISentryStackTraceFactory> _sentryStackTraceFactory;
+
+    internal ISentryStackTraceFactory SentryStackTraceFactory
+    {
+        get => _sentryStackTraceFactory.Value;
+        set => _sentryStackTraceFactory = new Lazy<ISentryStackTraceFactory>(() => value);
+    }
 
     internal int SentryVersion { get; } = ProtocolVersion;
 
     /// <summary>
     /// A list of exception processors
     /// </summary>
-    internal Dictionary<Type, Lazy<ISentryEventExceptionProcessor>> ExceptionProcessors { get; set; }
+    internal List<(Type Type, Lazy<ISentryEventExceptionProcessor> Lazy)> ExceptionProcessors { get; set; }
 
     /// <summary>
     /// A list of transaction processors
@@ -119,7 +125,7 @@ public class SentryOptions
     /// <summary>
     /// A list of event processors
     /// </summary>
-    internal Dictionary<Type, Lazy<ISentryEventProcessor>> EventProcessors { get; set; }
+    internal List<(Type Type, Lazy<ISentryEventProcessor> Lazy)> EventProcessors { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventProcessor"/>
@@ -139,7 +145,7 @@ public class SentryOptions
     /// <summary>
     /// A list of integrations to be added when the SDK is initialized.
     /// </summary>
-    internal Dictionary<Type, Lazy<ISdkIntegration>> Integrations { get; set; }
+    internal List<(Type Type, Lazy<ISdkIntegration> Lazy)> Integrations { get; set; }
 
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
@@ -685,8 +691,8 @@ public class SentryOptions
     public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange> { (500, 599) };
 
     // The default failed request target list will match anything, but adding to the list should clear that.
-    private IList<SubstringOrRegexPattern> _failedRequestTargets = new AutoClearingList<SubstringOrRegexPattern>(
-        new[] {new SubstringOrRegexPattern(".*")}, clearOnNextAdd: true);
+    private Lazy<IList<SubstringOrRegexPattern>> _failedRequestTargets = new(() => new AutoClearingList<SubstringOrRegexPattern>(
+        new[] {new SubstringOrRegexPattern(".*")}, clearOnNextAdd: true));
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
@@ -694,8 +700,8 @@ public class SentryOptions
     /// <para>Matches "*." by default.</para>
     /// </summary>
     public IList<SubstringOrRegexPattern> FailedRequestTargets {
-        get => _failedRequestTargets;
-        set => _failedRequestTargets = value.SetWithConfigBinding();
+        get => _failedRequestTargets.Value;
+        set => _failedRequestTargets = new(value.SetWithConfigBinding);
     }
 
     /// <summary>
@@ -1061,42 +1067,42 @@ public class SentryOptions
 
         _clientReportRecorder = new Lazy<IClientReportRecorder>(() => new ClientReportRecorder(this));
 
-        SentryStackTraceFactory = new (() => new SentryStackTraceFactory(this));
+        _sentryStackTraceFactory = new (() => new SentryStackTraceFactory(this));
 
-        ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory.Value;
+        ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
         EventProcessors = new(){
             // De-dupe to be the first to run
-            { typeof(DuplicateEventDetectionEventProcessor), new(() => new DuplicateEventDetectionEventProcessor(this)) },
-            { typeof(MainSentryEventProcessor), new(() => new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)) },
+            (typeof(DuplicateEventDetectionEventProcessor), new(() => new DuplicateEventDetectionEventProcessor(this))),
+            (typeof(MainSentryEventProcessor), new(() => new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor))),
         };
 
         EventProcessorsProviders = new() {
-            () => EventProcessors.Values.Select(x => x.Value)
+            () => EventProcessors.Select(x => x.Item2.Value)
         };
 
         ExceptionProcessors = new(){
-            { typeof(MainExceptionProcessor), new(() => new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)) }
+            ( typeof(MainExceptionProcessor), new(() => new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)) )
         };
 
         ExceptionProcessorsProviders = new() {
-            () => ExceptionProcessors.Values.Select(x => x.Value)
+            () => ExceptionProcessors.Select(x => x.Item2.Value)
         };
 
         Integrations = new() {
             // Auto-session tracking to be the first to run
-            { typeof(AutoSessionTrackingIntegration), new (() => new AutoSessionTrackingIntegration()) },
-            { typeof(AppDomainUnhandledExceptionIntegration), new (() => new AppDomainUnhandledExceptionIntegration()) },
-            { typeof(AppDomainProcessExitIntegration), new (() => new AppDomainProcessExitIntegration()) },
-            { typeof(UnobservedTaskExceptionIntegration), new (() => new UnobservedTaskExceptionIntegration()) },
+            ( typeof(AutoSessionTrackingIntegration), new (() => new AutoSessionTrackingIntegration()) ),
+            ( typeof(AppDomainUnhandledExceptionIntegration), new (() => new AppDomainUnhandledExceptionIntegration()) ),
+            ( typeof(AppDomainProcessExitIntegration), new (() => new AppDomainProcessExitIntegration()) ),
+            ( typeof(UnobservedTaskExceptionIntegration), new (() => new UnobservedTaskExceptionIntegration()) ),
 #if NETFRAMEWORK
-            { typeof(NetFxInstallationsIntegration), new (() => new NetFxInstallationsIntegration()) },
+            ( typeof(NetFxInstallationsIntegration), new (() => new NetFxInstallationsIntegration()) ),
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION
-            { typeof(SentryDiagnosticListenerIntegration), new (() => new SentryDiagnosticListenerIntegration()) },
+            ( typeof(SentryDiagnosticListenerIntegration), new (() => new SentryDiagnosticListenerIntegration()) ),
 #endif
 #if NET5_0_OR_GREATER
-            { typeof(WinUIUnhandledExceptionIntegration), new (() => new WinUIUnhandledExceptionIntegration()) },
+            ( typeof(WinUIUnhandledExceptionIntegration), new (() => new WinUIUnhandledExceptionIntegration()) ),
 #endif
         };
 

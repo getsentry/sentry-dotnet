@@ -112,7 +112,7 @@ public partial class MainExceptionProcessorTests
     public void Process_AggregateException()
     {
         var sut = _fixture.GetSut();
-        _fixture.SentryStackTraceFactory = _fixture.SentryOptions.SentryStackTraceFactory.Value;
+        _fixture.SentryStackTraceFactory = _fixture.SentryOptions.SentryStackTraceFactory;
         var evt = new SentryEvent();
         sut.Process(BuildAggregateException(), evt);
 
