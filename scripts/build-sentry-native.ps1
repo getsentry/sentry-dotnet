@@ -58,6 +58,10 @@ try
 
     $srcFile = "$buildDir/${libPrefix}sentry$libExtension"
     $outFile = "$outDir/${libPrefix}sentry-native$libExtension"
+
+    # New-Item creates the directory if it doesn't exist.
+    New-Item -ItemType File -Path $outFile -Force | Out-Null
+
     Write-Host "Copying $srcFile to $outFile"
     Copy-Item -Force -Path $srcFile -Destination $outFile
 
