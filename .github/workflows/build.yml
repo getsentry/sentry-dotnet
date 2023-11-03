@@ -20,11 +20,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - run: git submodule update --init modules/sentry-native
+
       - uses: actions/cache@v3
         id: cache
         with:
           path: src/Sentry/Platforms/Native/runtimes
-          key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
 
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
@@ -51,6 +53,35 @@ jobs:
         with:
           submodules: recursive
 
+      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      - name: Set Environment Variables
+        if: startsWith(matrix.os, 'macos')
+        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
+      - name: Download sentry-native (Linux)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux') }}
+        uses: actions/cache/restore@v3
+        with:
+          path: src/Sentry/Platforms/Native/runtimes
+          key: sentry-native-Linux-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (macOS)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'macOS') }}
+        uses: actions/cache/restore@v3
+        with:
+          path: src/Sentry/Platforms/Native/runtimes
+          key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (Windows)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
+        uses: actions/cache/restore@v3
+        with:
+          path: src/Sentry/Platforms/Native/runtimes
+          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
       - name: Rebuild Solution Filters
         shell: pwsh
         run: scripts/generate-solution-filters.ps1
@@ -58,11 +89,6 @@ jobs:
       - name: Ensure Solution Filters are up to date
         shell: pwsh
         run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
-
-      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
-      - name: Set Environment Variables
-        if: startsWith(matrix.os, 'macos')
-        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Setup Environment
         uses: ./.github/actions/environment
@@ -76,30 +102,6 @@ jobs:
 
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
-
-      - name: Download sentry-native (Linux)
-        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux') }}
-        uses: actions/cache/restore@v3
-        with:
-          path: src/Sentry/Platforms/Native/runtimes
-          key: sentry-native-Linux-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
-          fail-on-cache-miss: true
-
-      - name: Download sentry-native (macOS)
-        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'macOS') }}
-        uses: actions/cache/restore@v3
-        with:
-          path: src/Sentry/Platforms/Native/runtimes
-          key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
-          fail-on-cache-miss: true
-
-      - name: Download sentry-native (Windows)
-        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
-        uses: actions/cache/restore@v3
-        with:
-          path: src/Sentry/Platforms/Native/runtimes
-          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
-          fail-on-cache-miss: true
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
