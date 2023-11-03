@@ -38,7 +38,7 @@ jobs:
 
   build:
     needs: build-sentry-native
-    name: ${{ matrix.os }}
+    name: .NET (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -86,7 +86,7 @@ jobs:
       - name: Download sentry-native (Linux)
         uses: actions/download-artifact@v3
         with:
-          name: sentry-native-linux
+          name: sentry-native-ubuntu
           path: src/Sentry/Platforms/Native/runtimes
 
       - name: Download sentry-native (macOS)
