@@ -27,6 +27,7 @@ jobs:
         with:
           path: src/Sentry/Platforms/Native/runtimes
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          enableCrossOsArchive: true
 
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
@@ -81,6 +82,7 @@ jobs:
           path: src/Sentry/Platforms/Native/runtimes
           key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
+          enableCrossOsArchive: true
 
       - name: Rebuild Solution Filters
         shell: pwsh
