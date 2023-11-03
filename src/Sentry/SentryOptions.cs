@@ -68,7 +68,7 @@ public class SentryOptions
     /// </summary>
     public bool IsGlobalModeEnabled
     {
-        get => _isGlobalModeEnabled ?? Runtime.Current.IsBrowserWasm();
+        get => _isGlobalModeEnabled ??= Runtime.Current.IsBrowserWasm();
         set => _isGlobalModeEnabled = value;
     }
 #endif
