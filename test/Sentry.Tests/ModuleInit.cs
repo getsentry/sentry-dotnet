@@ -4,6 +4,8 @@ public static class ModuleInit
     [ModuleInitializer]
     public static void Init()
     {
+        Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+
         VerifierSettings.IgnoreMembers<SentryException>(_ => _.Module, _ => _.ThreadId);
 
         VerifierSettings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(
