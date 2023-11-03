@@ -24,17 +24,11 @@ jobs:
         id: cache
         with:
           path: src/Sentry/Platforms/Native/runtimes
-          key: sentry-native-${{ matrix.os }}-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
 
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: sentry-native-${{ matrix.os }}
-          if-no-files-found: error
-          path: src/Sentry/Platforms/Native/runtimes
 
   build:
     needs: build-sentry-native
@@ -84,22 +78,28 @@ jobs:
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Download sentry-native (Linux)
-        uses: actions/download-artifact@v3
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux') }}
+        uses: actions/cache/restore@v3
         with:
-          name: sentry-native-ubuntu
           path: src/Sentry/Platforms/Native/runtimes
+          key: sentry-native-Linux-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
 
       - name: Download sentry-native (macOS)
-        uses: actions/download-artifact@v3
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'macOS') }}
+        uses: actions/cache/restore@v3
         with:
-          name: sentry-native-macos
           path: src/Sentry/Platforms/Native/runtimes
+          key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
 
       - name: Download sentry-native (Windows)
-        uses: actions/download-artifact@v3
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
+        uses: actions/cache/restore@v3
         with:
-          name: sentry-native-windows
           path: src/Sentry/Platforms/Native/runtimes
+          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
