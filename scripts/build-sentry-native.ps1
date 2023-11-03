@@ -8,6 +8,7 @@ try
     $submodule = 'modules/sentry-native'
     $outDir = 'src/Sentry/Platforms/Native/runtimes'
     $buildDir = "$submodule/build"
+    $actualBuildDir = $buildDir
 
     $additionalArgs = @()
     $libPrefix = 'lib'
@@ -21,6 +22,7 @@ try
     {
         $outDir += '/win-x64/native'
         $additionalArgs += @('-C', 'src/Sentry/Platforms/Native/windows-config.cmake')
+        $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
         $libExtension = '.lib'
     }
@@ -56,7 +58,7 @@ try
         --config RelWithDebInfo `
         --parallel
 
-    $srcFile = "$buildDir/${libPrefix}sentry$libExtension"
+    $srcFile = "$actualBuildDir/${libPrefix}sentry$libExtension"
     $outFile = "$outDir/${libPrefix}sentry-native$libExtension"
 
     # New-Item creates the directory if it doesn't exist.
