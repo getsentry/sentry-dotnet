@@ -20,7 +20,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: src/Sentry/Platforms/Native/runtimes
+          key: sentry-native-${{ matrix.os }}-${{ hashFiles('scripts/build-sentry-native.ps1', '.git/modules/modules/sentry-native/HEAD') }}
+
       - run: scripts/build-sentry-native.ps1
+        if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
 
       - uses: actions/upload-artifact@v3
