@@ -35,21 +35,6 @@ runs:
       run: dotnet new globaljson --sdk-version 7.0.203 --force
       shell: bash
 
-    # We don't use a lockfile, so hash all files where we might be keeping <PackageReference> tags.
-    - name: Collect the list of NuGet package references for caching
-      shell: bash
-      run: |
-        grep -hr "<PackageReference " --include="*proj" --include="*.props" . | sort -u  > package-references.txt
-        cat package-references.txt
-
-    - name: NuGet package cache
-      uses: actions/cache@v3
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('package-references.txt') }}
-        restore-keys: ${{ runner.os }}-nuget-
-
-    # TODO: Figure out how to cache workloads, as they're not quite the same as nuget packages.
     - name: Install .NET Workloads
       shell: bash
       run: >
