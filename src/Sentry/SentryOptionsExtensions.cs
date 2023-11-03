@@ -351,12 +351,7 @@ public static class SentryOptionsExtensions
     /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
     public static SentryOptions UseStackTraceFactory(this SentryOptions options, ISentryStackTraceFactory sentryStackTraceFactory)
     {
-        if (sentryStackTraceFactory is null)
-        {
-            throw new ArgumentNullException(nameof(sentryStackTraceFactory));
-        }
-
-        options.SentryStackTraceFactory = sentryStackTraceFactory;
+        options.SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
 
         return options;
     }

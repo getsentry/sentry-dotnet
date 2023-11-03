@@ -5,18 +5,19 @@ namespace Sentry.Internal.Http;
 
 internal class LazyHttpTransport : ITransport
 {
-    private readonly SentryOptions _options;
-    private HttpTransport? _httpTransport;
+    private readonly Lazy<HttpTransport> _httpTransport;
 
     public LazyHttpTransport(SentryOptions options)
     {
-        _options = options;
+        _httpTransport = new Lazy<HttpTransport>(() =>
+        {
+            var factory = (options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory()).Create(options);
+            return new HttpTransport(options, factory);
+        });
     }
 
     public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
     {
-        _httpTransport ??= new HttpTransport(_options, (_options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory()).Create(_options));
-
-        return _httpTransport.SendEnvelopeAsync(envelope, cancellationToken);
+        return _httpTransport.Value.SendEnvelopeAsync(envelope, cancellationToken);
     }
 }

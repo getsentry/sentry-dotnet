@@ -1131,7 +1131,7 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void Ctor_HttpOptionsCallback_InvokedConfigureClient()
+    public async Task HttpOptionsCallback_InvokedConfigureClient_when_sending_envelope()
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
@@ -1140,12 +1140,13 @@ public partial class SentryClientTests
 
         using (_fixture.GetSut())
         {
+            await _fixture.SentryOptions.Transport!.SendEnvelopeAsync(new Envelope(new Dictionary<string, object>(), new List<EnvelopeItem>()));
             Assert.True(invoked);
         }
     }
 
     [Fact]
-    public void Ctor_CreateHttpClientHandler_InvokedConfigureHandler()
+    public async Task CreateHttpClientHandler_InvokedConfigureHandler_when_sending_envelope()
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
@@ -1158,6 +1159,7 @@ public partial class SentryClientTests
 
         using (_fixture.GetSut())
         {
+            await _fixture.SentryOptions.Transport!.SendEnvelopeAsync(new Envelope(new Dictionary<string, object>(), new List<EnvelopeItem>()));
             Assert.True(invoked);
         }
     }
@@ -1179,7 +1181,7 @@ public partial class SentryClientTests
 
         using var sut = new SentryClient(_fixture.SentryOptions);
 
-        _ = Assert.IsType<HttpTransport>(_fixture.SentryOptions.Transport);
+        _ = Assert.IsType<LazyHttpTransport>(_fixture.SentryOptions.Transport);
     }
 
     [Fact]
