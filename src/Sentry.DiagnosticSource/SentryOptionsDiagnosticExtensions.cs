@@ -15,7 +15,7 @@ public static class SentryOptionsDiagnosticExtensions
     /// <param name="options">The Sentry options.</param>
     public static void AddDiagnosticSourceIntegration(this SentryOptions options)
     {
-        if (options.Integrations.ContainsKey(typeof(SentryDiagnosticListenerIntegration)))
+        if (options.Integrations.Any(integration => integration.Type == typeof(SentryDiagnosticListenerIntegration)))
         {
             options.LogWarning($"{nameof(SentryDiagnosticListenerIntegration)} has already been added. The second call to {nameof(AddDiagnosticSourceIntegration)} will be ignored.");
             return;

@@ -15,7 +15,7 @@ public class SentryAspNetOptionsExtensionsTests :
         sut.AddAspNet();
 
         // Assert
-        var processor = sut.EventProcessors.Values.Select(x => x.Value).OfType<SystemWebRequestEventProcessor>().FirstOrDefault();
+        var processor = sut.EventProcessors.Select(x => x.Lazy.Value).OfType<SystemWebRequestEventProcessor>().FirstOrDefault();
         Assert.NotNull(processor);
 
         var extractor = Assert.IsType<RequestBodyExtractionDispatcher>(processor.PayloadExtractor);
@@ -31,7 +31,7 @@ public class SentryAspNetOptionsExtensionsTests :
         options.AddAspNet();
         options.AddAspNet();
 
-        Assert.Single(options.EventProcessors!, x => x.Value.Value is SystemWebRequestEventProcessor);
+        Assert.Single(options.EventProcessors!, x => x.Lazy.Value is SystemWebRequestEventProcessor);
     }
 
     [Fact]
