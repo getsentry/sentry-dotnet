@@ -33,7 +33,7 @@ internal class SdkComposer
         return transport;
     }
 
-    private HttpTransport CreateHttpTransport()
+    private LazyHttpTransport CreateHttpTransport()
     {
         if (_options.SentryHttpClientFactory is { })
         {
@@ -42,10 +42,7 @@ internal class SdkComposer
                 _options.SentryHttpClientFactory.GetType().Name);
         }
 
-        var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
-        var httpClient = httpClientFactory.Create(_options);
-
-        return new HttpTransport(_options, httpClient);
+        return new LazyHttpTransport(_options);
     }
 
     public IBackgroundWorker CreateBackgroundWorker()

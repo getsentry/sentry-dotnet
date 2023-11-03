@@ -26,7 +26,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
     private Hub GetSut() => new(_options, Substitute.For<ISentryClient>());
 
     private static IEnumerable<ISdkIntegration> GetIntegrations(ISentryClient hub) =>
-        hub.GetSentryOptions()?.Integrations ?? Enumerable.Empty<ISdkIntegration>();
+        hub.GetSentryOptions()?.Integrations.Values.Select(x => x.Value) ?? Enumerable.Empty<ISdkIntegration>();
 
     [Fact]
     public void DiagnosticListenerIntegration_DisabledWithoutTracesSampling()
@@ -77,7 +77,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
         options.AddDiagnosticSourceIntegration();
         options.AddDiagnosticSourceIntegration();
 
-        Assert.Single(options.Integrations!, _ => _ is SentryDiagnosticListenerIntegration);
+        Assert.Single(options.Integrations!, x => x.Value.Value is SentryDiagnosticListenerIntegration);
     }
 #endif
 }

@@ -88,16 +88,22 @@ public class SentryOptions
     /// </remarks>
     public ITransport? Transport { get; set; }
 
-    internal IClientReportRecorder ClientReportRecorder { get; set; }
+    private Lazy<IClientReportRecorder> _clientReportRecorder;
 
-    internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
+    internal IClientReportRecorder ClientReportRecorder
+    {
+        get => _clientReportRecorder.Value;
+        set => _clientReportRecorder = new Lazy<IClientReportRecorder>(() => value);
+    }
+
+    internal Lazy<ISentryStackTraceFactory> SentryStackTraceFactory { get; set; }
 
     internal int SentryVersion { get; } = ProtocolVersion;
 
     /// <summary>
     /// A list of exception processors
     /// </summary>
-    internal List<ISentryEventExceptionProcessor>? ExceptionProcessors { get; set; }
+    internal Dictionary<Type, Lazy<ISentryEventExceptionProcessor>> ExceptionProcessors { get; set; }
 
     /// <summary>
     /// A list of transaction processors
@@ -107,27 +113,27 @@ public class SentryOptions
     /// <summary>
     /// A list of event processors
     /// </summary>
-    internal List<ISentryEventProcessor>? EventProcessors { get; set; }
+    internal Dictionary<Type, Lazy<ISentryEventProcessor>> EventProcessors { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventProcessor>>>? EventProcessorsProviders { get; set; }
+    internal List<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryTransactionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryTransactionProcessor>>>? TransactionProcessorsProviders { get; set; }
+    internal List<Func<IEnumerable<ISentryTransactionProcessor>>> TransactionProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>>? ExceptionProcessorsProviders { get; set; }
+    internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of integrations to be added when the SDK is initialized.
     /// </summary>
-    internal List<ISdkIntegration>? Integrations { get; set; }
+    internal Dictionary<Type, Lazy<ISdkIntegration>> Integrations { get; set; }
 
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
@@ -1043,54 +1049,50 @@ public class SentryOptions
     {
         SettingLocator = new SettingLocator(this);
 
-        EventProcessorsProviders = new() {
-            () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
-        };
-
         TransactionProcessorsProviders = new() {
             () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
         };
 
-        ExceptionProcessorsProviders = new() {
-            () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
-        };
+        _clientReportRecorder = new Lazy<IClientReportRecorder>(() => new ClientReportRecorder(this));
 
-        ClientReportRecorder = new ClientReportRecorder(this);
+        SentryStackTraceFactory = new (() => new SentryStackTraceFactory(this));
 
-        SentryStackTraceFactory = new SentryStackTraceFactory(this);
-
-        ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
+        ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory.Value;
 
         EventProcessors = new(){
             // De-dupe to be the first to run
-            new DuplicateEventDetectionEventProcessor(this),
-            new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
+            { typeof(DuplicateEventDetectionEventProcessor), new(() => new DuplicateEventDetectionEventProcessor(this)) },
+            { typeof(MainSentryEventProcessor), new(() => new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)) },
+        };
+
+        EventProcessorsProviders = new() {
+            () => EventProcessors.Values.Select(x => x.Value)
         };
 
         ExceptionProcessors = new(){
-            new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)
+            { typeof(MainExceptionProcessor), new(() => new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)) }
+        };
+
+        ExceptionProcessorsProviders = new() {
+            () => ExceptionProcessors.Values.Select(x => x.Value)
         };
 
         Integrations = new() {
             // Auto-session tracking to be the first to run
-            new AutoSessionTrackingIntegration(),
-            new AppDomainUnhandledExceptionIntegration(),
-            new AppDomainProcessExitIntegration(),
-            new UnobservedTaskExceptionIntegration(),
+            { typeof(AutoSessionTrackingIntegration), new (() => new AutoSessionTrackingIntegration()) },
+            { typeof(AppDomainUnhandledExceptionIntegration), new (() => new AppDomainUnhandledExceptionIntegration()) },
+            { typeof(AppDomainProcessExitIntegration), new (() => new AppDomainProcessExitIntegration()) },
+            { typeof(UnobservedTaskExceptionIntegration), new (() => new UnobservedTaskExceptionIntegration()) },
 #if NETFRAMEWORK
-            new NetFxInstallationsIntegration(),
+            { typeof(NetFxInstallationsIntegration), new (() => new NetFxInstallationsIntegration()) },
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION
-            new SentryDiagnosticListenerIntegration(),
+            { typeof(SentryDiagnosticListenerIntegration), new (() => new SentryDiagnosticListenerIntegration()) },
+#endif
+#if NET5_0_OR_GREATER
+            { typeof(WinUIUnhandledExceptionIntegration), new (() => new WinUIUnhandledExceptionIntegration()) },
 #endif
         };
-
-#if NET5_0_OR_GREATER
-        if (WinUIUnhandledExceptionIntegration.IsApplicable)
-        {
-            this.AddIntegration(new WinUIUnhandledExceptionIntegration());
-        }
-#endif
 
 #if ANDROID
         Android = new AndroidOptions(this);

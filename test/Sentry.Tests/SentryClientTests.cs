@@ -663,7 +663,7 @@ public partial class SentryClientTests
             processingOrder.Add("eventProcessor");
             return @event;
         });
-        _fixture.SentryOptions.EventProcessors.Add((eventProcessor));
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
 
         _fixture.SentryOptions.SetBeforeSend((e, _) =>
         {
