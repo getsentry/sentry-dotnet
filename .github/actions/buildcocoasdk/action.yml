@@ -13,7 +13,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: modules/sentry-cocoa/Carthage
-        key: sentry-cocoa-${{ hashFiles('scripts/build-sentry-cocoa.sh', '.git/modules/modules/sentry-cocoa/HEAD') }}
+        key: sentry-cocoa-${{ hashFiles('scripts/build-sentry-cocoa.sh') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}
 
     - name: Build Sentry Cocoa SDK
       if: ${{ steps.cache-sentry-cocoa.outputs.cache-hit != 'true' }}
