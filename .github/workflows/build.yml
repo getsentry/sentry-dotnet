@@ -8,7 +8,29 @@ on:
   pull_request:
 
 jobs:
+  build-sentry-native:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, windows, macos]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: scripts/build-sentry-native.ps1
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sentry-native-${{ matrix.os }}
+          if-no-files-found: error
+          path: src/Sentry/Platforms/Native/runtimes
+
   build:
+    needs: build-sentry-native
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
@@ -38,7 +60,7 @@ jobs:
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        if: startsWith(matrix.os, 'macos')
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Setup Environment
@@ -54,15 +76,26 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Build (for non-release branch)
-        if: env.CI_PUBLISHING_BUILD != 'true'
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log
+      - name: Download sentry-native (Linux)
+        uses: actions/download-artifact@v3
+        with:
+          name: sentry-native-linux
+          path: src/Sentry/Platforms/Native/runtimes
 
-      - name: Build (for release branch)
-        if: env.CI_PUBLISHING_BUILD == 'true'
+      - name: Download sentry-native (macOS)
+        uses: actions/download-artifact@v3
+        with:
+          name: sentry-native-macos
+          path: src/Sentry/Platforms/Native/runtimes
+
+      - name: Download sentry-native (Windows)
+        uses: actions/download-artifact@v3
+        with:
+          name: sentry-native-windows
+          path: src/Sentry/Platforms/Native/runtimes
+
+      - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
@@ -81,11 +114,11 @@ jobs:
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
 
-      - name: Create Nuget Packages (release branch only)
+      - name: Create Nuget Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo
 
-      - name: Archive Nuget Packages (release branch only)
+      - name: Archive Nuget Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v3
         with:
