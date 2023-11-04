@@ -15,13 +15,11 @@ public static class SentryOptionsDiagnosticExtensions
     /// <param name="options">The Sentry options.</param>
     public static void AddDiagnosticSourceIntegration(this SentryOptions options)
     {
-        if (options.HasDefaultIntegration(SentryOptions.DefaultIntegrations.SentryDiagnosticListenerIntegration)
-         || options.HasIntegration<SentryDiagnosticListenerIntegration>())
+        if (options.HasIntegration<SentryDiagnosticListenerIntegration>())
         {
             options.LogWarning($"{nameof(SentryDiagnosticListenerIntegration)} has already been added. The second call to {nameof(AddDiagnosticSourceIntegration)} will be ignored.");
             return;
         }
-
 
         options.AddIntegration(new SentryDiagnosticListenerIntegration());
     }
@@ -32,7 +30,6 @@ public static class SentryOptionsDiagnosticExtensions
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
     {
-        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.SentryDiagnosticListenerIntegration);
         options.RemoveIntegration<SentryDiagnosticListenerIntegration>();
     }
 }

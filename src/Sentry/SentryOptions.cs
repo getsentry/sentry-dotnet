@@ -1242,10 +1242,6 @@ public class SentryOptions
 
     internal void RemoveDefaultIntegration(DefaultIntegrations defaultIntegrations) => _defaultIntegrations &= ~defaultIntegrations;
 
-    internal void AddDefaultIntegration(DefaultIntegrations defaultIntegrations) => _defaultIntegrations |= defaultIntegrations;
-
-    internal bool HasDefaultIntegration(DefaultIntegrations defaultIntegrations) => (_defaultIntegrations & defaultIntegrations) != 0;
-
     [Flags]
     internal enum DefaultIntegrations
     {
@@ -1253,9 +1249,15 @@ public class SentryOptions
         AppDomainUnhandledExceptionIntegration = 1 << 1,
         AppDomainProcessExitIntegration = 1 << 2,
         UnobservedTaskExceptionIntegration = 1 << 3,
+#if NETFRAMEWORK
         NetFxInstallationsIntegration = 1 << 4,
+#endif
+#if HAS_DIAGNOSTIC_INTEGRATION
         SentryDiagnosticListenerIntegration = 1 << 5,
+#endif
+#if NET5_0_OR_GREATER
         WinUiUnhandledExceptionIntegration = 1 << 6,
+#endif
     }
 
 }
