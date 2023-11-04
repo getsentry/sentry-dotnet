@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net48</TargetFrameworks>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
@@ -32,10 +32,6 @@
 
     <!-- This is needed because the version that is brought in transitively also has a vulnerability warning -->
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.1.25" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.32" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
