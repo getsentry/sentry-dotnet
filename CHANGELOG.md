@@ -27,6 +27,12 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 - Drop support for `Tizen` ([#2734](https://github.com/getsentry/sentry-dotnet/pull/2734))
 
+#### Dropping .NET Core 3.1 and .NET 5
+
+TODO: List frameworks and changes in detail
+
+- Drop deprecated frameworks ([#2787](https://github.com/getsentry/sentry-dotnet/pull/2787))
+
 #### API Changes:
 
 - IHasMeasurements was removed. Use ISpanData instead. ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
