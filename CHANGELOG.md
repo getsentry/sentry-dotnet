@@ -4,7 +4,16 @@
 
 ### Breaking changes
 
-Support Changes:
+The minimum version supported for different frameworks changed.
+For more details on reasoning, please check this [GitHub Discussion](https://github.com/getsentry/sentry-dotnet/discussions/2776).
+
+#### .NET Framework 4.6.1
+
+.NET Framework 4.6.1 was announced in Nov 30, 2015. And went out of support over a year ago, on Apr 26, 2022.
+
+- Drop support for .NET Framework 4.6.1 in favor of 4.6.2 ([#2786](https://github.com/getsentry/sentry-dotnet/pull/2786))
+
+#### .NET 6 on mobile (e.g: `net6.0-android`)
 
 .NET 6 on mobile is out of support since May 2023. With .NET 8 coming,
 it won't be possible to build .NET 6 Mobile specific targets.
@@ -13,9 +22,12 @@ Mobile apps still on .NET 6 will pull the `Sentry` .NET 6, which offers the .NET
 without native/platform specific bindings and SDKs. See [this ticket for more details](https://github.com/getsentry/sentry-dotnet/issues/2623).
 
 - Drop .NET 6 Mobile in favor of .NET 7 ([#2624](https://github.com/getsentry/sentry-dotnet/pull/2604))
+
+#### Tizen support dropped
+
 - Drop support for `Tizen` ([#2734](https://github.com/getsentry/sentry-dotnet/pull/2734))
 
-API Changes:
+#### API Changes:
 
 - IHasMeasurements was removed. Use ISpanData instead. ([#2659](https://github.com/getsentry/sentry-dotnet/pull/2659))
 - If `null` has been supplied as DSN when initializing Sentry, and ArgumentNullException is now thrown. ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
@@ -58,6 +70,7 @@ API Changes:
     scope.SetTag("key", "value");
   });
   ```
+
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
 - Removed obsolete setter from `Sentry.PlatformAbstractions.Runtime.Identifier` ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
 - `Sentry.Values<T>` is now internal as it is never exposed in the public API ([#2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
