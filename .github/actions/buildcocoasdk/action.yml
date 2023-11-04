@@ -4,10 +4,6 @@ runs:
   using: composite
 
   steps:
-    - name: Get submodule status
-      shell: bash
-      run: cat .git/modules/modules/sentry-cocoa/HEAD
-
     - name: Cache Sentry Cocoa SDK
       id: cache-sentry-cocoa
       uses: actions/cache@v3
