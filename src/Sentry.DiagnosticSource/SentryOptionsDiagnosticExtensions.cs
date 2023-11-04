@@ -15,7 +15,7 @@ public static class SentryOptionsDiagnosticExtensions
     /// <param name="options">The Sentry options.</param>
     public static void AddDiagnosticSourceIntegration(this SentryOptions options)
     {
-        if (options.Integrations.Any(integration => integration.Type == typeof(SentryDiagnosticListenerIntegration)))
+        if (options.HasDefaultIntegration(SentryOptions.DefaultIntegrations.SentryDiagnosticListenerIntegration))
         {
             options.LogWarning($"{nameof(SentryDiagnosticListenerIntegration)} has already been added. The second call to {nameof(AddDiagnosticSourceIntegration)} will be ignored.");
             return;
@@ -29,5 +29,5 @@ public static class SentryOptionsDiagnosticExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
-        => options.RemoveIntegration<SentryDiagnosticListenerIntegration>();
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.SentryDiagnosticListenerIntegration);
 }

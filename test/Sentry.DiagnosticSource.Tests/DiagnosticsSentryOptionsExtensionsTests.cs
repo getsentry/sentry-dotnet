@@ -2,6 +2,8 @@ using Sentry.Internal.DiagnosticSource;
 
 namespace Sentry.DiagnosticSource.Tests;
 
+#nullable enable
+
 public class DiagnosticsSentryOptionsExtensionsTests
 {
     private readonly SentryOptions _options = new()
@@ -26,14 +28,14 @@ public class DiagnosticsSentryOptionsExtensionsTests
     private Hub GetSut() => new(_options, Substitute.For<ISentryClient>());
 
     private static IEnumerable<ISdkIntegration> GetIntegrations(ISentryClient hub) =>
-        hub.GetSentryOptions()?.Integrations.Select(x => x.Lazy.Value) ?? Enumerable.Empty<ISdkIntegration>();
+        hub.GetSentryOptions()?.Integrations ?? Enumerable.Empty<ISdkIntegration>();
 
     [Fact]
     public void DiagnosticListenerIntegration_DisabledWithoutTracesSampling()
     {
         using var hub = GetSut();
         var integrations = GetIntegrations(hub);
-        Assert.DoesNotContain(integrations, _ => _ is SentryDiagnosticListenerIntegration);
+        Assert.DoesNotContain(integrations, i => i is SentryDiagnosticListenerIntegration);
     }
 
     [Fact]
@@ -43,7 +45,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
 
         using var hub = GetSut();
         var integrations = GetIntegrations(hub);
-        Assert.Contains(integrations, _ => _ is SentryDiagnosticListenerIntegration);
+        Assert.Contains(integrations, i => i is SentryDiagnosticListenerIntegration);
     }
 
     [Fact]
@@ -54,7 +56,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
 
         using var hub = GetSut();
         var integrations = GetIntegrations(hub);
-        Assert.Contains(integrations, _ => _ is SentryDiagnosticListenerIntegration);
+        Assert.Contains(integrations, i => i is SentryDiagnosticListenerIntegration);
     }
 
     [Fact]
@@ -65,7 +67,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
 
         using var hub = GetSut();
         var integrations = GetIntegrations(hub);
-        Assert.DoesNotContain(integrations, _ => _ is SentryDiagnosticListenerIntegration);
+        Assert.DoesNotContain(integrations, i => i is SentryDiagnosticListenerIntegration);
     }
 
 #if NETFRAMEWORK
@@ -77,7 +79,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
         options.AddDiagnosticSourceIntegration();
         options.AddDiagnosticSourceIntegration();
 
-        Assert.Single(options.Integrations!, x => x.Lazy.Value is SentryDiagnosticListenerIntegration);
+        Assert.Single(options.Integrations, x => x is SentryDiagnosticListenerIntegration);
     }
 #endif
 }

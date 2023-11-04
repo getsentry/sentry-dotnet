@@ -142,10 +142,67 @@ public class SentryOptions
     /// </summary>
     internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
 
+    private DefaultIntegrations _defaultIntegrations;
+
     /// <summary>
     /// A list of integrations to be added when the SDK is initialized.
     /// </summary>
-    internal List<(Type Type, Lazy<ISdkIntegration> Lazy)> Integrations { get; set; }
+    internal IEnumerable<ISdkIntegration> Integrations
+    {
+        get
+        {
+            // Auto-session tracking to be the first to run
+            if ((_defaultIntegrations & DefaultIntegrations.AutoSessionTrackingIntegration) != 0)
+            {
+                yield return new AutoSessionTrackingIntegration();
+            }
+
+            if ((_defaultIntegrations & DefaultIntegrations.AppDomainUnhandledExceptionIntegration) != 0)
+            {
+                yield return new AppDomainUnhandledExceptionIntegration();
+            }
+
+            if ((_defaultIntegrations & DefaultIntegrations.AppDomainProcessExitIntegration) != 0)
+            {
+                yield return new AppDomainProcessExitIntegration();
+            }
+
+            if ((_defaultIntegrations & DefaultIntegrations.UnobservedTaskExceptionIntegration) != 0)
+            {
+                yield return new UnobservedTaskExceptionIntegration();
+            }
+
+            if ((_defaultIntegrations & DefaultIntegrations.UnobservedTaskExceptionIntegration) != 0)
+            {
+                yield return new UnobservedTaskExceptionIntegration();
+            }
+
+#if NETFRAMEWORK
+            if ((_defaultIntegrations & DefaultIntegrations.NetFxInstallationsIntegration) != 0)
+            {
+                yield return new NetFxInstallationsIntegration();
+            }
+#endif
+
+#if HAS_DIAGNOSTIC_INTEGRATION
+            if ((_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
+            {
+                yield return new SentryDiagnosticListenerIntegration();
+            }
+#endif
+#if NET5_0_OR_GREATER
+            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
+            {
+                yield return new WinUIUnhandledExceptionIntegration();
+            }
+#endif
+
+            foreach (var integration in _integrations)
+            {
+                yield return integration;
+            }
+        }
+    }
 
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
@@ -858,6 +915,7 @@ public class SentryOptions
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;
+    private readonly List<ISdkIntegration> _integrations = new();
 
     /// <summary>
     /// ATTENTION: This option will change how issues are grouped in Sentry!
@@ -1089,22 +1147,23 @@ public class SentryOptions
             () => ExceptionProcessors.Select(x => x.Item2.Value)
         };
 
-        Integrations = new() {
-            // Auto-session tracking to be the first to run
-            ( typeof(AutoSessionTrackingIntegration), new (() => new AutoSessionTrackingIntegration()) ),
-            ( typeof(AppDomainUnhandledExceptionIntegration), new (() => new AppDomainUnhandledExceptionIntegration()) ),
-            ( typeof(AppDomainProcessExitIntegration), new (() => new AppDomainProcessExitIntegration()) ),
-            ( typeof(UnobservedTaskExceptionIntegration), new (() => new UnobservedTaskExceptionIntegration()) ),
+        _integrations = new();
+
+        _defaultIntegrations = DefaultIntegrations.AutoSessionTrackingIntegration |
+                               DefaultIntegrations.AppDomainUnhandledExceptionIntegration |
+                               DefaultIntegrations.AppDomainProcessExitIntegration |
+                               DefaultIntegrations.AutoSessionTrackingIntegration |
+                               DefaultIntegrations.UnobservedTaskExceptionIntegration
 #if NETFRAMEWORK
-            ( typeof(NetFxInstallationsIntegration), new (() => new NetFxInstallationsIntegration()) ),
+                               | DefaultIntegrations.NetFxInstallationsIntegration
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION
-            ( typeof(SentryDiagnosticListenerIntegration), new (() => new SentryDiagnosticListenerIntegration()) ),
+                               | DefaultIntegrations.SentryDiagnosticListenerIntegration
 #endif
 #if NET5_0_OR_GREATER
-            ( typeof(WinUIUnhandledExceptionIntegration), new (() => new WinUIUnhandledExceptionIntegration()) ),
+                               | DefaultIntegrations.WinUiUnhandledExceptionIntegration
 #endif
-        };
+                               ;
 
 #if ANDROID
         Android = new AndroidOptions(this);
@@ -1170,5 +1229,32 @@ public class SentryOptions
                 UriComponents.SchemeAndServer,
                 UriFormat.Unescaped)
         );
+    }
+
+    internal void AddIntegration(ISdkIntegration integration)
+    {
+        _integrations.Add(integration);
+    }
+
+    internal void RemoveIntegration<TIntegration>()
+    {
+        // TODO: For backward compatibility, check if it's a default integration type?
+        _integrations.RemoveAll(integration => integration is TIntegration);
+    }
+
+    internal void RemoveDefaultIntegration(DefaultIntegrations defaultIntegrations) => _defaultIntegrations &= ~defaultIntegrations;
+
+    internal bool HasDefaultIntegration(DefaultIntegrations defaultIntegrations) => (_defaultIntegrations & defaultIntegrations) != 0;
+
+    [Flags]
+    internal enum DefaultIntegrations
+    {
+        AutoSessionTrackingIntegration = 1 << 0,
+        AppDomainUnhandledExceptionIntegration = 1 << 1,
+        AppDomainProcessExitIntegration = 1 << 2,
+        UnobservedTaskExceptionIntegration = 1 << 3,
+        NetFxInstallationsIntegration = 1 << 4,
+        SentryDiagnosticListenerIntegration = 1 << 5,
+        WinUiUnhandledExceptionIntegration = 1 << 6,
     }
 }

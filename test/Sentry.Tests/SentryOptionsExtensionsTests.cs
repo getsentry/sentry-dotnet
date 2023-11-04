@@ -2,6 +2,8 @@
 using Sentry.PlatformAbstractions;
 #endif
 
+#nullable enable
+
 namespace Sentry.Tests;
 
 public class SentryOptionsExtensionsTests
@@ -32,16 +34,16 @@ public class SentryOptionsExtensionsTests
     public void DisableAppDomainUnhandledExceptionCapture_RemovesAppDomainUnhandledExceptionIntegration()
     {
         Sut.DisableAppDomainUnhandledExceptionCapture();
-        Assert.DoesNotContain(Sut.Integrations!,
-            p => p.Lazy.Value is AppDomainUnhandledExceptionIntegration);
+        Assert.DoesNotContain(Sut.Integrations,
+            p => p is AppDomainUnhandledExceptionIntegration);
     }
 
     [Fact]
     public void DisableTaskUnobservedTaskExceptionCapture_UnobservedTaskExceptionIntegration()
     {
         Sut.DisableUnobservedTaskExceptionCapture();
-        Assert.DoesNotContain(Sut.Integrations!,
-            p => p.Lazy.Value is UnobservedTaskExceptionIntegration);
+        Assert.DoesNotContain(Sut.Integrations,
+            p => p is UnobservedTaskExceptionIntegration);
     }
 
     [Fact]
@@ -49,7 +51,7 @@ public class SentryOptionsExtensionsTests
     {
         var expected = Substitute.For<ISdkIntegration>();
         Sut.AddIntegration(expected);
-        Assert.Contains(Sut.Integrations!, actual => actual.Lazy.Value == expected);
+        Assert.Contains(Sut.Integrations, actual => actual == expected);
     }
 
     [Fact]
@@ -73,7 +75,7 @@ public class SentryOptionsExtensionsTests
     {
         var expected = Substitute.For<ISentryEventExceptionProcessor>();
         Sut.AddExceptionProcessor(expected);
-        Assert.Contains(Sut.ExceptionProcessors!, actual => actual.Lazy.Value == expected);
+        Assert.Contains(Sut.ExceptionProcessors, actual => actual.Lazy.Value == expected);
     }
 
     [Fact]
@@ -82,7 +84,7 @@ public class SentryOptionsExtensionsTests
         var first = Substitute.For<ISentryEventExceptionProcessor>();
         var second = Substitute.For<ISentryEventExceptionProcessor>();
         Sut.AddExceptionProcessors(new[] { first, second });
-        Assert.Contains(Sut.ExceptionProcessors!, actual => actual.Lazy.Value == first);
+        Assert.Contains(Sut.ExceptionProcessors, actual => actual.Lazy.Value == first);
         Assert.Contains(Sut.ExceptionProcessors, actual => actual.Lazy.Value == second);
     }
 
@@ -100,21 +102,21 @@ public class SentryOptionsExtensionsTests
     public void AddExceptionProcessor_DoesNotExcludeMainProcessor()
     {
         Sut.AddExceptionProcessor(Substitute.For<ISentryEventExceptionProcessor>());
-        Assert.Contains(Sut.ExceptionProcessors!, actual => actual.Lazy.Value.GetType() == typeof(MainExceptionProcessor));
+        Assert.Contains(Sut.ExceptionProcessors, actual => actual.Lazy.Value.GetType() == typeof(MainExceptionProcessor));
     }
 
     [Fact]
     public void AddExceptionProcessors_DoesNotExcludeMainProcessor()
     {
         Sut.AddExceptionProcessors(new[] { Substitute.For<ISentryEventExceptionProcessor>() });
-        Assert.Contains(Sut.ExceptionProcessors!, actual => actual.Lazy.Value.GetType() == typeof(MainExceptionProcessor));
+        Assert.Contains(Sut.ExceptionProcessors, actual => actual.Lazy.Value.GetType() == typeof(MainExceptionProcessor));
     }
 
     [Fact]
     public void AddExceptionProcessorProvider_DoesNotExcludeMainProcessor()
     {
         Sut.AddExceptionProcessorProvider(() => new[] { Substitute.For<ISentryEventExceptionProcessor>() });
-        Assert.Contains(Sut.ExceptionProcessors!, actual => actual.Lazy.Value.GetType() == typeof(MainExceptionProcessor));
+        Assert.Contains(Sut.ExceptionProcessors, actual => actual.Lazy.Value.GetType() == typeof(MainExceptionProcessor));
     }
 
     [Fact]
@@ -176,7 +178,7 @@ public class SentryOptionsExtensionsTests
         var second = Substitute.For<ISentryTransactionProcessor>();
         Sut.AddTransactionProcessors(new[] { first, second });
         Assert.Contains(Sut.TransactionProcessors!, actual => actual == first);
-        Assert.Contains(Sut.TransactionProcessors, actual => actual == second);
+        Assert.Contains(Sut.TransactionProcessors!, actual => actual == second);
     }
 
     [Fact]
@@ -279,19 +281,19 @@ public class SentryOptionsExtensionsTests
     [Fact]
     public void Integrations_Includes_AppDomainUnhandledExceptionIntegration()
     {
-        Assert.Contains(Sut.Integrations!, i => i.Lazy.Value.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
+        Assert.Contains(Sut.Integrations, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
     }
 
     [Fact]
     public void Integrations_Includes_AppDomainProcessExitIntegration()
     {
-        Assert.Contains(Sut.Integrations!, i => i.Lazy.Value.GetType() == typeof(AppDomainProcessExitIntegration));
+        Assert.Contains(Sut.Integrations, i => i.GetType() == typeof(AppDomainProcessExitIntegration));
     }
 
     [Fact]
     public void Integrations_Includes_TaskUnobservedTaskExceptionIntegration()
     {
-        Assert.Contains(Sut.Integrations!, i => i.Lazy.Value.GetType() == typeof(UnobservedTaskExceptionIntegration));
+        Assert.Contains(Sut.Integrations, i => i.GetType() == typeof(UnobservedTaskExceptionIntegration));
     }
 
     [Theory]

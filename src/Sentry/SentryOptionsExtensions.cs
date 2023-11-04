@@ -37,7 +37,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) =>
-        options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.AppDomainUnhandledExceptionIntegration);
 
 #if HAS_DIAGNOSTIC_INTEGRATION
     /// <summary>
@@ -45,7 +45,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
-        => options.RemoveIntegration<SentryDiagnosticListenerIntegration>();
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.SentryDiagnosticListenerIntegration);
 #endif
 
     /// <summary>
@@ -61,7 +61,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableUnobservedTaskExceptionCapture(this SentryOptions options) =>
-        options.RemoveIntegration<UnobservedTaskExceptionIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.UnobservedTaskExceptionIntegration);
 
 #if NETFRAMEWORK
     /// <summary>
@@ -71,7 +71,7 @@ public static class SentryOptionsExtensions
     public static void DisableNetFxInstallationsIntegration(this SentryOptions options)
     {
         options.RemoveEventProcessor<NetFxInstallationsEventProcessor>();
-        options.RemoveIntegration<NetFxInstallationsIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.NetFxInstallationsIntegration);
     }
 #endif
 
@@ -81,7 +81,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableAppDomainProcessExitFlush(this SentryOptions options) =>
-        options.RemoveIntegration<AppDomainProcessExitIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.AppDomainProcessExitIntegration);
 
 #if NET5_0_OR_GREATER
     /// <summary>
@@ -89,7 +89,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableWinUiUnhandledExceptionIntegration(this SentryOptions options)
-        => options.RemoveIntegration<WinUIUnhandledExceptionIntegration>();
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.WinUiUnhandledExceptionIntegration);
 #endif
 
     /// <summary>
@@ -98,9 +98,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to hold the processor.</param>
     /// <param name="integration">The integration.</param>
     public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
-    {
-        options.Integrations.Add((integration.GetType(), new Lazy<ISdkIntegration>(() => integration)));
-    }
+        => options.AddIntegration(integration);
 
     /// <summary>
     /// Removes all integrations of type <typeparamref name="TIntegration"/>.
@@ -109,7 +107,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
     public static void RemoveIntegration<TIntegration>(this SentryOptions options)
         where TIntegration : ISdkIntegration
-        => options.Integrations.RemoveAll(integration => integration.Type == typeof(TIntegration));
+        => options.RemoveIntegration<TIntegration>();
 
     /// <summary>
     /// Add an exception filter.
