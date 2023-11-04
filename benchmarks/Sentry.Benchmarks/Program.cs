@@ -2,6 +2,7 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Exporters;
+using BenchmarkDotNet.Filters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
@@ -16,7 +17,6 @@ internal class Program
     {
         public Config()
         {
-            AddJob(Job.Default.WithRuntime(CoreRuntime.Core60));
             AddDiagnoser(MemoryDiagnoser.Default);
             AddExporter(MarkdownExporter.GitHub);
             AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());

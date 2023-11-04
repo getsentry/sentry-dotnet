@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
+
 ### Fixes
 
 - Fixed chaining on the IApplicationBuilder for methods like UseRouting and UseEndpoints ([#2726](https://github.com/getsentry/sentry-dotnet/pull/2726))
