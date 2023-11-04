@@ -4,23 +4,12 @@ runs:
   using: composite
 
   steps:
-
-    - name: Fetch version tags for Sentry Cocoa SDK
-      shell: bash
-      run: git fetch --tags --quiet
-      working-directory: modules/sentry-cocoa
-
-    - name: Get Sentry Cocoa SHA
-      shell: bash
-      run: echo "SENTRY_COCOA_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
-      working-directory: modules/sentry-cocoa
-
     - name: Cache Sentry Cocoa SDK
       id: cache-sentry-cocoa
       uses: actions/cache@v3
       with:
         path: modules/sentry-cocoa/Carthage
-        key: sentry-cocoa-${{ env.SENTRY_COCOA_SHA }}
+        key: sentry-cocoa-${{ hashFiles('scripts/build-sentry-cocoa.sh') }}-${{ hashFiles('.git/modules/modules/sentry-cocoa/HEAD') }}
 
     - name: Build Sentry Cocoa SDK
       if: ${{ steps.cache-sentry-cocoa.outputs.cache-hit != 'true' }}

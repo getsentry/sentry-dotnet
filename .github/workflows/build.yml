@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: verify-test-results
-          path: '**/*.received.*'
+          path: "**/*.received.*"
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
 
