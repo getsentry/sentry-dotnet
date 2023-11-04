@@ -172,11 +172,6 @@ public class SentryOptions
                 yield return new UnobservedTaskExceptionIntegration();
             }
 
-            if ((_defaultIntegrations & DefaultIntegrations.UnobservedTaskExceptionIntegration) != 0)
-            {
-                yield return new UnobservedTaskExceptionIntegration();
-            }
-
 #if NETFRAMEWORK
             if ((_defaultIntegrations & DefaultIntegrations.NetFxInstallationsIntegration) != 0)
             {
@@ -190,6 +185,7 @@ public class SentryOptions
                 yield return new SentryDiagnosticListenerIntegration();
             }
 #endif
+
 #if NET5_0_OR_GREATER
             if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
             {
@@ -1242,7 +1238,11 @@ public class SentryOptions
         _integrations.RemoveAll(integration => integration is TIntegration);
     }
 
+    internal bool HasIntegration<TIntegration>() => _integrations.Any(integration => integration is TIntegration);
+
     internal void RemoveDefaultIntegration(DefaultIntegrations defaultIntegrations) => _defaultIntegrations &= ~defaultIntegrations;
+
+    internal void AddDefaultIntegration(DefaultIntegrations defaultIntegrations) => _defaultIntegrations |= defaultIntegrations;
 
     internal bool HasDefaultIntegration(DefaultIntegrations defaultIntegrations) => (_defaultIntegrations & defaultIntegrations) != 0;
 
@@ -1257,4 +1257,5 @@ public class SentryOptions
         SentryDiagnosticListenerIntegration = 1 << 5,
         WinUiUnhandledExceptionIntegration = 1 << 6,
     }
+
 }
