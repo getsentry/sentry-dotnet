@@ -13,16 +13,10 @@ internal static class AotHelper
 
     static AotHelper()
     {
-        try
-        {
-            // GetMethod should throw an exception if Trimming is enabled
-            var type = typeof(AotTester);
-            _ = type.GetMethod(nameof(AotTester.Test));
-        }
-        catch
-        {
-            IsAot = true;
-        }
         IsAot = false;
+#if NET6_0_OR_GREATER   // TODO NET7 once we target it
+        var stackTrace = new StackTrace(false);
+        IsAot = (stackTrace.GetFrame(0)?.GetMethod() is not { });
+#endif
     }
 }

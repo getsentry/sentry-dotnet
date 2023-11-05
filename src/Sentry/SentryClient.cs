@@ -47,6 +47,12 @@ public class SentryClient : ISentryClient, IDisposable
 
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
+        if (AotHelper.IsAot) {
+            options.LogDebug("This looks like an AOT application build.");
+        } else {
+            options.LogDebug("This looks like a JIT application build.");
+        }
+
         if (worker == null)
         {
             var composer = new SdkComposer(options);
