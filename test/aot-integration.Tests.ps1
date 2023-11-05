@@ -48,15 +48,28 @@ Describe 'Console app (<framework>)' -ForEach @(
         }
         @"
 using Sentry;
+using Sentry.Extensibility;
+using Sentry.Protocol.Envelopes;
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
 {
-    options.Dsn = Environment.GetCommandLineArgs()[1];
+    options.Dsn = "http://key@127.0.0.1:9999/123";
     options.Debug = true;
+    options.Transport = new FakeTransport();
 });
 
 throw new ApplicationException("Something happened!");
+
+internal class FakeTransport : ITransport
+{
+    public virtual Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        envelope.Serialize(Console.OpenStandardOutput(), null);
+        return Task.CompletedTask;
+    }
+}
+
 "@ | Out-File $path/Program.cs
         @"
 <Project>
@@ -80,40 +93,39 @@ throw new ApplicationException("Something happened!");
             Pop-Location
         }
 
-        # Publish once, then test the executable in following functions
-        RunDotnet 'publish' 'temp/console-app' $False $False $framework
+        # Publish once, then run the executable in actual tests.
+        dotnet publish temp/console-app -c Release --nologo --framework $framework | ForEach-Object { Write-Host $_ }
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "Failed to publish the test app project."
+        }
 
         function runConsoleApp()
         {
-            Invoke-SentryServer {
-                Param([string]$url)
-                if ($IsMacOS)
-                {
-                    $path = "./temp/console-app/bin/Release/$framework/osx-x64/publish/console-app"
-                }
-                elseif ($IsWindows)
-                {
-                    $path = "./temp/console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
-                }
-                else
-                {
-                    $path = "./temp/console-app/bin/Release/$framework/linux-x64/publish/console-app"
-                }
+            if ($IsMacOS)
+            {
+                $path = "./temp/console-app/bin/Release/$framework/osx-x64/publish/console-app"
+            }
+            elseif ($IsWindows)
+            {
+                $path = "./temp/console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
+            }
+            else
+            {
+                $path = "./temp/console-app/bin/Release/$framework/linux-x64/publish/console-app"
+            }
 
-                $dsn = $url -replace 'http://', 'http://publickey@'
-                $dsn += '/123' # project ID
-                Write-Host "::group::Executing $path $dsn"
-                try
-                {
-                    & $path $dsn | ForEach-Object {
-                        Write-Host "  $_"
-                        $_
-                    }
+            Write-Host "::group::Executing $path"
+            try
+            {
+                & $path | ForEach-Object {
+                    Write-Host "  $_"
+                    $_
                 }
-                finally
-                {
-                    Write-Host "::endgroup::"
-                }
+            }
+            finally
+            {
+                Write-Host "::endgroup::"
             }
         }
     }
@@ -128,13 +140,10 @@ throw new ApplicationException("Something happened!");
     # }
 
     It "sends native debug images" {
-        $result = runConsoleApp
-        $result.ScriptOutput | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"pe","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
+        runConsoleApp | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"pe","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
     }
 
     It "sends stack trace with " {
-        $result = runConsoleApp
-        $result.ScriptOutput | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
+        runConsoleApp | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
     }
-
 }

@@ -57,7 +57,7 @@ function RunDotnet([string] $action, [string]$project, [bool]$Symbols, [bool]$So
 
     $result = Invoke-SentryServer {
         Param([string]$url)
-        Write-Host "::group::Building $project"
+        Write-Host "::group::${action}ing $project"
         try
         {
             dotnet $action $project `
