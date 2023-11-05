@@ -29,9 +29,7 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 
 #### Dropping .NET Core 3.1 and .NET 5
 
-TODO: List frameworks and changes in detail
-
-- Drop deprecated frameworks ([#2787](https://github.com/getsentry/sentry-dotnet/pull/2787))
+- Drop .NET Core 3.1 and .NET 5 support ([#2787](https://github.com/getsentry/sentry-dotnet/pull/2787))
 
 #### API Changes:
 
@@ -86,6 +84,10 @@ TODO: List frameworks and changes in detail
   - When compiling AOT, Sentry isn't able to automatically register an unhandled exception handler in WinUI applications, since that also relies on reflection. If you're using Sentry with a WinUI application and you want to use AOT compilation, you'll need to take care of registering the unhandled event handler yourself. TODO *** Fill in the gaps here when https://github.com/getsentry/sentry-dotnet/issues/2778 has been completed ***
   - ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732))
 - The TracePropagationTarget class has been removed. Use the SubstringOrRegexPattern class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
+
+#### Sentry.Google.Cloud.Functions
+
+- Min version of `Google.Cloud.Functions.Hosting` supported 1.1.0 to 2.0.0 ([#2787](https://github.com/getsentry/sentry-dotnet/pull/2787))
 
 ## Unreleased
 
