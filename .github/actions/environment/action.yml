@@ -17,14 +17,11 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
-    # https://github.com/actions/runner-images/issues/7667
-    # .NET 3.1 has been removed from all OS due to EOL
     # .NET 6 and .NET 8 are not built-in with macos-13
     - name: Install .NET SDK
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: |
-          3.1.x
           6.0.x
           7.0.x
           8.0.x
