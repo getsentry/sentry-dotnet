@@ -2,6 +2,8 @@ using Sentry.AspNet.Internal;
 
 namespace Sentry.AspNet.Tests;
 
+#nullable enable
+
 public class SentryAspNetOptionsExtensionsTests :
     HttpContextTest
 {
@@ -31,7 +33,7 @@ public class SentryAspNetOptionsExtensionsTests :
         options.AddAspNet();
         options.AddAspNet();
 
-        Assert.Single(options.EventProcessors!, x => x.Lazy.Value is SystemWebRequestEventProcessor);
+        Assert.Single(options.EventProcessors, x => x.Lazy.Value is SystemWebRequestEventProcessor);
     }
 
     [Fact]

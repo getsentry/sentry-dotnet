@@ -1,9 +1,6 @@
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Exporters;
-using BenchmarkDotNet.Filters;
-using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
 namespace Sentry.Benchmarks;

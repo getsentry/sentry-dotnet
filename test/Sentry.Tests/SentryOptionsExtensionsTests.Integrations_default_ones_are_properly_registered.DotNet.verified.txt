@@ -6,9 +6,6 @@
     ]
   },
   {
-    Message: New scope pushed.
-  },
-  {
     Message: Registering integration: '{0}'.,
     Args: [
       AutoSessionTrackingIntegration
@@ -37,10 +34,6 @@
     Args: [
       SentryDiagnosticListenerIntegration
     ]
-  },
-  {
-    Level: info,
-    Message: DiagnosticSource Integration is disabled because tracing is disabled.
   },
   {
     Message: Registering integration: '{0}'.,

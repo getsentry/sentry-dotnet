@@ -6,9 +6,6 @@
     ]
   },
   {
-    Message: New scope pushed.
-  },
-  {
     Message: Registering integration: '{0}'.,
     Args: [
       AutoSessionTrackingIntegration
