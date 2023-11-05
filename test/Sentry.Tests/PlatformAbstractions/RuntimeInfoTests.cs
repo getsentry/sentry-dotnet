@@ -16,8 +16,6 @@ public class RuntimeInfoTests
 #if NET5_0_OR_GREATER
         Assert.Equal(".NET", actual.Name);
         Assert.NotNull(actual.Identifier);
-#elif NETCOREAPP
-        Assert.Equal(".NET Core", actual.Name);
 #elif NETFRAMEWORK
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -45,8 +43,6 @@ public class RuntimeInfoTests
         Assert.StartsWith("7.0", actual.Version);
 #elif NET6_0
         Assert.StartsWith("6.0", actual.Version);
-#elif NETCOREAPP3
-        Assert.StartsWith("3", actual.Version);
 #endif
     }
 

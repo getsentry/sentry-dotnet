@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net48</TargetFrameworks>
   </PropertyGroup>
 
   <!-- Test EF Core 7 on .NET 7 -->
@@ -16,16 +16,6 @@
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.19" />
-  </ItemGroup>
-
-  <!-- Test EF Core 5 on .NET Core 3.1 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.17" />
-
-    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
-    <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
   </ItemGroup>
 
   <!-- Test EF Core 3.1 on .NET Framework -->
