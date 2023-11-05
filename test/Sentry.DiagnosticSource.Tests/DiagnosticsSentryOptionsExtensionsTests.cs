@@ -4,14 +4,18 @@ namespace Sentry.DiagnosticSource.Tests;
 
 #nullable enable
 
+[UsesVerify]
+
 public class DiagnosticsSentryOptionsExtensionsTests
 {
+    private readonly InMemoryDiagnosticLogger _logger = new();
     private readonly SentryOptions _options = new()
     {
         Dsn = ValidDsn,
         AutoSessionTracking = false,
         IsGlobalModeEnabled = true,
         BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+        Debug = true,
 
         // Set explicitly for this test in case the defaults change in the future.
         TracesSampleRate = 0.0,
@@ -20,6 +24,7 @@ public class DiagnosticsSentryOptionsExtensionsTests
 
     public DiagnosticsSentryOptionsExtensionsTests()
     {
+        _options.DiagnosticLogger = _logger;
 #if NETFRAMEWORK
         _options.AddDiagnosticSourceIntegration();
 #endif
@@ -34,8 +39,10 @@ public class DiagnosticsSentryOptionsExtensionsTests
     public void DiagnosticListenerIntegration_DisabledWithoutTracesSampling()
     {
         using var hub = GetSut();
-        var integrations = GetIntegrations(hub);
-        Assert.DoesNotContain(integrations, i => i is SentryDiagnosticListenerIntegration);
+        GetIntegrations(hub);
+
+        Assert.Contains(_logger.Entries, x => x.Message == "DiagnosticSource Integration is disabled because tracing is disabled."
+                                                     && x.Level == SentryLevel.Info);
     }
 
     [Fact]

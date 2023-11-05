@@ -6,9 +6,10 @@ using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests;
 
+ [UsesVerify]
 public class SentryOptionsExtensionsTests
 {
-    public SentryOptions Sut { get; set; } = new();
+    private SentryOptions Sut { get; set; } = new();
 
     [Fact]
     public void DisableDuplicateEventDetection_RemovesDisableDuplicateEventDetection()
@@ -305,5 +306,20 @@ public class SentryOptionsExtensionsTests
     public void Integrations_Includes_MajorSystemPrefixes(string expected)
     {
         Assert.Contains(Sut.InAppExclude!, e => e == expected);
+    }
+
+    [Fact]
+    public Task Integrations_default_ones_are_properly_registered()
+    {
+        InMemoryDiagnosticLogger logger = new();
+        SentryOptions options = new()
+        {
+            Dsn = ValidDsn,
+            Debug = true,
+            DiagnosticLogger = logger
+        };
+        Hub _ = new(options, Substitute.For<ISentryClient>());
+
+        return Verify(logger.Entries).UniqueForRuntime().AutoVerify(includeBuildServer: false);
     }
 }

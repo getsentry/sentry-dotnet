@@ -61,9 +61,7 @@ internal class Hub : IHubEx, IDisposable
 
         _enricher = new Enricher(options);
 
-        // An integration _can_ deregister itself, so make a copy of the list before iterating.
-        var integrations = options.Integrations.ToList();
-        foreach (var integration in integrations)
+        foreach (var integration in options.Integrations)
         {
             options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
             integration.Register(this, options);
