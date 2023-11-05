@@ -11,6 +11,6 @@ public class DbConcurrencyExceptionProcessor : SentryEventExceptionProcessor<DBC
     protected internal override void ProcessException(DBConcurrencyException exception, SentryEvent sentryEvent)
     {
         sentryEvent.SetExtra("Row Count", exception.RowCount);
-        sentryEvent.SetExtra("Row Error", exception.Row.RowError);
+        sentryEvent.SetExtra("Row Error", exception.Row?.RowError);
     }
 }
