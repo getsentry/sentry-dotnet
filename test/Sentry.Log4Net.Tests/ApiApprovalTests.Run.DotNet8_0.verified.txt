@@ -1,0 +1,14 @@
+﻿[assembly: System.CLSCompliant(true)]
+namespace Sentry.Log4Net
+{
+    public class SentryAppender : log4net.Appender.AppenderSkeleton
+    {
+        public SentryAppender() { }
+        public string? Dsn { get; set; }
+        public string? Environment { get; set; }
+        public log4net.Core.Level? MinimumEventLevel { get; set; }
+        public bool SendIdentity { get; set; }
+        protected override void Append(log4net.Core.LoggingEvent loggingEvent) { }
+        protected override void OnClose() { }
+    }
+}

@@ -1,0 +1,90 @@
+﻿namespace Microsoft.AspNetCore.Builder
+{
+    public static class SentryTracingMiddlewareExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseSentryTracing(this Microsoft.AspNetCore.Builder.IApplicationBuilder builder) { }
+    }
+}
+namespace Microsoft.AspNetCore.Hosting
+{
+    public static class SentryWebHostBuilderExtensions
+    {
+        public static void AddSentryTunneling(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, params string[] hostnames) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Sentry.AspNetCore.ISentryBuilder>? configureSentry) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Sentry.AspNetCore.SentryAspNetCoreOptions>? configureOptions) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Microsoft.AspNetCore.Hosting.WebHostBuilderContext, Sentry.AspNetCore.ISentryBuilder>? configureSentry) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, System.Action<Microsoft.AspNetCore.Hosting.WebHostBuilderContext, Sentry.AspNetCore.SentryAspNetCoreOptions>? configureOptions) { }
+        public static Microsoft.AspNetCore.Hosting.IWebHostBuilder UseSentry(this Microsoft.AspNetCore.Hosting.IWebHostBuilder builder, string dsn) { }
+        public static void UseSentryTunneling(this Microsoft.AspNetCore.Builder.IApplicationBuilder builder, string path = "/tunnel") { }
+    }
+}
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class ServiceCollectionExtensions
+    {
+        public static Sentry.AspNetCore.ISentryBuilder AddSentry(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+    }
+}
+namespace Sentry.AspNetCore
+{
+    public interface ISentryBuilder
+    {
+        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+    }
+    [System.Obsolete("This interface is tightly coupled to AspNetCore and will be removed in version 4." +
+        "0.0. Please consider using ISentryUserFactory with IHttpContextAccessor instead." +
+        "")]
+    public interface IUserFactory
+    {
+        Sentry.User? Create(Microsoft.AspNetCore.Http.HttpContext context);
+    }
+    public static class SamplingExtensions
+    {
+        public static Microsoft.AspNetCore.Http.HttpContext? TryGetHttpContext(this Sentry.TransactionSamplingContext samplingContext) { }
+        public static string? TryGetHttpMethod(this Sentry.TransactionSamplingContext samplingContext) { }
+        public static string? TryGetHttpPath(this Sentry.TransactionSamplingContext samplingContext) { }
+        public static string? TryGetHttpRoute(this Sentry.TransactionSamplingContext samplingContext) { }
+    }
+    public static class ScopeExtensions
+    {
+        public static void Populate(this Sentry.Scope scope, System.Diagnostics.Activity activity) { }
+        public static void Populate(this Sentry.Scope scope, Microsoft.AspNetCore.Http.HttpContext context, Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
+    }
+    [Microsoft.Extensions.Logging.ProviderAlias("Sentry")]
+    public class SentryAspNetCoreLoggerProvider : Sentry.Extensions.Logging.SentryLoggerProvider
+    {
+        public SentryAspNetCoreLoggerProvider(Microsoft.Extensions.Options.IOptions<Sentry.AspNetCore.SentryAspNetCoreOptions> options, Sentry.IHub hub) { }
+    }
+    public class SentryAspNetCoreOptions : Sentry.Extensions.Logging.SentryLoggingOptions
+    {
+        public SentryAspNetCoreOptions() { }
+        public bool AdjustStandardEnvironmentNameCasing { get; set; }
+        public bool FlushOnCompletedRequest { get; set; }
+        public bool IncludeActivityData { get; set; }
+        public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
+        public Sentry.AspNetCore.TransactionNameProvider? TransactionNameProvider { get; set; }
+    }
+    public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.ConfigureFromConfigurationOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
+    {
+        public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration) { }
+        [System.Obsolete("Use constructor with no IHostingEnvironment")]
+        public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment) { }
+        public override void Configure(Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
+    }
+    public static class SentryBuilderExtensions
+    {
+        public static Sentry.AspNetCore.ISentryBuilder AddSentryOptions(this Sentry.AspNetCore.ISentryBuilder builder, System.Action<Sentry.AspNetCore.SentryAspNetCoreOptions>? configureOptions) { }
+    }
+    public class SentryStartupFilter : Microsoft.AspNetCore.Hosting.IStartupFilter
+    {
+        public SentryStartupFilter() { }
+        public System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> Configure(System.Action<Microsoft.AspNetCore.Builder.IApplicationBuilder> next) { }
+    }
+    public class SentryTunnelMiddleware : Microsoft.AspNetCore.Http.IMiddleware
+    {
+        public SentryTunnelMiddleware(string[] allowedHosts) { }
+        public System.Threading.Tasks.Task InvokeAsync(Microsoft.AspNetCore.Http.HttpContext context, Microsoft.AspNetCore.Http.RequestDelegate next) { }
+    }
+    public delegate string? TransactionNameProvider(Microsoft.AspNetCore.Http.HttpContext context);
+}
