@@ -4,7 +4,7 @@ using BenchmarkDotNet.Diagnostics.Windows.Configs;
 
 namespace Sentry.Benchmarks;
 
-[SimpleJob(RunStrategy.ColdStart, launchCount: 5, iterationCount: 1, invocationCount: 1, warmupCount: 0)]
+[SimpleJob(RunStrategy.ColdStart, launchCount: 10, iterationCount: 1, invocationCount: 1, warmupCount: 0)]
 [MinColumn, MaxColumn, MeanColumn, MedianColumn]
 [JitStatsDiagnoser]
 public class SdkInitBenchmarks
