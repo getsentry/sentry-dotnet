@@ -14,7 +14,7 @@ BeforeAll {
 
     $packageVersion = GetSentryPackageVersion
     $packagePath = "src/Sentry/bin/Release/Sentry.$packageVersion.nupkg"
-    if (-not (Test-Path env:CI) -and -not (Test-Path $packagePath))
+    if (-not (Test-Path env:CI))
     {
         Write-Host "Package not found at $packagePath, running dotnet pack"
         dotnet pack src/Sentry -c Release --nologo -p:Version=$packageVersion | ForEach-Object { Write-Host $_ }
@@ -116,10 +116,10 @@ throw new ApplicationException("Something happened!");
 
             $dsn = $url -replace 'http://', 'http://publickey@'
             $dsn += '/123' # project ID
-            Write-Host "::group::Executing $path $url"
+            Write-Host "::group::Executing $path $dsn"
             try
             {
-                &$path $url | ForEach-Object {
+                & $path $dsn | ForEach-Object {
                     Write-Host "  $_"
                     $_
                 }
@@ -129,6 +129,9 @@ throw new ApplicationException("Something happened!");
                 Write-Host "::endgroup::"
             }
         }
+
+        $result.ScriptOutput | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"pe","image_addr":"0x'
+        $result.ScriptOutput | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x'
     }
 
 }
