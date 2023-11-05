@@ -111,11 +111,6 @@ jobs:
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
 
-      - name: Test symbol upload
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
-        with:
-          path: test
-
       - name: Upload build and test outputs
         if: failure()
         uses: actions/upload-artifact@v3
@@ -138,3 +133,36 @@ jobs:
           path: |
             ${{ github.workspace }}/src/**/Release/*.nupkg
             ${{ github.workspace }}/src/**/Release/*.snupkg
+
+  integration-test:
+    needs: build
+    name: Integration test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, windows, macos]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch Nuget Packages
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ github.sha }}
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install .NET Workloads
+        shell: bash
+        run: dotnet workload install maui-android maui-ios maui-maccatalyst maui-windows
+
+      - name: Test
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        with:
+          path: test
