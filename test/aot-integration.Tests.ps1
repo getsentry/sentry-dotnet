@@ -7,16 +7,14 @@ BeforeAll {
     . $PSScriptRoot/test-functions.ps1
     function GetSentryPackageVersion()
     {
-        $packageVersion = (Select-Xml -Path "$PSScriptRoot/../Directory.Build.props" -XPath "/Project/PropertyGroup/Version").Node.InnerText
-        $packageVersion += '-test' # so we can be sure it won't be fetched from nuget.org
-        $packageVersion
+        (Select-Xml -Path "$PSScriptRoot/../Directory.Build.props" -XPath "/Project/PropertyGroup/Version").Node.InnerText
     }
 
     $packageVersion = GetSentryPackageVersion
     $packagePath = "src/Sentry/bin/Release/Sentry.$packageVersion.nupkg"
     if (-not (Test-Path env:CI))
     {
-        Write-Host "Package not found at $packagePath, running dotnet pack"
+        Write-Host "Packaging $packagePath"
         dotnet pack src/Sentry -c Release --nologo -p:Version=$packageVersion | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
@@ -37,7 +35,7 @@ BeforeAll {
 }
 
 Describe 'Console app (<framework>)' -ForEach @(
-    # @{ framework = "net7.0" },
+    @{ framework = "net7.0" },
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
@@ -71,7 +69,7 @@ throw new ApplicationException("Something happened!");
         try
         {
             $packageVersion = GetSentryPackageVersion
-            dotnet add package sentry --source integraton-test --version $packageVersion | ForEach-Object { Write-Host $_ }
+            dotnet add package sentry --source ../packages --version $packageVersion | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to add package dependency to the test app project."
@@ -83,10 +81,41 @@ throw new ApplicationException("Something happened!");
         }
 
         # Publish once, then test the executable in following functions
-        RunDotnet 'publish' 'temp/console-app' $True $True $framework
-    }
+        RunDotnet 'publish' 'temp/console-app' $False $False $framework
 
-    BeforeEach {
+        function runConsoleApp()
+        {
+            Invoke-SentryServer {
+                Param([string]$url)
+                if ($IsMacOS)
+                {
+                    $path = "./temp/console-app/bin/Release/$framework/osx-x64/publish/console-app"
+                }
+                elseif ($IsWindows)
+                {
+                    $path = "./temp/console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
+                }
+                else
+                {
+                    $path = "./temp/console-app/bin/Release/$framework/linux-x64/publish/console-app"
+                }
+
+                $dsn = $url -replace 'http://', 'http://publickey@'
+                $dsn += '/123' # project ID
+                Write-Host "::group::Executing $path $dsn"
+                try
+                {
+                    & $path $dsn | ForEach-Object {
+                        Write-Host "  $_"
+                        $_
+                    }
+                }
+                finally
+                {
+                    Write-Host "::endgroup::"
+                }
+            }
+        }
     }
 
     # TODO migrate CLI integration tests to run on blank template app, such as the following code.
@@ -98,40 +127,14 @@ throw new ApplicationException("Something happened!");
     #     $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
     # }
 
-    It "sends debug images" {
-        $result = Invoke-SentryServer {
-            Param([string]$url)
-            if ($IsMacOS)
-            {
-                $path = './temp/console-app/bin/Release/net8.0/osx-x64/publish/console-app'
-            }
-            elseif ($IsWindows)
-            {
-                $path = './temp/console-app/bin/Release/net8.0/win-x64/publish/console-app.exe'
-            }
-            else
-            {
-                $path = './temp/console-app/bin/Release/net8.0/linux-x64/publish/console-app'
-            }
+    It "sends native debug images" {
+        $result = runConsoleApp
+        $result.ScriptOutput | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"pe","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
+    }
 
-            $dsn = $url -replace 'http://', 'http://publickey@'
-            $dsn += '/123' # project ID
-            Write-Host "::group::Executing $path $dsn"
-            try
-            {
-                & $path $dsn | ForEach-Object {
-                    Write-Host "  $_"
-                    $_
-                }
-            }
-            finally
-            {
-                Write-Host "::endgroup::"
-            }
-        }
-
-        $result.ScriptOutput | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"pe","image_addr":"0x'
-        $result.ScriptOutput | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x'
+    It "sends stack trace with " {
+        $result = runConsoleApp
+        $result.ScriptOutput | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
     }
 
 }
