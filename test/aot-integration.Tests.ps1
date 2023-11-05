@@ -146,4 +146,6 @@ internal class FakeTransport : ITransport
     It "sends stack trace with " {
         runConsoleApp | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
     }
+
+    # TODO test the contents of the publish directory (there should be no sentry-native.a)
 }
