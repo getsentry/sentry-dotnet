@@ -1,6 +1,6 @@
 namespace Sentry.Tests;
 
-public class SentryOptionsTests
+public partial class SentryOptionsTests
 {
     [Fact]
     public void DecompressionMethods_ByDefault_AllBitsSet()

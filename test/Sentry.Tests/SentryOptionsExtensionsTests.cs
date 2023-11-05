@@ -6,9 +6,6 @@ using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests;
 
-#if !__MOBILE__
-[UsesVerify]
-#endif
 public class SentryOptionsExtensionsTests
 {
     private SentryOptions Sut { get; set; } = new();
@@ -309,24 +306,4 @@ public class SentryOptionsExtensionsTests
     {
         Assert.Contains(Sut.InAppExclude!, e => e == expected);
     }
-
-#if !__MOBILE__
-    [Fact]
-    public Task Integrations_default_ones_are_properly_registered()
-    {
-        InMemoryDiagnosticLogger logger = new();
-        SentryOptions options = new()
-        {
-            Dsn = ValidDsn,
-            Debug = true,
-            IsGlobalModeEnabled = true,
-            DiagnosticLogger = logger,
-            EnableTracing = true,
-            TracesSampleRate = 1.0
-        };
-        Hub _ = new(options, Substitute.For<ISentryClient>());
-
-        return Verify(logger.Entries).UniqueForRuntime().AutoVerify(includeBuildServer: false);
-    }
-#endif
 }
