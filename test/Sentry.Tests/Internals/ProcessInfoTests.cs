@@ -5,7 +5,6 @@ public class ProcessInfoTests
     [SkippableFact]
     public async Task Ctor_StartupTimeSimilarToUtcNow()
     {
-
 #if NETCOREAPP
         // Skip this test when running on macOS with Apple Silicon (M1) hardware due to a bug in .NET with Process.StartTime.
         // See https://github.com/getsentry/sentry-dotnet/issues/1508

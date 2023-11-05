@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net48</TargetFrameworks>
   </PropertyGroup>
 
   <!--
@@ -23,12 +23,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.19" />
   </ItemGroup>
 
-  <!-- Test EF Core 5 on .NET Core 3.1 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.17" />
-  </ItemGroup>
-
   <!-- Test EF Core 3.1 on .NET Framework -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net48' ">
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
@@ -36,14 +30,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.32" />
   </ItemGroup>
 
-  <!--
-    Pin to LocalDb 14.2.1 on .NET Core 3.1 for the transitive dependency on Microsoft.Data.SqClient 5.0.1.
-    See https://github.com/getsentry/sentry-dotnet/issues/2189
-  -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="LocalDb" Version="14.2.1" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'netcoreapp3.1'">
+  <ItemGroup>
     <PackageReference Include="LocalDb" Version="14.2.1" />
   </ItemGroup>
 

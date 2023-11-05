@@ -52,38 +52,11 @@ Looking for more samples? Check out [this repository](https://github.com/getsent
 ### Talks
 
 * On.NET [Error monitoring with Sentry for .NET MAUI](https://www.youtube.com/watch?v=8YmEC4iKD2I)
-* .NET Conf [focus on MAUI](https://www.youtube.com/watch?v=RW3hiukVXZQ&list=PLdo4fOcmZ0oWePZU3W162NJ9vcXqgpMVc) 
-
-## Compatibility
-
-The packages target **.NET Standard 2.0** and **.NET Framework 4.6.1**.
-They also include targets such as **.NET 5**, **.NET 6** and platform-specific targets where appropriate.
-That means [they are compatible with](https://docs.microsoft.com/dotnet/standard/net-standard) the following versions _or newer_:
-
-* .NET 5.0
-* .NET Core 2.0
-* .NET Framework 4.6.1
-* Mono 5.4
-* Xamarin.Android 8.0
-* Xamarin.iOS 10.14
-* Xamarin.Mac 3.8
-* Universal Windows Platform 10.0.16299
-
-Of those, we run our unit and integration tests against the following:
-
-* .NET 7 on Windows, macOS and Linux
-* .NET 6 on Windows, macOS and Linux
-* .NET Core 3.1 on Windows, macOS and Linux
-* .NET Framework 4.8 on Windows
-* Mono 6.12 on macOS and Linux
+* .NET Conf [focus on MAUI](https://www.youtube.com/watch?v=RW3hiukVXZQ&list=PLdo4fOcmZ0oWePZU3W162NJ9vcXqgpMVc)
 
 ### Sentry Protocol
 
 For more details, please: **refer to the [documentation](https://getsentry.github.io/sentry-dotnet/index.html)**
-
-### Legacy frameworks
-
-Sentry's [Raven SDK](https://github.com/getsentry/raven-csharp/) is still available, and recommended for use with .NET Framework 3.5 to 4.6.0.
 
 ## Resources
 * [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/)

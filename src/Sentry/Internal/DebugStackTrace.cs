@@ -161,13 +161,7 @@ internal class DebugStackTrace : SentryStackTrace
         var frames = (!AotHelper.IsAot && _options.StackTraceMode == StackTraceMode.Enhanced)
             ? EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p))
             : stackTrace.GetFrames()
-                // error CS8619: Nullability of reference types in value of type 'StackFrame?[]' doesn't match target type 'IEnumerable<StackFrame>'.
-#if NETCOREAPP3_1
-                .Where(f => f is not null)
-                .Select(p => new RealStackFrame(p!));
-#else
                 .Select(p => new RealStackFrame(p));
-#endif
 
         // Not to throw on code that ignores nullability warnings.
         if (frames.IsNull())
