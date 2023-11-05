@@ -1234,7 +1234,7 @@ public class SentryOptions
 
     internal void RemoveIntegration<TIntegration>()
     {
-        // TODO: For backward compatibility, check if it's a default integration type?
+    // Note: Not removing default integrations
         _integrations.RemoveAll(integration => integration is TIntegration);
     }
 
