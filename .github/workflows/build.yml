@@ -147,7 +147,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: test/*.ps1
+          sparse-checkout: |
+            .github
+            test/*.ps1
           sparse-checkout-cone-mode: false
 
       - name: Fetch Nuget Packages
