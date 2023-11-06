@@ -33,4 +33,13 @@
     <MtouchUseLlvm>false</MtouchUseLlvm>
   </PropertyGroup>
 
+  <!--
+  These are needed because we use project references in this solution.
+  In an app that uses our nuget packages, they will come through the nuget packages automatically.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)..\src\Sentry\buildTransitive\Sentry.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)..\src\Sentry.Bindings.Cocoa\buildTransitive\Sentry.Bindings.Cocoa.targets"
+    Condition="'$(OutputType)' == 'Exe' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst')" />
+  <Import Project="$(MSBuildThisFileDirectory)..\src\Sentry\Platforms\Native\buildTransitive\Sentry.Native.targets" />
+
 </Project>

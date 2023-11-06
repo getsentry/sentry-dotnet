@@ -214,6 +214,7 @@
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
     <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload proguard mapping." />
-
   </Target>
+
+  <Import Condition="'$(MSBuildProjectName)' != 'Sentry' and !$(MSBuildProjectName.StartsWith('Sentry.'))" Project="$(MSBuildThisFileDirectory)Sentry.Native.targets"/>
 </Project>

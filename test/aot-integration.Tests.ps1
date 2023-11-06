@@ -91,5 +91,4 @@ internal class FakeTransport : ITransport
         $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be (@(
                 'console-app.exe', 'console-app.pdb') | Sort-Object -Unique)
     }
-
 }

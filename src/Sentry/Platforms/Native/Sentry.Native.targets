@@ -17,11 +17,8 @@
 
   <!-- Packaging -->
   <ItemGroup>
-    <!-- Include our transitive build targets in the nuget. -->
-    <None Include="$(MSBuildThisFileDirectory)buildTransitive.targets">
-      <Pack>true</Pack>
-      <PackagePath>buildTransitive\Sentry.Native.targets</PackagePath>
-    </None>
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Native.targets" Pack="true" PackagePath="buildTransitive\Sentry.Native.targets" />
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Native.targets" Pack="true" PackagePath="build\Sentry.Native.targets" />
   </ItemGroup>
 
   <!-- Packaging the native library -->
