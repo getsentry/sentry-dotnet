@@ -165,6 +165,8 @@ jobs:
             7.0.x
             8.0.x
 
+      - run: dotnet workload install maui-android
+
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:

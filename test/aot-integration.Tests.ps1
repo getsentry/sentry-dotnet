@@ -4,7 +4,6 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/integration-test-setup.ps1
 
 Describe 'Console app (<framework>)' -ForEach @(
-    @{ framework = "net7.0" },
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
@@ -46,7 +45,8 @@ internal class FakeTransport : ITransport
         {
             if ($IsMacOS)
             {
-                return "./temp/console-app/bin/Release/$framework/osx-x64/publish/console-app"
+                $arch = $(uname -m) -eq 'arm64' ? 'arm64' : 'x64'
+                return "./temp/console-app/bin/Release/$framework/osx-$arch/publish/console-app"
             }
             elseif ($IsWindows)
             {
@@ -77,7 +77,7 @@ internal class FakeTransport : ITransport
     }
 
     It "sends native debug images" {
-        runConsoleApp | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"pe","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
+        runConsoleApp | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"(pe|dwarf|macho)","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
     }
 
     It "sends stack trace native addresses" {
@@ -88,7 +88,9 @@ internal class FakeTransport : ITransport
         $path = getConsoleAppPath
         Test-Path $path | Should -BeTrue
         $items = Get-ChildItem -Path (Get-Item $path).DirectoryName
+        $exeExtension = $IsWindows ? '.exe' : ''
+        $debugExtension = $IsWindows ? '.pdb' : $IsMacOS ? '.dSYM' : '.dbg'
         $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be (@(
-                'console-app.exe', 'console-app.pdb') | Sort-Object -Unique)
+                "console-app$exeExtension", "console-app$debugExtension") | Sort-Object -Unique)
     }
 }

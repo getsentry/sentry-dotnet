@@ -181,22 +181,24 @@ BeforeAll {
         if ($type -eq 'maui')
         {
             AddPackageReference $path 'Sentry.Maui'
-
-            Push-Location $path
-            try
+            if (Test-Path env:CI)
             {
-                dotnet workload restore | ForEach-Object { Write-Host $_ }
-                if ($LASTEXITCODE -ne 0)
+                Push-Location $path
+                try
                 {
-                    throw "Failed to restore workloads."
+                    dotnet workload restore | ForEach-Object { Write-Host $_ }
+                    if ($LASTEXITCODE -ne 0)
+                    {
+                        throw "Failed to restore workloads."
+                    }
+                }
+                finally
+                {
+                    Pop-Location
                 }
             }
-            finally
-            {
-                Pop-Location
-            }
         }
-        else
+        elseif (!$IsMacOS -or $framework -eq 'net8.0')
         {
             AddPackageReference $path 'Sentry'
             @"

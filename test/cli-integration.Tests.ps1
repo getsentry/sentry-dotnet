@@ -114,6 +114,10 @@ Describe 'MAUI' {
         RegisterLocalPackage 'Sentry.Bindings.Android'
         RegisterLocalPackage 'Sentry.Extensions.Logging'
         RegisterLocalPackage 'Sentry.Maui'
+        if ($IsMacOS)
+        {
+            RegisterLocalPackage 'Sentry.Bindings.Cocoa'
+        }
         DotnetNew 'maui' './temp/maui-app' 'net7.0'
     }
 
