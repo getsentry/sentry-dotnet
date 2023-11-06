@@ -39,8 +39,8 @@
       <UseSentryCLI Condition="
         '$(UseSentryCLI)' == ''
         and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true')
-        and ('$(MSBuildProjectName)' != 'Sentry')
-        and (!$(MSBuildProjectName.StartsWith('Sentry.')) or '$(MSBuildProjectName)' == '$(SentryCLIIntegrationTestProject)')">true</UseSentryCLI>
+        and '$(MSBuildProjectName)' != 'Sentry'
+        and !$(MSBuildProjectName.StartsWith('Sentry.'))">true</UseSentryCLI>
     </PropertyGroup>
   </Target>
 

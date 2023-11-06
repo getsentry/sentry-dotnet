@@ -16,7 +16,7 @@ internal static class AotHelper
         IsAot = false;
 #if NET6_0_OR_GREATER   // TODO NET7 once we target it
         var stackTrace = new StackTrace(false);
-        IsAot = (stackTrace.GetFrame(0)?.GetMethod() is not { });
+        IsAot = stackTrace.GetFrame(0)?.GetMethod() is null;
 #endif
     }
 }
