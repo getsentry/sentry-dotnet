@@ -1,11 +1,16 @@
+using Sentry.PlatformAbstractions;
+
 namespace Sentry.Tests;
 
 [UsesVerify]
 public partial class HubTests
 {
-    [Fact]
+    [SkippableFact]
     public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
     {
+        // See https://github.com/getsentry/sentry-dotnet/issues/2785
+        Skip.If(RuntimeInfo.GetRuntime().IsMono() && TestEnvironment.IsGitHubActions);
+
         // Arrange
         var worker = new FakeBackgroundWorker();
 
