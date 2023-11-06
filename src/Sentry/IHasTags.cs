@@ -27,4 +27,16 @@ public static class HasTagsExtensions
             hasTags.Tags[key] = value;
         }
     }
+
+    /// <summary>
+    /// Sets a tag on the object.
+    /// </summary>
+    /// <remarks>Included to make it easier to migrate from Sentry 3.x</remarks>
+    public static void SetTag(this IHasTags? hasTags, string key, string value)
+    {
+        if (hasTags != null)
+        {
+            hasTags.Tags[key] = value;
+        }
+    }
 }

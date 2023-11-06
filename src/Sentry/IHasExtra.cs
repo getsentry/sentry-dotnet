@@ -27,4 +27,16 @@ public static class HasExtraExtensions
             hasExtra.Extra[key] = value;
         }
     }
+
+    /// <summary>
+    /// Sets extra data on the object.
+    /// </summary>
+    /// <remarks>Included to make it easier to migrate from Sentry 3.x</remarks>
+    public static void SetExtra(this IHasExtra? hasExtra, string key, object? value)
+    {
+        if (hasExtra != null)
+        {
+            hasExtra.Extra[key] = value;
+        }
+    }
 }
