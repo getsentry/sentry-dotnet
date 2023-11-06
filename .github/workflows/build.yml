@@ -145,10 +145,12 @@ jobs:
         os: [ubuntu, windows, macos]
 
     steps:
+      # We only check out what is absolutely necessary to reduce a chance of local files impacting integration tests.
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
             .github
+            Directory.Build.props
             test/*.ps1
           sparse-checkout-cone-mode: false
 
