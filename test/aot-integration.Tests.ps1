@@ -42,21 +42,25 @@ internal class FakeTransport : ITransport
             throw "Failed to publish the test app project."
         }
 
-        function runConsoleApp()
+        function getConsoleAppPath()
         {
             if ($IsMacOS)
             {
-                $path = "./temp/console-app/bin/Release/$framework/osx-x64/publish/console-app"
+                return "./temp/console-app/bin/Release/$framework/osx-x64/publish/console-app"
             }
             elseif ($IsWindows)
             {
-                $path = "./temp/console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
+                return "./temp/console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
             }
             else
             {
-                $path = "./temp/console-app/bin/Release/$framework/linux-x64/publish/console-app"
+                return "./temp/console-app/bin/Release/$framework/linux-x64/publish/console-app"
             }
+        }
 
+        function runConsoleApp()
+        {
+            $path = getConsoleAppPath
             Write-Host "::group::Executing $path"
             try
             {
@@ -76,9 +80,16 @@ internal class FakeTransport : ITransport
         runConsoleApp | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"pe","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
     }
 
-    It "sends stack trace with " {
+    It "sends stack trace native addresses" {
         runConsoleApp | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
     }
 
-    # TODO test the contents of the publish directory (there should be no sentry-native.a)
+    It "publish directory contains expected files" {
+        $path = getConsoleAppPath
+        Test-Path $path | Should -BeTrue
+        $items = Get-ChildItem -Path (Get-Item $path).DirectoryName
+        $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be (@(
+                'console-app.exe', 'console-app.pdb') | Sort-Object -Unique)
+    }
+
 }

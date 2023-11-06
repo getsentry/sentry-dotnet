@@ -5,13 +5,13 @@
     <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
     <SentryNativeBuildScript>../../scripts/build-sentry-native.ps1</SentryNativeBuildScript>
     <SentryNativeBuildInputs>../../.git/modules/modules/sentry-native/HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
-    <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)runtimes\</SentryNativeOutputDirectory>
+    <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)sentry-native\</SentryNativeOutputDirectory>
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
-    <NativeLibRelativePath-win-x64>win-x64\native</NativeLibRelativePath-win-x64>
+    <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
     <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)\</SentryNativeOutputDirectory-win-x64>
-    <NativeLibRelativePath-linux-x64>linux-x64\native</NativeLibRelativePath-linux-x64>
+    <NativeLibRelativePath-linux-x64>linux-x64</NativeLibRelativePath-linux-x64>
     <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)\</SentryNativeOutputDirectory-linux-x64>
-    <NativeLibRelativePath-osx>osx\native</NativeLibRelativePath-osx>
+    <NativeLibRelativePath-osx>osx</NativeLibRelativePath-osx>
     <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
   </PropertyGroup>
 
@@ -28,21 +28,21 @@
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Windows'))">
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
-      <PackagePath>\runtimes\$(NativeLibRelativePath-win-x64)</PackagePath>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Linux'))">
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
-      <PackagePath>\runtimes\$(NativeLibRelativePath-linux-x64)</PackagePath>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
     <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
-      <PackagePath>\runtimes\$(NativeLibRelativePath-osx)</PackagePath>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-osx)</PackagePath>
     </None>
   </ItemGroup>
 

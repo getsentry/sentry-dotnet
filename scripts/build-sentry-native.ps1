@@ -6,7 +6,7 @@ Push-Location $PSScriptRoot/..
 try
 {
     $submodule = 'modules/sentry-native'
-    $outDir = 'src/Sentry/Platforms/Native/runtimes'
+    $outDir = 'src/Sentry/Platforms/Native/sentry-native'
     $buildDir = "$submodule/build"
     $actualBuildDir = $buildDir
 
@@ -15,12 +15,12 @@ try
     $libExtension = '.a'
     if ($IsMacOS)
     {
-        $outDir += '/osx/native'
+        $outDir += '/osx'
         $additionalArgs += @('-D', 'CMAKE_OSX_ARCHITECTURES=arm64;x86_64')
     }
     elseif ($IsWindows)
     {
-        $outDir += '/win-x64/native'
+        $outDir += '/win-x64'
         $additionalArgs += @('-C', 'src/Sentry/Platforms/Native/windows-config.cmake')
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
@@ -28,7 +28,7 @@ try
     }
     elseif ($IsLinux)
     {
-        $outDir += '/linux-x64/native'
+        $outDir += '/linux-x64'
     }
     else
     {
