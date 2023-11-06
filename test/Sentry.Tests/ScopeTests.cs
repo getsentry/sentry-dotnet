@@ -549,6 +549,27 @@ public class ScopeTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void RemoveExtra_ObserverExist_ObserverUnsetsExtraIfEnabled(bool observerEnable)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions {
+            ScopeObserver = observer,
+            EnableScopeSync = observerEnable
+        });
+        var expectedKey = "1234";
+        var expectedCount = observerEnable ? 1 : 0;
+
+        // Act
+        scope.Extra.Remove(expectedKey);
+
+        // Assert
+        observer.Received(expectedCount).UnsetExtra(Arg.Is(expectedKey));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void SetExtra_ObserverExist_ObserverSetsExtraIfEnabled(bool observerEnable)
     {
         // Arrange

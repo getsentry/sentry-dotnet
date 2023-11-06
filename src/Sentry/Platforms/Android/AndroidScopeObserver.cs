@@ -87,6 +87,18 @@ internal sealed class AndroidScopeObserver : IScopeObserver
         }
     }
 
+    public void UnsetExtra(string key)
+    {
+        try
+        {
+            JavaSdk.Sentry.RemoveExtra(key);
+        }
+        finally
+        {
+            _innerObserver?.UnsetExtra(key);
+        }
+    }
+
     public void SetUser(User? user)
     {
         try

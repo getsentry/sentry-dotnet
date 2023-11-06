@@ -1,33 +1,5 @@
 namespace Sentry.Internal;
 
-internal class TagsDictionary : ScopeSyncingDictionary<string, string>
-{
-    public TagsDictionary(IDictionary<string, string> innerDictionary, SentryOptions options) : base(innerDictionary, options)
-    {
-    }
-
-    public override bool FilterValue(string key, string value) => Options.TagFilters.Any(x => x.IsMatch(key));
-
-    public override void SyncSetValue(string key, string value) => Options.ScopeObserver?.SetTag(key, value);
-
-    public override void SyncRemoveValue(string key) => Options.ScopeObserver?.UnsetTag(key);
-}
-
-internal class ExtrasDictionary : ScopeSyncingDictionary<string, object?>
-{
-    public ExtrasDictionary(IDictionary<string, object?> innerDictionary, SentryOptions options) : base(innerDictionary, options)
-    {
-    }
-
-    public override void SyncSetValue(string key, object? value) => Options.ScopeObserver?.SetExtra(key, value);
-
-    // TODO: See if SentryCocoaSdk has an UnsetExtra method that we can use to sync this
-    // public override void SyncRemoveValue(string key) => Options.ScopeObserver?.UnsetExtra(key);
-    public override void SyncRemoveValue(string key)
-    {
-    }
-}
-
 internal abstract class ScopeSyncingDictionary <K, V> : IDictionary<K, V>
 {
     private readonly IDictionary<K, V> _innerDictionary;

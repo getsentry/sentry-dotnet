@@ -65,6 +65,17 @@ internal sealed class IosScopeObserver : IScopeObserver
         }
     }
 
+    public void UnsetExtra(string key)
+    {
+        try
+        {
+            SentryCocoaSdk.ConfigureScope(scope => scope.RemoveExtraForKey(key));
+        }
+        finally
+        {
+            _innerObserver?.UnsetExtra(key);
+        }    }
+
     public void SetTag(string key, string value)
     {
         try

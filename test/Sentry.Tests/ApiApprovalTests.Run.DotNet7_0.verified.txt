@@ -148,11 +148,14 @@ namespace Sentry
     }
     public static class HasExtraExtensions
     {
+        public static void SetExtra(this Sentry.IHasExtra? hasExtra, string key, object? value) { }
         public static void SetExtras(this Sentry.IHasExtra hasExtra, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object?>> values) { }
     }
     public static class HasTagsExtensions
     {
+        public static void SetTag(this Sentry.IHasTags? hasTags, string key, string value) { }
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
+        public static void UnsetTag(this Sentry.IHasTags? hasTags, string key) { }
     }
     public class Hint
     {
@@ -254,6 +257,7 @@ namespace Sentry
         void SetExtra(string key, object? value);
         void SetTag(string key, string value);
         void SetUser(Sentry.User? user);
+        void UnsetExtra(string key);
         void UnsetTag(string key);
     }
     public interface ISentryClient

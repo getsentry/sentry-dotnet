@@ -16,6 +16,12 @@ public interface IScopeObserver
     void SetExtra(string key, object? value);
 
     /// <summary>
+    /// Removes an extra.
+    /// </summary>
+    /// <param name="key"></param>
+    void UnsetExtra(string key);
+
+    /// <summary>
     /// Sets a tag.
     /// </summary>
     void SetTag(string key, string value);
