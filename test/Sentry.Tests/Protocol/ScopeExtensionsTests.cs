@@ -112,7 +112,7 @@ public class ScopeExtensionsTests
             {"expected Extra", new object()}
         };
 
-        sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
+        sut.Extra[expectedExtra.Keys.Single()] = expectedExtra.Values.Single();
 
         Assert.Equal(expectedExtra, sut.Extra);
     }
@@ -121,8 +121,8 @@ public class ScopeExtensionsTests
     public void SetExtra_SecondExtra_AddedToDictionary()
     {
         var sut = _fixture.GetSut();
-        sut.SetExtra("original", "foo");
-        sut.SetExtra("another", "bar");
+        sut.Extra["original"] = "foo";
+        sut.Extra["another"] = "bar";
 
         sut.Extra.Should().BeEquivalentTo(new Dictionary<string, object>
         {
@@ -140,7 +140,7 @@ public class ScopeExtensionsTests
             {"expected Extra", null}
         };
 
-        sut.SetExtra(expectedExtra.Keys.Single(), expectedExtra.Values.Single());
+        sut.Extra[expectedExtra.Keys.Single()] = expectedExtra.Values.Single();
 
         Assert.Equal(expectedExtra, sut.Extra);
     }
@@ -149,8 +149,8 @@ public class ScopeExtensionsTests
     public void SetExtra_SecondExtraWithNullValue_AddedToDictionary()
     {
         var sut = _fixture.GetSut();
-        sut.SetExtra("original", "foo");
-        sut.SetExtra("another", null);
+        sut.Extra["original"] = "foo";
+        sut.Extra["another"] = null;
 
         sut.Extra.Should().BeEquivalentTo(new Dictionary<string, object>
         {
@@ -177,7 +177,7 @@ public class ScopeExtensionsTests
     public void SetExtras_SecondExtra_AddedToDictionary()
     {
         var sut = _fixture.GetSut();
-        sut.SetExtra("original", "foo");
+        sut.Extra["original"] = "foo";
 
         var expectedExtra = new Dictionary<string, object>
         {
@@ -643,10 +643,10 @@ public class ScopeExtensionsTests
     public void Apply_Extra_OnTarget_MergedWithSource()
     {
         var sut = _fixture.GetSut();
-        sut.SetExtra("sut", "sut");
+        sut.Extra["sut"] = "sut";
 
         var target = _fixture.GetSut();
-        target.SetExtra("target", "target");
+        target.Extra["target"] = "target";
         sut.Apply(target);
 
         Assert.Equal(2, target.Extra.Count);
@@ -658,9 +658,9 @@ public class ScopeExtensionsTests
         const string conflictingKey = "conflict";
         const string expectedValue = "expected";
         var sut = _fixture.GetSut();
-        sut.SetExtra(conflictingKey, "sut");
+        sut.Extra[conflictingKey] = "sut";
         var target = _fixture.GetSut();
-        target.SetExtra(conflictingKey, expectedValue);
+        target.Extra[conflictingKey] = expectedValue;
 
         sut.Apply(target);
 
@@ -672,7 +672,7 @@ public class ScopeExtensionsTests
     public void Apply_Extra_NotOnTarget_SetFromSource()
     {
         var sut = _fixture.GetSut();
-        sut.SetExtra("sut", "sut");
+        sut.Extra["sut"] = "sut";
 
         var target = _fixture.GetSut();
         sut.Apply(target);
@@ -684,7 +684,7 @@ public class ScopeExtensionsTests
     public void Apply_Extra_NotOnSource_TargetUnmodified()
     {
         var target = _fixture.GetSut();
-        target.SetExtra("target", "target");
+        target.Extra["target"] = "target";
         var expected = target.Extra;
 
         var sut = _fixture.GetSut();

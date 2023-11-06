@@ -209,43 +209,12 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _extra = new();
+    private readonly ExtrasDictionary _extra;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    public IDictionary<string, object?> Extra => _extra;
 
-    private readonly InterceptingDictionary<string, string> _tags;
-
-    private bool BeforeSetTag(string key, string value) => !Options.TagFilters.Any(x => x.IsMatch(key));
-
-    private void AfterSetTag(string key, string value)
-    {
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTag(key, value);
-        }
-    }
-
-    private void AfterRemoveTag(string key)
-    {
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.UnsetTag(key);
-        }
-    }
-
-    private bool BeforeClearTags()
-    {
-        if (Options.EnableScopeSync)
-        {
-            // Workaround for the lack of a Tags.Clear method in the SentryCocoaSdk
-            foreach (var key in Tags.Keys)
-            {
-                Options.ScopeObserver?.UnsetTag(key);
-            }
-        }
-        return true;
-    }
+    private readonly TagsDictionary _tags;
 
     /// <inheritdoc />
     public IDictionary<string, string> Tags => _tags;
@@ -273,13 +242,8 @@ public class Scope : IEventLike
     {
         Options = options ?? new SentryOptions();
         PropagationContext = new SentryPropagationContext(propagationContext);
-        _tags = new(
-            new ConcurrentDictionary<string, string>(),
-            beforeSet: BeforeSetTag,
-            afterSet: AfterSetTag,
-            afterRemove: AfterRemoveTag,
-            beforeClear: BeforeClearTags
-        );
+        _extra = new ExtrasDictionary(new ConcurrentDictionary<string, object?>(), Options);
+        _tags = new TagsDictionary(new ConcurrentDictionary<string, string>(), Options);
     }
 
     // For testing. Should explicitly require SentryOptions.
@@ -328,16 +292,6 @@ public class Scope : IEventLike
         if (Options.EnableScopeSync)
         {
             Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
-        }
-    }
-
-    /// <inheritdoc />
-    public void SetExtra(string key, object? value)
-    {
-        _extra[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetExtra(key, value);
         }
     }
 
@@ -428,7 +382,7 @@ public class Scope : IEventLike
         {
             if (!other.Extra.ContainsKey(key))
             {
-                other.SetExtra(key, value);
+                other.Extra[key] = value;
             }
         }
 

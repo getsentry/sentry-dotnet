@@ -11,6 +11,6 @@ public class SpecialExceptionProcessor : SentryEventExceptionProcessor<SpecialEx
     {
         sentryEvent.AddBreadcrumb("Processor running on special exception.");
 
-        sentryEvent.SetTag("IsSpecial", exception.IsSpecial.ToString());
+        sentryEvent.Tags["IsSpecial"] = exception.IsSpecial.ToString();
     }
 }

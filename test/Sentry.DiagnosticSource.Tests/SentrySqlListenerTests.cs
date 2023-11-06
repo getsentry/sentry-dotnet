@@ -104,7 +104,7 @@ public class SentrySqlListenerTests
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         if (addConnectionSpan)
         {
-            _fixture.Tracer.StartChild("abc").SetExtra(SqlKeys.DbConnectionId, Guid.Empty);
+            _fixture.Tracer.StartChild("abc").Extra[SqlKeys.DbConnectionId] = Guid.Empty;
         }
 
         // Act

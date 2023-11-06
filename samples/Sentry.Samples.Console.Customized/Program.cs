@@ -13,7 +13,7 @@ internal static class Program
             // Never executed:
             // This could be any async I/O operation, like a DB query
             await Task.Yield();
-            scope.SetExtra("Key", "Value");
+            scope.Extra["Key"] = "Value";
         });
 
         // Enable the SDK
@@ -124,12 +124,10 @@ internal static class Program
 
                 // This could be any async I/O operation, like a DB query
                 await Task.Yield();
-                scope.SetExtra("SomeExtraInfo",
-                    new
-                    {
-                        Data = "Value fetched asynchronously",
-                        ManaLevel = 199
-                    });
+                scope.Extra["SomeExtraInfo"] = new {
+                    Data = "Value fetched asynchronously",
+                    ManaLevel = 199
+                };
             });
 
             // Configures a scope which is only valid within the callback
@@ -262,7 +260,7 @@ internal static class Program
         protected override void ProcessException(ArgumentException exception, SentryEvent sentryEvent)
         {
             // Handle specific types of exceptions and add more data to the event
-            sentryEvent.SetTag("parameter-name", exception.ParamName);
+            sentryEvent.Tags["parameter-name"] = exception.ParamName;
         }
     }
 

@@ -19,7 +19,7 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
     {
         Debug.Assert(commandId != Guid.Empty);
 
-        span.SetExtra(EFKeys.DbCommandId, commandId);
+        span.Extra[EFKeys.DbCommandId] = commandId;
     }
 
     private static Guid? TryGetCommandId(ISpanTracer span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbCommandId);

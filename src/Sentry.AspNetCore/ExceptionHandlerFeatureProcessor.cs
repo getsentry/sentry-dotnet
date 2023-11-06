@@ -31,18 +31,18 @@ internal class ExceptionHandlerFeatureProcessor : ISentryEventExceptionProcessor
         var actionName = endpoint?.DisplayName;
         if (actionName is not null)
         {
-            evt.SetTag("ActionName", actionName);
+            evt.Tags["ActionName"] = actionName;
         }
 
         if (_exceptionHandlerFeature.RouteValues is {} routeValues)
         {
             if (routeValues.TryGetValue("controller", out var controller))
             {
-                evt.SetTag("route.controller", $"{controller}");
+                evt.Tags["route.controller"] = $"{controller}";
             }
             if (routeValues.TryGetValue("action", out var action))
             {
-                evt.SetTag("route.action", $"{action}");
+                evt.Tags["route.action"] = $"{action}";
             }
         }
     }

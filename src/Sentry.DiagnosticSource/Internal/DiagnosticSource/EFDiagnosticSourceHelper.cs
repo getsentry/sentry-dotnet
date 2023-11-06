@@ -47,7 +47,7 @@ internal abstract class EFDiagnosticSourceHelper
     {
         Debug.Assert(connectionId != Guid.Empty);
 
-        span.SetExtra(EFKeys.DbConnectionId, connectionId);
+        span.Extra[EFKeys.DbConnectionId] = connectionId;
     }
 
     internal void AddSpan(object? diagnosticSourceValue)
@@ -93,17 +93,17 @@ internal abstract class EFDiagnosticSourceHelper
     {
         if (GetDatabaseName(diagnosticSourceValue) is { } dataBaseName)
         {
-            span.SetExtra(OTelKeys.DbName, dataBaseName);
+            span.Extra[OTelKeys.DbName] = dataBaseName;
         }
 
         if (GetDatabaseSystem(diagnosticSourceValue) is { } databaseProviderName)
         {
-            span.SetExtra(OTelKeys.DbSystem, databaseProviderName);
+            span.Extra[OTelKeys.DbSystem] = databaseProviderName;
         }
 
         if (GetDatabaseServerAddress(diagnosticSourceValue) is { } databaseServerAddress)
         {
-            span.SetExtra(OTelKeys.DbServer, databaseServerAddress);
+            span.Extra[OTelKeys.DbServer] = databaseServerAddress;
         }
     }
 

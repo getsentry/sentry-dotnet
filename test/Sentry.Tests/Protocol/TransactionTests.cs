@@ -121,13 +121,13 @@ public class TransactionTests
         var child1 = txTracer.StartChild("child_op123", "child_desc123 https://user@sentry.io");
         child1.Status = SpanStatus.Unimplemented;
         child1.Tags["q"] = "v";
-        child1.SetExtra("f", "p");
+        child1.Extra["f"] = "p";
         child1.Finish(SpanStatus.Unimplemented);
 
         var child2 = txTracer.StartChild("child_op999", "child_desc999 https://user:password@sentry.io");
         child2.Status = SpanStatus.OutOfRange;
         child2.Tags["xxx"] = "zzz";
-        child2.SetExtra("f222", "p111");
+        child2.Extra["f222"] = "p111";
         child2.Finish(SpanStatus.OutOfRange);
 
         txTracer.Finish(SpanStatus.Aborted);
@@ -205,7 +205,7 @@ public class TransactionTests
             "category",
             BreadcrumbLevel.Warning));
 
-        transaction.SetExtra("extra_key", "extra_value");
+        transaction.Extra["extra_key"] = "extra_value";
         transaction.Fingerprint = new[] { "fingerprint" };
         transaction.Tags["tag_key"] = "tag_value";
         transaction.SetMeasurement("measurement_1", 111);
@@ -216,13 +216,13 @@ public class TransactionTests
         var child1 = transaction.StartChild("child_op123", "child_desc123");
         child1.Status = SpanStatus.Unimplemented;
         child1.Tags["q"] = "v";
-        child1.SetExtra("f", "p");
+        child1.Extra["f"] = "p";
         child1.Finish(SpanStatus.Unimplemented);
 
         var child2 = transaction.StartChild("child_op999", "child_desc999");
         child2.Status = SpanStatus.OutOfRange;
         child2.Tags["xxx"] = "zzz";
-        child2.SetExtra("f222", "p111");
+        child2.Extra["f222"] = "p111";
         child2.Finish(SpanStatus.OutOfRange);
 
         transaction.Finish(SpanStatus.Aborted);

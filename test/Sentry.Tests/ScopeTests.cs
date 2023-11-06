@@ -528,12 +528,11 @@ public class ScopeTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void UnsetTag_ObserverExist_ObserverUnsetsTagIfEnabled(bool observerEnable)
+    public void RemoveTag_ObserverExist_ObserverUnsetsTagIfEnabled(bool observerEnable)
     {
         // Arrange
         var observer = Substitute.For<IScopeObserver>();
-        var scope = new Scope(new SentryOptions
-        {
+        var scope = new Scope(new SentryOptions {
             ScopeObserver = observer,
             EnableScopeSync = observerEnable
         });
@@ -564,7 +563,7 @@ public class ScopeTests
         var expectedCount = observerEnable ? 1 : 0;
 
         // Act
-        scope.SetExtra(expectedKey, expectedValue);
+        scope.Extra[expectedKey] = expectedValue;
 
         // Assert
         observer.Received(expectedCount).SetExtra(Arg.Is(expectedKey), Arg.Is(expectedValue));
@@ -631,7 +630,7 @@ public static class ScopeTestExtensions
         scope.Transaction = Substitute.For<ITransactionTracer>();
         scope.Fingerprint = new[] { $"{salt} fingerprint" };
         scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
-        scope.SetExtra("extra", $"{salt} extra");
+        scope.Extra["extra"] = $"{salt} extra";
         scope.Tags["tag"] = $"{salt} tag";
         scope.AddAttachment(new Attachment(default, default, default, $"{salt} attachment"));
     }

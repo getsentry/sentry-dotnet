@@ -9,7 +9,7 @@ public class ReadOnlyDictionaryExtensionsTests
         var dictionary = new Dictionary<string, object>(); // Empty dictionary
 
         // Act
-        var result = dictionary.TryGetValue<string, string>("key");
+        var result = DictionaryExtensions.TryGetValue<string, string>(dictionary,"key");
 
         // Assert
         result.Should().BeNull();
@@ -25,7 +25,7 @@ public class ReadOnlyDictionaryExtensionsTests
         };
 
         // Act
-        var result = dictionary.TryGetValue<string, string>("key");
+        var result = DictionaryExtensions.TryGetValue<string, string>(dictionary, "key");
 
         // Assert
         result.Should().Be("value");
@@ -41,7 +41,7 @@ public class ReadOnlyDictionaryExtensionsTests
         };
 
         // Act
-        var result = dictionary.TryGetValue<string, string>("key");
+        var result = DictionaryExtensions.TryGetValue<string, string>(dictionary, "key");
 
         // Assert
         result.Should().BeNull();

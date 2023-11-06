@@ -56,23 +56,11 @@ public class Span : ISpanData, IJsonSerializable
     /// <inheritdoc />
     public IDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
-    /// <inheritdoc />
-    public void SetTag(string key, string value) =>
-        (_tags ??= new Dictionary<string, string>())[key] = value;
-
-    /// <inheritdoc />
-    public void UnsetTag(string key) =>
-        (_tags ??= new Dictionary<string, string>()).Remove(key);
-
     // Aka 'data'
     private Dictionary<string, object?>? _extra;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
-
-    /// <inheritdoc />
-    public void SetExtra(string key, object? value) =>
-        (_extra ??= new Dictionary<string, object?>())[key] = value;
+    public IDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
     /// <summary>
     /// Initializes an instance of <see cref="Span"/>.

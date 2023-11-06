@@ -263,7 +263,7 @@ public class SentryHttpMessageHandlerTests
         returnedSpan.Should().NotBeNull();
         returnedSpan!.Operation.Should().Be("http.client");
         returnedSpan.Description.Should().Be($"{method} {url}");
-        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        returnedSpan.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be(method);
     }
 
     [Fact]

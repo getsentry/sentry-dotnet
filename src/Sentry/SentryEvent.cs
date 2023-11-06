@@ -172,7 +172,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
     private Dictionary<string, object?>? _extra;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
+    public IDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
 
     private Dictionary<string, string>? _tags;
 
@@ -229,18 +229,6 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
     /// <inheritdoc />
     public void AddBreadcrumb(Breadcrumb breadcrumb) =>
         (_breadcrumbs ??= new List<Breadcrumb>()).Add(breadcrumb);
-
-    /// <inheritdoc />
-    public void SetExtra(string key, object? value) =>
-        (_extra ??= new Dictionary<string, object?>())[key] = value;
-
-    /// <inheritdoc />
-    public void SetTag(string key, string value) =>
-        (_tags ??= new Dictionary<string, string>())[key] = value;
-
-    /// <inheritdoc />
-    public void UnsetTag(string key) =>
-        (_tags ??= new Dictionary<string, string>()).Remove(key);
 
     internal void Redact()
     {

@@ -42,28 +42,28 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
     {
         Debug.Assert(databaseName != string.Empty);
 
-        span.SetExtra(OTelKeys.DbName, databaseName);
+        span.Extra[OTelKeys.DbName] = databaseName;
     }
 
     private static void SetDatabaseAddress(ISpanTracer span, string databaseAddress)
     {
         Debug.Assert(databaseAddress != string.Empty);
 
-        span.SetExtra(OTelKeys.DbServer, databaseAddress);
+        span.Extra[OTelKeys.DbServer] = databaseAddress;
     }
 
     private static void SetConnectionId(ISpanTracer span, Guid? connectionId)
     {
         Debug.Assert(connectionId != Guid.Empty);
 
-        span.SetExtra(SqlKeys.DbConnectionId, connectionId);
+        span.Extra[SqlKeys.DbConnectionId] = connectionId;
     }
 
     private static void SetOperationId(ISpanTracer span, Guid? operationId)
     {
         Debug.Assert(operationId != Guid.Empty);
 
-        span.SetExtra(SqlKeys.DbOperationId, operationId);
+        span.Extra[SqlKeys.DbOperationId] = operationId;
     }
 
     private static Guid? TryGetOperationId(ISpanTracer span) => span.Extra.TryGetValue<string, Guid?>(SqlKeys.DbOperationId);
@@ -80,7 +80,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
         var parent = transaction.GetDbParentSpan();
         var span = parent.StartChild(operation);
-        span.SetExtra(OTelKeys.DbSystem, "sql");
+        span.Extra[OTelKeys.DbSystem] = "sql";
         SetOperationId(span, value?.GetGuidProperty("OperationId"));
         SetConnectionId(span, value?.GetGuidProperty("ConnectionId"));
     }
@@ -257,17 +257,17 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
         if (statistics["SelectRows"] is long selectRows)
         {
-            span.SetExtra("rows_sent", selectRows);
+            span.Extra["rows_sent"] =  selectRows;
         }
 
         if (statistics["BytesReceived"] is long bytesReceived)
         {
-            span.SetExtra("bytes_received", bytesReceived);
+            span.Extra["bytes_received"] =  bytesReceived;
         }
 
         if (statistics["BytesSent"] is long bytesSent)
         {
-            span.SetExtra("bytes_sent ", bytesSent);
+            span.Extra["bytes_sent"] =  bytesSent;
         }
     }
 }

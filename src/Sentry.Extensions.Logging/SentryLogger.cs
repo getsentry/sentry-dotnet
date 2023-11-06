@@ -108,22 +108,22 @@ internal sealed class SentryLogger : ILogger
                 switch (property.Value)
                 {
                     case string stringTagValue:
-                        @event.SetTag(property.Key, stringTagValue);
+                        @event.Tags[property.Key] = stringTagValue;
                         break;
 
                     case Guid guidTagValue when guidTagValue != Guid.Empty:
-                        @event.SetTag(property.Key, guidTagValue.ToString());
+                        @event.Tags[property.Key] = guidTagValue.ToString();
                         break;
 
                     case Enum enumValue:
-                        @event.SetTag(property.Key, enumValue.ToString());
+                        @event.Tags[property.Key] = enumValue.ToString();
                         break;
 
                     default:
                     {
                         if (property.Value?.GetType().IsPrimitive == true)
                         {
-                            @event.SetTag(property.Key, Convert.ToString(property.Value, CultureInfo.InvariantCulture)!);
+                            @event.Tags[property.Key] = Convert.ToString(property.Value, CultureInfo.InvariantCulture)!;
                         }
                         break;
                     }
@@ -134,7 +134,7 @@ internal sealed class SentryLogger : ILogger
         var tuple = id.ToTupleOrNull();
         if (tuple.HasValue)
         {
-            @event.SetTag(tuple.Value.name, tuple.Value.value);
+            @event.Tags[tuple.Value.name] = tuple.Value.value;
         }
 
         return @event;

@@ -66,21 +66,10 @@ public class SpanTracer : ISpanTracer
     /// <inheritdoc />
     public IDictionary<string, string> Tags => InternalTags ??= new ConcurrentDictionary<string, string>();
 
-    /// <inheritdoc />
-    public void SetTag(string key, string value) =>
-        (InternalTags ??= new ConcurrentDictionary<string, string>())[key] = value;
-
-    /// <inheritdoc />
-    public void UnsetTag(string key) =>
-        (InternalTags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
-
     private readonly ConcurrentDictionary<string, object?> _data = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _data;
-
-    /// <inheritdoc />
-    public void SetExtra(string key, object? value) => _data[key] = value;
+    public IDictionary<string, object?> Extra => _data;
 
     /// <summary>
     /// Initializes an instance of <see cref="SpanTracer"/>.

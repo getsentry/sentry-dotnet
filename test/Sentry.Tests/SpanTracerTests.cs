@@ -27,7 +27,7 @@ public class SpanTracerTests
 
                 for (var i = 0; i < amount; i++)
                 {
-                    transaction.SetExtra(Guid.NewGuid().ToString(), Guid.NewGuid());
+                    transaction.Extra[Guid.NewGuid().ToString()] = Guid.NewGuid();
                 }
             })).ToList();
             ready.WaitOne();
