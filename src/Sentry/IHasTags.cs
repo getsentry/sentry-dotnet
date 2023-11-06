@@ -39,4 +39,10 @@ public static class HasTagsExtensions
             hasTags.Tags[key] = value;
         }
     }
+
+    /// <summary>
+    /// Removes a tag from the object.
+    /// </summary>
+    /// <remarks>Included to make it easier to migrate from Sentry 3.x</remarks>
+    public static void UnsetTag(this IHasTags? hasTags, string key) => hasTags?.Tags.Remove(key);
 }
