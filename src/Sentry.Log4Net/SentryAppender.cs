@@ -93,7 +93,7 @@ public class SentryAppender : AppenderSkeleton
             var level = loggingEvent.ToBreadcrumbLevel();
             IDictionary<string, string> data = GetLoggingEventProperties(loggingEvent)
                 .Where(kvp => kvp.Value != null)
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString()!);
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.ToString() ?? "");
 
             _hub.AddBreadcrumb(message, category, type: null, data, level ?? default);
             return;
