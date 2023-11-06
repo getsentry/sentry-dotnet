@@ -145,8 +145,10 @@ jobs:
         os: [ubuntu, windows, macos]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: test/*.ps1
+          sparse-checkout-cone-mode: false
 
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v3
