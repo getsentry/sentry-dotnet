@@ -54,7 +54,7 @@ public class Span : ISpanData, IJsonSerializable
     private Dictionary<string, string>? _tags;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
+    public IDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>

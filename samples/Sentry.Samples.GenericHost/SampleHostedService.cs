@@ -21,7 +21,7 @@ internal class SampleHostedService : IHostedService
         _hub.AddBreadcrumb("Breadcrumb added directly to Sentry Hub")
             ;
         // Hub allows total control of the scope
-        _hub.ConfigureScope(s => s.SetTag("Worker", nameof(SampleHostedService)));
+        _hub.ConfigureScope(s => s.Tags["Worker"] = nameof(SampleHostedService));
 
         // By default Error and Critical log messages are sent to sentry as events
         _logger.LogError("An event sent to sentry.");

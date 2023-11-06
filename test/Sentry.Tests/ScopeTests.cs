@@ -519,7 +519,7 @@ public class ScopeTests
         var expectedCount = observerEnable ? 1 : 0;
 
         // Act
-        scope.SetTag(expectedKey, expectedValue);
+        scope.Tags[expectedKey] = expectedValue;
 
         // Assert
         observer.Received(expectedCount).SetTag(Arg.Is(expectedKey), Arg.Is(expectedValue));
@@ -541,7 +541,7 @@ public class ScopeTests
         var expectedCount = observerEnable ? 1 : 0;
 
         // Act
-        scope.UnsetTag(expectedKey);
+        scope.Tags.Remove(expectedKey);
 
         // Assert
         observer.Received(expectedCount).UnsetTag(Arg.Is(expectedKey));
@@ -610,7 +610,7 @@ public class ScopeTests
 
         foreach (var (key, value) in tags)
         {
-            scope.SetTag(key, value);
+            scope.Tags[key] = value;
         }
 
         scope.Tags.Should().OnlyContain(pair => pair.Key == "AzFunctions" && pair.Value == "rule");
@@ -632,7 +632,7 @@ public static class ScopeTestExtensions
         scope.Fingerprint = new[] { $"{salt} fingerprint" };
         scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
         scope.SetExtra("extra", $"{salt} extra");
-        scope.SetTag("tag", $"{salt} tag");
+        scope.Tags["tag"] = $"{salt} tag";
         scope.AddAttachment(new Attachment(default, default, default, $"{salt} attachment"));
     }
 

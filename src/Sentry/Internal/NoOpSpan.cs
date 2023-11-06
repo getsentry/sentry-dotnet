@@ -17,7 +17,7 @@ internal class NoOpSpan : ISpanTracer
     public SpanId? ParentSpanId => SpanId.Empty;
     public SentryId TraceId => SentryId.Empty;
     public bool? IsSampled => default;
-    public IReadOnlyDictionary<string, string> Tags => ImmutableDictionary<string, string>.Empty;
+    public IDictionary<string, string> Tags => ImmutableDictionary<string, string>.Empty;
     public IReadOnlyDictionary<string, object?> Extra => ImmutableDictionary<string, object?>.Empty;
     public DateTimeOffset StartTimestamp => default;
     public DateTimeOffset? EndTimestamp => default;

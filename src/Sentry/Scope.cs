@@ -214,10 +214,41 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public IReadOnlyDictionary<string, object?> Extra => _extra;
 
-    private readonly ConcurrentDictionary<string, string> _tags = new();
+    private readonly InterceptingDictionary<string, string> _tags;
+
+    private bool BeforeSetTag(string key, string value) => !Options.TagFilters.Any(x => x.IsMatch(key));
+
+    private void AfterSetTag(string key, string value)
+    {
+        if (Options.EnableScopeSync)
+        {
+            Options.ScopeObserver?.SetTag(key, value);
+        }
+    }
+
+    private void AfterRemoveTag(string key)
+    {
+        if (Options.EnableScopeSync)
+        {
+            Options.ScopeObserver?.UnsetTag(key);
+        }
+    }
+
+    private bool BeforeClearTags()
+    {
+        if (Options.EnableScopeSync)
+        {
+            // Workaround for the lack of a Tags.Clear method in the SentryCocoaSdk
+            foreach (var key in Tags.Keys)
+            {
+                Options.ScopeObserver?.UnsetTag(key);
+            }
+        }
+        return true;
+    }
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags;
+    public IDictionary<string, string> Tags => _tags;
 
 #if NETSTANDARD2_0 || NETFRAMEWORK
     private ConcurrentBag<Attachment> _attachments = new();
@@ -242,6 +273,13 @@ public class Scope : IEventLike
     {
         Options = options ?? new SentryOptions();
         PropagationContext = new SentryPropagationContext(propagationContext);
+        _tags = new(
+            new ConcurrentDictionary<string, string>(),
+            beforeSet: BeforeSetTag,
+            afterSet: AfterSetTag,
+            afterRemove: AfterRemoveTag,
+            beforeClear: BeforeClearTags
+        );
     }
 
     // For testing. Should explicitly require SentryOptions.
@@ -300,31 +338,6 @@ public class Scope : IEventLike
         if (Options.EnableScopeSync)
         {
             Options.ScopeObserver?.SetExtra(key, value);
-        }
-    }
-
-    /// <inheritdoc />
-    public void SetTag(string key, string value)
-    {
-        if (Options.TagFilters.Any(x => x.IsMatch(key)))
-        {
-            return;
-        }
-
-        _tags[key] = value;
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.SetTag(key, value);
-        }
-    }
-
-    /// <inheritdoc />
-    public void UnsetTag(string key)
-    {
-        _tags.TryRemove(key, out _);
-        if (Options.EnableScopeSync)
-        {
-            Options.ScopeObserver?.UnsetTag(key);
         }
     }
 
@@ -423,7 +436,7 @@ public class Scope : IEventLike
         {
             if (!other.Tags.ContainsKey(key))
             {
-                other.SetTag(key, value);
+                other.Tags[key] = value;
             }
         }
 

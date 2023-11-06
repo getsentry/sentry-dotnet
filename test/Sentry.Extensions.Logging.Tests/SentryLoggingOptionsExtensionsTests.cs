@@ -9,8 +9,13 @@ public class SentryLoggingOptionsExtensionsTests
     {
         const string key = "key";
         const string expected = "event tag value";
-        var target = new SentryEvent();
-        target.SetTag(key, expected);
+        var target = new SentryEvent
+        {
+            Tags =
+            {
+                [key] = expected
+            }
+        };
         _sut.DefaultTags[key] = "default value";
 
         _sut.ApplyDefaultTags(target);

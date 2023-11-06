@@ -28,7 +28,7 @@ internal class Program
                 // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
                 o.AddLogEntryFilter((_, level, _, exception) => level < LogLevel.Critical && exception is DivideByZeroException);
 
-                o.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
+                o.ConfigureScope(s => s.Tags["RootScope"] = "sent with all events");
             });
         });
         var logger = loggerFactory.CreateLogger<Program>();

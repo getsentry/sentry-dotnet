@@ -64,7 +64,7 @@ public class SpanTracer : ISpanTracer
     internal ConcurrentDictionary<string, string>? InternalTags { get; private set; }
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => InternalTags ??= new ConcurrentDictionary<string, string>();
+    public IDictionary<string, string> Tags => InternalTags ??= new ConcurrentDictionary<string, string>();
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>

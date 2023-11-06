@@ -131,7 +131,7 @@ public partial class ScopeExtensionsTests
     public void Populate_Request_Url_UnsetsRequestPath()
     {
         const string expected = "/request/path";
-        _sut.SetTag("RequestPath", expected);
+        _sut.Tags["RequestPath"] = expected;
         _httpContext.Request.Path.Returns(new PathString(expected));
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
@@ -413,7 +413,7 @@ public partial class ScopeExtensionsTests
     public void Populate_TraceIdentifier_WhenRequestIdMatch_NotSetAsTag()
     {
         const string expected = "identifier";
-        _sut.SetTag("RequestId", expected);
+        _sut.Tags["RequestId"] = expected;
         _httpContext.TraceIdentifier.Returns(expected);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
@@ -425,7 +425,7 @@ public partial class ScopeExtensionsTests
     public void Populate_TraceIdentifier_WhenRequestIdDoesNotMatch_SetAsTag()
     {
         const string expected = "identifier";
-        _sut.SetTag("RequestId", "different identifier");
+        _sut.Tags["RequestId"] = "different identifier";
         _httpContext.TraceIdentifier.Returns(expected);
 
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);

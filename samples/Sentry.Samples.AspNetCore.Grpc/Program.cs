@@ -55,7 +55,7 @@ public static class Program
                     options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
                     // Configures the root scope
-                    options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
+                    options.ConfigureScope(s => s.Tags["Always sent"] = "this tag");
                 });
             })
             .Build();

@@ -220,7 +220,7 @@ public class ScopeExtensionsTests
             {"expected", "tag"}
         };
 
-        sut.SetTag(expectedTag.Keys.Single(), expectedTag.Values.Single());
+        sut.Tags[expectedTag.Keys.Single()] = expectedTag.Values.Single();
 
         Assert.Equal(expectedTag, sut.Tags);
     }
@@ -230,8 +230,8 @@ public class ScopeExtensionsTests
     {
         const string expected = "expected";
         var sut = _fixture.GetSut();
-        sut.SetTag(expected, expected);
-        sut.UnsetTag(expected);
+        sut.Tags[expected] = expected;
+        sut.Tags.Remove(expected);
 
         Assert.Empty(sut.Tags);
     }
@@ -240,14 +240,14 @@ public class ScopeExtensionsTests
     public void SetTag_SecondTag_AddedToDictionary()
     {
         var sut = _fixture.GetSut();
-        sut.SetTag("original", "value");
+        sut.Tags["original"] = "value";
 
         var expectedTag = new Dictionary<string, string>
         {
             {"additional", "bar"}
         };
 
-        sut.SetTag(expectedTag.Keys.Single(), expectedTag.Values.Single());
+        sut.Tags[expectedTag.Keys.Single()] = expectedTag.Values.Single();
 
         sut.Tags.Should().BeEquivalentTo(new Dictionary<string, string>
         {
@@ -275,7 +275,7 @@ public class ScopeExtensionsTests
     public void SetTags_SecondTag_AddedToDictionary()
     {
         var sut = _fixture.GetSut();
-        sut.SetTag("original", "value");
+        sut.Tags["original"] = "value";
 
         var expectedTags = new Dictionary<string, string>
         {
@@ -697,9 +697,9 @@ public class ScopeExtensionsTests
     public void Apply_Tags_OnTarget_MergedWithSource()
     {
         var sut = _fixture.GetSut();
-        sut.SetTag("sut", "sut");
+        sut.Tags["sut"] = "sut";
         var target = _fixture.GetSut();
-        target.SetTag("target", "target");
+        target.Tags["target"] = "target";
 
         sut.Apply(target);
 
@@ -712,9 +712,9 @@ public class ScopeExtensionsTests
         const string conflictingKey = "conflict";
         const string expectedValue = "expected";
         var sut = _fixture.GetSut();
-        sut.SetTag(conflictingKey, "sut");
+        sut.Tags[conflictingKey] = "sut";
         var target = _fixture.GetSut();
-        target.SetTag(conflictingKey, expectedValue);
+        target.Tags[conflictingKey] = expectedValue;
 
         sut.Apply(target);
 
@@ -726,7 +726,7 @@ public class ScopeExtensionsTests
     public void Apply_Tags_NotOnTarget_SetFromSource()
     {
         var sut = _fixture.GetSut();
-        sut.SetTag("sut", "sut");
+        sut.Tags["sut"] = "sut";
 
         var target = _fixture.GetSut();
         sut.Apply(target);
@@ -739,7 +739,7 @@ public class ScopeExtensionsTests
     {
         var sut = _fixture.GetSut();
         var target = _fixture.GetSut();
-        target.SetTag("target", "target");
+        target.Tags["target"] = "target";
         var expected = target.Tags;
 
         sut.Apply(target);

@@ -23,7 +23,7 @@ public static class ScopeExtensions
             return;
         }
 
-        scope.SetTag("grpc.method", context.Method);
+        scope.Tags["grpc.method"] = context.Method;
 
         if (request is IMessage requestMessage)
         {

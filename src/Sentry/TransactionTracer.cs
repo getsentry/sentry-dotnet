@@ -163,7 +163,7 @@ public class TransactionTracer : ITransactionTracer
     private readonly ConcurrentDictionary<string, string> _tags = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags;
+    public IDictionary<string, string> Tags => _tags;
 
     private readonly ConcurrentBag<SpanTracer> _spans = new();
 

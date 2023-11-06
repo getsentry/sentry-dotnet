@@ -655,7 +655,7 @@ public class EnvelopeTests
 
         @event.SetExtra("extra_key", "extra_value");
         @event.Fingerprint = new[] { "fingerprint" };
-        @event.SetTag("tag_key", "tag_value");
+        @event.Tags["tag_key"] = "tag_value";
 
         using var envelope = Envelope.FromEvent(@event);
 

@@ -62,7 +62,7 @@ public partial class SentryEventTests
 
         sut.SetExtra("extra_key", "extra_value");
         sut.Fingerprint = new[] { "fingerprint" };
-        sut.SetTag("tag_key", "tag_value");
+        sut.Tags["tag_key"] = "tag_value";
 
         var actualString = sut.ToJsonString(_testOutputLogger, indented: true);
 

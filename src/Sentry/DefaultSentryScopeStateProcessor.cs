@@ -16,7 +16,7 @@ public class DefaultSentryScopeStateProcessor : ISentryScopeStateProcessor
         {
             case string scopeString:
                 // TODO: find unique key to support multiple single-string scopes
-                scope.SetTag("scope", scopeString);
+                scope.Tags["scope"] = scopeString;
                 break;
             case IEnumerable<KeyValuePair<string, string>> keyValStringString:
                 scope.SetTags(keyValStringString
@@ -36,7 +36,7 @@ public class DefaultSentryScopeStateProcessor : ISentryScopeStateProcessor
             case ValueTuple<string, string> tupleStringString:
                 if (!string.IsNullOrEmpty(tupleStringString.Item2))
                 {
-                    scope.SetTag(tupleStringString.Item1, tupleStringString.Item2);
+                    scope.Tags[tupleStringString.Item1] = tupleStringString.Item2;
                 }
                 break;
 #endif

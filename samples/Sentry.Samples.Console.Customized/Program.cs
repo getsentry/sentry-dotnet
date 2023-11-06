@@ -274,7 +274,7 @@ internal static class Program
         {
             if (state is SpecialContextObject specialState)
             {
-                scope.SetTag("SpecialContextObject", specialState.A + specialState.B);
+                scope.Tags["SpecialContextObject"] = specialState.A + specialState.B;
             }
             else
             {

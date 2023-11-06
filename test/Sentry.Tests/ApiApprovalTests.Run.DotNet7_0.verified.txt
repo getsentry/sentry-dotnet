@@ -226,9 +226,7 @@ namespace Sentry
     }
     public interface IHasTags
     {
-        System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
-        void SetTag(string key, string value);
-        void UnsetTag(string key);
+        System.Collections.Generic.IDictionary<string, string> Tags { get; }
     }
     public interface IHub : Sentry.ISentryClient, Sentry.ISentryScopeManager
     {
@@ -439,7 +437,7 @@ namespace Sentry
         public Sentry.Request Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.ISpanTracer? Span { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public System.Collections.Generic.IDictionary<string, string> Tags { get; }
         public Sentry.ITransactionTracer? Transaction { get; set; }
         public string? TransactionName { get; set; }
         public Sentry.User User { get; set; }
@@ -456,8 +454,6 @@ namespace Sentry
         [System.Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
         public Sentry.ISpanTracer? GetSpan() { }
         public void SetExtra(string key, object? value) { }
-        public void SetTag(string key, string value) { }
-        public void UnsetTag(string key) { }
     }
     public static class ScopeExtensions
     {
@@ -535,7 +531,7 @@ namespace Sentry
         public System.Collections.Generic.IEnumerable<Sentry.Protocol.SentryException>? SentryExceptions { get; set; }
         public System.Collections.Generic.IEnumerable<Sentry.SentryThread>? SentryThreads { get; set; }
         public string? ServerName { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public System.Collections.Generic.IDictionary<string, string> Tags { get; }
         public System.DateTimeOffset Timestamp { get; }
         public string? TransactionName { get; set; }
         public Sentry.User User { get; set; }
@@ -894,7 +890,7 @@ namespace Sentry
         public Sentry.SpanId SpanId { get; }
         public System.DateTimeOffset StartTimestamp { get; }
         public Sentry.SpanStatus? Status { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public System.Collections.Generic.IDictionary<string, string> Tags { get; }
         public Sentry.SentryId TraceId { get; }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetExtra(string key, object? value) { }
@@ -980,7 +976,7 @@ namespace Sentry
         public Sentry.SpanId SpanId { get; }
         public System.DateTimeOffset StartTimestamp { get; }
         public Sentry.SpanStatus? Status { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public System.Collections.Generic.IDictionary<string, string> Tags { get; }
         public Sentry.SentryId TraceId { get; }
         public void Finish() { }
         public void Finish(Sentry.SpanStatus status) { }
@@ -1051,7 +1047,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Span> Spans { get; }
         public System.DateTimeOffset StartTimestamp { get; }
         public Sentry.SpanStatus? Status { get; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public System.Collections.Generic.IDictionary<string, string> Tags { get; }
         public Sentry.SentryId TraceId { get; }
         public Sentry.User User { get; set; }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
@@ -1114,7 +1110,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyCollection<Sentry.ISpanTracer> Spans { get; }
         public System.DateTimeOffset StartTimestamp { get; }
         public Sentry.SpanStatus? Status { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public System.Collections.Generic.IDictionary<string, string> Tags { get; }
         public Sentry.SentryId TraceId { get; }
         public Sentry.User User { get; set; }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }

@@ -112,7 +112,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
                     value is string stringValue &&
                     key.StartsWith(ExceptionDataTagKey, StringComparison.OrdinalIgnoreCase))
                 {
-                    sentryEvent.SetTag(key[ExceptionDataTagKey.Length..], stringValue);
+                    sentryEvent.Tags[key[ExceptionDataTagKey.Length..]] = stringValue;
                     keysToRemove.Add(key);
                 }
                 else if (key.Length > ExceptionDataContextKey.Length &&

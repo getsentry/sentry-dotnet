@@ -116,17 +116,17 @@ public class TransactionTests
             new Dictionary<string, string> { { "data-key", breadcrumbDataValue } },
             "category",
             BreadcrumbLevel.Warning));
-        txTracer.SetTag("tag_key", tagValue);
+        txTracer.Tags["tag_key"] = tagValue;
 
         var child1 = txTracer.StartChild("child_op123", "child_desc123 https://user@sentry.io");
         child1.Status = SpanStatus.Unimplemented;
-        child1.SetTag("q", "v");
+        child1.Tags["q"] = "v";
         child1.SetExtra("f", "p");
         child1.Finish(SpanStatus.Unimplemented);
 
         var child2 = txTracer.StartChild("child_op999", "child_desc999 https://user:password@sentry.io");
         child2.Status = SpanStatus.OutOfRange;
-        child2.SetTag("xxx", "zzz");
+        child2.Tags["xxx"] = "zzz";
         child2.SetExtra("f222", "p111");
         child2.Finish(SpanStatus.OutOfRange);
 
@@ -207,7 +207,7 @@ public class TransactionTests
 
         transaction.SetExtra("extra_key", "extra_value");
         transaction.Fingerprint = new[] { "fingerprint" };
-        transaction.SetTag("tag_key", "tag_value");
+        transaction.Tags["tag_key"] = "tag_value";
         transaction.SetMeasurement("measurement_1", 111);
         transaction.SetMeasurement("measurement_2", 2.34, MeasurementUnit.Custom("things"));
         transaction.SetMeasurement("measurement_3", 333, MeasurementUnit.Information.Terabyte);
@@ -215,13 +215,13 @@ public class TransactionTests
 
         var child1 = transaction.StartChild("child_op123", "child_desc123");
         child1.Status = SpanStatus.Unimplemented;
-        child1.SetTag("q", "v");
+        child1.Tags["q"] = "v";
         child1.SetExtra("f", "p");
         child1.Finish(SpanStatus.Unimplemented);
 
         var child2 = transaction.StartChild("child_op999", "child_desc999");
         child2.Status = SpanStatus.OutOfRange;
-        child2.SetTag("xxx", "zzz");
+        child2.Tags["xxx"] = "zzz";
         child2.SetExtra("f222", "p111");
         child2.Finish(SpanStatus.OutOfRange);
 

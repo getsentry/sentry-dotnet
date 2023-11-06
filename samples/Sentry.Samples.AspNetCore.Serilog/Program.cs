@@ -54,7 +54,7 @@ public class Program
                     hub.ConfigureScope(s =>
                     {
                         // More data can be added to the scope like this:
-                        s.SetTag("Sample", "ASP.NET Core"); // indexed by Sentry
+                        s.Tags["Sample"] = "ASP.NET Core"; // indexed by Sentry
                         s.SetExtra("Extra!", "Some extra information");
                     });
 

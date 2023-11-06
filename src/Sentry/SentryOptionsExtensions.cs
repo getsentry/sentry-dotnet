@@ -402,7 +402,7 @@ public static class SentryOptionsExtensions
         foreach (var defaultTag in options.DefaultTags
             .Where(t => !hasTags.Tags.TryGetValue(t.Key, out _)))
         {
-            hasTags.SetTag(defaultTag.Key, defaultTag.Value);
+            hasTags.Tags[defaultTag.Key] = defaultTag.Value;
         }
     }
 

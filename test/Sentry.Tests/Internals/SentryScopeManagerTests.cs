@@ -314,7 +314,7 @@ public class SentryScopeManagerTests
     {
         var sut = _fixture.GetSut();
         var root = sut.GetCurrent();
-        void AddRandomTag() => sut.GetCurrent().Key.SetTag(Guid.NewGuid().ToString(), "1");
+        void AddRandomTag() => sut.GetCurrent().Key.Tags[Guid.NewGuid().ToString()] = "1";
         void AssertTagCount(int count) => Assert.Equal(count, sut.GetCurrent().Key.Tags.Count);
 
         AddRandomTag();

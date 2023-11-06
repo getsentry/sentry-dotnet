@@ -136,7 +136,7 @@ public partial class SentryEventTests
             new Dictionary<string, string> { { "data-key", breadcrumbDataValue } },
             "category",
             BreadcrumbLevel.Warning));
-        evt.SetTag("tag_key", tagValue);
+        evt.Tags["tag_key"] = tagValue;
 
         // Act
         evt.Redact();

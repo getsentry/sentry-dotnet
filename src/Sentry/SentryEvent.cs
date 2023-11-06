@@ -177,7 +177,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
     private Dictionary<string, string>? _tags;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
+    public IDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
     internal bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
 

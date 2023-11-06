@@ -181,7 +181,7 @@ public class Transaction : ITransactionData, IJsonSerializable
     private Dictionary<string, string> _tags = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, string> Tags => _tags;
+    public IDictionary<string, string> Tags => _tags;
 
     // Not readonly because of deserialization
     private Span[] _spans = Array.Empty<Span>();

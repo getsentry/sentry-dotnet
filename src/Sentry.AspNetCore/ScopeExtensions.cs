@@ -33,7 +33,7 @@ public static class ScopeExtensions
         // two tags with the same value: RequestId and TraceIdentifier
         if (!scope.Tags.TryGetValue("RequestId", out var requestId) || requestId != context.TraceIdentifier)
         {
-            scope.SetTag(nameof(context.TraceIdentifier), context.TraceIdentifier);
+            scope.Tags[nameof(context.TraceIdentifier)] = context.TraceIdentifier;
         }
 
         if (options.SendDefaultPii && !scope.HasUser())
@@ -77,22 +77,22 @@ public static class ScopeExtensions
 
             if (values["controller"] is string controller)
             {
-                scope.SetTag("route.controller", controller);
+                scope.Tags["route.controller"] = controller;
             }
 
             if (values["action"] is string action)
             {
-                scope.SetTag("route.action", action);
+                scope.Tags["route.action"] = action;
             }
 
             if (values["area"] is string area)
             {
-                scope.SetTag("route.area", area);
+                scope.Tags["route.area"] = area;
             }
 
             if (values["version"] is string version)
             {
-                scope.SetTag("route.version", version);
+                scope.Tags["route.version"] = version;
             }
 
             // Transaction Name may only be available afterward the creation of the Transaction.
@@ -129,7 +129,7 @@ public static class ScopeExtensions
             host += $":{context.Request.Host.Port}";
         }
         scope.Request.Url = $"{context.Request.Scheme}://{host}{context.Request.Path}";
-        scope.UnsetTag("RequestPath");
+        scope.Tags.Remove("RequestPath");
 
         scope.Request.QueryString = context.Request.QueryString.ToString();
         foreach (var requestHeader in context.Request.Headers)
