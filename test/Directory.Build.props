@@ -70,4 +70,5 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
+  <Import Project="$(MSBuildThisFileDirectory)..\src\Sentry\buildTransitive\Sentry.targets" />
 </Project>
