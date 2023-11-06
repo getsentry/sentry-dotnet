@@ -110,17 +110,17 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 
 Describe 'MAUI' {
     BeforeAll {
-        CreateSentryPackage 'Sentry.Android.AssemblyReader'
-        CreateSentryPackage 'Sentry.Bindings.Android'
-        CreateSentryPackage 'Sentry.Extensions.Logging'
-        CreateSentryPackage 'Sentry.Maui'
+        RegisterLocalPackage 'Sentry.Android.AssemblyReader'
+        RegisterLocalPackage 'Sentry.Bindings.Android'
+        RegisterLocalPackage 'Sentry.Extensions.Logging'
+        RegisterLocalPackage 'Sentry.Maui'
         DotnetNew 'maui' './temp/maui-app' 'net7.0'
     }
 
     It "uploads symbols and sources for an Android build" {
         $result = RunDotnet 'build' './temp/maui-app' $True $True 'net7.0-android'
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('maui-app.pdb')
-        $result.ScriptOutput | Should -AnyElementMatch 'Found 6 debug information files \(6 with embedded sources\)'
+        $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
@@ -136,11 +136,6 @@ Describe 'MAUI' {
             'libSystem.Security.Cryptography.Native.Apple.dylib',
             'libxamarin-dotnet-debug.dylib',
             'libxamarin-dotnet.dylib',
-            'Sentry',
-            'Sentry.Bindings.Cocoa.pdb',
-            'Sentry.Extensions.Logging.pdb',
-            'Sentry.Maui.pdb',
-            'Sentry.pdb',
             'maui-app',
             'maui-app.pdb'
         )

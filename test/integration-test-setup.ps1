@@ -59,7 +59,7 @@ BeforeAll {
         (Select-Xml -Path "$PSScriptRoot/../Directory.Build.props" -XPath "/Project/PropertyGroup/Version").Node.InnerText
     }
 
-    function CreateSentryPackage([string] $name)
+    function RegisterLocalPackage([string] $name)
     {
         $packageVersion = GetSentryPackageVersion
         $packagePath = "src/$name/bin/Release/$name.$packageVersion.nupkg"
@@ -85,7 +85,7 @@ BeforeAll {
     }
 
     Remove-Item -Path ./temp/packages -Recurse -Force -ErrorAction SilentlyContinue
-    CreateSentryPackage 'Sentry'
+    RegisterLocalPackage 'Sentry'
 
     function RunDotnet([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0')
     {
@@ -181,16 +181,17 @@ BeforeAll {
         if ($type -eq 'maui')
         {
             AddPackageReference $path 'Sentry.Maui'
-        } else {
-            AddPackageReference $path 'Sentry'
         }
-
-        @"
+        else
+        {
+            AddPackageReference $path 'Sentry'
+            @"
 <Project>
   <PropertyGroup>
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 </Project>
 "@ | Out-File $path/Directory.build.props
+        }
     }
 }
