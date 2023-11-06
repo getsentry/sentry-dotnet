@@ -181,6 +181,20 @@ BeforeAll {
         if ($type -eq 'maui')
         {
             AddPackageReference $path 'Sentry.Maui'
+
+            Push-Location $path
+            try
+            {
+                dotnet workload restore | ForEach-Object { Write-Host $_ }
+                if ($LASTEXITCODE -ne 0)
+                {
+                    throw "Failed to restore workloads."
+                }
+            }
+            finally
+            {
+                Pop-Location
+            }
         }
         else
         {
