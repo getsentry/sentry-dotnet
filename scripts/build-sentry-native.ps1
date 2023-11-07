@@ -17,6 +17,7 @@ try
     {
         $outDir += '/osx'
         $additionalArgs += @('-D', 'CMAKE_OSX_ARCHITECTURES=arm64;x86_64')
+        $additionalArgs += @('-D', 'CMAKE_OSX_DEPLOYMENT_TARGET=12.0')
     }
     elseif ($IsWindows)
     {

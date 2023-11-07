@@ -172,7 +172,7 @@ BeforeAll {
     function DotnetNew([string] $type, [string] $path, [string] $framework)
     {
         Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
-        dotnet new $type --output $path --framework $framework --no-restore | ForEach-Object { Write-Host $_ }
+        dotnet new $type --output $path --framework $framework | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
             throw "Failed to create the test app '$path' from template '$type'."
@@ -198,16 +198,19 @@ BeforeAll {
             }
             AddPackageReference $path 'Sentry.Maui'
         }
-        elseif (!$IsMacOS -or $framework -eq 'net8.0')
+        else
         {
             AddPackageReference $path 'Sentry'
-            @"
+            if (!$IsMacOS -or $framework -eq 'net8.0')
+            {
+                @"
 <Project>
   <PropertyGroup>
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 </Project>
 "@ | Out-File $path/Directory.build.props
+            }
         }
     }
 }

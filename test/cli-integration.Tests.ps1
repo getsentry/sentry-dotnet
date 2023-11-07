@@ -48,7 +48,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 
     BeforeEach {
-        Remove-Item "./temp/console-app/bin/Release/$framework/publish" -ErrorAction SilentlyContinue
+        Remove-Item "./temp/console-app/bin/Release/$framework/publish" -Recurse -ErrorAction SilentlyContinue
     }
 
     It "uploads symbols and sources" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
@@ -128,7 +128,7 @@ Describe 'MAUI' {
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
-        $result = RunDotnet 'build' './temp/maui-app' $True $True 'net8.0-ios'
+        $result = RunDotnet 'build' './temp/maui-app' $True $True 'net7.0-ios'
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
             'libmono-component-diagnostics_tracing.dylib',
