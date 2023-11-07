@@ -27,7 +27,7 @@
         Environment: production,
         Breadcrumbs: [
           {
-            Message: Request starting HTTP/1.1 GET http://localhost/v1.1/Target - -,
+            Message: Request starting HTTP/1.1 GET http://localhost/v1.1/Target - - -,
             Data: {
               eventId: 1
             },
