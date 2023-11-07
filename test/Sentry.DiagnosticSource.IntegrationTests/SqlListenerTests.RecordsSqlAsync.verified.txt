@@ -52,7 +52,7 @@
           IsSampled: true,
           Extra: {
             bytes_received: 167,
-            bytes_sent : 536,
+            bytes_sent: 536,
             db.connection_id: Guid_1,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_2,
