@@ -21,9 +21,13 @@ For big feature it's advised to raise an issue to discuss it first.
 
   *If using an M1 ("Apple silicon") processor, read [the special instructions below](#special-instructions-for-apple-silicon-cpus).*
 
-* On Windows: [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
+* On Windows: 
+  - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
+  - You'll need `CMake` somewhere on your PATH. If you don't already have this, one way to get it is to install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation)
   - `Sentry.DiagnosticSource.IntegrationTests.csproj` uses [SQL LocalDb](https://docs.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb) - [download SQL LocalDB 2019](https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi). To avoid running these tests, unload `Sentry.DiagnosticSource.IntegrationTests.csproj` from the solution.
-* On macOS/Linux: [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
+* On macOS/Linux
+  - [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
+  - Install `CMake` using your favourite package manager (e.g. `brew install cmake`) 
 
 ## .NET MAUI Requirements
 

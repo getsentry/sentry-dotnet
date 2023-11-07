@@ -425,9 +425,12 @@ public class TransactionTests
         transaction.Spans.Should().NotContain(s => s.Operation == "sentryRequest");
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task Finish_SentryRequestTransactionGetsIgnored()
     {
+        // See https://github.com/getsentry/sentry-dotnet/issues/2785
+        Skip.If(TestEnvironment.IsGitHubActions);
+
         // Arrange
         var client = Substitute.For<ISentryClient>();
         var options = new SentryOptions
