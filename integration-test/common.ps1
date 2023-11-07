@@ -92,7 +92,7 @@ BeforeAll {
     New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
     RegisterLocalPackage 'Sentry'
 
-    function RunDotnet([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0')
+    function RunDotnetWithSentryCLI([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0')
     {
         $rootDir = $PSScriptRoot
 
@@ -186,27 +186,23 @@ BeforeAll {
             # Workaround for the missing "ios" workload on Linux, see https://github.com/dotnet/maui/pull/18580
             $tfs = $IsMacos ? "$framework-android;$framework-ios;$framework-maccatalyst" : "$framework-android"
             (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
-
-            if (Test-Path env:CI)
+            Push-Location $name
+            try
             {
-                Push-Location $name
-                try
+                dotnet workload restore | ForEach-Object { Write-Host $_ }
+                if ($LASTEXITCODE -ne 0)
                 {
-                    dotnet workload restore | ForEach-Object { Write-Host $_ }
-                    if ($LASTEXITCODE -ne 0)
-                    {
-                        throw "Failed to restore workloads."
-                    }
-                    dotnet restore | ForEach-Object { Write-Host $_ }
-                    if ($LASTEXITCODE -ne 0)
-                    {
-                        throw "Failed to restore."
-                    }
+                    throw "Failed to restore workloads."
                 }
-                finally
+                dotnet restore | ForEach-Object { Write-Host $_ }
+                if ($LASTEXITCODE -ne 0)
                 {
-                    Pop-Location
+                    throw "Failed to restore."
                 }
+            }
+            finally
+            {
+                Pop-Location
             }
             AddPackageReference $name 'Sentry.Maui'
         }

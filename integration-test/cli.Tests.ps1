@@ -15,26 +15,26 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
     }
 
     It "uploads symbols and sources" {
-        $result = RunDotnet 'build' 'console-app' $True $True $framework
+        $result = RunDotnetWithSentryCLI 'build' 'console-app' $True $True $framework
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('console-app.pdb')
         $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
         $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 0 debug information files'
     }
 
     It "uploads symbols" {
-        $result = RunDotnet 'build' 'console-app' $True $False $framework
+        $result = RunDotnetWithSentryCLI 'build' 'console-app' $True $False $framework
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('console-app.pdb')
         $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
     }
 
     It "uploads sources" {
-        $result = RunDotnet 'build' 'console-app' $False $True $framework
+        $result = RunDotnetWithSentryCLI 'build' 'console-app' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch 'Skipping embedded source file: .*/console-app/Program.cs'
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
 
     It "uploads nothing when disabled" {
-        $result = RunDotnet 'build' 'console-app' $False $False $framework
+        $result = RunDotnetWithSentryCLI 'build' 'console-app' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
 }
@@ -52,7 +52,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 
     It "uploads symbols and sources" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'console-app' $True $True $framework
+        $result = RunDotnetWithSentryCLI 'publish' 'console-app' $True $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
         {
@@ -73,7 +73,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 
     It "uploads symbols" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'console-app' $True $False $framework
+        $result = RunDotnetWithSentryCLI 'publish' 'console-app' $True $False $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
         {
@@ -92,7 +92,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 
     It "uploads sources" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'console-app' $False $True $framework
+        $result = RunDotnetWithSentryCLI 'publish' 'console-app' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         $sourceBundle = 'console-app.src.zip'
         if ($IsMacOS -or ($IsLinux -and $framework -eq 'net7.0'))
@@ -103,7 +103,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 
     It "uploads nothing when disabled" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
-        $result = RunDotnet 'publish' 'console-app' $False $False $framework
+        $result = RunDotnetWithSentryCLI 'publish' 'console-app' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }
 }
@@ -122,13 +122,13 @@ Describe 'MAUI' {
     }
 
     It "uploads symbols and sources for an Android build" {
-        $result = RunDotnet 'build' 'maui-app' $True $True 'net7.0-android'
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True 'net7.0-android'
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('maui-app.pdb')
         $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
-        $result = RunDotnet 'build' 'maui-app' $True $True 'net7.0-ios'
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True 'net7.0-ios'
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
             'libmono-component-diagnostics_tracing.dylib',
