@@ -77,7 +77,7 @@ internal class FakeTransport : ITransport
     }
 
     It "sends native debug images" {
-        runConsoleApp | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"(pe|dwarf|macho)","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
+        runConsoleApp | Should -AnyElementMatch '"debug_meta":{"images":\[{"type":"(pe|elf|macho)","image_addr":"0x[a-f0-9]+","image_size":[0-9]+,"debug_id":"[a-f0-9\-]+"'
     }
 
     It "sends stack trace native addresses" {

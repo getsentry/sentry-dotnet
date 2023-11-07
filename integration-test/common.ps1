@@ -78,7 +78,7 @@ BeforeAll {
         }
         Write-Host "Using package $packagePath - $((Get-Item $packagePath).Length) bytes"
 
-        nuget add $packagePath -source "$PSScriptRoot/packages" | ForEach-Object { Write-Host $_ }
+        dotnet nuget push $packagePath --source integration-test | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
             throw "Failed to add package $name to a local nuget source."
@@ -88,7 +88,8 @@ BeforeAll {
         Remove-Item -Path ~/.nuget/packages/$name/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
     }
 
-    Remove-Item -Path ./packages -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$PSScriptRoot/packages" -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
     RegisterLocalPackage 'Sentry'
 
     function RunDotnet([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0')
@@ -156,7 +157,7 @@ BeforeAll {
             dotnet restore | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
-                throw "Failed to add restore test app project."
+                throw "Failed to restore the test app project."
             }
 
             $packageVersion = GetSentryPackageVersion
@@ -171,20 +172,24 @@ BeforeAll {
             Pop-Location
         }
     }
-    function DotnetNew([string] $type, [string] $path, [string] $framework)
+    function DotnetNew([string] $type, [string] $name, [string] $framework)
     {
-        Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
-        dotnet new $type --output $path --framework $framework | ForEach-Object { Write-Host $_ }
+        Remove-Item -Path $name -Recurse -Force -ErrorAction SilentlyContinue
+        dotnet new $type --output $name --framework $framework | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
-            throw "Failed to create the test app '$path' from template '$type'."
+            throw "Failed to create the test app '$name' from template '$type'."
         }
 
         if ($type -eq 'maui')
         {
+            # Workaround for the missing "ios" workload on Linux, see https://github.com/dotnet/maui/pull/18580
+            $tfs = $IsMacos ? "$framework-android;$framework-ios;$framework-maccatalyst" : "$framework-android"
+            (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
+
             if (Test-Path env:CI)
             {
-                Push-Location $path
+                Push-Location $name
                 try
                 {
                     dotnet workload restore | ForEach-Object { Write-Host $_ }
@@ -203,11 +208,11 @@ BeforeAll {
                     Pop-Location
                 }
             }
-            AddPackageReference $path 'Sentry.Maui'
+            AddPackageReference $name 'Sentry.Maui'
         }
         else
         {
-            AddPackageReference $path 'Sentry'
+            AddPackageReference $name 'Sentry'
             if (!$IsMacOS -or $framework -eq 'net8.0')
             {
                 @"
@@ -216,7 +221,7 @@ BeforeAll {
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 </Project>
-"@ | Out-File $path/Directory.build.props
+"@ | Out-File $name/Directory.Build.props
             }
         }
     }
