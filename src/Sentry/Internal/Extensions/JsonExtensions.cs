@@ -42,7 +42,7 @@ internal static class JsonExtensions
         return options;
     }
 
-    private static JsonSerializerOptions SerializerOptions = null!;
+    internal static JsonSerializerOptions SerializerOptions = null!;
     private static JsonSerializerOptions AltSerializerOptions = null!;
 
     private static List<JsonSerializerContext> DefaultSerializerContexts = new();
