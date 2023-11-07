@@ -190,6 +190,11 @@ BeforeAll {
                     {
                         throw "Failed to restore workloads."
                     }
+                    dotnet restore | ForEach-Object { Write-Host $_ }
+                    if ($LASTEXITCODE -ne 0)
+                    {
+                        throw "Failed to restore."
+                    }
                 }
                 finally
                 {

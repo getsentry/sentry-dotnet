@@ -141,7 +141,8 @@ Describe 'MAUI' {
             'libxamarin-dotnet-debug.dylib',
             'libxamarin-dotnet.dylib',
             'maui-app',
-            'maui-app.pdb'
+            'maui-app.pdb',
+            'Sentry'
         )
         $nonZeroNumberRegex = '[1-9][0-9]*';
         $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
