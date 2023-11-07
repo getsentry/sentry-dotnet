@@ -20,11 +20,11 @@ internal static class AotHelper
 #if NET6_0_OR_GREATER   // TODO NET7 once we target it
         try
         {
-            var json = JsonSerializer.Serialize(
+            var _ = JsonSerializer.Serialize(
                 new { a = "1" },
                 JsonExtensions.SerializerOptions
             );
-            IsAot = !string.IsNullOrEmpty(json);
+            IsAot = false;
         }
         catch
         {

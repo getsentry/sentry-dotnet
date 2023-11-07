@@ -34,45 +34,12 @@
               {
                 Type: System.Exception,
                 Value: Exception message,
-                Stacktrace: {
-                  Frames: [
-                    {
-                      FileName: IntegrationTests.verify.cs,
-                      Function: Task IntegrationTests.Simple(),
-                      Module: null,
-                      LineNumber: 48,
-                      ColumnNumber: 17,
-                      AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
-                      ContextLine: null,
-                      InApp: false,
-                      Package: Sentry.NLog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,
-                      Platform: null,
-                      ImageAddress: null,
-                      SymbolAddress: null,
-                      InstructionAddress: 2,
-                      AddressMode: rel:0,
-                      FunctionId: 1
-                    }
-                  ]
-                },
                 Mechanism: {
                   Type: generic,
                   Handled: true,
                   Synthetic: false,
                   IsExceptionGroup: false
                 }
-              }
-            ],
-            DebugImages: [
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: .../Sentry.NLog.Tests.pdb,
-                CodeId: _____________,
-                CodeFile: .../Sentry.NLog.Tests.dll
               }
             ],
             Level: error,
