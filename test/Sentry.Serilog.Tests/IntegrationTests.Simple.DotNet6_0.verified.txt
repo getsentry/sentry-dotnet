@@ -194,6 +194,27 @@
               {
                 Type: System.Exception,
                 Value: Exception message,
+                Stacktrace: {
+                  Frames: [
+                    {
+                      FileName: IntegrationTests.verify.cs,
+                      Function: Task IntegrationTests.Simple(),
+                      Module: null,
+                      LineNumber: 47,
+                      ColumnNumber: 17,
+                      AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
+                      ContextLine: null,
+                      InApp: false,
+                      Package: Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,
+                      Platform: null,
+                      ImageAddress: null,
+                      SymbolAddress: null,
+                      InstructionAddress: 2,
+                      AddressMode: rel:0,
+                      FunctionId: 1
+                    }
+                  ]
+                },
                 Mechanism: {
                   Type: generic,
                   Handled: true,
@@ -203,6 +224,18 @@
                     details: Do work always throws.
                   }
                 }
+              }
+            ],
+            DebugImages: [
+              {
+                Type: pe_dotnet,
+                ImageAddress: null,
+                ImageSize: null,
+                DebugId: ________-____-____-____-____________-________,
+                DebugChecksum: ______:________________________________________________________________,
+                DebugFile: .../Sentry.Serilog.Tests.pdb,
+                CodeId: _____________,
+                CodeFile: .../Sentry.Serilog.Tests.dll
               }
             ],
             Level: fatal,
