@@ -1,13 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net462;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net462;netstandard2.1</TargetFrameworks>
     <Description>Official Entity Framework 6 integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <PackageTags>$(PackageTags);EntityFramework;EF;EF6</PackageTags>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
-    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
