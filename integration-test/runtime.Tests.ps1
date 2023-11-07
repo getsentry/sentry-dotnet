@@ -1,13 +1,13 @@
 # This file contains test cases for https://pester.dev/
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-. $PSScriptRoot/integration-test-setup.ps1
+. $PSScriptRoot/common.ps1
 
 Describe 'Console app (<framework>)' -ForEach @(
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
-        $path = './temp/console-app'
+        $path = './console-app'
         DotnetNew 'console' $path $framework
         @"
 using Sentry;
@@ -35,7 +35,7 @@ internal class FakeTransport : ITransport
 "@ | Out-File $path/Program.cs
 
         # Publish once, then run the executable in actual tests.
-        dotnet publish temp/console-app -c Release --nologo --framework $framework | ForEach-Object { Write-Host $_ }
+        dotnet publish console-app -c Release --nologo --framework $framework | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
             throw "Failed to publish the test app project."
@@ -46,15 +46,15 @@ internal class FakeTransport : ITransport
             if ($IsMacOS)
             {
                 $arch = $(uname -m) -eq 'arm64' ? 'arm64' : 'x64'
-                return "./temp/console-app/bin/Release/$framework/osx-$arch/publish/console-app"
+                return "./console-app/bin/Release/$framework/osx-$arch/publish/console-app"
             }
             elseif ($IsWindows)
             {
-                return "./temp/console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
+                return "./console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
             }
             else
             {
-                return "./temp/console-app/bin/Release/$framework/linux-x64/publish/console-app"
+                return "./console-app/bin/Release/$framework/linux-x64/publish/console-app"
             }
         }
 

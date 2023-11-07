@@ -1,5 +1,4 @@
 # So that this works in VS Code testing integration. Otherwise the script is run within its directory.
-Push-Location $PSScriptRoot/../
 
 # In CI, the module is loaded automatically
 if (!(Test-Path env:CI ))
@@ -51,7 +50,12 @@ BeforeDiscovery {
         -SupportsArrayInput
 }
 
+AfterAll {
+    Pop-Location
+}
+
 BeforeAll {
+    Push-Location $PSScriptRoot
     $env:SENTRY_LOG_LEVEL = 'debug';
 
     function GetSentryPackageVersion()
@@ -62,11 +66,11 @@ BeforeAll {
     function RegisterLocalPackage([string] $name)
     {
         $packageVersion = GetSentryPackageVersion
-        $packagePath = "src/$name/bin/Release/$name.$packageVersion.nupkg"
+        $packagePath = "$PSScriptRoot/../src/$name/bin/Release/$name.$packageVersion.nupkg"
         if (-not (Test-Path env:CI))
         {
             Write-Host "Packaging $name, expected output path: $packagePath"
-            dotnet pack src/$name -c Release --nologo --no-restore -p:Version=$packageVersion -p:IsPackable=true | ForEach-Object { Write-Host $_ }
+            dotnet pack "$PSScriptRoot/../src/$name" -c Release --nologo --no-restore -p:Version=$packageVersion -p:IsPackable=true | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to package $name."
@@ -74,7 +78,7 @@ BeforeAll {
         }
         Write-Host "Using package $packagePath - $((Get-Item $packagePath).Length) bytes"
 
-        nuget add $packagePath -source ./temp/packages | ForEach-Object { Write-Host $_ }
+        nuget add $packagePath -source "$PSScriptRoot/packages" | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
             throw "Failed to add package $name to a local nuget source."
@@ -84,12 +88,12 @@ BeforeAll {
         Remove-Item -Path ~/.nuget/packages/$name/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
     }
 
-    Remove-Item -Path ./temp/packages -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path ./packages -Recurse -Force -ErrorAction SilentlyContinue
     RegisterLocalPackage 'Sentry'
 
     function RunDotnet([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0')
     {
-        $rootDir = "$(Get-Item $PSScriptRoot/../../)"
+        $rootDir = $PSScriptRoot
 
         $result = Invoke-SentryServer {
             Param([string]$url)
@@ -117,9 +121,7 @@ BeforeAll {
                     }
                     else
                     {
-                        "$_". `
-                            Replace($rootDir, '').  `
-                            Replace('\', '/')
+                        "$_".Replace('\', '/').Replace($rootDir, '')
                     }
                 }
                 | ForEach-Object {
@@ -158,7 +160,7 @@ BeforeAll {
             }
 
             $packageVersion = GetSentryPackageVersion
-            dotnet add package $package --source $PSScriptRoot/../temp/packages --version $packageVersion | ForEach-Object { Write-Host $_ }
+            dotnet add package $package --source $PSScriptRoot/packages --version $packageVersion | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to add package dependency to the test app project."

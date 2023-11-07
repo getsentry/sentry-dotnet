@@ -150,8 +150,7 @@ jobs:
         with:
           sparse-checkout: |
             Directory.Build.props
-            test/*.ps1
-          sparse-checkout-cone-mode: false
+            integration-test
 
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v3
@@ -170,4 +169,4 @@ jobs:
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
-          path: test
+          path: integration-test
