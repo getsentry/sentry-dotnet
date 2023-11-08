@@ -5,13 +5,15 @@ namespace Sentry.PlatformAbstractions;
 /// </summary>
 public class Runtime : IEquatable<Runtime>
 {
+    private static Lazy<Runtime> _currentRuntime = new(RuntimeInfo.GetRuntime);
+
     /// <summary>
     /// Gets the current runtime
     /// </summary>
     /// <value>
     /// The current runtime.
     /// </value>
-    public static Runtime Current { get; } = RuntimeInfo.GetRuntime();
+    public static Runtime Current => _currentRuntime.Value;
 
     /// <summary>
     /// The name of the runtime

@@ -8,12 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5" />
     <PackageReference Include="NSubstitute" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
+    <ProjectReference Include="..\..\test\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
   <!-- BenchmarkDotNet depends on Microsoft.Diagnostics.Tracing.TraceEvent which includes types we're vendoring in Sentry through the perview submodule.-->

@@ -719,6 +719,7 @@ namespace Sentry
             "usage.")]
         public static void DisableTaskUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static void DisableUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
+        public static void DisableWinUiUnhandledExceptionIntegration(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors(this Sentry.SentryOptions options) { }
