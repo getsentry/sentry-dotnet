@@ -162,6 +162,10 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - run: dotnet workload list
+
+      - run: dotnet workload install android
+
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
