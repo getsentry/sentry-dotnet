@@ -141,6 +141,8 @@ Directory [./integration-test](./integration-test/) contains [Pester](https://pe
 These tests create sample apps with `dotnet new` and run against local nuget packages (.nuget files).
 In CI, these packages are expected to be present, while locally, scripts will run `nuget pack` automatically.
 
-Because these tests rely on Sentry mock server from <https://github.com/getsentry/github-workflows/tree/main/sentry-cli/integration-test>, you need to check out `getsentry/github-workflows` as a sibling directory next to your `getsentry/sentry-dotnet` checkout.
+### Running integration tests locally
 
-Localy, you can run individual tests either via Pester integration (e.g. in VS Code), or from command line: `./integration-test/cli.Tests.ps1`. Consult Pester docs for details on how to write tests.
+You can run individual tests either via Pester integration (e.g. in VS Code), or from command line: `./integration-test/cli.Tests.ps1`. Consult Pester docs for details on how to write tests.
+
+Because these tests rely on a Sentry server mock (`Invoke-SentryServer`) from <https://github.com/getsentry/github-workflows/tree/main/sentry-cli/integration-test>, you need to check out [getsentry/github-workflows](https://github.com/getsentry/github-workflows) as a sibling directory next to your `getsentry/sentry-dotnet` checkout.

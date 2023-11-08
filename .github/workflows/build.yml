@@ -151,7 +151,6 @@ jobs:
           sparse-checkout: |
             Directory.Build.props
             integration-test
-            .github
 
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v3
@@ -159,12 +158,13 @@ jobs:
           name: ${{ github.sha }}
           path: src
 
-      - name: Setup Environment
-        uses: ./.github/actions/environment
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            7.0.x
+            8.0.x
 
-      - run: dotnet workload list
-
-      - run: dotnet workload install android
+      - run: dotnet workload install android maui-android
 
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
