@@ -35,7 +35,8 @@ internal static class RouteUtils
             builder.Append(routePattern);
         }
 
-        return builder.ToString();
+        // Force a leading slash (if there isn't already one present)
+        return $"/{builder.ToString().TrimStart('/')}";
     }
 
     // Internal for testing.

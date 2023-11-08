@@ -28,13 +28,13 @@ public class RouteUtilsTests
     }
 
     [Theory]
-    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "myPath/theArea/house/about/{id?}", "house", "about", "theArea")]
-    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "myPath/{area=MyArea}/house/about/{id?}", "house", "about", null)]
-    [InlineData("{area=}/{controller=}/{action=}/{id?}", "myPath/{area=}/{controller=}/{action=}/{id?}", "house", "about", "theArea")]
-    [InlineData("{controller=Home}/{action=Index}/{id?}", "myPath/house/about/{id?}", "house", "about", null)]
-    [InlineData("{controller=Home}/{action=Index}", "myPath/house/about", "house", "about", null)]
-    [InlineData("{controller=Home}/{id?}", "myPath/house/{id?}", "house", "about", null)]
-    [InlineData("{action=Index}/{id?}", "myPath/about/{id?}", null, "about", null)]
+    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "/myPath/theArea/house/about/{id?}", "house", "about", "theArea")]
+    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "/myPath/{area=MyArea}/house/about/{id?}", "house", "about", null)]
+    [InlineData("{area=}/{controller=}/{action=}/{id?}", "/myPath/{area=}/{controller=}/{action=}/{id?}", "house", "about", "theArea")]
+    [InlineData("{controller=Home}/{action=Index}/{id?}", "/myPath/house/about/{id?}", "house", "about", null)]
+    [InlineData("{controller=Home}/{action=Index}", "/myPath/house/about", "house", "about", null)]
+    [InlineData("{controller=Home}/{id?}", "/myPath/house/{id?}", "house", "about", null)]
+    [InlineData("{action=Index}/{id?}", "/myPath/about/{id?}", null, "about", null)]
     public void NewRouteFormat_MvcRouteWithPathBase_ParsedParameters(string routeInput, string expectedOutput, string controller, string action, string area)
     {
         // Arrange
@@ -48,14 +48,14 @@ public class RouteUtilsTests
     }
 
     [Theory]
-    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "theArea/house/about/{id?}", "house", "about", "theArea", null)]
-    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "{area=MyArea}/house/about/{id?}", "house", "about", null, null)]
-    [InlineData("{area=}/{controller=}/{action=}/{id?}", "{area=}/{controller=}/{action=}/{id?}", "house", "about", "theArea", null)]
-    [InlineData("{controller=Home}/{action=Index}/{id?}", "house/about/{id?}", "house", "about", null, null)]
-    [InlineData("{controller=Home}/{action=Index}", "house/about", "house", "about", null, null)]
-    [InlineData("{controller=Home}/{id?}", "house/{id?}", "house", "about", null, null)]
-    [InlineData("{action=Index}/{id?}", "about/{id?}", null, "about", null, null)]
-    [InlineData("v{version:apiVersion}/Target", "v1.1/Target", null, "about", null, "1.1")]
+    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "/theArea/house/about/{id?}", "house", "about", "theArea", null)]
+    [InlineData("{area=MyArea}/{controller=Home}/{action=Index}/{id?}", "/{area=MyArea}/house/about/{id?}", "house", "about", null, null)]
+    [InlineData("{area=}/{controller=}/{action=}/{id?}", "/{area=}/{controller=}/{action=}/{id?}", "house", "about", "theArea", null)]
+    [InlineData("{controller=Home}/{action=Index}/{id?}", "/house/about/{id?}", "house", "about", null, null)]
+    [InlineData("{controller=Home}/{action=Index}", "/house/about", "house", "about", null, null)]
+    [InlineData("{controller=Home}/{id?}", "/house/{id?}", "house", "about", null, null)]
+    [InlineData("{action=Index}/{id?}", "/about/{id?}", null, "about", null, null)]
+    [InlineData("v{version:apiVersion}/Target", "/v1.1/Target", null, "about", null, "1.1")]
     public void NewRouteFormat_MvcRouteWithoutPathBase_ParsedParameters(string routeInput, string expectedOutput, string controller, string action, string area, string version)
     {
         // Arrange
@@ -69,9 +69,9 @@ public class RouteUtilsTests
     }
 
     [Theory]
-    [InlineData("myPath/some/Path", "/myPath", "some/Path")]
-    [InlineData("some/Path", null, "some/Path")]
-    [InlineData("api/health", "/api", "/health")]
+    [InlineData("/myPath/some/Path", "/myPath", "some/Path")]
+    [InlineData("/some/Path", null, "some/Path")]
+    [InlineData("/api/health", "/api", "/health")]
     [InlineData(null, null, "")]
     [InlineData(null, null, null)]
     public void NewRouteFormat_WithPathBase_MatchesExpectedRoute(string expectedRoute, string pathBase, string rawRoute)
