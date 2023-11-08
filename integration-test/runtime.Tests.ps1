@@ -58,13 +58,13 @@ internal class FakeTransport : ITransport
             }
         }
 
-        function runConsoleApp()
+        function runConsoleApp([bool]$IsAOT = $true)
         {
-            $path = getConsoleAppPath
-            Write-Host "::group::Executing $path"
+            $executable = $IsAOT ? { & (getConsoleAppPath) } : { dotnet run --project $path -c Release --framework $framework }
+            Write-Host "::group::Executing $executable"
             try
             {
-                & $path | ForEach-Object {
+                $executable.Invoke() | ForEach-Object {
                     Write-Host "  $_"
                     $_
                 }
@@ -92,5 +92,13 @@ internal class FakeTransport : ITransport
         $debugExtension = $IsWindows ? '.pdb' : $IsMacOS ? '.dSYM' : '.dbg'
         $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be (@(
                 "console-app$exeExtension", "console-app$debugExtension") | Sort-Object -Unique)
+    }
+
+    It "'dotnet publish' produces an app that's recognized as AOT by Sentry" {
+        runConsoleApp | Should -AnyElementMatch 'This looks like an AOT application build.'
+    }
+
+    It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
+        runConsoleApp $false | Should -AnyElementMatch 'This looks like a JIT application build.'
     }
 }
