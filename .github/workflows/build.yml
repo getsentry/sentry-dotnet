@@ -27,14 +27,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Rebuild Solution Filters
-        shell: pwsh
-        run: scripts/generate-solution-filters.ps1
-
-      - name: Ensure Solution Filters are up to date
-        shell: pwsh
-        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
-
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
@@ -93,3 +85,19 @@ jobs:
           path: |
             ${{ github.workspace }}/src/**/Release/*.nupkg
             ${{ github.workspace }}/src/**/Release/*.snupkg
+
+  test-solution-filters:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Rebuild Solution Filters
+        shell: pwsh
+        run: pwsh scripts/generate-solution-filters.ps1
+
+      - name: Ensure Solution Filters are up to date
+        shell: pwsh
+        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
