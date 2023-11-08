@@ -108,11 +108,9 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 }
 
-# TODO creating a sample app with `dotnet new` currently fails in CI on all platforms with:
-#  'error: NU1100: Unable to resolve 'Microsoft.Extensions.Http (>= 6.0.0)' for 'net7.0-android33.0'. PackageSourceMapping is enabled, the following source(s) were not considered: integration-test.'
 Describe 'MAUI' -ForEach @(
     @{ framework = "net7.0" }
-) -Skip:$true {
+) {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
         RegisterLocalPackage 'Sentry.Bindings.Android'
