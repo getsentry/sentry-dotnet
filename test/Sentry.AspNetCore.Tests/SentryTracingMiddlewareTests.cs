@@ -155,6 +155,48 @@ public class SentryTracingMiddlewareTests
         );
     }
 
+    [Fact]
+    public async Task Transaction_name_includes_slash_prefix()
+    {
+        // Arrange
+        var sentryClient = Substitute.For<ISentryClient>();
+
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseDefaultServiceProvider(di => di.EnableValidation())
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.AddRouting();
+
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+            })
+            .Configure(app =>
+            {
+                app.UseRouting();
+
+                app.UseEndpoints(routes => routes.Map("foo", _ => Task.CompletedTask));
+            }));
+
+        var client = server.CreateClient();
+        Transaction transaction = null;
+        sentryClient.CaptureTransaction(
+            Arg.Do<Transaction>(t => transaction = t),
+            Arg.Any<Hint>()
+            );
+
+        // Act
+        using var request = new HttpRequestMessage(HttpMethod.Get, "foo");
+
+        await client.SendAsync(request);
+
+        // Assert
+        transaction.Should().NotBeNull();
+        transaction.Name.Should().Be("GET /foo");
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
