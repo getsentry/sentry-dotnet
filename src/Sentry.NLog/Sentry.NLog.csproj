@@ -7,6 +7,10 @@
     <CLSCompliant>true</CLSCompliant>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="NLog" Version="5.0.5" />
   </ItemGroup>

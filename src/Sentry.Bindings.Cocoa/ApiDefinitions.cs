@@ -20,7 +20,7 @@ partial interface Constants
 
     // extern const unsigned char[] SentryVersionString;
     [Field ("SentryVersionString", "__Internal")]
-    [return: PlainString]
+    [PlainString]
     NSString SentryVersionString { get; }
 }
 
@@ -151,7 +151,7 @@ interface SentryBreadcrumb : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
+    new NSDictionary<NSString, NSObject> Serialize();
 
     // -(BOOL)isEqualToBreadcrumb:(SentryBreadcrumb * _Nonnull)breadcrumb;
     [Export ("isEqualToBreadcrumb:")]
@@ -1798,7 +1798,7 @@ partial interface SentryScope : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
+    new NSDictionary<NSString, NSObject> Serialize();
 
     // -(void)setContextValue:(NSDictionary<NSString *,id> * _Nonnull)value forKey:(NSString * _Nonnull)key __attribute__((swift_name("setContext(value:key:)")));
     [Export ("setContextValue:forKey:")]

@@ -132,7 +132,7 @@ public partial class MainExceptionProcessorTests
         try
         {
             // Throwing will put a stack trace on the exception
-            throw new AggregateException(
+            throw new AggregateException("One or more errors occurred.",
                 new Exception("Inner message1"),
                 new Exception("Inner message2"));
         }

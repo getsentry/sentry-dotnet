@@ -78,18 +78,20 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 - `ISpan` and `ITransaction` have been renamed to `ISpanTracer` and `ITransactionTracer`. You will need to update any references to these interfaces in your code to use the new interface names ([#2731](https://github.com/getsentry/sentry-dotnet/pull/2731))
 - Removed obsolete setter from `Sentry.PlatformAbstractions.Runtime.Identifier` ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
 - `Sentry.Values<T>` is now internal as it is never exposed in the public API ([#2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
-- The Sentry core package now supports AOT compilation for .NET 7+. There are some functional differences when compiling AOT:
+- AOT compilation support for .NET 7+ has been added to Sentry, Sentry.Serilog, Sentry.Profiling, Sentry.OpenTelemetry and Sentry.NLog. There are some functional differences when compiling AOT:
   - Enhanced Stack Traces are not available when compiling AOT, as the mechanism to generate these ehanced stack traces currently relies heavily on reflection and isn't compatible with trimming. 
   - Reflection cannot be leveraged for JSON Serialization and you may need to supply a `JsonSerializationContext` for types that you'd like to send to Sentry (e.g. in the Span.Context). You can use `SentryOptions.AddJsonSerializerContext` to supply your own context when initializing Sentry.
   - When compiling AOT, Sentry isn't able to automatically register an unhandled exception handler in WinUI applications, since that also relies on reflection. If you're using Sentry with a WinUI application and you want to use AOT compilation, you'll need to take care of registering the unhandled event handler yourself. TODO *** Fill in the gaps here when https://github.com/getsentry/sentry-dotnet/issues/2778 has been completed ***
-  - ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732))
+  - ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732)), ([#2793](https://github.com/getsentry/sentry-dotnet/pull/2793))
 - The TracePropagationTarget class has been removed. Use the SubstringOrRegexPattern class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
 
 #### Sentry.Google.Cloud.Functions
 
 - Min version of `Google.Cloud.Functions.Hosting` supported 1.1.0 to 2.0.0 ([#2787](https://github.com/getsentry/sentry-dotnet/pull/2787))
 
-## Unreleased
+## 3.41.0
+
+- Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
 
 ### Fixes
 
@@ -100,9 +102,9 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 - Bump Cocoa SDK from v8.13.0 to v8.15.0 ([#2722](https://github.com/getsentry/sentry-dotnet/pull/2722), [#2740](https://github.com/getsentry/sentry-dotnet/pull/2740), [#2746](https://github.com/getsentry/sentry-dotnet/pull/2746), [#2801](https://github.com/getsentry/sentry-dotnet/pull/2801))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8150)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.13.0...8.15.0)
-- Bump Java SDK from v6.30.0 to v6.33.0 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723), [#2741](https://github.com/getsentry/sentry-dotnet/pull/2741), [#2783](https://github.com/getsentry/sentry-dotnet/pull/2783))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6330)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.33.0)
+- Bump Java SDK from v6.30.0 to v6.33.1 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723), [#2741](https://github.com/getsentry/sentry-dotnet/pull/2741), [#2783](https://github.com/getsentry/sentry-dotnet/pull/2783), [#2803](https://github.com/getsentry/sentry-dotnet/pull/2803))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6331)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.33.1)
 
 ## 3.40.1
 

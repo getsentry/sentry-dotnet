@@ -1,8 +1,6 @@
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Exporters;
-using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
 namespace Sentry.Benchmarks;
@@ -16,7 +14,6 @@ internal class Program
     {
         public Config()
         {
-            AddJob(Job.Default.WithRuntime(CoreRuntime.Core60));
             AddDiagnoser(MemoryDiagnoser.Default);
             AddExporter(MarkdownExporter.GitHub);
             AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());

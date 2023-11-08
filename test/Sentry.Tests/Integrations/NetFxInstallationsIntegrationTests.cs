@@ -19,7 +19,7 @@ public class NetFxInstallationsIntegrationTests
         integration.Register(null!, options);
 
         //Assert
-        Assert.DoesNotContain(options.EventProcessors!, p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
+        Assert.DoesNotContain(options.EventProcessors!, p => p.Lazy.Value.GetType() == typeof(NetFxInstallationsEventProcessor));
     }
 
     [SkippableFact]
@@ -35,7 +35,7 @@ public class NetFxInstallationsIntegrationTests
         integration.Register(null!, options);
 
         //Assert
-        Assert.Contains(options.EventProcessors!, p => p.GetType() == typeof(NetFxInstallationsEventProcessor));
+        Assert.Contains(options.EventProcessors!, p => p.Lazy.Value.GetType() == typeof(NetFxInstallationsEventProcessor));
     }
 }
 

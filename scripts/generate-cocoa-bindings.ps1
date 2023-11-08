@@ -139,7 +139,7 @@ $Text = $Text -replace '(?ms)@protocol (SentrySerializable|SentrySpan).+?\[Proto
 $Text = $Text -replace 'interface SentrySpan\b', "[BaseType (typeof(NSObject))]`n`$&"
 
 # Fix string constants
-$Text = $Text -replace 'byte\[\] SentryVersionString', "[return: PlainString]`n    NSString SentryVersionString"
+$Text = $Text -replace 'byte\[\] SentryVersionString', "[PlainString]`n    NSString SentryVersionString"
 $Text = $Text -replace '(?m)(.*\n){2}^\s{4}NSString k.+?\n\n?', ''
 $Text = $Text -replace '(?m)(.*\n){4}^partial interface Constants\n{\n}\n', ''
 $Text = $Text -replace '\[Verify \(ConstantsInterfaceAssociation\)\]\n', ''
@@ -172,6 +172,9 @@ $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 
 # Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
 $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
+
+# Prefix SentryBreadcrumb.Serialize and SentryScope.Serialize with new (since these hide the base method)
+$Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)(NSDictionary)', '${1}new $2'
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
