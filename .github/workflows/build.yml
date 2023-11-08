@@ -162,10 +162,6 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
-      # TODO: Remove - just for debug
-      - name: Add nuget.org as nuget package source
-        run: dotnet nuget list source
-
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
