@@ -162,9 +162,9 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
-      # Workaround for missing package references (maybe?)
+      # TODO: Remove - just for debug
       - name: Add nuget.org as nuget package source
-        run: dotnet nuget add source https://api.nuget.org/v3/index.json --name nuget.org
+        run: dotnet nuget list source
 
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
