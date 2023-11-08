@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.41.0
 
 - Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
 
