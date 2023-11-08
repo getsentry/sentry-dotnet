@@ -25,7 +25,7 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
             ));
         Configure = o =>
         {
-            o.ExceptionProcessors.Add(exceptionProcessor);
+            o.AddExceptionProcessor(exceptionProcessor);
         };
 
         const string throwPath = "/throw";
@@ -68,7 +68,7 @@ public partial class IntegrationsTests : AspNetSentrySdkTestFixture
         ));
         Configure = o =>
         {
-            o.ExceptionProcessors.Add(exceptionProcessor);
+            o.AddExceptionProcessor(exceptionProcessor);
         };
 
         const string throwPath = "/test/throw";
