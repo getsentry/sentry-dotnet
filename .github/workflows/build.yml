@@ -8,8 +8,34 @@ on:
   pull_request:
 
 jobs:
+  build-sentry-native:
+    name: sentry-native (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, windows, macos]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: git submodule update --init modules/sentry-native
+
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          enableCrossOsArchive: true
+
+      - run: scripts/build-sentry-native.ps1
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+
   build:
-    name: ${{ matrix.os }}
+    needs: build-sentry-native
+    name: .NET (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -30,8 +56,41 @@ jobs:
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
-        if: startsWith(matrix.os, 'macos') && startsWith(github.ref_name, 'release/')
+        if: startsWith(matrix.os, 'macos')
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
+      - name: Download sentry-native (Linux)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux') }}
+        uses: actions/cache/restore@v3
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-Linux-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (macOS)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'macOS') }}
+        uses: actions/cache/restore@v3
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (Windows)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
+        uses: actions/cache/restore@v3
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+
+      - name: Rebuild Solution Filters
+        shell: pwsh
+        run: scripts/generate-solution-filters.ps1
+
+      - name: Ensure Solution Filters are up to date
+        shell: pwsh
+        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
 
       - name: Setup Environment
         uses: ./.github/actions/environment
@@ -46,23 +105,11 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Build (for non-release branch)
-        if: env.CI_PUBLISHING_BUILD != 'true'
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log
-
-      - name: Build (for release branch)
-        if: env.CI_PUBLISHING_BUILD == 'true'
+      - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
-
-      - name: Test symbol upload
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
-        with:
-          path: test
 
       - name: Upload build and test outputs
         if: failure()
@@ -73,19 +120,56 @@ jobs:
 
       # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
 
-      - name: Create Nuget Packages (release branch only)
+      - name: Create Nuget Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo
 
-      - name: Archive Nuget Packages (release branch only)
+      - name: Archive Nuget Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}
           if-no-files-found: error
           path: |
-            ${{ github.workspace }}/src/**/Release/*.nupkg
-            ${{ github.workspace }}/src/**/Release/*.snupkg
+            src/**/Release/*.nupkg
+            src/**/Release/*.snupkg
+
+  integration-test:
+    needs: build
+    name: Integration test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, windows, macos]
+
+    steps:
+      # We only check out what is absolutely necessary to reduce a chance of local files impacting integration tests.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            Directory.Build.props
+            integration-test
+
+      - name: Fetch Nuget Packages
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ github.sha }}
+          path: src
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            7.0.x
+            8.0.x
+
+      - run: dotnet workload install android maui-android
+
+      - name: Test
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        with:
+          path: integration-test
 
   test-solution-filters:
     runs-on: ubuntu-latest
