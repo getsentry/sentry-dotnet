@@ -108,7 +108,9 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 }
 
-Describe 'MAUI' {
+Describe 'MAUI' -ForEach @(
+    @{ framework = "net7.0" }
+) {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
         RegisterLocalPackage 'Sentry.Bindings.Android'
@@ -118,17 +120,40 @@ Describe 'MAUI' {
         {
             RegisterLocalPackage 'Sentry.Bindings.Cocoa'
         }
-        DotnetNew 'maui' 'maui-app' 'net7.0'
+
+        $name = 'maui-app'
+        DotnetNew 'maui' $name $framework
+
+        # Workaround for the missing "ios" workload on Linux, see https://github.com/dotnet/maui/pull/18580
+        $tfs = $IsMacos ? "$framework-android;$framework-ios;$framework-maccatalyst" : "$framework-android"
+        (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
+
+        dotnet remove $name/$name.csproj package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "Failed to remove package"
+        }
+
+        if (Test-Path env:CI)
+        {
+            dotnet workload restore $name/$name.csproj | ForEach-Object { Write-Host $_ }
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Failed to restore workloads."
+            }
+        }
+
+        AddPackageReference $name 'Sentry.Maui'
     }
 
     It "uploads symbols and sources for an Android build" {
-        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True 'net7.0-android'
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('maui-app.pdb')
         $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
-        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True 'net7.0-ios'
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
             'libmono-component-diagnostics_tracing.dylib',

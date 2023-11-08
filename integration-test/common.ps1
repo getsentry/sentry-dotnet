@@ -181,32 +181,7 @@ BeforeAll {
             throw "Failed to create the test app '$name' from template '$type'."
         }
 
-        if ($type -eq 'maui')
-        {
-            # Workaround for the missing "ios" workload on Linux, see https://github.com/dotnet/maui/pull/18580
-            $tfs = $IsMacos ? "$framework-android;$framework-ios;$framework-maccatalyst" : "$framework-android"
-            (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
-            Push-Location $name
-            try
-            {
-                dotnet workload restore | ForEach-Object { Write-Host $_ }
-                if ($LASTEXITCODE -ne 0)
-                {
-                    throw "Failed to restore workloads."
-                }
-                dotnet restore | ForEach-Object { Write-Host $_ }
-                if ($LASTEXITCODE -ne 0)
-                {
-                    throw "Failed to restore."
-                }
-            }
-            finally
-            {
-                Pop-Location
-            }
-            AddPackageReference $name 'Sentry.Maui'
-        }
-        else
+        if ($type -eq 'console')
         {
             AddPackageReference $name 'Sentry'
             if (!$IsMacOS -or $framework -eq 'net8.0')
