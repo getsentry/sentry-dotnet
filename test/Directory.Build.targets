@@ -27,5 +27,9 @@
     </Content>
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- Used in buildTransitive\Sentry.targets -->
+    <IsSentryTestProject>true</IsSentryTestProject>
+  </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\src\Sentry\buildTransitive\Sentry.targets" />
 </Project>
