@@ -9,6 +9,10 @@
     <Description>Performance profiling support for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />

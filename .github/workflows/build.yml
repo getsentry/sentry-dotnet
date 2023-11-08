@@ -170,3 +170,19 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
+
+  test-solution-filters:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Rebuild Solution Filters
+        shell: pwsh
+        run: pwsh scripts/generate-solution-filters.ps1
+
+      - name: Ensure Solution Filters are up to date
+        shell: pwsh
+        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
