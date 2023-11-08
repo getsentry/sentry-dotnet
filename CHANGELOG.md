@@ -11,9 +11,9 @@
 - Bump Cocoa SDK from v8.13.0 to v8.15.0 ([#2722](https://github.com/getsentry/sentry-dotnet/pull/2722), [#2740](https://github.com/getsentry/sentry-dotnet/pull/2740), [#2746](https://github.com/getsentry/sentry-dotnet/pull/2746), [#2801](https://github.com/getsentry/sentry-dotnet/pull/2801))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8150)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.13.0...8.15.0)
-- Bump Java SDK from v6.30.0 to v6.33.0 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723), [#2741](https://github.com/getsentry/sentry-dotnet/pull/2741), [#2783](https://github.com/getsentry/sentry-dotnet/pull/2783))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6330)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.33.0)
+- Bump Java SDK from v6.30.0 to v6.33.1 ([#2723](https://github.com/getsentry/sentry-dotnet/pull/2723), [#2741](https://github.com/getsentry/sentry-dotnet/pull/2741), [#2783](https://github.com/getsentry/sentry-dotnet/pull/2783), [#2803](https://github.com/getsentry/sentry-dotnet/pull/2803))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6331)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.33.1)
 
 ## 3.40.1
 
