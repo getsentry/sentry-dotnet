@@ -158,10 +158,9 @@ internal class DebugStackTrace : SentryStackTrace
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
     {
-        var frames = (!AotHelper.IsAot && _options.StackTraceMode == StackTraceMode.Enhanced)
+        var frames = (!AotHelper.IsNativeAot && _options.StackTraceMode == StackTraceMode.Enhanced)
             ? EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p))
-            : stackTrace.GetFrames()
-                .Select(p => new RealStackFrame(p));
+            : stackTrace.GetFrames().Select(p => new RealStackFrame(p));
 
         // Not to throw on code that ignores nullability warnings.
         if (frames.IsNull())
@@ -483,7 +482,7 @@ internal class DebugStackTrace : SentryStackTrace
     [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
-        if (AotHelper.IsAot)
+        if (AotHelper.IsNativeAot)
         {
             assemblyName = null;
             return null;
