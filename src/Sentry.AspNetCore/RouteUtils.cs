@@ -36,7 +36,8 @@ internal static class RouteUtils
         }
 
         // Force a leading slash (if there isn't already one present)
-        return $"/{builder.ToString().TrimStart('/')}";
+        var url = builder.ToString();
+        return url.Length>0 && url[0] == '/' ? url : $"/{url}";
     }
 
     // Internal for testing.
