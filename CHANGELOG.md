@@ -90,6 +90,7 @@ without native/platform specific bindings and SDKs. See [this ticket for more de
 - Min version of `Google.Cloud.Functions.Hosting` supported 1.1.0 to 2.0.0 ([#2787](https://github.com/getsentry/sentry-dotnet/pull/2787))
 
 ## Unreleased
+## 3.41.0
 
 - Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
 
