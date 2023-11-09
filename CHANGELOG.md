@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.0-alpha.0
+
+### Various fixes & improvements
+
+- move to mobile platform targets to net7 (#2624) by @bruno-garcia
+
 ## Unreleased (version Four)
 
 ### Breaking changes
