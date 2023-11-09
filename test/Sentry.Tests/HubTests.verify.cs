@@ -5,12 +5,9 @@ namespace Sentry.Tests;
 [UsesVerify]
 public partial class HubTests
 {
-    [SkippableFact]
+    [Fact]
     public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
     {
-        // See https://github.com/getsentry/sentry-dotnet/issues/2785
-        Skip.If(RuntimeInfo.GetRuntime().IsMono() && TestEnvironment.IsGitHubActions);
-
         // Arrange
         var worker = new FakeBackgroundWorker();
 
@@ -53,7 +50,8 @@ public partial class HubTests
                     _.DebugFile.Contains("Xunit.SkippableFact") ||
                     _.DebugFile.Contains("xunit.runner") ||
                     _.DebugFile.Contains("JetBrains.ReSharper.TestRunner") ||
-                    _.DebugFile.Contains("Microsoft.TestPlatform")
+                    _.DebugFile.Contains("Microsoft.TestPlatform") ||
+                    _.DebugFile.Contains("Microsoft.VisualStudio.TestPlatform.Common.pdb")
                 )
             );
     }
