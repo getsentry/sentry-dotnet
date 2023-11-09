@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump CLI from v2.21.2 to v2.21.3 ([#2811](https://github.com/getsentry/sentry-dotnet/pull/2811))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2213)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.3)
+
 ## 3.41.0
 
 - Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
