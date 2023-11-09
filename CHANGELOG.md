@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.15.0 to v8.15.1 ([#2812](https://github.com/getsentry/sentry-dotnet/pull/2812))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8151)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.15.0...8.15.1)
+
 ## 3.41.0
 
 - Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
