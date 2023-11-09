@@ -5,7 +5,7 @@ namespace Sentry.Tests;
 [UsesVerify]
 public partial class HubTests
 {
-    [SkippableFact]
+    [Fact]
     public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
     {
         // See https://github.com/getsentry/sentry-dotnet/issues/2785
