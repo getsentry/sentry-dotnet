@@ -2,6 +2,7 @@ using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
 using Sentry.Native;
 using Sentry.Internal.ILSpy;
+using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
