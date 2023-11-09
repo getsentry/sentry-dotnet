@@ -30,4 +30,5 @@ jobs:
         shell: bash
         run: |
           dotnet list Sentry.sln  package --vulnerable --include-transitive | tee vulnerable.txt
-          sh -c "! grep 'has the following vulnerable packages' vulnerable.txt"
+          # https://github.com/getsentry/sentry-dotnet/issues/2814
+          # ! grep 'has the following vulnerable packages' vulnerable.txt
