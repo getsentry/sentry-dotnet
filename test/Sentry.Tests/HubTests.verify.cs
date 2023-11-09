@@ -53,7 +53,8 @@ public partial class HubTests
                     _.DebugFile.Contains("Xunit.SkippableFact") ||
                     _.DebugFile.Contains("xunit.runner") ||
                     _.DebugFile.Contains("JetBrains.ReSharper.TestRunner") ||
-                    _.DebugFile.Contains("Microsoft.TestPlatform")
+                    _.DebugFile.Contains("Microsoft.TestPlatform") ||
+                    _.DebugFile.Contains("Microsoft.VisualStudio.TestPlatform.Common.pdb")
                 )
             );
     }
