@@ -4,6 +4,9 @@
 
 ### Dependencies
 
+- Bump Cocoa SDK from v8.15.0 to v8.15.1 ([#2812](https://github.com/getsentry/sentry-dotnet/pull/2812))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8151)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.15.0...8.15.1)
 - Bump CLI from v2.21.2 to v2.21.3 ([#2811](https://github.com/getsentry/sentry-dotnet/pull/2811))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2213)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.3)

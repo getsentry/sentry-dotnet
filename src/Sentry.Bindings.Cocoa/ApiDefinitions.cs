@@ -2177,6 +2177,10 @@ interface SentryTraceContext : SentrySerializable
     [Export ("initWithTracer:scope:options:")]
     NativeHandle Constructor (SentryTracer tracer, [NullAllowed] SentryScope scope, SentryOptions options);
 
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId options:(SentryOptions * _Nonnull)options userSegment:(NSString * _Nullable)userSegment;
+    [Export ("initWithTraceId:options:userSegment:")]
+    NativeHandle Constructor (SentryId traceId, SentryOptions options, [NullAllowed] string userSegment);
+
     // -(SentryBaggage * _Nonnull)toBaggage;
     [Export ("toBaggage")]
     SentryBaggage ToBaggage();
