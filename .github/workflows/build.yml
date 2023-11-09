@@ -145,9 +145,10 @@ jobs:
         os: [ubuntu, windows, macos]
 
     steps:
-      # We only check out what is absolutely necessary to reduce a chance of local files impacting integration tests.
       - uses: actions/checkout@v4
         with:
+          # We only check out what is absolutely necessary to reduce a chance of local files impacting
+          # integration tests, e.g. Directory.Build.props, nuget.config, ...
           sparse-checkout: |
             Directory.Build.props
             integration-test
