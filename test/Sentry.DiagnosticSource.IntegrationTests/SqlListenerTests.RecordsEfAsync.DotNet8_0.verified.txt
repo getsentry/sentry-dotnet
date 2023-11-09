@@ -1,0 +1,112 @@
+﻿[
+  {
+    Source: {
+      Exception: {
+        $type: Exception,
+        Type: Exception,
+        Message: my exception
+      },
+      Platform: csharp,
+      SentryExceptions: [
+        {
+          Type: System.Exception,
+          Value: my exception
+        }
+      ],
+      Level: error,
+      TransactionName: my transaction,
+      Request: {},
+      Contexts: {
+        trace: {
+          Operation: 
+        }
+      },
+      User: {}
+    }
+  },
+  {
+    Source: {
+      Name: my transaction,
+      Platform: csharp,
+      Operation: my operation,
+      Description: ,
+      Status: Ok,
+      IsSampled: true,
+      SampleRate: 1.0,
+      Request: {},
+      Contexts: {
+        trace: {
+          Operation: my operation,
+          Description: ,
+          Status: Ok,
+          IsSampled: true
+        }
+      },
+      User: {},
+      Spans: [
+        {
+          IsFinished: true,
+          Operation: db.connection,
+          Description: SqlListenerTests.verify_RecordsEfAsync,
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            bytes_received: 225,
+            bytes_sent : 570,
+            db.connection_id: Guid_1,
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
+            db.operation_id: Guid_2,
+            db.server: (LocalDb)\SqlListenerTests,
+            db.system: sql,
+            rows_sent: 1
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Description:
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+OUTPUT INSERTED.[Id]
+VALUES (@p0);
+,
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
+            db.operation_id: Guid_3,
+            db.system: sql
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query.compile,
+          Description: 'DbSet<TestEntity>()',
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            db.system: mssql
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Description:
+SELECT [t].[Id], [t].[Property]
+FROM [TestEntities] AS [t],
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_1,
+            db.name: SqlListenerTests.verify_RecordsEfAsync,
+            db.operation_id: Guid_4,
+            db.system: sql
+          }
+        }
+      ],
+      IsFinished: true
+    }
+  }
+]
