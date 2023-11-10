@@ -16,6 +16,7 @@
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishAot>true</PublishAot>
 
     <!-- Display name -->
     <ApplicationTitle>Sentry.Samples.Maui</ApplicationTitle>
