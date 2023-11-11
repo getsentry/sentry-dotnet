@@ -21,7 +21,8 @@
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
-  <Import Project="Platforms\Native\Sentry.Native.targets"/>
+  <Import Project="Platforms\Native\Sentry.Native.targets"
+        Condition="'$(TargetPlatformIdentifier)' != 'android' and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'"/>
 
   <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
     <IsAotCompatible>true</IsAotCompatible>

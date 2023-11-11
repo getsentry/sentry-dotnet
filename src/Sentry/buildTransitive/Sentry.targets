@@ -128,7 +128,12 @@
   <!-- Native AOT publishing
        While '_IsPublishing' looks a bit "private", it's also OK if it suddenly stops working and this step runs anyway.
        See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993 -->
-  <PropertyGroup Condition="'$(PublishDir)' != '' and '$(PublishAot)' == 'true' and '$(_IsPublishing)' == 'true'">
+  <PropertyGroup Condition="
+      '$(PublishDir)' != ''
+      and '$(PublishAot)' == 'true'
+      and '$(_IsPublishing)' == 'true'
+      and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'
+      and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'maccatalyst'">
     <SentryCLIUploadNativeAOT>true</SentryCLIUploadNativeAOT>
     <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
     <!-- We must run after "_CopyAotSymbols" (not "Publish"), because that is the one that actually copies debug symbols to the publish directory. -->
