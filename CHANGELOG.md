@@ -11,6 +11,11 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2213)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.3)
 
+### Fixes
+
+ - Fixed CaptureFailedRequests and FailedRequestStatusCodes not affecting the Cocoa layer ([#2744](https://github.com/getsentry/sentry-dotnet/issues/2744))
+
+
 ## 3.41.0
 
 - Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
