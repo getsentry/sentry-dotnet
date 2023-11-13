@@ -97,20 +97,6 @@ namespace Sentry
         Managed = 0,
         ManagedBackgroundThread = 1,
     }
-    public sealed class DebugImage : Sentry.IJsonSerializable
-    {
-        public DebugImage() { }
-        public string? CodeFile { get; set; }
-        public string? CodeId { get; set; }
-        public string? DebugChecksum { get; set; }
-        public string? DebugFile { get; set; }
-        public string? DebugId { get; set; }
-        public long? ImageAddress { get; set; }
-        public long? ImageSize { get; set; }
-        public string? Type { get; set; }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.DebugImage FromJson(System.Text.Json.JsonElement json) { }
-    }
     [System.Flags]
     public enum DeduplicateMode
     {
@@ -516,7 +502,7 @@ namespace Sentry
         public SentryEvent(System.Exception? exception) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
-        public System.Collections.Generic.List<Sentry.DebugImage>? DebugImages { get; set; }
+        public System.Collections.Generic.List<Sentry.Protocol.DebugImage>? DebugImages { get; set; }
         public string? Distribution { get; set; }
         public string? Environment { get; set; }
         public Sentry.SentryId EventId { get; }
@@ -1499,6 +1485,20 @@ namespace Sentry.Protocol
         public string? Version { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.Browser FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class DebugImage : Sentry.IJsonSerializable
+    {
+        public DebugImage() { }
+        public string? CodeFile { get; set; }
+        public string? CodeId { get; set; }
+        public string? DebugChecksum { get; set; }
+        public string? DebugFile { get; set; }
+        public string? DebugId { get; set; }
+        public long? ImageAddress { get; set; }
+        public long? ImageSize { get; set; }
+        public string? Type { get; set; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.Protocol.DebugImage FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class Device : Sentry.IJsonSerializable
     {

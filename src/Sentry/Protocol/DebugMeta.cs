@@ -1,7 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry;
+namespace Sentry.Protocol;
 
 /// <summary>
 /// The Sentry Debug Meta interface.
