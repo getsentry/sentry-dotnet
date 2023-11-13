@@ -213,4 +213,36 @@ public class SentryStackFrameTests
         // Assert
         Assert.True(sut.InApp, "InApp started as true but ConfigureAppFrame changed it to false.");
     }
+
+    [Fact]
+    public void ConfigureAppFrame_NativeAOTWithoutMethodInfo_InAppIsNull()
+    {
+        // See values set by TryCreateNativeAOTFrame
+        var sut = new SentryStackFrame
+        {
+            ImageAddress = 1,
+            InstructionAddress = 2
+        };
+
+        // Act
+        sut.ConfigureAppFrame(new());
+
+        // Assert
+        Assert.Null(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_NativeAOTWithoutMethodInfo_InAppIsSet()
+    {
+        var sut = DebugStackTrace.ParseNativeAOTToString(
+            "System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task) + 0x42 at offset 66 in file:line:column <filename unknown>:0:0");
+        sut.ConfigureAppFrame(new());
+        Assert.False(sut.InApp);
+
+        sut = DebugStackTrace.ParseNativeAOTToString(
+            "Program.<<Main>$>d__0.MoveNext() + 0xdd at offset 221 in file:line:column <filename unknown>:0:0");
+        sut.ConfigureAppFrame(new());
+        Assert.True(sut.InApp);
+    }
+
 }

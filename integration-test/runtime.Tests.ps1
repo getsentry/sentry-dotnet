@@ -81,7 +81,7 @@ internal class FakeTransport : ITransport
     }
 
     It "sends stack trace native addresses" {
-        runConsoleApp | Should -AnyElementMatch '"stacktrace":{"frames":\[{"in_app":true,"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
+        runConsoleApp | Should -AnyElementMatch '"stacktrace":{"frames":\[{"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
     }
 
     It "publish directory contains expected files" {
