@@ -83,7 +83,7 @@ public static class SentryOptionsExtensions
     public static void DisableAppDomainProcessExitFlush(this SentryOptions options) =>
         options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.AppDomainProcessExitIntegration);
 
-#if NET5_0_OR_GREATER
+#if NET5_0_OR_GREATER && !__MOBILE__
     /// <summary>
     /// Disables WinUI exception handler
     /// </summary>
