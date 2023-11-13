@@ -27,6 +27,8 @@ public static partial class SentrySdk
         cocoaOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
         cocoaOptions.Dsn = options.Dsn;
         cocoaOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
+        cocoaOptions.EnableCaptureFailedRequests = options.CaptureFailedRequests;
+        cocoaOptions.FailedRequestStatusCodes = GetFailedRequestStatusCodes(options.FailedRequestStatusCodes);
         cocoaOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
         cocoaOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
         cocoaOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
@@ -201,4 +203,16 @@ public static partial class SentrySdk
     private static string GetDefaultDistributionString() => GetBundleValue("CFBundleVersion");
 
     private static string GetBundleValue(string key) => NSBundle.MainBundle.ObjectForInfoDictionary(key).ToString();
+
+    private static CocoaSdk.SentryHttpStatusCodeRange[] GetFailedRequestStatusCodes(IList<HttpStatusCodeRange> httpStatusCodeRanges)
+    {
+        var nativeRanges = new CocoaSdk.SentryHttpStatusCodeRange[httpStatusCodeRanges.Count];
+        for (var i = 0; i < httpStatusCodeRanges.Count; i++)
+        {
+            var range = httpStatusCodeRanges[i];
+            nativeRanges[i] = new CocoaSdk.SentryHttpStatusCodeRange(range.Start, range.End);
+        }
+
+        return nativeRanges;
+    }
 }
