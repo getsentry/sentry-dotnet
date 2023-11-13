@@ -4,11 +4,7 @@
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="!$([MSBuild]::IsOSPlatform('OSX')) or '$(TargetFramework)' == 'net8.0'">
-    <!-- AOT not supported for osx-arm64 on .NET 7 -->
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 
