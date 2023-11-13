@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+ - `CaptureFailedRequests` and `FailedRequestStatusCodes` are now getting respected by the Cocoa SDK. This is relevant for MAUI apps where requests are getting handled natively ([#2744](https://github.com/getsentry/sentry-dotnet/issues/2744))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.15.0 to v8.15.2 ([#2812](https://github.com/getsentry/sentry-dotnet/pull/2812), [#2816](https://github.com/getsentry/sentry-dotnet/pull/2816))
@@ -10,11 +14,6 @@
 - Bump CLI from v2.21.2 to v2.21.3 ([#2811](https://github.com/getsentry/sentry-dotnet/pull/2811))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2213)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.3)
-
-### Fixes
-
- - Fixed CaptureFailedRequests and FailedRequestStatusCodes not affecting the Cocoa layer ([#2744](https://github.com/getsentry/sentry-dotnet/issues/2744))
-
 
 ## 3.41.0
 
