@@ -4,7 +4,7 @@
 
 ### Fixes
 
- - `CaptureFailedRequests` and `FailedRequestStatusCodes` are now getting respected by the Cocoa SDK. This is relevant for MAUI apps where requests are getting handled natively ([#2744](https://github.com/getsentry/sentry-dotnet/issues/2744))
+- `CaptureFailedRequests` and `FailedRequestStatusCodes` are now getting respected by the Cocoa SDK. This is relevant for MAUI apps where requests are getting handled natively. ([#2826](https://github.com/getsentry/sentry-dotnet/issues/2826))
 
 ### Dependencies
 
@@ -128,7 +128,7 @@
 
 - Graphql client ([#2538](https://github.com/getsentry/sentry-dotnet/pull/2538))
 
-###  Fixes
+### Fixes
 
 - Android: Fix proguard/r8 mapping file upload ([#2574](https://github.com/getsentry/sentry-dotnet/pull/2574))
 
@@ -199,7 +199,7 @@
 
 ### Fixes
 
-- Builds targeting Android with `r8` enabled no longer crash during SDK init. The package now contains the required proguard rules ([#2450]https://github.com/getsentry/sentry-dotnet/pull/2450)
+- Builds targeting Android with `r8` enabled no longer crash during SDK init. The package now contains the required proguard rules ([#2450](https://github.com/getsentry/sentry-dotnet/pull/2450))
 - Fix Sentry logger options for MAUI and Azure Functions ([#2423](https://github.com/getsentry/sentry-dotnet/pull/2423))
 
 ### Dependencies
@@ -257,7 +257,7 @@
 
 ### Fixes
 
-  - Status messages when uploading symbols or sources are improved. ([#2307](https://github.com/getsentry/sentry-dotnet/issues/2307))
+- Status messages when uploading symbols or sources are improved. ([#2307](https://github.com/getsentry/sentry-dotnet/issues/2307))
 
 ### Dependencies
 
@@ -293,7 +293,6 @@
 
 - CachedTransport gracefully handles malformed envelopes during processing  ([#2371](https://github.com/getsentry/sentry-dotnet/pull/2371))
 - Remove extraneous iOS simulator resources when building MAUI apps using Visual Studio "Hot Restart" mode, to avoid hitting Windows max path  ([#2384](https://github.com/getsentry/sentry-dotnet/pull/2384))
-
 
 ### Dependencies
 
@@ -592,7 +591,7 @@ See the [MSBuild Setup](https://docs.sentry.io/platforms/dotnet/configuration/ms
 
 ## 3.21.0
 
-_Includes Sentry.Maui Preview 3_
+Includes Sentry.Maui Preview 3
 
 ### Features
 
@@ -648,7 +647,7 @@ _Includes Sentry.Maui Preview 3_
 
 ## 3.19.0
 
-_Includes Sentry.Maui Preview 2_
+Includes Sentry.Maui Preview 2
 
 ### Features
 
@@ -670,7 +669,7 @@ _Includes Sentry.Maui Preview 2_
 
 ## 3.18.0
 
-_Includes Sentry.Maui Preview 1_
+Includes Sentry.Maui Preview 1
 
 ### Features
 
@@ -1471,9 +1470,7 @@ Removed `-beta` from dependencies.
 Major version bumped due to these breaking changes:
 
 1. `Sentry.Protocol` version 2.0.0
-
-* Remove StackTrace from SentryEvent [#38](https://github.com/getsentry/sentry-dotnet-protocol/pull/38) - StackTrace is either part of Thread or SentryException.
-
+   - Remove StackTrace from SentryEvent [#38](https://github.com/getsentry/sentry-dotnet-protocol/pull/38) - StackTrace is  either part of Thread or SentryException.
 2. Removed `ContextLine` #223
 3. Use `StackTrace` from `Threads` #222
 4. `FlushAsync` added to `ISentryClient` #214
@@ -1538,9 +1535,7 @@ Thanks @josh-degraw for:
 Major version bumped due to these breaking changes:
 
 1. `Sentry.Protocol` version 2.0.0
-
-* Remove StackTrace from SentryEvent [#38](https://github.com/getsentry/sentry-dotnet-protocol/pull/38) - StackTrace is either part of Thread or SentryException.
-
+   - Remove StackTrace from SentryEvent [#38](https://github.com/getsentry/sentry-dotnet-protocol/pull/38) - StackTrace is either part of Thread or SentryException.
 2. Removed `ContextLine` #223
 3. Use `StackTrace` from `Threads` #222
 4. `FlushAsync` added to `ISentryClient` #214
@@ -1587,6 +1582,7 @@ Bug fix: Don't override user  #199
 ## 1.1.3-beta2
 
 Feature:
+
 - MaxRequestSize for ASP.NET and ASP.NET Core #174
 - InAppInclude #171
 
@@ -1595,10 +1591,12 @@ Fix: Diagnostic log order: #173 by @scolestock
 ## 1.1.3-beta
 
 Fixed:
+
 - Read the hub to take latest Client: 8f4b5ba1a3
 - Uses Sentry.Protocol 1.0.4 4035e25
 
 Feature
+
 - Overload to `AddSentry` #163 by @F1nZeR
 - ASP.NET Core `AddSentry` has now `ConfigureScope`: #160
 
@@ -1613,14 +1611,17 @@ ASP.NET Core integration issue when containers are built on the ServiceCollectio
 ## 1.1.2-beta
 
 Fixed:
+
 - ASP.NET Core integration issue when containers are built on the ServiceCollection after SDK is initialized (#157, #103 )
 
 ## 1.1.1
 
 Fixed:
+
 - Serilog bug that self log would recurse #156
 
 Feature:
+
 - log4net environment via xml configuration #150 (Thanks Sébastien Pierre)
 
 ## 1.1.0
@@ -1669,12 +1670,14 @@ Lowering Newtonsoft.Json requirements; #138
 ## 1.0.1-beta
 
 Features:
+
 - Use log entry to improve grouping #125
 - Use .NET Core SDK 2.1.401
 - Make `AddProcessors` extension methods on Options public  #115
 - Format InternalsVisibleTo to avoid iOS issue: 94e28b3
 
 Bug fixes:
+
 - Disabled SDK throws on shutdown: #124
 - Log4net only init if current hub is disabled #119
 
@@ -1738,6 +1741,7 @@ Bug fixes:
 - Request body compressed
 
 All packages are:
+
 - Strong named
 - Tested on Windows, Linux and macOS
 - Tested on .NET Core, .NET Framework and Mono
@@ -1759,7 +1763,7 @@ Download it directly from GitHub or using NuGet:
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 | **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 
-# 1.0.0-rc2
+## 1.0.0-rc2
 
 Features and improvements:
 
@@ -1781,7 +1785,7 @@ Download it directly below from GitHub or using NuGet:
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 | **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 
-# 1.0.0-rc
+## 1.0.0-rc
 
 Features and improvements:
 
@@ -1813,7 +1817,7 @@ Download it directly below from GitHub or using NuGet:
 | **Sentry.Extensions.Logging** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Extensions.Logging.svg)](https://www.nuget.org/packages/Sentry.Extensions.Logging)   |
 | **Sentry.Log4Net** | [![NuGet](https://img.shields.io/nuget/vpre/Sentry.Log4Net.svg)](https://www.nuget.org/packages/Sentry.Log4Net)   |
 
-# 0.0.1-preview5
+## 0.0.1-preview5
 
 Features:
 
@@ -1830,7 +1834,7 @@ Bug fixes:
 - On-prem without chuncked support for gzip #71
 - Exception.Data key is not string #77
 
-##### [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration
+**[Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration**
 
 Download it directly below from GitHub or using NuGet:
 
@@ -1859,6 +1863,7 @@ Bug fixes:
 - ASP.NET Core integration throws when Serilog added #65, #68, #67
 
 Improvements to [the docs](https://getsentry.github.io/sentry-dotnet) like:
+
 - Release discovery
 - `ConfigureScope` clarifications
 - Documenting samples
@@ -1892,8 +1897,8 @@ Features and improvements:
 
 Bug fixes:
 
-# 46 Strong name
-# 40 Logger provider gets disposed/flushes events
+- Strong name
+- Logger provider gets disposed/flushes events
 
 [Watch on youtube](https://www.youtube.com/watch?v=xK6a1goK_w0) how to use the ASP.NET Core integration.
 
@@ -1910,6 +1915,7 @@ Download it directly from GitHub or using NuGet:
 This second release includes bug fixes and more features. Test coverage increased to 93%
 
 Features and improvements:
+
 - Added `CaptureMessage`
 - `BeforeSend` callback errors are sent as breadcrumbs
 - `ASP.NET Core` integration doesn't add tags added by `Microsoft.Extensions.Logging`
@@ -1919,6 +1925,7 @@ Features and improvements:
 - Filter kestrel log eventid 13 (application error) when already captured by the middleware
 
 Bugs fixed:
+
 - Fixed #28
 - HTTP Proxy set to HTTP message handler
 
@@ -1935,6 +1942,7 @@ Download it directly from GitHub or using NuGet:
 Our first preview of the SDK:
 
 Main features:
+
 - Easy ASP.NET Core integration, single line: `UseSentry`.
 - Captures unhandled exceptions in the middleware pipeline
 - Captures exceptions handled by the framework `UseExceptionHandler` and Error page display.
