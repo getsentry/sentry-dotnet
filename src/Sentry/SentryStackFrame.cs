@@ -182,7 +182,7 @@ public sealed class SentryStackFrame : IJsonSerializable
         {
             ConfigureAppFrame(options, Function, mustIncludeSeparator: true);
         }
-        else
+        else if (ImageAddress is null or 0 && InstructionAddress is null or 0) // Leave InApp=null on NativeAOT
         {
             InApp = true;
         }
