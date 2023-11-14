@@ -98,10 +98,10 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction, Hint? hint)
+    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -137,7 +137,16 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        var processedTransaction = BeforeSendTransaction(transaction, hint ?? new Hint());
+        scope ??= new Scope(_options);
+        hint ??= new Hint();
+        hint.AddAttachmentsFromScope(scope);
+
+        _options.LogInfo("Capturing transaction.");
+
+        scope.Evaluate();
+        scope.Apply(transaction);
+
+        var processedTransaction = BeforeSendTransaction(transaction, hint);
         if (processedTransaction is null) // Rejected transaction
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
