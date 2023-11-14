@@ -186,7 +186,7 @@ public class SentryOptions
             }
 #endif
 
-#if NET5_0_OR_GREATER
+#if NET5_0_OR_GREATER && !__MOBILE__
             if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
             {
                 yield return new WinUIUnhandledExceptionIntegration();
@@ -1199,7 +1199,7 @@ public class SentryOptions
 #if HAS_DIAGNOSTIC_INTEGRATION
                                | DefaultIntegrations.SentryDiagnosticListenerIntegration
 #endif
-#if NET5_0_OR_GREATER
+#if NET5_0_OR_GREATER && !__MOBILE__
                                | DefaultIntegrations.WinUiUnhandledExceptionIntegration
 #endif
                                ;
@@ -1298,7 +1298,7 @@ public class SentryOptions
 #if HAS_DIAGNOSTIC_INTEGRATION
         SentryDiagnosticListenerIntegration = 1 << 5,
 #endif
-#if NET5_0_OR_GREATER
+#if NET5_0_OR_GREATER && !__MOBILE__
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
     }
