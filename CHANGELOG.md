@@ -101,15 +101,18 @@ Native AOT publishing for compilation support for .NET 7+ has been added to Sent
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
 
 ## Unreleased - 3.x
+### Fixes
+
+ - `CaptureFailedRequests` and `FailedRequestStatusCodes` are now getting respected by the Cocoa SDK. This is relevant for MAUI apps where requests are getting handled natively ([#2744](https://github.com/getsentry/sentry-dotnet/issues/2744))
 
 ### Dependencies
 
-- Bump Cocoa SDK from v8.15.0 to v8.15.1 ([#2812](https://github.com/getsentry/sentry-dotnet/pull/2812))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8151)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.15.0...8.15.1)
-- Bump CLI from v2.21.2 to v2.21.3 ([#2811](https://github.com/getsentry/sentry-dotnet/pull/2811))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2213)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.3)
+- Bump Cocoa SDK from v8.15.0 to v8.15.2 ([#2812](https://github.com/getsentry/sentry-dotnet/pull/2812), [#2816](https://github.com/getsentry/sentry-dotnet/pull/2816))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8152)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.15.0...8.15.2)
+- Bump CLI from v2.21.2 to v2.21.4 ([#2811](https://github.com/getsentry/sentry-dotnet/pull/2811), [#2834](https://github.com/getsentry/sentry-dotnet/pull/2834))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2214)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.4)
 
 ## 3.41.0
 
