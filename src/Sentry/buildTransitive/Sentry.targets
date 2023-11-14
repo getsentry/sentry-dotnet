@@ -131,9 +131,9 @@
   <PropertyGroup Condition="'$(PublishDir)' != '' and '$(PublishAot)' == 'true' and '$(_IsPublishing)' == 'true'">
     <SentryCLIUploadNativeAOT>true</SentryCLIUploadNativeAOT>
     <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
-    <!-- We must run after "CopyNativeBinary" (not "Publish"),
+    <!-- We must run after "_CopyAotSymbols" (not "Publish"),
          because that is the one that actually copies native AOT symbols to the publish directory. -->
-    <SentryCLIUploadAfterTargets>CopyNativeBinary</SentryCLIUploadAfterTargets>
+    <SentryCLIUploadAfterTargets>_CopyAotSymbols</SentryCLIUploadAfterTargets>
   </PropertyGroup>
   <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
     <SentryCLIUploadSymbolType Include="pdb" />
