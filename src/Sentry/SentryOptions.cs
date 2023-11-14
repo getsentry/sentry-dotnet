@@ -1287,5 +1287,4 @@ public class SentryOptions
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
     }
-
 }

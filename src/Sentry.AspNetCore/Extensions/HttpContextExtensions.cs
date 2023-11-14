@@ -60,7 +60,7 @@ internal static class HttpContextExtensions
 
         try
         {
-            return SentryTraceHeader.Parse(value);
+            return SentryTraceHeader.Parse(value!);
         }
         catch (Exception ex)
         {
@@ -84,7 +84,7 @@ internal static class HttpContextExtensions
 
         try
         {
-            return BaggageHeader.TryParse(value, onlySentry: true);
+            return BaggageHeader.TryParse(value!, onlySentry: true);
         }
         catch (Exception ex)
         {

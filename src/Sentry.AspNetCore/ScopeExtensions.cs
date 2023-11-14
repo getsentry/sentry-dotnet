@@ -142,7 +142,7 @@ public static class ScopeExtensions
                 continue;
             }
 
-            scope.Request.Headers[requestHeader.Key] = requestHeader.Value;
+            scope.Request.Headers[requestHeader.Key] = requestHeader.Value!;
 
             if (requestHeader.Key == HeaderNames.Cookie)
             {
@@ -163,7 +163,7 @@ public static class ScopeExtensions
 
         if (context.Response.Headers.TryGetValue("Server", out var server))
         {
-            scope.Request.Env["SERVER_SOFTWARE"] = server;
+            scope.Request.Env["SERVER_SOFTWARE"] = server!;
         }
     }
 
