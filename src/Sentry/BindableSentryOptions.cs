@@ -22,8 +22,8 @@ internal class BindableSentryOptions
     public string? Dsn { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
-    //public TimeSpan? ShutdownTimeout { get; set; }
-    //public TimeSpan? FlushTimeout { get; set; }
+    public TimeSpan? ShutdownTimeout { get; set; }
+    public TimeSpan? FlushTimeout { get; set; }
     public DecompressionMethods? DecompressionMethods { get; set; }
     public CompressionLevel? RequestBodyCompressionLevel { get; set; }
     public bool? RequestBodyCompressionBuffered { get; set; }
@@ -37,7 +37,7 @@ internal class BindableSentryOptions
     public bool? CaptureFailedRequests { get; set; }
     //public List<HttpStatusCodeRange>? FailedRequestStatusCodes { get; set; }
     //public List<SubstringOrRegexPattern>? FailedRequestTargets { get; set; }
-    //public TimeSpan? InitCacheFlushTimeout { get; set; }
+    public TimeSpan? InitCacheFlushTimeout { get; set; }
     // public Dictionary<string,string> DefaultTags { get; set; }
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
@@ -45,18 +45,13 @@ internal class BindableSentryOptions
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
     public StartupTimeDetectionMode? DetectStartupTime { get; set; }
-    // public TimeSpan? AutoSessionTrackingInterval { get; set; }
+    public TimeSpan? AutoSessionTrackingInterval { get; set; }
     public bool? AutoSessionTracking { get; set; }
     public bool? UseAsyncFileIO { get; set; }
-    // public bool? KeepAggregateException { get; set; }
     public bool? JsonPreserveReferences { get; set; }
 
     public void ApplyTo(SentryOptions options)
     {
-        options.Dsn = Dsn ?? options.Dsn;
-        options.Environment = Environment ?? options.Environment;
-        options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
-        // TODO: all the other options...
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
         options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
         // Add assertion for TagFilters here if needed
@@ -72,8 +67,8 @@ internal class BindableSentryOptions
         options.Dsn = Dsn ?? options.Dsn;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
-        // Add assertion for ShutdownTimeout here if needed
-        // Add assertion for FlushTimeout here if needed
+        options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
+        options.FlushTimeout = FlushTimeout ?? options.FlushTimeout;
         options.DecompressionMethods = DecompressionMethods ?? options.DecompressionMethods;
         options.RequestBodyCompressionLevel = RequestBodyCompressionLevel ?? options.RequestBodyCompressionLevel;
         options.RequestBodyCompressionBuffered = RequestBodyCompressionBuffered ?? options.RequestBodyCompressionBuffered;
@@ -86,7 +81,7 @@ internal class BindableSentryOptions
         options.CaptureFailedRequests = CaptureFailedRequests ?? options.CaptureFailedRequests;
         // Add assertion for FailedRequestStatusCodes here if needed
         // Add assertion for FailedRequestTargets here if needed
-        // Add assertion for InitCacheFlushTimeout here if needed
+        options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         // Add assertion for DefaultTags here if needed
         options.EnableTracing = EnableTracing ?? options.EnableTracing;
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
@@ -94,7 +89,7 @@ internal class BindableSentryOptions
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
         options.DetectStartupTime = DetectStartupTime ?? options.DetectStartupTime;
-        // Add assertion for AutoSessionTrackingInterval here if needed
+        options.AutoSessionTrackingInterval = AutoSessionTrackingInterval ?? options.AutoSessionTrackingInterval;
         options.AutoSessionTracking = AutoSessionTracking ?? options.AutoSessionTracking;
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;

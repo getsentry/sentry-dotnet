@@ -27,7 +27,7 @@ public class SentryLoggingOptionsSetupTests
             Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647",
             MaxQueueItems = 8,
             MaxCacheItems = 9,
-            // ShutdownTimeout = TimeSpan,
+            ShutdownTimeout = TimeSpan.FromSeconds(13),
             // FlushTimeout = TimeSpan,
             DecompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             RequestBodyCompressionLevel = CompressionLevel.Fastest,
@@ -41,7 +41,7 @@ public class SentryLoggingOptionsSetupTests
             CaptureFailedRequests = true,
             // FailedRequestStatusCodes = IList<HttpStatusCodeRange>,
             // FailedRequestTargets = IList<SubstringOrRegexPattern>,
-            // InitCacheFlushTimeout = TimeSpan,
+            InitCacheFlushTimeout = TimeSpan.FromSeconds(27),
             // DefaultTags = Dictionary<string,string>,
             EnableTracing = true,
             TracesSampleRate = 0.8f,
@@ -49,7 +49,7 @@ public class SentryLoggingOptionsSetupTests
             StackTraceMode = StackTraceMode.Enhanced,
             MaxAttachmentSize = 21478,
             DetectStartupTime = StartupTimeDetectionMode.Fast,
-            // AutoSessionTrackingInterval = TimeSpan,
+            AutoSessionTrackingInterval = TimeSpan.FromHours(3),
             AutoSessionTracking = true,
             UseAsyncFileIO = true,
             JsonPreserveReferences = true,
@@ -75,8 +75,8 @@ public class SentryLoggingOptionsSetupTests
                 new KeyValuePair<string, string>("Dsn", expected.Dsn),
                 new KeyValuePair<string, string>("MaxQueueItems", expected.MaxQueueItems.ToString()),
                 new KeyValuePair<string, string>("MaxCacheItems", expected.MaxCacheItems.ToString()),
-                // new KeyValuePair<string, string>("ShutdownTimeout", expected.ShutdownTimeout.ToString()),
-                // new KeyValuePair<string, string>("FlushTimeout", expected.FlushTimeout.ToString()),
+                new KeyValuePair<string, string>("ShutdownTimeout", expected.ShutdownTimeout.ToString()),
+                new KeyValuePair<string, string>("FlushTimeout", expected.FlushTimeout.ToString()),
                 new KeyValuePair<string, string>("DecompressionMethods", expected.DecompressionMethods.ToString()),
                 new KeyValuePair<string, string>("RequestBodyCompressionLevel", expected.RequestBodyCompressionLevel.ToString()),
                 new KeyValuePair<string, string>("RequestBodyCompressionBuffered", expected.RequestBodyCompressionBuffered.ToString()),
@@ -89,7 +89,7 @@ public class SentryLoggingOptionsSetupTests
                 new KeyValuePair<string, string>("CaptureFailedRequests", expected.CaptureFailedRequests.ToString()),
                 // new KeyValuePair<string, string>("FailedRequestStatusCodes", expected.FailedRequestStatusCodes.ToString()),
                 // new KeyValuePair<string, string>("FailedRequestTargets", expected.FailedRequestTargets.ToString()),
-                // new KeyValuePair<string, string>("InitCacheFlushTimeout", expected.InitCacheFlushTimeout.ToString()),
+                new KeyValuePair<string, string>("InitCacheFlushTimeout", expected.InitCacheFlushTimeout.ToString()),
                 // new KeyValuePair<string, string>("DefaultTags", expected.DefaultTags.ToString()),
                 new KeyValuePair<string, string>("EnableTracing", expected.EnableTracing.ToString()),
                 new KeyValuePair<string, string>("TracesSampleRate", expected.TracesSampleRate.ToString()),
@@ -97,7 +97,7 @@ public class SentryLoggingOptionsSetupTests
                 new KeyValuePair<string, string>("StackTraceMode", expected.StackTraceMode.ToString()),
                 new KeyValuePair<string, string>("MaxAttachmentSize", expected.MaxAttachmentSize.ToString()),
                 new KeyValuePair<string, string>("DetectStartupTime", expected.DetectStartupTime.ToString()),
-                // new KeyValuePair<string, string>("AutoSessionTrackingInterval", expected.AutoSessionTrackingInterval.ToString()),
+                new KeyValuePair<string, string>("AutoSessionTrackingInterval", expected.AutoSessionTrackingInterval.ToString()),
                 new KeyValuePair<string, string>("AutoSessionTracking", expected.AutoSessionTracking.ToString()),
                 new KeyValuePair<string, string>("UseAsyncFileIO", expected.UseAsyncFileIO.ToString()),
                 new KeyValuePair<string, string>("JsonPreserveReferences", expected.JsonPreserveReferences.ToString()),
@@ -134,8 +134,8 @@ public class SentryLoggingOptionsSetupTests
             actual.Dsn.Should().Be(expected.Dsn);
             actual.MaxQueueItems.Should().Be(expected.MaxQueueItems);
             actual.MaxCacheItems.Should().Be(expected.MaxCacheItems);
-            // Add assertion for ShutdownTimeout here if needed
-            // Add assertion for FlushTimeout here if needed
+            actual.ShutdownTimeout.Should().Be(expected.ShutdownTimeout);
+            actual.FlushTimeout.Should().Be(expected.FlushTimeout);
             actual.DecompressionMethods.Should().Be(expected.DecompressionMethods);
             actual.RequestBodyCompressionLevel.Should().Be(expected.RequestBodyCompressionLevel);
             actual.RequestBodyCompressionBuffered.Should().Be(expected.RequestBodyCompressionBuffered);
@@ -148,7 +148,7 @@ public class SentryLoggingOptionsSetupTests
             actual.CaptureFailedRequests.Should().Be(expected.CaptureFailedRequests);
             // Add assertion for FailedRequestStatusCodes here if needed
             // Add assertion for FailedRequestTargets here if needed
-            // Add assertion for InitCacheFlushTimeout here if needed
+            actual.InitCacheFlushTimeout.Should().Be(expected.InitCacheFlushTimeout);
             // Add assertion for DefaultTags here if needed
             actual.EnableTracing.Should().Be(expected.EnableTracing);
             actual.TracesSampleRate.Should().Be(expected.TracesSampleRate);
@@ -156,7 +156,7 @@ public class SentryLoggingOptionsSetupTests
             actual.StackTraceMode.Should().Be(expected.StackTraceMode);
             actual.MaxAttachmentSize.Should().Be(expected.MaxAttachmentSize);
             actual.DetectStartupTime.Should().Be(expected.DetectStartupTime);
-            // Add assertion for AutoSessionTrackingInterval here if needed
+            actual.AutoSessionTrackingInterval.Should().Be(expected.AutoSessionTrackingInterval);
             actual.AutoSessionTracking.Should().Be(expected.AutoSessionTracking);
             actual.UseAsyncFileIO.Should().Be(expected.UseAsyncFileIO);
             actual.JsonPreserveReferences.Should().Be(expected.JsonPreserveReferences);
