@@ -9,7 +9,7 @@ internal class BindableSentryOptions
 {
     public bool? IsGlobalModeEnabled { get; set; }
     public bool? EnableScopeSync { get; set; }
-    // public List<SubstringOrRegexPattern>? TagFilters { get; set; }
+    public List<string>? TagFilters { get; set; }
     public bool? SendDefaultPii { get; set; }
     public bool? IsEnvironmentUser { get; set; }
     public string? ServerName { get; set; }
@@ -30,18 +30,16 @@ internal class BindableSentryOptions
     public bool? SendClientReports { get; set; }
     public bool? Debug { get; set; }
     public SentryLevel? DiagnosticLevel { get; set; }
-    // public bool? ReportAssemblies { get; set; }
     public ReportAssembliesMode? ReportAssembliesMode { get; set; }
     public DeduplicateMode? DeduplicateMode { get; set; }
     public string? CacheDirectoryPath { get; set; }
     public bool? CaptureFailedRequests { get; set; }
-    //public List<HttpStatusCodeRange>? FailedRequestStatusCodes { get; set; }
-    //public List<SubstringOrRegexPattern>? FailedRequestTargets { get; set; }
+    public List<string>? FailedRequestTargets { get; set; }
     public TimeSpan? InitCacheFlushTimeout { get; set; }
-    // public Dictionary<string,string> DefaultTags { get; set; }
+    public Dictionary<string, string>? DefaultTags { get; set; }
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
-    // public List<SubstringOrRegexPattern>? TracePropagationTargets { get; set; }
+    public List<string>? TracePropagationTargets { get; set; }
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
     public StartupTimeDetectionMode? DetectStartupTime { get; set; }
@@ -54,7 +52,7 @@ internal class BindableSentryOptions
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
         options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
-        // Add assertion for TagFilters here if needed
+        options.TagFilters = TagFilters?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.TagFilters;
         options.SendDefaultPii = SendDefaultPii ?? options.SendDefaultPii;
         options.IsEnvironmentUser = IsEnvironmentUser ?? options.IsEnvironmentUser;
         options.ServerName = ServerName ?? options.ServerName;
@@ -79,13 +77,12 @@ internal class BindableSentryOptions
         options.DeduplicateMode = DeduplicateMode ?? options.DeduplicateMode;
         options.CacheDirectoryPath = CacheDirectoryPath ?? options.CacheDirectoryPath;
         options.CaptureFailedRequests = CaptureFailedRequests ?? options.CaptureFailedRequests;
-        // Add assertion for FailedRequestStatusCodes here if needed
-        // Add assertion for FailedRequestTargets here if needed
+        options.FailedRequestTargets = FailedRequestTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.FailedRequestTargets;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
-        // Add assertion for DefaultTags here if needed
+        options.DefaultTags = DefaultTags ?? options.DefaultTags;
         options.EnableTracing = EnableTracing ?? options.EnableTracing;
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
-        // Add assertion for TracePropagationTargets here if needed
+        options.TracePropagationTargets = TracePropagationTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.TracePropagationTargets;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
         options.DetectStartupTime = DetectStartupTime ?? options.DetectStartupTime;

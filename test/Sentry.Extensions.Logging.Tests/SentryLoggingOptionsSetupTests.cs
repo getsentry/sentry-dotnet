@@ -14,7 +14,7 @@ public class SentryLoggingOptionsSetupTests
         {
             IsGlobalModeEnabled = true,
             EnableScopeSync = true,
-            // TagFilters = ICollection<SubstringOrRegexPattern>,
+            TagFilters = new List<SubstringOrRegexPattern> { "tag1", "tag2" },
             SendDefaultPii = true,
             IsEnvironmentUser = true,
             ServerName = "FakeServerName",
@@ -28,7 +28,7 @@ public class SentryLoggingOptionsSetupTests
             MaxQueueItems = 8,
             MaxCacheItems = 9,
             ShutdownTimeout = TimeSpan.FromSeconds(13),
-            // FlushTimeout = TimeSpan,
+            FlushTimeout = TimeSpan.FromSeconds(17),
             DecompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             RequestBodyCompressionLevel = CompressionLevel.Fastest,
             RequestBodyCompressionBuffered = true,
@@ -40,12 +40,12 @@ public class SentryLoggingOptionsSetupTests
             CacheDirectoryPath = "~/test",
             CaptureFailedRequests = true,
             // FailedRequestStatusCodes = IList<HttpStatusCodeRange>,
-            // FailedRequestTargets = IList<SubstringOrRegexPattern>,
+            FailedRequestTargets = new List<SubstringOrRegexPattern> { "target1", "target2" },
             InitCacheFlushTimeout = TimeSpan.FromSeconds(27),
             // DefaultTags = Dictionary<string,string>,
             EnableTracing = true,
             TracesSampleRate = 0.8f,
-            // TracePropagationTargets = IList<SubstringOrRegexPattern>,
+            TracePropagationTargets = new List<SubstringOrRegexPattern> { "target3", "target4" },
             StackTraceMode = StackTraceMode.Enhanced,
             MaxAttachmentSize = 21478,
             DetectStartupTime = StartupTimeDetectionMode.Fast,
@@ -55,55 +55,59 @@ public class SentryLoggingOptionsSetupTests
             JsonPreserveReferences = true,
 
             MinimumBreadcrumbLevel = LogLevel.Debug,
-            MinimumEventLevel = LogLevel.Error
+            MinimumEventLevel = LogLevel.Error,
+            InitializeSdk = true
         };
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new[]
+            .AddInMemoryCollection(new Dictionary<string, string>
             {
-                new KeyValuePair<string, string>("IsGlobalModeEnabled", expected.IsGlobalModeEnabled.ToString()),
-                new KeyValuePair<string, string>("EnableScopeSync", expected.EnableScopeSync.ToString()),
-                // new KeyValuePair<string, string>("TagFilters", expected.TagFilters.ToString()),
-                new KeyValuePair<string, string>("SendDefaultPii", expected.SendDefaultPii.ToString()),
-                new KeyValuePair<string, string>("IsEnvironmentUser", expected.IsEnvironmentUser.ToString()),
-                new KeyValuePair<string, string>("ServerName", expected.ServerName),
-                new KeyValuePair<string, string>("AttachStacktrace", expected.AttachStacktrace.ToString()),
-                new KeyValuePair<string, string>("MaxBreadcrumbs", expected.MaxBreadcrumbs.ToString()),
-                new KeyValuePair<string, string>("SampleRate", expected.SampleRate.ToString()),
-                new KeyValuePair<string, string>("Release", expected.Release),
-                new KeyValuePair<string, string>("Distribution", expected.Distribution),
-                new KeyValuePair<string, string>("Environment", expected.Environment),
-                new KeyValuePair<string, string>("Dsn", expected.Dsn),
-                new KeyValuePair<string, string>("MaxQueueItems", expected.MaxQueueItems.ToString()),
-                new KeyValuePair<string, string>("MaxCacheItems", expected.MaxCacheItems.ToString()),
-                new KeyValuePair<string, string>("ShutdownTimeout", expected.ShutdownTimeout.ToString()),
-                new KeyValuePair<string, string>("FlushTimeout", expected.FlushTimeout.ToString()),
-                new KeyValuePair<string, string>("DecompressionMethods", expected.DecompressionMethods.ToString()),
-                new KeyValuePair<string, string>("RequestBodyCompressionLevel", expected.RequestBodyCompressionLevel.ToString()),
-                new KeyValuePair<string, string>("RequestBodyCompressionBuffered", expected.RequestBodyCompressionBuffered.ToString()),
-                new KeyValuePair<string, string>("SendClientReports", expected.SendClientReports.ToString()),
-                new KeyValuePair<string, string>("Debug", expected.Debug.ToString()),
-                new KeyValuePair<string, string>("DiagnosticLevel", expected.DiagnosticLevel.ToString()),
-                new KeyValuePair<string, string>("ReportAssembliesMode", expected.ReportAssembliesMode.ToString()),
-                new KeyValuePair<string, string>("DeduplicateMode", expected.DeduplicateMode.ToString()),
-                new KeyValuePair<string, string>("CacheDirectoryPath", expected.CacheDirectoryPath.ToString()),
-                new KeyValuePair<string, string>("CaptureFailedRequests", expected.CaptureFailedRequests.ToString()),
-                // new KeyValuePair<string, string>("FailedRequestStatusCodes", expected.FailedRequestStatusCodes.ToString()),
-                // new KeyValuePair<string, string>("FailedRequestTargets", expected.FailedRequestTargets.ToString()),
-                new KeyValuePair<string, string>("InitCacheFlushTimeout", expected.InitCacheFlushTimeout.ToString()),
-                // new KeyValuePair<string, string>("DefaultTags", expected.DefaultTags.ToString()),
-                new KeyValuePair<string, string>("EnableTracing", expected.EnableTracing.ToString()),
-                new KeyValuePair<string, string>("TracesSampleRate", expected.TracesSampleRate.ToString()),
-                // new KeyValuePair<string, string>("TracePropagationTargets", expected.TracePropagationTargets.ToString()),
-                new KeyValuePair<string, string>("StackTraceMode", expected.StackTraceMode.ToString()),
-                new KeyValuePair<string, string>("MaxAttachmentSize", expected.MaxAttachmentSize.ToString()),
-                new KeyValuePair<string, string>("DetectStartupTime", expected.DetectStartupTime.ToString()),
-                new KeyValuePair<string, string>("AutoSessionTrackingInterval", expected.AutoSessionTrackingInterval.ToString()),
-                new KeyValuePair<string, string>("AutoSessionTracking", expected.AutoSessionTracking.ToString()),
-                new KeyValuePair<string, string>("UseAsyncFileIO", expected.UseAsyncFileIO.ToString()),
-                new KeyValuePair<string, string>("JsonPreserveReferences", expected.JsonPreserveReferences.ToString()),
-
-                new KeyValuePair<string, string>("MinimumBreadcrumbLevel", expected.MinimumBreadcrumbLevel.ToString()),
-                new KeyValuePair<string, string>("MinimumEventLevel", expected.MinimumEventLevel.ToString()),
+                ["IsGlobalModeEnabled"] = expected.IsGlobalModeEnabled.ToString(),
+                ["EnableScopeSync"] = expected.EnableScopeSync.ToString(),
+                ["TagFilters:0"] = "tag1",
+                ["TagFilters:1"] = "tag2",
+                ["SendDefaultPii"] = expected.SendDefaultPii.ToString(),
+                ["IsEnvironmentUser"] = expected.IsEnvironmentUser.ToString(),
+                ["ServerName"] = expected.ServerName,
+                ["AttachStacktrace"] = expected.AttachStacktrace.ToString(),
+                ["MaxBreadcrumbs"] = expected.MaxBreadcrumbs.ToString(),
+                ["SampleRate"] = expected.SampleRate.ToString(),
+                ["Release"] = expected.Release,
+                ["Distribution"] = expected.Distribution,
+                ["Environment"] = expected.Environment,
+                ["Dsn"] = expected.Dsn,
+                ["MaxQueueItems"] = expected.MaxQueueItems.ToString(),
+                ["MaxCacheItems"] = expected.MaxCacheItems.ToString(),
+                ["ShutdownTimeout"] = expected.ShutdownTimeout.ToString(),
+                ["FlushTimeout"] = expected.FlushTimeout.ToString(),
+                ["DecompressionMethods"] = expected.DecompressionMethods.ToString(),
+                ["RequestBodyCompressionLevel"] = expected.RequestBodyCompressionLevel.ToString(),
+                ["RequestBodyCompressionBuffered"] = expected.RequestBodyCompressionBuffered.ToString(),
+                ["SendClientReports"] = expected.SendClientReports.ToString(),
+                ["Debug"] = expected.Debug.ToString(),
+                ["DiagnosticLevel"] = expected.DiagnosticLevel.ToString(),
+                ["ReportAssembliesMode"] = expected.ReportAssembliesMode.ToString(),
+                ["DeduplicateMode"] = expected.DeduplicateMode.ToString(),
+                ["CacheDirectoryPath"] = expected.CacheDirectoryPath.ToString(),
+                ["CaptureFailedRequests"] = expected.CaptureFailedRequests.ToString(),
+                ["FailedRequestStatusCodes"] = expected.FailedRequestStatusCodes.ToString(),
+                ["FailedRequestTargets:0"] = expected.FailedRequestTargets.First().ToString(),
+                ["FailedRequestTargets:1"] = expected.FailedRequestTargets.Last().ToString(),
+                ["InitCacheFlushTimeout"] = expected.InitCacheFlushTimeout.ToString(),
+                ["DefaultTags"] = expected.DefaultTags.ToString(),
+                ["EnableTracing"] = expected.EnableTracing.ToString(),
+                ["TracesSampleRate"] = expected.TracesSampleRate.ToString(),
+                ["TracePropagationTargets:0"] = expected.TracePropagationTargets.First().ToString(),
+                ["TracePropagationTargets:1"] = expected.TracePropagationTargets.Last().ToString(),
+                ["StackTraceMode"] = expected.StackTraceMode.ToString(),
+                ["MaxAttachmentSize"] = expected.MaxAttachmentSize.ToString(),
+                ["DetectStartupTime"] = expected.DetectStartupTime.ToString(),
+                ["AutoSessionTrackingInterval"] = expected.AutoSessionTrackingInterval.ToString(),
+                ["AutoSessionTracking"] = expected.AutoSessionTracking.ToString(),
+                ["UseAsyncFileIO"] = expected.UseAsyncFileIO.ToString(),
+                ["JsonPreserveReferences"] = expected.JsonPreserveReferences.ToString(),
+                ["MinimumBreadcrumbLevel"] = expected.MinimumBreadcrumbLevel.ToString(),
+                ["MinimumEventLevel"] = expected.MinimumEventLevel.ToString(),
+                ["InitializeSdk"] = expected.InitializeSdk.ToString(),
             })
             .Build();
 
@@ -121,7 +125,7 @@ public class SentryLoggingOptionsSetupTests
         {
             actual.IsGlobalModeEnabled.Should().Be(expected.IsGlobalModeEnabled);
             actual.EnableScopeSync.Should().Be(expected.EnableScopeSync);
-            // Add assertion for TagFilters here if needed
+            actual.TagFilters.Should().BeEquivalentTo(expected.TagFilters);
             actual.SendDefaultPii.Should().Be(expected.SendDefaultPii);
             actual.IsEnvironmentUser.Should().Be(expected.IsEnvironmentUser);
             actual.ServerName.Should().Be(expected.ServerName);
@@ -146,13 +150,11 @@ public class SentryLoggingOptionsSetupTests
             actual.DeduplicateMode.Should().Be(expected.DeduplicateMode);
             actual.CacheDirectoryPath.Should().Be(expected.CacheDirectoryPath);
             actual.CaptureFailedRequests.Should().Be(expected.CaptureFailedRequests);
-            // Add assertion for FailedRequestStatusCodes here if needed
-            // Add assertion for FailedRequestTargets here if needed
+            actual.FailedRequestTargets.Should().BeEquivalentTo(expected.FailedRequestTargets);
             actual.InitCacheFlushTimeout.Should().Be(expected.InitCacheFlushTimeout);
-            // Add assertion for DefaultTags here if needed
             actual.EnableTracing.Should().Be(expected.EnableTracing);
             actual.TracesSampleRate.Should().Be(expected.TracesSampleRate);
-            // Add assertion for TracePropagationTargets here if needed
+            actual.TracePropagationTargets.Should().BeEquivalentTo(expected.TracePropagationTargets);
             actual.StackTraceMode.Should().Be(expected.StackTraceMode);
             actual.MaxAttachmentSize.Should().Be(expected.MaxAttachmentSize);
             actual.DetectStartupTime.Should().Be(expected.DetectStartupTime);
@@ -163,6 +165,7 @@ public class SentryLoggingOptionsSetupTests
 
             actual.MinimumBreadcrumbLevel.Should().Be(expected.MinimumBreadcrumbLevel);
             actual.MinimumEventLevel.Should().Be(expected.MinimumEventLevel);
+            actual.InitializeSdk.Should().Be(expected.InitializeSdk);
         }
     }
 }
