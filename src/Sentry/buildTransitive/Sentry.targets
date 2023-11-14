@@ -133,7 +133,8 @@
     <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
     <!-- We must run after "_CopyAotSymbols" (not "Publish"), because that is the one that actually copies debug symbols to the publish directory. -->
     <!-- See also https://github.com/dotnet/runtime/blob/v8.0.0/src/coreclr/nativeaot/BuildIntegration/Microsoft.NETCore.Native.Publish.targets#L100 -->
-    <SentryCLIUploadAfterTargets>_CopyAotSymbols</SentryCLIUploadAfterTargets>
+    <SentryCLIUploadAfterTargets Condition="!$(TargetFramework.StartsWith('net7'))">_CopyAotSymbols</SentryCLIUploadAfterTargets>
+    <SentryCLIUploadAfterTargets Condition="$(TargetFramework.StartsWith('net7'))">CopyNativeBinary</SentryCLIUploadAfterTargets>
   </PropertyGroup>
   <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
     <SentryCLIUploadSymbolType Include="pdb" />
