@@ -84,14 +84,6 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
-      - name: Rebuild Solution Filters
-        shell: pwsh
-        run: scripts/generate-solution-filters.ps1
-
-      - name: Ensure Solution Filters are up to date
-        shell: pwsh
-        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
-
       - name: Setup Environment
         uses: ./.github/actions/environment
 
