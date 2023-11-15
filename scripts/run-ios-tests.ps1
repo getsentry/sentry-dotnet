@@ -9,7 +9,7 @@ try
         dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
     }
 
-    $tfm = 'net8.0-ios'
+    $tfm = 'net7.0-ios'
     dotnet build -f $tfm test/Sentry.Maui.Device.TestApp
     if ($LASTEXITCODE -ne 0)
     {
