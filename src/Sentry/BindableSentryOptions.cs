@@ -5,7 +5,7 @@ namespace Sentry;
 /// Note that all of these properties are nullable, so that if they are not present in configuration, the values from
 /// the type being bound to will be preserved.
 /// </summary>
-internal class BindableSentryOptions
+internal partial class BindableSentryOptions
 {
     public bool? IsGlobalModeEnabled { get; set; }
     public bool? EnableScopeSync { get; set; }
@@ -90,5 +90,10 @@ internal class BindableSentryOptions
         options.AutoSessionTracking = AutoSessionTracking ?? options.AutoSessionTracking;
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
+#if ANDROID
+        Android.ApplyTo(options.Android);
+#elif __IOS__
+        iOS.ApplyTo(options.iOS);
+#endif
     }
 }
