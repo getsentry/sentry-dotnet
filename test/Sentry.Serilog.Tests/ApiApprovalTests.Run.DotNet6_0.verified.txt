@@ -37,7 +37,7 @@ namespace Serilog
                     bool? requestBodyCompressionBuffered = default,
                     bool? debug = default,
                     Sentry.SentryLevel? diagnosticLevel = default,
-                    bool? reportAssemblies = default,
+                    Sentry.ReportAssembliesMode? reportAssembliesMode = default,
                     Sentry.DeduplicateMode? deduplicateMode = default,
                     bool? initializeSdk = default,
                     System.Collections.Generic.Dictionary<string, string>? defaultTags = null) { }
@@ -64,7 +64,7 @@ namespace Serilog
                     bool? requestBodyCompressionBuffered = default,
                     bool? debug = default,
                     Sentry.SentryLevel? diagnosticLevel = default,
-                    bool? reportAssemblies = default,
+                    Sentry.ReportAssembliesMode? reportAssembliesMode = default,
                     Sentry.DeduplicateMode? deduplicateMode = default,
                     bool? initializeSdk = default,
                     System.Collections.Generic.Dictionary<string, string>? defaultTags = null) { }

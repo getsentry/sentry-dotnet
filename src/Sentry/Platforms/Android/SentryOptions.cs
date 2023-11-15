@@ -270,7 +270,7 @@ public partial class SentryOptions
         public bool EnableAndroidSdkTracing { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value that indicates if the <see cref="BeforeSend"/> callback will be invoked for
+        /// Gets or sets a value that indicates if the <see cref="o:SetBeforeSend"/> callback will be invoked for
         /// events that originate from the embedded Android SDK. The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>
