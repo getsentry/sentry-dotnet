@@ -36,14 +36,14 @@ jobs:
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
 
       - name: Build iOS Test App
-        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net8.0-ios --no-restore --nologo
+        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net7.0-ios --no-restore --nologo
 
       - name: Upload iOS Test App
         uses: actions/upload-artifact@v3
         with:
           name: device-test-ios
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app
 
   ios:
     needs: [build]

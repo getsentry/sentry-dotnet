@@ -39,14 +39,14 @@ jobs:
         run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
 
       - name: Build Android Test App
-        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net8.0-android --no-restore --nologo
+        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net7.0-android --no-restore --nologo
 
       - name: Upload Android Test App
         uses: actions/upload-artifact@v3
         with:
           name: device-test-android
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
