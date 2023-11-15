@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
-    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="8.0.0-rc.2.9530" />
+    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
 </Project>

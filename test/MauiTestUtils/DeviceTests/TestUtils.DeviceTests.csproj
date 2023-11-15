@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
-    <PackageReference Include="Microsoft.Maui.Core" Version="8.0.0-rc.2.9530" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.0-rc.2.9530" />
+    <PackageReference Include="Microsoft.Maui.Core" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="$(MauiVersion)" />
   </ItemGroup>
 
 </Project>

@@ -71,7 +71,7 @@
     <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
-    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="8.0.0-rc.2.9530" />
+    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
   <!-- https://github.com/dotnet/maui/blob/main/.nuspec/Microsoft.Maui.TestUtils.DeviceTests.Runners.targets -->
