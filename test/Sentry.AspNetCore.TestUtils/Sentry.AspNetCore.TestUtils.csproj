@@ -50,7 +50,7 @@
 
   <ItemGroup Condition="$(TargetFramework) == 'net8.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0-rc.2.23480.2" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
     <PackageReference Include="Verify.AspNetCore" Version="3.4.1" />
     <PackageReference Include="Verify.Http" Version="4.3.2" />
   </ItemGroup>
