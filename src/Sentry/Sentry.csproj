@@ -27,28 +27,21 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Adding any condition directly in the Link tag results in a NETSDK1022 error due to the order or evaluation -->
-    <BenDemystifierLink>%(RecursiveDir)\%(Filename)%(Extension)</BenDemystifierLink>
-  </PropertyGroup>
-  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild">
-    <!--
-      Ben.Demystifier is compiled directly into Sentry.
-      Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
-    -->
-    <ItemGroup>
-      <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
-        <Link>$(BenDemystifierLink)</Link>
-      </Compile>
-      <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
-    </ItemGroup>
+  <!--
+    Ben.Demystifier is compiled directly into Sentry.
+    Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
+  </ItemGroup>
 
-    <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
-    <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
-      <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
-    </ItemGroup>
-  </Target>
-
+  <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
+    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+  </ItemGroup>
 
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
