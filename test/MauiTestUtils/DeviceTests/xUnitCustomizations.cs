@@ -8,184 +8,185 @@ using System.Threading.Tasks;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Microsoft.Maui;
-
-/// <summary>
-/// Custom trait discoverer which adds a Category trait for filtering, etc.
-/// </summary>
-public class CategoryDiscoverer : ITraitDiscoverer
+namespace Microsoft.Maui
 {
-    public const string Category = "Category";
-
-    public IEnumerable<KeyValuePair<string, string>> GetTraits(IAttributeInfo traitAttribute)
+    /// <summary>
+    /// Custom trait discoverer which adds a Category trait for filtering, etc.
+    /// </summary>
+    public class CategoryDiscoverer : ITraitDiscoverer
     {
-        var args = traitAttribute.GetConstructorArguments().FirstOrDefault();
+        public const string Category = "Category";
 
-        if (args is string[] categories)
+        public IEnumerable<KeyValuePair<string, string>> GetTraits(IAttributeInfo traitAttribute)
         {
-            foreach (var category in categories)
+            var args = traitAttribute.GetConstructorArguments().FirstOrDefault();
+
+            if (args is string[] categories)
             {
-                yield return new KeyValuePair<string, string>(Category, category.ToString());
+                foreach (var category in categories)
+                {
+                    yield return new KeyValuePair<string, string>(Category, category.ToString());
+                }
             }
         }
     }
-}
 
-/// <summary>
-/// Custom fact discoverer which wraps the resulting test cases to provide custom names
-/// </summary>
-public class FactDiscoverer : Xunit.Sdk.FactDiscoverer
-{
-    public FactDiscoverer(IMessageSink diagnosticMessageSink) : base(diagnosticMessageSink)
+    /// <summary>
+    /// Custom fact discoverer which wraps the resulting test cases to provide custom names
+    /// </summary>
+    public class FactDiscoverer : Xunit.Sdk.FactDiscoverer
     {
-    }
-
-    public override IEnumerable<IXunitTestCase> Discover(ITestFrameworkDiscoveryOptions discoveryOptions,
-        ITestMethod testMethod, IAttributeInfo factAttribute)
-    {
-        var cases = base.Discover(discoveryOptions, testMethod, factAttribute);
-
-        foreach (var testCase in cases)
+        public FactDiscoverer(IMessageSink diagnosticMessageSink) : base(diagnosticMessageSink)
         {
-            yield return new DeviceTestCase(testCase);
+        }
+
+        public override IEnumerable<IXunitTestCase> Discover(ITestFrameworkDiscoveryOptions discoveryOptions,
+            ITestMethod testMethod, IAttributeInfo factAttribute)
+        {
+            var cases = base.Discover(discoveryOptions, testMethod, factAttribute);
+
+            foreach (var testCase in cases)
+            {
+                yield return new DeviceTestCase(testCase);
+            }
         }
     }
-}
 
-/// <summary>
-/// Custom theory discoverer which wraps the resulting test cases to provide custom names
-/// </summary>
-public class TheoryDiscoverer : Xunit.Sdk.TheoryDiscoverer
-{
-    public TheoryDiscoverer(IMessageSink diagnosticMessageSink) : base(diagnosticMessageSink)
+    /// <summary>
+    /// Custom theory discoverer which wraps the resulting test cases to provide custom names
+    /// </summary>
+    public class TheoryDiscoverer : Xunit.Sdk.TheoryDiscoverer
     {
-    }
-
-    public override IEnumerable<IXunitTestCase> Discover(ITestFrameworkDiscoveryOptions discoveryOptions,
-        ITestMethod testMethod, IAttributeInfo factAttribute)
-    {
-        var testCases = base.Discover(discoveryOptions, testMethod, factAttribute);
-
-        foreach (var testCase in testCases)
+        public TheoryDiscoverer(IMessageSink diagnosticMessageSink) : base(diagnosticMessageSink)
         {
-            yield return new DeviceTestCase(testCase);
+        }
+
+        public override IEnumerable<IXunitTestCase> Discover(ITestFrameworkDiscoveryOptions discoveryOptions,
+            ITestMethod testMethod, IAttributeInfo factAttribute)
+        {
+            var testCases = base.Discover(discoveryOptions, testMethod, factAttribute);
+
+            foreach (var testCase in testCases)
+            {
+                yield return new DeviceTestCase(testCase);
+            }
         }
     }
-}
 
-/// <summary>
-/// Conveninence attribute for setting a Category trait on a test or test class
-/// </summary>
-[TraitDiscoverer("Microsoft.Maui.CategoryDiscoverer", "Microsoft.Maui.TestUtils.DeviceTests")]
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class CategoryAttribute : Attribute, ITraitAttribute
-{
-    // Yes, it looks like the cateory parameter is not used. Don't worry, CategoryDiscoverer uses it.
-    public CategoryAttribute(params string[] categories) { }
-}
-
-/// <summary>
-/// Custom Fact attribute which defaults to using the test method name for the DisplayName property
-/// </summary>
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-[XunitTestCaseDiscoverer("Microsoft.Maui.FactDiscoverer", "Microsoft.Maui.TestUtils.DeviceTests")]
-public class FactAttribute : Xunit.FactAttribute
-{
-    public FactAttribute([CallerMemberName] string displayName = "")
+    /// <summary>
+    /// Conveninence attribute for setting a Category trait on a test or test class
+    /// </summary>
+    [TraitDiscoverer("Microsoft.Maui.CategoryDiscoverer", "Microsoft.Maui.TestUtils.DeviceTests")]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+    public class CategoryAttribute : Attribute, ITraitAttribute
     {
-        base.DisplayName = displayName;
+        // Yes, it looks like the cateory parameter is not used. Don't worry, CategoryDiscoverer uses it.
+        public CategoryAttribute(params string[] categories) { }
     }
-}
 
-/// <summary>
-/// Custom Theory attribute which defaults to using the test method name for the DisplayName property
-/// </summary>
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-[XunitTestCaseDiscoverer("Microsoft.Maui.TheoryDiscoverer", "Microsoft.Maui.TestUtils.DeviceTests")]
-public class TheoryAttribute : Xunit.TheoryAttribute
-{
-    public TheoryAttribute([CallerMemberName] string displayName = "")
+    /// <summary>
+    /// Custom Fact attribute which defaults to using the test method name for the DisplayName property
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [XunitTestCaseDiscoverer("Microsoft.Maui.FactDiscoverer", "Microsoft.Maui.TestUtils.DeviceTests")]
+    public class FactAttribute : Xunit.FactAttribute
     {
-        base.DisplayName = displayName;
+        public FactAttribute([CallerMemberName] string displayName = "")
+        {
+            base.DisplayName = displayName;
+        }
     }
-}
+
+    /// <summary>
+    /// Custom Theory attribute which defaults to using the test method name for the DisplayName property
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [XunitTestCaseDiscoverer("Microsoft.Maui.TheoryDiscoverer", "Microsoft.Maui.TestUtils.DeviceTests")]
+    public class TheoryAttribute : Xunit.TheoryAttribute
+    {
+        public TheoryAttribute([CallerMemberName] string displayName = "")
+        {
+            base.DisplayName = displayName;
+        }
+    }
 
 #pragma warning disable xUnit3000 // Test case classes must derive directly or indirectly from Xunit.LongLivedMarshalByRefObject
-// If we try to actually subclass Xunit.LongLivedMarshalByRefObject here, we get a version conflict between the XUnit and
-// the runner. LLMBRO is only a concern if we're worried about app domains, and for the moment we aren't. If we have to
-// worry about that later, we can work out the conflict issues.
-public class DeviceTestCase : IXunitTestCase
+    // If we try to actually subclass Xunit.LongLivedMarshalByRefObject here, we get a version conflict between the XUnit and
+    // the runner. LLMBRO is only a concern if we're worried about app domains, and for the moment we aren't. If we have to
+    // worry about that later, we can work out the conflict issues.
+    public class DeviceTestCase : IXunitTestCase
 #pragma warning restore xUnit3000 // Test case classes must derive directly or indirectly from Xunit.LongLivedMarshalByRefObject
-{
-    readonly IXunitTestCase _inner = null!;
-
-    public DeviceTestCase() { }
-
-    public DeviceTestCase(IXunitTestCase inner)
     {
-        _inner = inner;
-    }
+        readonly IXunitTestCase _inner = null!;
 
-    public Exception InitializationException => _inner.InitializationException;
+        public DeviceTestCase() { }
 
-    public IMethodInfo Method => _inner.Method;
-
-    public int Timeout => _inner.Timeout;
-
-    string? _categoryPrefix;
-
-    string GetCategoryPrefix()
-    {
-        if (_categoryPrefix == null)
+        public DeviceTestCase(IXunitTestCase inner)
         {
-            if (!Traits.ContainsKey(CategoryDiscoverer.Category))
+            _inner = inner;
+        }
+
+        public Exception InitializationException => _inner.InitializationException;
+
+        public IMethodInfo Method => _inner.Method;
+
+        public int Timeout => _inner.Timeout;
+
+        string? _categoryPrefix;
+
+        string GetCategoryPrefix()
+        {
+            if (_categoryPrefix == null)
             {
-                _categoryPrefix = string.Empty;
+                if (!Traits.ContainsKey(CategoryDiscoverer.Category))
+                {
+                    _categoryPrefix = string.Empty;
+                }
+                else
+                {
+                    _categoryPrefix = $"[{string.Join(", ", Traits[CategoryDiscoverer.Category])}] ";
+                }
             }
-            else
+
+            return _categoryPrefix;
+        }
+
+        string? _displayName;
+
+        public string DisplayName
+        {
+            get
             {
-                _categoryPrefix = $"[{string.Join(", ", Traits[CategoryDiscoverer.Category])}] ";
+                _displayName = _displayName ?? $"{GetCategoryPrefix()}{_inner.DisplayName}";
+                return _displayName;
             }
         }
 
-        return _categoryPrefix;
-    }
+        public string SkipReason => _inner.SkipReason;
 
-    string? _displayName;
+        public ISourceInformation SourceInformation { get => _inner.SourceInformation; set => _inner.SourceInformation = value; }
 
-    public string DisplayName
-    {
-        get
+        public ITestMethod TestMethod => _inner.TestMethod;
+
+        public object[] TestMethodArguments => _inner.TestMethodArguments;
+
+        public Dictionary<string, List<string>> Traits => _inner.Traits;
+
+        public string UniqueID => _inner.UniqueID;
+
+        public void Deserialize(IXunitSerializationInfo info)
         {
-            _displayName = _displayName ?? $"{GetCategoryPrefix()}{_inner.DisplayName}";
-            return _displayName;
+            _inner.Deserialize(info);
         }
-    }
 
-    public string SkipReason => _inner.SkipReason;
+        public Task<RunSummary> RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+        {
+            return _inner.RunAsync(diagnosticMessageSink, messageBus, constructorArguments, aggregator, cancellationTokenSource);
+        }
 
-    public ISourceInformation SourceInformation { get => _inner.SourceInformation; set => _inner.SourceInformation = value; }
-
-    public ITestMethod TestMethod => _inner.TestMethod;
-
-    public object[] TestMethodArguments => _inner.TestMethodArguments;
-
-    public Dictionary<string, List<string>> Traits => _inner.Traits;
-
-    public string UniqueID => _inner.UniqueID;
-
-    public void Deserialize(IXunitSerializationInfo info)
-    {
-        _inner.Deserialize(info);
-    }
-
-    public Task<RunSummary> RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
-    {
-        return _inner.RunAsync(diagnosticMessageSink, messageBus, constructorArguments, aggregator, cancellationTokenSource);
-    }
-
-    public void Serialize(IXunitSerializationInfo info)
-    {
-        _inner.Serialize(info);
+        public void Serialize(IXunitSerializationInfo info)
+        {
+            _inner.Serialize(info);
+        }
     }
 }

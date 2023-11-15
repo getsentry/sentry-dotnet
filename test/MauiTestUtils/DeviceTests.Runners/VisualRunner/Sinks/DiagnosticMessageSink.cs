@@ -2,15 +2,16 @@
 using System;
 using Xunit;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-class DiagnosticMessageSink : DiagnosticEventSink
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    public DiagnosticMessageSink(Action<string> logger, string assemblyDisplayName, bool showDiagnostics)
+    class DiagnosticMessageSink : DiagnosticEventSink
     {
-        if (showDiagnostics && logger != null)
+        public DiagnosticMessageSink(Action<string> logger, string assemblyDisplayName, bool showDiagnostics)
         {
-            DiagnosticMessageEvent += args => logger($"{assemblyDisplayName}: {args.Message.Message}");
+            if (showDiagnostics && logger != null)
+            {
+                DiagnosticMessageEvent += args => logger($"{assemblyDisplayName}: {args.Message.Message}");
+            }
         }
     }
 }

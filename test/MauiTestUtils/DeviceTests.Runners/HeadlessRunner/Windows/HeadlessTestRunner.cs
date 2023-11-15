@@ -1,80 +1,79 @@
 ﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Android.App;
-using Android.OS;
 using Microsoft.DotNet.XHarness.TestRunners.Common;
 using Microsoft.DotNet.XHarness.TestRunners.Xunit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
-    class HeadlessTestRunner : AndroidApplicationEntryPoint
+    public class HeadlessTestRunner : AndroidApplicationEntryPoint
     {
+        public static string? TestResultsFile;
+
         readonly HeadlessRunnerOptions _runnerOptions;
         readonly TestOptions _options;
-        readonly string _resultsPath;
+        readonly string? _resultsPath;
+        TestLogger _logger;
 
         public HeadlessTestRunner(HeadlessRunnerOptions runnerOptions, TestOptions options)
         {
             _runnerOptions = runnerOptions;
             _options = options;
-
-            var cache = Application.Context.CacheDir!.AbsolutePath;
-            _resultsPath = Path.Combine(cache, _runnerOptions.TestResultsFilename);
+            _resultsPath = TestResultsFile;
+            _logger = new();
         }
 
         protected override bool LogExcludedTests => true;
 
-        public override TextWriter? Logger => null;
+        public override TextWriter? Logger => _logger;
 
-        public override string TestsResultsFinalPath => _resultsPath;
+        public override string TestsResultsFinalPath => _resultsPath!;
 
-        protected override int? MaxParallelThreads => System.Environment.ProcessorCount;
+        protected override int? MaxParallelThreads => Environment.ProcessorCount;
 
         protected override IDevice Device { get; } = new TestDevice();
 
         protected override IEnumerable<TestAssemblyInfo> GetTestAssemblies() =>
             _options.Assemblies
                 .Distinct()
-                .Select(assembly =>
-                {
-                    // Android needs this file to "exist" but it uses the assembly actually.
-                    var path = Path.Combine(Application.Context.CacheDir!.AbsolutePath, assembly.GetName().Name + ".dll");
-                    if (!File.Exists(path))
-                        File.Create(path).Close();
+                .Select(assembly => new TestAssemblyInfo(assembly, assembly.Location));
 
-                    return new TestAssemblyInfo(assembly, path);
-                });
-
-        protected override void TerminateWithSuccess() { }
+        protected override void TerminateWithSuccess()
+        {
+            UI.Xaml.Application.Current.Exit();
+        }
 
         protected override TestRunner GetTestRunner(LogWriter logWriter)
         {
             var testRunner = base.GetTestRunner(logWriter);
+
             if (_options.SkipCategories?.Count > 0)
                 testRunner.SkipCategories(_options.SkipCategories);
+
             return testRunner;
         }
 
-        public async Task<Bundle> RunTestsAsync()
+        public async Task<string?> RunTestsAsync()
         {
-            var bundle = new Bundle();
-
             TestsCompleted += OnTestsCompleted;
 
-            await RunAsync();
-
+            try
+            {
+                await RunAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.WriteLine(ex.ToString());
+            }
             TestsCompleted -= OnTestsCompleted;
 
             if (File.Exists(TestsResultsFinalPath))
-                bundle.PutString("test-results-path", TestsResultsFinalPath);
+                return TestsResultsFinalPath;
 
-            if (bundle.GetLong("return-code", -1) == -1)
-                bundle.PutLong("return-code", 1);
-
-            return bundle;
+            return null;
 
             void OnTestsCompleted(object? sender, TestRunResult results)
             {
@@ -85,9 +84,8 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
                     $"Failed: {results.FailedTests} " +
                     $"Ignored: {results.SkippedTests}";
 
-                bundle.PutString("test-execution-summary", message);
-
-                bundle.PutLong("return-code", results.FailedTests == 0 ? 0 : 1);
+                _logger.WriteLine("test-execution-summary" + message);
+                _logger.WriteLine("return-code " + (results.FailedTests == 0 ? 0 : 1));
             }
         }
     }
