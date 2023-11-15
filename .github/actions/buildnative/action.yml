@@ -9,26 +9,39 @@ runs:
       shell: bash
       run: echo "JAVA_HOME_11=$JAVA_HOME_11_X64" >> $GITHUB_ENV
 
+    - uses: actions/cache@v3
+      id: cache-c
+      with:
+        path: lib/sentrysupplemental/bin
+        key: supplemental-c-${{ runner.os }}-${{ hashFiles('lib/sentrysupplemental/*.*') }}
+
     - name: Install Ninja
+      if: ${{ steps.cache-c.outputs.cache-hit != 'true' }}
       shell: bash
       run: ${{ runner.os == 'macOS' && 'brew install ninja' || runner.os == 'Windows' && 'choco install ninja' || 'sudo apt-get update && sudo apt-get install ninja-build' }}
 
     - name: Build C Project
-      if: runner.os == 'Linux' || runner.os == 'macOS'
+      if: ${{ steps.cache-c.outputs.cache-hit != 'true' && (runner.os == 'Linux' || runner.os == 'macOS') }}
       shell: bash
       run: lib/sentrysupplemental/build.sh
 
     - name: Build C Project
-      if: runner.os == 'Windows'
+      if: ${{ steps.cache-c.outputs.cache-hit != 'true' && runner.os == 'Windows' }}
       shell: cmd
       run: lib\sentrysupplemental\build.cmd
 
+    - uses: actions/cache@v3
+      id: cache-android
+      with:
+        path: lib/sentry-android-supplemental/bin
+        key: supplemental-android-${{ runner.os }}-${{ hashFiles('lib/sentry-android-supplemental/*.*') }}
+
     - name: Build Java Project
-      if: runner.os == 'Linux' || runner.os == 'macOS'
+      if: ${{ steps.cache-android.outputs.cache-hit != 'true' && runner.os == 'Linux' || runner.os == 'macOS' }}
       shell: bash
       run: lib/sentry-android-supplemental/build.sh
 
     - name: Build Java Project
-      if: runner.os == 'Windows'
+      if: ${{ steps.cache-android.outputs.cache-hit != 'true' && runner.os == 'Windows' }}
       shell: cmd
       run: lib\sentry-android-supplemental\build.cmd
