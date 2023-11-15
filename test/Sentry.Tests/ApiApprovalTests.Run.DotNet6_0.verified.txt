@@ -251,7 +251,7 @@ namespace Sentry
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.Transaction transaction);
-        void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint);
+        void CaptureTransaction(Sentry.Transaction transaction, Sentry.Scope? scope, Sentry.Hint? hint);
         void CaptureUserFeedback(Sentry.UserFeedback userFeedback);
         System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
     }
@@ -480,7 +480,7 @@ namespace Sentry
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
-        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
+        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         [System.Obsolete("Sentry client should not be explicitly disposed of. This method will be removed i" +
             "n version 4.")]
@@ -737,7 +737,7 @@ namespace Sentry
         public static Sentry.SentryId CaptureMessage(string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public static void CaptureTransaction(Sentry.Transaction transaction) { }
-        public static void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
+        public static void CaptureTransaction(Sentry.Transaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
         public static void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public static void CaptureUserFeedback(Sentry.SentryId eventId, string email, string comments, string? name = null) { }
         [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
@@ -1208,7 +1208,7 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
-        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
+        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
@@ -1250,7 +1250,7 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureException(System.Exception exception) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
-        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Hint? hint) { }
+        public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }

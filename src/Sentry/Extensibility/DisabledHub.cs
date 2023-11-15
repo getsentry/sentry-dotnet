@@ -158,7 +158,7 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureTransaction(Transaction transaction, Hint? hint)
+    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
     {
     }
 

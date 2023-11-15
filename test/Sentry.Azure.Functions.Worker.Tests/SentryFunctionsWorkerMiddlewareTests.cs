@@ -22,7 +22,7 @@ public class SentryFunctionsWorkerMiddlewareTests
             var client = Substitute.For<ISentryClient>();
             var sessionManager = Substitute.For<ISessionManager>();
 
-            client.When(x => x.CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>()))
+            client.When(x => x.CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>()))
                 .Do(callback => Transaction = callback.Arg<Transaction>());
 
             ScopeManager = new SentryScopeManager(options, client);
