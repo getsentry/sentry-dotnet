@@ -89,14 +89,7 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 
 #### Native AOT
 
-Native AOT publishing for compilation support for .NET 8 has been added to the following packages:
-
-- Sentry
-- Sentry.Serilog
-- Sentry.OpenTelemetry
-- Sentry.NLog
-
-##### Supported platforms
+Native AOT publishing support for .NET 8 has been added to Sentry for the following platforms:
 
 - Windows
 - Linux
