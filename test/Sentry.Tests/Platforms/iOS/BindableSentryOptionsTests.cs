@@ -8,7 +8,6 @@ public class BindableSentryOptionsTests
     [SkippableFact]
     public void ApplyTo_SetsiOSOptionsFromConfig()
     {
-        Skip.If(true,"I couldn't work out how to get this test to run");
         var expected = new SentryOptions.IosOptions(new SentryOptions())
         {
             AttachScreenshot = true,
