@@ -297,6 +297,7 @@ public class SentryOptions
     public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
     private float? _sampleRate;
+
     /// <summary>
     /// The rate to sample error and crash events.
     /// </summary>
@@ -315,8 +316,10 @@ public class SentryOptions
         {
             if (value is > 1 or <= 0)
             {
-                throw new InvalidOperationException($"The value {value} is not valid. Use null to disable or values between 0.01 (inclusive) and 1.0 (exclusive) ");
+                throw new InvalidOperationException(
+                    $"The value {value} is not valid. Use null to disable or values between 0.01 (inclusive) and 1.0 (exclusive) ");
             }
+
             _sampleRate = value;
         }
     }
@@ -373,6 +376,7 @@ public class SentryOptions
     public string? Environment { get; set; }
 
     private string? _dsn;
+
     /// <summary>
     /// The Data Source Name of a given project in Sentry.
     /// </summary>
@@ -410,17 +414,6 @@ public class SentryOptions
     internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
-    /// Configures a callback to invoke before sending an event to Sentry
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
-    public Func<SentryEvent, SentryEvent?>? BeforeSend
-    {
-        get => null;
-        set => _beforeSend = value is null ? null : (e, _) => value(e);
-    }
-
-    /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
     /// </summary>
     /// <remarks>
@@ -451,21 +444,6 @@ public class SentryOptions
     internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
-    /// A callback to invoke before sending a transaction to Sentry
-    /// </summary>
-    /// <remarks>
-    /// The return of this transaction will be sent to Sentry. This allows the application
-    /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
-    /// should not be sent at all, return null from the callback.
-    /// </remarks>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction instead.")]
-    public Func<Transaction, Transaction?>? BeforeSendTransaction
-    {
-        get => null;
-        set => _beforeSendTransaction = value is null ? null : (e, _) => value(e);
-    }
-
-    /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
@@ -486,17 +464,6 @@ public class SentryOptions
     private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
 
     internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
-
-    /// <summary>
-    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
-    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb
-    {
-        get => null;
-        set => _beforeBreadcrumb = value is null ? null : (e, _) => value(e);
-    }
 
     /// <summary>
     /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
@@ -534,8 +501,10 @@ public class SentryOptions
         {
             if (value < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the queue.");
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "At least 1 item must be allowed in the queue.");
             }
+
             _maxQueueItems = value;
         }
     }
@@ -553,7 +522,8 @@ public class SentryOptions
         {
             if (value < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the cache.");
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "At least 1 item must be allowed in the cache.");
             }
 
             _maxCacheItems = value;
@@ -589,7 +559,7 @@ public class SentryOptions
     /// By default accepts all available compression methods supported by the platform
     /// </remarks>
     public DecompressionMethods DecompressionMethods { get; set; }
-        // Note the ~ enabling all bits
+    // Note the ~ enabling all bits
         = ~DecompressionMethods.None;
 
     /// <summary>
@@ -621,26 +591,6 @@ public class SentryOptions
     /// An optional web proxy
     /// </summary>
     public IWebProxy? HttpProxy { get; set; }
-
-    /// <summary>
-    /// private field to hold the <see cref="CreateHttpClientHandler"/>, since a typecheck or cast won't work here.
-    /// </summary>
-    private Func<HttpClientHandler>? _createClientHandler = null;
-
-    /// <summary>
-    /// Creates the inner most <see cref="HttpClientHandler"/>.
-    /// Deprecated in favor of <see cref="CreateHttpMessageHandler"/>.
-    /// </summary>
-    [Obsolete("Use CreateHttpMessageHandler instead")]
-    public Func<HttpClientHandler>? CreateHttpClientHandler
-    {
-        get => _createClientHandler;
-        set
-        {
-            CreateHttpMessageHandler = value;
-            _createClientHandler = value;
-        }
-    }
 
     /// <summary>
     /// Creates the inner most <see cref="HttpMessageHandler"/>.
@@ -691,7 +641,8 @@ public class SentryOptions
         {
             if (value is null)
             {
-                _diagnosticLogger?.LogDebug("Sentry will not emit SDK debug messages because debug mode has been turned off.");
+                _diagnosticLogger?.LogDebug(
+                    "Sentry will not emit SDK debug messages because debug mode has been turned off.");
             }
             else
             {
@@ -700,17 +651,6 @@ public class SentryOptions
 
             _diagnosticLogger = value;
         }
-    }
-
-    /// <summary>
-    /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
-    /// </summary>
-    [Obsolete("Use ReportAssembliesMode instead", error: false)]
-    public bool ReportAssemblies
-    {
-        // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode
-        get => ReportAssembliesMode != ReportAssembliesMode.None;
-        set => ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None;
     }
 
     /// <summary>
@@ -744,11 +684,15 @@ public class SentryOptions
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.</para>
     /// <para>Defaults to 500-599 (Server error responses only).</para>
     /// </summary>
-    public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange> { (500, 599) };
+    public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange>
+    {
+        (500, 599)
+    };
 
     // The default failed request target list will match anything, but adding to the list should clear that.
-    private Lazy<IList<SubstringOrRegexPattern>> _failedRequestTargets = new(() => new AutoClearingList<SubstringOrRegexPattern>(
-        new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true));
+    private Lazy<IList<SubstringOrRegexPattern>> _failedRequestTargets = new(() =>
+        new AutoClearingList<SubstringOrRegexPattern>(
+            new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true));
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
@@ -785,9 +729,12 @@ public class SentryOptions
     /// <remarks>
     /// If the key already exists in the event, it will not be overwritten by a default tag.
     /// </remarks>
-    public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
+    public Dictionary<string, string> DefaultTags {
+        get => _defaultTags ??= new Dictionary<string, string>();
+        internal set => _defaultTags = value;
+    }
 
-    /// <summary>
+/// <summary>
     /// Indicates whether the performance feature is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
@@ -1028,17 +975,6 @@ public class SentryOptions
     /// </para>
     /// </summary>
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
-
-    /// <summary>
-    /// This property is no longer used.  It will be removed in a future version.
-    /// </summary>
-    /// <remarks>
-    /// All exceptions are now sent to Sentry, including <see cref="AggregateException"/>s.
-    /// The issue grouping rules in Sentry have been updated to accomodate "exception groups",
-    /// such as <see cref="AggregateException"/> in .NET.
-    /// </remarks>
-    [Obsolete("This property is no longer used.  It will be removed in a future version.")]
-    public bool KeepAggregateException { get; set; }
 
     /// <summary>
     /// Adds a <see cref="JsonConverter"/> to be used when serializing or deserializing
@@ -1287,5 +1223,4 @@ public class SentryOptions
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
     }
-
 }

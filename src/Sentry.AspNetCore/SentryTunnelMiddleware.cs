@@ -29,7 +29,7 @@ public class SentryTunnelMiddleware : IMiddleware
         var request = context.Request;
         if (request.Method == "OPTIONS")
         {
-            headers.Add("Access-Control-Allow-Origin", new[] { (string)request.Headers["Origin"] });
+            headers.Add("Access-Control-Allow-Origin", new[] { (string)request.Headers["Origin"]! });
             headers.Add("Access-Control-Allow-Headers", new[] { "Origin, X-Requested-With, Content-Type, Accept" });
             headers.Add("Access-Control-Allow-Methods", new[] { "POST, OPTIONS" });
             headers.Add("Access-Control-Allow-Credentials", new[] { "true" });
