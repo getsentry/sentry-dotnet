@@ -104,7 +104,7 @@ internal class FakeTransport : ITransport
 }
 
 # This ensures we don't have a regression for https://github.com/getsentry/sentry-dotnet/issues/2825
-Describe 'Console app regression (missing System.Reflection.Metadata)' {
+Describe 'Console app regression (missing System.Reflection.Metadata)' -Skip:(!$IsWindows) {
     AfterAll {
         dotnet remove ./net4-console/console-app.csproj package Sentry
     }
