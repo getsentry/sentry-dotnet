@@ -36,7 +36,16 @@ internal class Enricher
             // RuntimeInformation.OSDescription is throwing on Mono 5.12
             if (!PlatformAbstractions.Runtime.Current.IsMono())
             {
+#if NETFRAMEWORK
+                // RuntimeInformation.* throws on .NET Framework on macOS/Linux
+                try {
+                    eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+                } catch {
+                    eventLike.Contexts.OperatingSystem.RawDescription = Environment.OSVersion.VersionString;
+                }
+#else
                 eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+#endif
             }
         }
 

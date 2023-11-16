@@ -70,7 +70,7 @@ BeforeAll {
         if (-not (Test-Path env:CI))
         {
             Write-Host "Packaging $name, expected output path: $packagePath"
-            dotnet pack "$PSScriptRoot/../src/$name" -c Release --nologo --no-restore -p:Version=$packageVersion -p:IsPackable=true | ForEach-Object { Write-Host $_ }
+            dotnet pack "$PSScriptRoot/../src/$name" -c Release --nologo -p:Version=$packageVersion -p:IsPackable=true | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to package $name."
@@ -161,7 +161,7 @@ BeforeAll {
             }
 
             $packageVersion = GetSentryPackageVersion
-            dotnet add package $package --source $PSScriptRoot/packages --version $packageVersion | ForEach-Object { Write-Host $_ }
+            dotnet add package $package --source $PSScriptRoot/packages --version $packageVersion --no-restore | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to add package dependency to the test app project."
