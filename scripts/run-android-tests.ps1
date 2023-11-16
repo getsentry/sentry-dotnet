@@ -16,9 +16,10 @@ try
         throw "Failed to build Sentry.Maui.Device.TestApp"
     }
 
+    $arch = $(uname -m) -eq 'arm64' ? 'arm64' : 'x64'
     Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
     xharness android test `
-        --app=test/Sentry.Maui.Device.TestApp/bin/Debug/$tfm/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk `
+        --app=test/Sentry.Maui.Device.TestApp/bin/Debug/$tfm/android-$arch/io.sentry.dotnet.maui.device.testapp-Signed.apk `
         --package-name=io.sentry.dotnet.maui.device.testapp `
         --output-directory=test_output
 }

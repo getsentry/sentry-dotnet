@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
-Describe 'Console app (<framework>)' -ForEach @(
+Describe 'Console app NativeAOT (<framework>)' -ForEach @(
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
@@ -100,5 +100,39 @@ internal class FakeTransport : ITransport
 
     It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
         runConsoleApp $false | Should -AnyElementMatch 'This looks like a standard JIT/AOT application build.'
+    }
+}
+
+# This ensures we don't have a regression for https://github.com/getsentry/sentry-dotnet/issues/2825
+Describe 'Console app regression (missing System.Reflection.Metadata)' {
+    AfterAll {
+        dotnet remove ./net4-console/console-app.csproj package Sentry
+    }
+
+    It "Ensure System.Reflection.Metadata is not missing" {
+        $path = './net4-console'
+        Remove-Item -Recurse -Force -Path @("$path/bin", "$path/obj") -ErrorAction SilentlyContinue
+        AddPackageReference $path 'Sentry'
+
+        function runConsoleApp()
+        {
+            $executable = { dotnet run --project $path -c Release }
+            Write-Host "::group::Executing $executable"
+            try
+            {
+                $executable.Invoke() | ForEach-Object {
+                    Write-Host "  $_"
+                    $_
+                }
+            }
+            finally
+            {
+                Write-Host "::endgroup::"
+            }
+        }
+
+        $output = runConsoleApp
+        $output | Should -Not -AnyElementMatch 'Could not load file or assembly.'
+        $output | Should -AnyElementMatch '"exception":{"values":\[{"type":"System.ApplicationException","value":"Something happened!"'
     }
 }
