@@ -43,6 +43,14 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 - Obsolete setter `Sentry.PlatformAbstractions.Runtime.Identifier` has been removed ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
 - `Sentry.Values<T>` is now internal as it is never exposed in the public API ([#2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
 - `TracePropagationTarget` class has been removed, use the `SubstringOrRegexPattern` class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
+- A number of `[Obsolete]` options have been removed ([#2841](https://github.com/getsentry/sentry-dotnet/pull/2841))
+  - `BeforeSend` - use `SetBeforeSend` instead.
+  - `BeforeSendTransaction` - use `SetBeforeSendTransaction` instead.
+  - `BeforeBreadcrumb` - use `SetBeforeBreadcrumb` instead.
+  - `CreateHttpClientHandler` - use `CreateHttpMessageHandler` instead.
+  - `ReportAssemblies` - use `ReportAssembliesMode` instead.
+  - `KeepAggregateException` - This property is no longer used and has no replacement.
+  - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
 
 #### Changed APIs
 

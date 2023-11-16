@@ -25,17 +25,6 @@ public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<Se
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
-    /// </summary>
-    [Obsolete("Use constructor with no IHostingEnvironment")]
-    public SentryAspNetCoreOptionsSetup(
-        ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider> providerConfiguration,
-        IHostingEnvironment hostingEnvironment)
-        : base(providerConfiguration.Configuration)
-    {
-    }
-
-    /// <summary>
     /// Configures the <see cref="SentryAspNetCoreOptions"/>.
     /// </summary>
     public override void Configure(SentryAspNetCoreOptions options)

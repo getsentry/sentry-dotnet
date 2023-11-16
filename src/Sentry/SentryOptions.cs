@@ -414,17 +414,6 @@ public class SentryOptions
     internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
-    /// Configures a callback to invoke before sending an event to Sentry
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
-    public Func<SentryEvent, SentryEvent?>? BeforeSend
-    {
-        get => null;
-        set => _beforeSend = value is null ? null : (e, _) => value(e);
-    }
-
-    /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
     /// </summary>
     /// <remarks>
@@ -455,21 +444,6 @@ public class SentryOptions
     internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
-    /// A callback to invoke before sending a transaction to Sentry
-    /// </summary>
-    /// <remarks>
-    /// The return of this transaction will be sent to Sentry. This allows the application
-    /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
-    /// should not be sent at all, return null from the callback.
-    /// </remarks>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction instead.")]
-    public Func<Transaction, Transaction?>? BeforeSendTransaction
-    {
-        get => null;
-        set => _beforeSendTransaction = value is null ? null : (e, _) => value(e);
-    }
-
-    /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
@@ -490,17 +464,6 @@ public class SentryOptions
     private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
 
     internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
-
-    /// <summary>
-    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
-    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb
-    {
-        get => null;
-        set => _beforeBreadcrumb = value is null ? null : (e, _) => value(e);
-    }
 
     /// <summary>
     /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
@@ -630,26 +593,6 @@ public class SentryOptions
     public IWebProxy? HttpProxy { get; set; }
 
     /// <summary>
-    /// private field to hold the <see cref="CreateHttpClientHandler"/>, since a typecheck or cast won't work here.
-    /// </summary>
-    private Func<HttpClientHandler>? _createClientHandler = null;
-
-    /// <summary>
-    /// Creates the inner most <see cref="HttpClientHandler"/>.
-    /// Deprecated in favor of <see cref="CreateHttpMessageHandler"/>.
-    /// </summary>
-    [Obsolete("Use CreateHttpMessageHandler instead")]
-    public Func<HttpClientHandler>? CreateHttpClientHandler
-    {
-        get => _createClientHandler;
-        set
-        {
-            CreateHttpMessageHandler = value;
-            _createClientHandler = value;
-        }
-    }
-
-    /// <summary>
     /// Creates the inner most <see cref="HttpMessageHandler"/>.
     /// </summary>
     public Func<HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
@@ -708,17 +651,6 @@ public class SentryOptions
 
             _diagnosticLogger = value;
         }
-    }
-
-    /// <summary>
-    /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
-    /// </summary>
-    [Obsolete("Use ReportAssembliesMode instead", error: false)]
-    public bool ReportAssemblies
-    {
-        // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode
-        get => ReportAssembliesMode != ReportAssembliesMode.None;
-        set => ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None;
     }
 
     /// <summary>
@@ -1043,17 +975,6 @@ public class SentryOptions
     /// </para>
     /// </summary>
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
-
-    /// <summary>
-    /// This property is no longer used.  It will be removed in a future version.
-    /// </summary>
-    /// <remarks>
-    /// All exceptions are now sent to Sentry, including <see cref="AggregateException"/>s.
-    /// The issue grouping rules in Sentry have been updated to accomodate "exception groups",
-    /// such as <see cref="AggregateException"/> in .NET.
-    /// </remarks>
-    [Obsolete("This property is no longer used.  It will be removed in a future version.")]
-    public bool KeepAggregateException { get; set; }
 
     /// <summary>
     /// Adds a <see cref="JsonConverter"/> to be used when serializing or deserializing

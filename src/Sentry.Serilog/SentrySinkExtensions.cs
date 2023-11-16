@@ -31,7 +31,7 @@ public static class SentrySinkExtensions
     /// <param name="requestBodyCompressionBuffered">Whether the body compression is buffered and the request 'Content-Length' known in advance. <seealso cref="SentryOptions.RequestBodyCompressionBuffered"/></param>
     /// <param name="debug">Whether to log diagnostics messages. <seealso cref="SentryOptions.Debug"/></param>
     /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
-    /// <param name="reportAssemblies">Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>. <seealso cref="SentryOptions.ReportAssemblies"/></param>
+    /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
     /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
     /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
     /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
@@ -66,7 +66,7 @@ public static class SentrySinkExtensions
     ///                     "requestBodyCompressionBuffered": false,
     ///                     "debug": false,
     ///                     "diagnosticLevel": "Debug",
-    ///                     "reportAssemblies": false,
+    ///                     "reportAssembliesMode": ReportAssembliesMode.None,
     ///                     "deduplicateMode": "All",
     ///                     "initializeSdk": true,
     ///                     "defaultTags": {
@@ -102,7 +102,7 @@ public static class SentrySinkExtensions
         bool? requestBodyCompressionBuffered = null,
         bool? debug = null,
         SentryLevel? diagnosticLevel = null,
-        bool? reportAssemblies = null,
+        ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
         bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
@@ -128,7 +128,7 @@ public static class SentrySinkExtensions
             requestBodyCompressionBuffered,
             debug,
             diagnosticLevel,
-            reportAssemblies,
+            reportAssembliesMode,
             deduplicateMode,
             initializeSdk,
             defaultTags));
@@ -158,7 +158,7 @@ public static class SentrySinkExtensions
     /// <param name="requestBodyCompressionBuffered">Whether the body compression is buffered and the request 'Content-Length' known in advance. <seealso cref="SentryOptions.RequestBodyCompressionBuffered"/></param>
     /// <param name="debug">Whether to log diagnostics messages. <seealso cref="SentryOptions.Debug"/></param>
     /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
-    /// <param name="reportAssemblies">Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>. <seealso cref="SentryOptions.ReportAssemblies"/></param>
+    /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
     /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
     /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
     /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
@@ -184,7 +184,7 @@ public static class SentrySinkExtensions
         bool? requestBodyCompressionBuffered = null,
         bool? debug = null,
         SentryLevel? diagnosticLevel = null,
-        bool? reportAssemblies = null,
+        ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
         bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
@@ -289,11 +289,9 @@ public static class SentrySinkExtensions
             sentrySerilogOptions.DiagnosticLevel = diagnosticLevel.Value;
         }
 
-        if (reportAssemblies.HasValue)
+        if (reportAssembliesMode.HasValue)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            sentrySerilogOptions.ReportAssemblies = reportAssemblies.Value;
-#pragma warning restore CS0618 // Type or member is obsolete
+            sentrySerilogOptions.ReportAssembliesMode = reportAssembliesMode.Value;
         }
 
         if (deduplicateMode.HasValue)
