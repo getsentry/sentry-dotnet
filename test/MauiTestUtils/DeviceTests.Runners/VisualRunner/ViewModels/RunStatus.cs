@@ -1,10 +1,11 @@
-﻿namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-public enum RunStatus
+﻿namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    Ok,
-    Failed,
-    NoTests,
-    Skipped,
-    NotRun
+    public enum RunStatus
+    {
+        Ok,
+        Failed,
+        NoTests,
+        Skipped,
+        NotRun
+    }
 }

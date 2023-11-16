@@ -3,35 +3,36 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-partial class MauiVisualRunnerApp : Application
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    readonly TestOptions _options;
-    readonly ILogger _logger;
-
-    public MauiVisualRunnerApp(TestOptions options, ILogger logger)
+    partial class MauiVisualRunnerApp : Application
     {
-        _options = options;
-        _logger = logger;
+        readonly TestOptions _options;
+        readonly ILogger _logger;
 
-        InitializeComponent();
-    }
+        public MauiVisualRunnerApp(TestOptions options, ILogger logger)
+        {
+            _options = options;
+            _logger = logger;
 
-    protected override Window CreateWindow(IActivationState? activationState)
-    {
-        var hp = new HomePage();
+            InitializeComponent();
+        }
 
-        var nav = new TestNavigator(hp.Navigation);
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            var hp = new HomePage();
 
-        var runner = new DeviceRunner(_options.Assemblies, nav, _logger);
+            var nav = new TestNavigator(hp.Navigation);
 
-        var vm = new HomeViewModel(nav, runner);
+            var runner = new DeviceRunner(_options.Assemblies, nav, _logger);
 
-        hp.BindingContext = vm;
+            var vm = new HomeViewModel(nav, runner);
 
-        var navPage = new NavigationPage(hp);
+            hp.BindingContext = vm;
 
-        return new Window(navPage);
+            var navPage = new NavigationPage(hp);
+
+            return new Window(navPage);
+        }
     }
 }

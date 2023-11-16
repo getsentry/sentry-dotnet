@@ -3,99 +3,89 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-class SortedList<T> : IList<T>
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    readonly IComparer<T> _comparer;
-    readonly List<T> _list;
-
-    public SortedList(IComparer<T> comparer)
+    class SortedList<T> : IList<T>
     {
-        _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
-        _list = new List<T>();
-    }
+        readonly IComparer<T> _comparer;
+        readonly List<T> _list;
 
-    public int IndexOf(T item)
-    {
-        // PERF hint: this is a O(n) algorithm but could be rewritten as a O(log n) one.
-        if (Count == 0)
-            return ~0;
-
-        for (var i = 0; i < Count; i++)
+        public SortedList(IComparer<T> comparer)
         {
-            var existing = this[i];
-            var compare = _comparer.Compare(item, existing);
-            if (compare == 0)
-                return i;
-            if (compare < 0)
-                return ~i;
+            _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            _list = new List<T>();
         }
 
-        return ~Count;
-    }
-
-    public void Insert(int index, T item)
-    {
-        // We trust our caller to be passing in a sorted index.
-        _list.Insert(index, item);
-    }
-
-    public void RemoveAt(int index)
-    {
-        _list.RemoveAt(index);
-    }
-
-    public T this[int index]
-    {
-        get => _list[index];
-        set => throw new NotSupportedException();
-    }
-
-    public void Add(T item)
-    {
-        var index = IndexOf(item);
-        if (index < 0)
+        public int IndexOf(T item)
         {
-            index = ~index;
+            if (Count == 0)
+                return ~0;
+
+            return _list.BinarySearch(item, _comparer);
         }
 
-        _list.Insert(index, item);
-    }
-
-    public void Clear()
-    {
-        _list.Clear();
-    }
-
-    public bool Contains(T item)
-    {
-        return IndexOf(item) >= 0;
-    }
-
-    public void CopyTo(T[] array, int arrayIndex)
-    {
-        _list.CopyTo(array, arrayIndex);
-    }
-
-    public int Count => _list.Count;
-
-    public bool IsReadOnly => false;
-
-    public bool Remove(T item)
-    {
-        var index = IndexOf(item);
-        if (index < 0)
+        public void Insert(int index, T item)
         {
-            return false;
+            // We trust our caller to be passing in a sorted index.
+            _list.Insert(index, item);
         }
 
-        RemoveAt(index);
+        public void RemoveAt(int index)
+        {
+            _list.RemoveAt(index);
+        }
 
-        return true;
+        public T this[int index]
+        {
+            get => _list[index];
+            set => throw new NotSupportedException();
+        }
+
+        public void Add(T item)
+        {
+            var index = IndexOf(item);
+            if (index < 0)
+            {
+                index = ~index;
+            }
+
+            _list.Insert(index, item);
+        }
+
+        public void Clear()
+        {
+            _list.Clear();
+        }
+
+        public bool Contains(T item)
+        {
+            return IndexOf(item) >= 0;
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            _list.CopyTo(array, arrayIndex);
+        }
+
+        public int Count => _list.Count;
+
+        public bool IsReadOnly => false;
+
+        public bool Remove(T item)
+        {
+            var index = IndexOf(item);
+            if (index < 0)
+            {
+                return false;
+            }
+
+            RemoveAt(index);
+
+            return true;
+        }
+
+        public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
-
-    public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

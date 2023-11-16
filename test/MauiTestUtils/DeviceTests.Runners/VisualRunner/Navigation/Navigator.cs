@@ -4,30 +4,31 @@ using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-class TestNavigator : ITestNavigation
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    readonly INavigation _navigation;
-
-    public TestNavigator(INavigation navigation)
+    class TestNavigator : ITestNavigation
     {
-        _navigation = navigation;
-    }
+        readonly INavigation _navigation;
 
-    public Task NavigateTo(PageType page, object? dataContext = null)
-    {
-        ContentPage p = page switch
+        public TestNavigator(INavigation navigation)
         {
-            PageType.Home => new HomePage(),
-            PageType.AssemblyTestList => new TestAssemblyPage(),
-            PageType.TestResult => new TestResultPage(),
-            PageType.Credits => new CreditsPage(),
-            _ => throw new ArgumentOutOfRangeException(nameof(page)),
-        };
+            _navigation = navigation;
+        }
 
-        p.BindingContext = dataContext;
+        public Task NavigateTo(PageType page, object? dataContext = null)
+        {
+            ContentPage p = page switch
+            {
+                PageType.Home => new HomePage(),
+                PageType.AssemblyTestList => new TestAssemblyPage(),
+                PageType.TestResult => new TestResultPage(),
+                PageType.Credits => new CreditsPage(),
+                _ => throw new ArgumentOutOfRangeException(nameof(page)),
+            };
 
-        return _navigation.PushAsync(p);
+            p.BindingContext = dataContext;
+
+            return _navigation.PushAsync(p);
+        }
     }
 }

@@ -2,19 +2,20 @@
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
-
-partial class CreditsPage : ContentPage
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages
 {
-    public CreditsPage()
+    partial class CreditsPage : ContentPage
     {
-        InitializeComponent();
-    }
+        public CreditsPage()
+        {
+            InitializeComponent();
+        }
 
-    void OnNavigating(object? sender, WebNavigatingEventArgs e)
-    {
-        Browser.OpenAsync(e.Url);
+        void OnNavigating(object? sender, WebNavigatingEventArgs e)
+        {
+            Browser.OpenAsync(e.Url);
 
-        e.Cancel = true;
+            e.Cancel = true;
+        }
     }
 }

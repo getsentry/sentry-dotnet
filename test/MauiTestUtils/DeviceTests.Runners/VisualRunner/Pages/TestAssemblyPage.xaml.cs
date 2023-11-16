@@ -1,22 +1,23 @@
 ﻿#nullable enable
 using Microsoft.Maui.Controls;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
-
-partial class TestAssemblyPage : ContentPage
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages
 {
-    public TestAssemblyPage()
+    partial class TestAssemblyPage : ContentPage
     {
-        InitializeComponent();
-    }
+        public TestAssemblyPage()
+        {
+            InitializeComponent();
+        }
 
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
 
-        testsList.SelectedItem = null;
+            testsList.SelectedItem = null;
 
-        if (BindingContext is ViewModelBase vm)
-            vm.OnAppearing();
+            if (BindingContext is ViewModelBase vm)
+                vm.OnAppearing();
+        }
     }
 }

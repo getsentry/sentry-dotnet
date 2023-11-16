@@ -3,18 +3,19 @@ using System;
 using System.IO;
 using Microsoft.Maui.Controls;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-class EmbeddedHtmlExtension : EmbeddedResourceExtension
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    public override object? ProvideValue(IServiceProvider serviceProvider)
+    class EmbeddedHtmlExtension : EmbeddedResourceExtension
     {
-        if (base.ProvideValue(serviceProvider) is Stream stream)
+        public override object? ProvideValue(IServiceProvider serviceProvider)
         {
-            using var reader = new StreamReader(stream, leaveOpen: false);
-            return new HtmlWebViewSource { Html = reader.ReadToEnd() };
-        }
+            if (base.ProvideValue(serviceProvider) is Stream stream)
+            {
+                using var reader = new StreamReader(stream, leaveOpen: false);
+                return new HtmlWebViewSource { Html = reader.ReadToEnd() };
+            }
 
-        return null;
+            return null;
+        }
     }
 }
