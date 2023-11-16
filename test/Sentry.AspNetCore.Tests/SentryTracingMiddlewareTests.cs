@@ -440,9 +440,7 @@ public class SentryTracingMiddlewareTests
         // Arrange
         ITransactionData transaction = null;
 
-        var sentryClient = Substitute.For<ISentryClient>();
-
-        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 }, sentryClient);
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1 });
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())

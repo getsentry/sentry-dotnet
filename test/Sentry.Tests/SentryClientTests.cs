@@ -1010,11 +1010,7 @@ public partial class SentryClientTests
         });
 
         // Act
-        _fixture.GetSut().CaptureTransaction(
-            transaction,
-            scope,
-            hint
-            );
+        _fixture.GetSut().CaptureTransaction(transaction, scope, hint);
 
         // Assert
         hint.Should().NotBeNull();
@@ -1022,7 +1018,7 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void CaptureTransaction_TransactionProcessor_ReceivesHint()
+    public void CaptureTransaction_AddedTransactionProcessor_ReceivesHint()
     {
         // Arrange
         var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
@@ -1046,6 +1042,12 @@ public partial class SentryClientTests
     public void CaptureTransaction_TransactionProcessor_ReceivesScopeAttachments()
     {
         // Arrange
+        var transaction = new Transaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
         var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
         Hint hint = null;
         processor.Process(
@@ -1055,12 +1057,12 @@ public partial class SentryClientTests
         _fixture.SentryOptions.AddTransactionProcessor(processor);
 
         var attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
-        var hub = _fixture.GetSut();
-        hub.ConfigureScope(s => s.AddAttachment(attachments[0]));
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(attachments[0]);
 
         // Act
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
+        var client = _fixture.GetSut();
+        client.CaptureTransaction(transaction, scope, null);
 
         // Assert
         hint.Should().NotBeNull();
