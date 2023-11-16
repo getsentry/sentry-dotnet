@@ -97,9 +97,17 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 
 #### Native AOT
 
-Native AOT publishing for compilation support for .NET 7+ has been added to Sentry, Sentry.Serilog, Sentry.Profiling, Sentry.OpenTelemetry and Sentry.NLog. There are some functional differences when publishing Native AOT:
+Native AOT publishing support for .NET 8 has been added to Sentry for the following platforms:
 
-- `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these ehanced stack traces relies heavily on reflection which isn't compatible with trimming.
+- Windows
+- Linux
+- macOS
+- Mac Catalyst
+- iOS
+
+There are some functional differences when publishing Native AOT:
+
+- `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these enhanced stack traces relies heavily on reflection which isn't compatible with trimming.
 - Reflection cannot be leveraged for JSON Serialization and you may need to use `SentryOptions.AddJsonSerializerContext` to supply a serialization context for types that you'd like to send to Sentry (e.g. in the `Span.Context`). ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732), [#2793](https://github.com/getsentry/sentry-dotnet/pull/2793))
 - WinUI applications: when publishing Native AOT, Sentry isn't able to automatically register an unhandled exception handler  because that relies on reflection. You'll need to [register the unhandled event handler manually](https://github.com/getsentry/sentry-dotnet/issues/2778) instead.
 
