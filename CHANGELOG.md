@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+### Fixes
+
+- Don't add WinUI exception integration on mobile platforms ([#2821](https://github.com/getsentry/sentry-dotnet/pull/2821))
+
+### API breaking Changes
+
+#### Removed APIs
+
+- A number of `[Obsolete]` options have been removed ([#2841](https://github.com/getsentry/sentry-dotnet/pull/2841))
+  - `BeforeSend` - use `SetBeforeSend` instead.
+  - `BeforeSendTransaction` - use `SetBeforeSendTransaction` instead.
+  - `BeforeBreadcrumb` - use `SetBeforeBreadcrumb` instead.
+  - `CreateHttpClientHandler` - use `CreateHttpMessageHandler` instead.
+  - `ReportAssemblies` - use `ReportAssembliesMode` instead.
+  - `KeepAggregateException` - This property is no longer used and has no replacement.
+  - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
+
+#### Changed APIs
+
+- `DebugImage` and `DebugMeta` moved to `Sentry.Protocol` namespace. ([#2815](https://github.com/getsentry/sentry-dotnet/pull/2815))
+
 ## 4.0.0-alpha.0
 
 This release brings support for .NET 8 Native AOT publishing and cleans up some of the old APIs that have outlived their use.
@@ -43,14 +64,6 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 - Obsolete setter `Sentry.PlatformAbstractions.Runtime.Identifier` has been removed ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
 - `Sentry.Values<T>` is now internal as it is never exposed in the public API ([#2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
 - `TracePropagationTarget` class has been removed, use the `SubstringOrRegexPattern` class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
-- A number of `[Obsolete]` options have been removed ([#2841](https://github.com/getsentry/sentry-dotnet/pull/2841))
-  - `BeforeSend` - use `SetBeforeSend` instead.
-  - `BeforeSendTransaction` - use `SetBeforeSendTransaction` instead.
-  - `BeforeBreadcrumb` - use `SetBeforeBreadcrumb` instead.
-  - `CreateHttpClientHandler` - use `CreateHttpMessageHandler` instead.
-  - `ReportAssemblies` - use `ReportAssembliesMode` instead.
-  - `KeepAggregateException` - This property is no longer used and has no replacement.
-  - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
 
 #### Changed APIs
 
@@ -88,10 +101,6 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 - Contexts now inherits from `IDictionary` rather than `ConcurrentDictionary`. The specific dictionary being used is an implementation detail. ([#2729](https://github.com/getsentry/sentry-dotnet/pull/2729))
 - Transaction names for ASP.NET Core are now consistently named `HTTP-VERB /path` (e.g. `GET /home`). Previously the leading forward slash was missing for some endpoints. ([#2808](https://github.com/getsentry/sentry-dotnet/pull/2808))
 - `DebugImage` and `DebugMeta` moved to `Sentry.Protocol` namespace. ([#2815](https://github.com/getsentry/sentry-dotnet/pull/2815))
-
-### Fixes
-
-- Don't add WinUI exception integration on mobile platforms ([#2821](https://github.com/getsentry/sentry-dotnet/pull/2821))
 
 ### Features
 
