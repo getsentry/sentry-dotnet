@@ -5,34 +5,33 @@ using Android.OS;
 using AndroidX.AppCompat.App;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
+
+public abstract class MauiTestActivity : AppCompatActivity
 {
-    public abstract class MauiTestActivity : AppCompatActivity
+    public TaskCompletionSource<Bundle> TaskCompletionSource { get; } = new TaskCompletionSource<Bundle>();
+
+    protected override void OnCreate(Bundle? savedInstanceState)
     {
-        public TaskCompletionSource<Bundle> TaskCompletionSource { get; } = new TaskCompletionSource<Bundle>();
+        base.OnCreate(savedInstanceState);
 
-        protected override void OnCreate(Bundle? savedInstanceState)
+        // Do the work on the background thread to avoid a keyDispatchingTimedOut ANR
+        Task.Run(async () =>
         {
-            base.OnCreate(savedInstanceState);
-
-            // Do the work on the background thread to avoid a keyDispatchingTimedOut ANR
-            Task.Run(async () =>
+            try
             {
-                try
-                {
-                    var runner = MauiTestInstrumentation.Current.Services.GetRequiredService<HeadlessTestRunner>();
+                var runner = MauiTestInstrumentation.Current.Services.GetRequiredService<HeadlessTestRunner>();
 
-                    var bundle = await runner.RunTestsAsync();
+                var bundle = await runner.RunTestsAsync();
 
-                    TaskCompletionSource.TrySetResult(bundle);
-                }
-                catch (Exception ex)
-                {
-                    TaskCompletionSource.TrySetException(ex);
-                }
+                TaskCompletionSource.TrySetResult(bundle);
+            }
+            catch (Exception ex)
+            {
+                TaskCompletionSource.TrySetException(ex);
+            }
 
-                Finish();
-            });
-        }
+            Finish();
+        });
     }
 }

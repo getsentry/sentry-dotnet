@@ -3,99 +3,99 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen;
+
+public class RunnerGenerator
 {
-    public class RunnerGenerator
+    public RunnerGenerator(GeneratorExecutionContext context, string targetFramework)
     {
-        public RunnerGenerator(GeneratorExecutionContext context, string targetFramework)
+        Context = context;
+
+        TargetFramework = targetFramework;
+
+        context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.ApplicationId", out var applicationId);
+        context.Log($"ApplicationId: {applicationId}");
+        ApplicationId = applicationId ?? throw new Exception("ApplicationId needs to be set.");
+
+        context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.ApplicationTitle", out var applicationTitle);
+        context.Log($"ApplicationTitle: {applicationTitle}");
+        ApplicationTitle = applicationTitle ?? "Tests";
+
+        context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.RootNamespace", out var rootNamespace);
+        context.Log($"RootNamespace: {rootNamespace}");
+        RootNamespace = rootNamespace ?? "TestRunnerNamespace";
+
+        ContainsSplashScreen = false;
+        foreach (var file in context.AdditionalFiles)
         {
-            Context = context;
-
-            TargetFramework = targetFramework;
-
-            context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.ApplicationId", out var applicationId);
-            context.Log($"ApplicationId: {applicationId}");
-            ApplicationId = applicationId ?? throw new Exception("ApplicationId needs to be set.");
-
-            context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.ApplicationTitle", out var applicationTitle);
-            context.Log($"ApplicationTitle: {applicationTitle}");
-            ApplicationTitle = applicationTitle ?? "Tests";
-
-            context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.RootNamespace", out var rootNamespace);
-            context.Log($"RootNamespace: {rootNamespace}");
-            RootNamespace = rootNamespace ?? "TestRunnerNamespace";
-
-            ContainsSplashScreen = false;
-            foreach (var file in context.AdditionalFiles)
+            var options = context.AnalyzerConfigOptions.GetOptions(file);
+            if (options.TryGetValue("build_metadata.AdditionalFiles.IsMauiSplashScreen", out var isMauiSplashScreen) && bool.TryParse(isMauiSplashScreen, out var isSplash) && isSplash)
             {
-                var options = context.AnalyzerConfigOptions.GetOptions(file);
-                if (options.TryGetValue("build_metadata.AdditionalFiles.IsMauiSplashScreen", out var isMauiSplashScreen) && bool.TryParse(isMauiSplashScreen, out var isSplash) && isSplash)
-                {
-                    ContainsSplashScreen = true;
-                    break;
-                }
-            }
-            context.Log($"ContainsSplashScreen: {ContainsSplashScreen}");
-        }
-
-        public GeneratorExecutionContext Context { get; }
-
-        public string TargetFramework { get; }
-
-        public string RootNamespace { get; }
-
-        public string ApplicationId { get; }
-
-        public string ApplicationTitle { get; }
-
-        public bool ContainsSplashScreen { get; }
-
-        public void Generate()
-        {
-            Context.Log($"Generating runners...");
-
-            if (TargetFramework.IndexOf("-android", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                var code = GenerateAndroidSource();
-                var name = "TestRunner.Android.sg.cs";
-
-                AddSource(name, code);
-            }
-            else if (TargetFramework.IndexOf("-ios", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                var code = GenerateIosSource();
-                var name = "TestRunner.iOS.sg.cs";
-
-                AddSource(name, code);
-            }
-            else if (TargetFramework.IndexOf("-maccatalyst", StringComparison.OrdinalIgnoreCase) != -1)
-            {
-                var code = GenerateIosSource();
-                var name = "TestRunner.MacCatalyst.sg.cs";
-
-                AddSource(name, code);
+                ContainsSplashScreen = true;
+                break;
             }
         }
+        context.Log($"ContainsSplashScreen: {ContainsSplashScreen}");
+    }
 
-        protected void AddSource(string filename, string contents)
+    public GeneratorExecutionContext Context { get; }
+
+    public string TargetFramework { get; }
+
+    public string RootNamespace { get; }
+
+    public string ApplicationId { get; }
+
+    public string ApplicationTitle { get; }
+
+    public bool ContainsSplashScreen { get; }
+
+    public void Generate()
+    {
+        Context.Log($"Generating runners...");
+
+        if (TargetFramework.IndexOf("-android", StringComparison.OrdinalIgnoreCase) != -1)
         {
-            Context.Log($"AddSource: {filename}");
-            Context.AddSource(filename, SourceText.From(contents, Encoding.UTF8));
+            var code = GenerateAndroidSource();
+            var name = "TestRunner.Android.sg.cs";
+
+            AddSource(name, code);
         }
-
-        string GenerateAndroidSource()
+        else if (TargetFramework.IndexOf("-ios", StringComparison.OrdinalIgnoreCase) != -1)
         {
-            var mauiProgramName = "MauiProgram";
-            var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
-            var splash = ContainsSplashScreen ? @"Theme = ""@style/Maui.SplashTheme""," : "";
+            var code = GenerateIosSource();
+            var name = "TestRunner.iOS.sg.cs";
 
-            var appName = "MainApplication";
-            var visualActivityName = "MainActivity";
+            AddSource(name, code);
+        }
+        else if (TargetFramework.IndexOf("-maccatalyst", StringComparison.OrdinalIgnoreCase) != -1)
+        {
+            var code = GenerateIosSource();
+            var name = "TestRunner.MacCatalyst.sg.cs";
 
-            var instrumentationName = "TestInstrumentation";
-            var headlessActivityName = "TestActivity";
+            AddSource(name, code);
+        }
+    }
 
-            return @"
+    protected void AddSource(string filename, string contents)
+    {
+        Context.Log($"AddSource: {filename}");
+        Context.AddSource(filename, SourceText.From(contents, Encoding.UTF8));
+    }
+
+    string GenerateAndroidSource()
+    {
+        var mauiProgramName = "MauiProgram";
+        var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
+        var splash = ContainsSplashScreen ? @"Theme = ""@style/Maui.SplashTheme""," : "";
+
+        var appName = "MainApplication";
+        var visualActivityName = "MainActivity";
+
+        var instrumentationName = "TestInstrumentation";
+        var headlessActivityName = "TestActivity";
+
+        return @"
 #if !SKIP_RUNNER_ENTRYPOINT_GENERATION && !SKIP_VISUAL_RUNNER_ENTRYPOINT_GENERATION && !SKIP_VISUAL_RUNNER_APPLICATION_GENERATION
 namespace " + RootNamespace + @"
 {
@@ -162,16 +162,16 @@ namespace " + RootNamespace + @"
 }
 #endif
 ";
-        }
+    }
 
-        string GenerateIosSource()
-        {
-            var mauiProgramName = "MauiProgram";
-            var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
-            var visualDelegateName = "VisualRunnerAppDelegate";
-            var headlessDelegateName = "HeadlessRunnerAppDelegate";
+    string GenerateIosSource()
+    {
+        var mauiProgramName = "MauiProgram";
+        var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
+        var visualDelegateName = "VisualRunnerAppDelegate";
+        var headlessDelegateName = "HeadlessRunnerAppDelegate";
 
-            return @"
+        return @"
 #if !SKIP_RUNNER_ENTRYPOINT_GENERATION && !SKIP_VISUAL_RUNNER_ENTRYPOINT_GENERATION && !SKIP_RUNNER_PROGRAM_GENERATION
 namespace " + RootNamespace + @"
 {
@@ -219,6 +219,5 @@ namespace " + RootNamespace + @"
 }
 #endif
 ";
-        }
     }
 }
