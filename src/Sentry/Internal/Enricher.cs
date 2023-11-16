@@ -33,10 +33,14 @@ internal class Enricher
         // Operating System
         if (!eventLike.Contexts.ContainsKey(OperatingSystem.Type))
         {
-            // RuntimeInformation.OSDescription is throwing on Mono 5.12
-            if (!PlatformAbstractions.Runtime.Current.IsMono())
-            {
-                eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+            // RuntimeInformation.OSDescription is throwing on Mono 5.12 and .net 4.6.2 on Linux/macOS
+            try {
+                if (!PlatformAbstractions.Runtime.Current.IsMono())
+                {
+                    eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+                }
+            } catch {
+                // ignored
             }
         }
 
