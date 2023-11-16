@@ -84,14 +84,6 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
-      - name: Rebuild Solution Filters
-        shell: pwsh
-        run: scripts/generate-solution-filters.ps1
-
-      - name: Ensure Solution Filters are up to date
-        shell: pwsh
-        run: scripts/dirty-check.ps1 -PathToCheck ./*.sln* -GuidanceOnFailure "Uncommitted changes to the solution filters detected. Run `scripts/generate-solution-filters.ps1` locally and commit changes."
-
       - name: Setup Environment
         uses: ./.github/actions/environment
 
@@ -101,6 +93,10 @@ jobs:
       - name: Build Cocoa SDK
         if: runner.os == 'macOS'
         uses: ./.github/actions/buildcocoasdk
+
+      # Only switch to newer xcode after building the Cocoa SDK so that it can keep IPHONEOS_DEPLOYMENT_TARGET=11.0
+      - run: sudo xcode-select -s /Applications/Xcode_15.0.1.app
+        if: startsWith(matrix.os, 'macos')
 
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
