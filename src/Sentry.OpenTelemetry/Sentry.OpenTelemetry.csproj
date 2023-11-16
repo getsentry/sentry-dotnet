@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Official OpenTelemetry integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <PackageTags>$(PackageTags);OpenTelemetry</PackageTags>
-    <TargetFrameworks>$(SentryMainTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 

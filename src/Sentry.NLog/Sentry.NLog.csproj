@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(SentryMainTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;NLog</PackageTags>
     <Description>Official NLog integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <CLSCompliant>true</CLSCompliant>
