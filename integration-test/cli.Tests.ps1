@@ -4,7 +4,8 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
-    @{ framework = "net7.0" }
+    @{ framework = "net7.0" },
+    @{ framework = "net8.0" }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework

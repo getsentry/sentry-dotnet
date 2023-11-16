@@ -605,20 +605,10 @@ namespace Sentry
         public bool AutoSessionTracking { get; set; }
         public System.TimeSpan AutoSessionTrackingInterval { get; set; }
         public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
-        [System.Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instea" +
-            "d.")]
-        public System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?>? BeforeBreadcrumb { get; set; }
-        [System.Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
-        public System.Func<Sentry.SentryEvent, Sentry.SentryEvent?>? BeforeSend { get; set; }
-        [System.Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction i" +
-            "nstead.")]
-        public System.Func<Sentry.Transaction, Sentry.Transaction?>? BeforeSendTransaction { get; set; }
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }
-        [System.Obsolete("Use CreateHttpMessageHandler instead")]
-        public System.Func<System.Net.Http.HttpClientHandler>? CreateHttpClientHandler { get; set; }
         public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
         public bool Debug { get; set; }
         public System.Net.DecompressionMethods DecompressionMethods { get; set; }
@@ -640,16 +630,12 @@ namespace Sentry
         public bool IsEnvironmentUser { get; set; }
         public bool IsGlobalModeEnabled { get; set; }
         public bool JsonPreserveReferences { get; set; }
-        [System.Obsolete("This property is no longer used.  It will be removed in a future version.")]
-        public bool KeepAggregateException { get; set; }
         public long MaxAttachmentSize { get; set; }
         public int MaxBreadcrumbs { get; set; }
         public int MaxCacheItems { get; set; }
         public int MaxQueueItems { get; set; }
         public Sentry.Extensibility.INetworkStatusListener? NetworkStatusListener { get; set; }
         public string? Release { get; set; }
-        [System.Obsolete("Use ReportAssembliesMode instead", false)]
-        public bool ReportAssemblies { get; set; }
         public Sentry.ReportAssembliesMode ReportAssembliesMode { get; set; }
         public bool RequestBodyCompressionBuffered { get; set; }
         public System.IO.Compression.CompressionLevel RequestBodyCompressionLevel { get; set; }
@@ -699,9 +685,6 @@ namespace Sentry
         public static void DisableAppDomainUnhandledExceptionCapture(this Sentry.SentryOptions options) { }
         public static void DisableDuplicateEventDetection(this Sentry.SentryOptions options) { }
         public static void DisableNetFxInstallationsIntegration(this Sentry.SentryOptions options) { }
-        [System.Obsolete("Method has been renamed to DisableUnobservedTaskExceptionCapture.  Please update " +
-            "usage.")]
-        public static void DisableTaskUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static void DisableUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }

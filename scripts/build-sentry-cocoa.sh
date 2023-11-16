@@ -10,7 +10,6 @@ rm -rf Carthage
 sdks=$(xcodebuild -showsdks)
 ios_sdk=$(echo "$sdks" | awk '/iOS SDKs/{getline; print $NF}')
 ios_simulator_sdk=$(echo "$sdks" | awk '/iOS Simulator SDKs/{getline; print $NF}')
-macos_sdk=$(echo "$sdks" | awk '/macOS SDKs/{getline; print $NF}')
 
 # Note - We keep the build output in separate directories so that .NET
 # bundles iOS with net6.0-ios and Mac Catalyst with net6.0-maccatalyst.

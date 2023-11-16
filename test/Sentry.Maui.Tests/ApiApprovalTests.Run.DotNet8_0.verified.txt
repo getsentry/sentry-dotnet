@@ -1,0 +1,19 @@
+﻿namespace Microsoft.Maui.Hosting
+{
+    public static class SentryMauiAppBuilderExtensions
+    {
+        public static Microsoft.Maui.Hosting.MauiAppBuilder UseSentry(this Microsoft.Maui.Hosting.MauiAppBuilder builder) { }
+        public static Microsoft.Maui.Hosting.MauiAppBuilder UseSentry(this Microsoft.Maui.Hosting.MauiAppBuilder builder, System.Action<Sentry.Maui.SentryMauiOptions>? configureOptions) { }
+        public static Microsoft.Maui.Hosting.MauiAppBuilder UseSentry(this Microsoft.Maui.Hosting.MauiAppBuilder builder, string dsn) { }
+    }
+}
+namespace Sentry.Maui
+{
+    public class SentryMauiOptions : Sentry.Extensions.Logging.SentryLoggingOptions
+    {
+        public SentryMauiOptions() { }
+        public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
+        public bool IncludeTextInBreadcrumbs { get; set; }
+        public bool IncludeTitleInBreadcrumbs { get; set; }
+    }
+}

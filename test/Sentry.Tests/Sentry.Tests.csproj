@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android;net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst;net8.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,6 +37,11 @@
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <DependentUpon>HintTests.cs</DependentUpon>
     </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

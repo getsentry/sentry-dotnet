@@ -52,14 +52,6 @@ public static class SentryOptionsExtensions
     /// Disables the capture of errors through <see cref="TaskScheduler.UnobservedTaskException"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
-    [Obsolete("Method has been renamed to DisableUnobservedTaskExceptionCapture.  Please update usage.")]
-    public static void DisableTaskUnobservedTaskExceptionCapture(this SentryOptions options) =>
-        options.DisableUnobservedTaskExceptionCapture();
-
-    /// <summary>
-    /// Disables the capture of errors through <see cref="TaskScheduler.UnobservedTaskException"/>.
-    /// </summary>
-    /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableUnobservedTaskExceptionCapture(this SentryOptions options) =>
         options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.UnobservedTaskExceptionIntegration);
 

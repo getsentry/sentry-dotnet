@@ -23,7 +23,7 @@ public class SentrySerilogSinkExtensionsTests
         public bool RequestBodyCompressionBuffered { get; } = false;
         public bool Debug { get; } = true;
         public SentryLevel DiagnosticLevel { get; } = SentryLevel.Warning;
-        public bool ReportAssemblies { get; } = false;
+        public ReportAssembliesMode ReportAssembliesMode { get; } = ReportAssembliesMode.None;
         public DeduplicateMode DeduplicateMode { get; } = DeduplicateMode.SameExceptionInstance;
         public bool InitializeSdk { get; } = false;
         public LogEventLevel MinimumEventLevel { get; } = LogEventLevel.Verbose;
@@ -71,7 +71,7 @@ public class SentrySerilogSinkExtensionsTests
         var sut = Fixture.GetSut();
 
         SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, sendDefaultPii: _fixture.SendDefaultPii,
-            decompressionMethods: _fixture.DecompressionMethods, reportAssemblies: _fixture.ReportAssemblies, sampleRate: _fixture.SampleRate);
+            decompressionMethods: _fixture.DecompressionMethods, reportAssembliesMode: _fixture.ReportAssembliesMode, sampleRate: _fixture.SampleRate);
 
         // Fail early
         AssertNotEqualDeep(_fixture.Options, sut);
@@ -79,9 +79,7 @@ public class SentrySerilogSinkExtensionsTests
         // Compare individual properties
         Assert.Equal(_fixture.SendDefaultPii, sut.SendDefaultPii);
         Assert.Equal(_fixture.DecompressionMethods, sut.DecompressionMethods);
-#pragma warning disable CS0618 // Type or member is obsolete
-        Assert.Equal(_fixture.ReportAssemblies, sut.ReportAssemblies);
-#pragma warning restore CS0618 // Type or member is obsolete
+        Assert.Equal(_fixture.ReportAssembliesMode, sut.ReportAssembliesMode);
         Assert.Equal(_fixture.SampleRate, sut.SampleRate);
     }
 
@@ -96,7 +94,7 @@ public class SentrySerilogSinkExtensionsTests
             _fixture.SampleRate, _fixture.Release, _fixture.Environment, _fixture.MaxQueueItems,
             _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
             _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticLevel,
-            _fixture.ReportAssemblies, _fixture.DeduplicateMode, _fixture.InitializeSdk);
+            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, _fixture.InitializeSdk);
 
         // Fail early
         AssertNotEqualDeep(_fixture.Options, sut);
@@ -118,9 +116,7 @@ public class SentrySerilogSinkExtensionsTests
         Assert.Equal(_fixture.RequestBodyCompressionBuffered, sut.RequestBodyCompressionBuffered);
         Assert.Equal(_fixture.Debug, sut.Debug);
         Assert.Equal(_fixture.DiagnosticLevel, sut.DiagnosticLevel);
-#pragma warning disable CS0618 // Type or member is obsolete
-        Assert.Equal(_fixture.ReportAssemblies, sut.ReportAssemblies);
-#pragma warning restore CS0618 // Type or member is obsolete
+        Assert.Equal(_fixture.ReportAssembliesMode, sut.ReportAssembliesMode);
         Assert.Equal(_fixture.DeduplicateMode, sut.DeduplicateMode);
         Assert.Equal(_fixture.InitializeSdk, sut.InitializeSdk);
         Assert.Equal(_fixture.MinimumEventLevel, sut.MinimumEventLevel);
