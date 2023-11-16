@@ -471,10 +471,9 @@ internal class Hub : IHub, IDisposable
         try
         {
             var (currentScope, client) = ScopeManager.GetCurrent();
-            // scope ??= currentScope;
+            scope ??= currentScope;
 
-            client.CaptureTransaction(transaction, currentScope, hint);
-            Console.WriteLine("HALP!");
+            client.CaptureTransaction(transaction, scope, hint);
         }
         catch (Exception e)
         {
