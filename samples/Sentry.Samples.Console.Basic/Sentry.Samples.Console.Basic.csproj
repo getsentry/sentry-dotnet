@@ -4,8 +4,8 @@
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <TargetFramework>net8.0</TargetFramework>
-    <PublishAot>true</PublishAot>
+    <TargetFrameworks>$(SentryMainTargetFrameworks)</TargetFrameworks>
+    <PublishAot Condition="$(TargetFramework.StartsWith('net8'))">true</PublishAot>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <TargetFrameworks>$(SentryMainTargetFrameworks)</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;Serilog</PackageTags>
     <Description>Official Serilog integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <CLSCompliant>true</CLSCompliant>

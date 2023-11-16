@@ -15,6 +15,9 @@
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+
+    <!-- Platform-agnostic TFMs that packages should target. -->
+    <SentryMainTargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</SentryMainTargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.NoMobile'">
