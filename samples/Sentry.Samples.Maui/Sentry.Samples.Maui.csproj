@@ -16,6 +16,7 @@
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishAot Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">true</PublishAot>
 
     <!-- Display name -->
     <ApplicationTitle>Sentry.Samples.Maui</ApplicationTitle>
@@ -58,11 +59,12 @@
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
 
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64'">iossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(_IsPublishing)' == 'true'">ios-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64' And '$(_IsPublishing)' != 'true'">iossimulator-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
 
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64'">iossimulator-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64' And '$(_IsPublishing)' != 'true'">iossimulator-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
   </PropertyGroup>
 
