@@ -23,7 +23,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISentryEventExceptionProcessor, AspNetCoreExceptionProcessor>();
 
         services.AddHttpContextAccessor();
-        services.TryAddSingleton<IUserFactory, DefaultUserFactory>();
         services.TryAddSingleton<ISentryUserFactory, DefaultUserFactory>();
 
         services

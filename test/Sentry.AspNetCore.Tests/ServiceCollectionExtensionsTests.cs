@@ -73,7 +73,7 @@ public class ServiceCollectionExtensionsTests
     public void AddSentry_DefaultUserFactory_Registered()
     {
         _ = _sut.AddSentry();
-        _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(IUserFactory)
+        _sut.Received().Add(Arg.Is<ServiceDescriptor>(d => d.ServiceType == typeof(ISentryUserFactory)
                                                            && d.ImplementationType == typeof(DefaultUserFactory)));
     }
 #pragma warning restore CS0618

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Sentry.AspNetCore;
 
-internal class DefaultUserFactory : IUserFactory, ISentryUserFactory
+internal class DefaultUserFactory : ISentryUserFactory
 {
     private readonly IHttpContextAccessor? _httpContextAccessor;
 

@@ -38,8 +38,8 @@ public static class ScopeExtensions
 
         if (options.SendDefaultPii && !scope.HasUser())
         {
-            var userFactory = context.RequestServices.GetService<IUserFactory>();
-            var user = userFactory?.Create(context);
+            var userFactory = context.RequestServices.GetService<ISentryUserFactory>();
+            var user = userFactory?.Create();
 
             if (user != null)
             {
