@@ -22,6 +22,7 @@
 #### Changed APIs
 
 - `DebugImage` and `DebugMeta` moved to `Sentry.Protocol` namespace. ([#2815](https://github.com/getsentry/sentry-dotnet/pull/2815))
+- `SentryClient.Dispose` is no longer obsolete ([#2842](https://github.com/getsentry/sentry-dotnet/pull/2842))
 
 ## 4.0.0-alpha.0
 
