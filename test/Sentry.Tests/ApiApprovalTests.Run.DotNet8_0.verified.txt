@@ -1627,9 +1627,6 @@ namespace Sentry.Protocol
     public sealed class SentryException : Sentry.IJsonSerializable
     {
         public SentryException() { }
-        [System.Obsolete("Use SentryException.Mechanism.Data instead. This property will be removed in a fu" +
-            "ture version.")]
-        public System.Collections.Generic.IDictionary<string, object?> Data { get; }
         public Sentry.Protocol.Mechanism? Mechanism { get; set; }
         public string? Module { get; set; }
         public Sentry.SentryStackTrace? Stacktrace { get; set; }
