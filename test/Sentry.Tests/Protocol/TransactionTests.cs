@@ -472,7 +472,7 @@ public class TransactionTests
         transaction.Finish();
 
         // Assert
-        client.Received(1).CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
+        client.Received(1).CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
