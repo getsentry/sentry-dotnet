@@ -43,16 +43,6 @@ public sealed class SentryException : IJsonSerializable
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception/#exception-mechanism"/>
     public Mechanism? Mechanism { get; set; }
 
-    /// <summary>
-    /// Arbitrary extra data that is related to this error.
-    /// </summary>
-    /// <remarks>
-    /// This property is obsolete and should no longer be used.
-    /// Anything added here will be ignored and not sent to Sentry.
-    /// </remarks>
-    [Obsolete("Use SentryException.Mechanism.Data instead. This property will be removed in a future version.")]
-    public IDictionary<string, object?> Data { get; } = new Dictionary<string, object?>(StringComparer.Ordinal);
-
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {

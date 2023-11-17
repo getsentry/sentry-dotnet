@@ -403,7 +403,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// Disposes this client
     /// </summary>
     /// <inheritdoc />
-    [Obsolete("Sentry client should not be explicitly disposed of. This method will be removed in version 4.")]
     public void Dispose()
     {
         _options.LogDebug("Flushing SentryClient.");

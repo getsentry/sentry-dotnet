@@ -4,8 +4,8 @@
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <TargetFramework>net8.0</TargetFramework>
-    <PublishAot>true</PublishAot>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <PublishAot Condition="$(TargetFramework.StartsWith('net8'))">true</PublishAot>
   </PropertyGroup>
 
   <PropertyGroup>
