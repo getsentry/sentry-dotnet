@@ -150,17 +150,14 @@ public class SentryClient : ISentryClient, IDisposable
         _enricher.Apply(transaction);
 
         var processedTransaction = transaction;
-        if (transaction.IsSampled != false)
+        foreach (var processor in scope.GetAllTransactionProcessors())
         {
-            foreach (var processor in scope.GetAllTransactionProcessors())
+            processedTransaction = processor.DoProcessTransaction(transaction, hint);
+            if (processedTransaction == null) // Rejected transaction
             {
-                processedTransaction = processor.DoProcessTransaction(transaction, hint);
-                if (processedTransaction == null)
-                {
-                    _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
-                    _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                    return;
-                }
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+                _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
+                return;
             }
         }
 
