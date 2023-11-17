@@ -19,7 +19,7 @@
   - `KeepAggregateException` - this property is no longer used and has no replacement.
   - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
   - `DebugDiagnosticLogger` - use `TraceDiagnosticLogger` instead.
-- A number of iOS/Android-specific `[Obsolete]` options have been removed
+- A number of iOS/Android-specific `[Obsolete]` options have been removed ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
   - `Distribution` - use `SentryOptions.Distribution` instead.
   - `EnableAutoPerformanceTracking` - use `SetBeforeSendTransaction` instead.
   - `EnableCoreDataTracking` - use `EnableCoreDataTracing` instead.
@@ -29,13 +29,13 @@
   - `StitchAsyncCode` - no longer available.
   - `ProfilingTracesInterval` - no longer available.
   - `ProfilingEnabled` - use `ProfilesSampleRate` instead.
-- Obsolete `SystemClock` constructor removed, use `SystemClock.Clock` instead.
-- Obsolete `Runtime.Clone()` removed, this shouldn't have been public in the past and has no replacement.
-- Obsolete `SentryException.Data` removed, use `SentryException.Mechanism.Data` instead.
-- Obsolete `AssemblyExtensions` removed, this shouldn't have been public in the past and has no replacement.
-- Obsolete `SentryDatabaseLogging.UseBreadcrumbs()` removed, it is called automatically and has no replacement.
-- Obsolete `Scope.GetSpan()` removed, use `Span` property instead.
-- Obsolete `IUserFactory` removed, use `ISentryUserFactory` instead.
+- Obsolete `SystemClock` constructor removed, use `SystemClock.Clock` instead. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
+- Obsolete `Runtime.Clone()` removed, this shouldn't have been public in the past and has no replacement. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
+- Obsolete `SentryException.Data` removed, use `SentryException.Mechanism.Data` instead. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
+- Obsolete `AssemblyExtensions` removed, this shouldn't have been public in the past and has no replacement. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
+- Obsolete `SentryDatabaseLogging.UseBreadcrumbs()` removed, it is called automatically and has no replacement. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
+- Obsolete `Scope.GetSpan()` removed, use `Span` property instead. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
+- Obsolete `IUserFactory` removed, use `ISentryUserFactory` instead. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
 
 #### Changed APIs
 
