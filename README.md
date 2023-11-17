@@ -35,7 +35,6 @@ Sentry SDK for .NET
 
 Sentry offers other integrations that are not part of this repository:
 
-* [Sentry.Minidump](https://github.com/getsentry/sentry-dotnet-minidump): Capture Minidumps on Windows, macOS and Linux
 * [Sentry.Unity](https://github.com/getsentry/sentry-unity): Unity integrations
 * [Sentry.Xamarin](https://github.com/getsentry/sentry-xamarin): Xamarin native and Xamarin.Forms integrations
 
@@ -47,8 +46,6 @@ Each NuGet package in the table above has its custom view of the docs. Click on 
 
 Sentry has extensive documentation for its SDKs on [https://docs.sentry.io](https://docs.sentry.io/platforms/dotnet/).
 
-Additionally, our [.NET API reference docs](https://getsentry.github.io/sentry-dotnet/index.html) are generated and deployed on each merge to main.
-
 ### Samples
 
 **Consider taking a look at the _[samples](https://github.com/getsentry/sentry-dotnet/tree/main/samples)_ directory for different types of apps and example usages of the SDK.**
@@ -59,10 +56,6 @@ Looking for more samples? Check out [this repository](https://github.com/getsent
 
 * On.NET [Error monitoring with Sentry for .NET MAUI](https://www.youtube.com/watch?v=8YmEC4iKD2I)
 * .NET Conf [focus on MAUI](https://www.youtube.com/watch?v=RW3hiukVXZQ&list=PLdo4fOcmZ0oWePZU3W162NJ9vcXqgpMVc)
-
-### Sentry Protocol
-
-For more details, please: **refer to the [documentation](https://getsentry.github.io/sentry-dotnet/index.html)**
 
 ## Resources
 * [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/dotnet/)
