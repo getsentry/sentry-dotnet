@@ -47,10 +47,10 @@ public class SentryClient : ISentryClient, IDisposable
 
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
-        if (AotHelper.IsAot) {
-            options.LogDebug("This looks like an AOT application build.");
+        if (AotHelper.IsNativeAot) {
+            options.LogDebug("This looks like a NativeAOT application build.");
         } else {
-            options.LogDebug("This looks like a JIT application build.");
+            options.LogDebug("This looks like a standard JIT/AOT application build.");
         }
 
         if (worker == null)
@@ -168,7 +168,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsAot)
+            if (!AotHelper.IsNativeAot)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();
@@ -374,7 +374,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsAot)
+            if (!AotHelper.IsNativeAot)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();
@@ -403,7 +403,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// Disposes this client
     /// </summary>
     /// <inheritdoc />
-    [Obsolete("Sentry client should not be explicitly disposed of. This method will be removed in version 4.")]
     public void Dispose()
     {
         _options.LogDebug("Flushing SentryClient.");

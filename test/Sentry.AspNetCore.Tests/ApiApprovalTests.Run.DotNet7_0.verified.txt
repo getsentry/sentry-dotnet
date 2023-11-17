@@ -32,13 +32,6 @@ namespace Sentry.AspNetCore
     {
         Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
     }
-    [System.Obsolete("This interface is tightly coupled to AspNetCore and will be removed in version 4." +
-        "0.0. Please consider using ISentryUserFactory with IHttpContextAccessor instead." +
-        "")]
-    public interface IUserFactory
-    {
-        Sentry.User? Create(Microsoft.AspNetCore.Http.HttpContext context);
-    }
     public static class SamplingExtensions
     {
         public static Microsoft.AspNetCore.Http.HttpContext? TryGetHttpContext(this Sentry.TransactionSamplingContext samplingContext) { }
@@ -68,8 +61,6 @@ namespace Sentry.AspNetCore
     public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.ConfigureFromConfigurationOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
     {
         public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration) { }
-        [System.Obsolete("Use constructor with no IHostingEnvironment")]
-        public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment) { }
         public override void Configure(Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
     }
     public static class SentryBuilderExtensions

@@ -551,15 +551,18 @@ internal static class JsonExtensions
 
     private static byte[] InternalSerializeToUtf8Bytes(object value)
     {
-        return AotHelper.IsAot
-            ? AotSerializeToUtf8Bytes()
-            : JitSerializeToUtf8Bytes();
-
+#if NET8_0_OR_GREATER
         byte[] AotSerializeToUtf8Bytes()
         {
             var context = GetSerializerContext(value.GetType());
             return JsonSerializer.SerializeToUtf8Bytes(value, value.GetType(), context);
         }
+        return JsonSerializer.IsReflectionEnabledByDefault
+            ? JitSerializeToUtf8Bytes()
+            : AotSerializeToUtf8Bytes();
+#else
+        return JitSerializeToUtf8Bytes();
+#endif
 
         [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
         [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
@@ -568,28 +571,27 @@ internal static class JsonExtensions
 
     private static void InternalSerialize(Utf8JsonWriter writer, object value, bool preserveReferences = false)
     {
-        if (AotHelper.IsAot)
-        {
-            AotSerialize();
-        }
-        else
+#if NET8_0_OR_GREATER
+        if (JsonSerializer.IsReflectionEnabledByDefault)
         {
             JitSerialize();
         }
-        return;
-
-        void AotSerialize()
+        else
         {
             var context = GetSerializerContext(value.GetType(), preserveReferences);
             JsonSerializer.Serialize(writer, value, value.GetType(), context);
         }
+#else
+        JitSerialize();
+#endif
+        return;
 
         [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
         [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
         void JitSerialize()
         {
-         var options = preserveReferences ? AltSerializerOptions : SerializerOptions;
-         JsonSerializer.Serialize(writer, value, options);
+            var options = preserveReferences ? AltSerializerOptions : SerializerOptions;
+            JsonSerializer.Serialize(writer, value, options);
         }
     }
 

@@ -10,7 +10,6 @@ internal class SentryDiagnosticListenerIntegration : ISdkIntegration
         if (!options.IsPerformanceMonitoringEnabled)
         {
             options.Log(SentryLevel.Info, "DiagnosticSource Integration is disabled because tracing is disabled.");
-            options.DisableDiagnosticSourceIntegration();
             return;
         }
 
