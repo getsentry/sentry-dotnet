@@ -20,6 +20,7 @@
   - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
   - `DebugDiagnosticLogger` - use `TraceDiagnosticLogger` instead.
   - `SystemClock` constructor removed - use `SystemClock.Clock` instead.
+  - `Runtime.Clone()` - this shouldn't have been public in the past and has no replacement.
 
 #### Changed APIs
 
