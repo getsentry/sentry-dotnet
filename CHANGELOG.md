@@ -19,7 +19,7 @@
   - `KeepAggregateException` - this property is no longer used and has no replacement.
   - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
   - `DebugDiagnosticLogger` - use `TraceDiagnosticLogger` instead.
-- A number of iOS-specific `[Obsolete]` options have been removed
+- A number of iOS/Android-specific `[Obsolete]` options have been removed
   - `Distribution` - use `SentryOptions.Distribution` instead.
   - `EnableAutoPerformanceTracking` - use `SetBeforeSendTransaction` instead.
   - `EnableCoreDataTracking` - use `EnableCoreDataTracing` instead.
@@ -27,6 +27,8 @@
   - `EnableOutOfMemoryTracking` - use `EnableWatchdogTerminationTracking` instead.
   - `EnableUIViewControllerTracking` - use `EnableUIViewControllerTracing` instead.
   - `StitchAsyncCode` - no longer available.
+  - `ProfilingTracesInterval` - no longer available.
+  - `ProfilingEnabled` - use `ProfilesSampleRate` instead.
 - Obsolete `SystemClock` constructor removed, use `SystemClock.Clock` instead.
 - Obsolete `Runtime.Clone()` removed, this shouldn't have been public in the past and has no replacement.
 - Obsolete `SentryException.Data` removed, use `SentryException.Mechanism.Data` instead.
