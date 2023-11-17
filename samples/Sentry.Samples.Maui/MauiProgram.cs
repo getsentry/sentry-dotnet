@@ -16,6 +16,8 @@ public static class MauiProgram
                 // By default, we will send the last 100 breadcrumbs with each event.
                 // If you want to see everything we can capture from MAUI, you may wish to use a larger value.
                 options.MaxBreadcrumbs = 1000;
+
+                options.Debug = true;
             })
 
             .ConfigureFonts(fonts =>

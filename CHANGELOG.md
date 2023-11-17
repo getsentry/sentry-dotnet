@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+### Fixes
+
+- Don't add WinUI exception integration on mobile platforms ([#2821](https://github.com/getsentry/sentry-dotnet/pull/2821))
+
+### API breaking Changes
+
+#### Removed APIs
+
+- A number of `[Obsolete]` options have been removed ([#2841](https://github.com/getsentry/sentry-dotnet/pull/2841))
+  - `BeforeSend` - use `SetBeforeSend` instead.
+  - `BeforeSendTransaction` - use `SetBeforeSendTransaction` instead.
+  - `BeforeBreadcrumb` - use `SetBeforeBreadcrumb` instead.
+  - `CreateHttpClientHandler` - use `CreateHttpMessageHandler` instead.
+  - `ReportAssemblies` - use `ReportAssembliesMode` instead.
+  - `KeepAggregateException` - This property is no longer used and has no replacement.
+  - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
+
+#### Changed APIs
+
+- `DebugImage` and `DebugMeta` moved to `Sentry.Protocol` namespace. ([#2815](https://github.com/getsentry/sentry-dotnet/pull/2815))
+- `SentryClient.Dispose` is no longer obsolete ([#2842](https://github.com/getsentry/sentry-dotnet/pull/2842))
+
 ## 4.0.0-alpha.0
 
 This release brings support for .NET 8 Native AOT publishing and cleans up some of the old APIs that have outlived their use.
@@ -43,14 +65,6 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 - Obsolete setter `Sentry.PlatformAbstractions.Runtime.Identifier` has been removed ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
 - `Sentry.Values<T>` is now internal as it is never exposed in the public API ([#2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
 - `TracePropagationTarget` class has been removed, use the `SubstringOrRegexPattern` class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
-- A number of `[Obsolete]` options have been removed ([#2841](https://github.com/getsentry/sentry-dotnet/pull/2841))
-  - `BeforeSend` - use `SetBeforeSend` instead.
-  - `BeforeSendTransaction` - use `SetBeforeSendTransaction` instead.
-  - `BeforeBreadcrumb` - use `SetBeforeBreadcrumb` instead.
-  - `CreateHttpClientHandler` - use `CreateHttpMessageHandler` instead.
-  - `ReportAssemblies` - use `ReportAssembliesMode` instead.
-  - `KeepAggregateException` - This property is no longer used and has no replacement.
-  - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
 
 #### Changed APIs
 
@@ -87,20 +101,22 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 - `DebugImage.ImageAddress` changed to `long?`. ([#2725](https://github.com/getsentry/sentry-dotnet/pull/2725))
 - Contexts now inherits from `IDictionary` rather than `ConcurrentDictionary`. The specific dictionary being used is an implementation detail. ([#2729](https://github.com/getsentry/sentry-dotnet/pull/2729))
 - Transaction names for ASP.NET Core are now consistently named `HTTP-VERB /path` (e.g. `GET /home`). Previously the leading forward slash was missing for some endpoints. ([#2808](https://github.com/getsentry/sentry-dotnet/pull/2808))
-- `DebugImage` and `DebugMeta` moved to `Sentry.Protocol` namespace. ([#2815](https://github.com/getsentry/sentry-dotnet/pull/2815))
-- `SentryClient.Dispose` is no longer obsolete ([#2842](https://github.com/getsentry/sentry-dotnet/pull/2842))
-
-### Fixes
-
-- Don't add WinUI exception integration on mobile platforms ([#2821](https://github.com/getsentry/sentry-dotnet/pull/2821))
 
 ### Features
 
 #### Native AOT
 
-Native AOT publishing for compilation support for .NET 7+ has been added to Sentry, Sentry.Serilog, Sentry.Profiling, Sentry.OpenTelemetry and Sentry.NLog. There are some functional differences when publishing Native AOT:
+Native AOT publishing support for .NET 8 has been added to Sentry for the following platforms:
 
-- `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these ehanced stack traces relies heavily on reflection which isn't compatible with trimming.
+- Windows
+- Linux
+- macOS
+- Mac Catalyst
+- iOS
+
+There are some functional differences when publishing Native AOT:
+
+- `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these enhanced stack traces relies heavily on reflection which isn't compatible with trimming.
 - Reflection cannot be leveraged for JSON Serialization and you may need to use `SentryOptions.AddJsonSerializerContext` to supply a serialization context for types that you'd like to send to Sentry (e.g. in the `Span.Context`). ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732), [#2793](https://github.com/getsentry/sentry-dotnet/pull/2793))
 - WinUI applications: when publishing Native AOT, Sentry isn't able to automatically register an unhandled exception handler  because that relies on reflection. You'll need to [register the unhandled event handler manually](https://github.com/getsentry/sentry-dotnet/issues/2778) instead.
 
