@@ -439,8 +439,6 @@ namespace Sentry
         public void ClearAttachments() { }
         public void ClearBreadcrumbs() { }
         public Sentry.Scope Clone() { }
-        [System.Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
-        public Sentry.ISpanTracer? GetSpan() { }
         public void SetExtra(string key, object? value) { }
         public void SetTag(string key, string value) { }
         public void UnsetTag(string key) { }
@@ -1356,13 +1354,6 @@ namespace Sentry.Infrastructure
         public ConsoleDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
         protected override void LogMessage(string message) { }
     }
-    [System.Obsolete("Logger doesn\'t work outside of Sentry SDK. Please use TraceDiagnosticLogger inste" +
-        "ad")]
-    public class DebugDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
-    {
-        public DebugDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
-        protected override void LogMessage(string message) { }
-    }
     public abstract class DiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
     {
         protected DiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
@@ -1383,9 +1374,6 @@ namespace Sentry.Infrastructure
     public sealed class SystemClock : Sentry.Infrastructure.ISystemClock
     {
         public static readonly Sentry.Infrastructure.SystemClock Clock;
-        [System.Obsolete("This constructor will become private in a future major version. Use the `SystemCl" +
-            "ock.Clock` singleton instead.")]
-        public SystemClock() { }
         public System.DateTimeOffset GetUtcNow() { }
     }
     public class TraceDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
@@ -1629,17 +1617,12 @@ namespace Sentry.Protocol
         public string? Name { get; set; }
         public string? RawDescription { get; set; }
         public string? Version { get; set; }
-        [System.Obsolete("This method will be made internal in a future version.")]
-        public Sentry.Protocol.Runtime Clone() { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.Runtime FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class SentryException : Sentry.IJsonSerializable
     {
         public SentryException() { }
-        [System.Obsolete("Use SentryException.Mechanism.Data instead. This property will be removed in a fu" +
-            "ture version.")]
-        public System.Collections.Generic.IDictionary<string, object?> Data { get; }
         public Sentry.Protocol.Mechanism? Mechanism { get; set; }
         public string? Module { get; set; }
         public Sentry.SentryStackTrace? Stacktrace { get; set; }
@@ -1703,14 +1686,6 @@ namespace Sentry.Protocol.Envelopes
     {
         void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger);
         System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default);
-    }
-}
-namespace Sentry.Reflection
-{
-    [System.Obsolete("Should not be public. This method will be removed in version 4.")]
-    public static class AssemblyExtensions
-    {
-        public static Sentry.SdkVersion GetNameAndVersion(this System.Reflection.Assembly asm) { }
     }
 }
 public static class SentryExceptionExtensions
