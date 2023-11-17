@@ -1378,9 +1378,6 @@ namespace Sentry.Infrastructure
     public sealed class SystemClock : Sentry.Infrastructure.ISystemClock
     {
         public static readonly Sentry.Infrastructure.SystemClock Clock;
-        [System.Obsolete("This constructor will become private in a future major version. Use the `SystemCl" +
-            "ock.Clock` singleton instead.")]
-        public SystemClock() { }
         public System.DateTimeOffset GetUtcNow() { }
     }
     public class TraceDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger

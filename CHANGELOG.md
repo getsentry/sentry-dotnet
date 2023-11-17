@@ -19,6 +19,7 @@
   - `KeepAggregateException` - This property is no longer used and has no replacement.
   - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
   - `DebugDiagnosticLogger` - use `TraceDiagnosticLogger` instead.
+  - `SystemClock` constructor removed - use `SystemClock.Clock` instead.
 
 #### Changed APIs
 
