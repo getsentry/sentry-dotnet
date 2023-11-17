@@ -19,10 +19,11 @@
   - `KeepAggregateException` - This property is no longer used and has no replacement.
   - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
   - `DebugDiagnosticLogger` - use `TraceDiagnosticLogger` instead.
-  - `SystemClock` constructor removed - use `SystemClock.Clock` instead.
-  - `Runtime.Clone()` - this shouldn't have been public in the past and has no replacement.
-  - `SentryException.Data` - use `SentryException.Mechanism.Data` instead.
-  - `AssemblyExtensions` - this shouldn't have been public in the past and has no replacement.
+- Obsolete `SystemClock` constructor removed, use `SystemClock.Clock` instead.
+- Obsolete `Runtime.Clone()` removed, this shouldn't have been public in the past and has no replacement.
+- Obsolete `SentryException.Data` removed, use `SentryException.Mechanism.Data` instead.
+- Obsolete `AssemblyExtensions` removed, this shouldn't have been public in the past and has no replacement.
+- Obsolete `SentryDatabaseLogging.UseBreadcrumbs()` removed, it is called automatically and has no replacement.
 
 #### Changed APIs
 

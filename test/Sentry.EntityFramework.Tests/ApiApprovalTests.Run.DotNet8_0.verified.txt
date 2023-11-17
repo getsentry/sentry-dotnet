@@ -28,12 +28,6 @@ namespace Sentry.EntityFramework
         public void ScalarExecuted(System.Data.Common.DbCommand command, System.Data.Entity.Infrastructure.Interception.DbCommandInterceptionContext<object> interceptionContext) { }
         public void ScalarExecuting(System.Data.Common.DbCommand command, System.Data.Entity.Infrastructure.Interception.DbCommandInterceptionContext<object> interceptionContext) { }
     }
-    public static class SentryDatabaseLogging
-    {
-        [System.Obsolete("This method is called automatically by options.AddEntityFramework. This method wi" +
-            "ll be removed in future versions.")]
-        public static Sentry.EntityFramework.SentryCommandInterceptor? UseBreadcrumbs(Sentry.EntityFramework.IQueryLogger? logger = null) { }
-    }
 }
 namespace Sentry
 {
