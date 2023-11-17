@@ -536,12 +536,6 @@ public class Scope : IEventLike
         }
     }
 
-    /// <summary>
-    /// Obsolete.  Use the <see cref="Span"/> property instead.
-    /// </summary>
-    [Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
-    public ISpanTracer? GetSpan() => Span;
-
     private ISpanTracer? _span;
 
     /// <summary>

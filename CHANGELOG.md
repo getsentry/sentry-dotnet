@@ -24,6 +24,7 @@
 - Obsolete `SentryException.Data` removed, use `SentryException.Mechanism.Data` instead.
 - Obsolete `AssemblyExtensions` removed, this shouldn't have been public in the past and has no replacement.
 - Obsolete `SentryDatabaseLogging.UseBreadcrumbs()` removed, it is called automatically and has no replacement.
+- Obsolete `Scope.GetSpan()` removed, use `Span` property instead.
 
 #### Changed APIs
 

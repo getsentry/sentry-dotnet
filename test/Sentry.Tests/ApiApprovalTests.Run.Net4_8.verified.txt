@@ -438,8 +438,6 @@ namespace Sentry
         public void ClearAttachments() { }
         public void ClearBreadcrumbs() { }
         public Sentry.Scope Clone() { }
-        [System.Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
-        public Sentry.ISpanTracer? GetSpan() { }
         public void SetExtra(string key, object? value) { }
         public void SetTag(string key, string value) { }
         public void UnsetTag(string key) { }
