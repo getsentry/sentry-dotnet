@@ -18,6 +18,7 @@
   - `ReportAssemblies` - use `ReportAssembliesMode` instead.
   - `KeepAggregateException` - This property is no longer used and has no replacement.
   - `DisableTaskUnobservedTaskExceptionCapture` method has been renamed to `DisableUnobservedTaskExceptionCapture`.
+  - `DebugDiagnosticLogger` - use `TraceDiagnosticLogger` instead.
 
 #### Changed APIs
 

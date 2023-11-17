@@ -1358,13 +1358,6 @@ namespace Sentry.Infrastructure
         public ConsoleDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
         protected override void LogMessage(string message) { }
     }
-    [System.Obsolete("Logger doesn\'t work outside of Sentry SDK. Please use TraceDiagnosticLogger inste" +
-        "ad")]
-    public class DebugDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
-    {
-        public DebugDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
-        protected override void LogMessage(string message) { }
-    }
     public abstract class DiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
     {
         protected DiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
