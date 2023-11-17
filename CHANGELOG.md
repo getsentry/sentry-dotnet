@@ -77,7 +77,6 @@ Additionally, we're dropping support for some of the old target frameworks, plea
 - `IHasBreadcrumbs` has been removed, use `IEventLike` instead. ([#2670](https://github.com/getsentry/sentry-dotnet/pull/2670))
 - `ISpanContext` has been removed, use `ITraceContext` instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
 - `IHasTransactionNameSource` has been removed, use `ITransactionContext` instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
-- `IUserFactory` has been removed, use `ISentryUserFactory` instead ([#2840](https://github.com/getsentry/sentry-dotnet/pull/2840))
 - ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
 - Unused `StackFrame.InstructionOffset` has been removed. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
 - Unused `Scope.Platform` property  has been removed. ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
