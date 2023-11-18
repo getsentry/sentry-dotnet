@@ -58,7 +58,6 @@
   <ItemGroup>
     <!-- Used to pull the CHANGELOG.md into the NuGet package Release Notes section -->
     <PackageReference Include="SIL.ReleaseTasks" Version="2.5.0" PrivateAssets="All" Condition="'$(Configuration)' != 'Debug'" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
