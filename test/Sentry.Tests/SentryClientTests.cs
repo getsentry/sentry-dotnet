@@ -1,8 +1,6 @@
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
-#pragma warning disable CS0618
-
 namespace Sentry.Tests;
 
 public partial class SentryClientTests

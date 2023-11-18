@@ -18,15 +18,6 @@ public class DsnTests
     }
 
     [Fact]
-    public void Ctor_SampleValidDsnWithSecret_CorrectlyConstructs()
-    {
-#pragma warning disable CS0618
-        var dsn = Dsn.Parse(ValidDsnWithSecret);
-        Assert.Equal(ValidDsnWithSecret, dsn.ToString());
-#pragma warning restore CS0618
-    }
-
-    [Fact]
     public void Ctor_NotUri_ThrowsUriFormatException()
     {
         var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse("Not a URI"));
@@ -138,14 +129,6 @@ public class DsnTests
     public void TryParse_SampleValidDsn_Succeeds()
     {
         Assert.NotNull(Dsn.TryParse(ValidDsn));
-    }
-
-    [Fact]
-    public void TryParse_SampleValidDsnWithSecret_Succeeds()
-    {
-#pragma warning disable CS0618
-        Assert.NotNull(Dsn.TryParse(ValidDsnWithSecret));
-#pragma warning restore CS0618
     }
 
     [Fact]
