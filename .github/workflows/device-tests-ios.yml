@@ -61,10 +61,6 @@ jobs:
           name: device-test-ios
           path: bin/Sentry.Maui.Device.TestApp.app
 
-      - name: Install XHarness
-        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*" --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
-        working-directory: ${{ runner.temp }} # Run outside of the project dir so global.json doesn't have an effect.
-
       - name: Run Tests
         id: first-run
         continue-on-error: true
