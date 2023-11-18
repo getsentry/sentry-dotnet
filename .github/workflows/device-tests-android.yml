@@ -35,11 +35,8 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
-      - name: Restore .NET Dependencies
-        run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
-
       - name: Build Android Test App
-        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net7.0-android --no-restore --nologo
+        run: pwsh ./scripts/device-test.ps1 android -Build
 
       - name: Upload Android Test App
         uses: actions/upload-artifact@v3
@@ -79,10 +76,6 @@ jobs:
         with:
           name: device-test-android
           path: bin
-
-      - name: Install XHarness
-        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*" --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
-        working-directory: ${{ runner.temp }} # Run outside of the project dir so global.json doesn't have an effect.
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a # pin@v2
@@ -127,12 +120,7 @@ jobs:
           disk-size: 4096M
           emulator-options: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
-          script: xharness android test --output-directory=./test_output --app=bin/io.sentry.dotnet.maui.device.testapp-Signed.apk --package-name=io.sentry.dotnet.maui.device.testapp
-
-      - name: Create Test Report
-        if: success() || failure()
-        run: scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
-        shell: pwsh
+          script: pwsh scripts/device-test.ps1 android -Run
 
       - name: Upload results
         if: success() || failure()
