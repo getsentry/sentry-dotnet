@@ -28,6 +28,49 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <!-- Sentry Browser Replay Worker -->
+  <PropertyGroup>
+    <!-- TODO: Needs an auto update solution -->
+    <SentryBrowserVersion>7.80.1</SentryBrowserVersion>
+    <SentryBrowserWorkerExpectedFileHash>D292CE4ECC0927646B2AED7A2762FC93056187846BE641D982301A973CB74F09</SentryBrowserWorkerExpectedFileHash>
+    <SentryJavaScriptIntermediatePath>$(MSBuildThisFileDirectory)obj/sentry-browser-$(SentryBrowserVersion)/</SentryJavaScriptIntermediatePath>
+    <SentryJavaScriptWorkerFileName>worker.min.js</SentryJavaScriptWorkerFileName>
+    <SentryJavaScriptWorkerIntermediateFilePath>$(SentryJavaScriptIntermediatePath)$(SentryJavaScriptWorkerFileName)</SentryJavaScriptWorkerIntermediateFilePath>
+    <SentryJavaScriptWorkerFinalFileName>worker-$(SentryBrowserWorkerExpectedFileHash.ToLower().Substring(0, 7)).js</SentryJavaScriptWorkerFinalFileName>
+    <SentryJavaScriptWorkerFinalFilePath>$(SentryJavaScriptIntermediatePath)$(SentryJavaScriptWorkerFinalFileName)</SentryJavaScriptWorkerFinalFilePath>
+    <!-- set to false below if local file is up to date -->
+    <DownloadSentryJavaScriptWorker>true</DownloadSentryJavaScriptWorker>
+  </PropertyGroup>
+  <ItemGroup>
+    <Item Include="$(SentryJavaScriptWorkerFinalFilePath)"
+          Link="JavaScript/$(SentryJavaScriptWorkerFinalFileName)"
+          Pack="true" PackagePath="tools\" />
+  </ItemGroup>
+  <Target Name="CheckSentryJavaScriptWorkerNeedsDownloading" BeforeTargets="Build" 
+          Condition="Exists($(SentryJavaScriptWorkerFinalFilePath))">
+    <GetFileHash Files="$(SentryJavaScriptWorkerFinalFilePath)">
+      <Output TaskParameter="Items" ItemName="SentryJavaScriptWorkerActualFileHash" />
+    </GetFileHash>
+    <PropertyGroup>
+      <DownloadSentryJavaScriptWorker 
+        Condition="'$(SentryBrowserWorkerExpectedFileHash)' == '' 
+        or $(SentryJavaScriptWorkerActualFileHash) != '@(SentryJavaScriptWorkerActualFileHash->'%(FileHash)')'">false</DownloadSentryJavaScriptWorker>
+    </PropertyGroup>
+  </Target>
+  <!-- Download the Sentry Session Replay worker JavaScript file to bundle in the package and serve via middlewre. -->
+  <Target Name="DownloadReplayWorker" AfterTargets="CheckSentryJavaScriptWorkerNeedsDownloading" Condition="$(DownloadSentryJavaScriptWorker) == true">
+    <!-- TODO: Worker isn't published to npm or the cdn yet -->
+    <DownloadFile SourceUrl="https://raw.githubusercontent.com/getsentry/sentry-javascript/$(SentryBrowserVersion)/packages/replay-worker/examples/$(SentryJavaScriptWorkerFileName)"
+                  Retries="3"
+                  DestinationFolder="$(SentryJavaScriptIntermediatePath)">
+    </DownloadFile>
+    <!-- Break the build if hash doesn't match -->
+    <VerifyFileHash File="$(SentryJavaScriptWorkerIntermediateFilePath)" Hash="$(SentryBrowserWorkerExpectedFileHash)" />
+    <Move SourceFiles="$(SentryJavaScriptWorkerIntermediateFilePath)"
+          DestinationFiles="$(SentryJavaScriptWorkerFinalFilePath)" />
+  </Target>
+  <!-- Sentry Browser Replay Worker -->
+
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.AspNetCore.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc" PublicKey="$(SentryPublicKey)" />
