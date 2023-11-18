@@ -437,7 +437,7 @@ internal class Hub : IHubEx, IDisposable
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && actualScope.Transaction is transaction)
+            if (evt.HasTerminalException() && actualScope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
