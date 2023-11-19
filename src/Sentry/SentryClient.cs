@@ -18,6 +18,7 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly SentryOptions _options;
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
+    private readonly Enricher _enricher;
 
     internal IBackgroundWorker Worker { get; }
     internal SentryOptions Options => _options;
@@ -44,8 +45,15 @@ public class SentryClient : ISentryClient, IDisposable
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
+        _enricher = new Enricher(options);
 
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
+
+        if (AotHelper.IsNativeAot) {
+            options.LogDebug("This looks like a NativeAOT application build.");
+        } else {
+            options.LogDebug("This looks like a standard JIT/AOT application build.");
+        }
 
         if (worker == null)
         {
@@ -92,10 +100,10 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction, Hint? hint)
+    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -121,8 +129,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         // Sampling decision MUST have been made at this point
-        Debug.Assert(transaction.IsSampled is not null,
-            "Attempt to capture transaction without sampling decision.");
+        Debug.Assert(transaction.IsSampled is not null, "Attempt to capture transaction without sampling decision.");
 
         if (transaction.IsSampled is false)
         {
@@ -131,7 +138,30 @@ public class SentryClient : ISentryClient, IDisposable
             return;
         }
 
-        var processedTransaction = BeforeSendTransaction(transaction, hint ?? new Hint());
+        scope ??= new Scope(_options);
+        hint ??= new Hint();
+        hint.AddAttachmentsFromScope(scope);
+
+        _options.LogInfo("Capturing transaction.");
+
+        scope.Evaluate();
+        scope.Apply(transaction);
+
+        _enricher.Apply(transaction);
+
+        var processedTransaction = transaction;
+        foreach (var processor in scope.GetAllTransactionProcessors())
+        {
+            processedTransaction = processor.DoProcessTransaction(transaction, hint);
+            if (processedTransaction == null) // Rejected transaction
+            {
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+                _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
+                return;
+            }
+        }
+
+        processedTransaction = BeforeSendTransaction(processedTransaction, hint);
         if (processedTransaction is null) // Rejected transaction
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
@@ -162,7 +192,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsAot)
+            if (!AotHelper.IsNativeAot)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();
@@ -368,7 +398,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsAot)
+            if (!AotHelper.IsNativeAot)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();
@@ -397,7 +427,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// Disposes this client
     /// </summary>
     /// <inheritdoc />
-    [Obsolete("Sentry client should not be explicitly disposed of. This method will be removed in version 4.")]
     public void Dispose()
     {
         _options.LogDebug("Flushing SentryClient.");

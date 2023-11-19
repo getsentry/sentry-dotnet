@@ -44,12 +44,13 @@ public interface ISentryClient
     /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
+    /// <param name="scope">The scope to be applied to the transaction</param>
     /// <param name="hint">
     /// A hint providing extra context.
     /// This will be available in callbacks prior to processing the transaction.
     /// </param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(Transaction transaction, Hint? hint);
+    void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint);
 
     /// <summary>
     /// Captures a session update.

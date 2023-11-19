@@ -20,7 +20,7 @@ partial interface Constants
 
     // extern const unsigned char[] SentryVersionString;
     [Field ("SentryVersionString", "__Internal")]
-    [return: PlainString]
+    [PlainString]
     NSString SentryVersionString { get; }
 }
 
@@ -151,7 +151,7 @@ interface SentryBreadcrumb : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
+    new NSDictionary<NSString, NSObject> Serialize();
 
     // -(BOOL)isEqualToBreadcrumb:(SentryBreadcrumb * _Nonnull)breadcrumb;
     [Export ("isEqualToBreadcrumb:")]
@@ -1798,7 +1798,7 @@ partial interface SentryScope : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
+    new NSDictionary<NSString, NSObject> Serialize();
 
     // -(void)setContextValue:(NSDictionary<NSString *,id> * _Nonnull)value forKey:(NSString * _Nonnull)key __attribute__((swift_name("setContext(value:key:)")));
     [Export ("setContextValue:forKey:")]
@@ -2176,6 +2176,10 @@ interface SentryTraceContext : SentrySerializable
     // -(instancetype _Nullable)initWithTracer:(SentryTracer * _Nonnull)tracer scope:(SentryScope * _Nullable)scope options:(SentryOptions * _Nonnull)options;
     [Export ("initWithTracer:scope:options:")]
     NativeHandle Constructor (SentryTracer tracer, [NullAllowed] SentryScope scope, SentryOptions options);
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId options:(SentryOptions * _Nonnull)options userSegment:(NSString * _Nullable)userSegment;
+    [Export ("initWithTraceId:options:userSegment:")]
+    NativeHandle Constructor (SentryId traceId, SentryOptions options, [NullAllowed] string userSegment);
 
     // -(SentryBaggage * _Nonnull)toBaggage;
     [Export ("toBaggage")]

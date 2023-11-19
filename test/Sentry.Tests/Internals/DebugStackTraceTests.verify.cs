@@ -192,6 +192,7 @@ public class DebugStackTraceTests
         }
     }
 
+#if NET6_0_OR_GREATER
     [Fact]
     public void ParseNativeAOTToString()
     {
@@ -214,8 +215,8 @@ public class DebugStackTraceTests
         Assert.Null(frame.Package);
     }
 
-// TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/issues/2772
+    // TODO: Create integration test to test this behaviour when publishing AOT apps
+    // See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public Task CreateFrame_ForNativeAOT()
     {
@@ -230,6 +231,7 @@ public class DebugStackTraceTests
 
         return VerifyJson(frame.ToJsonString());
     }
+#endif
 
     private class InjectableDebugStackTrace : DebugStackTrace
     {

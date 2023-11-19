@@ -465,8 +465,8 @@ public static class SentrySdk
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(Transaction transaction, Hint? hint)
-        => CurrentHub.CaptureTransaction(transaction, hint);
+    public static void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+        => CurrentHub.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>
     /// Captures a session update.

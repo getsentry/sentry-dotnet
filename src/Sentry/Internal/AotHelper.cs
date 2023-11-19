@@ -9,20 +9,16 @@ internal static class AotHelper
         public void Test() { }
     }
 
-    internal static bool IsAot { get; }
+    internal static bool IsNativeAot { get; }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     static AotHelper()
     {
-        try
-        {
-            // GetMethod should throw an exception if Trimming is enabled
-            var type = typeof(AotTester);
-            _ = type.GetMethod(nameof(AotTester.Test));
-        }
-        catch
-        {
-            IsAot = true;
-        }
-        IsAot = false;
+#if NET6_0_OR_GREATER   // TODO NET7 once we target it
+        var stackTrace = new StackTrace(false);
+        IsNativeAot = stackTrace.GetFrame(0)?.GetMethod() is null;
+#else
+        IsNativeAot = false;
+#endif
     }
 }

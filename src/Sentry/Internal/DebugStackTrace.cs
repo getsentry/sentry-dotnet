@@ -1,7 +1,7 @@
 using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
-using Sentry.Native;
 using Sentry.Internal.ILSpy;
+using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
@@ -16,8 +16,11 @@ internal class DebugStackTrace : SentryStackTrace
     private readonly Dictionary<Guid, int> _debugImageIndexByModule = new();
     private const int DebugImageMissing = -1;
     private bool _debugImagesMerged;
+
+#if NET6_0_OR_GREATER
     private Dictionary<long, DebugImage>? _nativeDebugImages;
     private HashSet<long> _usedNativeDebugImages = new();
+#endif
 
     /*
      *  NOTE: While we could improve these regexes, doing so might break exception grouping on the backend.
@@ -158,10 +161,9 @@ internal class DebugStackTrace : SentryStackTrace
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace)
     {
-        var frames = (!AotHelper.IsAot && _options.StackTraceMode == StackTraceMode.Enhanced)
+        var frames = (!AotHelper.IsNativeAot && _options.StackTraceMode == StackTraceMode.Enhanced)
             ? EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p))
-            : stackTrace.GetFrames()
-                .Select(p => new RealStackFrame(p));
+            : stackTrace.GetFrames().Select(p => new RealStackFrame(p));
 
         // Not to throw on code that ignores nullability warnings.
         if (frames.IsNull())
@@ -220,6 +222,7 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
+#if NET6_0_OR_GREATER
     /// <summary>
     /// Native AOT implementation of CreateFrame.
     /// Native frames have only limited method information at runtime (and even that can be disabled).
@@ -237,7 +240,15 @@ internal class DebugStackTrace : SentryStackTrace
         frame.ImageAddress = imageAddress;
         frame.InstructionAddress = stackFrame.GetNativeIP();
 
-        _nativeDebugImages ??= C.LoadDebugImages(_options.DiagnosticLogger);
+#if __ANDROID__
+        // TODO there will be support for NativeAOT in the future.
+        _nativeDebugImages ??= new();
+#elif __IOS__ || MACCATALYST
+        _nativeDebugImages ??= Sentry.iOS.C.LoadDebugImages(_options.DiagnosticLogger);
+#else
+        _nativeDebugImages ??= Sentry.Native.C.LoadDebugImages(_options.DiagnosticLogger);
+#endif
+
         if (!_usedNativeDebugImages.Contains(imageAddress) && _nativeDebugImages.TryGetValue(imageAddress, out var debugImage))
         {
             _usedNativeDebugImages.Add(imageAddress);
@@ -261,6 +272,7 @@ internal class DebugStackTrace : SentryStackTrace
         }
         return frame;
     }
+#endif
 
     /// <summary>
     /// Default the implementation of CreateFrame.
@@ -352,7 +364,9 @@ internal class DebugStackTrace : SentryStackTrace
     internal SentryStackFrame? CreateFrame(IStackFrame stackFrame)
     {
         var frame = TryCreateManagedFrame(stackFrame);
+#if NET6_0_OR_GREATER
         frame ??= TryCreateNativeAOTFrame(stackFrame);
+#endif
         if (frame is null)
         {
             return null;
@@ -483,7 +497,7 @@ internal class DebugStackTrace : SentryStackTrace
     [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
-        if (AotHelper.IsAot)
+        if (AotHelper.IsNativeAot)
         {
             assemblyName = null;
             return null;

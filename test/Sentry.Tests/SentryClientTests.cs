@@ -663,7 +663,7 @@ public partial class SentryClientTests
             processingOrder.Add("eventProcessor");
             return @event;
         });
-        _fixture.SentryOptions.EventProcessors.Add((eventProcessor));
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
 
         _fixture.SentryOptions.SetBeforeSend((e, _) =>
         {
@@ -987,6 +987,89 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureTransaction_ScopeContainsAttachments_GetAppliedToHint()
+    {
+        // Arrange
+        var transaction = new Transaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+        var attachments = new List<Attachment> {
+            AttachmentHelper.FakeAttachment("foo"),
+            AttachmentHelper.FakeAttachment("bar")
+        };
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(attachments[0]);
+        scope.AddAttachment(attachments[1]);
+
+        Hint hint = null;
+        _fixture.SentryOptions.SetBeforeSendTransaction((e, h) => {
+            hint = h;
+            return e;
+        });
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction, scope, hint);
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(attachments);
+    }
+
+    [Fact]
+    public void CaptureTransaction_AddedTransactionProcessor_ReceivesHint()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
+        processor.Process(Arg.Any<Transaction>(), Arg.Any<Hint>()).Returns(new Transaction("name", "operation"));
+        _fixture.SentryOptions.AddTransactionProcessor(processor);
+
+        var transaction = new Transaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction);
+
+        // Assert
+        processor.Received(1).Process(Arg.Any<Transaction>(), Arg.Any<Hint>());
+    }
+
+    [Fact]
+    public void CaptureTransaction_TransactionProcessor_ReceivesScopeAttachments()
+    {
+        // Arrange
+        var transaction = new Transaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
+        Hint hint = null;
+        processor.Process(
+            Arg.Any<Transaction>(),
+            Arg.Do<Hint>(h => hint = h))
+            .Returns(new Transaction("name", "operation"));
+        _fixture.SentryOptions.AddTransactionProcessor(processor);
+
+        var attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddAttachment(attachments[0]);
+
+        // Act
+        var client = _fixture.GetSut();
+        client.CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.Should().Contain(attachments);
+    }
+
+    [Fact]
     public void CaptureTransaction_BeforeSendTransaction_GetsHint()
     {
         Hint received = null;
@@ -1004,7 +1087,7 @@ public partial class SentryClientTests
 
         var sut = _fixture.GetSut();
         var hint = new Hint();
-        sut.CaptureTransaction(transaction, hint);
+        sut.CaptureTransaction(transaction, null, hint);
 
         Assert.Same(hint, received);
     }
@@ -1131,7 +1214,7 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void Ctor_HttpOptionsCallback_InvokedConfigureClient()
+    public async Task HttpOptionsCallback_InvokedConfigureClient_when_sending_envelope()
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
@@ -1140,12 +1223,13 @@ public partial class SentryClientTests
 
         using (_fixture.GetSut())
         {
+            await _fixture.SentryOptions.Transport!.SendEnvelopeAsync(new Envelope(new Dictionary<string, object>(), new List<EnvelopeItem>()));
             Assert.True(invoked);
         }
     }
 
     [Fact]
-    public void Ctor_CreateHttpClientHandler_InvokedConfigureHandler()
+    public async Task CreateHttpClientHandler_InvokedConfigureHandler_when_sending_envelope()
     {
         var invoked = false;
         _fixture.BackgroundWorker = null;
@@ -1158,6 +1242,7 @@ public partial class SentryClientTests
 
         using (_fixture.GetSut())
         {
+            await _fixture.SentryOptions.Transport!.SendEnvelopeAsync(new Envelope(new Dictionary<string, object>(), new List<EnvelopeItem>()));
             Assert.True(invoked);
         }
     }
@@ -1179,7 +1264,7 @@ public partial class SentryClientTests
 
         using var sut = new SentryClient(_fixture.SentryOptions);
 
-        _ = Assert.IsType<HttpTransport>(_fixture.SentryOptions.Transport);
+        _ = Assert.IsType<LazyHttpTransport>(_fixture.SentryOptions.Transport);
     }
 
     [Fact]

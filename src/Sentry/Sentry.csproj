@@ -8,10 +8,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <TargetFrameworks>net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android;net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst;net8.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
@@ -21,34 +21,28 @@
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
-  <Import Project="Platforms\Native\Sentry.Native.targets" Condition="'$(TargetFramework)' == 'net6.0'" /> <!-- TODO use net7.0 instead, if we add that as a TF. -->
+  <Import Project="Platforms\Native\Sentry.Native.targets"
+        Condition="'$(TargetPlatformIdentifier)' != 'android' and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'"/>
 
   <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Adding any condition directly in the Link tag results in a NETSDK1022 error due to the order or evaluation -->
-    <BenDemystifierLink>%(RecursiveDir)\%(Filename)%(Extension)</BenDemystifierLink>
-  </PropertyGroup>
-  <Target Name="IncludeBenDemystifier" BeforeTargets="BeforeBuild">
-    <!--
-      Ben.Demystifier is compiled directly into Sentry.
-      Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
-    -->
-    <ItemGroup>
-      <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
-        <Link>$(BenDemystifierLink)</Link>
-      </Compile>
-      <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
-    </ItemGroup>
+  <!--
+    Ben.Demystifier is compiled directly into Sentry.
+    Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\modules\Ben.Demystifier\src\**\*.cs">
+      <Link>%(RecursiveDir)\%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
+  </ItemGroup>
 
-    <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
-    <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
-      <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
-    </ItemGroup>
-  </Target>
-
+  <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
+    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+  </ItemGroup>
 
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
@@ -107,13 +101,13 @@
       <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
     </PropertyGroup>
     <ItemGroup>
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="e8a9c4849e72b05c8b7c0ecfdd4fded04a312cb39870c16e7fa18c627e1398d3" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="88ba4a057db6169ca18ce342db8f8593222b3cec842cd8698a8767397b1c4eb1" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="aa6085a9b24e349dbcef301127aebc6e8c3adfa8389964df5e91d96b3fb92e08" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="f354aaa0c4942820ed5c342a384c23dc077ccdd106dcb858d966812e3757c8ed" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="0016d21b20d6b83fe10d514d10ca1dbed854e8694d71fada9749e702730ed728" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="2060d806c12d7f71e43c860973a18609f075a6b17c8875fc058398f61f35215d" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="53d48d3da7b24b04f686b75195eb18250b743999841f6305dab2a40443925ca4" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="e142beae033d0cbd04b27678be9a5c5ea1ec03fc3f385055088f5e9606077a5f" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="88bda5b074b896f557ac7eb23442bf53d4c2085c478d6bf6464821ff2463bda6" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="74838d45d7915f1c9bc08b262a7cc57da8b1d597faa7d754aab4be8eb7af8e17" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="45038805edf469c20f9b1fcc5d2185aafe6c3f9540223265b8a78a0054742e0a" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="6027f652fc3f9ad17a8b20df027d78dc458a1747db33657a4df0d9c9ba6d2ccd" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="265a9bdcbf91cfc5453fb3f67762e9ebd5a8675af92b9bad7816cdbc637248f1" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="38ca36c244c6a45e27f4b5a914b2b1eaa99b502972c630a8fec4473f053e76e4" />
     </ItemGroup>
 
     <!-- Download the files -->

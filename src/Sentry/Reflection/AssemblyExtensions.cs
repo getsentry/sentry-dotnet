@@ -4,8 +4,7 @@ namespace Sentry.Reflection;
 /// Extension methods to <see cref="Assembly"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-[Obsolete("Should not be public. This method will be removed in version 4.")]
-public static class AssemblyExtensions
+internal static class AssemblyExtensions
 {
     /// <summary>
     /// Get the assemblies Name and Version.

@@ -39,8 +39,8 @@
       <UseSentryCLI Condition="
         '$(UseSentryCLI)' == ''
         and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true')
-        and ('$(MSBuildProjectName)' != 'Sentry')
-        and (!$(MSBuildProjectName.StartsWith('Sentry.')) or '$(MSBuildProjectName)' == '$(SentryCLIIntegrationTestProject)')">true</UseSentryCLI>
+        and '$(MSBuildProjectName)' != 'Sentry'
+        and !$(MSBuildProjectName.StartsWith('Sentry.'))">true</UseSentryCLI>
     </PropertyGroup>
   </Target>
 
@@ -128,12 +128,18 @@
   <!-- Native AOT publishing
        While '_IsPublishing' looks a bit "private", it's also OK if it suddenly stops working and this step runs anyway.
        See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993 -->
-  <PropertyGroup Condition="'$(PublishDir)' != '' and '$(PublishAot)' == 'true' and '$(_IsPublishing)' == 'true'">
+  <PropertyGroup Condition="
+      '$(PublishDir)' != ''
+      and '$(PublishAot)' == 'true'
+      and '$(_IsPublishing)' == 'true'
+      and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'
+      and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'maccatalyst'">
     <SentryCLIUploadNativeAOT>true</SentryCLIUploadNativeAOT>
     <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
-    <!-- We must run after "CopyNativeBinary" (not "Publish"),
-         because that is the one that actually copies native AOT symbols to the publish directory. -->
-    <SentryCLIUploadAfterTargets>CopyNativeBinary</SentryCLIUploadAfterTargets>
+    <!-- We must run after "_CopyAotSymbols" (not "Publish"), because that is the one that actually copies debug symbols to the publish directory. -->
+    <!-- See also https://github.com/dotnet/runtime/blob/v8.0.0/src/coreclr/nativeaot/BuildIntegration/Microsoft.NETCore.Native.Publish.targets#L100 -->
+    <SentryCLIUploadAfterTargets Condition="!$(TargetFramework.StartsWith('net7'))">_CopyAotSymbols</SentryCLIUploadAfterTargets>
+    <SentryCLIUploadAfterTargets Condition="$(TargetFramework.StartsWith('net7'))">CopyNativeBinary</SentryCLIUploadAfterTargets>
   </PropertyGroup>
   <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
     <SentryCLIUploadSymbolType Include="pdb" />
@@ -214,6 +220,7 @@
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
     <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload proguard mapping." />
-
   </Target>
+
+  <Import Condition="'$(MSBuildProjectName)' != 'Sentry' and !$(MSBuildProjectName.StartsWith('Sentry.')) and '$(IsSentryTestProject)' == ''" Project="$(MSBuildThisFileDirectory)Sentry.Native.targets"/>
 </Project>

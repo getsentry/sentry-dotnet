@@ -32,5 +32,4 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(TargetFramework)' == 'net7.0-ios' And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">
     <MtouchUseLlvm>false</MtouchUseLlvm>
   </PropertyGroup>
-
 </Project>
