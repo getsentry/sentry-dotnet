@@ -2,10 +2,8 @@
 
   <PropertyGroup>
     <!-- TODO check and update the list of supported frameworks. -->
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <PackageTags>$(PackageTags);Profiling;Diagnostic</PackageTags>
-    <!-- TODO: re-enable packing once we've resolved all dependencies for Sentry.Profiling -->
-    <IsPackable>false</IsPackable>
     <Description>Performance profiling support for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 
@@ -15,8 +13,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
-    <ProjectReference Include="../../modules/perfview/src/TraceEvent/TraceEvent.csproj" />
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.452401" />
+    <!--  This triggers the build of this project and its dependencies. We don't need all of them but this is the easiest way -->
+    <!--  to make sure the project builds/cleans etc in tandem with this. Packaging copies the 2 DLLs we need below -->
+    <ProjectReference Include="../../modules/perfview/src/TraceEvent/TraceEvent.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,4 +24,17 @@
     <InternalsVisibleTo Include="Sentry.Profiling.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll" />
+    <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
+    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.pdb" />
+    <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.pdb" />
+  </ItemGroup>
+    <ItemGroup>
+      <!-- TODO: pdb's are getting packed on the nupkg (as well as the snupkg), figure out a way to exclude from nupkg-->
+      <TfmSpecificPackageFile Include="@(ProfilingDependency)">
+        <Pack>true</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
 </Project>
