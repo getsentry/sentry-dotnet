@@ -11,9 +11,7 @@
 
   <ItemGroup>
     <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll" />
-    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.pdb" />
     <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
-    <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.pdb" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="@(ProfilingDependency)" />
