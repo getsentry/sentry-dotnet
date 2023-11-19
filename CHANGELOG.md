@@ -6,6 +6,7 @@
 
 - Don't add WinUI exception integration on mobile platforms ([#2821](https://github.com/getsentry/sentry-dotnet/pull/2821))
 - `Transactions` are now getting enriched by the client instead of the hub ([#2838](https://github.com/getsentry/sentry-dotnet/pull/2838))
+- `Sentry.Profiling` is now packaged to be uploaded to nuget.org ([#2800](https://github.com/getsentry/sentry-dotnet/pull/2800))
 
 ### API breaking Changes
 

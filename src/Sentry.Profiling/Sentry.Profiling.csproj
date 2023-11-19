@@ -13,8 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.421201" />
-    <ProjectReference Include="../../modules/perfview/src/TraceEvent/TraceEvent.csproj" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.452401" />
+<!--    <ProjectReference Include="../../modules/perfview/src/TraceEvent/TraceEvent.csproj" PrivateAssets="all" />-->
   </ItemGroup>
 
   <ItemGroup>
@@ -22,15 +22,35 @@
     <InternalsVisibleTo Include="Sentry.Profiling.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+<!--  <PropertyGroup>-->
+<!--    <TraceEventProjectPath>../../modules/perfview/src/TraceEvent/TraceEvent.csproj</TraceEventProjectPath>-->
+<!--  </PropertyGroup>-->
+<!--  <Target Name="BuildTraceEvent" Condition="!Exists('@(ProfilingDependency)')" BeforeTargets="Build">-->
+<!--    <MSBuild Projects="$(TraceEventProjectPath)"-->
+<!--             Targets="Build"-->
+<!--             Properties="Configuration=$(Configuration);Platform=$(Platform);OutDir=obj/TraceEvent/$(Configuration)/" />-->
+<!--  </Target>-->
+<!--  <Target Name="Clean">-->
+<!--    <MSBuild Projects="$(TraceEventProjectPath)" Targets="Clean" />-->
+<!--  </Target>-->
+
+  <ItemGroup>
+<!--        <ProfilingDependency Include="obj/TraceEvent/$(Configuration)/netstandard2.0/Microsoft.Diagnostics.FastSerialization.dll" />-->
+
+    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll" />
+    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.pdb" />
+    <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
+    <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.pdb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="@(ProfilingDependency)" />
+  </ItemGroup>
   <Target Name="PackDependencies" AfterTargets="Build">
     <ItemGroup>
-      <None Include="..\..\modules\perfview\src\FastSerialization\bin\Release\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll">
+      <None Include="@(ProfilingDependency)">
         <Pack>true</Pack>
-        <PackagePath>lib\net6.0</PackagePath>
-      </None>
-      <None Include="..\..\modules\perfview\src\TraceEvent\bin\Release\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.dll">
-        <Pack>true</Pack>
-        <PackagePath>lib\net6.0</PackagePath>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
   </Target>
