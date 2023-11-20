@@ -82,14 +82,14 @@ public sealed class HubAdapter : IHub
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public void BindException(Exception exception, ISpanTracer span) =>
+    public void BindException(Exception exception, ISpan span) =>
         SentrySdk.BindException(exception, span);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public ISpanTracer? GetSpan()
+    public ISpan? GetSpan()
         => SentrySdk.GetSpan();
 
     /// <summary>

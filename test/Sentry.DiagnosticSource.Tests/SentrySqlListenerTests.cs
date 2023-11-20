@@ -7,7 +7,7 @@ namespace Sentry.DiagnosticSource.Tests;
 
 public class SentrySqlListenerTests
 {
-    private static Func<ISpanTracer, bool> GetValidator(string type)
+    private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
             SqlDataWriteConnectionOpenBeforeCommand or
@@ -45,7 +45,7 @@ public class SentrySqlListenerTests
 
         public SentryOptions Options { get; }
 
-        public IReadOnlyCollection<ISpanTracer> Spans => Tracer?.Spans;
+        public IReadOnlyCollection<ISpan> Spans => Tracer?.Spans;
         public IHub Hub { get; }
 
         public Fixture()

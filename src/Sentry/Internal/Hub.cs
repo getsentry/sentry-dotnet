@@ -18,7 +18,7 @@ internal class Hub : IHub, IDisposable
     private int _isPersistedSessionRecovered;
 
     // Internal for testability
-    internal ConditionalWeakTable<Exception, ISpanTracer> ExceptionToSpanMap { get; } = new();
+    internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
 
@@ -171,7 +171,7 @@ internal class Hub : IHub, IDisposable
         return transaction;
     }
 
-    public void BindException(Exception exception, ISpanTracer span)
+    public void BindException(Exception exception, ISpan span)
     {
         // Don't bind on sampled out spans
         if (span.IsSampled == false)
@@ -183,7 +183,7 @@ internal class Hub : IHub, IDisposable
         _ = ExceptionToSpanMap.GetValue(exception, _ => span);
     }
 
-    public ISpanTracer? GetSpan() => ScopeManager.GetCurrent().Key.Span;
+    public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
     public SentryTraceHeader GetTraceHeader()
     {
@@ -333,7 +333,7 @@ internal class Hub : IHub, IDisposable
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
         EndSession(_clock.GetUtcNow(), status);
 
-    private ISpanTracer? GetLinkedSpan(SentryEvent evt)
+    private ISpan? GetLinkedSpan(SentryEvent evt)
     {
         // Find the span which is bound to the same exception
         if (evt.Exception is { } exception &&
@@ -345,7 +345,7 @@ internal class Hub : IHub, IDisposable
         return null;
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, ISpanTracer span)
+    private void ApplyTraceContextToEvent(SentryEvent evt, ISpan span)
     {
         evt.Contexts.Trace.SpanId = span.SpanId;
         evt.Contexts.Trace.TraceId = span.TraceId;

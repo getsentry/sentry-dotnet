@@ -38,7 +38,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     }
 
     /// <inheritdoc />
-    protected internal override ISpanTracer? ProcessRequest(HttpRequestMessage request, string method, string url)
+    protected internal override ISpan? ProcessRequest(HttpRequestMessage request, string method, string url)
     {
         var content = GraphQLContentExtractor.ExtractRequestContentAsync(request, _options).Result;
         if (content is not { } graphQlRequestContent)
@@ -59,7 +59,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     }
 
     /// <inheritdoc />
-    protected internal override void HandleResponse(HttpResponseMessage response, ISpanTracer? span, string method, string url)
+    protected internal override void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url)
     {
         var graphqlInfo = response.RequestMessage?.GetFused<GraphQLRequestContent>();
         var breadcrumbData = new Dictionary<string, string>

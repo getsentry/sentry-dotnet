@@ -536,7 +536,7 @@ public class Scope : IEventLike
         }
     }
 
-    private ISpanTracer? _span;
+    private ISpan? _span;
 
     /// <summary>
     /// Gets or sets the active span, or <c>null</c> if none available.
@@ -546,7 +546,7 @@ public class Scope : IEventLike
     /// Otherwise, the active span is the latest unfinished span on the transaction, presuming a transaction
     /// was set on the scope via the <see cref="Transaction"/> property.
     /// </remarks>
-    public ISpanTracer? Span
+    public ISpan? Span
     {
         get
         {

@@ -313,7 +313,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var mockEnricher = Substitute.For<IOpenTelemetryEnricher>();
-        mockEnricher.Enrich(Arg.Do<ISpanTracer>(s => s.SetTag("foo", "bar")), Arg.Any<Activity>(), Arg.Any<IHub>(), Arg.Any<SentryOptions>());
+        mockEnricher.Enrich(Arg.Do<ISpan>(s => s.SetTag("foo", "bar")), Arg.Any<Activity>(), Arg.Any<IHub>(), Arg.Any<SentryOptions>());
         _fixture.Enrichers.Add(mockEnricher);
         var sut = _fixture.GetSut();
 
