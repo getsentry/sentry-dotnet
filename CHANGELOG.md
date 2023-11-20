@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased - 4.x
+
+- ISpanTracer has been renamed back again to ISpan, to make it easier to upgrade from v3.x to v4.x ([#2870](https://github.com/getsentry/sentry-dotnet/pull/2870))
+
 ## 4.0.0-beta.1
 
 ### Features
