@@ -5,6 +5,7 @@
 ### Fixes
 
 - `CaptureFailedRequests` and `FailedRequestStatusCodes` are now getting respected by the Cocoa SDK. This is relevant for MAUI apps where requests are getting handled natively. ([#2826](https://github.com/getsentry/sentry-dotnet/issues/2826))
+- Added `SentryOptions.AutoRegisterTracing` for users who need to control registration of Sentry's tracing middleware ([#2871](https://github.com/getsentry/sentry-dotnet/pull/2871))
 
 ### Dependencies
 
