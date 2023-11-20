@@ -70,7 +70,10 @@ public class SentryTunnelMiddleware : IMiddleware
 
         try
         {
+// TODO: temporary... we need to deserialize to a known type here
+#pragma warning disable IL2026, IL3050
             var headerJson = JsonSerializer.Deserialize<Dictionary<string, object>>(header);
+#pragma warning restore IL2026, IL3050
             if (headerJson == null)
             {
                 response.StatusCode = StatusCodes.Status400BadRequest;
