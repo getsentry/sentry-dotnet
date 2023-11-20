@@ -5,7 +5,7 @@ namespace Sentry;
 /// <summary>
 /// SpanTracer interface
 /// </summary>
-public interface ISpanTracer : ISpanData
+public interface ISpan : ISpanData
 {
     /// <summary>
     /// Span description.
@@ -28,7 +28,7 @@ public interface ISpanTracer : ISpanData
     /// <summary>
     /// Starts a child span.
     /// </summary>
-    ISpanTracer StartChild(string operation);
+    ISpan StartChild(string operation);
 
     /// <summary>
     /// Finishes the span.
@@ -52,7 +52,7 @@ public interface ISpanTracer : ISpanData
 }
 
 /// <summary>
-/// Extensions for <see cref="ISpanTracer"/>.
+/// Extensions for <see cref="ISpan"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SpanExtensions
@@ -60,7 +60,7 @@ public static class SpanExtensions
     /// <summary>
     /// Starts a child span.
     /// </summary>
-    public static ISpanTracer StartChild(this ISpanTracer span, string operation, string? description)
+    public static ISpan StartChild(this ISpan span, string operation, string? description)
     {
         var child = span.StartChild(operation);
         child.Description = description;
@@ -68,7 +68,7 @@ public static class SpanExtensions
         return child;
     }
 
-    internal static ISpanTracer StartChild(this ISpanTracer span, SpanContext context)
+    internal static ISpan StartChild(this ISpan span, SpanContext context)
     {
         var transaction = span.GetTransaction() as TransactionTracer;
         if (transaction?.StartChild(context.SpanId, span.SpanId, context.Operation, context.Instrumenter)
@@ -84,7 +84,7 @@ public static class SpanExtensions
     /// <summary>
     /// Gets the transaction that this span belongs to.
     /// </summary>
-    public static ITransactionTracer GetTransaction(this ISpanTracer span) =>
+    public static ITransactionTracer GetTransaction(this ISpan span) =>
         span switch
         {
             ITransactionTracer transaction => transaction,
@@ -99,7 +99,7 @@ public static class SpanExtensions
     /// <remarks>
     /// Used by EF, EF Core, and SQLClient integrations.
     /// </remarks>
-    internal static ISpanTracer GetDbParentSpan(this ISpanTracer span)
+    internal static ISpan GetDbParentSpan(this ISpan span)
     {
         var transaction = span.GetTransaction();
         return transaction.Spans

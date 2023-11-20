@@ -48,9 +48,9 @@ public class SentryGraphQlHttpMessageHandlerTests
     {
         // Arrange
         var hub = Substitute.For<IHub>();
-        var parentSpan = Substitute.For<ISpanTracer>();
+        var parentSpan = Substitute.For<ISpan>();
         hub.GetSpan().Returns(parentSpan);
-        var childSpan = Substitute.For<ISpanTracer>();
+        var childSpan = Substitute.For<ISpan>();
         parentSpan.When(p => p.StartChild(Arg.Any<string>()))
                   .Do(op => childSpan.Operation = op.Arg<string>());
         parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);

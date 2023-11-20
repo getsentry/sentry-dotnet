@@ -88,7 +88,7 @@ public class Span : ISpanData, IJsonSerializable
     /// <summary>
     /// Initializes an instance of <see cref="Span"/>.
     /// </summary>
-    public Span(ISpanTracer tracer)
+    public Span(ISpan tracer)
         : this(tracer.ParentSpanId, tracer.Operation)
     {
         SpanId = tracer.SpanId;

@@ -53,14 +53,14 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void BindException(Exception exception, ISpanTracer span)
+    public void BindException(Exception exception, ISpan span)
     {
     }
 
     /// <summary>
     /// Returns null.
     /// </summary>
-    public ISpanTracer? GetSpan() => null;
+    public ISpan? GetSpan() => null;
 
     /// <summary>
     /// Returns null.

@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// TransactionTracer interface
 /// </summary>
-public interface ITransactionTracer : ITransactionData, ISpanTracer
+public interface ITransactionTracer : ITransactionData, ISpan
 {
     /// <summary>
     /// Transaction name.
@@ -20,10 +20,10 @@ public interface ITransactionTracer : ITransactionData, ISpanTracer
     /// <summary>
     /// Flat list of spans within this transaction.
     /// </summary>
-    IReadOnlyCollection<ISpanTracer> Spans { get; }
+    IReadOnlyCollection<ISpan> Spans { get; }
 
     /// <summary>
     /// Gets the last active (not finished) span in this transaction.
     /// </summary>
-    ISpanTracer? GetLastActiveSpan();
+    ISpan? GetLastActiveSpan();
 }

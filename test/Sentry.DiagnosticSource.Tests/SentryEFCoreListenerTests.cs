@@ -5,7 +5,7 @@ namespace Sentry.DiagnosticSource.Tests;
 
 public class SentryEFCoreListenerTests
 {
-    private static Func<ISpanTracer, bool> GetValidator(string type)
+    private static Func<ISpan, bool> GetValidator(string type)
         => type switch
         {
             EFQueryCompiling or EFQueryCompiled =>
@@ -28,7 +28,7 @@ public class SentryEFCoreListenerTests
 
         public SentryOptions Options { get; }
 
-        public IReadOnlyCollection<ISpanTracer> Spans => Tracer?.Spans;
+        public IReadOnlyCollection<ISpan> Spans => Tracer?.Spans;
 
         public IHub Hub { get; }
 
@@ -473,13 +473,13 @@ public class SentryEFCoreListenerTests
         interceptor.OnNext(new(EFConnectionClosed, connectionA));
 
         // Assert
-        bool IsDbSpan(ISpanTracer s) => s.Operation == "db.connection";
-        bool IsCommandSpan(ISpanTracer s) => s.Operation == "db.query";
-        Func<ISpanTracer, FakeDiagnosticConnectionEventData, bool> forConnection = (s, e) =>
+        bool IsDbSpan(ISpan s) => s.Operation == "db.connection";
+        bool IsCommandSpan(ISpan s) => s.Operation == "db.query";
+        Func<ISpan, FakeDiagnosticConnectionEventData, bool> forConnection = (s, e) =>
             s.Extra.ContainsKey(EFKeys.DbConnectionId)
             && s.Extra[EFKeys.DbConnectionId] is Guid connectionId
             && connectionId == e.ConnectionId;
-        Func<ISpanTracer, FakeDiagnosticCommandEventData, bool> forCommand = (s, e) =>
+        Func<ISpan, FakeDiagnosticCommandEventData, bool> forCommand = (s, e) =>
             s.Extra.ContainsKey(EFKeys.DbCommandId)
             && s.Extra[EFKeys.DbCommandId] is Guid commandId
             && commandId == e.CommandId;

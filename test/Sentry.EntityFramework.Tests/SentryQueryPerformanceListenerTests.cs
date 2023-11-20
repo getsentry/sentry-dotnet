@@ -14,7 +14,7 @@ public class SentryQueryPerformanceListenerTests
         public IHub Hub { get; }
         public ITransactionTracer Tracer { get; }
 
-        public ConcurrentBag<ISpanTracer> Spans = new();
+        public ConcurrentBag<ISpan> Spans = new();
 
         public Fixture()
         {
@@ -26,9 +26,9 @@ public class SentryQueryPerformanceListenerTests
             Hub.GetSpan().ReturnsForAnyArgs(Tracer);
         }
 
-        private ISpanTracer AddSpan(CallInfo callInfo)
+        private ISpan AddSpan(CallInfo callInfo)
         {
-            var span = Substitute.For<ISpanTracer>();
+            var span = Substitute.For<ISpan>();
             span.Operation = callInfo.Arg<string>();
             Spans.Add(span);
             return span;

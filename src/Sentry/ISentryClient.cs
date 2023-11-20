@@ -30,7 +30,7 @@ public interface ISentryClient
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -41,7 +41,7 @@ public interface ISentryClient
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
     /// <param name="scope">The scope to be applied to the transaction</param>

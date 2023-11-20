@@ -136,7 +136,7 @@ public static class HttpContextExtensions
             return;
         }
 
-        if (httpContext.Items[HttpContextTransactionItemName] is not ISpanTracer transaction)
+        if (httpContext.Items[HttpContextTransactionItemName] is not ISpan transaction)
         {
             return;
         }

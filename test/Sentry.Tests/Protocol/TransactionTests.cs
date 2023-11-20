@@ -571,7 +571,7 @@ public class TransactionTests
     {
         // Arrange
         var hub = Substitute.For<IHub>();
-        ISpanTracer transaction = new TransactionTracer(hub, "my name", "my op");
+        ISpan transaction = new TransactionTracer(hub, "my name", "my op");
 
         // Act
         var result = transaction.GetTransaction();
