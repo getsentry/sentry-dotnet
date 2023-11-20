@@ -58,10 +58,10 @@ namespace Sentry.AspNetCore
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
         public Sentry.AspNetCore.TransactionNameProvider? TransactionNameProvider { get; set; }
     }
-    public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.ConfigureFromConfigurationOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
+    public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.IConfigureOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
     {
         public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration) { }
-        public override void Configure(Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
+        public void Configure(Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
     }
     public static class SentryBuilderExtensions
     {
