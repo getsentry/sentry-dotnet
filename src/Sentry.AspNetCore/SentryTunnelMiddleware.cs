@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore;
 
@@ -70,10 +71,14 @@ public class SentryTunnelMiddleware : IMiddleware
 
         try
         {
-// TODO: temporary... we need to deserialize to a known type here
-#pragma warning disable IL2026, IL3050
+#if NETSTANDARD2_0
             var headerJson = JsonSerializer.Deserialize<Dictionary<string, object>>(header);
-#pragma warning restore IL2026, IL3050
+#else
+            var headerJson = JsonSerializer.Deserialize(
+                header,
+                SentryJsonContext.Default.DictionaryStringObject
+                );
+#endif
             if (headerJson == null)
             {
                 response.StatusCode = StatusCodes.Status400BadRequest;
