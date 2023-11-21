@@ -1,14 +1,14 @@
-#if ANDROID
+#if !NETFRAMEWORK
 using Microsoft.Extensions.Configuration;
 
-namespace Sentry.Tests.Platforms.Android;
+namespace Sentry.Tests;
 
-public class BindableSentryOptionsTests : BindableTests<SentryOptions.AndroidOptions>
+public class BindableSentryOptionsTests : BindableTests<SentryOptions>
 {
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {
-        var actual = GetPropertyNames<BindableSentryOptions.AndroidOptions>();
+        var actual = GetPropertyNames<BindableSentryOptions>();
         AssertContainsAllOptionsProperties(actual);
     }
 
@@ -16,8 +16,8 @@ public class BindableSentryOptionsTests : BindableTests<SentryOptions.AndroidOpt
     public void ApplyTo_SetsOptionsFromConfig()
     {
         // Arrange
-        var actual = new SentryOptions.AndroidOptions(new SentryOptions());
-        var bindable = new BindableSentryOptions.AndroidOptions();
+        var actual = new SentryOptions();
+        var bindable = new BindableSentryOptions();
 
         // Act
         Fixture.Config.Bind(bindable);
