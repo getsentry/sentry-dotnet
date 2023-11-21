@@ -73,7 +73,7 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// </para>
     /// <para>
     /// If you need to control when Sentry's tracing middleware is registered, you can set
-    /// <see cref="AutoRegisterTracing"/> to false call
+    /// <see cref="AutoRegisterTracing"/> to false and call
     /// <see cref="SentryTracingMiddlewareExtensions.UseSentryTracing"/> yourself, sometime after calling
     /// `EndpointRoutingApplicationBuilderExtensions.UseRouting` and before calling
     /// `EndpointRoutingApplicationBuilderExtensions.UseEndpoints`.
