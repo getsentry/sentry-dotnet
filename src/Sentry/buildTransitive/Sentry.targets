@@ -141,6 +141,11 @@
     <SentryCLIUploadAfterTargets Condition="!$(TargetFramework.StartsWith('net7'))">_CopyAotSymbols</SentryCLIUploadAfterTargets>
     <SentryCLIUploadAfterTargets Condition="$(TargetFramework.StartsWith('net7'))">CopyNativeBinary</SentryCLIUploadAfterTargets>
   </PropertyGroup>
+  <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
+    <SentryCLIUploadSymbolType Include="pdb" />
+    <SentryCLIUploadSymbolType Include="dsym" />
+    <SentryCLIUploadSymbolType Include="elf" />
+  </ItemGroup>
 
   <!-- "Standard" managed build -->
   <PropertyGroup Condition="'$(SentryCLIUploadNativeAOT)' != 'true'">
@@ -148,17 +153,17 @@
     <SentryCLIUploadDirectory>$(OutputPath)</SentryCLIUploadDirectory>
     <SentryCLIUploadAfterTargets>Build</SentryCLIUploadAfterTargets>
   </PropertyGroup>
+  <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' != 'true'">
+    <SentryCLIUploadSymbolType Include="pdb" />
+    <SentryCLIUploadSymbolType Include="portablepdb" />
+    <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
+    <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
+    <SentryCLIUploadSymbolType Include="elf"  Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
+  </ItemGroup>
 
   <!-- Upload symbols to Sentry after the build. -->
   <Target Name="UploadDebugInfoToSentry" AfterTargets="$(SentryCLIUploadAfterTargets)" DependsOnTargets="PrepareSentryCLI"
     Condition="'$(SentryCLI)' != '' and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true')">
-
-    <ItemGroup>
-      <SentryCLIUploadSymbolType Include="pdb" />
-      <SentryCLIUploadSymbolType Include="portablepdb" Condition="'$(SentryCLIUploadNativeAOT)' != 'true'" />
-      <SentryCLIUploadSymbolType Include="dsym" />
-      <SentryCLIUploadSymbolType Include="elf" Condition="'$(SentryCLIUploadNativeAOT)' == 'true' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
-    </ItemGroup>
 
     <!-- For Android, we need to upload native symbols, but there's no point in uploading the intermediary ".dll.so" which just ended up being combined into the final app. -->
     <ItemGroup Condition="'$(IntermediateOutputPath)' != '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
