@@ -169,29 +169,28 @@
         Condition="!$([System.Text.RegularExpressions.Regex]::Match(%(Identity),'.*.dll.so').Success)"/>
     </ItemGroup>
 
+    <PropertyGroup>
+      <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
+      <SentryCLIUploadItems Condition="'@(AndroidNativeSymbolFilesExceptDll)' != ''">$(SentryCLIUploadItems) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')</SentryCLIUploadItems>
+    </PropertyGroup>
+
     <!-- if (UploadSymbols && UploadSources) { -->
       <Message Importance="High"
         Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadDirectory)" />
-      <Message Importance="High"
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true' and '@(AndroidNativeSymbolFilesExceptDll)' != ''"
-        Text="Additionally, uploading these native debug symbols: @(AndroidNativeSymbolFilesExceptDll)" />
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols and referenced source code from $(SentryCLIUploadItems)" />
       <Exec
         Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' == 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') --include-sources $(SentryCLIUploadDirectory) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')"
+        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') --include-sources $(SentryCLIUploadItems)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
     <!-- } else if (UploadSymbols && !UploadSources) { -->
       <Message Importance="High"
         Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadDirectory)" />
-      <Message Importance="High"
-        Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true' and '@(AndroidNativeSymbolFilesExceptDll)' != ''"
-        Text="Additionally, uploading these native debug symbols: @(AndroidNativeSymbolFilesExceptDll)" />
+        Text="Preparing upload to Sentry for project '$(MSBuildProjectName)' ($(Configuration)/$(TargetFramework)): collecting debug symbols from $(SentryCLIUploadItems)" />
       <Exec
         Condition="'$(SentryUploadSymbols)' == 'true' and '$(SentryUploadSources)' != 'true'"
-        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(SentryCLIUploadDirectory) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')"
+        Command="$(SentryCLIDebugFilesUploadCommand) @(SentryCLIUploadSymbolType -> '-t %(Identity)', ' ') $(SentryCLIUploadItems)"
         IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
         <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
       </Exec>
