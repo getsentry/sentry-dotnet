@@ -2,7 +2,13 @@
 
 ## Unreleased - 4.x
 
+### API breaking Changes
+
 - ISpanTracer has been renamed back again to ISpan, to make it easier to upgrade from v3.x to v4.x ([#2870](https://github.com/getsentry/sentry-dotnet/pull/2870))
+
+### Fixes
+
+- Android native symbol upload ([#2876](https://github.com/getsentry/sentry-dotnet/pull/2876))
 
 ## 4.0.0-beta.1
 
