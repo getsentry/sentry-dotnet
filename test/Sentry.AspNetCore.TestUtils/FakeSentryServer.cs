@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 namespace Sentry.AspNetCore.TestUtils;
 
-internal static class FakeSentryServer
+public static class FakeSentryServer
 {
     public static TestServer CreateServer(IReadOnlyCollection<RequestHandler> handlers)
     {

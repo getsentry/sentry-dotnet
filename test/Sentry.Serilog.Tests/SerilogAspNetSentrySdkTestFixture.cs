@@ -1,3 +1,4 @@
+#if NET6_0_OR_GREATER
 using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.Serilog.Tests;
@@ -36,3 +37,4 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         base.ConfigureBuilder(builder);
     }
 }
+#endif

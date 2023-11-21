@@ -20,4 +20,8 @@
     <Using Include="Serilog.Parsing" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,3 +1,4 @@
+#if NET6_0_OR_GREATER
 using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.Serilog.Tests;
@@ -22,3 +23,4 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
         Assert.Collection(Events, @event => Assert.Collection(@event.SentryExceptions, x => Assert.False(x.Mechanism?.Handled)));
     }
 }
+#endif
