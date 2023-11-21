@@ -141,11 +141,6 @@
     <SentryCLIUploadAfterTargets Condition="!$(TargetFramework.StartsWith('net7'))">_CopyAotSymbols</SentryCLIUploadAfterTargets>
     <SentryCLIUploadAfterTargets Condition="$(TargetFramework.StartsWith('net7'))">CopyNativeBinary</SentryCLIUploadAfterTargets>
   </PropertyGroup>
-  <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
-    <SentryCLIUploadSymbolType Include="pdb" />
-    <SentryCLIUploadSymbolType Include="dsym" />
-    <SentryCLIUploadSymbolType Include="elf" />
-  </ItemGroup>
 
   <!-- "Standard" managed build -->
   <PropertyGroup Condition="'$(SentryCLIUploadNativeAOT)' != 'true'">
@@ -153,16 +148,17 @@
     <SentryCLIUploadDirectory>$(OutputPath)</SentryCLIUploadDirectory>
     <SentryCLIUploadAfterTargets>Build</SentryCLIUploadAfterTargets>
   </PropertyGroup>
-  <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' != 'true'">
-    <SentryCLIUploadSymbolType Include="pdb" />
-    <SentryCLIUploadSymbolType Include="portablepdb" />
-    <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
-    <SentryCLIUploadSymbolType Include="dsym" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'" />
-  </ItemGroup>
 
   <!-- Upload symbols to Sentry after the build. -->
   <Target Name="UploadDebugInfoToSentry" AfterTargets="$(SentryCLIUploadAfterTargets)" DependsOnTargets="PrepareSentryCLI"
     Condition="'$(SentryCLI)' != '' and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true')">
+
+    <ItemGroup>
+      <SentryCLIUploadSymbolType Include="pdb" />
+      <SentryCLIUploadSymbolType Condition="'$(SentryCLIUploadNativeAOT)' != 'true'" Include="portablepdb" />
+      <SentryCLIUploadSymbolType Include="dsym" />
+      <SentryCLIUploadSymbolType Include="elf" />
+    </ItemGroup>
 
     <!-- if (UploadSymbols && UploadSources) { -->
       <Message Importance="High"
