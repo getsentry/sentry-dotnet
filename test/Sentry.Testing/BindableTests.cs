@@ -3,35 +3,34 @@ using Microsoft.Extensions.Configuration;
 
 namespace Sentry.Testing;
 
-public abstract class BindableTests<TOptions>
+public abstract class BindableTests<TOptions>(params string[] skipProperties)
 {
     public class TextFixture
     {
-        public IEnumerable<string> ExpectedPropertyNames => GetBindableProperties().Select(x => x.Name);
+        public IEnumerable<string> ExpectedPropertyNames { get; }
         public List<KeyValuePair<PropertyInfo, object>> ExpectedPropertyValues { get; }
 
         public IConfigurationRoot Config { get; }
 
-        public TextFixture()
+        public TextFixture(params string[] skipProperties)
         {
-            ExpectedPropertyValues = GetBindableProperties().Select(GetDummyBindableValue).ToList();
+            ExpectedPropertyNames = GetBindableProperties(skipProperties).Select(x => x.Name);
+            ExpectedPropertyValues = GetBindableProperties(skipProperties).Select(GetDummyBindableValue).ToList();
             Config = new ConfigurationBuilder()
                 .AddInMemoryCollection(ExpectedPropertyValues.SelectMany(ToConfigValues))
                 .Build();
         }
     }
 
-    protected TextFixture Fixture { get; } = new();
+    protected TextFixture Fixture { get; } = new(skipProperties);
 
-    protected virtual IEnumerable<string> SkipProperties => Enumerable.Empty<string>();
-
-    private IEnumerable<PropertyInfo> GetBindableProperties()
+    private static IEnumerable<PropertyInfo> GetBindableProperties(IEnumerable<string> skipProperties)
     {
         return typeof(TOptions).GetProperties()
             .Where(p =>
                 !p.PropertyType.IsSubclassOf(typeof(Delegate)) // Exclude delegate properties
                 && !p.PropertyType.IsInterface // Exclude interface properties
-                && !SkipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
+                && !skipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
 #if ANDROID
                 && !(p.PropertyType == typeof(SentryOptions.AndroidOptions)) // Exclude the Mobile sub-property
 #elif __IOS__

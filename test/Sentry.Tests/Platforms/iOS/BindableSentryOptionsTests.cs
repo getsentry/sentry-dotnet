@@ -5,8 +5,10 @@ namespace Sentry.Tests.Platforms.iOS;
 
 public class BindableSentryOptionsTests : BindableTests<SentryOptions.IosOptions>
 {
-    protected override IEnumerable<string> SkipProperties =>
-        new[] { nameof(SentryOptions.IosOptions.UrlSessionDelegate) };
+    public BindableSentryOptionsTests()
+    : base(nameof(SentryOptions.IosOptions.UrlSessionDelegate))
+    {
+    }
 
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
