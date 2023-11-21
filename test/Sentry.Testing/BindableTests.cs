@@ -23,12 +23,15 @@ public abstract class BindableTests<TOptions>
 
     protected TextFixture Fixture { get; } = new();
 
-    private static IEnumerable<PropertyInfo> GetBindableProperties()
+    protected virtual IEnumerable<string> SkipProperties => Enumerable.Empty<string>();
+
+    private IEnumerable<PropertyInfo> GetBindableProperties()
     {
         return typeof(TOptions).GetProperties()
             .Where(p =>
                 !p.PropertyType.IsSubclassOf(typeof(Delegate)) // Exclude delegate properties
                 && !p.PropertyType.IsInterface // Exclude interface properties
+                && !SkipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
 #if ANDROID
                 && !(p.PropertyType == typeof(SentryOptions.AndroidOptions)) // Exclude the Mobile sub-property
 #elif __IOS__
