@@ -29,6 +29,11 @@ public abstract class BindableTests<TOptions>
             .Where(p =>
                 !p.PropertyType.IsSubclassOf(typeof(Delegate)) // Exclude delegate properties
                 && !p.PropertyType.IsInterface // Exclude interface properties
+#if ANDROID
+                && !(p.PropertyType == typeof(SentryOptions.AndroidOptions)) // Exclude the Mobile sub-property
+#elif __IOS__
+                && !(p.PropertyType == typeof(SentryOptions.IosOptions)) // Exclude the Mobile sub-property
+#endif
                 );
     }
 
