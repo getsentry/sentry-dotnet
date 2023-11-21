@@ -5,7 +5,7 @@ namespace Sentry.Tests.Platforms.Android;
 public class BindableSentryOptionsTests
 {
 #if ANDROID
-    [SkippableFact]
+    [Fact]
     public void ApplyTo_SetsAndroidOptionsFromConfig()
     {
         var expected = new SentryOptions.AndroidOptions(new SentryOptions())

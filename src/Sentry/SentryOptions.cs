@@ -734,7 +734,7 @@ public class SentryOptions
         internal set => _defaultTags = value;
     }
 
-/// <summary>
+    /// <summary>
     /// Indicates whether the performance feature is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
