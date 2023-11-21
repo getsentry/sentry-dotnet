@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Builder;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SentryTracingMiddlewareExtensions
 {
-    internal const string AlreadyRegisteredWarning = "Sentry tracing middleware has already registered. This call to UseSentryTracing is unnecessary.";
+    internal const string AlreadyRegisteredWarning = "Sentry tracing middleware was already registered. This call to UseSentryTracing is unnecessary.";
     private const string UseSentryTracingKey = "__UseSentryTracing";
     private const string ShouldRegisterKey = "__ShouldRegisterSentryTracing";
 
