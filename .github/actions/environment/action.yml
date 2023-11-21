@@ -43,7 +43,7 @@ runs:
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows maui-tizen' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json \
-          -skip-sign-check
+          --skip-sign-check
 
     # We build Sentry.Maui for every supported MAUI target so we can access platform-specific features.
     # That includes Tizen. We don't need the entire Tizen SDK, but we do need the base Tizen workload.
