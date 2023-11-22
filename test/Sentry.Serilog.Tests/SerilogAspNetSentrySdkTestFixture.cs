@@ -19,9 +19,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         {
             app.UseExceptionHandler(new ExceptionHandlerOptions
             {
-#if NET6_0_OR_GREATER
                 AllowStatusCode404Response = true,
-#endif
                 ExceptionHandlingPath = "/error"
             });
         };

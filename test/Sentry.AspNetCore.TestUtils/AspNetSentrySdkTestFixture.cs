@@ -1,9 +1,8 @@
 #if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Hosting;
-using Sentry.AspNetCore;
 using Sentry.AspNetCore.TestUtils;
 
-namespace Sentry.Serilog.Tests;
+namespace Sentry.AspNetCore.TestUtils;
 
 // Allows integration tests the include the background worker and mock only the HTTP bits
 public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
