@@ -1,6 +1,5 @@
 #if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Hosting;
-using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.AspNetCore.TestUtils;
 
