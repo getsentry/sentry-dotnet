@@ -7,7 +7,7 @@ namespace Sentry.AspNetCore.TestUtils;
 
 public static class FakeSentryServer
 {
-    public static TestServer CreateServer(IReadOnlyCollection<RequestHandler> handlers)
+    internal static TestServer CreateServer(IReadOnlyCollection<RequestHandler> handlers)
     {
         var builder = new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
