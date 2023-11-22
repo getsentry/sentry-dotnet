@@ -192,7 +192,7 @@ public static class SentrySinkExtensions
         bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
     {
-        if (dsn != null)
+        if (dsn is not null)
         {
             sentrySerilogOptions.Dsn = dsn;
         }
