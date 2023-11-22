@@ -28,6 +28,8 @@
     <Compile Remove="**\Windows\**\*.cs" />
   </ItemGroup>
 
+  <!-- TODO exclude Platforms/Native from platforms and TFMs that don't have sentry-native integrated. -->
+
   <!-- Allow setting CLSCompliant via property in any csproj -->
   <ItemGroup>
     <AssemblyAttribute Include="CLSCompliantAttribute" Condition="'$(CLSCompliant)' == 'true'">

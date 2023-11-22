@@ -12,11 +12,7 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-#if __MOBILE__
 public static partial class SentrySdk
-#else
-public static class SentrySdk
-#endif
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
@@ -52,17 +48,39 @@ public static class SentrySdk
         }
 
         // Initialize native platform SDKs here
-#if __MOBILE__
         if (options.InitNativeSdks)
         {
 #if __IOS__
             InitSentryCocoaSdk(options);
 #elif ANDROID
             InitSentryAndroidSdk(options);
+#else
+            if (AotHelper.IsNativeAot) {
+                InitNativeSdk(options);
+            }
 #endif
         }
-#endif
-        return new Hub(options);
+
+        // We init the hub after native SDK in case the native init needs to adapt some options.
+        var hub = new Hub(options);
+
+        // Do the initial scope sync, if configured by the native integration.
+        if (options.NativeContextWriter is { } contextWriter)
+        {
+            hub.ConfigureScope((scope) =>
+            {
+                Task.Run(() => contextWriter.Write(scope)).ContinueWith(t =>
+                {
+                    if (t.Exception is not null)
+                    {
+                        options.DiagnosticLogger?.LogWarning(
+                            "Failed to synchronize scope to the native SDK: {0}", t.Exception);
+                    }
+                });
+            });
+        }
+
+        return hub;
     }
 
     /// <summary>
@@ -219,8 +237,17 @@ public static class SentrySdk
         {
             _ = Interlocked.CompareExchange(ref CurrentHub, DisabledHub.Instance, _localHub);
             (_localHub as IDisposable)?.Dispose();
-
             _localHub = null!;
+
+#if __IOS__
+            // TODO
+#elif ANDROID
+            // TODO
+#else
+            if (AotHelper.IsNativeAot) {
+                CloseNativeSdk();
+            }
+#endif
         }
     }
 

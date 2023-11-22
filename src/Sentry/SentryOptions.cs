@@ -1073,6 +1073,11 @@ public class SentryOptions
     internal bool InitNativeSdks { get; set; } = true;
 
     /// <summary>
+    /// Used to synchronize context from .NET to the native SDK
+    /// </summary>
+    internal ContextWriter? NativeContextWriter { get; set; } = null;
+
+    /// <summary>
     /// Creates a new instance of <see cref="SentryOptions"/>
     /// </summary>
     public SentryOptions()
