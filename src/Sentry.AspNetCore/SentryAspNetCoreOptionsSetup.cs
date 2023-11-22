@@ -2,11 +2,7 @@ using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 
-#if NETSTANDARD2_0
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#endif
 
 namespace Sentry.AspNetCore;
 
@@ -39,9 +35,5 @@ public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<Se
                    category,
                    "Microsoft.AspNetCore.Server.Kestrel",
                    StringComparison.Ordinal));
-
-#if NETSTANDARD2_0
-        options.AddDiagnosticSourceIntegration();
-#endif
     }
 }
