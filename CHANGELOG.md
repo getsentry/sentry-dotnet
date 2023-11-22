@@ -2,13 +2,19 @@
 
 ## Unreleased - 4.x
 
-### API breaking Changes
-
-- ISpanTracer has been renamed back again to ISpan, to make it easier to upgrade from v3.x to v4.x ([#2870](https://github.com/getsentry/sentry-dotnet/pull/2870))
-
 ### Fixes
 
 - Android native symbol upload ([#2876](https://github.com/getsentry/sentry-dotnet/pull/2876))
+
+### .NET target frameworks changes
+
+**Dropped netstandard2.0 support for Sentry.AspNetCore** ([#2807](https://github.com/getsentry/sentry-dotnet/pull/2807))
+
+### API breaking Changes
+
+#### Changed APIs
+
+- ISpanTracer has been renamed back again to ISpan, to make it easier to upgrade from v3.x to v4.x ([#2870](https://github.com/getsentry/sentry-dotnet/pull/2870))
 
 ## 4.0.0-beta.1
 

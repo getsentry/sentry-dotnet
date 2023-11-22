@@ -1,3 +1,4 @@
+#if NET6_0_OR_GREATER
 using Microsoft.AspNetCore.Hosting;
 
 namespace Sentry.AspNetCore.TestUtils;
@@ -24,3 +25,4 @@ public class AspNetSentrySdkTestFixture : SentrySdkTestFixture
         AfterConfigureBuilder?.Invoke(builder);
     }
 }
+#endif

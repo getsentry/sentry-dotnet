@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Sentry.Extensibility;
 
-#if !NETSTANDARD2_0
 using Microsoft.AspNetCore.Http.Features;
-#endif
 
 namespace Sentry.AspNetCore.Extensions;
 
@@ -12,7 +10,6 @@ internal static class HttpContextExtensions
 {
     internal static string? TryGetRouteTemplate(this HttpContext context)
     {
-#if !NETSTANDARD2_0 // endpoint routing is only supported after ASP.NET Core 3.0
         // Requires .UseRouting()/.UseEndpoints()
         var endpoint = context.Features.Get<IEndpointFeature?>()?.Endpoint as RouteEndpoint;
         var routePattern = endpoint?.RoutePattern.RawText;
@@ -23,7 +20,7 @@ internal static class HttpContextExtensions
         {
             return formattedRoute;
         }
-#endif
+
         // Fallback for legacy .UseMvc().
         // Note: GetRouteData can return null on netstandard2
         return (context.GetRouteData() is { } routeData)
