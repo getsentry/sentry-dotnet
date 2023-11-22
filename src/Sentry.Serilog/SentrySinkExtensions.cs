@@ -1,7 +1,5 @@
 // ReSharper disable once CheckNamespace - Discoverability
 
-using Constants = Sentry.Constants;
-
 namespace Serilog;
 
 /// <summary>
