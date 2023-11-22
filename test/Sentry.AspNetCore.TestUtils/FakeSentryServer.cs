@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.TestHost;
 
 namespace Sentry.AspNetCore.TestUtils;
 
-public static class FakeSentryServer
+internal static class FakeSentryServer
 {
-    internal static TestServer CreateServer(IReadOnlyCollection<RequestHandler> handlers)
+    public static TestServer CreateServer(IReadOnlyCollection<RequestHandler> handlers)
     {
         var builder = new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
