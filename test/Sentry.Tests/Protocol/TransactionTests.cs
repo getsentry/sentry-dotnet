@@ -472,7 +472,7 @@ public class TransactionTests
         transaction.Finish();
 
         // Assert
-        client.Received(1).CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
+        client.Received(1).CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -571,7 +571,7 @@ public class TransactionTests
     {
         // Arrange
         var hub = Substitute.For<IHub>();
-        ISpanTracer transaction = new TransactionTracer(hub, "my name", "my op");
+        ISpan transaction = new TransactionTracer(hub, "my name", "my op");
 
         // Act
         var result = transaction.GetTransaction();

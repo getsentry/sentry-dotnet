@@ -87,11 +87,11 @@ internal class NoOpTransaction : NoOpSpan, ITransactionTracer
         set { }
     }
 
-    public IReadOnlyCollection<ISpanTracer> Spans => ImmutableList<ISpanTracer>.Empty;
+    public IReadOnlyCollection<ISpan> Spans => ImmutableList<ISpan>.Empty;
 
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => ImmutableList<Breadcrumb>.Empty;
 
-    public ISpanTracer? GetLastActiveSpan() => default;
+    public ISpan? GetLastActiveSpan() => default;
 
     public void AddBreadcrumb(Breadcrumb breadcrumb) { }
 }

@@ -1,10 +1,21 @@
 # Changelog
 
-## Unreleased
+## Unreleased - 4.x
+
+- ISpanTracer has been renamed back again to ISpan, to make it easier to upgrade from v3.x to v4.x ([#2870](https://github.com/getsentry/sentry-dotnet/pull/2870))
+
+## 4.0.0-beta.1
+
+### Features
+
+- `Sentry.Profiling` is now packaged to be uploaded to nuget.org ([#2800](https://github.com/getsentry/sentry-dotnet/pull/2800))
+
+## 4.0.0-beta.0
 
 ### Fixes
 
 - Don't add WinUI exception integration on mobile platforms ([#2821](https://github.com/getsentry/sentry-dotnet/pull/2821))
+- `Transactions` are now getting enriched by the client instead of the hub ([#2838](https://github.com/getsentry/sentry-dotnet/pull/2838))
 
 ### API breaking Changes
 
@@ -35,7 +46,7 @@
 - Obsolete `AssemblyExtensions` removed, this shouldn't have been public in the past and has no replacement. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
 - Obsolete `SentryDatabaseLogging.UseBreadcrumbs()` removed, it is called automatically and has no replacement. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
 - Obsolete `Scope.GetSpan()` removed, use `Span` property instead. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
-- Obsolete `IUserFactory` removed, use `ISentryUserFactory` instead. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856))
+- Obsolete `IUserFactory` removed, use `ISentryUserFactory` instead. ([#2856](https://github.com/getsentry/sentry-dotnet/pull/2856), [#2840](https://github.com/getsentry/sentry-dotnet/pull/2840))
 
 #### Changed APIs
 

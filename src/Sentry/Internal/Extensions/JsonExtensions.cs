@@ -887,6 +887,7 @@ internal static class JsonExtensions
 
 [JsonSerializable(typeof(GrowableArray<int>))]
 [JsonSerializable(typeof(Dictionary<string, bool>))]
+[JsonSerializable(typeof(Dictionary<string, object>))]
 internal partial class SentryJsonContext : JsonSerializerContext
 {
 }

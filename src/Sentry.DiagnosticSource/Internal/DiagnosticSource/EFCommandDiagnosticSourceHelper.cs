@@ -15,16 +15,16 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     private static Guid? GetCommandId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("CommandId");
 
-    private static void SetCommandId(ISpanTracer span, Guid? commandId)
+    private static void SetCommandId(ISpan span, Guid? commandId)
     {
         Debug.Assert(commandId != Guid.Empty);
 
         span.SetExtra(EFKeys.DbCommandId, commandId);
     }
 
-    private static Guid? TryGetCommandId(ISpanTracer span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbCommandId);
+    private static Guid? TryGetCommandId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbCommandId);
 
-    protected override ISpanTracer? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue)
+    protected override ISpan? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue)
     {
         if (GetCommandId(diagnosticSourceValue) is { } commandId)
         {
@@ -38,7 +38,7 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
         return null;
     }
 
-    protected override void SetSpanReference(ISpanTracer span, object? diagnosticSourceValue)
+    protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {
         if (GetCommandId(diagnosticSourceValue) is { } commandId)
         {
