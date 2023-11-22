@@ -9,7 +9,7 @@
 ### Fixes
 
 - Android native symbol upload ([#2876](https://github.com/getsentry/sentry-dotnet/pull/2876))
-- Sentry.Serilog no longer throws if a DSN is not specified ([#2883](https://github.com/getsentry/sentry-dotnet/pull/2883))
+- Sentry.Serilog no longer throws if a disabled DSN is provided when initializing Sentry via the Serilog integration ([#2883](https://github.com/getsentry/sentry-dotnet/pull/2883))
 
 ## 4.0.0-beta.1
 
