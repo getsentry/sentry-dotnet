@@ -167,7 +167,7 @@ There are some functional differences when publishing Native AOT:
 - Upgraded to NLog version 5. ([#2697](https://github.com/getsentry/sentry-dotnet/pull/2697))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
 
-## Unreleased - 3.x
+## 3.41.1
 
 ### Fixes
 
@@ -176,9 +176,9 @@ There are some functional differences when publishing Native AOT:
 
 ### Dependencies
 
-- Bump Cocoa SDK from v8.15.0 to v8.15.2 ([#2812](https://github.com/getsentry/sentry-dotnet/pull/2812), [#2816](https://github.com/getsentry/sentry-dotnet/pull/2816))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8152)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.15.0...8.15.2)
+- Bump Cocoa SDK from v8.15.0 to v8.16.0 ([#2812](https://github.com/getsentry/sentry-dotnet/pull/2812), [#2816](https://github.com/getsentry/sentry-dotnet/pull/2816), [#2882](https://github.com/getsentry/sentry-dotnet/pull/2882))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8160)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.15.0...8.16.0)
 - Bump CLI from v2.21.2 to v2.21.5 ([#2811](https://github.com/getsentry/sentry-dotnet/pull/2811), [#2834](https://github.com/getsentry/sentry-dotnet/pull/2834), [#2851](https://github.com/getsentry/sentry-dotnet/pull/2851))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2215)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.5)
