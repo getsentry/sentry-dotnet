@@ -19,6 +19,7 @@ internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
     public bool? FlushOnCompletedRequest { get; set; }
     public bool? FlushBeforeRequestCompleted { get; set; }
     public bool? AdjustStandardEnvironmentNameCasing { get; set; }
+    public bool? AutoRegisterTracing { get; set; }
 
     public void ApplyTo(SentryAspNetCoreOptions options)
     {
@@ -28,5 +29,6 @@ internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
         options.FlushOnCompletedRequest = FlushOnCompletedRequest ?? options.FlushOnCompletedRequest;
         options.FlushBeforeRequestCompleted = FlushBeforeRequestCompleted ?? options.FlushBeforeRequestCompleted;
         options.AdjustStandardEnvironmentNameCasing = AdjustStandardEnvironmentNameCasing ?? options.AdjustStandardEnvironmentNameCasing;
+        options.AutoRegisterTracing = AutoRegisterTracing ?? options.AutoRegisterTracing;
     }
 }

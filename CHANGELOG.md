@@ -2,6 +2,10 @@
 
 ## Unreleased - 4.x
 
+### Fixes
+
+- Android native symbol upload ([#2876](https://github.com/getsentry/sentry-dotnet/pull/2876))
+
 ### .NET target frameworks changes
 
 **Dropped netstandard2.0 support for Sentry.AspNetCore** ([#2807](https://github.com/getsentry/sentry-dotnet/pull/2807))
@@ -167,6 +171,7 @@ There are some functional differences when publishing Native AOT:
 ### Fixes
 
 - `CaptureFailedRequests` and `FailedRequestStatusCodes` are now getting respected by the Cocoa SDK. This is relevant for MAUI apps where requests are getting handled natively. ([#2826](https://github.com/getsentry/sentry-dotnet/issues/2826))
+- Added `SentryOptions.AutoRegisterTracing` for users who need to control registration of Sentry's tracing middleware ([#2871](https://github.com/getsentry/sentry-dotnet/pull/2871))
 
 ### Dependencies
 
@@ -176,6 +181,9 @@ There are some functional differences when publishing Native AOT:
 - Bump CLI from v2.21.2 to v2.21.5 ([#2811](https://github.com/getsentry/sentry-dotnet/pull/2811), [#2834](https://github.com/getsentry/sentry-dotnet/pull/2834), [#2851](https://github.com/getsentry/sentry-dotnet/pull/2851))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2215)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.5)
+- Bump Java SDK from v6.33.1 to v6.34.0 ([#2874](https://github.com/getsentry/sentry-dotnet/pull/2874))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6340)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.33.1...6.34.0)
 
 ## 3.41.0
 
