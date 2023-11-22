@@ -1,4 +1,7 @@
 // ReSharper disable once CheckNamespace - Discoverability
+
+using Constants = Sentry.Constants;
+
 namespace Serilog;
 
 /// <summary>
@@ -82,7 +85,7 @@ public static class SentrySinkExtensions
     /// </example>
     public static LoggerConfiguration Sentry(
         this LoggerSinkConfiguration loggerConfiguration,
-        string? dsn = null,
+        string? dsn = Constants.DisableSdkDsnValue,
         LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
         LogEventLevel minimumEventLevel = LogEventLevel.Error,
         IFormatProvider? formatProvider = null,
@@ -189,7 +192,7 @@ public static class SentrySinkExtensions
         bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
     {
-        if (!string.IsNullOrWhiteSpace(dsn))
+        if (dsn != null)
         {
             sentrySerilogOptions.Dsn = dsn;
         }
