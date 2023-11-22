@@ -85,7 +85,7 @@ public static class SentrySinkExtensions
     /// </example>
     public static LoggerConfiguration Sentry(
         this LoggerSinkConfiguration loggerConfiguration,
-        string? dsn = Constants.DisableSdkDsnValue,
+        string? dsn = null,
         LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
         LogEventLevel minimumEventLevel = LogEventLevel.Error,
         IFormatProvider? formatProvider = null,

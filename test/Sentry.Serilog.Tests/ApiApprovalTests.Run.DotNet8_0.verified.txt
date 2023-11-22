@@ -44,7 +44,7 @@ namespace Serilog
         public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, System.Action<Sentry.Serilog.SentrySerilogOptions> configureOptions) { }
         public static Serilog.LoggerConfiguration Sentry(
                     this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration,
-                    string? dsn = "",
+                    string? dsn = null,
                     Serilog.Events.LogEventLevel minimumBreadcrumbLevel = 2,
                     Serilog.Events.LogEventLevel minimumEventLevel = 4,
                     System.IFormatProvider? formatProvider = null,
