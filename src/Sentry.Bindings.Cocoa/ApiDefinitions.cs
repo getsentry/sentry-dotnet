@@ -882,6 +882,10 @@ interface SentryOptions
     // @property (assign, nonatomic) BOOL swiftAsyncStacktraces;
     [Export ("swiftAsyncStacktraces")]
     bool SwiftAsyncStacktraces { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nonnull cacheDirectoryPath;
+    [Export ("cacheDirectoryPath")]
+    string CacheDirectoryPath { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>
