@@ -75,7 +75,10 @@ try
         }
         finally
         {
-            scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
+            if ($CI)
+            {
+                scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
+            }
         }
     }
 }
