@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace - Discoverability
+
 namespace Serilog;
 
 /// <summary>
@@ -189,7 +190,7 @@ public static class SentrySinkExtensions
         bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
     {
-        if (!string.IsNullOrWhiteSpace(dsn))
+        if (dsn is not null)
         {
             sentrySerilogOptions.Dsn = dsn;
         }
