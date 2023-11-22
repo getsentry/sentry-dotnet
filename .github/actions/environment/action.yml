@@ -33,4 +33,5 @@ runs:
           maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
-          --temp-dir "${{ runner.temp }}"
+          --temp-dir "${{ runner.temp }}" \
+          --skip-sign-check

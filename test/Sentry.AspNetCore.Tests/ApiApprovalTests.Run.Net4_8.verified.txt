@@ -53,6 +53,7 @@ namespace Sentry.AspNetCore
     {
         public SentryAspNetCoreOptions() { }
         public bool AdjustStandardEnvironmentNameCasing { get; set; }
+        public bool AutoRegisterTracing { get; set; }
         public bool FlushOnCompletedRequest { get; set; }
         public bool IncludeActivityData { get; set; }
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
