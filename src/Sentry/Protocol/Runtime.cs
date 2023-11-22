@@ -51,9 +51,7 @@ public sealed class Runtime : IJsonSerializable, ICloneable<Runtime>, IUpdatable
     /// <summary>
     /// Clones this instance
     /// </summary>
-    // NOTE: This appears to have been public by mistake
-    [Obsolete("This method will be made internal in a future version.")]
-    public Runtime Clone() => ((ICloneable<Runtime>)this).Clone();
+    internal Runtime Clone() => ((ICloneable<Runtime>)this).Clone();
 
     Runtime ICloneable<Runtime>.Clone()
         => new()

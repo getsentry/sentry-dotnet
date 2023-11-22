@@ -152,7 +152,13 @@ Describe 'MAUI' -ForEach @(
 
     It "uploads symbols and sources for an Android build" {
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android"
-        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @('maui-app.pdb')
+        $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            'libsentry-android.so',
+            'libsentry.so',
+            'libsentrysupplemental.so',
+            'libxamarin-app.so',
+            'maui-app.pdb'
+        )
         $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
     }
 

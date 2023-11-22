@@ -82,14 +82,14 @@ public sealed class HubAdapter : IHub
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public void BindException(Exception exception, ISpanTracer span) =>
+    public void BindException(Exception exception, ISpan span) =>
         SentrySdk.BindException(exception, span);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    public ISpanTracer? GetSpan()
+    public ISpan? GetSpan()
         => SentrySdk.GetSpan();
 
     /// <summary>
@@ -252,8 +252,8 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureTransaction(Transaction transaction, Hint? hint)
-        => SentrySdk.CaptureTransaction(transaction, hint);
+    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+        => SentrySdk.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

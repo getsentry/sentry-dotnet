@@ -11,6 +11,8 @@ public class ApplicationBuilderExtensionsTests
         public ISentryEventExceptionProcessor SentryEventExceptionProcessor { get; set; } = Substitute.For<ISentryEventExceptionProcessor>();
         public SentryAspNetCoreOptions SentryAspNetCoreOptions { get; set; } = new();
 
+        public Dictionary<string, object> Properties { get; } = new();
+
         public IApplicationBuilder GetSut()
         {
             var provider = Substitute.For<IServiceProvider>();
@@ -39,6 +41,7 @@ public class ApplicationBuilderExtensionsTests
                     : Enumerable.Empty<ISentryEventExceptionProcessor>());
 
             var sut = Substitute.For<IApplicationBuilder>();
+            sut.Properties.Returns(Properties);
             _ = sut.ApplicationServices.Returns(provider);
             return sut;
         }

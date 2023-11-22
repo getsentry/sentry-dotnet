@@ -80,22 +80,6 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void Init_ValidDsnWithSecret_EnablesSdk()
-    {
-        using var _ = SentrySdk.Init(o =>
-        {
-#pragma warning disable CS0618
-            o.Dsn = ValidDsnWithSecret;
-#pragma warning restore CS0618
-            o.AutoSessionTracking = false;
-            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitNativeSdks = false;
-        });
-
-        Assert.True(SentrySdk.IsEnabled);
-    }
-
-    [Fact]
     public void Init_ValidDsnEnvironmentVariable_EnablesSdk()
     {
         using var _ = SentrySdk.Init(o =>

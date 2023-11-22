@@ -39,11 +39,11 @@ internal abstract class EFDiagnosticSourceHelper
         Transaction = hub.GetTransactionIfSampled();
     }
 
-    protected static Guid? TryGetConnectionId(ISpanTracer span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
+    protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
 
     protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
 
-    protected static void SetConnectionId(ISpanTracer span, Guid? connectionId)
+    protected static void SetConnectionId(ISpan span, Guid? connectionId)
     {
         Debug.Assert(connectionId != Guid.Empty);
 
@@ -89,7 +89,7 @@ internal abstract class EFDiagnosticSourceHelper
         sourceSpan.Finish(status);
     }
 
-    protected void SetDbData(ISpanTracer span, object? diagnosticSourceValue)
+    protected void SetDbData(ISpan span, object? diagnosticSourceValue)
     {
         if (GetDatabaseName(diagnosticSourceValue) is { } dataBaseName)
         {
@@ -140,7 +140,7 @@ internal abstract class EFDiagnosticSourceHelper
         return str?[(str.IndexOf('\n') + 1)..];
     }
 
-    protected abstract ISpanTracer? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue);
+    protected abstract ISpan? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue);
 
-    protected abstract void SetSpanReference(ISpanTracer span, object? diagnosticSourceValue);
+    protected abstract void SetSpanReference(ISpan span, object? diagnosticSourceValue);
 }

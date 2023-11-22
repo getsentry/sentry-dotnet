@@ -6,7 +6,7 @@ internal class AspNetCoreEnricher : IOpenTelemetryEnricher
 
     internal AspNetCoreEnricher(ISentryUserFactory userFactory) => _userFactory = userFactory;
 
-    public void Enrich(ISpanTracer span, Activity activity, IHub hub, SentryOptions? options)
+    public void Enrich(ISpan span, Activity activity, IHub hub, SentryOptions? options)
     {
         if (options?.SendDefaultPii is true)
         {

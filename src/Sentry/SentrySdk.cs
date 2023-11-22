@@ -449,7 +449,7 @@ public static class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -461,12 +461,12 @@ public static class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(Transaction transaction, Hint? hint)
-        => CurrentHub.CaptureTransaction(transaction, hint);
+    public static void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+        => CurrentHub.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>
     /// Captures a session update.
@@ -529,14 +529,14 @@ public static class SentrySdk
     /// This method is used internally and is not meant for public use.
     /// </remarks>
     [DebuggerStepThrough]
-    public static void BindException(Exception exception, ISpanTracer span)
+    public static void BindException(Exception exception, ISpan span)
         => CurrentHub.BindException(exception, span);
 
     /// <summary>
     /// Gets the last active span.
     /// </summary>
     [DebuggerStepThrough]
-    public static ISpanTracer? GetSpan()
+    public static ISpan? GetSpan()
         => CurrentHub.GetSpan();
 
     /// <summary>

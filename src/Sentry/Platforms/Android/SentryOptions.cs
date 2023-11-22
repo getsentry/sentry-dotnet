@@ -143,13 +143,6 @@ public partial class SentryOptions
         /// </remarks>
         public bool EnableUserInteractionTracing { get; set; } = false;
 
-        /// <summary>
-        /// Deprecated.
-        /// </summary>
-        [Obsolete("This property is deprecated and ignored.")]
-        public TimeSpan ProfilingTracesInterval { get; set; }
-
-
         // ---------- From SentryOptions.java ----------
 
         /// <summary>
@@ -163,16 +156,6 @@ public partial class SentryOptions
         /// The default value is 5 seconds.
         /// </summary>
         public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(5);
-
-        /// <summary>
-        /// The distribution of the application, associated with the release set in <see cref="Release"/>.
-        /// </summary>
-        [Obsolete("Use SentryOptions.Distribution instead.  This property will be removed in a future version.")]
-        public string? Distribution
-        {
-            get => _options.Distribution;
-            set => _options.Distribution = value;
-        }
 
         /// <summary>
         /// Gets or sets a value that indicates if the NDK (Android Native Development Kit) is enabled.
@@ -200,17 +183,6 @@ public partial class SentryOptions
         /// printed to the standard error stream. The default value is <c>false</c> (disabled).
         /// </summary>
         public bool PrintUncaughtStackTrace { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets if profiling is enabled for transactions.
-        /// The default value is <c>false</c> (disabled).
-        /// </summary>
-        [Obsolete("Use ProfilesSampleRate instead")]
-        public bool ProfilingEnabled
-        {
-            get => (ProfilesSampleRate ?? 0.0) > 0.0;
-            set => ProfilesSampleRate = value ? 1.0 : null;
-        }
 
         /// <summary>
         /// Gets or sets the profiling sample rate, between 0.0 and 1.0.

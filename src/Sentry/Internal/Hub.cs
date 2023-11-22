@@ -14,12 +14,11 @@ internal class Hub : IHub, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
-    private readonly Enricher _enricher;
 
     private int _isPersistedSessionRecovered;
 
     // Internal for testability
-    internal ConditionalWeakTable<Exception, ISpanTracer> ExceptionToSpanMap { get; } = new();
+    internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
 
@@ -58,8 +57,6 @@ internal class Hub : IHub, IDisposable
             // Push the first scope so the async local starts from here
             PushScope();
         }
-
-        _enricher = new Enricher(options);
 
         foreach (var integration in options.Integrations)
         {
@@ -174,7 +171,7 @@ internal class Hub : IHub, IDisposable
         return transaction;
     }
 
-    public void BindException(Exception exception, ISpanTracer span)
+    public void BindException(Exception exception, ISpan span)
     {
         // Don't bind on sampled out spans
         if (span.IsSampled == false)
@@ -186,7 +183,7 @@ internal class Hub : IHub, IDisposable
         _ = ExceptionToSpanMap.GetValue(exception, _ => span);
     }
 
-    public ISpanTracer? GetSpan() => ScopeManager.GetCurrent().Key.Span;
+    public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
 
     public SentryTraceHeader GetTraceHeader()
     {
@@ -336,7 +333,7 @@ internal class Hub : IHub, IDisposable
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
         EndSession(_clock.GetUtcNow(), status);
 
-    private ISpanTracer? GetLinkedSpan(SentryEvent evt)
+    private ISpan? GetLinkedSpan(SentryEvent evt)
     {
         // Find the span which is bound to the same exception
         if (evt.Exception is { } exception &&
@@ -348,7 +345,7 @@ internal class Hub : IHub, IDisposable
         return null;
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, ISpanTracer span)
+    private void ApplyTraceContextToEvent(SentryEvent evt, ISpan span)
     {
         evt.Contexts.Trace.SpanId = span.SpanId;
         evt.Contexts.Trace.TraceId = span.TraceId;
@@ -424,12 +421,12 @@ internal class Hub : IHub, IDisposable
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
-            if (evt.HasTerminalException())
+            if (evt.HasTerminalException() && actualScope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
-                actualScope.Transaction?.Finish(SpanStatus.Aborted);
+                transaction.Finish(SpanStatus.Aborted);
             }
 
             return id;
@@ -458,9 +455,9 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
 
-    public void CaptureTransaction(Transaction transaction, Hint? hint)
+    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,
@@ -473,34 +470,10 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            // Apply scope data
-            var (scope, client) = ScopeManager.GetCurrent();
-            scope.Evaluate();
-            scope.Apply(transaction);
+            var (currentScope, client) = ScopeManager.GetCurrent();
+            scope ??= currentScope;
 
-            // Apply enricher
-            _enricher.Apply(transaction);
-
-            // Add attachments to the hint for processors and callbacks
-            hint ??= new Hint();
-            hint.AddAttachmentsFromScope(scope);
-
-            var processedTransaction = transaction;
-            if (transaction.IsSampled != false)
-            {
-                foreach (var processor in scope.GetAllTransactionProcessors())
-                {
-                    processedTransaction = processor.DoProcessTransaction(transaction, hint);
-                    if (processedTransaction == null)
-                    {
-                        _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
-                        _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                        return;
-                    }
-                }
-            }
-
-            client.CaptureTransaction(processedTransaction, hint);
+            client.CaptureTransaction(transaction, scope, hint);
         }
         catch (Exception e)
         {

@@ -1309,7 +1309,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled),Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -1323,74 +1323,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
-    }
-
-    [Fact]
-    public void CaptureTransaction_Client_Gets_ScopeAttachments()
-    {
-        // Arrange
-        var hub = _fixture.GetSut();
-        var attachments = new List<Attachment> {
-            AttachmentHelper.FakeAttachment("foo"),
-            AttachmentHelper.FakeAttachment("bar")
-        };
-        hub.ConfigureScope(s => {
-            s.AddAttachment(attachments[0]);
-            s.AddAttachment(attachments[1]);
-            });
-
-        // Act
-        Hint hint = null;
-        _fixture.Client.CaptureTransaction(
-            Arg.Any<Transaction>(),
-            Arg.Do<Hint>(h => hint = h)
-            );
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        hint.Should().NotBeNull();
-        hint.Attachments.Should().Contain(attachments);
-    }
-
-    [Fact]
-    public void CaptureTransaction_EventProcessor_Gets_Hint()
-    {
-        // Arrange
-        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
-        processor.Process(Arg.Any<Transaction>(), Arg.Any<Hint>()).Returns(new Transaction("name", "operation"));
-        _fixture.Options.AddTransactionProcessor(processor);
-
-        // Act
-        var hub = _fixture.GetSut();
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        processor.Received(1).Process(Arg.Any<Transaction>(), Arg.Any<Hint>());
-    }
-
-    [Fact]
-    public void CaptureTransaction_EventProcessor_Gets_ScopeAttachments()
-    {
-        // Arrange
-        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
-        Hint hint = null;
-        processor.Process(Arg.Any<Transaction>(), Arg.Do<Hint>(h => hint = h)).Returns(new Transaction("name", "operation"));
-        _fixture.Options.AddTransactionProcessor(processor);
-
-        var attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
-        var hub = _fixture.GetSut();
-        hub.ConfigureScope(s => s.AddAttachment(attachments[0]));
-
-        // Act
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        hint.Should().NotBeNull();
-        hint.Attachments.Should().Contain(attachments);
+        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Theory]

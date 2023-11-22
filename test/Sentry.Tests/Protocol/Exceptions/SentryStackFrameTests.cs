@@ -231,6 +231,7 @@ public class SentryStackFrameTests
         Assert.Null(sut.InApp);
     }
 
+#if NET6_0_OR_GREATER
     [Fact]
     public void ConfigureAppFrame_NativeAOTWithoutMethodInfo_InAppIsSet()
     {
@@ -244,5 +245,5 @@ public class SentryStackFrameTests
         sut.ConfigureAppFrame(new());
         Assert.True(sut.InApp);
     }
-
+#endif
 }

@@ -30,7 +30,7 @@ public interface ISentryClient
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -41,15 +41,16 @@ public interface ISentryClient
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpanTracer.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
+    /// <param name="scope">The scope to be applied to the transaction</param>
     /// <param name="hint">
     /// A hint providing extra context.
     /// This will be available in callbacks prior to processing the transaction.
     /// </param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(Transaction transaction, Hint? hint);
+    void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint);
 
     /// <summary>
     /// Captures a session update.
