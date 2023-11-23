@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ignore UnobservedTaskException for QUIC exceptions. See: https://github.com/dotnet/runtime/issues/80111 ([#2894](https://github.com/getsentry/sentry-dotnet/pull/2894))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.16.0 to v8.16.1 ([#2891](https://github.com/getsentry/sentry-dotnet/pull/2891))
