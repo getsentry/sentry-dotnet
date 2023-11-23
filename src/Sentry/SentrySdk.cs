@@ -672,13 +672,13 @@ public static partial class SentrySdk
                 break;
 #elif NET8_0_OR_GREATER
             case CrashType.Native:
-                if (AotHelper.IsNativeAot)
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    NativeCrash();
+                    MemSetMSVCRT(IntPtr.Zero, 0, 1);
                 }
                 else
                 {
-                    throw new NotSupportedException($"{nameof(CrashType)}.{crashType} is not supported without NativeAOT compilation");
+                    MemSetLibC(IntPtr.Zero, 0, 1);
                 }
                 break;
 #endif
@@ -687,4 +687,15 @@ public static partial class SentrySdk
         }
         CurrentOptions?.LogWarning("Something went wrong in {0}, execution should never reach this.", info);
     }
+
+#if ANDROID
+    [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
+    private static extern void NativeCrash();
+#elif NET8_0_OR_GREATER
+    [DllImport("msvcrt", EntryPoint = "memset")]
+    private static extern IntPtr MemSetMSVCRT(IntPtr dest, int c, IntPtr count);
+
+    [DllImport("libc", EntryPoint = "memset")]
+    private static extern IntPtr MemSetLibC(IntPtr dest, int c, IntPtr count);
+#endif
 }
