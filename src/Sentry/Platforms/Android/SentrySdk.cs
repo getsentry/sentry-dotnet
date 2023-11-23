@@ -261,4 +261,7 @@ public static partial class SentrySdk
 #pragma warning restore CA1422
 #pragma warning restore CS0618
     }
+
+    [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
+    private static extern void NativeCrash();
 }

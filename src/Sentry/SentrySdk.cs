@@ -687,9 +687,4 @@ public static partial class SentrySdk
         }
         CurrentOptions?.LogWarning("Something went wrong in {0}, execution should never reach this.", info);
     }
-
-#if ANDROID
-    [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
-    private static extern void NativeCrash();
-#endif
 }

@@ -13,6 +13,7 @@
     <!-- Link statically -->
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\win-x64\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
+    <NativeLibrary Include="winhttp.lib" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'linux-x64'">

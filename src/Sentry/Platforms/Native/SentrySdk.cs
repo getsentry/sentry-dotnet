@@ -48,5 +48,8 @@ public static partial class SentrySdk
 
     private static void CloseNativeSdk() => C.Close();
 
-    private static void NativeCrash() => C.NativeCrash();
+    private static void NativeCrash() => MemSet(IntPtr.Zero, 0, 1);
+
+    [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+    private static extern IntPtr MemSet(IntPtr dest, int c, IntPtr count);
 }

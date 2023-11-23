@@ -112,7 +112,7 @@ internal class FakeTransport : ITransport
         runConsoleApp | Should -AnyElementMatch 'This looks like a NativeAOT application build.'
     }
 
-    It "'dotnet run' produces an app that's recognized as JIT by Sentry" -Skip:($CrashType -eq 'Native') {
+    It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
         runConsoleApp $false | Should -AnyElementMatch 'This looks like a standard JIT/AOT application build.'
     }
 
