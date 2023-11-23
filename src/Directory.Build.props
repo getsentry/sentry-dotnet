@@ -35,8 +35,13 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-  <!-- Only compile with IsAotCompatible on .NET 6.0 and later. Our Device Tests fail for net7.0-android with this enabled as well -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net7.0-android' AND $([System.Text.RegularExpressions.Regex]::IsMatch('$(TargetFramework)', '^(?!net5\.|net4\d{2}|netstandard)net\d+'))">
+  <!-- Only compile with IsAotCompatible on .NET 8.0 and later -->
+  <PropertyGroup Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(TargetFramework)', 'net8\.|net9\.|net\d{2,}\.'))">
+    <!-- `FrameworkSupportsAot` is a custom property we use to centralise this logic for enabling `IsAotCompatible`. As
+    of very recently, this logic is fairly simple (net8.0 or later) but it's historically been more complex and very
+    volatile (as we learn more about the constraints of targeting AOT compilation). We may be able to remove this custom
+    property once we have confidence that this logic is unlikely to change again.
+    -->
     <FrameworkSupportsAot>true</FrameworkSupportsAot>
   </PropertyGroup>
 
