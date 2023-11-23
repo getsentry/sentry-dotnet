@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK no longer fails to finish sessions while capturing an event. This fixes broken crash-free rates ([#2895](https://github.com/getsentry/sentry-dotnet/pull/2895))
 - Ignore UnobservedTaskException for QUIC exceptions. See: https://github.com/dotnet/runtime/issues/80111 ([#2894](https://github.com/getsentry/sentry-dotnet/pull/2894))
 
 ### Dependencies
