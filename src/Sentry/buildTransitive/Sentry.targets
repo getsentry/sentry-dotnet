@@ -126,8 +126,9 @@
   </Target>
 
   <!-- Native AOT publishing
-       While '_IsPublishing' looks a bit "private", it's also OK if it suddenly stops working and this step runs anyway.
-       See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993 -->
+      Note 1: While '_IsPublishing' looks a bit "private", it's also OK if it suddenly stops working and this step runs anyway.
+              See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993
+      Note 2: Target framework conditions should be kept synchronized with src/Sentry/Platforms/Native/buildTransitive/Sentry.Native.targets -->
   <PropertyGroup Condition="
       $(TargetFramework.StartsWith('net8'))
       and '$(PublishDir)' != ''
