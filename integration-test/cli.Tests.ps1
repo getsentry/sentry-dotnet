@@ -55,8 +55,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         if ($IsWindows)
         {
-            $extension = $IsLinux ? '' : '.pdb'
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("console-app$extension")
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("console-app.pdb")
             $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
             $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
         }
@@ -76,8 +75,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         if ($IsWindows)
         {
-            $extension = $IsLinux ? '' : '.pdb'
-            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("console-app$extension")
+            $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("console-app.pdb")
             $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file'
         }
         else
