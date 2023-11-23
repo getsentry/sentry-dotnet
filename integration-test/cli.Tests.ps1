@@ -4,7 +4,6 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
-    @{ framework = "net7.0" },
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
@@ -41,7 +40,6 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
 }
 
 Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
-    @{ framework = "net7.0" },
     @{ framework = "net8.0" }
 ) {
     BeforeAll {
@@ -52,10 +50,10 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         Remove-Item "./console-app/bin/Release/$framework/publish" -Recurse -ErrorAction SilentlyContinue
     }
 
-    It "uploads symbols and sources" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
+    It "uploads symbols and sources" {
         $result = RunDotnetWithSentryCLI 'publish' 'console-app' $True $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
-        if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
+        if ($IsWindows)
         {
             $extension = $IsLinux ? '' : '.pdb'
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("console-app$extension")
@@ -73,10 +71,10 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         }
     }
 
-    It "uploads symbols" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
+    It "uploads symbols" {
         $result = RunDotnetWithSentryCLI 'publish' 'console-app' $True $False $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
-        if ($IsWindows -or ($IsLinux -and $framework -eq 'net7.0'))
+        if ($IsWindows)
         {
             $extension = $IsLinux ? '' : '.pdb'
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @("console-app$extension")
@@ -92,18 +90,18 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         }
     }
 
-    It "uploads sources" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
+    It "uploads sources" {
         $result = RunDotnetWithSentryCLI 'publish' 'console-app' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         $sourceBundle = 'console-app.src.zip'
-        if ($IsMacOS -or ($IsLinux -and $framework -eq 'net7.0'))
+        if ($IsMacOS)
         {
             $sourceBundle = 'console-app.src.zip'
         }
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @($sourceBundle)
     }
 
-    It "uploads nothing when disabled" -Skip:($IsMacOS -and $framework -eq 'net7.0') {
+    It "uploads nothing when disabled" {
         $result = RunDotnetWithSentryCLI 'publish' 'console-app' $False $False $framework
         $result.UploadedDebugFiles() | Should -BeNullOrEmpty
     }

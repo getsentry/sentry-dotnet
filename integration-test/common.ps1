@@ -92,7 +92,7 @@ BeforeAll {
     New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
     RegisterLocalPackage 'Sentry'
 
-    function RunDotnetWithSentryCLI([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework = 'net7.0')
+    function RunDotnetWithSentryCLI([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework)
     {
         $rootDir = $PSScriptRoot
 
