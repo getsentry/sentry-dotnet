@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK no longer fails to finish sessions while capturing an event. This fixes broken crash-free rates ([#2895](https://github.com/getsentry/sentry-dotnet/pull/2895))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.16.0 to v8.16.1 ([#2891](https://github.com/getsentry/sentry-dotnet/pull/2891))
