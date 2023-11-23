@@ -13,6 +13,9 @@
     <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)\</SentryNativeOutputDirectory-linux-x64>
     <NativeLibRelativePath-osx>osx</NativeLibRelativePath-osx>
     <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
+    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
   </PropertyGroup>
 
   <!-- Packaging -->
@@ -43,38 +46,19 @@
     </None>
   </ItemGroup>
 
-  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean">
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' == 'net8.0'">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
   </Target>
 
-  <!-- Build the Sentry Native SDK -->
-  <Target Name="_InnerBuildSentryNativeSDK">
+  <!-- Build the Sentry Native SDK (this only runs on local machines because in CI we expect the SDK to be
+       built already on each native platform and fetched for the final .net build. -->
+  <Target Name="_BuildSentryNativeSDK"
+    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
+    Condition="'$(TargetFramework)' == 'net8.0' and '$(CI)' != 'true'"
+    Inputs="$(SentryNativeBuildInputs)"
+    Outputs="$(SentryNativeBuildOutputs)">
     <Exec Command="pwsh $(SentryNativeBuildScript)" />
-  </Target>
-
-  <Target Name="_BuildSentryNativeSDK-win-x64"
-    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="'$(CI)' != 'true' and $([MSBuild]::IsOsPlatform('Windows'))"
-    Inputs="$(SentryNativeBuildInputs)"
-    Outputs="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryNativeSDK" Properties="TargetFramework=net6.0" />
-  </Target>
-
-  <Target Name="_BuildSentryNativeSDK-linux-x64"
-    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="'$(CI)' != 'true' and $([MSBuild]::IsOsPlatform('Linux'))"
-    Inputs="$(SentryNativeBuildInputs)"
-    Outputs="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryNativeSDK" Properties="TargetFramework=net6.0" />
-  </Target>
-
-  <Target Name="_BuildSentryNativeSDK-osx"
-    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="'$(CI)' != 'true' and $([MSBuild]::IsOsPlatform('OSX'))"
-    Inputs="$(SentryNativeBuildInputs)"
-    Outputs="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryNativeSDK" Properties="TargetFramework=net6.0" />
   </Target>
 </Project>

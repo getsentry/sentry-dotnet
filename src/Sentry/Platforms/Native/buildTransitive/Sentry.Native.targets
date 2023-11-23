@@ -1,5 +1,12 @@
+<!--
+  This is run during consumer build and:
+    - generates direct PInvoke
+    - links the native library statically
+  See https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/interop for more details.
+
+  Note:Target framework conditions should be kept synchronized with src/Sentry/buildTransitive/Sentry.Native.targets -->
 <Project>
-  <ItemGroup Condition="'$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'win-x64'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'win-x64'">
     <!-- Generate direct PInvokes for Dependency -->
     <DirectPInvoke Include="sentry-native" />
 
@@ -8,7 +15,7 @@
     <NativeLibrary Include="dbghelp.lib" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'linux-x64'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'linux-x64'">
     <!-- Generate direct PInvokes for Dependency -->
     <DirectPInvoke Include="sentry-native" />
 
@@ -16,7 +23,7 @@
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-x64\libsentry-native.a" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(OutputType)' == 'Exe' And ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <!-- Generate direct PInvokes for Dependency -->
     <DirectPInvoke Include="sentry-native" />
 

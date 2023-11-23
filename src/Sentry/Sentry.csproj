@@ -28,6 +28,11 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
+  <!-- Only include Native bindings code on .NET 8 (non-mobile platforms) -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+    <Compile Remove="**\Native\**\*" />
+  </ItemGroup>
+
   <!--
     Ben.Demystifier is compiled directly into Sentry.
     Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.
