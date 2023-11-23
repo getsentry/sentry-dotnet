@@ -50,7 +50,9 @@ public class SentryClient : ISentryClient, IDisposable
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
         if (AotHelper.IsNativeAot) {
+            #pragma warning disable 0162 // Unreachable code on old .NET frameworks
             options.LogDebug("This looks like a NativeAOT application build.");
+            #pragma warning restore 0162
         } else {
             options.LogDebug("This looks like a standard JIT/AOT application build.");
         }

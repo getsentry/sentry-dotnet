@@ -129,7 +129,8 @@
        While '_IsPublishing' looks a bit "private", it's also OK if it suddenly stops working and this step runs anyway.
        See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993 -->
   <PropertyGroup Condition="
-      '$(PublishDir)' != ''
+      $(TargetFramework.StartsWith('net8'))
+      and '$(PublishDir)' != ''
       and '$(PublishAot)' == 'true'
       and '$(_IsPublishing)' == 'true'
       and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'
@@ -138,8 +139,7 @@
     <SentryCLIUploadDirectory>$(PublishDir)</SentryCLIUploadDirectory>
     <!-- We must run after "_CopyAotSymbols" (not "Publish"), because that is the one that actually copies debug symbols to the publish directory. -->
     <!-- See also https://github.com/dotnet/runtime/blob/v8.0.0/src/coreclr/nativeaot/BuildIntegration/Microsoft.NETCore.Native.Publish.targets#L100 -->
-    <SentryCLIUploadAfterTargets Condition="!$(TargetFramework.StartsWith('net7'))">_CopyAotSymbols</SentryCLIUploadAfterTargets>
-    <SentryCLIUploadAfterTargets Condition="$(TargetFramework.StartsWith('net7'))">CopyNativeBinary</SentryCLIUploadAfterTargets>
+    <SentryCLIUploadAfterTargets>_CopyAotSymbols</SentryCLIUploadAfterTargets>
   </PropertyGroup>
   <ItemGroup Condition="'$(SentryCLIUploadNativeAOT)' == 'true'">
     <SentryCLIUploadSymbolType Include="pdb" />
