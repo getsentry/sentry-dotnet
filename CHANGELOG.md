@@ -1,15 +1,8 @@
 # Changelog
 
+## Unreleased
+
 ## 4.0.0-beta.2
-
-### Various fixes & improvements
-
-- release: 3.41.1 (b40818b1) by @getsentry-bot
-- chore(deps): update Cocoa SDK to v8.16.0 (#2882) by @github-actions
-- Add SentryOptions.AutoRegisterTracing (#2871) by @jamescrosswell
-- chore: update scripts/update-java.ps1 to 6.34.0 (#2874) by @github-actions
-
-## Unreleased - 4.x
 
 ### Fixes
 
