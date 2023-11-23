@@ -54,7 +54,7 @@ public static partial class SentrySdk
             InitSentryCocoaSdk(options);
 #elif ANDROID
             InitSentryAndroidSdk(options);
-#else
+#elif NET8_0_OR_GREATER
             if (AotHelper.IsNativeAot)
             {
                 InitNativeSdk(options);
@@ -244,7 +244,7 @@ public static partial class SentrySdk
             // TODO
 #elif ANDROID
             // TODO
-#else
+#elif NET8_0_OR_GREATER
             if (AotHelper.IsNativeAot)
             {
                 CloseNativeSdk();
@@ -640,9 +640,9 @@ public static partial class SentrySdk
     [Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a real application.")]
     public static void CauseCrash(CrashType crashType)
     {
-        var msg =
-            "This exception was caused deliberately by " +
-            $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType}).";
+        var info = $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType})";
+        var msg = $"This exception was caused deliberately by {info}.";
+        CurrentOptions?.LogDebug("Triggering a deliberate exception because {0} was called", info);
 
         switch (crashType)
         {
@@ -674,8 +674,10 @@ public static partial class SentrySdk
             case CrashType.Native:
                 if (AotHelper.IsNativeAot)
                 {
-                    CloseNativeSdk();
-                } else {
+                    NativeCrash();
+                }
+                else
+                {
                     throw new NotSupportedException($"{nameof(CrashType)}.{crashType} is not supported without NativeAOT compilation");
                 }
                 break;
@@ -683,6 +685,7 @@ public static partial class SentrySdk
             default:
                 throw new ArgumentOutOfRangeException(nameof(crashType), crashType, null);
         }
+        CurrentOptions?.LogWarning("Something went wrong in {0}, execution should never reach this.", info);
     }
 
 #if ANDROID

@@ -47,4 +47,6 @@ public static partial class SentrySdk
     }
 
     private static void CloseNativeSdk() => C.Close();
+
+    private static void NativeCrash() => C.NativeCrash();
 }

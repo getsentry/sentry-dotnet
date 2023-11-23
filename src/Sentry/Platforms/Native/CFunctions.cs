@@ -308,6 +308,8 @@ internal static class C
         internal double _double;
     }
 
+    internal static void NativeCrash() => sentry_options_set_dsn(IntPtr.Zero, "");
+
     [DllImport("sentry-native")]
     private static extern int sentry_init(IntPtr options);
 

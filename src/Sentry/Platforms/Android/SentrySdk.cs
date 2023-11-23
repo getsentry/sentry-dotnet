@@ -115,7 +115,7 @@ public static partial class SentrySdk
             }
 
             // These options we have behind feature flags
-            if (options is {IsPerformanceMonitoringEnabled: true, Android.EnableAndroidSdkTracing: true})
+            if (options is { IsPerformanceMonitoringEnabled: true, Android.EnableAndroidSdkTracing: true })
             {
                 o.EnableTracing = (JavaBoolean?)options.EnableTracing;
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
@@ -175,7 +175,7 @@ public static partial class SentrySdk
         });
 
         // Now initialize the Android SDK (with a logger only if we're debugging)
-        if (options.Debug && options.DiagnosticLogger is {} logger)
+        if (options.Debug && options.DiagnosticLogger is { } logger)
         {
             var androidLogger = new AndroidDiagnosticLogger(logger);
             SentryAndroid.Init(AppContext, androidLogger, configuration);

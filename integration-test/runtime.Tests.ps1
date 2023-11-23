@@ -3,8 +3,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
-Describe 'Console app NativeAOT (<framework>, <CrashType> error)' -ForEach @(
-    @{ Framework = "net8.0"; CrashType = "Managed" }
+Describe 'Console app NativeAOT (<framework>)' -ForEach @(
+    @{ framework = "net8.0" }
 ) {
     BeforeAll {
         $path = './console-app'
@@ -38,13 +38,6 @@ internal class FakeTransport : ITransport
 }
 "@ | Out-File $path/Program.cs
 
-        # Publish once, then run the executable in actual tests.
-        dotnet publish console-app -c Release --nologo --framework $framework | ForEach-Object { Write-Host $_ }
-        if ($LASTEXITCODE -ne 0)
-        {
-            throw "Failed to publish the test app project."
-        }
-
         function getConsoleAppPath()
         {
             if ($IsMacOS)
@@ -62,11 +55,26 @@ internal class FakeTransport : ITransport
             }
         }
 
-        function runConsoleApp([bool]$IsAOT = $true)
+        function runConsoleApp([bool]$IsAOT = $true, [string]$CrashType = 'Managed')
         {
-            $executable = $IsAOT `
-                ? "$(getConsoleAppPath) $CrashType" `
-                : "dotnet run --project $path -c Release --framework $framework $CrashType"
+            if ($IsAOT)
+            {
+                $path = getConsoleAppPath
+                If (!(Test-Path $path))
+                {
+                    dotnet publish console-app -c Release --nologo --framework $framework | ForEach-Object { Write-Host $_ }
+                    if ($LASTEXITCODE -ne 0)
+                    {
+                        throw "Failed to publish the test app project."
+                    }
+                }
+                $executable = "$path $CrashType"
+            }
+            else
+            {
+                $executable = "dotnet run --project $path -c Release --framework $framework $CrashType"
+            }
+
             Write-Host "::group::Executing $executable"
             try
             {
@@ -104,12 +112,14 @@ internal class FakeTransport : ITransport
         runConsoleApp | Should -AnyElementMatch 'This looks like a NativeAOT application build.'
     }
 
-    It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
+    It "'dotnet run' produces an app that's recognized as JIT by Sentry" -Skip:($CrashType -eq 'Native') {
         runConsoleApp $false | Should -AnyElementMatch 'This looks like a standard JIT/AOT application build.'
     }
 
-    It "'dotnet run' produces the expected exception" {
-        runConsoleApp $false | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.' + $CrashType + '\)."')
+    It "Produces the expected exception" {
+        runConsoleApp $false 'Managed' | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Managed\)."')
+        runConsoleApp $true 'Managed' | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Managed\)."')
+        runConsoleApp $true 'Native' | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Native\)."')
     }
 }
 
