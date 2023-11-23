@@ -18,7 +18,7 @@ public class SentrySdkCrashTests
     public static IEnumerable<object[]> GetTestCases =>
         Enum.GetValues(typeof(CrashType))
             .Cast<CrashType>()
-            .Select(crashType => new object[] {crashType});
+            .Select(crashType => new object[] { crashType });
 
     private static void RunCrashingApp(CrashType crashType, out int exitCode, out string stderr)
     {

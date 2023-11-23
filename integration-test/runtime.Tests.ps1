@@ -3,13 +3,14 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
-Describe 'Console app NativeAOT (<framework>)' -ForEach @(
-    @{ framework = "net8.0" }
+Describe 'Console app NativeAOT (<framework>, <CrashType> error)' -ForEach @(
+    @{ Framework = "net8.0"; CrashType = "Managed" }
 ) {
     BeforeAll {
         $path = './console-app'
         DotnetNew 'console' $path $framework
         @"
+using System;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Protocol.Envelopes;
@@ -22,7 +23,10 @@ SentrySdk.Init(options =>
     options.Transport = new FakeTransport();
 });
 
-throw new ApplicationException("Something happened!");
+#pragma warning disable CS0618
+var crashType = (CrashType)Enum.Parse(typeof(CrashType), Environment.GetCommandLineArgs()[1]);
+SentrySdk.CauseCrash(crashType);
+#pragma warning restore CS0618
 
 internal class FakeTransport : ITransport
 {
@@ -60,11 +64,13 @@ internal class FakeTransport : ITransport
 
         function runConsoleApp([bool]$IsAOT = $true)
         {
-            $executable = $IsAOT ? { & (getConsoleAppPath) } : { dotnet run --project $path -c Release --framework $framework }
+            $executable = $IsAOT `
+                ? "$(getConsoleAppPath) $CrashType" `
+                : "dotnet run --project $path -c Release --framework $framework $CrashType"
             Write-Host "::group::Executing $executable"
             try
             {
-                $executable.Invoke() | ForEach-Object {
+                Invoke-Expression $executable | ForEach-Object {
                     Write-Host "  $_"
                     $_
                 }
@@ -101,6 +107,10 @@ internal class FakeTransport : ITransport
     It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
         runConsoleApp $false | Should -AnyElementMatch 'This looks like a standard JIT/AOT application build.'
     }
+
+    It "'dotnet run' produces the expected exception" {
+        runConsoleApp $false | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.' + $CrashType + '\)."')
+    }
 }
 
 # This ensures we don't have a regression for https://github.com/getsentry/sentry-dotnet/issues/2825
@@ -116,11 +126,11 @@ Describe 'Console app regression (missing System.Reflection.Metadata)' {
 
         function runConsoleApp()
         {
-            $executable = { dotnet run --project $path -c Release }
+            $executable = "dotnet run --project $path -c Release"
             Write-Host "::group::Executing $executable"
             try
             {
-                $executable.Invoke() | ForEach-Object {
+                Invoke-Expression $executable | ForEach-Object {
                     Write-Host "  $_"
                     $_
                 }

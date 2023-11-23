@@ -55,7 +55,8 @@ public static partial class SentrySdk
 #elif ANDROID
             InitSentryAndroidSdk(options);
 #else
-            if (AotHelper.IsNativeAot) {
+            if (AotHelper.IsNativeAot)
+            {
                 InitNativeSdk(options);
             }
 #endif
@@ -244,7 +245,8 @@ public static partial class SentrySdk
 #elif ANDROID
             // TODO
 #else
-            if (AotHelper.IsNativeAot) {
+            if (AotHelper.IsNativeAot)
+            {
                 CloseNativeSdk();
             }
 #endif
@@ -653,20 +655,29 @@ public static partial class SentrySdk
                 break;
 
 #if ANDROID
-                case CrashType.Java:
-                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
-                    break;
+            case CrashType.Java:
+                JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
+                break;
 
-                case CrashType.JavaBackgroundThread:
-                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
-                    break;
+            case CrashType.JavaBackgroundThread:
+                JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
+                break;
 
-                case CrashType.Native:
-                    NativeCrash();
-                    break;
+            case CrashType.Native:
+                NativeCrash();
+                break;
 #elif __IOS__
             case CrashType.Native:
                 SentryCocoaSdk.Crash();
+                break;
+#elif NET8_0_OR_GREATER
+            case CrashType.Native:
+                if (AotHelper.IsNativeAot)
+                {
+                    CloseNativeSdk();
+                } else {
+                    throw new NotSupportedException($"{nameof(CrashType)}.{crashType} is not supported without NativeAOT compilation");
+                }
                 break;
 #endif
             default:
