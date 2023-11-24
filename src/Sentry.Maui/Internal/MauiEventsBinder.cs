@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using Sentry.Extensibility;
 
 namespace Sentry.Maui.Internal;
 
@@ -52,10 +51,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 BindVisualElementEvents(visualElement);
             }
 
-            // We'll use reflection to attach to other events
-            // This allows us to attach to events from custom controls
-            BindReflectedEvents(e.Element);
-
             // We can also attach to specific events on built-in controls
             // Be sure to update ExplicitlyHandledTypes when adding to this list
             switch (e.Element)
@@ -105,47 +100,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
         application.RequestedThemeChanged += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.RequestedThemeChanged), SystemType, RenderingCategory,
                 data => data.Add(nameof(e.RequestedTheme), e.RequestedTheme.ToString()));
-    }
-
-    public void BindReflectedEvents(BindableObject bindableObject, bool includeExplicitlyHandledTypes = false)
-    {
-        // This reflects over the object's events.
-        // By default, it attaches only to events that are *NOT* declared by types in the ExplicitlyHandledTypes list.
-        // We will only include such events when testing.
-
-        var type = bindableObject.GetType();
-
-        IEnumerable<EventInfo> events = type.GetEvents(BindingFlags.Instance | BindingFlags.Public);
-        if (!includeExplicitlyHandledTypes)
-        {
-            events = events.Where(e => !ExplicitlyHandledTypes.Contains(e.DeclaringType!));
-        }
-
-        foreach (var eventInfo in events)
-        {
-            var browsable = eventInfo.GetCustomAttribute<EditorBrowsableAttribute>();
-            if (browsable != null && browsable.State != EditorBrowsableState.Always)
-            {
-                // These events are not meant for typical consumption.
-                continue;
-            }
-
-            Action<object, object> handler = (sender, _) =>
-            {
-                _hub.AddBreadcrumbForEvent(_options, sender, eventInfo.Name);
-            };
-
-            try
-            {
-                var typedHandler = Delegate.CreateDelegate(eventInfo.EventHandlerType!, handler.Target, handler.Method);
-                eventInfo.AddEventHandler(bindableObject, typedHandler);
-            }
-            catch (Exception ex)
-            {
-                // Don't throw if we can't bind the event handler
-                _options.DiagnosticLogger?.LogError("Couldn't bind to {0}.{1}", ex, type.Name, eventInfo.Name);
-            }
-        }
     }
 
     public void BindWindowEvents(Window window)
