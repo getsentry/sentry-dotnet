@@ -168,6 +168,18 @@ There are some functional differences when publishing Native AOT:
 
 - Upgraded to NLog version 5. ([#2697](https://github.com/getsentry/sentry-dotnet/pull/2697))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
+## 3.41.2
+
+### Fixes
+
+- The SDK no longer fails to finish sessions while capturing an event. This fixes broken crash-free rates ([#2895](https://github.com/getsentry/sentry-dotnet/pull/2895))
+- Ignore UnobservedTaskException for QUIC exceptions. See: https://github.com/dotnet/runtime/issues/80111 ([#2894](https://github.com/getsentry/sentry-dotnet/pull/2894))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.16.0 to v8.16.1 ([#2891](https://github.com/getsentry/sentry-dotnet/pull/2891))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8161)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.16.0...8.16.1)
 
 ## 3.41.1
 
@@ -189,6 +201,8 @@ There are some functional differences when publishing Native AOT:
   - [diff](https://github.com/getsentry/sentry-java/compare/6.33.1...6.34.0)
 
 ## 3.41.0
+
+### Features
 
 - Speed up SDK init ([#2784](https://github.com/getsentry/sentry-dotnet/pull/2784))
 

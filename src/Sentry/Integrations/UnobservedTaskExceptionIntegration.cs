@@ -35,6 +35,15 @@ internal class UnobservedTaskExceptionIntegration : ISdkIntegration
         var ex = e.Exception!;
 #endif
 
+        // System.Net.Quic is leaking UnobservedTaskExceptions
+        // See: https://github.com/dotnet/runtime/issues/80111 . That will be fix maybe in net9.0
+#if NET7_0_OR_GREATER
+        if (ex.InnerExceptions.All(static exception => exception is System.Net.Quic.QuicException))
+        {
+            return;
+        }
+#endif
+
         ex.SetSentryMechanism(
             MechanismKey,
             "This exception was thrown from a task that was unobserved, such as from an async void method, or " +

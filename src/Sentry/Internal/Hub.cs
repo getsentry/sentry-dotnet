@@ -46,9 +46,9 @@ internal class Hub : IHub, IDisposable
 
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
-        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory);
-        _clock = clock ?? SystemClock.Clock;
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
+        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
+        _clock = clock ?? SystemClock.Clock;
 
         ScopeManager = scopeManager ?? new SentryScopeManager(options, _ownedClient);
 

@@ -16,7 +16,7 @@ public partial class SentryClientTests
 
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
-        public ISessionManager SessionManager { get; } = Substitute.For<ISessionManager>();
+        public ISessionManager SessionManager { get; set; } = Substitute.For<ISessionManager>();
 
         public Fixture()
         {
@@ -695,6 +695,47 @@ public partial class SentryClientTests
             "SampleRate"
         };
         processingOrder.Should().Equal(expectedOrder);
+    }
+
+    [Fact]
+    public void CaptureEvent_SessionRunningAndHasException_ReportsErrorButDoesNotEndSession()
+    {
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(envelope =>
+        {
+            var sessionItems = envelope.Items.Where(x => x.TryGetType() == "session");
+            foreach (var item in sessionItems)
+            {
+                var session = (SessionUpdate)((JsonSerializable)item.Payload).Source;
+                Assert.Equal(1, session.ErrorCount);
+                Assert.Null(session.EndStatus);
+            }
+        }));
+        _fixture.SessionManager = new GlobalSessionManager(_fixture.SentryOptions);
+        _fixture.SessionManager.StartSession();
+
+        _fixture.GetSut().CaptureEvent(new SentryEvent(new Exception("test exception")));
+    }
+
+    [Fact]
+    public void CaptureEvent_SessionRunningAndHasTerminalException_ReportsErrorAndEndsSessionAsCrashed()
+    {
+        _fixture.BackgroundWorker.EnqueueEnvelope(Arg.Do<Envelope>(envelope =>
+        {
+            var sessionItems = envelope.Items.Where(x => x.TryGetType() == "session");
+            foreach (var item in sessionItems)
+            {
+                var session = (SessionUpdate)((JsonSerializable)item.Payload).Source;
+                Assert.Equal(1, session.ErrorCount);
+                Assert.NotNull(session.EndStatus);
+                Assert.Equal(SessionEndStatus.Crashed, session.EndStatus);
+            }
+        }));
+        _fixture.SessionManager = new GlobalSessionManager(_fixture.SentryOptions);
+        _fixture.SessionManager.StartSession();
+
+        var exception = new Exception("test exception");
+        exception.SetSentryMechanism("test mechanism", handled: false);
+        _fixture.GetSut().CaptureEvent(new SentryEvent(exception));
     }
 
     [Fact]
