@@ -10,7 +10,6 @@ Describe 'Console app NativeAOT (<framework>)' -ForEach @(
         $path = './console-app'
         DotnetNew 'console' $path $framework
         @"
-using System;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Protocol.Envelopes;
@@ -18,15 +17,18 @@ using Sentry.Protocol.Envelopes;
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
 {
-    options.Dsn = "http://key@127.0.0.1:9999/123";
+    options.Dsn = args[0];
     options.Debug = true;
     options.Transport = new FakeTransport();
 });
 
-#pragma warning disable CS0618
-var crashType = (CrashType)Enum.Parse(typeof(CrashType), Environment.GetCommandLineArgs()[1]);
-SentrySdk.CauseCrash(crashType);
-#pragma warning restore CS0618
+if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
+{
+    #pragma warning disable CS0618
+    var crashType = (CrashType)Enum.Parse(typeof(CrashType), args[1]);
+    SentrySdk.CauseCrash(crashType);
+    #pragma warning restore CS0618
+}
 
 internal class FakeTransport : ITransport
 {
@@ -55,12 +57,12 @@ internal class FakeTransport : ITransport
             }
         }
 
-        function runConsoleApp([bool]$IsAOT = $true, [string]$CrashType = 'Managed')
+        function runConsoleApp([bool]$IsAOT = $true, [string]$CrashType = 'Managed', [string]$Dsn = "http://key@127.0.0.1:9999/123")
         {
             if ($IsAOT)
             {
-                $path = getConsoleAppPath
-                If (!(Test-Path $path))
+                $executable = getConsoleAppPath
+                If (!(Test-Path $executable))
                 {
                     dotnet publish console-app -c Release --nologo --framework $framework | ForEach-Object { Write-Host $_ }
                     if ($LASTEXITCODE -ne 0)
@@ -68,13 +70,12 @@ internal class FakeTransport : ITransport
                         throw "Failed to publish the test app project."
                     }
                 }
-                $executable = "$path $CrashType"
             }
             else
             {
-                $executable = "dotnet run --project $path -c Release --framework $framework $CrashType"
+                $executable = "dotnet run --project $path -c Release --framework $framework"
             }
-
+            $executable += " $Dsn $CrashType"
             Write-Host "::group::Executing $executable"
             try
             {
@@ -116,10 +117,23 @@ internal class FakeTransport : ITransport
         runConsoleApp $false | Should -AnyElementMatch 'This looks like a standard JIT/AOT application build.'
     }
 
-    It "Produces the expected exception" {
-        runConsoleApp $false 'Managed' | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Managed\)."')
-        runConsoleApp $true 'Managed' | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Managed\)."')
-        runConsoleApp $true 'Native' | Should -AnyElementMatch ('{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Native\)."')
+    It "Produces the expected exception (Managed, AOT=<_>)" -ForEach @($true, $false) {
+        runConsoleApp $_ 'Managed' | Should -AnyElementMatch '{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Managed\)."'
+    }
+
+    It "Produces the expected exception (Native)" {
+        # The first run triggers a native error. This error is captured by sentry-native and stored stored for the next run.
+        runConsoleApp $true 'Native' | Should -AnyElementMatch 'Triggering a deliberate exception'
+
+        # On the next run, we use a mock Sentry HTTP server to receive the native crash.
+        $result = Invoke-SentryServer {
+            Param([string]$url)
+            runConsoleApp $true '' ($url.Replace('http://', 'http://key@') + '/123')
+        }
+        $result.HasErrors() | Should -BeFalse
+        $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'True'"
+        # TODO the dummy server doesn't seem to receive & print envelopes at the moment...
+        # $result.ServerStdOut | Should -AnyElementMatch ''
     }
 }
 
