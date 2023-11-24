@@ -70,7 +70,7 @@ public static partial class SentrySdk
         {
             hub.ConfigureScope((scope) =>
             {
-                // Write context asynchronously to reduce overhead on `Init`. 
+                // Write context asynchronously to reduce overhead on `Init`.
                 // Any exception is logged to avoid UnobservedTaskException
                 Task.Run(() => contextWriter.Write(scope)).ContinueWith(t =>
                 {
@@ -676,11 +676,11 @@ public static partial class SentrySdk
             case CrashType.Native:
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    MemSetMSVCRT(IntPtr.Zero, 0, 1);
+                    NativeStrlenMSVCRT(IntPtr.Zero);
                 }
                 else
                 {
-                    MemSetLibC(IntPtr.Zero, 0, 1);
+                    NativeStrlenLibC(IntPtr.Zero);
                 }
                 break;
 #endif
@@ -694,10 +694,10 @@ public static partial class SentrySdk
     [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
     private static extern void NativeCrash();
 #elif NET8_0_OR_GREATER
-    [DllImport("msvcrt", EntryPoint = "memset")]
-    private static extern IntPtr MemSetMSVCRT(IntPtr dest, int c, IntPtr count);
+    [DllImport("msvcrt", EntryPoint = "strlen")]
+    private static extern IntPtr NativeStrlenMSVCRT(IntPtr str);
 
-    [DllImport("libc", EntryPoint = "memset")]
-    private static extern IntPtr MemSetLibC(IntPtr dest, int c, IntPtr count);
+    [DllImport("libc", EntryPoint = "strlen")]
+    private static extern IntPtr NativeStrlenLibC(IntPtr strt);
 #endif
 }
