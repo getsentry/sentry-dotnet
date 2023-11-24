@@ -29,6 +29,12 @@ jobs:
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
+      - name: Install build dependencies
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install libcurl4-openssl-dev
+
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
