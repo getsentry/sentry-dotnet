@@ -70,6 +70,8 @@ public static partial class SentrySdk
         {
             hub.ConfigureScope((scope) =>
             {
+                // Write context asynchronously to reduce overhead on `Init`. 
+                // Any exception is logged to avoid UnobservedTaskException
                 Task.Run(() => contextWriter.Write(scope)).ContinueWith(t =>
                 {
                     if (t.Exception is not null)
@@ -77,7 +79,7 @@ public static partial class SentrySdk
                         options.DiagnosticLogger?.LogWarning(
                             "Failed to synchronize scope to the native SDK: {0}", t.Exception);
                     }
-                });
+                }, TaskContinuationOptions.OnlyOnFaulted);
             });
         }
 
