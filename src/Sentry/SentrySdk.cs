@@ -65,23 +65,12 @@ public static partial class SentrySdk
         // We init the hub after native SDK in case the native init needs to adapt some options.
         var hub = new Hub(options);
 
-        // Do the initial scope sync, if configured by the native integration.
-        if (options.NativeContextWriter is { } contextWriter)
+        // Run all post-init callbacks set up by native integrations.
+        foreach (var callback in options.PostInitCallbacks)
         {
-            hub.ConfigureScope((scope) =>
-            {
-                // Write context asynchronously to reduce overhead on `Init`.
-                // Any exception is logged to avoid UnobservedTaskException
-                Task.Run(() => contextWriter.Write(scope)).ContinueWith(t =>
-                {
-                    if (t.Exception is not null)
-                    {
-                        options.DiagnosticLogger?.LogWarning(
-                            "Failed to synchronize scope to the native SDK: {0}", t.Exception);
-                    }
-                }, TaskContinuationOptions.OnlyOnFaulted);
-            });
+            callback.Invoke(hub);
         }
+        options.PostInitCallbacks.Clear();
 
         return hub;
     }
