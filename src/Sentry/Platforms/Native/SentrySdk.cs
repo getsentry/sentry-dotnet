@@ -58,7 +58,5 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => crashedLastRun;
     }
 
-    private static void CloseNativeSdk() => C.Close();
-
-
+    internal static void CloseNativeSdk() => C.Close();
 }

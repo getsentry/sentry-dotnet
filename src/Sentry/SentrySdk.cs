@@ -230,17 +230,6 @@ public static partial class SentrySdk
             _ = Interlocked.CompareExchange(ref CurrentHub, DisabledHub.Instance, _localHub);
             (_localHub as IDisposable)?.Dispose();
             _localHub = null!;
-
-#if __IOS__
-            // TODO
-#elif ANDROID
-            // TODO
-#elif NET8_0_OR_GREATER
-            if (AotHelper.IsNativeAot)
-            {
-                CloseNativeSdk();
-            }
-#endif
         }
     }
 

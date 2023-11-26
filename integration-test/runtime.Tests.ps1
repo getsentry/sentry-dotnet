@@ -128,12 +128,11 @@ internal class FakeTransport : ITransport
         # On the next run, we use a mock Sentry HTTP server to receive the native crash.
         $result = Invoke-SentryServer {
             Param([string]$url)
-            runConsoleApp $true '' ($url.Replace('http://', 'http://key@') + '/123')
+            runConsoleApp $true '' ($url.Replace('http://', 'http://key@') + '/0')
         }
         $result.HasErrors() | Should -BeFalse
         $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'True'"
-        # TODO the dummy server doesn't seem to receive & print envelopes at the moment...
-        # $result.ServerStdOut | Should -AnyElementMatch ''
+        $result.ServerStdOut | Should -AnyElementMatch '"exception":{"values":\[{"type":"SIGSEGV"'
     }
 }
 
