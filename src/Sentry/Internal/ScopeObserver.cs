@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
 
@@ -29,20 +30,19 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
 
     public void SetExtra(string key, object? value)
     {
-        // TODO json serialization
-        // var serialized = value is null ? null : SafeSerializer.SerializeSafely(value);
-        // if (value is not null && serialized is null)
-        // {
-        //     _options.DiagnosticLogger?.Log(SentryLevel.Warning,
-        //         "{0} Scope Sync - SetExtra k:\"{1}\" v:\"{2}\" - value was serialized as null",
-        //         null, _name, key, value);
-        // }
-        // else
-        // {
-        //     _options.DiagnosticLogger?.Log(SentryLevel.Debug,
-        //         "{0} Scope Sync - Setting Extra k:\"{1}\" v:\"{2}\"", null, _name, key, value);
-        // }
-        // SetExtraImpl(key, serialized);
+        var serialized = value is null ? null : value.ToUtf8Json();
+        if (value is not null && serialized is null)
+        {
+            _options.DiagnosticLogger?.Log(SentryLevel.Warning,
+                "{0} Scope Sync - SetExtra k:\"{1}\" v:\"{2}\" - value was serialized as null",
+                null, _name, key, value);
+        }
+        else
+        {
+            _options.DiagnosticLogger?.Log(SentryLevel.Debug,
+                "{0} Scope Sync - Setting Extra k:\"{1}\" v:\"{2}\"", null, _name, key, value);
+        }
+        SetExtraImpl(key, serialized);
     }
 
     public abstract void SetExtraImpl(string key, string? value);
