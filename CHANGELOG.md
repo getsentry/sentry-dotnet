@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. This change shouldn't impact SDK users as the method was likely only ever used for testing. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
+
 ## 4.0.0-beta.2
 
 ### Fixes
