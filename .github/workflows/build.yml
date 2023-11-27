@@ -161,6 +161,12 @@ jobs:
           name: ${{ github.sha }}
           path: src
 
+      - name: Install build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install libcurl4-openssl-dev
+
       - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: |
