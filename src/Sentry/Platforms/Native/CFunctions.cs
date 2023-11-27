@@ -111,19 +111,18 @@ internal static class C
         options.DiagnosticLogger?.LogDebug("Disabling native auto session tracking");
         sentry_options_set_auto_session_tracking(cOptions, 0);
 
-        // TODO platform-specific cache directory setup
-        // var dir = GetCacheDirectory(options);
-        // // Note: don't use RuntimeInformation.IsOSPlatform - it will report windows on WSL.
-        // if (ApplicationAdapter.Instance.Platform is RuntimePlatform.WindowsPlayer)
-        // {
-        //     options.DiagnosticLogger?.LogDebug("Setting CacheDirectoryPath on Windows: {0}", dir);
-        //     sentry_options_set_database_pathw(cOptions, dir);
-        // }
-        // else
-        // {
-        //     options.DiagnosticLogger?.LogDebug("Setting CacheDirectoryPath: {0}", dir);
-        //     sentry_options_set_database_path(cOptions, dir);
-        // }
+        var dir = GetCacheDirectory(options);
+        // Note: don't use RuntimeInformation.IsOSPlatform - it will report windows on WSL.
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            options.DiagnosticLogger?.LogDebug("Setting native CacheDirectoryPath on Windows: {0}", dir);
+            sentry_options_set_database_pathw(cOptions, dir);
+        }
+        else
+        {
+            options.DiagnosticLogger?.LogDebug("Setting native CacheDirectoryPath: {0}", dir);
+            sentry_options_set_database_path(cOptions, dir);
+        }
 
         // TODO logging
         // _isLinux = sentryUnityInfo.IsLinux();
