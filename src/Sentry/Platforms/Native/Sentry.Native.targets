@@ -1,0 +1,64 @@
+<Project>
+
+  <PropertyGroup>
+    <SentryNativeSourceDirectory>..\..\modules\sentry-native\</SentryNativeSourceDirectory>
+    <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
+    <SentryNativeBuildScript>../../scripts/build-sentry-native.ps1</SentryNativeBuildScript>
+    <SentryNativeBuildInputs>../../.git/modules/modules/sentry-native/HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
+    <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)sentry-native\</SentryNativeOutputDirectory>
+    <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
+    <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
+    <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)\</SentryNativeOutputDirectory-win-x64>
+    <NativeLibRelativePath-linux-x64>linux-x64</NativeLibRelativePath-linux-x64>
+    <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)\</SentryNativeOutputDirectory-linux-x64>
+    <NativeLibRelativePath-osx>osx</NativeLibRelativePath-osx>
+    <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
+    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
+  </PropertyGroup>
+
+  <!-- Packaging -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Native.targets" Pack="true" PackagePath="buildTransitive\Sentry.Native.targets" />
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Native.targets" Pack="true" PackagePath="build\Sentry.Native.targets" />
+  </ItemGroup>
+
+  <!-- Packaging the native library -->
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Windows'))">
+    <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
+      <Pack>true</Pack>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Linux'))">
+    <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
+      <Pack>true</Pack>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
+    <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
+      <Pack>true</Pack>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-osx)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' == 'net8.0'">
+    <Message Text="Inside Custom Clean" Importance="high"/>
+    <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
+    <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
+  </Target>
+
+  <!-- Build the Sentry Native SDK (this only runs on local machines because in CI we expect the SDK to be
+       built already on each native platform and fetched for the final .net build. -->
+  <Target Name="_BuildSentryNativeSDK"
+    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
+    Condition="'$(TargetFramework)' == 'net8.0' and '$(CI)' != 'true'"
+    Inputs="$(SentryNativeBuildInputs)"
+    Outputs="$(SentryNativeBuildOutputs)">
+    <Exec Command="pwsh $(SentryNativeBuildScript)" />
+  </Target>
+</Project>

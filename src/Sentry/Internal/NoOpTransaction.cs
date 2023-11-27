@@ -1,11 +1,13 @@
+using Sentry.Protocol;
+
 namespace Sentry.Internal;
 
 /// <summary>
 /// Transaction class to use when we can't return null but a request to create a transaction couldn't be completed.
 /// </summary>
-internal class NoOpTransaction : NoOpSpan, ITransaction
+internal class NoOpTransaction : NoOpSpan, ITransactionTracer
 {
-    public new static ITransaction Instance { get; } = new NoOpTransaction();
+    public new static ITransactionTracer Instance { get; } = new NoOpTransaction();
 
     private NoOpTransaction()
     {
@@ -22,6 +24,14 @@ internal class NoOpTransaction : NoOpSpan, ITransaction
     public bool? IsParentSampled
     {
         get => default;
+        set { }
+    }
+
+    public TransactionNameSource NameSource => TransactionNameSource.Custom;
+
+    public string? Distribution
+    {
+        get => string.Empty;
         set { }
     }
 
@@ -78,8 +88,10 @@ internal class NoOpTransaction : NoOpSpan, ITransaction
     }
 
     public IReadOnlyCollection<ISpan> Spans => ImmutableList<ISpan>.Empty;
+
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => ImmutableList<Breadcrumb>.Empty;
 
     public ISpan? GetLastActiveSpan() => default;
+
     public void AddBreadcrumb(Breadcrumb breadcrumb) { }
 }

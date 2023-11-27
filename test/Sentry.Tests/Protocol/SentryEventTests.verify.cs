@@ -3,7 +3,6 @@ namespace Sentry.Tests.Protocol;
 [UsesVerify]
 public partial class SentryEventTests
 {
-
     [Fact]
     public async Task SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {

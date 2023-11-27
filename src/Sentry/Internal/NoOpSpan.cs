@@ -1,3 +1,5 @@
+using Sentry.Protocol;
+
 namespace Sentry.Internal;
 
 /// <summary>
@@ -70,4 +72,10 @@ internal class NoOpSpan : ISpan
     }
 
     public SentryTraceHeader GetTraceHeader() => SentryTraceHeader.Empty;
+
+    public IReadOnlyDictionary<string, Measurement> Measurements => ImmutableDictionary<string, Measurement>.Empty;
+
+    public void SetMeasurement(string name, Measurement measurement)
+    {
+    }
 }

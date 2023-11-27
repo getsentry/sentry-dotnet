@@ -124,7 +124,7 @@ foreach ($filter in $config.filterConfigs)
     }
     else
     {
-        $config.defaultSolution
+        $config.coreSolution
     }
     $content = "{
   `"solution`": {
@@ -160,7 +160,9 @@ foreach ($filter in $config.filterConfigs)
     Write-Debug "Created $outputPath"
 }
 
-# Update solution files from Sentry.sln
-$source = Join-Path $repoRoot "Sentry.sln"
-$destination = Join-Path $repoRoot "Sentry.NoMobile.sln"
-Copy-Item -Path $source -Destination $destination -Force
+# Copy the Core solution to each of the required build solutions
+$source = Join-Path $repoRoot $config.coreSolution
+foreach ($buildSolution in $config.buildSolutions) {
+  $destination = Join-Path $repoRoot $buildSolution
+  Copy-Item -Path $source -Destination $destination -Force
+}

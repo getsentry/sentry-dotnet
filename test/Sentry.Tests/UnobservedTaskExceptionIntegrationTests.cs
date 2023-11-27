@@ -4,7 +4,7 @@ public class UnobservedTaskExceptionIntegrationTests
 {
     private class Fixture
     {
-        public IHubEx Hub { get; set; } = Substitute.For<IHubEx, IDisposable>();
+        public IHub Hub { get; set; } = Substitute.For<IHub, IDisposable>();
         public IAppDomain AppDomain { get; set; } = Substitute.For<IAppDomain>();
 
         public Fixture() => Hub.IsEnabled.Returns(true);
@@ -16,6 +16,7 @@ public class UnobservedTaskExceptionIntegrationTests
 
     private SentryOptions SentryOptions { get; } = new();
 
+#if !NET7_0_OR_GREATER // This is disabled on net7, see https://github.com/getsentry/sentry-dotnet/pull/2894
     [Fact]
     public void Handle_WithException_CaptureEvent()
     {
@@ -24,8 +25,9 @@ public class UnobservedTaskExceptionIntegrationTests
 
         sut.Handle(this, new UnobservedTaskExceptionEventArgs(new AggregateException()));
 
-        _ = _fixture.Hub.Received(1).CaptureEventInternal(Arg.Any<SentryEvent>());
+        _ = _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
+#endif
 
     // Test is flaky on mobile in CI.
 #if !(__MOBILE__ && CI_BUILD)
@@ -35,7 +37,7 @@ public class UnobservedTaskExceptionIntegrationTests
         _fixture.AppDomain = AppDomainAdapter.Instance;
         var captureCalledEvent = new ManualResetEvent(false);
         SentryEvent capturedEvent = null;
-        _fixture.Hub.When(x => x.CaptureEventInternal(Arg.Any<SentryEvent>()))
+        _fixture.Hub.When(x => x.CaptureEvent(Arg.Any<SentryEvent>()))
             .Do(callInfo =>
             {
                 capturedEvent = callInfo.Arg<SentryEvent>();
@@ -86,6 +88,8 @@ public class UnobservedTaskExceptionIntegrationTests
 
         // The first should be the actual exception that was unobserved.
         var actualException = exceptions[0];
+        // TODO: Create integration test to test this behaviour when publishing AOT apps
+        // See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
         Assert.NotNull(actualException.Stacktrace);
         Assert.NotNull(actualException.Mechanism);
         Assert.Equal("chained", actualException.Mechanism.Type);
@@ -97,6 +101,8 @@ public class UnobservedTaskExceptionIntegrationTests
 
         // The last should be the aggregate exception that raised the UnobservedTaskException event.
         var aggregateException = exceptions[1];
+        // TODO: Create integration test to test this behaviour when publishing AOT apps
+        // See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
         Assert.Null(aggregateException.Stacktrace);
         Assert.NotNull(aggregateException.Mechanism);
         Assert.Equal("UnobservedTaskException", aggregateException.Mechanism.Type);

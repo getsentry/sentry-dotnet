@@ -13,7 +13,7 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     protected override string? GetDescription(object? diagnosticSourceValue) => GetDatabaseName(diagnosticSourceValue);
 
-    protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
+    protected override ISpan? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue)
     {
         if (GetConnectionId(diagnosticSourceValue) is { } connectionId)
         {

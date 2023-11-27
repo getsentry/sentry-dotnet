@@ -14,8 +14,8 @@ public class TracePropagationTargetTests
     public void SentryOptions_TracePropagationTargets_AddRemovesDefault()
     {
         var options = new SentryOptions();
-        options.TracePropagationTargets.Add(new TracePropagationTarget("foo"));
-        options.TracePropagationTargets.Add(new TracePropagationTarget("bar"));
+        options.TracePropagationTargets.Add(new SubstringOrRegexPattern("foo"));
+        options.TracePropagationTargets.Add(new SubstringOrRegexPattern("bar"));
 
         Assert.Equal(2, options.TracePropagationTargets.Count);
         Assert.Equal("foo", options.TracePropagationTargets[0].ToString());
@@ -28,9 +28,9 @@ public class TracePropagationTargetTests
         var options = new SentryOptions();
         var targets = new []
         {
-            new TracePropagationTarget(".*"),
-            new TracePropagationTarget("foo"),
-            new TracePropagationTarget("bar")
+            new SubstringOrRegexPattern(".*"),
+            new SubstringOrRegexPattern("foo"),
+            new SubstringOrRegexPattern("bar")
         };
 
         options.TracePropagationTargets = targets;
@@ -59,7 +59,7 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>()
+            TracePropagationTargets = new List<SubstringOrRegexPattern>()
         };
 
         var result1 = options.TracePropagationTargets.ContainsMatch("foo");
@@ -76,7 +76,7 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>
+            TracePropagationTargets = new List<SubstringOrRegexPattern>
             {
                 new("foo"),
                 new("localhost"),
@@ -93,7 +93,7 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>
+            TracePropagationTargets = new List<SubstringOrRegexPattern>
             {
                 new("foo"),
                 new("localhost"),
@@ -110,7 +110,7 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>
+            TracePropagationTargets = new List<SubstringOrRegexPattern>
             {
                 new("foo"),
                 new("localhost"),

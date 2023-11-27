@@ -4,7 +4,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
 {
     private class Fixture
     {
-        public IHubEx Hub { get; } = Substitute.For<IHubEx, IDisposable>();
+        public IHub Hub { get; } = Substitute.For<IHub, IDisposable>();
         public IAppDomain AppDomain { get; } = Substitute.For<IAppDomain>();
 
         public AppDomainUnhandledExceptionIntegration GetSut() => new(AppDomain);
@@ -21,7 +21,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
 
         sut.Handle(this, new UnhandledExceptionEventArgs(new Exception(), true));
 
-        _fixture.Hub.Received(1).CaptureEventInternal(Arg.Any<SentryEvent>());
+        _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class AppDomainUnhandledExceptionIntegrationTests
 
         sut.Handle(this, new UnhandledExceptionEventArgs(new object(), true));
 
-        _fixture.Hub.DidNotReceive().CaptureEventInternal(Arg.Any<SentryEvent>());
+        _fixture.Hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
     }
 
     [Fact]

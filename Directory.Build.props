@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <Version>3.41.2</Version>
-    <LangVersion>11</LangVersion>
+    <Version>4.0.0-beta.2</Version>
+    <LangVersion>12</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -27,7 +27,6 @@
     <NO_IOS>true</NO_IOS>
     <NO_MACCATALYST>true</NO_MACCATALYST>
     <NO_WINDOWS>true</NO_WINDOWS>
-    <NO_TIZEN>true</NO_TIZEN>
   </PropertyGroup>
 
   <!--
@@ -51,11 +50,6 @@
     <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
 
-  <!-- If running in CI and auth token is not set, disable SentryCLI completely (to avoid logging warnings). -->
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' And '$(SENTRY_AUTH_TOKEN)' == ''">
-    <UseSentryCLI>false</UseSentryCLI>
-  </PropertyGroup>
-
   <!--
     Note: The following platform-specific properties need to be set in both Directory.Build.props and DirectoryBuild.targets.
     TODO: Figure out how to consolidate to a single location.
@@ -65,7 +59,6 @@
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">10.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'tizen'">6.5</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>

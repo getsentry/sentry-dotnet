@@ -8,10 +8,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <TargetFrameworks>net6.0;net5.0;netcoreapp3.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net6.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android;net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst;net8.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
@@ -21,6 +21,17 @@
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+  <Import Project="Platforms\Native\Sentry.Native.targets"
+        Condition="'$(TargetPlatformIdentifier)' != 'android' and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'"/>
+
+  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <!-- Only include Native bindings code on .NET 8 (non-mobile platforms) -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+    <Compile Remove="**\Native\**\*" />
+  </ItemGroup>
 
   <!--
     Ben.Demystifier is compiled directly into Sentry.
@@ -34,7 +45,7 @@
   </ItemGroup>
 
   <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netcoreapp'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
   </ItemGroup>
 
@@ -69,9 +80,9 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
-  <!-- System.Text.Json is already included with .NET 5 and higher. Add a direct reference for other targets. -->
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net5')) and !$(TargetFramework.StartsWith('net6'))">
-    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net6')) and !$(TargetFramework.StartsWith('net7')) and !$(TargetFramework.StartsWith('net8'))">
+    <PackageReference Include="System.Text.Json" Version="6.0.8" />
   </ItemGroup>
 
   <!--

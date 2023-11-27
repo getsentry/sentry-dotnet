@@ -41,7 +41,7 @@ public class SentryHttpMessageHandlerTests
         var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>
+            TracePropagationTargets = new List<SubstringOrRegexPattern>
             {
                 new("localhost")
             }
@@ -73,7 +73,7 @@ public class SentryHttpMessageHandlerTests
         var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>
+            TracePropagationTargets = new List<SubstringOrRegexPattern>
             {
                 new("foo")
             }
@@ -323,7 +323,7 @@ public class SentryHttpMessageHandlerTests
         var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>
+            TracePropagationTargets = new List<SubstringOrRegexPattern>
             {
                 new("localhost")
             }
@@ -355,7 +355,7 @@ public class SentryHttpMessageHandlerTests
         var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<TracePropagationTarget>
+            TracePropagationTargets = new List<SubstringOrRegexPattern>
             {
                 new("foo")
             }

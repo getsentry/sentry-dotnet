@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction metadata used for sampling.
 /// </summary>
-public class TransactionContext : SpanContext, ITransactionContext, IHasTransactionNameSource
+public class TransactionContext : SpanContext, ITransactionContext
 {
     /// <inheritdoc />
     public string Name { get; set; }
@@ -20,17 +20,18 @@ public class TransactionContext : SpanContext, ITransactionContext, IHasTransact
     /// Initializes an instance of <see cref="TransactionContext"/>.
     /// </summary>
     public TransactionContext(
-        SpanId spanId,
-        SpanId? parentSpanId,
-        SentryId traceId,
         string name,
         string operation,
-        string? description,
-        SpanStatus? status,
-        bool? isSampled,
-        bool? isParentSampled,
-        TransactionNameSource nameSource)
-        : base(spanId, parentSpanId, traceId, operation, description, status, isSampled)
+        SpanId? spanId = null,
+        SpanId? parentSpanId = null,
+        SentryId? traceId = null,
+        string? description = "",
+        SpanStatus? status = null,
+        bool? isSampled = null,
+        bool? isParentSampled = null,
+        TransactionNameSource nameSource = TransactionNameSource.Custom
+    )
+        : base(operation, spanId, parentSpanId, traceId, description, status, isSampled)
     {
         Name = name;
         IsParentSampled = isParentSampled;
@@ -40,83 +41,11 @@ public class TransactionContext : SpanContext, ITransactionContext, IHasTransact
     /// <summary>
     /// Initializes an instance of <see cref="TransactionContext"/>.
     /// </summary>
-    public TransactionContext(
-        SpanId spanId,
-        SpanId? parentSpanId,
-        SentryId traceId,
-        string name,
-        string operation,
-        string? description,
-        SpanStatus? status,
-        bool? isSampled,
-        bool? isParentSampled)
-        : base(spanId, parentSpanId, traceId, operation, description, status, isSampled)
-    {
-        Name = name;
-        IsParentSampled = isParentSampled;
-        NameSource = TransactionNameSource.Custom;
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionContext"/>.
-    /// </summary>
-    public TransactionContext(
-        SpanId? parentSpanId,
-        SentryId traceId,
-        string name,
-        string operation,
-        bool? isParentSampled)
-        : this(SpanId.Create(), parentSpanId, traceId, name, operation, "", null, isParentSampled, isParentSampled)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionContext"/>.
-    /// </summary>
-    public TransactionContext(
-        string name,
-        string operation,
-        bool? isSampled)
-        : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, isSampled, null)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionContext"/>.
-    /// </summary>
-    public TransactionContext(
+    internal TransactionContext(
         string name,
         string operation,
         SentryTraceHeader traceHeader)
-        : this(SpanId.Create(), traceHeader.SpanId, traceHeader.TraceId, name, operation, "", null, traceHeader.IsSampled, traceHeader.IsSampled)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionContext"/>.
-    /// </summary>
-    public TransactionContext(
-        string name,
-        string operation,
-        SentryTraceHeader traceHeader,
-        TransactionNameSource nameSource)
-        : this(SpanId.Create(), traceHeader.SpanId, traceHeader.TraceId, name, operation, "", null, traceHeader.IsSampled, traceHeader.IsSampled, nameSource)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionContext"/>.
-    /// </summary>
-    public TransactionContext(string name, string operation)
-        : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, null, null)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionContext"/>.
-    /// </summary>
-    public TransactionContext(string name, string operation, TransactionNameSource nameSource)
-        : this(SpanId.Create(), null, SentryId.Create(), name, operation, "", null, null, null, nameSource)
+        : this(name, operation, SpanId.Create(), parentSpanId: traceHeader.SpanId, traceId: traceHeader.TraceId, "", null, isSampled: traceHeader.IsSampled, isParentSampled: traceHeader.IsSampled)
     {
     }
 }

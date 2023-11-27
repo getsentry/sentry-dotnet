@@ -6,10 +6,13 @@ on:
       - main
       - release/*
   pull_request:
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build:
-    runs-on: macos-latest
+    # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
+    runs-on: macos-13
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -28,14 +31,11 @@ jobs:
       - name: Build Cocoa SDK
         uses: ./.github/actions/buildcocoasdk
 
-      - name: Install .NET Workloads
-        run: dotnet workload install maui-ios --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
-
-      - name: Restore .NET Dependencies
-        run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Build iOS Test App
-        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net7.0-ios --no-restore --nologo
+        run: pwsh ./scripts/device-test.ps1 ios -Build
 
       - name: Upload iOS Test App
         uses: actions/upload-artifact@v3
@@ -54,7 +54,6 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -64,33 +63,14 @@ jobs:
           name: device-test-ios
           path: bin/Sentry.Maui.Device.TestApp.app
 
-      - name: Install XHarness
-        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
-
       - name: Run Tests
         id: first-run
-        shell: bash +e {0}
-        run: >
-          xharness apple test \
-            --app=bin/Sentry.Maui.Device.TestApp.app \
-            --target=ios-simulator-64 \
-            --launch-timeout=00:10:00 \
-            --output-directory=./test_output \
-          ; export exitcode=$? ; echo "exitcode=$exitcode" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+        run: pwsh scripts/device-test.ps1 ios -Run
 
       - name: Retry Tests (if previous failed to run)
-        if: steps.first-run.outputs.exitcode > 1
-        run: >
-          xharness apple test \
-            --app=bin/Sentry.Maui.Device.TestApp.app \
-            --target=ios-simulator-64 \
-            --launch-timeout=00:10:00 \
-            --output-directory=./test_output
-
-      - name: Create Test Report
-        if: success() || failure()
-        run: scripts/parse-xunit2-xml.ps1 @(gci ./test_output/*.xml)[0].FullName | Out-File $env:GITHUB_STEP_SUMMARY
-        shell: pwsh
+        if: steps.first-run.outcome == 'failure'
+        run: pwsh scripts/device-test.ps1 ios -Run
 
       - name: Upload results
         if: success() || failure()

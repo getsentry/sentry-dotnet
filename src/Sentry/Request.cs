@@ -174,9 +174,9 @@ public sealed class Request : IJsonSerializable
 
         return new Request
         {
-            InternalEnv = env?.WhereNotNullValue().ToDictionary(),
-            InternalOther = other?.WhereNotNullValue().ToDictionary(),
-            InternalHeaders = headers?.WhereNotNullValue().ToDictionary(),
+            InternalEnv = env?.WhereNotNullValue().ToDict(),
+            InternalOther = other?.WhereNotNullValue().ToDict(),
+            InternalHeaders = headers?.WhereNotNullValue().ToDict(),
             Url = url,
             Method = method,
             Data = data,

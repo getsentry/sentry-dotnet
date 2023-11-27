@@ -24,7 +24,7 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
 
     private static Guid? TryGetCommandId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbCommandId);
 
-    protected override ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue)
+    protected override ISpan? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue)
     {
         if (GetCommandId(diagnosticSourceValue) is { } commandId)
         {

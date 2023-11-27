@@ -29,9 +29,16 @@ internal static class CollectionsExtensions
         }
     }
 
-    public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+    // Note this was renamed from ToDictionary to ToDict to avoid conflicts with System.Linq.Enumerable.ToDictionary.
+    // on .NET 8 and later. Previously this code was simply omitted for .NET 8 targets and later, which compiles fine
+    // but breaks at runtime (where it's still looking for  CollectionExtensions.ToDictionary method).
+    internal static Dictionary<TKey, TValue> ToDict<TKey, TValue>(
         this IEnumerable<KeyValuePair<TKey, TValue>> source) where TKey : notnull =>
+#if NET8_0_OR_GREATER
+        source.ToDictionary();
+#else
         source.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+#endif
 
     public static IEnumerable<KeyValuePair<TKey, TValue>> WhereNotNullValue<TKey, TValue>(
         this IEnumerable<KeyValuePair<TKey, TValue?>> source) where TKey : notnull
@@ -44,17 +51,17 @@ internal static class CollectionsExtensions
             }
         }
     }
-
     public static IEnumerable<KeyValuePair<TKey, TValue>> Append<TKey, TValue>(
         this IEnumerable<KeyValuePair<TKey, TValue>> source, TKey key, TValue value) =>
         source.Append(new KeyValuePair<TKey, TValue>(key, value));
-
     public static IReadOnlyList<T> AsReadOnly<T>(this IList<T> list) =>
         list as IReadOnlyList<T> ?? new ReadOnlyCollection<T>(list);
 
+#if !NET7_0_OR_GREATER
     public static IReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
         where TKey : notnull =>
         new ReadOnlyDictionary<TKey, TValue>(dictionary);
+#endif
 
     public static IEnumerable<T> ExceptNulls<T>(this IEnumerable<T?> source) =>
         source.Where(x => x != null).Select(x => x!);

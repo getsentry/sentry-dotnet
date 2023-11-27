@@ -1,5 +1,3 @@
-#pragma warning disable CS0618
-
 namespace Sentry.Samples.MacCatalyst;
 
 [Register ("AppDelegate")]

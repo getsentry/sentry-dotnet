@@ -6,7 +6,7 @@ namespace Sentry.Internal.DiagnosticSource;
 internal abstract class EFDiagnosticSourceHelper
 {
     protected SentryOptions Options { get; }
-    protected ITransaction? Transaction { get; }
+    protected ITransactionTracer? Transaction { get; }
     protected abstract string Operation { get; }
 
     protected abstract string? GetDescription(object? diagnosticSourceValue);
@@ -140,7 +140,7 @@ internal abstract class EFDiagnosticSourceHelper
         return str?[(str.IndexOf('\n') + 1)..];
     }
 
-    protected abstract ISpan? GetSpanReference(ITransaction transaction, object? diagnosticSourceValue);
+    protected abstract ISpan? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue);
 
     protected abstract void SetSpanReference(ISpan span, object? diagnosticSourceValue);
 }

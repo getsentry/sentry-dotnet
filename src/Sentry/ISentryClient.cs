@@ -11,21 +11,13 @@ public interface ISentryClient
     bool IsEnabled { get; }
 
     /// <summary>
-    /// Capture the event.
-    /// </summary>
-    /// <param name="evt">The event to be captured.</param>
-    /// <param name="scope">An optional scope to be applied to the event.</param>
-    /// <returns>The Id of the event.</returns>
-    SentryId CaptureEvent(SentryEvent evt, Scope? scope = null);
-
-    /// <summary>
     /// Capture the event
     /// </summary>
     /// <param name="evt">The event to be captured.</param>
-    /// <param name="hint">An optional hint providing high level context for the source of the event</param>
     /// <param name="scope">An optional scope to be applied to the event.</param>
+    /// <param name="hint">An optional hint providing high level context for the source of the event</param>
     /// <returns>The Id of the event.</returns>
-    SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null);
+    SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null);
 
     /// <summary>
     /// Captures a user feedback.
@@ -52,12 +44,13 @@ public interface ISentryClient
     /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
+    /// <param name="scope">The scope to be applied to the transaction</param>
     /// <param name="hint">
     /// A hint providing extra context.
     /// This will be available in callbacks prior to processing the transaction.
     /// </param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(Transaction transaction, Hint? hint);
+    void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint);
 
     /// <summary>
     /// Captures a session update.

@@ -624,12 +624,11 @@ public static class ScopeTestExtensions
         scope.Request = new() { Data = $"{salt} request" };
         scope.Contexts.Add($"{salt} context", "{}");
         scope.User = new User() { Username = $"{salt} username" };
-        scope.Platform = $"{salt} platform";
         scope.Release = $"{salt} release";
         scope.Distribution = $"{salt} distribution";
         scope.Environment = $"{salt} environment";
         scope.TransactionName = $"{salt} transaction";
-        scope.Transaction = Substitute.For<ITransaction>();
+        scope.Transaction = Substitute.For<ITransactionTracer>();
         scope.Fingerprint = new[] { $"{salt} fingerprint" };
         scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
         scope.SetExtra("extra", $"{salt} extra");
@@ -643,7 +642,6 @@ public static class ScopeTestExtensions
         source.Request.Should().BeEquivalentTo(target.Request);
         source.Contexts.Should().BeEquivalentTo(target.Contexts);
         source.User.Should().BeEquivalentTo(target.User);
-        source.Platform.Should().Be(target.Platform);
         source.Release.Should().Be(target.Release);
         source.Distribution.Should().Be(target.Distribution);
         source.Environment.Should().Be(target.Environment);

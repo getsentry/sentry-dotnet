@@ -13,7 +13,7 @@ namespace Sentry;
 /// Scope data is sent together with any event captured
 /// during the lifetime of the scope.
 /// </remarks>
-public class Scope : IEventLike, IHasDistribution
+public class Scope : IEventLike
 {
     internal SentryOptions Options { get; }
 
@@ -138,9 +138,6 @@ public class Scope : IEventLike, IHasDistribution
     }
 
     /// <inheritdoc />
-    public string? Platform { get; set; }
-
-    /// <inheritdoc />
     public string? Release { get; set; }
 
     /// <inheritdoc />
@@ -182,12 +179,12 @@ public class Scope : IEventLike, IHasDistribution
         }
     }
 
-    private ITransaction? _transaction;
+    private ITransactionTracer? _transaction;
 
     /// <summary>
     /// Transaction.
     /// </summary>
-    public ITransaction? Transaction
+    public ITransactionTracer? Transaction
     {
         get => _transaction;
         set => _transaction = value;
@@ -345,7 +342,6 @@ public class Scope : IEventLike, IHasDistribution
         Request = new();
         Contexts.Clear();
         User = new();
-        Platform = default;
         Release = default;
         Distribution = default;
         Environment = default;
@@ -435,9 +431,8 @@ public class Scope : IEventLike, IHasDistribution
         Request.CopyTo(other.Request);
         User.CopyTo(other.User);
 
-        other.Platform ??= Platform;
         other.Release ??= Release;
-        other.WithDistribution(_ => _.Distribution ??= Distribution);
+        other.Distribution ??= Distribution;
         other.Environment ??= Environment;
         other.TransactionName ??= TransactionName;
         other.Level ??= Level;
@@ -532,7 +527,7 @@ public class Scope : IEventLike, IHasDistribution
             }
             catch (Exception ex)
             {
-                Options.DiagnosticLogger?.LogError("Failed invoking event handler.", ex);
+                Options.DiagnosticLogger?.LogError(ex, "Failed invoking event handler.");
             }
             finally
             {
@@ -540,12 +535,6 @@ public class Scope : IEventLike, IHasDistribution
             }
         }
     }
-
-    /// <summary>
-    /// Obsolete.  Use the <see cref="Span"/> property instead.
-    /// </summary>
-    [Obsolete("Use the Span property instead.  This method will be removed in a future release.")]
-    public ISpan? GetSpan() => Span;
 
     private ISpan? _span;
 
@@ -571,6 +560,6 @@ public class Scope : IEventLike, IHasDistribution
         set => _span = value;
     }
 
-    internal void ResetTransaction(ITransaction? expectedCurrentTransaction) =>
+    internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction) =>
         Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
 }

@@ -6,8 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Helps serialization of Sentry protocol types which include a values property.
 /// </summary>
-// TODO: consider removing this as we control the serialization now
-public sealed class SentryValues<T> : IJsonSerializable
+internal sealed class SentryValues<T> : IJsonSerializable
 {
     /// <summary>
     /// The values.

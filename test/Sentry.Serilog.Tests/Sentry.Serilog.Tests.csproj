@@ -1,23 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.12.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
 
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
-    <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
 
-    <Using Include="Microsoft.AspNetCore.Builder" />
-    <Using Include="Microsoft.AspNetCore.Hosting" />
     <Using Include="Serilog" />
     <Using Include="Serilog.Events" />
     <Using Include="Serilog.Context" />
     <Using Include="Serilog.Formatting.Display" />
     <Using Include="Serilog.Parsing" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
+    <ProjectReference Include="..\Sentry.AspNetCore.TestUtils\Sentry.AspNetCore.TestUtils.csproj" />
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Hosting" />
   </ItemGroup>
 
 </Project>

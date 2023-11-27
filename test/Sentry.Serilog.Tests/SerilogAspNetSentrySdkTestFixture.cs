@@ -1,3 +1,4 @@
+#if NET6_0_OR_GREATER
 using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.Serilog.Tests;
@@ -18,9 +19,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         {
             app.UseExceptionHandler(new ExceptionHandlerOptions
             {
-#if NET6_0_OR_GREATER
                 AllowStatusCode404Response = true,
-#endif
                 ExceptionHandlingPath = "/error"
             });
         };
@@ -28,7 +27,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         builder.ConfigureLogging(loggingBuilder =>
         {
             var logger = new LoggerConfiguration()
-                .WriteTo.Sentry()
+                .WriteTo.Sentry(ValidDsn)
                 .CreateLogger();
             loggingBuilder.AddSerilog(logger);
         });
@@ -36,3 +35,4 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
         base.ConfigureBuilder(builder);
     }
 }
+#endif

@@ -89,7 +89,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
                     ((int)response.StatusCode).ToString()
                 };
             }
-            Hub.CaptureEvent(@event, hint);
+            Hub.CaptureEvent(@event, hint: hint);
         }
     }
 }

@@ -2,6 +2,7 @@
 public static class ModuleInit
 {
     [ModuleInitializer]
+    [SuppressMessage("Usage", "CA2255:The \'ModuleInitializer\' attribute should not be used in libraries")]
     public static void Init()
     {
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");

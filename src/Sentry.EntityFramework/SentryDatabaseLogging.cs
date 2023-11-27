@@ -3,18 +3,9 @@ namespace Sentry.EntityFramework;
 /// <summary>
 /// Sentry Database Logger
 /// </summary>
-public static class SentryDatabaseLogging
+internal static class SentryDatabaseLogging
 {
     private static int Init;
-
-    /// <summary>
-    /// Adds an instance of <see cref="SentryCommandInterceptor"/> to <see cref="DbInterception"/>
-    /// This is a static setup call, so make sure you only call it once for each <see cref="IQueryLogger"/> instance you want to register globally
-    /// </summary>
-    /// <param name="logger">Query Logger.</param>
-    [Obsolete("This method is called automatically by options.AddEntityFramework. This method will be removed in future versions.")]
-    public static SentryCommandInterceptor? UseBreadcrumbs(IQueryLogger? logger = null)
-        => UseBreadcrumbs(logger, true);
 
     internal static SentryCommandInterceptor? UseBreadcrumbs(
         IQueryLogger? queryLogger = null,

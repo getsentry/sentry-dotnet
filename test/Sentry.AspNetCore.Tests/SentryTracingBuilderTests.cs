@@ -45,7 +45,11 @@ public class SentryTracingBuilderTests
         // Arrange
         _fixture.ConfigureServices = services => services.AddRouting();
         _fixture.Configure = applicationBuilder => applicationBuilder.UseRouting();
-        _fixture.ConfigureOptions = options => options.AutoRegisterTracing = false;
+        _fixture.ConfigureOptions = options =>
+        {
+            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+            options.AutoRegisterTracing = false;
+        };
 
         // Act - implicit
         var (_, builder) = _fixture.GetSut();
@@ -60,7 +64,11 @@ public class SentryTracingBuilderTests
         // Arrange
         _fixture.ConfigureServices = services => services.AddRouting();
         _fixture.Configure = applicationBuilder => applicationBuilder.UseRouting();
-        _fixture.ConfigureOptions = options => options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.ConfigureOptions = options =>
+        {
+            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+            options.Instrumenter = Instrumenter.OpenTelemetry;
+        };
 
         // Act - implicit
         var (_, builder) = _fixture.GetSut();
@@ -82,6 +90,10 @@ public class SentryTracingBuilderTests
             services.AddRouting();
         };
         _fixture.Configure = applicationBuilder => applicationBuilder.UseRouting();
+        _fixture.ConfigureOptions = options =>
+        {
+            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+        };
 
         // Act
         var (_, builder) = _fixture.GetSut();
@@ -106,6 +118,10 @@ public class SentryTracingBuilderTests
         {
             applicationBuilder.UseRouting();
             applicationBuilder.UseSentryTracing();
+        };
+        _fixture.ConfigureOptions = options =>
+        {
+            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
         };
 
         // Act

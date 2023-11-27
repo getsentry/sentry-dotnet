@@ -1,5 +1,6 @@
 using Sentry.Android.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Android;
 
@@ -48,12 +49,12 @@ internal sealed class AndroidScopeObserver : IScopeObserver
 
             try
             {
-                var json = JsonSerializer.Serialize(value);
+                var json = value.ToUtf8Json();
                 JavaSdk.Sentry.SetExtra(key, json);
             }
             catch (Exception ex)
             {
-                _options.LogError("Extra with key '{0}' could not be serialized.", ex, key);
+                _options.LogError(ex, "Extra with key '{0}' could not be serialized.", key);
             }
         }
         finally

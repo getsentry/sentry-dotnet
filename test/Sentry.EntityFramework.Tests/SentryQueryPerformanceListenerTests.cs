@@ -12,7 +12,7 @@ public class SentryQueryPerformanceListenerTests
         public DbConnection DbConnection { get; }
         public TestDbContext DbContext { get; }
         public IHub Hub { get; }
-        public ITransaction Tracer { get; }
+        public ITransactionTracer Tracer { get; }
 
         public ConcurrentBag<ISpan> Spans = new();
 
@@ -21,7 +21,7 @@ public class SentryQueryPerformanceListenerTests
             DbConnection = Effort.DbConnectionFactory.CreateTransient();
             DbContext = new TestDbContext(DbConnection, true);
             Hub = Substitute.For<IHub>();
-            Tracer = Substitute.For<ITransaction>();
+            Tracer = Substitute.For<ITransactionTracer>();
             Tracer.StartChild(Arg.Any<string>()).ReturnsForAnyArgs(AddSpan);
             Hub.GetSpan().ReturnsForAnyArgs(Tracer);
         }

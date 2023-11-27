@@ -6,6 +6,8 @@ on:
       - main
       - release/*
   pull_request:
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build:
@@ -26,27 +28,24 @@ jobs:
       - name: Set Java Version
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '11'
+          distribution: "temurin"
+          java-version: "11"
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
-      - name: Install .NET Workloads
-        run: dotnet workload install maui-android --temp-dir "${{ runner.temp }}" --from-rollback-file rollback.json
-
-      - name: Restore .NET Dependencies
-        run: dotnet restore test/Sentry.Maui.Device.TestApp --nologo
-
       - name: Build Android Test App
-        run: dotnet build test/Sentry.Maui.Device.TestApp -c Release -f net7.0-android --no-restore --nologo
+        run: pwsh ./scripts/device-test.ps1 android -Build
 
       - name: Upload Android Test App
         uses: actions/upload-artifact@v3
         with:
           name: device-test-android
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-android/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
@@ -64,13 +63,12 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
     steps:
-
       # See https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
       - name: Enable KVM group perms
         run: |
-            echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-            sudo udevadm control --reload-rules
-            sudo udevadm trigger --name-match=kvm
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -80,9 +78,6 @@ jobs:
         with:
           name: device-test-android
           path: bin
-
-      - name: Install XHarness
-        run: dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*"
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@87a9a15658c426a54dd469d4fc7dc1a73ca9d4a6 # pin@v2
@@ -127,12 +122,7 @@ jobs:
           disk-size: 4096M
           emulator-options: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
-          script: xharness android test --output-directory=./test_output --app=bin/io.sentry.dotnet.maui.device.testapp-Signed.apk --package-name=io.sentry.dotnet.maui.device.testapp
-
-      - name: Create Test Report
-        if: success() || failure()
-        run: scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
-        shell: pwsh
+          script: pwsh scripts/device-test.ps1 android -Run
 
       - name: Upload results
         if: success() || failure()

@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Sentry.AspNetCore;
 
-#pragma warning disable CS0618
-internal class DefaultUserFactory : IUserFactory, ISentryUserFactory
-#pragma warning restore CS0618
+internal class DefaultUserFactory : ISentryUserFactory
 {
     private readonly IHttpContextAccessor? _httpContextAccessor;
 
