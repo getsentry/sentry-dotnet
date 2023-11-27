@@ -6,11 +6,11 @@
       Target net6.0 so we can run unit tests on platform-neutral code.
       Target other platforms so we can include platform-specific code, and bundle native SDKs.
     -->
-    <TargetFrameworks>net7.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_WINDOWS)' == '' And !$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android;net7.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net7.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-maccatalyst;net7.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_WINDOWS)' == '' And !$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net8.0-windows10.0.19041.0;net7.0-windows10.0.19041.0</TargetFrameworks>
 
     <!--
       This flag allows us to target Windows-specific code when building on OSX, so we can build and pack all platforms on a single machine.
@@ -28,6 +28,14 @@
     -->
     <UseMaui>true</UseMaui>
 
+    <!-- Skip warnings about including Microsoft.Maui.Controls... that should be done from the application -->
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
 
   <ItemGroup>
