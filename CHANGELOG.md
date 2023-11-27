@@ -168,6 +168,12 @@ There are some functional differences when publishing Native AOT:
 
 - Upgraded to NLog version 5. ([#2697](https://github.com/getsentry/sentry-dotnet/pull/2697))
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
+
+- Bump CLI from v2.21.5 to v2.22.2 ([#2901](https://github.com/getsentry/sentry-dotnet/pull/2901))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2222)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.22.2)
+
+
 ## 3.41.2
 
 ### Fixes
