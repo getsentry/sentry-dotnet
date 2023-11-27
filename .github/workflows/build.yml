@@ -2,12 +2,12 @@ name: build
 
 on:
   push:
-    paths-ignore:
-      - '**.md'
     branches:
       - main
       - release/*
   pull_request:
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build-sentry-native:
