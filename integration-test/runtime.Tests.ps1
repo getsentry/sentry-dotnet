@@ -132,7 +132,8 @@ internal class FakeTransport : ITransport
         }
         $result.HasErrors() | Should -BeFalse
         $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'True'"
-        $result.Envelopes() | Should -AnyElementMatch '"exception":{"values":\[{"type":"SIGSEGV"'
+        $type = $IsWindows ? 'EXCEPTION_ACCESS_VIOLATION' : 'SIGSEGV'
+        $result.Envelopes() | Should -AnyElementMatch "`"exception`":{`"values`":\[{`"type`":`"$type`""
     }
 }
 
