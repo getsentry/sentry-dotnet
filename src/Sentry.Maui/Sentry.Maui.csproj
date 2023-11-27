@@ -30,6 +30,11 @@
 
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8.0'))">
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
