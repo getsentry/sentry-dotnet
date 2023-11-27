@@ -93,6 +93,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
     <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
   </ItemGroup>
 
 </Project>
