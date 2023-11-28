@@ -31,7 +31,7 @@ public partial class MainPage
 
     private void AddHandlerBreadcrumbs()
     {
-        foreach (var visualElement in GetVisualTreeDescendants())
+        foreach (var visualElement in this.GetVisualTreeDescendants())
         {
             if (visualElement is Element element)
             {
