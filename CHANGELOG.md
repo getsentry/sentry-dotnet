@@ -2,7 +2,17 @@
 
 ## Unreleased
 
-- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
+### API breaking Changes
+
+#### Removed APIs
+
+- `SentrySinkExtensions.ConfigureSentrySerilogOptions` is now internal, use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.16.1 to v8.17.0 ([#2910](https://github.com/getsentry/sentry-dotnet/pull/2910))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8170)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.16.1...8.17.0)
 
 ## 4.0.0-beta.2
 
