@@ -8,6 +8,7 @@ namespace Sentry.Internal;
 /// </summary>
 /// <remarks>
 /// WriteScope() is called in a new Task (background thread from a pool).
+/// It's also only used once. For changes in the scope done during the execution, ScopeObserver is used
 /// </remarks>
 internal abstract class ContextWriter
 {
