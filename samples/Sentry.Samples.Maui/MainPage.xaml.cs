@@ -48,22 +48,6 @@ public partial class MainPage
                     }
                 };
             }
-            // Element handler events
-            // https://docs.microsoft.com/dotnet/maui/user-interface/handlers/customize#handler-lifecycle
-            // element.HandlerChanging += (sender, e) =>
-            //     _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanging), SystemType, HandlersCategory,
-            //         data =>
-            //         {
-            //             data.Add(nameof(e.OldHandler), e.OldHandler?.ToStringOrTypeName() ?? "");
-            //             data.Add(nameof(e.NewHandler), e.NewHandler?.ToStringOrTypeName() ?? "");
-            //         });
-            // element.HandlerChanged += (sender, _) =>
-            //     _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanged), SystemType, HandlersCategory,
-            //         data =>
-            //         {
-            //             var e = sender as Element;
-            //             data.Add(nameof(e.Handler), e?.Handler?.ToStringOrTypeName() ?? "");
-            //         });
         }
     }
 
