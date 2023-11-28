@@ -21,20 +21,20 @@ public static partial class SentrySdk
         options.ScopeObserver = new NativeScopeObserver(options);
         options.EnableScopeSync = true;
 
-        // Do an initial scope sync.
-        options.PostInitCallbacks.Add((IHub hub) => hub.ConfigureScope((scope) =>
-        {
-            // Write context asynchronously to reduce overhead on `Init`.
-            // Any exception is logged to avoid UnobservedTaskException
-            Task.Run(() => new NativeContextWriter().Write(scope)).ContinueWith(t =>
-            {
-                if (t.Exception is not null)
-                {
-                    options.DiagnosticLogger?.LogWarning(
-                        "Failed to synchronize scope to the native SDK: {0}", t.Exception);
-                }
-            }, TaskContinuationOptions.OnlyOnFaulted);
-        }));
+        // TODO: Do an initial scope sync - we cannot do it now because scope is not propagated until a .NET event is being processed.
+        // options.PostInitCallbacks.Add((IHub hub) => hub.ConfigureScope((scope) =>
+        // {
+        //     // Write context asynchronously to reduce overhead on `Init`.
+        //     // Any exception is logged to avoid UnobservedTaskException
+        //     Task.Run(() => new NativeContextWriter().Write(scope)).ContinueWith(t =>
+        //     {
+        //         if (t.Exception is not null)
+        //         {
+        //             options.DiagnosticLogger?.LogWarning(
+        //                 "Failed to synchronize scope to the native SDK: {0}", t.Exception);
+        //         }
+        //     }, TaskContinuationOptions.OnlyOnFaulted);
+        // }));
 
         // Note: we must actually call the function now and on every other call use the value we get here.
         // Additionally, we cannot call this multiple times for the same directory, because the result changes
@@ -50,9 +50,7 @@ public static partial class SentrySdk
             {
                 crashedLastRun = C.HandleCrashedLastRun(options);
                 PerDirectoryCrashInfo.Add(cacheDirectory, crashedLastRun);
-
-                options.DiagnosticLogger?
-                    .LogDebug("Native SDK reported: 'crashedLastRun': '{0}'", crashedLastRun);
+                options.DiagnosticLogger?.LogDebug("Native SDK reported: 'crashedLastRun': '{0}'", crashedLastRun);
             }
         }
         options.CrashedLastRun = () => crashedLastRun;
