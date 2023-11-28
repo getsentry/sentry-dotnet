@@ -24,10 +24,10 @@ SentrySdk.Init(options =>
 
 if (args.Length > 1 && !string.IsNullOrEmpty(args[1]))
 {
-    #pragma warning disable CS0618
+#pragma warning disable CS0618
     var crashType = (CrashType)Enum.Parse(typeof(CrashType), args[1]);
     SentrySdk.CauseCrash(crashType);
-    #pragma warning restore CS0618
+#pragma warning restore CS0618
 }
 
 internal class FakeTransport : ITransport
