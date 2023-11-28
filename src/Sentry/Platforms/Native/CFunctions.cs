@@ -241,6 +241,17 @@ internal static class C
 
     internal static Dictionary<long, DebugImage> LoadDebugImages(IDiagnosticLogger? logger)
     {
+        // It only makes sense to load them once because they're cached on the native side anyway. We could force
+        // native to reload the list by calling sentry_clear_modulecache() when a dynamic library is loaded, but
+        // there's currently no way for us to know when that should happen.
+        DebugImages ??= LoadDebugImagesOnce(logger);
+        return DebugImages;
+    }
+
+    private static Dictionary<long, DebugImage>? DebugImages;
+
+    private static Dictionary<long, DebugImage> LoadDebugImagesOnce(IDiagnosticLogger? logger)
+    {
         logger?.LogDebug("Collecting a list of native debug images.");
         var result = new Dictionary<long, DebugImage>();
         try
