@@ -26,7 +26,7 @@ public sealed class User : IJsonSerializable
         get => _id;
         set
         {
-            if (_id is not value)
+            if (_id != value)
             {
                 _id = value;
                 PropertyChanged?.Invoke(this);
@@ -42,7 +42,7 @@ public sealed class User : IJsonSerializable
         get => _username;
         set
         {
-            if (_username is not value)
+            if (_username != value)
             {
                 _username = value;
                 PropertyChanged?.Invoke(this);
@@ -58,7 +58,7 @@ public sealed class User : IJsonSerializable
         get => _email;
         set
         {
-            if (_email is not value)
+            if (_email != value)
             {
                 _email = value;
                 PropertyChanged?.Invoke(this);
@@ -74,7 +74,7 @@ public sealed class User : IJsonSerializable
         get => _ipAddress;
         set
         {
-            if (_ipAddress is not value)
+            if (_ipAddress != value)
             {
                 _ipAddress = value;
                 PropertyChanged?.Invoke(this);
@@ -90,7 +90,7 @@ public sealed class User : IJsonSerializable
         get => _segment;
         set
         {
-            if (_segment is not value)
+            if (_segment != value)
             {
                 _segment = value;
                 PropertyChanged?.Invoke(this);
@@ -106,7 +106,7 @@ public sealed class User : IJsonSerializable
         get => _other ??= new Dictionary<string, string>();
         set
         {
-            if (_other is not value)
+            if (_other != value)
             {
                 _other = value;
                 PropertyChanged?.Invoke(this);
