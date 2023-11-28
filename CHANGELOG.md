@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+
+- Reduced noise created by automatically captured breadcrumbs on MAUI ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
+- The SDK no longer consumes third-party events on MAUI ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
+
 ### API breaking Changes
 
 #### Removed APIs
