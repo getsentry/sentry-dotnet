@@ -112,7 +112,7 @@ internal static class C
         sentry_options_set_auto_session_tracking(cOptions, 0);
 
         var dir = GetCacheDirectory(options);
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (System.OperatingSystem.IsWindows())
         {
             options.DiagnosticLogger?.LogDebug("Setting native CacheDirectoryPath on Windows: {0}", dir);
             sentry_options_set_database_pathw(cOptions, dir);
@@ -123,7 +123,7 @@ internal static class C
             sentry_options_set_database_path(cOptions, dir);
         }
 
-        _isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        _isLinux = System.OperatingSystem.IsLinux();
         if (options.DiagnosticLogger is null)
         {
             _logger?.LogDebug("Unsetting the current native logger");
