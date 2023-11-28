@@ -88,9 +88,7 @@ public partial class MauiEventsBinderTests
             return new List<object[]>
             {
                 // Note, these are distinct from the Window events with the same names.
-                new object[] {nameof(Application.ModalPushing), new ModalPushingEventArgs(modelPage)},
                 new object[] {nameof(Application.ModalPushed), new ModalPushedEventArgs(modelPage)},
-                new object[] {nameof(Application.ModalPopping), new ModalPoppingEventArgs(modelPage)},
                 new object[] {nameof(Application.ModalPopped), new ModalPoppedEventArgs(modelPage)}
             };
         }

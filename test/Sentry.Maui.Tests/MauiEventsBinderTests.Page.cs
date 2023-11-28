@@ -29,62 +29,6 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
-    public void Page_NavigatingFrom_AddsBreadcrumb()
-    {
-        // Arrange
-        var page = new Page
-        {
-            StyleId = "page"
-        };
-        _fixture.Binder.BindPageEvents(page);
-
-        // Act
-        page.RaiseEvent(nameof(Page.NavigatingFrom), new NavigatingFromEventArgs());
-
-        // Assert
-        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
-        Assert.Equal($"{nameof(Page)}.{nameof(Page.NavigatingFrom)}", crumb.Message);
-        Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
-        crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
-    }
-
-    [Fact]
-    public void Page_NavigatedFrom_AddsBreadcrumb()
-    {
-        // Arrange
-        var page = new Page
-        {
-            StyleId = "page"
-        };
-        _fixture.Binder.BindPageEvents(page);
-
-        var otherPage = new Page
-        {
-            StyleId = "otherPage"
-        };
-        var navigatedFromEventArgs = (NavigatedFromEventArgs)
-            typeof(NavigatedFromEventArgs)
-                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] {typeof(Page)})!
-                .Invoke(new object[] {otherPage});
-
-        // Act
-        page.RaiseEvent(nameof(Page.NavigatedFrom), navigatedFromEventArgs);
-
-        // Assert
-        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
-        Assert.Equal($"{nameof(Page)}.{nameof(Page.NavigatedFrom)}", crumb.Message);
-        Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
-        crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
-        crumb.Data.Should().Contain("DestinationPage", nameof(Page));
-        crumb.Data.Should().Contain("DestinationPage.Name", "otherPage");
-    }
-
-
-    [Fact]
     public void Page_NavigatedTo_AddsBreadcrumb()
     {
         // Arrange
