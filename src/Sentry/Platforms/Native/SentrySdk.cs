@@ -13,7 +13,7 @@ public static partial class SentrySdk
         if (!C.Init(options))
         {
             options.DiagnosticLogger?
-                .LogWarning("Sentry native initialization failed - native crashes are not captured.");
+                .LogError("Sentry native initialization failed - native crashes will not be captured. Managed code continues normally.");
             return;
         }
 
