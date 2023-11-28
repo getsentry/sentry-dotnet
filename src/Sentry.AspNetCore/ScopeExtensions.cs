@@ -38,10 +38,8 @@ public static class ScopeExtensions
 
         if (options.SendDefaultPii && !scope.HasUser())
         {
-#pragma warning disable CS0618
-            var userFactory = context.RequestServices.GetService<IUserFactory>();
-            var user = userFactory?.Create(context);
-#pragma warning restore CS0618
+            var userFactory = context.RequestServices.GetService<ISentryUserFactory>();
+            var user = userFactory?.Create();
 
             if (user != null)
             {
@@ -64,7 +62,7 @@ public static class ScopeExtensions
         }
         catch (Exception e)
         {
-            options.LogError("Failed to extract body.", e);
+            options.LogError(e, "Failed to extract body.");
         }
 
         SetEnv(scope, context, options);
@@ -142,7 +140,7 @@ public static class ScopeExtensions
                 continue;
             }
 
-            scope.Request.Headers[requestHeader.Key] = requestHeader.Value;
+            scope.Request.Headers[requestHeader.Key] = requestHeader.Value!;
 
             if (requestHeader.Key == HeaderNames.Cookie)
             {
@@ -163,7 +161,7 @@ public static class ScopeExtensions
 
         if (context.Response.Headers.TryGetValue("Server", out var server))
         {
-            scope.Request.Env["SERVER_SOFTWARE"] = server;
+            scope.Request.Env["SERVER_SOFTWARE"] = server!;
         }
     }
 

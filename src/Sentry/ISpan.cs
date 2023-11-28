@@ -3,7 +3,7 @@ using Sentry.Internal;
 namespace Sentry;
 
 /// <summary>
-/// Span.
+/// SpanTracer interface
 /// </summary>
 public interface ISpan : ISpanData
 {
@@ -84,10 +84,10 @@ public static class SpanExtensions
     /// <summary>
     /// Gets the transaction that this span belongs to.
     /// </summary>
-    public static ITransaction GetTransaction(this ISpan span) =>
+    public static ITransactionTracer GetTransaction(this ISpan span) =>
         span switch
         {
-            ITransaction transaction => transaction,
+            ITransactionTracer transaction => transaction,
             SpanTracer tracer => tracer.Transaction,
             _ => throw new ArgumentOutOfRangeException(nameof(span), span, null)
         };

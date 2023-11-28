@@ -5,7 +5,7 @@ using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHubEx, IDisposable
+internal class Hub : IHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -14,7 +14,6 @@ internal class Hub : IHubEx, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
-    private readonly Enricher _enricher;
 
     private int _isPersistedSessionRecovered;
 
@@ -59,8 +58,6 @@ internal class Hub : IHubEx, IDisposable
             PushScope();
         }
 
-        _enricher = new Enricher(options);
-
         foreach (var integration in options.Integrations)
         {
             options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
@@ -76,7 +73,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to ConfigureScope", e);
+            _options.LogError(e, "Failure to ConfigureScope");
         }
     }
 
@@ -88,7 +85,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to ConfigureScopeAsync", e);
+            _options.LogError(e, "Failure to ConfigureScopeAsync");
         }
     }
 
@@ -98,26 +95,14 @@ internal class Hub : IHubEx, IDisposable
 
     public void RestoreScope(Scope savedScope) => ScopeManager.RestoreScope(savedScope);
 
-    [Obsolete]
-    public void WithScope(Action<Scope> scopeCallback) => ScopeManager.WithScope(scopeCallback);
-
-    [Obsolete]
-    public T? WithScope<T>(Func<Scope, T?> scopeCallback) => ScopeManager.WithScope(scopeCallback);
-
-    [Obsolete]
-    public Task WithScopeAsync(Func<Scope, Task> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
-
-    [Obsolete]
-    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback) => ScopeManager.WithScopeAsync(scopeCallback);
-
     public void BindClient(ISentryClient client) => ScopeManager.BindClient(client);
 
-    public ITransaction StartTransaction(
+    public ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => StartTransaction(context, customSamplingContext, null);
 
-    internal ITransaction StartTransaction(
+    internal ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
@@ -277,7 +262,7 @@ internal class Hub : IHubEx, IDisposable
             }
             catch (Exception ex)
             {
-                _options.LogError("Failed to recover persisted session.", ex);
+                _options.LogError(ex, "Failed to recover persisted session.");
             }
         }
 
@@ -292,7 +277,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to start a session.", ex);
+            _options.LogError(ex, "Failed to start a session.");
         }
     }
 
@@ -306,7 +291,7 @@ internal class Hub : IHubEx, IDisposable
             }
             catch (Exception ex)
             {
-                _options.LogError("Failed to pause a session.", ex);
+                _options.LogError(ex, "Failed to pause a session.");
             }
         }
     }
@@ -324,7 +309,7 @@ internal class Hub : IHubEx, IDisposable
             }
             catch (Exception ex)
             {
-                _options.LogError("Failed to resume a session.", ex);
+                _options.LogError(ex, "Failed to resume a session.");
             }
         }
     }
@@ -341,7 +326,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to end a session.", ex);
+            _options.LogError(ex, "Failed to end a session.");
         }
     }
 
@@ -380,8 +365,8 @@ internal class Hub : IHubEx, IDisposable
         evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options);
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) =>
-        CaptureEvent(evt, null, configureScope);
+    public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
+        => CaptureEvent(evt, null, configureScope);
 
     public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
     {
@@ -395,23 +380,22 @@ internal class Hub : IHubEx, IDisposable
             var clonedScope = ScopeManager.GetCurrent().Key.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, hint, clonedScope);
+            return CaptureEvent(evt, clonedScope, hint);
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+            _options.LogError(e, "Failure to capture event: {0}", evt.EventId);
             return SentryId.Empty;
         }
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null) =>
-        CaptureEvent(evt, null, scope);
-
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope = null) =>
-        IsEnabled ? ((IHubEx)this).CaptureEventInternal(evt, hint, scope) : SentryId.Empty;
-
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
     {
+        if (!IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
         try
         {
             ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
@@ -433,7 +417,7 @@ internal class Hub : IHubEx, IDisposable
             }
 
             // Now capture the event with the Sentry client on the current scope.
-            var id = sentryClient.CaptureEvent(evt, hint, actualScope);
+            var id = sentryClient.CaptureEvent(evt, actualScope, hint);
             actualScope.LastEventId = id;
             actualScope.SessionUpdate = null;
 
@@ -449,7 +433,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture event: {0}", e, evt.EventId);
+            _options.LogError(e, "Failure to capture event: {0}", evt.EventId);
             return SentryId.Empty;
         }
     }
@@ -467,13 +451,13 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture user feedback: {0}", e, userFeedback.EventId);
+            _options.LogError(e, "Failure to capture user feedback: {0}", userFeedback.EventId);
         }
     }
 
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null);
+    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
 
-    public void CaptureTransaction(Transaction transaction, Hint? hint)
+    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,
@@ -486,38 +470,14 @@ internal class Hub : IHubEx, IDisposable
 
         try
         {
-            // Apply scope data
-            var (scope, client) = ScopeManager.GetCurrent();
-            scope.Evaluate();
-            scope.Apply(transaction);
+            var (currentScope, client) = ScopeManager.GetCurrent();
+            scope ??= currentScope;
 
-            // Apply enricher
-            _enricher.Apply(transaction);
-
-            // Add attachments to the hint for processors and callbacks
-            hint ??= new Hint();
-            hint.AddAttachmentsFromScope(scope);
-
-            var processedTransaction = transaction;
-            if (transaction.IsSampled != false)
-            {
-                foreach (var processor in scope.GetAllTransactionProcessors())
-                {
-                    processedTransaction = processor.DoProcessTransaction(transaction, hint);
-                    if (processedTransaction == null)
-                    {
-                        _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
-                        _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                        return;
-                    }
-                }
-            }
-
-            client.CaptureTransaction(processedTransaction, hint);
+            client.CaptureTransaction(transaction, scope, hint);
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture transaction: {0}", e, transaction.SpanId);
+            _options.LogError(e, "Failure to capture transaction: {0}", transaction.SpanId);
         }
     }
 
@@ -534,7 +494,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to capture session update: {0}", e, sessionUpdate.Id);
+            _options.LogError(e, "Failure to capture session update: {0}", sessionUpdate.Id);
         }
     }
 
@@ -547,7 +507,7 @@ internal class Hub : IHubEx, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError("Failure to Flush events", e);
+            _options.LogError(e, "Failure to Flush events");
         }
     }
 

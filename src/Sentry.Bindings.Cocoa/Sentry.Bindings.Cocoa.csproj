@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net6.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net6.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net7.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net7.0-maccatalyst</TargetFrameworks>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <!-- Build the Sentry Cocoa SDK -->
-  <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+  <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(CI)' != 'true' and $([MSBuild]::IsOSPlatform('OSX'))"
     Inputs="..\..\.git\modules\modules\sentry-cocoa\HEAD" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
   </Target>

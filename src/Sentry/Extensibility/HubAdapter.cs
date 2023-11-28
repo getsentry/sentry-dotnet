@@ -12,7 +12,7 @@ namespace Sentry.Extensibility;
 /// </remarks>
 /// <inheritdoc cref="IHub" />
 [DebuggerStepThrough]
-public sealed class HubAdapter : IHub, IHubEx
+public sealed class HubAdapter : IHub
 {
     /// <summary>
     /// The single instance which forwards all calls to <see cref="SentrySdk"/>
@@ -62,17 +62,8 @@ public sealed class HubAdapter : IHub, IHubEx
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
     [DebuggerStepThrough]
-    public void WithScope(Action<Scope> scopeCallback)
-        => SentrySdk.WithScope(scopeCallback);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>.
-    /// </summary>
-    [DebuggerStepThrough]
-    public ITransaction StartTransaction(
+    public ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => SentrySdk.StartTransaction(context, customSamplingContext);
@@ -81,7 +72,7 @@ public sealed class HubAdapter : IHub, IHubEx
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
-    internal ITransaction StartTransaction(
+    internal ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
@@ -205,12 +196,6 @@ public sealed class HubAdapter : IHub, IHubEx
             level);
 
     /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    SentryId IHubEx.CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
-        => SentrySdk.CaptureEventInternal(evt, hint, scope);
-
-    /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
@@ -223,15 +208,15 @@ public sealed class HubAdapter : IHub, IHubEx
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
-        => SentrySdk.CaptureEvent(evt, scope);
+        => SentrySdk.CaptureEvent(evt, scope, null);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
-        => SentrySdk.CaptureEvent(evt, hint, scope);
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope, Hint? hint = null)
+        => SentrySdk.CaptureEvent(evt, scope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -240,6 +225,12 @@ public sealed class HubAdapter : IHub, IHubEx
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => SentrySdk.CaptureEvent(evt, configureScope);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+        => SentrySdk.CaptureEvent(evt, hint, configureScope);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -261,8 +252,8 @@ public sealed class HubAdapter : IHub, IHubEx
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureTransaction(Transaction transaction, Hint? hint)
-        => SentrySdk.CaptureTransaction(transaction, hint);
+    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+        => SentrySdk.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -287,28 +278,4 @@ public sealed class HubAdapter : IHub, IHubEx
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
         => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    public T? WithScope<T>(Func<Scope, T?> scopeCallback)
-        => SentrySdk.WithScope(scopeCallback);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    public Task WithScopeAsync(Func<Scope, Task> scopeCallback)
-        => SentrySdk.WithScopeAsync(scopeCallback);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    public Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
-        => SentrySdk.WithScopeAsync(scopeCallback);
 }

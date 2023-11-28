@@ -26,7 +26,8 @@
   <attr path="/api/package[@name='io.sentry.android.ndk']" name="managedName">Sentry.JavaSdk.Android.Ndk</attr>
   <attr path="/api/package[@name='io.sentry.android.supplemental']" name="managedName">Sentry.JavaSdk.Android.Supplemental</attr>
   <attr path="/api/package[@name='io.sentry.cache']" name="managedName">Sentry.JavaSdk.Cache</attr>
-  <attr path="/api/package[@name='io.sentry.clientreport']" name="managedName">Sentry.JavaSdk.ClientReport</attr>
+  <!-- Renaming 'clientreport' to 'clientreports' (plural) as a workaround for typename matching namespace: io.sentry.clientreport.clientreport -->
+  <attr path="/api/package[@name='io.sentry.clientreport']" name="managedName">Sentry.JavaSdk.ClientReports</attr>
   <attr path="/api/package[@name='io.sentry.config']" name="managedName">Sentry.JavaSdk.Config</attr>
   <attr path="/api/package[@name='io.sentry.exception']" name="managedName">Sentry.JavaSdk.Exception</attr>
   <attr path="/api/package[@name='io.sentry.hints']" name="managedName">Sentry.JavaSdk.Hints</attr>

@@ -7,6 +7,9 @@ public class JsonTests
     public JsonTests(ITestOutputHelper output)
     {
         _testOutputLogger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(output);
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new JsonTestsJsonContext(o));
+#endif
     }
 
     public static Exception GenerateException(string description)
@@ -21,7 +24,7 @@ public class JsonTests
         }
     }
 
-    private class DataAndNonSerializableObject<T>
+    internal class DataAndNonSerializableObject<T>
     {
         /// <summary>
         /// A class containing two objects that can be serialized and a third one that will have issues if serialized.
@@ -60,7 +63,7 @@ public class JsonTests
         public int? HResult { get; set; }
     }
 
-    private class DataWithSerializableObject<T> : DataAndNonSerializableObject<T>
+    internal class DataWithSerializableObject<T> : DataAndNonSerializableObject<T>
     {
         /// <summary>
         /// A class containing three objects that can be serialized.
@@ -242,3 +245,15 @@ public class JsonTests
         public SelfReferencedObject Object => this;
     }
 }
+
+#if NET6_0_OR_GREATER
+[JsonSerializable(typeof(AccessViolationException))]
+[JsonSerializable(typeof(Exception))]
+[JsonSerializable(typeof(JsonTests.DataAndNonSerializableObject<Assembly>))]
+[JsonSerializable(typeof(JsonTests.DataWithSerializableObject<Exception>))]
+[JsonSerializable(typeof(JsonTests.SelfReferencedObject))]
+[JsonSerializable(typeof(JsonTests.DataWithSerializableObject<Type>))]
+internal partial class JsonTestsJsonContext : JsonSerializerContext
+{
+}
+#endif

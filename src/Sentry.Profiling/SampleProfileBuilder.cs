@@ -178,11 +178,7 @@ internal class SampleProfileBuilder
         }
 
         // TODO enable this once we implement symbolication (we will need to send debug_meta too), see StackTraceFactory.
-        // if (_traceLog.CodeAddresses.ILOffset(codeAddressIndex) is { } ilOffset && ilOffset >= 0)
-        // {
-        //     frame.InstructionOffset = ilOffset;
-        // }
-        // else if (_traceLog.CodeAddresses.Address(codeAddressIndex) is { } address)
+        // if (_traceLog.CodeAddresses.Address(codeAddressIndex) is { } address)
         // {
         //     frame.InstructionAddress = $"0x{address:x}";
         // }

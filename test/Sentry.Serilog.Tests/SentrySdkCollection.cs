@@ -1,3 +1,4 @@
+#if NET6_0_OR_GREATER
 namespace Sentry.Serilog.Tests;
 
 [CollectionDefinition(nameof(SerilogAspNetSentrySdkTestFixture))]
@@ -8,3 +9,4 @@ public sealed class SentrySdkCollection : ICollectionFixture<SerilogAspNetSentry
     // ICollectionFixture<> interfaces.
     // See: https://xunit.net/docs/shared-context#collection-fixture
 }
+#endif

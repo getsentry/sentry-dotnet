@@ -44,8 +44,9 @@ public static class SentryMauiAppBuilderExtensions
         Action<SentryMauiOptions>? configureOptions)
     {
         var services = builder.Services;
-        services.Configure<SentryMauiOptions>(options =>
-            builder.Configuration.GetSection("Sentry").Bind(options));
+
+        var section = builder.Configuration.GetSection("Sentry");
+        services.AddSingleton<IConfigureOptions<SentryMauiOptions>>(_ => new SentryMauiOptionsSetup(section));
 
         if (configureOptions != null)
         {
@@ -92,9 +93,6 @@ public static class SentryMauiAppBuilderExtensions
                 (application as IPlatformApplication)?.BindMauiEvents()));
 #elif WINDOWS
             events.AddWindows(lifecycle => lifecycle.OnLaunching((application, _) =>
-                (application as IPlatformApplication)?.BindMauiEvents()));
-#elif TIZEN
-            events.AddTizen(lifecycle => lifecycle.OnCreate(application =>
                 (application as IPlatformApplication)?.BindMauiEvents()));
 #endif
         });

@@ -106,7 +106,7 @@ public sealed class SentryStackFrame : IJsonSerializable
     /// Optionally an address of the debug image to reference.
     /// If this is set and a known image is defined by debug_meta then symbolication can take place.
     /// </summary>
-    public long ImageAddress { get; set; }
+    public long? ImageAddress { get; set; }
 
     /// <summary>
     /// An optional address that points to a symbol.
@@ -116,20 +116,9 @@ public sealed class SentryStackFrame : IJsonSerializable
 
     /// <summary>
     /// An optional instruction address for symbolication.<br/>
-    /// This should be a string with a hexadecimal number that includes a <b>0x</b> prefix.<br/>
     /// If this is set and a known image is defined in the <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta/">Debug Meta Interface</see>, then symbolication can take place.<br/>
     /// </summary>
-    public string? InstructionAddress { get; set; }
-
-    /// <summary>
-    /// The instruction offset.
-    /// </summary>
-    /// <remarks>
-    /// The official docs refer to it as 'The difference between instruction address and symbol address in bytes.'
-    /// In .NET this means the IL Offset within the assembly.
-    /// </remarks>
-    [Obsolete("This property is unused and will be removed in the future.")]
-    public long? InstructionOffset { get; set; }
+    public long? InstructionAddress { get; set; }
 
     /// <summary>
     /// Optionally changes the addressing mode. The default value is the same as
@@ -141,11 +130,9 @@ public sealed class SentryStackFrame : IJsonSerializable
 
     /// <summary>
     /// The optional Function Id.<br/>
-    /// This is derived from the `MetadataToken`, and should be the record id
-    /// of a `MethodDef`.<br/>
-    /// This should be a string with a hexadecimal number that includes a <b>0x</b> prefix.<br/>
+    /// This is derived from the `MetadataToken`, and should be the record id of a `MethodDef`.
     /// </summary>
-    public string? FunctionId { get; set; }
+    public long? FunctionId { get; set; }
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
@@ -166,14 +153,11 @@ public sealed class SentryStackFrame : IJsonSerializable
         writer.WriteBooleanIfNotNull("in_app", InApp);
         writer.WriteStringIfNotWhiteSpace("package", Package);
         writer.WriteStringIfNotWhiteSpace("platform", Platform);
-        writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress.NullIfDefault()?.ToHexString());
-        writer.WriteStringIfNotWhiteSpace("symbol_addr", SymbolAddress?.ToHexString());
-        writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress);
-#pragma warning disable 0618
-        writer.WriteNumberIfNotNull("instruction_offset", InstructionOffset);
-#pragma warning restore 0618
+        writer.WriteStringIfNotWhiteSpace("image_addr", ImageAddress?.NullIfDefault()?.ToHexString());
+        writer.WriteStringIfNotWhiteSpace("symbol_addr", SymbolAddress?.NullIfDefault()?.ToHexString());
+        writer.WriteStringIfNotWhiteSpace("instruction_addr", InstructionAddress?.ToHexString());
         writer.WriteStringIfNotWhiteSpace("addr_mode", AddressMode);
-        writer.WriteStringIfNotWhiteSpace("function_id", FunctionId);
+        writer.WriteStringIfNotWhiteSpace("function_id", FunctionId?.ToHexString());
 
         writer.WriteEndObject();
     }
@@ -198,7 +182,7 @@ public sealed class SentryStackFrame : IJsonSerializable
         {
             ConfigureAppFrame(options, Function, mustIncludeSeparator: true);
         }
-        else
+        else if (ImageAddress is null or 0 && InstructionAddress is null or 0) // Leave InApp=null on NativeAOT
         {
             InApp = true;
         }
@@ -240,18 +224,17 @@ public sealed class SentryStackFrame : IJsonSerializable
         var inApp = json.GetPropertyOrNull("in_app")?.GetBoolean();
         var package = json.GetPropertyOrNull("package")?.GetString();
         var platform = json.GetPropertyOrNull("platform")?.GetString();
-        var imageAddress = json.GetPropertyOrNull("image_addr")?.GetAddressAsLong() ?? 0;
-        var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetAddressAsLong();
-        var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetString();
-        var instructionOffset = json.GetPropertyOrNull("instruction_offset")?.GetInt64();
+        var imageAddress = json.GetPropertyOrNull("image_addr")?.GetHexAsLong();
+        var symbolAddress = json.GetPropertyOrNull("symbol_addr")?.GetHexAsLong();
+        var instructionAddress = json.GetPropertyOrNull("instruction_addr")?.GetHexAsLong();
         var addressMode = json.GetPropertyOrNull("addr_mode")?.GetString();
-        var functionId = json.GetPropertyOrNull("function_id")?.GetString();
+        var functionId = json.GetPropertyOrNull("function_id")?.GetHexAsLong();
 
         return new SentryStackFrame
         {
             InternalPreContext = preContext!,
             InternalPostContext = postContext!,
-            InternalVars = vars?.WhereNotNullValue().ToDictionary(),
+            InternalVars = vars?.WhereNotNullValue().ToDict(),
             InternalFramesOmitted = framesOmitted,
             FileName = filename,
             Function = function,
@@ -266,9 +249,6 @@ public sealed class SentryStackFrame : IJsonSerializable
             ImageAddress = imageAddress,
             SymbolAddress = symbolAddress,
             InstructionAddress = instructionAddress,
-#pragma warning disable 0618
-            InstructionOffset = instructionOffset,
-#pragma warning restore 0618
             AddressMode = addressMode,
             FunctionId = functionId,
         };

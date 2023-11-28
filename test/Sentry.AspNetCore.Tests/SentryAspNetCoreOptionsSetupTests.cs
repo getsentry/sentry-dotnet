@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 
@@ -11,29 +12,60 @@ namespace Sentry.AspNetCore.Tests;
 
 public class SentryAspNetCoreOptionsSetupTests
 {
-    private readonly SentryAspNetCoreOptionsSetup _sut = new(
-        Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>());
+    class Fixture
+    {
+        public Dictionary<string, string> Configuration { get; set; } = new();
 
+        public SentryAspNetCoreOptionsSetup GetSut()
+        {
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(Configuration)
+                .Build();
+            var loggingConfig = Substitute.For<ILoggerProviderConfiguration<SentryAspNetCoreLoggerProvider>>();
+            loggingConfig.Configuration.Returns(config);
+            return new(loggingConfig);
+        }
+    }
+
+    private readonly Fixture _fixture = new();
     private readonly SentryAspNetCoreOptions _target = new();
 
     [Fact]
     public void Filters_KestrelApplicationEvent_NoException_Filtered()
     {
-        _sut.Configure(_target);
+        // Arrange
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Configure(_target);
+
+        //Assert
         Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, null));
     }
 
     [Fact]
     public void Filters_KestrelApplicationEvent_WithException_Filtered()
     {
-        _sut.Configure(_target);
+        // Arrange
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Configure(_target);
+
+        // Assert
         Assert.Contains(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Critical, 13, new Exception()));
     }
 
     [Fact]
     public void Filters_KestrelEventId1_WithException_NotFiltered()
     {
-        _sut.Configure(_target);
+        // Arrange
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Configure(_target);
+
+        // Assert
         Assert.DoesNotContain(_target.Filters, f => f.Filter("Microsoft.AspNetCore.Server.Kestrel", LogLevel.Trace, 1, null));
     }
 

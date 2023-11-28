@@ -25,7 +25,7 @@ internal class EnvelopeHttpContent : SerializableHttpContent
         }
         catch (Exception e)
         {
-            _logger?.LogError("Failed to serialize Envelope into the network stream", e);
+            _logger?.LogError(e, "Failed to serialize Envelope into the network stream");
             throw;
         }
     }
@@ -38,7 +38,7 @@ internal class EnvelopeHttpContent : SerializableHttpContent
         }
         catch (Exception e)
         {
-            _logger?.LogError("Failed to serialize Envelope into the network stream", e);
+            _logger?.LogError(e, "Failed to serialize Envelope into the network stream");
             throw;
         }
     }

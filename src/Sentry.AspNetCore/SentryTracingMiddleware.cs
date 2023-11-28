@@ -27,7 +27,7 @@ internal class SentryTracingMiddleware
         _options = options.Value;
     }
 
-    private ITransaction? TryStartTransaction(HttpContext context)
+    private ITransactionTracer? TryStartTransaction(HttpContext context)
     {
         if (context.Request.Method == HttpMethod.Options.Method)
         {
@@ -90,7 +90,7 @@ internal class SentryTracingMiddleware
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to start transaction.", ex);
+            _options.LogError(ex, "Failed to start transaction.");
             return null;
         }
     }

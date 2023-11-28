@@ -1,30 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <!--
-    ASP.NET Core on .NET Framework is supported by Microsoft indefinitely on version 2.1 only.
-    Indeed, version 2.1 has newer nuget packages than version 2.2 (which is out of support).
-    Thus, we will test on 2.1.*, not 2.*.
-    See https://dotnet.microsoft.com/platform/support/policy/aspnet
-    And https://github.com/dotnet/aspnetcore/issues/3753#issuecomment-438046364
+  <ItemGroup Condition="$(TargetFramework) != 'net48'">
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+  </ItemGroup>
 
-    Also, JetBrains Rider (via Checkmarx) may report the following security vulnerabilities:
-      CVE-2019-0815
-      CVE-2020-1045
-      CVE-2020-1597
-    These are safe to ignore for our tests.  A real project would resolve them by installing
-    an updated version of the ASP.NET Core runtime on their hosting server.
-    See https://github.com/dotnet/aspnetcore/issues/15423
-  -->
+  <!--
+  ASP.NET Core on .NET Framework is supported by Microsoft indefinitely on version 2.1 only.
+  Indeed, version 2.1 has newer nuget packages than version 2.2 (which is out of support).
+  Thus, we will test on 2.1.*, not 2.*.
+  See https://dotnet.microsoft.com/platform/support/policy/aspnet
+  And https://github.com/dotnet/aspnetcore/issues/3753#issuecomment-438046364
+  Also, JetBrains Rider (via Checkmarx) may report the following security vulnerabilities:
+    CVE-2019-0815
+    CVE-2020-1045
+    CVE-2020-1597
+  These are safe to ignore for our tests.  A real project would resolve them by installing
+  an updated version of the ASP.NET Core runtime on their hosting server.
+  See https://github.com/dotnet/aspnetcore/issues/15423
+-->
   <ItemGroup Condition="$(TargetFramework) == 'net48'">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
@@ -34,22 +36,25 @@
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.1.25" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.32" />
-  </ItemGroup>
-
   <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.19" />
     <PackageReference Include="Verify.AspNetCore" Version="2.0.0" />
-    <PackageReference Include="Verify.Http" Version="4.2.1" />
+    <PackageReference Include="Verify.Http" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net7.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.8" />
-    <PackageReference Include="Verify.AspNetCore" Version="3.4.0" />
-    <PackageReference Include="Verify.Http" Version="4.2.1" />
+    <PackageReference Include="Verify.AspNetCore" Version="3.4.1" />
+    <PackageReference Include="Verify.Http" Version="4.3.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net8.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
+    <PackageReference Include="Verify.AspNetCore" Version="3.4.1" />
+    <PackageReference Include="Verify.Http" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup>

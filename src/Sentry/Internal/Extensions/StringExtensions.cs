@@ -11,4 +11,19 @@ internal static class StringExtensions
     /// Otherwise, returns <paramref name="str"/>.
     /// </summary>
     public static string? NullIfWhitespace(this string? str) => string.IsNullOrWhiteSpace(str) ? null : str;
+
+    public static long ParseHexAsLong(this string str)
+    {
+        // It should be in hex format, such as "0x7fff5bf346c0"
+        if (str.StartsWith("0x") &&
+            long.TryParse(str[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result))
+        {
+            return result;
+        }
+        else if (long.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out result))
+        {
+            return result;
+        }
+        throw new FormatException($"ParseHexAsLong() cannot parse '{str}'");
+    }
 }

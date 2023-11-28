@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1;net48</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.2.2" />
+    <PackageReference Include="NLog" Version="5.2.4" />
     <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
 

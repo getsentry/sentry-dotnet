@@ -88,7 +88,7 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to intercept EF Core event.", ex);
+            _options.LogError(ex, "Failed to intercept EF Core event.");
         }
     }
 }

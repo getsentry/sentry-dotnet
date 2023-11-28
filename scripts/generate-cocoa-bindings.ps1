@@ -7,27 +7,43 @@ $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
 $BackupPath = "$BindingsPath/obj/_unpatched"
 
 # Ensure running on macOS
-if (!$IsMacOS) {
+if (!$IsMacOS)
+{
     Write-Error 'Bindings generation can only be performed on macOS.' `
         -CategoryActivity Error -ErrorAction Stop
 }
 
 # Ensure Objective Sharpie is installed
-if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
-    Write-Output 'Objective Sharpie not found.  Attempting to install via Homebrew.'
+if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
+{
+    Write-Output 'Objective Sharpie not found. Attempting to install via Homebrew.'
     brew install --cask objectivesharpie
+
+    if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
+    {
+        Write-Error 'Could not install Objective Sharpie automatically. Try installing from https://aka.ms/objective-sharpie manually.'
+    }
 }
-if (!(Get-Command sharpie -ErrorAction SilentlyContinue)) {
-    Write-Error 'Could not install Objective Sharpie automatically.  Try installing from https://aka.ms/objective-sharpie manually.' `
-        -CategoryActivity Error -ErrorAction Stop
+
+# Ensure Xamarin is installed (or sharpie won't produce expected output).
+if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
+{
+    Write-Output 'Xamarin.iOS not found. Attempting to install via Homebrew.'
+    brew install --cask xamarin-ios
+
+    if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
+    {
+        Write-Error 'Xamarin.iOS not found. Try installing manually from: https://learn.microsoft.com/en-us/xamarin/ios/get-started/installation/.'
+    }
 }
 
 # Get iPhone SDK version
 $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
+Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
-sharpie bind -sdk $iPhoneSdkVersion -quiet `
+sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
@@ -35,7 +51,8 @@ sharpie bind -sdk $iPhoneSdkVersion -quiet `
     -c -Wno-objc-property-no-attribute
 
 # Ensure backup path exists
-if (!(Test-Path $BackupPath)) {
+if (!(Test-Path $BackupPath))
+{
     New-Item -ItemType Directory -Path $BackupPath | Out-Null
 }
 
@@ -122,7 +139,7 @@ $Text = $Text -replace '(?ms)@protocol (SentrySerializable|SentrySpan).+?\[Proto
 $Text = $Text -replace 'interface SentrySpan\b', "[BaseType (typeof(NSObject))]`n`$&"
 
 # Fix string constants
-$Text = $Text -replace 'byte\[\] SentryVersionString', "[return: PlainString]`n    NSString SentryVersionString"
+$Text = $Text -replace 'byte\[\] SentryVersionString', "[PlainString]`n    NSString SentryVersionString"
 $Text = $Text -replace '(?m)(.*\n){2}^\s{4}NSString k.+?\n\n?', ''
 $Text = $Text -replace '(?m)(.*\n){4}^partial interface Constants\n{\n}\n', ''
 $Text = $Text -replace '\[Verify \(ConstantsInterfaceAssociation\)\]\n', ''
@@ -155,6 +172,9 @@ $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 
 # Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
 $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
+
+# Prefix SentryBreadcrumb.Serialize and SentryScope.Serialize with new (since these hide the base method)
+$Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)(NSDictionary)', '${1}new $2'
 
 # Add header and output file
 $Text = "$Header`n`n$Text"

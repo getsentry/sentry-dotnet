@@ -36,11 +36,11 @@ public class ApplicationVersionLocatorTests
 
     [Theory]
     [InlineData("")]
-    public void GetCurrent_InvalidCases_ReturnsNull(string version)
+    public void GetCurrent_InvalidCases_DoesNotReturnNull(string version)
     {
         var asm = AssemblyCreationHelper.CreateWithInformationalVersion(version);
         var actual = ApplicationVersionLocator.GetCurrent(asm);
-        Assert.Null(actual);
+        Assert.NotNull(actual);
     }
 
     [Fact]

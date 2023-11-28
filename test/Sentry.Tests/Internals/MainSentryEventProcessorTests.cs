@@ -373,10 +373,7 @@ public class MainSentryEventProcessorTests
     [Fact]
     public void Process_Modules_IsEmpty_WhenSpecified()
     {
-        // Note: this property is obsolete, test is kept for backwards compatibility check
-#pragma warning disable CS0618 // Type or member is obsolete
-        _fixture.SentryOptions.ReportAssemblies = false;
-#pragma warning restore CS0618 // Type or member is obsolete
+        _fixture.SentryOptions.ReportAssembliesMode = ReportAssembliesMode.None;
 
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();

@@ -64,6 +64,7 @@ public class SentryLoggerFactoryExtensionsTests
         var sut = Substitute.For<ILoggerFactory>();
         _ = sut.AddSentry(o =>
         {
+            o.Dsn = Sentry.Constants.DisableSdkDsnValue;
             o.Debug = true;
             options = o;
         });
@@ -79,6 +80,7 @@ public class SentryLoggerFactoryExtensionsTests
         var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
         _ = sut.AddSentry(o =>
         {
+            o.Dsn = Sentry.Constants.DisableSdkDsnValue;
             o.Debug = true;
             Assert.Null(o.DiagnosticLogger);
             o.DiagnosticLogger = diagnosticLogger;
@@ -93,7 +95,11 @@ public class SentryLoggerFactoryExtensionsTests
     {
         var callbackInvoked = false;
         var expected = Substitute.For<ILoggerFactory>();
-        _ = expected.AddSentry(_ => callbackInvoked = true);
+        _ = expected.AddSentry(o =>
+        {
+            o.Dsn = Sentry.Constants.DisableSdkDsnValue;
+            callbackInvoked = true;
+        });
 
         Assert.True(callbackInvoked);
     }
@@ -112,7 +118,7 @@ public class SentryLoggerFactoryExtensionsTests
     public void AddSentry_ReturnsSameFactory()
     {
         var expected = Substitute.For<ILoggerFactory>();
-        var actual = expected.AddSentry();
+        var actual = expected.AddSentry(o => o.Dsn = Sentry.Constants.DisableSdkDsnValue);
 
         Assert.Same(expected, actual);
     }
@@ -121,7 +127,7 @@ public class SentryLoggerFactoryExtensionsTests
     public void AddSentry_ConfigureOptionsOverload_ReturnsSameFactory()
     {
         var expected = Substitute.For<ILoggerFactory>();
-        var actual = expected.AddSentry(_ => { });
+        var actual = expected.AddSentry(o => o.Dsn = Sentry.Constants.DisableSdkDsnValue);
 
         Assert.Same(expected, actual);
     }
@@ -134,6 +140,7 @@ public class SentryLoggerFactoryExtensionsTests
         var invoked = false;
         _ = expected.AddSentry(o =>
         {
+            o.Dsn = Sentry.Constants.DisableSdkDsnValue;
             Assert.NotNull(o);
             invoked = true;
         });

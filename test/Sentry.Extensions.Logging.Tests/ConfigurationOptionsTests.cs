@@ -47,9 +47,12 @@ public class ConfigurationOptionsTests
         var provider = _fixture.GetSut();
         var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
 
-        Assert.False(sentryLoggingOptions.InitializeSdk);
-        Assert.Equal(LogLevel.Warning, sentryLoggingOptions.MinimumBreadcrumbLevel);
-        Assert.Equal(LogLevel.Critical, sentryLoggingOptions.MinimumEventLevel);
+        using (new AssertionScope())
+        {
+            sentryLoggingOptions.InitializeSdk.Should().BeFalse();
+            sentryLoggingOptions.MinimumBreadcrumbLevel.Should().Be(LogLevel.Warning);
+            sentryLoggingOptions.MinimumEventLevel.Should().Be(LogLevel.Critical);
+        }
     }
 
     [Fact]
@@ -85,7 +88,8 @@ public class ConfigurationOptionsTests
         var provider = _fixture.GetSut();
         var sentryLoggingOptions = provider.GetRequiredService<IOptions<SentryLoggingOptions>>().Value;
 
-        Assert.Equal(expectedValue, sentryLoggingOptions.DefaultTags[expectedKey]);
+        sentryLoggingOptions.DefaultTags.Should().ContainKey(expectedKey);
+        sentryLoggingOptions.DefaultTags[expectedKey].Should().Be(expectedValue);
     }
 
     [Fact]

@@ -144,5 +144,5 @@ internal class SubstringOrRegexPatternTypeConverter : TypeConverter
         sourceType == typeof(string);
 
     public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) =>
-        new TracePropagationTarget((string)value);
+        new SubstringOrRegexPattern((string)value);
 }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -13,7 +13,7 @@
 
   <!--  Build the Android test app in various configurations during the build of this test project. -->
   <Target Name="BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net7.0-android" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net8.0-android" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />

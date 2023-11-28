@@ -1,9 +1,11 @@
+using Sentry.Protocol;
+
 namespace Sentry;
 
 /// <summary>
 /// Span metadata used for sampling.
 /// </summary>
-public class SpanContext : ISpanContext
+public class SpanContext : ITraceContext
 {
     /// <inheritdoc />
     public SpanId SpanId { get; }
@@ -35,17 +37,17 @@ public class SpanContext : ISpanContext
     /// Initializes an instance of <see cref="SpanContext"/>.
     /// </summary>
     public SpanContext(
-        SpanId spanId,
-        SpanId? parentSpanId,
-        SentryId traceId,
         string operation,
-        string? description,
-        SpanStatus? status,
-        bool? isSampled)
+        SpanId? spanId = null,
+        SpanId? parentSpanId = null,
+        SentryId? traceId = null,
+        string? description = null,
+        SpanStatus? status = null,
+        bool? isSampled = null)
     {
-        SpanId = spanId;
+        SpanId = spanId ?? SpanId.Create();
         ParentSpanId = parentSpanId;
-        TraceId = traceId;
+        TraceId = traceId ?? SentryId.Create();
         Operation = operation;
         Description = description;
         Status = status;

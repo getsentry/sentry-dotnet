@@ -144,7 +144,7 @@ public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatab
             BodySize = bodySize,
             Cookies = cookies,
             Data = data,
-            InternalHeaders = headers?.WhereNotNullValue().ToDictionary(),
+            InternalHeaders = headers?.WhereNotNullValue().ToDict(),
             StatusCode = statusCode
         };
     }

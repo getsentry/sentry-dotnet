@@ -1,4 +1,3 @@
-#pragma warning disable CS0618
 namespace Sentry.Samples.Android;
 
 [Activity(Label = "@string/app_name", MainLauncher = true)]
@@ -50,12 +49,18 @@ public class MainActivity : Activity
         throwUnhandledException.Click += (s, a) => throw new Exception("Unhandled");
 
         var throwJavaException = (Button)base.FindViewById(Resource.Id.throwJavaException)!;
+#pragma warning disable CS0618
         throwJavaException.Click += (s, a) => SentrySdk.CauseCrash(CrashType.Java);
+#pragma warning restore CS0618
 
         var throwJavaExceptionBackgroundThread = (Button)base.FindViewById(Resource.Id.throwJavaExceptionBackgroundThread)!;
+#pragma warning disable CS0618
         throwJavaExceptionBackgroundThread.Click += (s, a) => SentrySdk.CauseCrash(CrashType.JavaBackgroundThread);
+#pragma warning restore CS0618
 
         var crashInC = (Button)base.FindViewById(Resource.Id.crashInC)!;
+#pragma warning disable CS0618
         crashInC.Click += (s, a) => SentrySdk.CauseCrash(CrashType.Native);
+#pragma warning restore CS0618
     }
 }

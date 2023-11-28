@@ -3,11 +3,11 @@ namespace Sentry.Tests.Extensibility;
 [Collection(nameof(SentrySdkCollection))]
 public class HubAdapterTests : IDisposable
 {
-    private IHubEx Hub { get; }
+    private IHub Hub { get; }
 
     public HubAdapterTests()
     {
-        Hub = Substitute.For<IHubEx>();
+        Hub = Substitute.For<IHub>();
         SentrySdk.UseHub(Hub);
     }
 
@@ -34,7 +34,7 @@ public class HubAdapterTests : IDisposable
         var expected = new Exception();
         Hub.IsEnabled.Returns(true);
         HubAdapter.Instance.CaptureException(expected);
-        Hub.Received(1).CaptureEventInternal(Arg.Is<SentryEvent>(s => s.Exception == expected));
+        Hub.Received(1).CaptureEvent(Arg.Is<SentryEvent>(s => s.Exception == expected));
     }
 
     [Fact]
@@ -76,42 +76,6 @@ public class HubAdapterTests : IDisposable
         void Expected(Scope _) { }
         HubAdapter.Instance.ConfigureScope(Expected);
         Hub.Received(1).ConfigureScope(Expected);
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScope_MockInvoked()
-    {
-        void Expected(Scope _) { }
-        HubAdapter.Instance.WithScope(Expected);
-        Hub.Received(1).WithScope(Expected);
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScopeT_MockInvoked()
-    {
-        object Expected(Scope _) => null;
-        HubAdapter.Instance.WithScope(Expected);
-        Hub.Received(1).WithScope(Expected);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsync_MockInvoked()
-    {
-        Task Expected(Scope _) => Task.CompletedTask;
-        await HubAdapter.Instance.WithScopeAsync(Expected);
-        await Hub.Received(1).WithScopeAsync(Expected);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsyncT_MockInvoked()
-    {
-        Task<object> Expected(Scope _) => Task.FromResult<object>(null);
-        await HubAdapter.Instance.WithScopeAsync(Expected);
-        await Hub.Received(1).WithScopeAsync(Expected);
     }
 
     [Fact]

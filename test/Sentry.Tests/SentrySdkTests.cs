@@ -80,22 +80,6 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void Init_ValidDsnWithSecret_EnablesSdk()
-    {
-        using var _ = SentrySdk.Init(o =>
-        {
-#pragma warning disable CS0618
-            o.Dsn = ValidDsnWithSecret;
-#pragma warning restore CS0618
-            o.AutoSessionTracking = false;
-            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitNativeSdks = false;
-        });
-
-        Assert.True(SentrySdk.IsEnabled);
-    }
-
-    [Fact]
     public void Init_ValidDsnEnvironmentVariable_EnablesSdk()
     {
         using var _ = SentrySdk.Init(o =>
@@ -141,6 +125,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
+            Dsn = Constants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = true,
             InitNativeSdks = false
@@ -148,7 +133,7 @@ public class SentrySdkTests : IDisposable
 
         using (SentrySdk.Init(options))
         {
-            _logger.Received(1).Log(SentryLevel.Warning, "Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+            _logger.Received(1).Log(SentryLevel.Warning, "Init called with an empty string as the DSN. Sentry SDK will be disabled.");
         }
     }
 
@@ -176,6 +161,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
+            Dsn = Constants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = false,
             InitNativeSdks = false,
@@ -467,153 +453,6 @@ public class SentrySdkTests : IDisposable
         }
     }
 
-    [Obsolete]
-    [Fact]
-    public void WithScope_DisabledSdk_CallbackNeverInvoked()
-    {
-        var invoked = false;
-
-        // Note: Specifying void in the lambda ensures we are testing WithScope, rather than WithScope<T>.
-        SentrySdk.WithScope(void (_) => invoked = true);
-        Assert.False(invoked);
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScopeT_DisabledSdk_CallbackNeverInvoked()
-    {
-        var invoked = SentrySdk.WithScope(_ => true);
-        Assert.False(invoked);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsync_DisabledSdk_CallbackNeverInvoked()
-    {
-        var invoked = false;
-        await SentrySdk.WithScopeAsync(_ =>
-        {
-            invoked = true;
-            return Task.CompletedTask;
-        });
-        Assert.False(invoked);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsyncT_DisabledSdk_CallbackNeverInvoked()
-    {
-        var invoked = await SentrySdk.WithScopeAsync(_ => Task.FromResult(true));
-        Assert.False(invoked);
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScope_InvokedWithNewScope()
-    {
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            IsGlobalModeEnabled = false,
-            AutoSessionTracking = false,
-            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitNativeSdks = false
-        };
-
-        using var _ = SentrySdk.Init(options);
-
-        Scope expected = null;
-        SentrySdk.ConfigureScope(s => expected = s);
-
-        Scope actual = null;
-        // Note: Specifying void in the lambda ensures we are testing WithScope, rather than WithScope<T>.
-        SentrySdk.WithScope(void (s) => actual = s);
-
-        Assert.NotNull(actual);
-        Assert.NotSame(expected, actual);
-        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScopeT_InvokedWithNewScope()
-    {
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            IsGlobalModeEnabled = false,
-            AutoSessionTracking = false,
-            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitNativeSdks = false
-        };
-
-        using var _ = SentrySdk.Init(options);
-
-        Scope expected = null;
-        SentrySdk.ConfigureScope(s => expected = s);
-
-        var actual = SentrySdk.WithScope(s => s);
-
-        Assert.NotNull(actual);
-        Assert.NotSame(expected, actual);
-        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsync_InvokedWithNewScope()
-    {
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            IsGlobalModeEnabled = false,
-            AutoSessionTracking = false,
-            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitNativeSdks = false
-        };
-
-        using var _ = SentrySdk.Init(options);
-
-        Scope expected = null;
-        SentrySdk.ConfigureScope(s => expected = s);
-
-        Scope actual = null;
-        await SentrySdk.WithScopeAsync(s =>
-        {
-            actual = s;
-            return Task.CompletedTask;
-        });
-
-        Assert.NotNull(actual);
-        Assert.NotSame(expected, actual);
-        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsyncT_InvokedWithNewScope()
-    {
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            IsGlobalModeEnabled = false,
-            AutoSessionTracking = false,
-            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitNativeSdks = false
-        };
-
-        using var _ = SentrySdk.Init(options);
-
-        Scope expected = null;
-        SentrySdk.ConfigureScope(s => expected = s);
-
-        var actual = await SentrySdk.WithScopeAsync(Task.FromResult);
-
-        Assert.NotNull(actual);
-        Assert.NotSame(expected, actual);
-        SentrySdk.ConfigureScope(s => Assert.Same(expected, s));
-    }
-
     [Fact]
     public void CaptureEvent_WithConfiguredScope_ScopeAppliesToEvent()
     {
@@ -829,14 +668,14 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_NoDsn_DisposeDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions()) as IDisposable;
+        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue}) as IDisposable;
         sut?.Dispose();
     }
 
     [Fact]
     public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions());
+        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue});
         await sut.FlushAsync();
     }
 

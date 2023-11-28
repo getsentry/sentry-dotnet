@@ -145,7 +145,7 @@ public class StackFrameBenchmarks
           Module ="Sentry.Extensions.Profiling"
         },
         new SentryStackFrame() {
-          Function ="SamplingTransactionProfiler.Start(class Sentry.ITransaction) {QuickJitted}",
+          Function ="SamplingTransactionProfiler.Start(class Sentry.ITransactionTracer) {QuickJitted}",
           Module ="Sentry.Extensions.Profiling"
         },
         new SentryStackFrame() {

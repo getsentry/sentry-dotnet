@@ -8,7 +8,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransaction, IHasDistribution, IHasTransactionNameSource, IHasMeasurements
+public class TransactionTracer : ITransactionTracer
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
@@ -41,13 +41,13 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
         private set => Contexts.Trace.TraceId = value;
     }
 
-    /// <inheritdoc cref="ITransaction.Name" />
+    /// <inheritdoc cref="ITransactionTracer.Name" />
     public string Name { get; set; }
 
-    /// <inheritdoc cref="IHasTransactionNameSource.NameSource" />
+    /// <inheritdoc cref="ITransactionContext.NameSource" />
     public TransactionNameSource NameSource { get; set; }
 
-    /// <inheritdoc cref="ITransaction.IsParentSampled" />
+    /// <inheritdoc cref="ITransactionTracer.IsParentSampled" />
     public bool? IsParentSampled { get; set; }
 
     /// <inheritdoc />
@@ -190,20 +190,17 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// </summary>
     internal bool IsSentryRequest { get; set; }
 
-    // TODO: mark as internal in version 4
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation)
-        : this(hub, name, operation, TransactionNameSource.Custom)
+    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
     {
     }
 
-    // TODO: mark as internal in version 4
     /// <summary>
     /// Initializes an instance of <see cref="Transaction"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource)
+    internal TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
     {
         _hub = hub;
         _options = _hub.GetSentryOptions();
@@ -218,19 +215,12 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     /// <summary>
     /// Initializes an instance of <see cref="TransactionTracer"/>.
     /// </summary>
-    public TransactionTracer(IHub hub, ITransactionContext context) : this(hub, context, null)
-    {
-    }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="TransactionTracer"/>.
-    /// </summary>
     internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
     {
         _hub = hub;
         _options = _hub.GetSentryOptions();
         Name = context.Name;
-        NameSource = context is IHasTransactionNameSource c ? c.NameSource : TransactionNameSource.Custom;
+        NameSource = context.NameSource;
         Operation = context.Operation;
         SpanId = context.SpanId;
         ParentSpanId = context.ParentSpanId;
@@ -278,7 +268,6 @@ public class TransactionTracer : ITransaction, IHasDistribution, IHasTransaction
     public void UnsetTag(string key) => _tags.TryRemove(key, out _);
 
     /// <inheritdoc />
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />

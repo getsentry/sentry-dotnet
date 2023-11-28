@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.GraphQL;
 
 namespace Sentry;
 
@@ -25,8 +26,7 @@ internal class GraphQLRequestContent
 
         try
         {
-            var deserialized = JsonSerializer.Deserialize<Dictionary<string, object>>(requestContent, SerializerOptions);
-            Items = (deserialized ?? new Dictionary<string, object>()).AsReadOnly();
+            Items = GraphQLRequestContentReader.Read(requestContent);
         }
         catch (Exception e)
         {

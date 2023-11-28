@@ -1,5 +1,3 @@
-#pragma warning disable CS0618
-
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.Maui;
@@ -49,12 +47,16 @@ public partial class MainPage
 
     private void OnUnhandledExceptionClicked(object sender, EventArgs e)
     {
+#pragma warning disable CS0618
         SentrySdk.CauseCrash(CrashType.Managed);
+#pragma warning restore CS0618
     }
 
     private void OnBackgroundThreadUnhandledExceptionClicked(object sender, EventArgs e)
     {
+#pragma warning disable CS0618
         SentrySdk.CauseCrash(CrashType.ManagedBackgroundThread);
+#pragma warning restore CS0618
     }
 
     private void OnCapturedExceptionClicked(object sender, EventArgs e)
@@ -68,18 +70,21 @@ public partial class MainPage
             SentrySdk.CaptureException(ex);
         }
     }
-
     private void OnJavaCrashClicked(object sender, EventArgs e)
     {
 #if ANDROID
+#pragma warning disable CS0618
         SentrySdk.CauseCrash(CrashType.Java);
+#pragma warning restore CS0618
 #endif
     }
 
     private void OnNativeCrashClicked(object sender, EventArgs e)
     {
 #if __MOBILE__
+#pragma warning disable CS0618
         SentrySdk.CauseCrash(CrashType.Native);
+#pragma warning restore CS0618
 #endif
     }
 }

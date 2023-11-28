@@ -128,8 +128,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -151,8 +150,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -191,8 +189,7 @@ public partial class HubTests
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.DynamicSamplingContext == dsc),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -214,8 +211,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -234,8 +230,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == scope.PropagationContext.TraceId &&
                 evt.Contexts.Trace.SpanId == scope.PropagationContext.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -275,7 +270,7 @@ public partial class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
-    private class EvilContext
+    internal class EvilContext
     {
         // This property will throw an exception during serialization.
         // ReSharper disable once UnusedMember.Local
@@ -300,6 +295,9 @@ public partial class HubTests
 
     private async Task CapturesEventWithContextKey_Implementation(bool offlineCaching)
     {
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new HubTestsJsonContext(o));
+#endif
         var tcs = new TaskCompletionSource<bool>();
         var expectedMessage = Guid.NewGuid().ToString();
 
@@ -442,14 +440,12 @@ public partial class HubTests
         var hub = _fixture.GetSut();
 
         // Act
-        hub.CaptureEvent(@event, hint);
+        hub.CaptureEvent(@event, hint: hint);
 
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Is<Hint>(h => h == hint),
-            Arg.Any<Scope>()
-            );
+            Arg.Any<Scope>(), Arg.Is<Hint>(h => h == hint));
     }
 
     [Fact]
@@ -1252,7 +1248,7 @@ public partial class HubTests
         hub.CaptureEvent(evt);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Hint>(), Arg.Any<Scope>());
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Theory]
@@ -1313,7 +1309,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled),Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -1327,74 +1323,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
-    }
-
-    [Fact]
-    public void CaptureTransaction_Client_Gets_ScopeAttachments()
-    {
-        // Arrange
-        var hub = _fixture.GetSut();
-        var attachments = new List<Attachment> {
-            AttachmentHelper.FakeAttachment("foo"),
-            AttachmentHelper.FakeAttachment("bar")
-        };
-        hub.ConfigureScope(s => {
-            s.AddAttachment(attachments[0]);
-            s.AddAttachment(attachments[1]);
-            });
-
-        // Act
-        Hint hint = null;
-        _fixture.Client.CaptureTransaction(
-            Arg.Any<Transaction>(),
-            Arg.Do<Hint>(h => hint = h)
-            );
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        hint.Should().NotBeNull();
-        hint.Attachments.Should().Contain(attachments);
-    }
-
-    [Fact]
-    public void CaptureTransaction_EventProcessor_Gets_Hint()
-    {
-        // Arrange
-        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
-        processor.Process(Arg.Any<Transaction>(), Arg.Any<Hint>()).Returns(new Transaction("name", "operation"));
-        _fixture.Options.AddTransactionProcessor(processor);
-
-        // Act
-        var hub = _fixture.GetSut();
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        processor.Received(1).Process(Arg.Any<Transaction>(), Arg.Any<Hint>());
-    }
-
-    [Fact]
-    public void CaptureTransaction_EventProcessor_Gets_ScopeAttachments()
-    {
-        // Arrange
-        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
-        Hint hint = null;
-        processor.Process(Arg.Any<Transaction>(), Arg.Do<Hint>(h => hint = h)).Returns(new Transaction("name", "operation"));
-        _fixture.Options.AddTransactionProcessor(processor);
-
-        var attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
-        var hub = _fixture.GetSut();
-        hub.ConfigureScope(s => s.AddAttachment(attachments[0]));
-
-        // Act
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        hint.Should().NotBeNull();
-        hint.Attachments.Should().Contain(attachments);
+        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Theory]
@@ -1435,91 +1364,12 @@ public partial class HubTests
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
 
-    [Obsolete]
-    [Fact]
-    public void WithScope_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        hub.WithScope(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-        });
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScopeT_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        var result = hub.WithScope(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-
-            return true;
-        });
-
-        Assert.True(result);
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsync_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        await hub.WithScopeAsync(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-
-            return Task.CompletedTask;
-        });
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsyncT_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        var result = await hub.WithScopeAsync(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-
-            return Task.FromResult(true);
-        });
-
-        Assert.True(result);
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
 }
+
+#if NET6_0_OR_GREATER
+[JsonSerializable(typeof(HubTests.EvilContext))]
+internal partial class HubTestsJsonContext : JsonSerializerContext
+{
+}
+#endif

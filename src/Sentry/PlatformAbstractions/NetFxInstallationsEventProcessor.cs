@@ -38,7 +38,7 @@ internal class NetFxInstallationsEventProcessor : ISentryEventProcessor
             }
             catch (Exception ex)
             {
-                _options.LogError("Failed to add NetFxInstallations into event.", ex);
+                _options.LogError(ex, "Failed to add NetFxInstallations into event.");
 
                 // In case of any failure, this process function will be disabled to avoid throwing exceptions for future events.
                 _netFxInstallationEnabled = false;
