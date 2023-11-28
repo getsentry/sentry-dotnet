@@ -17,6 +17,8 @@ public partial class MainPage
 
     protected override void OnAppearing()
     {
+        AddHandlerBreadcrumbs();
+
 #if !ANDROID
         JavaCrashBtn.IsVisible = false;
 #endif
@@ -25,6 +27,44 @@ public partial class MainPage
         NativeCrashBtn.IsVisible = false;
 #endif
         base.OnAppearing();
+    }
+
+    private void AddHandlerBreadcrumbs()
+    {
+        foreach (var visualElement in this.GetVisualTreeDescendants())
+        {
+            if (visualElement is Element element)
+            {
+                element.HandlerChanged += (sender, _) =>
+                {
+                    // The StyleId correlates to the element's name if one is set in XAML
+                    var elementName = element.StyleId;
+                    if (elementName is not null)
+                    {
+                        var type = element.Handler?.GetType();
+                        var handlerName = type is not null ? type.Name : string.Empty;
+
+                        SentrySdk.AddBreadcrumb($"'{elementName}' handler changed to '{handlerName}'", "system", "ui.handlers");
+                    }
+                };
+            }
+            // Element handler events
+            // https://docs.microsoft.com/dotnet/maui/user-interface/handlers/customize#handler-lifecycle
+            // element.HandlerChanging += (sender, e) =>
+            //     _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanging), SystemType, HandlersCategory,
+            //         data =>
+            //         {
+            //             data.Add(nameof(e.OldHandler), e.OldHandler?.ToStringOrTypeName() ?? "");
+            //             data.Add(nameof(e.NewHandler), e.NewHandler?.ToStringOrTypeName() ?? "");
+            //         });
+            // element.HandlerChanged += (sender, _) =>
+            //     _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanged), SystemType, HandlersCategory,
+            //         data =>
+            //         {
+            //             var e = sender as Element;
+            //             data.Add(nameof(e.Handler), e?.Handler?.ToStringOrTypeName() ?? "");
+            //         });
+        }
     }
 
     private void OnCounterClicked(object sender, EventArgs e)
@@ -88,4 +128,3 @@ public partial class MainPage
 #endif
     }
 }
-
