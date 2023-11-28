@@ -12,25 +12,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
     internal const string NavigationType = "navigation";
     internal const string SystemType = "system";
     internal const string UserType = "user";
-    internal const string HandlersCategory = "ui.handlers";
     internal const string LifecycleCategory =  "ui.lifecycle";
     internal const string NavigationCategory = "navigation";
     internal const string RenderingCategory = "ui.rendering";
     internal const string UserActionCategory = "ui.useraction";
-
-    // This list should contain all types that we have explicitly added handlers for their events.
-    // Any elements that are not in this list will have their events discovered by reflection.
-    internal static readonly HashSet<Type> ExplicitlyHandledTypes = new()
-    {
-        typeof(BindableObject),
-        typeof(Element),
-        typeof(VisualElement),
-        typeof(Application),
-        typeof(Window),
-        typeof(Shell),
-        typeof(Page),
-        typeof(Button),
-    };
 
     public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options)
     {
@@ -82,14 +67,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
         application.PageDisappearing += (sender, page) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, page, nameof(Page)));
-        application.ModalPushing += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushing), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         application.ModalPushed += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        application.ModalPopping += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopping), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         application.ModalPopped += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPopped), NavigationType, NavigationCategory,
@@ -146,14 +125,8 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 });
 
         // Navigation events
-        window.ModalPushing += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPushing), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.ModalPushed += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPushed), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
-        window.ModalPopping += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopping), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
         window.ModalPopped += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Window.ModalPopped), NavigationType, NavigationCategory,
@@ -164,23 +137,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     public void BindElementEvents(Element element)
     {
-        // Element handler events
-        // https://docs.microsoft.com/dotnet/maui/user-interface/handlers/customize#handler-lifecycle
-        element.HandlerChanging += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanging), SystemType, HandlersCategory,
-                data =>
-                {
-                    data.Add(nameof(e.OldHandler), e.OldHandler?.ToStringOrTypeName() ?? "");
-                    data.Add(nameof(e.NewHandler), e.NewHandler?.ToStringOrTypeName() ?? "");
-                });
-        element.HandlerChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.HandlerChanged), SystemType, HandlersCategory,
-                data =>
-                {
-                    var e = sender as Element;
-                    data.Add(nameof(e.Handler), e?.Handler?.ToStringOrTypeName() ?? "");
-                });
-
         // Rendering events
         element.ChildAdded += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ChildAdded), SystemType, RenderingCategory,
@@ -188,13 +144,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
         element.ChildRemoved += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ChildRemoved), SystemType, RenderingCategory,
                 data => data.AddElementInfo(_options, e.Element, nameof(e.Element)));
-        element.ParentChanging += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ParentChanging), SystemType, RenderingCategory,
-                data =>
-                {
-                    data.AddElementInfo(_options, e.OldParent, nameof(e.OldParent));
-                    data.AddElementInfo(_options, e.NewParent, nameof(e.NewParent));
-                });
         element.ParentChanged += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ParentChanged), SystemType, RenderingCategory,
                 data =>
@@ -225,10 +174,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 data =>
                     data.Add(nameof(BindableObject.BindingContext), bindingContext.ToStringOrTypeName()));
         };
-
-        // NotifyPropertyChanged events are too noisy to be useful
-        // element.PropertyChanging
-        // element.PropertyChanged
     }
 
     public void BindVisualElementEvents(VisualElement element)
@@ -238,21 +183,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
         element.Unfocused += (sender, _) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unfocused), SystemType, RenderingCategory);
-
-        element.Loaded += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Loaded), SystemType, RenderingCategory);
-
-        element.Unloaded += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unloaded), SystemType, RenderingCategory);
-
-        element.ChildrenReordered += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.ChildrenReordered), SystemType, RenderingCategory);
-
-        element.MeasureInvalidated += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.MeasureInvalidated), SystemType, RenderingCategory);
-
-        element.SizeChanged += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.SizeChanged), SystemType, RenderingCategory);
     }
 
     public void BindShellEvents(Shell shell)
@@ -291,11 +221,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
         // Navigation events
         // https://github.com/dotnet/docs-maui/issues/583
-        page.NavigatingFrom += (sender, _) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatingFrom), NavigationType, NavigationCategory);
-        page.NavigatedFrom += (sender, e) =>
-            _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedFrom), NavigationType, NavigationCategory,
-                data => data.AddElementInfo(_options, e.GetDestinationPage(), "DestinationPage"));
         page.NavigatedTo += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.NavigatedTo), NavigationType, NavigationCategory,
                 data => data.AddElementInfo(_options, e.GetPreviousPage(), "PreviousPage"));
