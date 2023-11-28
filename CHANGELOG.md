@@ -2,7 +2,13 @@
 
 ## Unreleased
 
+### API breaking Changes
+
 - SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
+
+### Fixes
+
+- Fixed Sentry SDK has not been initialised when using ASP.NET Core, SeriLog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
 
 ## 4.0.0-beta.2
 
