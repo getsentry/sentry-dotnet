@@ -15,32 +15,6 @@ namespace Serilog
 {
     public static class SentrySinkExtensions
     {
-        public static void ConfigureSentrySerilogOptions(
-                    Sentry.Serilog.SentrySerilogOptions sentrySerilogOptions,
-                    string? dsn = null,
-                    Serilog.Events.LogEventLevel? minimumEventLevel = default,
-                    Serilog.Events.LogEventLevel? minimumBreadcrumbLevel = default,
-                    System.IFormatProvider? formatProvider = null,
-                    Serilog.Formatting.ITextFormatter? textFormatter = null,
-                    bool? sendDefaultPii = default,
-                    bool? isEnvironmentUser = default,
-                    string? serverName = null,
-                    bool? attachStackTrace = default,
-                    int? maxBreadcrumbs = default,
-                    float? sampleRate = default,
-                    string? release = null,
-                    string? environment = null,
-                    int? maxQueueItems = default,
-                    System.TimeSpan? shutdownTimeout = default,
-                    System.Net.DecompressionMethods? decompressionMethods = default,
-                    System.IO.Compression.CompressionLevel? requestBodyCompressionLevel = default,
-                    bool? requestBodyCompressionBuffered = default,
-                    bool? debug = default,
-                    Sentry.SentryLevel? diagnosticLevel = default,
-                    Sentry.ReportAssembliesMode? reportAssembliesMode = default,
-                    Sentry.DeduplicateMode? deduplicateMode = default,
-                    bool? initializeSdk = default,
-                    System.Collections.Generic.Dictionary<string, string>? defaultTags = null) { }
         public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, System.Action<Sentry.Serilog.SentrySerilogOptions> configureOptions) { }
         public static Serilog.LoggerConfiguration Sentry(
                     this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration,

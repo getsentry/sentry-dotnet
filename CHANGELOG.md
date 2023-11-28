@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
+
 ## 4.0.0-beta.2
 
 ### Fixes
