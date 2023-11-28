@@ -112,8 +112,7 @@ internal static class C
         sentry_options_set_auto_session_tracking(cOptions, 0);
 
         var dir = GetCacheDirectory(options);
-        // Note: don't use RuntimeInformation.IsOSPlatform - it will report windows on WSL.
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             options.DiagnosticLogger?.LogDebug("Setting native CacheDirectoryPath on Windows: {0}", dir);
             sentry_options_set_database_pathw(cOptions, dir);

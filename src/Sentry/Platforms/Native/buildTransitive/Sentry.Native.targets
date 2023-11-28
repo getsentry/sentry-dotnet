@@ -15,14 +15,56 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'linux-x64'">
-    <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-x64\libsentry-native.a" />
     <LinkerArg Include="-lcurl"/>
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
-    <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
     <LinkerArg Include="-lcurl"/>
+  </ItemGroup>
+
+  <!-- On non-windows platforms, We need to exclude windows-specific `sentry_options_set_database_pathw`,
+        the only way to do that at the moment is explicitly specifying every other symbol.
+        See https://github.com/dotnet/runtime/issues/95319 for context-->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
+    <DirectPInvoke Include="sentry-native!sentry_value_new_object" />
+    <DirectPInvoke Include="sentry-native!sentry_value_new_null" />
+    <DirectPInvoke Include="sentry-native!sentry_value_new_bool" />
+    <DirectPInvoke Include="sentry-native!sentry_value_new_double" />
+    <DirectPInvoke Include="sentry-native!sentry_value_new_int32" />
+    <DirectPInvoke Include="sentry-native!sentry_value_new_string" />
+    <DirectPInvoke Include="sentry-native!sentry_value_new_breadcrumb" />
+    <DirectPInvoke Include="sentry-native!sentry_value_set_by_key" />
+    <DirectPInvoke Include="sentry-native!sentry_value_is_null" />
+    <DirectPInvoke Include="sentry-native!sentry_value_as_int32" />
+    <DirectPInvoke Include="sentry-native!sentry_value_as_double" />
+    <DirectPInvoke Include="sentry-native!sentry_value_as_string" />
+    <DirectPInvoke Include="sentry-native!sentry_value_get_length" />
+    <DirectPInvoke Include="sentry-native!sentry_value_get_by_index" />
+    <DirectPInvoke Include="sentry-native!sentry_value_get_by_key" />
+    <DirectPInvoke Include="sentry-native!sentry_set_context" />
+    <DirectPInvoke Include="sentry-native!sentry_add_breadcrumb" />
+    <DirectPInvoke Include="sentry-native!sentry_set_tag" />
+    <DirectPInvoke Include="sentry-native!sentry_remove_tag" />
+    <DirectPInvoke Include="sentry-native!sentry_set_user" />
+    <DirectPInvoke Include="sentry-native!sentry_remove_user" />
+    <DirectPInvoke Include="sentry-native!sentry_set_extra" />
+    <DirectPInvoke Include="sentry-native!sentry_remove_extra" />
+    <DirectPInvoke Include="sentry-native!sentry_get_modules_list" />
+    <DirectPInvoke Include="sentry-native!sentry_value_decref" />
+    <DirectPInvoke Include="sentry-native!sentry_init" />
+    <DirectPInvoke Include="sentry-native!sentry_close" />
+    <DirectPInvoke Include="sentry-native!sentry_get_crashed_last_run" />
+    <DirectPInvoke Include="sentry-native!sentry_clear_crashed_last_run" />
+    <DirectPInvoke Include="sentry-native!sentry_options_new" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_dsn" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_release" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_debug" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_environment" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_sample_rate" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_database_path" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_auto_session_tracking" />
+    <DirectPInvoke Include="sentry-native!sentry_options_set_logger" />
   </ItemGroup>
 </Project>
