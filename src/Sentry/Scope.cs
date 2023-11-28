@@ -127,7 +127,7 @@ public class Scope : IEventLike
         };
         set
         {
-            if (_user is not value)
+            if (_user != value)
             {
                 _user = value;
                 if (_user is not null)
