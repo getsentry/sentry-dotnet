@@ -14,6 +14,7 @@
       "samples\\Sentry.Samples.Azure.Functions.Worker\\Sentry.Samples.Azure.Functions.Worker.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
       "samples\\Sentry.Samples.Console.Customized\\Sentry.Samples.Console.Customized.csproj",
+      "samples\\Sentry.Samples.Console.Native\\Sentry.Samples.Console.Native.csproj",
       "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
       "samples\\Sentry.Samples.EntityFramework\\Sentry.Samples.EntityFramework.csproj",
       "samples\\Sentry.Samples.GenericHost\\Sentry.Samples.GenericHost.csproj",
