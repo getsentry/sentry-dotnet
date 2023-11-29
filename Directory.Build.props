@@ -10,9 +10,6 @@
     <Features>strict</Features>
     <ImplicitUsings>true</ImplicitUsings>
 
-    <!-- Ignore EOL warnings... we need to support old stuff -->
-    <CheckEolWorkloads>false</CheckEolWorkloads>
-
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
@@ -66,12 +63,6 @@
   <!-- This is helpful in code to distinguish neutral targets. -->
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetPlatformIdentifier)' == ''">$(DefineConstants);PLATFORM_NEUTRAL</DefineConstants>
-  </PropertyGroup>
-
-  <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->
-  <!-- there's no reason to cause friction to a consumer that for some reason is stuck on an unsupported version. -->
-  <PropertyGroup>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
