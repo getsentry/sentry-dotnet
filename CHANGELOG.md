@@ -4,8 +4,11 @@
 
 ### Fixes
 
-- Reduced noise created by automatically captured breadcrumbs on MAUI ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
-- The SDK no longer consumes third-party events on MAUI ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
+- Reworked automatic breadcrumb creation for MAUI. ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
+  - The SDK no longer uses on reflection to bind to all public element events. This also fixes issues where the SDK would consume third-party events.
+  - Added `CreateElementEventsBreadcrumbs` to the SentryMauiOptions to allow users to opt-in automatic breadcrumb creation for `BindingContextChanged`, `ChildAdded`, `ChildRemoved` and `ParentChanged` on `Element`.
+  - Reduced amount of automatic breadcrumbs by limiting the amount of bindings created in `VisualElement`, `Window`, `Shell`, `Page` and `Button`.
+
 ### Features
 
 - Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
