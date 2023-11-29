@@ -15,6 +15,11 @@ public enum LogCatIntegrationType
     Unhandled,
 
     /// <summary>
+    /// LogCat logs are attached to events with an exception.
+    /// </summary>
+    Errors,
+
+    /// <summary>
     /// LogCat logs are attached to all events.
     /// </summary>
     All
