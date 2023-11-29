@@ -12,7 +12,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "shell"
         };
-        _fixture.Binder.BindShellEvents(shell);
+        MauiEventsBinder.HandleShellEvents(shell);
 
         var current = new ShellNavigationState("foo");
         var target = new ShellNavigationState("bar");
@@ -25,8 +25,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Shell)}.{nameof(Shell.Navigating)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
+        Assert.Equal(MauiEvents.NavigationType, crumb.Type);
+        Assert.Equal(MauiEvents.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Shell)}.Name", "shell");
         crumb.Data.Should().Contain($"from", "foo");
         crumb.Data.Should().Contain($"to", "bar");
@@ -41,7 +41,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "shell"
         };
-        _fixture.Binder.BindShellEvents(shell);
+        MauiEventsBinder.HandleShellEvents(shell);
 
         var previous = new ShellNavigationState("foo");
         var current = new ShellNavigationState("bar");
@@ -54,8 +54,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Shell)}.{nameof(Shell.Navigated)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
+        Assert.Equal(MauiEvents.NavigationType, crumb.Type);
+        Assert.Equal(MauiEvents.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Shell)}.Name", "shell");
         crumb.Data.Should().Contain($"from", "foo");
         crumb.Data.Should().Contain($"to", "bar");

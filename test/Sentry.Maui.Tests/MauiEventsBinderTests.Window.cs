@@ -18,7 +18,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "window"
         };
-        _fixture.Binder.BindWindowEvents(window);
+        MauiEventsBinder.HandleWindowEvents(window);
 
         // Act
         window.RaiseEvent(eventName, EventArgs.Empty);
@@ -27,8 +27,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Window)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.LifecycleCategory, crumb.Category);
+        Assert.Equal(MauiEvents.SystemType, crumb.Type);
+        Assert.Equal(MauiEvents.LifecycleCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Window)}.Name", "window");
     }
 
@@ -42,7 +42,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "window"
         };
-        _fixture.Binder.BindWindowEvents(window);
+        MauiEventsBinder.HandleWindowEvents(window);
         _fixture.Options.IncludeBackgroundingStateInBreadcrumbs = includeStateInBreadcrumb;
 
         var state = new PersistedState
@@ -59,8 +59,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Window)}.{nameof(Window.Backgrounding)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.LifecycleCategory, crumb.Category);
+        Assert.Equal(MauiEvents.SystemType, crumb.Type);
+        Assert.Equal(MauiEvents.LifecycleCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Window)}.Name", "window");
 
         if (includeStateInBreadcrumb)
@@ -83,7 +83,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "window"
         };
-        _fixture.Binder.BindWindowEvents(window);
+        MauiEventsBinder.HandleWindowEvents(window);
 
         // Act
         window.RaiseEvent(nameof(Window.DisplayDensityChanged), new DisplayDensityChangedEventArgs(1.25f));
@@ -92,8 +92,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Window)}.{nameof(Window.DisplayDensityChanged)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.LifecycleCategory, crumb.Category);
+        Assert.Equal(MauiEvents.SystemType, crumb.Type);
+        Assert.Equal(MauiEvents.LifecycleCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Window)}.Name", "window");
         crumb.Data.Should().Contain("DisplayDensity", "1.25");
     }
@@ -106,7 +106,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "window"
         };
-        _fixture.Binder.BindWindowEvents(window);
+        MauiEventsBinder.HandleWindowEvents(window);
 
         // Act
         window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
@@ -115,8 +115,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Window)}.{nameof(Window.PopCanceled)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
+        Assert.Equal(MauiEvents.NavigationType, crumb.Type);
+        Assert.Equal(MauiEvents.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Window)}.Name", "window");
     }
 
@@ -129,7 +129,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "window"
         };
-        _fixture.Binder.BindWindowEvents(window);
+        MauiEventsBinder.HandleWindowEvents(window);
 
         // Act
         window.RaiseEvent(eventName, eventArgs);
@@ -138,8 +138,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Window)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
+        Assert.Equal(MauiEvents.NavigationType, crumb.Type);
+        Assert.Equal(MauiEvents.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Window)}.Name", "window");
         crumb.Data.Should().Contain("Modal", nameof(ContentPage));
         crumb.Data.Should().Contain("Modal.Name", "TestModalPage");
