@@ -127,13 +127,16 @@ public class Scope : IEventLike
         };
         set
         {
-            _user = value;
-            if (_user is not null)
+            if (_user != value)
             {
-                _user.PropertyChanged = UserChanged;
-            }
+                _user = value;
+                if (_user is not null)
+                {
+                    _user.PropertyChanged = UserChanged;
+                }
 
-            UserChanged.Invoke(_user);
+                UserChanged.Invoke(_user);
+            }
         }
     }
 

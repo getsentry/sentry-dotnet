@@ -29,7 +29,7 @@ public enum CrashType
         JavaBackgroundThread,
 #endif
 
-#if __MOBILE__
+#if __MOBILE__ || NET8_0_OR_GREATER
         /// <summary>
         /// A native operation that will crash the application will be performed by a C library.
         /// </summary>

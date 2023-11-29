@@ -40,7 +40,7 @@ try
 
     if ($Clean)
     {
-        rm -rf $buildDir
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $buildDir
     }
 
     cmake `
@@ -49,8 +49,7 @@ try
         -D CMAKE_BUILD_TYPE=RelWithDebInfo `
         -D SENTRY_SDK_NAME=sentry.native.dotnet `
         -D SENTRY_BUILD_SHARED_LIBS=0 `
-        -D SENTRY_BACKEND=none `
-        -D SENTRY_TRANSPORT=none `
+        -D SENTRY_BACKEND=inproc `
         $additionalArgs
 
     cmake `

@@ -12,11 +12,7 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-#if __MOBILE__
 public static partial class SentrySdk
-#else
-public static class SentrySdk
-#endif
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
@@ -52,17 +48,31 @@ public static class SentrySdk
         }
 
         // Initialize native platform SDKs here
-#if __MOBILE__
         if (options.InitNativeSdks)
         {
 #if __IOS__
             InitSentryCocoaSdk(options);
 #elif ANDROID
             InitSentryAndroidSdk(options);
+#elif NET8_0_OR_GREATER
+            if (AotHelper.IsNativeAot)
+            {
+                InitNativeSdk(options);
+            }
 #endif
         }
-#endif
-        return new Hub(options);
+
+        // We init the hub after native SDK in case the native init needs to adapt some options.
+        var hub = new Hub(options);
+
+        // Run all post-init callbacks set up by native integrations.
+        foreach (var callback in options.PostInitCallbacks)
+        {
+            callback.Invoke(hub);
+        }
+        options.PostInitCallbacks.Clear();
+
+        return hub;
     }
 
     /// <summary>
@@ -219,7 +229,6 @@ public static class SentrySdk
         {
             _ = Interlocked.CompareExchange(ref CurrentHub, DisabledHub.Instance, _localHub);
             (_localHub as IDisposable)?.Dispose();
-
             _localHub = null!;
         }
     }
@@ -611,9 +620,9 @@ public static class SentrySdk
     [Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a real application.")]
     public static void CauseCrash(CrashType crashType)
     {
-        var msg =
-            "This exception was caused deliberately by " +
-            $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType}).";
+        var info = $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType})";
+        var msg = $"This exception was caused deliberately by {info}.";
+        CurrentOptions?.LogDebug("Triggering a deliberate exception because {0} was called", info);
 
         switch (crashType)
         {
@@ -626,29 +635,47 @@ public static class SentrySdk
                 break;
 
 #if ANDROID
-                case CrashType.Java:
-                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
-                    break;
+            case CrashType.Java:
+                JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
+                break;
 
-                case CrashType.JavaBackgroundThread:
-                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
-                    break;
+            case CrashType.JavaBackgroundThread:
+                JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
+                break;
 
-                case CrashType.Native:
-                    NativeCrash();
-                    break;
+            case CrashType.Native:
+                NativeCrash();
+                break;
 #elif __IOS__
             case CrashType.Native:
                 SentryCocoaSdk.Crash();
+                break;
+#elif NET8_0_OR_GREATER
+            case CrashType.Native:
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    NativeStrlenMSVCRT(IntPtr.Zero);
+                }
+                else
+                {
+                    NativeStrlenLibC(IntPtr.Zero);
+                }
                 break;
 #endif
             default:
                 throw new ArgumentOutOfRangeException(nameof(crashType), crashType, null);
         }
+        CurrentOptions?.LogWarning("Something went wrong in {0}, execution should never reach this.", info);
     }
 
 #if ANDROID
     [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
     private static extern void NativeCrash();
+#elif NET8_0_OR_GREATER
+    [DllImport("msvcrt", EntryPoint = "strlen")]
+    private static extern IntPtr NativeStrlenMSVCRT(IntPtr str);
+
+    [DllImport("libc", EntryPoint = "strlen")]
+    private static extern IntPtr NativeStrlenLibC(IntPtr strt);
 #endif
 }

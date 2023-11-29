@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
+
 ### API breaking Changes
 
 #### Removed APIs

@@ -14,16 +14,19 @@ For big feature it's advised to raise an issue to discuss it first.
 ## Dependencies
 
 * The latest versions of the following .NET SDKs:
-  - [.NET 7.0](https://dotnet.microsoft.com/download/dotnet/7.0)
+  - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
   - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
 
-  *Technically, you only need the full SDK install for the latest version (7.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 6.0 .  However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK install for the latest version (8.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 6.0 .  However, installing the full SDKs will also give you the runtimes.*
 
   *If using an M1 ("Apple silicon") processor, read [the special instructions below](#special-instructions-for-apple-silicon-cpus).*
 
+* You'll need `CMake` somewhere on your PATH. If you don't already have this, one way to get it is to install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation)
+
+* You'll need [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) on PATH.
+
 * On Windows:
   - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
-  - You'll need `CMake` somewhere on your PATH. If you don't already have this, one way to get it is to install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation)
   - `Sentry.DiagnosticSource.IntegrationTests.csproj` uses [SQL LocalDb](https://docs.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb) - [download SQL LocalDB 2019](https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi). To avoid running these tests, unload `Sentry.DiagnosticSource.IntegrationTests.csproj` from the solution.
 * On macOS/Linux
   - [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.

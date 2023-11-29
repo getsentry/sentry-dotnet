@@ -59,6 +59,7 @@
     Condition="'$(TargetFramework)' == 'net8.0' and '$(CI)' != 'true'"
     Inputs="$(SentryNativeBuildInputs)"
     Outputs="$(SentryNativeBuildOutputs)">
-    <Exec Command="pwsh $(SentryNativeBuildScript)" />
+    <!-- We want a "-Clean" because if the build script changes, previous cmake cache may contain invalid defines. -->
+    <Exec Command="pwsh $(SentryNativeBuildScript) -Clean" />
   </Target>
 </Project>

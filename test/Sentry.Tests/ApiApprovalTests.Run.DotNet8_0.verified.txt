@@ -96,6 +96,7 @@ namespace Sentry
     {
         Managed = 0,
         ManagedBackgroundThread = 1,
+        Native = 2,
     }
     [System.Flags]
     public enum DeduplicateMode
