@@ -92,8 +92,17 @@ public static class SentryMauiAppBuilderExtensions
             events.AddAndroid(lifecycle => lifecycle.OnApplicationCreating(application =>
                 (application as IPlatformApplication)?.BindMauiEvents()));
 #elif WINDOWS
-            events.AddWindows(lifecycle => lifecycle.OnLaunching((application, _) =>
-                (application as IPlatformApplication)?.BindMauiEvents()));
+            events.AddWindows(lifecycle =>
+            {
+                lifecycle.OnLaunching((application, _) =>
+                {
+                    (application as IPlatformApplication)?.BindMauiEvents();
+                });
+                lifecycle.OnClosed((application, _) =>
+                {
+                    (application as IPlatformApplication)?.UnbindMauiEvents();
+                });
+            });
 #endif
         });
     }
@@ -117,5 +126,26 @@ public static class SentryMauiAppBuilderExtensions
         // Bind the events
         var binder = services.GetRequiredService<IMauiEventsBinder>();
         binder.BindApplicationEvents(application);
+    }
+
+    private static void UnbindMauiEvents(this IPlatformApplication platformApplication)
+    {
+        // We need to resolve the application manually, because it's not necessarily
+        // set on platformApplication.Application at this point in the lifecycle.
+        var services = platformApplication.Services;
+        var app = services.GetService<IApplication>();
+
+        // Use a real Application control, because the required events needed for binding
+        // are not present on IApplication and related interfaces.
+        if (app is not Application application)
+        {
+            var options = services.GetService<IOptions<SentryMauiOptions>>()?.Value;
+            options?.LogWarning("Could not unbind from MAUI events!");
+            return;
+        }
+
+        // Unbind the events
+        var binder = services.GetRequiredService<IMauiEventsBinder>();
+        binder.UnbindApplicationEvents(application);
     }
 }
