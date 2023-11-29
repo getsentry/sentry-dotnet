@@ -12,6 +12,7 @@ public partial class MauiEventsBinderTests
     public void Application_ChildElementEvents_AddsBreadcrumb(string eventName)
     {
         // Arrange
+        _fixture.Options.CreateElementEventsBreadcrumbs = true;
         var application = MockApplication.Create();
         _fixture.Binder.HandleApplicationEvents(application);
 

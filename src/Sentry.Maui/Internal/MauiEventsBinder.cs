@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Maui.Internal;
 
-internal class MauiEventsBinder : IMauiEventsBinder
+internal class MauiEventsBinder// : IMauiEventsBinder
 {
     private readonly SentryMauiOptions _options;
 
@@ -119,7 +119,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private static void HandleWindowEvents(Window window, bool bind = true)
+    internal static void HandleWindowEvents(Window window, bool bind = true)
     {
         if(bind)
         {
@@ -165,7 +165,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private static void HandleElementEvents(Element element, bool bind = true)
+    internal static void HandleElementEvents(Element element, bool bind = true)
     {
         if (bind)
         {
@@ -193,7 +193,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private static void HandleVisualElementEvents(VisualElement element, bool bind = true)
+    internal static void HandleVisualElementEvents(VisualElement element, bool bind = true)
     {
         if (bind)
         {
@@ -207,7 +207,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private static void HandleShellEvents(Shell shell, bool bind = true)
+    internal static void HandleShellEvents(Shell shell, bool bind = true)
     {
         if (bind)
         {
@@ -231,7 +231,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private static void HandlePageEvents(Page page, bool bind = true)
+    internal static void HandlePageEvents(Page page, bool bind = true)
     {
         if (bind)
         {
@@ -265,7 +265,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private static void HandleButtonEvents(Button button, bool bind = true)
+    internal static void HandleButtonEvents(Button button, bool bind = true)
     {
         if (bind)
         {

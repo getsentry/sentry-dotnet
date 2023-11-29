@@ -58,7 +58,7 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
-        services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
+        services.TryAddSingleton<MauiEventsBinder>();
 
         services.AddSentry<SentryMauiOptions>();
 
@@ -134,7 +134,7 @@ public static class SentryMauiAppBuilderExtensions
         }
 
         // Bind the events
-        var binder = services.GetRequiredService<IMauiEventsBinder>();
+        var binder = services.GetRequiredService<MauiEventsBinder>();
         binder.HandleApplicationEvents(application, bind);
     }
 }
