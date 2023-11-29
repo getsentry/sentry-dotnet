@@ -137,6 +137,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     public void BindElementEvents(Element element)
     {
+        if (_options.CreateElementEventBreadcrumbs)
+        {
+            return;
+        }
+
         // Rendering events
         element.ChildAdded += (sender, e) =>
             _hub.AddBreadcrumbForEvent(_options, sender, nameof(Element.ChildAdded), SystemType, RenderingCategory,
