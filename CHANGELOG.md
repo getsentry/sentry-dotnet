@@ -6,12 +6,19 @@
 
 - Reduced noise created by automatically captured breadcrumbs on MAUI ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
 - The SDK no longer consumes third-party events on MAUI ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
+### Features
+
+- Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
 
 ### API breaking Changes
 
 #### Removed APIs
 
-- `SentrySinkExtensions.ConfigureSentrySerilogOptions` is now internal, use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902))
+- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
+
+### Fixes
+
+- Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
 
 ### Dependencies
 

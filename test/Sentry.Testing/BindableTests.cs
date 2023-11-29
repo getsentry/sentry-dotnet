@@ -78,7 +78,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
         }
         else
         {
-            yield return new KeyValuePair<string, string>(prop.Name, value.ToString());
+            yield return new KeyValuePair<string, string>(prop.Name, Convert.ToString(value, CultureInfo.InvariantCulture));
         }
     }
 

@@ -26,8 +26,11 @@ public sealed class User : IJsonSerializable
         get => _id;
         set
         {
-            _id = value;
-            PropertyChanged?.Invoke(this);
+            if (_id != value)
+            {
+                _id = value;
+                PropertyChanged?.Invoke(this);
+            }
         }
     }
 
@@ -39,8 +42,11 @@ public sealed class User : IJsonSerializable
         get => _username;
         set
         {
-            _username = value;
-            PropertyChanged?.Invoke(this);
+            if (_username != value)
+            {
+                _username = value;
+                PropertyChanged?.Invoke(this);
+            }
         }
     }
 
@@ -52,8 +58,11 @@ public sealed class User : IJsonSerializable
         get => _email;
         set
         {
-            _email = value;
-            PropertyChanged?.Invoke(this);
+            if (_email != value)
+            {
+                _email = value;
+                PropertyChanged?.Invoke(this);
+            }
         }
     }
 
@@ -65,8 +74,11 @@ public sealed class User : IJsonSerializable
         get => _ipAddress;
         set
         {
-            _ipAddress = value;
-            PropertyChanged?.Invoke(this);
+            if (_ipAddress != value)
+            {
+                _ipAddress = value;
+                PropertyChanged?.Invoke(this);
+            }
         }
     }
 
@@ -78,8 +90,11 @@ public sealed class User : IJsonSerializable
         get => _segment;
         set
         {
-            _segment = value;
-            PropertyChanged?.Invoke(this);
+            if (_segment != value)
+            {
+                _segment = value;
+                PropertyChanged?.Invoke(this);
+            }
         }
     }
 
@@ -91,8 +106,11 @@ public sealed class User : IJsonSerializable
         get => _other ??= new Dictionary<string, string>();
         set
         {
-            _other = value;
-            PropertyChanged?.Invoke(this);
+            if (_other != value)
+            {
+                _other = value;
+                PropertyChanged?.Invoke(this);
+            }
         }
     }
 

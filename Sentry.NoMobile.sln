@@ -161,13 +161,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraceEvent", "modules\perfv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastSerialization", "modules\perfview\src\FastSerialization\FastSerialization.csproj", "{8032310D-3C06-442C-A318-F365BCC4C804}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Native", "samples\Sentry.Samples.Console.Native\Sentry.Samples.Console.Native.csproj", "{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8328B70C-B808-4ED1-BB16-8555B2752CB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -462,6 +461,13 @@ Global
 		{8032310D-3C06-442C-A318-F365BCC4C804}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8032310D-3C06-442C-A318-F365BCC4C804}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8032310D-3C06-442C-A318-F365BCC4C804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8328B70C-B808-4ED1-BB16-8555B2752CB6} = {7D4D7A6A-3F5C-4B4C-A198-AC51F9220231}
@@ -538,5 +544,6 @@ Global
 		{162A1CAE-ACEE-45CA-A6D0-7702ADE4D3DE} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{67269916-C417-4CEE-BD7D-CA66C3830AEE} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{8032310D-3C06-442C-A318-F365BCC4C804} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
+		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 	EndGlobalSection
 EndGlobal
