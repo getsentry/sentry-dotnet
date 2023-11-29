@@ -5,6 +5,7 @@
 ### Features
 
 - Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
+- Added Android LogCat collection to the Android SDK, configurable via `SentryMauiOptions.LogCatIntegration`. ([#2926](https://github.com/getsentry/sentry-dotnet/pull/2926))
 
 ### API breaking Changes
 
