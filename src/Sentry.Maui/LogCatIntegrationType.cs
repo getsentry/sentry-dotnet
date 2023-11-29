@@ -21,6 +21,8 @@ public enum LogCatIntegrationType
 
     /// <summary>
     /// LogCat logs are attached to all events.
+    /// Use caution when enabling, as this may result in a lot of data being sent to Sentry
+    /// and severe performance issues if the SDK generates a lot of events.
     /// </summary>
     All
 }
