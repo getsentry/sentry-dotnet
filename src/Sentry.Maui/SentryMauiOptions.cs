@@ -55,5 +55,5 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// like 'ChildAdded', 'ChildRemoved', 'ParentChanged' and 'BindingContextChanged'.
     /// Use caution when enabling, as depending on your application this might incur a performance overhead.
     /// </summary>
-    public bool CreateElementEventBreadcrumbs { get; set; } = false;
+    public bool CreateElementEventsBreadcrumbs { get; set; } = false;
 }
