@@ -2,6 +2,7 @@
 using Sentry.Extensibility;
 using Runtime = Java.Lang.Runtime;
 using Android.Content;
+using Application = Android.App.Application;
 
 namespace Sentry.Maui.Internal;
 
@@ -50,14 +51,14 @@ internal class SentryAndroidLogsEventProcessor : ISentryEventProcessorWithHint
                 return @event;
 
             // We write the logcat logs to a file so we can attach it
-            using var output = Android.App.Application.Context.OpenFileOutput("sentry_logcat.txt", FileCreationMode.Private);
+            using var output = Application.Context.OpenFileOutput("sentry_logcat.txt", FileCreationMode.Private);
             if (output is null)
                 return @event;
 
             process.InputStream.CopyTo(output);
             process.WaitFor();
 
-            hint.AddAttachment(Android.App.Application.Context.FilesDir!.Path + "/sentry_logcat.txt", AttachmentType.Default, "text/plain");
+            hint.AddAttachment(Application.Context.FilesDir!.Path + "/sentry_logcat.txt", AttachmentType.Default, "text/plain");
 
             return @event;
         }
