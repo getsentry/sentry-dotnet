@@ -16,6 +16,10 @@
 
 - Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
 
+#### Changed APIs
+
+- `AssemblyExtensions` have been made public again. ([#2917](https://github.com/getsentry/sentry-dotnet/pull/2917))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.16.1 to v8.17.0 ([#2910](https://github.com/getsentry/sentry-dotnet/pull/2910))
