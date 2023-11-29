@@ -96,6 +96,10 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         var httpMethod = requestData.Method.ToUpperInvariant();
         var transactionNameKey = $"{context.FunctionDefinition.EntryPoint}-{httpMethod}";
 
+        // Note that, when Trimming is enabled, we can't use reflection to read route data from the HttpTrigger
+        // attribute. In that case the route name will always be /api/<FUNCTION_NAME>
+        // If this is ever a problem for customers, we can potentially see if there are alternate ways to get this info
+        // from route tables or something. We're not even sure if anyone will use this functionality for now though. 
         if (!AotHelper.IsNativeAot && !TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
         {
             // Find the HTTP Trigger attribute via reflection
