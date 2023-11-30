@@ -63,7 +63,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             process.InputStream.CopyTo(output);
             process.WaitFor();
 
-            hint.AddAttachment(Application.Context.FilesDir!.Path + "/sentry_logcat.txt", AttachmentType.Default, "text/plain");
+            hint.AddAttachment(Application.Context.FilesDir!.Path + "/sentry_logcat.txt", AttachmentType.Default, "text/logcat");
 
             return @event;
         }
