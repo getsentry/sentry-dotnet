@@ -132,7 +132,11 @@ public static class SentrySinkExtensions
     }
 
     /// <summary>
-    /// Adds a Sentry Sink for Serilog.
+    /// <para>Adds a Sentry Sink for Serilog.</para>
+    /// <remarks>
+    /// Note this overload doesn't initialize Sentry for you, so you'll need to have already done so. Alternatively you
+    /// can use use the overload of this extension method, passing a DSN string in the first argument.
+    /// </remarks>
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
     /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
@@ -163,10 +167,10 @@ public static class SentrySinkExtensions
     /// </example>
     public static LoggerConfiguration Sentry(
         this LoggerSinkConfiguration loggerConfiguration,
-        LogEventLevel? minimumEventLevel,
-        LogEventLevel? minimumBreadcrumbLevel,
-        IFormatProvider? formatProvider,
-        ITextFormatter? textFormatter
+        LogEventLevel? minimumEventLevel = null,
+        LogEventLevel? minimumBreadcrumbLevel = null,
+        IFormatProvider? formatProvider = null,
+        ITextFormatter? textFormatter = null
         )
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
