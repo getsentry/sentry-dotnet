@@ -3,12 +3,12 @@ namespace Sentry;
 
 internal partial class BindableSentryOptions
 {
-    public IosOptions iOS { get; } = new IosOptions();
+    public CocoaOptions Cocoa { get; } = new CocoaOptions();
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
-    public class IosOptions
+    public class CocoaOptions
     {
         public bool? AttachScreenshot { get; set; }
         public TimeSpan? AppHangTimeoutInterval { get; set; }
@@ -26,7 +26,7 @@ internal partial class BindableSentryOptions
         public bool? EnableUserInteractionTracing { get; set; }
         public bool? EnableCocoaSdkTracing { get; set; }
 
-        public void ApplyTo(SentryOptions.IosOptions options)
+        public void ApplyTo(SentryOptions.CocoaOptions options)
         {
             options.AttachScreenshot = AttachScreenshot ?? options.AttachScreenshot;
             options.AppHangTimeoutInterval = AppHangTimeoutInterval ?? options.AppHangTimeoutInterval;

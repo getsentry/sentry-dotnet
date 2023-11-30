@@ -1,7 +1,7 @@
 // using Sentry.Extensibility;
 // using Sentry.Protocol.Envelopes;
 //
-// namespace Sentry.iOS.Extensions;
+// namespace Sentry.Cocoa.Extensions;
 //
 // internal static class SentryEventExtensions
 // {

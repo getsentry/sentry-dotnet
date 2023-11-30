@@ -1,6 +1,6 @@
-using Sentry.iOS.Facades;
+using Sentry.Cocoa.Facades;
 
-namespace Sentry.iOS.Extensions;
+namespace Sentry.Cocoa.Extensions;
 
 internal static class SamplingContextExtensions
 {

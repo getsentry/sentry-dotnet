@@ -1,6 +1,6 @@
-using Sentry.iOS.Extensions;
+using Sentry.Cocoa.Extensions;
 
-namespace Sentry.iOS.Facades;
+namespace Sentry.Cocoa.Facades;
 
 internal class TransactionContextFacade : ITransactionContext
 {

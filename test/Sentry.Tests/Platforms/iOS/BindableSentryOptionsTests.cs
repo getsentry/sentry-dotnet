@@ -1,19 +1,19 @@
 # if __IOS__
 using Microsoft.Extensions.Configuration;
 
-namespace Sentry.Tests.Platforms.iOS;
+namespace Sentry.Tests.Platforms.Cocoa;
 
-public class BindableSentryOptionsTests : BindableTests<SentryOptions.IosOptions>
+public class BindableSentryOptionsTests : BindableTests<SentryOptions.CocoaOptions>
 {
     public BindableSentryOptionsTests()
-    : base(nameof(SentryOptions.IosOptions.UrlSessionDelegate))
+    : base(nameof(SentryOptions.CocoaOptions.UrlSessionDelegate))
     {
     }
 
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {
-        var actual = GetPropertyNames<BindableSentryOptions.IosOptions>();
+        var actual = GetPropertyNames<BindableSentryOptions.CocoaOptions>();
         AssertContainsAllOptionsProperties(actual);
     }
 
@@ -21,8 +21,8 @@ public class BindableSentryOptionsTests : BindableTests<SentryOptions.IosOptions
     public void ApplyTo_SetsOptionsFromConfig()
     {
         // Arrange
-        var actual = new SentryOptions.IosOptions(new SentryOptions());
-        var bindable = new BindableSentryOptions.IosOptions();
+        var actual = new SentryOptions.CocoaOptions(new SentryOptions());
+        var bindable = new BindableSentryOptions.CocoaOptions();
 
         // Act
         Fixture.Config.Bind(bindable);
