@@ -25,8 +25,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockApplication)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.RenderingCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain("Element", element.ToString());
     }
 
@@ -50,8 +50,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockApplication)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.NavigationType, crumb.Type);
-        Assert.Equal(MauiEvents.NavigationCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain("Page", nameof(ContentPage));
         crumb.Data.Should().Contain("Page.Name", page.StyleId);
     }
@@ -71,8 +71,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockApplication)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.NavigationType, crumb.Type);
-        Assert.Equal(MauiEvents.NavigationCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain("Modal", nameof(ContentPage));
         crumb.Data.Should().Contain("Modal.Name", "TestModalPage");
     }
@@ -110,8 +110,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockApplication)}.{nameof(Application.RequestedThemeChanged)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.RenderingCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain("RequestedTheme", AppTheme.Dark.ToString());
     }
 }

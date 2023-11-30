@@ -12,7 +12,7 @@ public partial class MauiEventsBinderTests
     {
         // Arrange
         var parent = new MockElement("parent");
-        MauiEventsBinder.HandleElementEvents(parent);
+        _fixture.Binder.HandleElementEvents(parent);
 
         var child = new MockElement("child");
 
@@ -23,8 +23,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockElement)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.RenderingCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(MockElement)}.Name", "parent");
         crumb.Data.Should().Contain("Element", nameof(MockElement));
         crumb.Data.Should().Contain("Element.Name", "child");
@@ -38,7 +38,7 @@ public partial class MauiEventsBinderTests
         {
             Parent = new MockElement("parent")
         };
-        MauiEventsBinder.HandleElementEvents(element);
+        _fixture.Binder.HandleElementEvents(element);
 
         // Act
         element.RaiseEvent(nameof(Application.ParentChanged), EventArgs.Empty);
@@ -47,8 +47,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockElement)}.{nameof(Element.ParentChanged)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.RenderingCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(MockElement)}.Name", "element");
         crumb.Data.Should().Contain("Parent", element.Parent.GetType().Name);
         crumb.Data.Should().Contain("Parent.Name", element.Parent.StyleId);
@@ -59,7 +59,7 @@ public partial class MauiEventsBinderTests
     {
         // Arrange
         var element = new MockElement("element");
-        MauiEventsBinder.HandleElementEvents(element);
+        _fixture.Binder.HandleElementEvents(element);
 
         var bindingContext = Substitute.For<object>();
 
@@ -70,8 +70,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockElement)}.{nameof(Element.BindingContextChanged)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.RenderingCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(MockElement)}.Name", "element");
         crumb.Data.Should().Contain("BindingContext", bindingContext.ToString());
     }

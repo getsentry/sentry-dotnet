@@ -15,7 +15,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "button"
         };
-        MauiEventsBinder.HandleButtonEvents(button);
+        _fixture.Binder.HandleButtonEvents(button);
 
         // Act
         button.RaiseEvent(eventName, EventArgs.Empty);
@@ -24,8 +24,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Button)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.UserType, crumb.Type);
-        Assert.Equal(MauiEvents.UserActionCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.UserType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.UserActionCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Button)}.Name", "button");
     }
 }

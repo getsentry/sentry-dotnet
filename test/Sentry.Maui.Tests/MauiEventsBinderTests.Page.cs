@@ -14,7 +14,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "page"
         };
-        MauiEventsBinder.HandlePageEvents(page);
+        _fixture.Binder.HandlePageEvents(page);
 
         // Act
         page.RaiseEvent(eventName, EventArgs.Empty);
@@ -23,8 +23,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Page)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.LifecycleCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.LifecycleCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
     }
 
@@ -36,7 +36,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "page"
         };
-        MauiEventsBinder.HandlePageEvents(page);
+        _fixture.Binder.HandlePageEvents(page);
 
         var otherPage = new Page
         {
@@ -54,8 +54,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Page)}.{nameof(Page.NavigatedTo)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.NavigationType, crumb.Type);
-        Assert.Equal(MauiEvents.NavigationCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
         crumb.Data.Should().Contain("PreviousPage", nameof(Page));
         crumb.Data.Should().Contain("PreviousPage.Name", "otherPage");
@@ -69,7 +69,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "page"
         };
-        MauiEventsBinder.HandlePageEvents(page);
+        _fixture.Binder.HandlePageEvents(page);
 
         // Act
         page.RaiseEvent(nameof(Page.LayoutChanged), EventArgs.Empty);
@@ -78,8 +78,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(Page)}.{nameof(Page.LayoutChanged)}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.RenderingCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
     }
 }

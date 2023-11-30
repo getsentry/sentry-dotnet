@@ -12,7 +12,7 @@ public partial class MauiEventsBinderTests
     {
         // Arrange
         var element = new MockVisualElement("element");
-        MauiEventsBinder.HandleVisualElementEvents(element);
+        _fixture.Binder.HandleVisualElementEvents(element);
 
         // Act
         element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
@@ -21,8 +21,8 @@ public partial class MauiEventsBinderTests
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
         Assert.Equal($"{nameof(MockVisualElement)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEvents.SystemType, crumb.Type);
-        Assert.Equal(MauiEvents.RenderingCategory, crumb.Category);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(MockVisualElement)}.Name", "element");
     }
 }
