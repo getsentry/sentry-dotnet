@@ -33,7 +33,9 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
         try
         {
             if (_logCatIntegrationType != LogCatIntegrationType.All && @event.Exception is null)
+            {
                 return @event;
+            }
 
             // Only send logcat logs if the event is unhandled if the integration is set to Unhandled
             if (_logCatIntegrationType == LogCatIntegrationType.Unhandled)
