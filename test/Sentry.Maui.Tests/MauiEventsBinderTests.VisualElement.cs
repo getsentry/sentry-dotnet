@@ -25,4 +25,25 @@ public partial class MauiEventsBinderTests
         Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(MockVisualElement)}.Name", "element");
     }
+
+    [Theory]
+    [InlineData(nameof(VisualElement.Focused), true)]
+    [InlineData(nameof(VisualElement.Unfocused), false)]
+    public void VisualElement_UnbindFocusEvents_DoesNotAddBreadcrumb(string eventName, bool isFocused)
+    {
+        // Arrange
+        var element = new MockVisualElement("element");
+        _fixture.Binder.HandleVisualElementEvents(element);
+
+        element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleVisualElementEvents(element, bind: false);
+
+        // Act
+        element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+    }
 }

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using Sentry.Maui.Internal;
 using Sentry.Maui.Tests.Mocks;
 
@@ -31,6 +30,30 @@ public partial class MauiEventsBinderTests
     }
 
     [Theory]
+    [InlineData(nameof(Application.ChildAdded))]
+    [InlineData(nameof(Application.ChildRemoved))]
+    public void Application_UnbindChildElementEvents_DoesNotAddBreadcrumb(string eventName)
+    {
+        // Arrange
+        _fixture.Options.CreateElementEventsBreadcrumbs = true;
+        var application = MockApplication.Create();
+        _fixture.Binder.HandleApplicationEvents(application);
+
+        var element = Substitute.For<Element>();
+        application.RaiseEvent(eventName, new ElementEventArgs(element));
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleApplicationEvents(application, bind: false);
+
+        // Act
+        application.RaiseEvent(eventName, new ElementEventArgs(element));
+
+        // Assert
+        application.RaiseEvent(eventName, new ElementEventArgs(element));
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+    }
+
+    [Theory]
     [InlineData(nameof(Application.PageAppearing))]
     [InlineData(nameof(Application.PageDisappearing))]
     public void Application_PageEvents_AddsBreadcrumb(string eventName)
@@ -57,6 +80,31 @@ public partial class MauiEventsBinderTests
     }
 
     [Theory]
+    [InlineData(nameof(Application.PageAppearing))]
+    [InlineData(nameof(Application.PageDisappearing))]
+    public void Application_UnbindPageEvents_DoesNotAddBreadcrumb(string eventName)
+    {
+        // Arrange
+        var application = MockApplication.Create();
+        _fixture.Binder.HandleApplicationEvents(application);
+        var page = new ContentPage
+        {
+            StyleId = "TestPage"
+        };
+
+        application.RaiseEvent(eventName, page);
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleApplicationEvents(application, bind: false);
+
+        // Act
+        application.RaiseEvent(eventName, page);
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+    }
+
+    [Theory]
     [MemberData(nameof(ApplicationModalEventsData))]
     public void Application_ModalEvents_AddsBreadcrumb(string eventName, object eventArgs)
     {
@@ -75,6 +123,26 @@ public partial class MauiEventsBinderTests
         Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
         crumb.Data.Should().Contain("Modal", nameof(ContentPage));
         crumb.Data.Should().Contain("Modal.Name", "TestModalPage");
+    }
+
+    [Theory]
+    [MemberData(nameof(ApplicationModalEventsData))]
+    public void Application_UnbindModalEvents_DoesNotAddBreadcrumb(string eventName, object eventArgs)
+    {
+        // Arrange
+        var application = MockApplication.Create();
+        _fixture.Binder.HandleApplicationEvents(application);
+
+        application.RaiseEvent(eventName, eventArgs);
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleApplicationEvents(application, bind: false);
+
+        // Act
+        application.RaiseEvent(eventName, eventArgs);
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
     }
 
     public static IEnumerable<object[]> ApplicationModalEventsData
@@ -113,5 +181,25 @@ public partial class MauiEventsBinderTests
         Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
         Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
         crumb.Data.Should().Contain("RequestedTheme", AppTheme.Dark.ToString());
+    }
+
+    [Fact]
+    public void Application_UnbindRequestedThemeChanged_DoesNotAddBreadcrumb()
+    {
+        // Arrange
+        var application = MockApplication.Create();
+        application.UserAppTheme = AppTheme.Unspecified;
+        _fixture.Binder.HandleApplicationEvents(application);
+
+        application.UserAppTheme = AppTheme.Dark;
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleApplicationEvents(application, bind: false);
+
+        // Act
+        application.UserAppTheme = AppTheme.Light;
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
     }
 }

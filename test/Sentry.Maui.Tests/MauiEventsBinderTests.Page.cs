@@ -28,6 +28,30 @@ public partial class MauiEventsBinderTests
         crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
     }
 
+    [Theory]
+    [InlineData(nameof(Page.Appearing))]
+    [InlineData(nameof(Page.Disappearing))]
+    public void Page_UnbindLifecycleEvents_DoesNotAddBreadcrumb(string eventName)
+    {
+        // Arrange
+        var page = new Page
+        {
+            StyleId = "page"
+        };
+        _fixture.Binder.HandlePageEvents(page);
+
+        page.RaiseEvent(eventName, EventArgs.Empty);
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandlePageEvents(page, bind: false);
+
+        // Act
+        page.RaiseEvent(eventName, EventArgs.Empty);
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+    }
+
     [Fact]
     public void Page_NavigatedTo_AddsBreadcrumb()
     {
@@ -59,6 +83,37 @@ public partial class MauiEventsBinderTests
         crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
         crumb.Data.Should().Contain("PreviousPage", nameof(Page));
         crumb.Data.Should().Contain("PreviousPage.Name", "otherPage");
+    }
+
+    [Fact]
+    public void Page_UnbindNavigatedTo_AddsBreadcrumb()
+    {
+        // Arrange
+        var page = new Page
+        {
+            StyleId = "page"
+        };
+        _fixture.Binder.HandlePageEvents(page);
+
+        var otherPage = new Page
+        {
+            StyleId = "otherPage"
+        };
+        var navigatedToEventArgs = (NavigatedToEventArgs)
+            typeof(NavigatedToEventArgs)
+                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] {typeof(Page)})!
+                .Invoke(new object[] {otherPage});
+
+        page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandlePageEvents(page, bind: false);
+
+        // Act
+        page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
     }
 
     [Fact]

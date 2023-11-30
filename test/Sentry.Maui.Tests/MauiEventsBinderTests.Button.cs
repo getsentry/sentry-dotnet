@@ -28,4 +28,28 @@ public partial class MauiEventsBinderTests
         Assert.Equal(MauiEventsBinder.UserActionCategory, crumb.Category);
         crumb.Data.Should().Contain($"{nameof(Button)}.Name", "button");
     }
+
+    [Theory]
+    [InlineData(nameof(Button.Clicked))]
+    [InlineData(nameof(Button.Pressed))]
+    [InlineData(nameof(Button.Released))]
+    public void Button_UnbindCommonEvents_DoesNotAddBreadcrumb(string eventName)
+    {
+        // Arrange
+        var button = new Button
+        {
+            StyleId = "button"
+        };
+        _fixture.Binder.HandleButtonEvents(button);
+        button.RaiseEvent(eventName, EventArgs.Empty);
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleButtonEvents(button, bind: false);
+
+        // Act
+        button.RaiseEvent(eventName, EventArgs.Empty);
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+    }
 }
