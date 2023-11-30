@@ -9,7 +9,7 @@ public class SentrySerilogOptions : SentryOptions
     /// <summary>
     /// Whether to initialize this SDK through this integration
     /// </summary>
-    public bool InitializeSdk { get; set; } = true;
+    internal bool InitializeSdk { get; set; } = true;
 
     /// <summary>
     /// Minimum log level to send an event.

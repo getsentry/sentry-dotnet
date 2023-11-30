@@ -9,10 +9,10 @@ namespace Serilog;
 public static class SentrySinkExtensions
 {
     /// <summary>
-    /// Add Sentry Serilog Sink.
+    /// Initialize Sentry and add the SentrySink for Serilog.
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
-    /// <param name="dsn">The Sentry DSN. <seealso cref="SentryOptions.Dsn"/></param>
+    /// <param name="dsn">The Sentry DSN (required) <seealso cref="SentryOptions.Dsn"/></param>
     /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
     /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
     /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
@@ -34,7 +34,6 @@ public static class SentrySinkExtensions
     /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
     /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
     /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
-    /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
     /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
     /// <example>This sample shows how each item may be set from within a configuration file:
@@ -69,7 +68,6 @@ public static class SentrySinkExtensions
     ///                     "diagnosticLevel": "Debug",
     ///                     "reportAssembliesMode": ReportAssembliesMode.None,
     ///                     "deduplicateMode": "All",
-    ///                     "initializeSdk": true,
     ///                     "defaultTags": {
     ///                         "key-1", "value-1",
     ///                         "key-2", "value-2"
@@ -83,9 +81,9 @@ public static class SentrySinkExtensions
     /// </example>
     public static LoggerConfiguration Sentry(
         this LoggerSinkConfiguration loggerConfiguration,
-        string? dsn = null,
-        LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
-        LogEventLevel minimumEventLevel = LogEventLevel.Error,
+        string dsn,
+        LogEventLevel? minimumBreadcrumbLevel = null,
+        LogEventLevel? minimumEventLevel = null,
         IFormatProvider? formatProvider = null,
         ITextFormatter? textFormatter = null,
         bool? sendDefaultPii = null,
@@ -105,7 +103,6 @@ public static class SentrySinkExtensions
         SentryLevel? diagnosticLevel = null,
         ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
-        bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
@@ -131,13 +128,58 @@ public static class SentrySinkExtensions
             diagnosticLevel,
             reportAssembliesMode,
             deduplicateMode,
-            initializeSdk,
             defaultTags));
+    }
+
+    /// <summary>
+    /// Adds a Sentry Sink for Serilog.
+    /// </summary>
+    /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
+    /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
+    /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
+    /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
+    /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
+    /// <returns><see cref="LoggerConfiguration"/></returns>
+    /// <example>This sample shows how each item may be set from within a configuration file:
+    /// <code>
+    /// {
+    ///     "Serilog": {
+    ///         "Using": [
+    ///             "Serilog",
+    ///             "Sentry",
+    ///         ],
+    ///         "WriteTo": [{
+    ///                 "Name": "Sentry",
+    ///                 "Args": {
+    ///                     "minimumEventLevel": "Error",
+    ///                     "minimumBreadcrumbLevel": "Verbose",
+    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"///
+    ///                 }
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    public static LoggerConfiguration Sentry(
+        this LoggerSinkConfiguration loggerConfiguration,
+        LogEventLevel? minimumEventLevel,
+        LogEventLevel? minimumBreadcrumbLevel,
+        IFormatProvider? formatProvider,
+        ITextFormatter? textFormatter
+        )
+    {
+        return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
+            null,
+            minimumEventLevel,
+            minimumBreadcrumbLevel,
+            formatProvider,
+            textFormatter));
     }
 
     internal static void ConfigureSentrySerilogOptions(
         SentrySerilogOptions sentrySerilogOptions,
-        string? dsn = null,
+        string? dsn,
         LogEventLevel? minimumEventLevel = null,
         LogEventLevel? minimumBreadcrumbLevel = null,
         IFormatProvider? formatProvider = null,
@@ -159,131 +201,44 @@ public static class SentrySinkExtensions
         SentryLevel? diagnosticLevel = null,
         ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
-        bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
     {
-        if (dsn is not null)
-        {
-            sentrySerilogOptions.Dsn = dsn;
-        }
-
-        if (minimumEventLevel.HasValue)
-        {
-            sentrySerilogOptions.MinimumEventLevel = minimumEventLevel.Value;
-        }
-
-        if (minimumBreadcrumbLevel.HasValue)
-        {
-            sentrySerilogOptions.MinimumBreadcrumbLevel = minimumBreadcrumbLevel.Value;
-        }
-
-        if (formatProvider != null)
-        {
-            sentrySerilogOptions.FormatProvider = formatProvider;
-        }
-
-        if (textFormatter != null)
-        {
-            sentrySerilogOptions.TextFormatter = textFormatter;
-        }
-
-        if (sendDefaultPii.HasValue)
-        {
-            sentrySerilogOptions.SendDefaultPii = sendDefaultPii.Value;
-        }
-
-        if (isEnvironmentUser.HasValue)
-        {
-            sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser.Value;
-        }
-
-        if (!string.IsNullOrWhiteSpace(serverName))
-        {
-            sentrySerilogOptions.ServerName = serverName;
-        }
-
-        if (attachStackTrace.HasValue)
-        {
-            sentrySerilogOptions.AttachStacktrace = attachStackTrace.Value;
-        }
-
-        if (maxBreadcrumbs.HasValue)
-        {
-            sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs.Value;
-        }
-
-        if (sampleRate.HasValue)
-        {
-            sentrySerilogOptions.SampleRate = sampleRate;
-        }
-
-        if (!string.IsNullOrWhiteSpace(release))
-        {
-            sentrySerilogOptions.Release = release;
-        }
-
-        if (!string.IsNullOrWhiteSpace(environment))
-        {
-            sentrySerilogOptions.Environment = environment;
-        }
-
-        if (maxQueueItems.HasValue)
-        {
-            sentrySerilogOptions.MaxQueueItems = maxQueueItems.Value;
-        }
-
-        if (shutdownTimeout.HasValue)
-        {
-            sentrySerilogOptions.ShutdownTimeout = shutdownTimeout.Value;
-        }
-
-        if (decompressionMethods.HasValue)
-        {
-            sentrySerilogOptions.DecompressionMethods = decompressionMethods.Value;
-        }
-
-        if (requestBodyCompressionLevel.HasValue)
-        {
-            sentrySerilogOptions.RequestBodyCompressionLevel = requestBodyCompressionLevel.Value;
-        }
-
-        if (requestBodyCompressionBuffered.HasValue)
-        {
-            sentrySerilogOptions.RequestBodyCompressionBuffered = requestBodyCompressionBuffered.Value;
-        }
-
-        if (debug.HasValue)
-        {
-            sentrySerilogOptions.Debug = debug.Value;
-        }
-
-        if (diagnosticLevel.HasValue)
-        {
-            sentrySerilogOptions.DiagnosticLevel = diagnosticLevel.Value;
-        }
-
-        if (reportAssembliesMode.HasValue)
-        {
-            sentrySerilogOptions.ReportAssembliesMode = reportAssembliesMode.Value;
-        }
-
-        if (deduplicateMode.HasValue)
-        {
-            sentrySerilogOptions.DeduplicateMode = deduplicateMode.Value;
-        }
+        sentrySerilogOptions.Dsn = dsn ?? sentrySerilogOptions.Dsn;
+        sentrySerilogOptions.MinimumEventLevel = minimumEventLevel ?? sentrySerilogOptions.MinimumEventLevel;
+        sentrySerilogOptions.MinimumBreadcrumbLevel = minimumBreadcrumbLevel ?? sentrySerilogOptions.MinimumBreadcrumbLevel;
+        sentrySerilogOptions.FormatProvider = formatProvider ?? sentrySerilogOptions.FormatProvider;
+        sentrySerilogOptions.TextFormatter = textFormatter ?? sentrySerilogOptions.TextFormatter;
+        sentrySerilogOptions.SendDefaultPii = sendDefaultPii ?? sentrySerilogOptions.SendDefaultPii;
+        sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser ?? sentrySerilogOptions.IsEnvironmentUser;
+        sentrySerilogOptions.ServerName = NonNullOrWhiteSpaceOrDefault(serverName, sentrySerilogOptions.ServerName);
+        sentrySerilogOptions.AttachStacktrace = attachStackTrace ?? sentrySerilogOptions.AttachStacktrace;
+        sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs ?? sentrySerilogOptions.MaxBreadcrumbs;
+        sentrySerilogOptions.SampleRate = sampleRate ?? sentrySerilogOptions.SampleRate;
+        sentrySerilogOptions.Release = NonNullOrWhiteSpaceOrDefault(release, sentrySerilogOptions.Release);
+        sentrySerilogOptions.Environment = NonNullOrWhiteSpaceOrDefault(environment, sentrySerilogOptions.Environment);
+        sentrySerilogOptions.MaxQueueItems = maxQueueItems ?? sentrySerilogOptions.MaxQueueItems;
+        sentrySerilogOptions.ShutdownTimeout = shutdownTimeout ?? sentrySerilogOptions.ShutdownTimeout;
+        sentrySerilogOptions.DecompressionMethods = decompressionMethods ?? sentrySerilogOptions.DecompressionMethods;
+        sentrySerilogOptions.RequestBodyCompressionLevel = requestBodyCompressionLevel ?? sentrySerilogOptions.RequestBodyCompressionLevel;
+        sentrySerilogOptions.RequestBodyCompressionBuffered = requestBodyCompressionBuffered ?? sentrySerilogOptions.RequestBodyCompressionBuffered;
+        sentrySerilogOptions.Debug = debug ?? sentrySerilogOptions.Debug;
+        sentrySerilogOptions.DiagnosticLevel = diagnosticLevel ?? sentrySerilogOptions.DiagnosticLevel;
+        sentrySerilogOptions.ReportAssembliesMode = reportAssembliesMode ?? sentrySerilogOptions.ReportAssembliesMode;
+        sentrySerilogOptions.DeduplicateMode = deduplicateMode ?? sentrySerilogOptions.DeduplicateMode;
 
         // Serilog-specific items
-        if (initializeSdk.HasValue)
-        {
-            sentrySerilogOptions.InitializeSdk = initializeSdk.Value;
-        }
-
-        if (defaultTags?.Any() == true)
+        sentrySerilogOptions.InitializeSdk = dsn is not null;
+        if (defaultTags?.Count > 0)
         {
             foreach (var tag in defaultTags)
             {
                 sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
             }
+        }
+
+        string? NonNullOrWhiteSpaceOrDefault(string? value, string? defaultValue)
+        {
+            return string.IsNullOrWhiteSpace(value) ? defaultValue : value;
         }
     }
 

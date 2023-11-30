@@ -5,7 +5,6 @@ namespace Sentry.Serilog
     {
         public SentrySerilogOptions() { }
         public System.IFormatProvider? FormatProvider { get; set; }
-        public bool InitializeSdk { get; set; }
         public Serilog.Events.LogEventLevel MinimumBreadcrumbLevel { get; set; }
         public Serilog.Events.LogEventLevel MinimumEventLevel { get; set; }
         public Serilog.Formatting.ITextFormatter? TextFormatter { get; set; }
@@ -16,11 +15,12 @@ namespace Serilog
     public static class SentrySinkExtensions
     {
         public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, System.Action<Sentry.Serilog.SentrySerilogOptions> configureOptions) { }
+        public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, Serilog.Events.LogEventLevel? minimumEventLevel, Serilog.Events.LogEventLevel? minimumBreadcrumbLevel, System.IFormatProvider? formatProvider, Serilog.Formatting.ITextFormatter? textFormatter) { }
         public static Serilog.LoggerConfiguration Sentry(
                     this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration,
-                    string? dsn = null,
-                    Serilog.Events.LogEventLevel minimumBreadcrumbLevel = 2,
-                    Serilog.Events.LogEventLevel minimumEventLevel = 4,
+                    string dsn,
+                    Serilog.Events.LogEventLevel? minimumBreadcrumbLevel = default,
+                    Serilog.Events.LogEventLevel? minimumEventLevel = default,
                     System.IFormatProvider? formatProvider = null,
                     Serilog.Formatting.ITextFormatter? textFormatter = null,
                     bool? sendDefaultPii = default,
@@ -40,7 +40,6 @@ namespace Serilog
                     Sentry.SentryLevel? diagnosticLevel = default,
                     Sentry.ReportAssembliesMode? reportAssembliesMode = default,
                     Sentry.DeduplicateMode? deduplicateMode = default,
-                    bool? initializeSdk = default,
                     System.Collections.Generic.Dictionary<string, string>? defaultTags = null) { }
     }
 }
