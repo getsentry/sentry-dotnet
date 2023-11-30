@@ -51,7 +51,9 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 
             // Strangely enough, process.InputStream is the *output* of the command
             if (process?.InputStream is null)
+            {
                 return @event;
+            }
 
             // We write the logcat logs to a file so we can attach it
             using var output = Application.Context.OpenFileOutput("sentry_logcat.txt", FileCreationMode.Private);
