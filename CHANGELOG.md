@@ -185,6 +185,7 @@ There are some functional differences when publishing Native AOT:
 - `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these enhanced stack traces relies heavily on reflection which isn't compatible with trimming.
 - Reflection cannot be leveraged for JSON Serialization and you may need to use `SentryOptions.AddJsonSerializerContext` to supply a serialization context for types that you'd like to send to Sentry (e.g. in the `Span.Context`). ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732), [#2793](https://github.com/getsentry/sentry-dotnet/pull/2793))
 - WinUI applications: when publishing Native AOT, Sentry isn't able to automatically register an unhandled exception handler  because that relies on reflection. You'll need to [register the unhandled event handler manually](https://github.com/getsentry/sentry-dotnet/issues/2778) instead.
+- For Azure Functions Workers, when AOT/Trimming is enabled we can't use reflection to read route data from the HttpTrigger so the route name will always be `/api/<FUNCTION_NAME>` ([#2920](https://github.com/getsentry/sentry-dotnet/pull/2920))
 
 ### Dependencies
 
