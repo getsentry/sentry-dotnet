@@ -224,14 +224,21 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="source"/>.
     /// </summary>
-    internal static EnvelopeItem FromProfileInfo(Task<ProfileInfo> source)
+    internal static EnvelopeItem FromProfileInfo(object source)
     {
         var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
         {
             [TypeKey] = TypeValueProfile
         };
 
-        return new EnvelopeItem(header, AsyncJsonSerializable.CreateFrom(source));
+        ISerializable payload = source switch
+        {
+            ISerializable serializable => serializable,
+            Task<IJsonSerializable> task => AsyncJsonSerializable.CreateFrom(task),
+            _ => throw new ArgumentException("Unsupported profile info source type.", nameof(source))
+        };
+
+        return new EnvelopeItem(header, payload);
     }
 
     /// <summary>

@@ -96,11 +96,11 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     /// <inheritdoc />
-    public async Task<ProfileInfo> CollectAsync(Transaction transaction)
+    public async object Collect(Transaction transaction)
     {
         if (!_stopped)
         {
-            throw new InvalidOperationException("Profiler.CollectAsync() called before Finish()");
+            throw new InvalidOperationException("Profiler.Collect() called before Finish()");
         }
 
         // Wait for the last sample (<= _endTimeMs), or at most 1 second. The timeout shouldn't happen because

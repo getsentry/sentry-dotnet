@@ -8,6 +8,7 @@ internal struct SentryStopwatch
 {
     private static readonly double StopwatchTicksPerTimeSpanTick =
         (double)Stopwatch.Frequency / TimeSpan.TicksPerSecond;
+    private static readonly double StopwatchTicksPerNs = (double)Stopwatch.Frequency / 1000000000.0;
 
     private long _startTimestamp;
     private DateTimeOffset _startDateTimeOffset;
@@ -21,14 +22,15 @@ internal struct SentryStopwatch
     public DateTimeOffset StartDateTimeOffset => _startDateTimeOffset;
     public DateTimeOffset CurrentDateTimeOffset => _startDateTimeOffset + Elapsed;
 
+    private long Diff() => Stopwatch.GetTimestamp() - _startTimestamp;
+
     public TimeSpan Elapsed
     {
-        get
-        {
-            var now = Stopwatch.GetTimestamp();
-            var diff = now - _startTimestamp;
-            var ticks = (long)(diff / StopwatchTicksPerTimeSpanTick);
-            return TimeSpan.FromTicks(ticks);
-        }
+        get => TimeSpan.FromTicks((long)(Diff() / StopwatchTicksPerTimeSpanTick));
+    }
+
+    public ulong ElapsedNanoseconds
+    {
+        get => (ulong)(Diff() / StopwatchTicksPerNs);
     }
 }

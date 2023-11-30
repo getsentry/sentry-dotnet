@@ -154,6 +154,7 @@ internal class Hub : IHub, IDisposable
                 transaction.SampleRate = sampleRate;
             }
 
+            // TODO profileSampleRate
             if (transaction.IsSampled is true && _options.TransactionProfilerFactory is { } profilerFactory)
             {
                 // TODO cancellation token based on Hub being closed?
@@ -200,7 +201,7 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
-        if (GetSpan() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc } )
+        if (GetSpan() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc })
         {
             return dsc.ToBaggageHeader();
         }

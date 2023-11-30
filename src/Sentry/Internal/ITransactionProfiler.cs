@@ -26,5 +26,6 @@ internal interface ITransactionProfiler
     /// <summary>
     /// Process and collect the profile.
     /// </summary>
-    Task<ProfileInfo> CollectAsync(Transaction transaction);
+    /// <returns>The collected profile. See EnvelopeItem.FromProfileInfo() for supported return types.</returns>
+    object Collect(Transaction transaction);
 }

@@ -187,6 +187,7 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
         options.ScopeObserver = new IosScopeObserver(options);
+        options.TransactionProfilerFactory = new CocoaProfilerFactory(options);
 
         // TODO: Pause/Resume
     }
