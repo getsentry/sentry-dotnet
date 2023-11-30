@@ -41,7 +41,9 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             if (_logCatIntegrationType == LogCatIntegrationType.Unhandled)
             {
                 if (!@event.HasTerminalException())
+                {
                     return @event;
+                }
             }
 
             // We run the logcat command via the runtime
