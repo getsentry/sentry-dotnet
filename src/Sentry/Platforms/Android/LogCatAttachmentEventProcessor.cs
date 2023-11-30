@@ -7,18 +7,20 @@ namespace Sentry.Android;
 
 internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 {
-    private static bool _sendLogcatLogs = true;
+    private static bool SendLogcatLogs = true;
     private readonly LogCatIntegrationType _logCatIntegrationType;
+    private readonly IDiagnosticLogger? _diagnosticLogger;
 
-    public LogCatAttachmentEventProcessor(LogCatIntegrationType logCatIntegrationType)
+    public LogCatAttachmentEventProcessor(LogCatIntegrationType logCatIntegrationType, IDiagnosticLogger? diagnosticLogger)
     {
         _logCatIntegrationType = logCatIntegrationType;
+        _diagnosticLogger = diagnosticLogger;
     }
 
-    public SentryEvent? Process(SentryEvent @event, Hint hint)
+    public SentryEvent Process(SentryEvent @event, Hint hint)
     {
         // If sending has failed once, we have to disable this feature to prevent infinite loops and to allow the SDK to work otherwise
-        if (!_sendLogcatLogs)
+        if (!SendLogcatLogs)
         {
             return @event;
         }
@@ -26,14 +28,21 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
         // The logcat command only works on Android API 23 and above
         if (!OperatingSystem.IsAndroidVersionAtLeast(23))
         {
-            _sendLogcatLogs = false;
+            SendLogcatLogs = false;
             return @event;
         }
 
         try
         {
-            if (_logCatIntegrationType != LogCatIntegrationType.All && @event.Exception is null)
+            if (_logCatIntegrationType != LogCatIntegrationType.All && (@event.SentryExceptions?.Any() ?? false))
             {
+                return @event;
+            }
+
+            var filesDir = Application.Context.FilesDir;
+            if (filesDir == null)
+            {
+                _diagnosticLogger?.LogWarning("Failed to get files directory");
                 return @event;
             }
 
@@ -58,27 +67,29 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             // We write the logcat logs to a file so we can attach it
             using var output = Application.Context.OpenFileOutput("sentry_logcat.txt", FileCreationMode.Private);
             if (output is null)
+            {
                 return @event;
+            }
 
             process.InputStream.CopyTo(output);
             process.WaitFor();
 
-            hint.AddAttachment(Application.Context.FilesDir!.Path + "/sentry_logcat.txt", AttachmentType.Default, "text/logcat");
+            hint.AddAttachment(filesDir!.Path + "/sentry_logcat.txt", AttachmentType.Default, "text/logcat");
 
             return @event;
         }
         catch (Exception e) // Catch all exceptions to prevent crashing the app during logging
         {
             // Disable the feature if it fails once
-            _sendLogcatLogs = false;
+            SendLogcatLogs = false;
 
             // Log the failure to Sentry
-            SentrySdk.CaptureException(e);
+            _diagnosticLogger?.LogError(e, "Failed to send logcat logs");
             return @event;
         }
     }
 
-    public SentryEvent? Process(SentryEvent @event)
+    public SentryEvent Process(SentryEvent @event)
     {
         return Process(@event, new Hint());
     }
