@@ -1,3 +1,5 @@
+using Sentry.Android;
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 
@@ -195,6 +197,12 @@ public partial class SentryOptions
         /// The default value is 5 seconds.
         /// </summary>
         public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
+        /// <summary>
+        /// Gets or sets whether when LogCat logs are attached to events.
+        /// The default is <see cref="LogCatIntegrationType.Unhandled"/>
+        /// </summary>
+        public LogCatIntegrationType LogCatIntegration { get; set; } = LogCatIntegrationType.Unhandled;
 
 
         // ---------- Other ----------

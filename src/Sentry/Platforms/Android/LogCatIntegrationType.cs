@@ -1,4 +1,4 @@
-namespace Sentry.Maui;
+namespace Sentry.Android;
 
 /// <summary>
 /// Configures when to attach LogCat logs to events.

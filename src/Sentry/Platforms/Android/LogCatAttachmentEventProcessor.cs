@@ -1,17 +1,16 @@
-#if ANDROID
 using Sentry.Extensibility;
 using Runtime = Java.Lang.Runtime;
 using Android.Content;
 using Application = Android.App.Application;
 
-namespace Sentry.Maui.Internal;
+namespace Sentry.Android;
 
-internal class SentryAndroidLogsEventProcessor : ISentryEventProcessorWithHint
+internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 {
     private static bool _sendLogcatLogs = true;
     private readonly LogCatIntegrationType _logCatIntegrationType;
 
-    public SentryAndroidLogsEventProcessor(LogCatIntegrationType logCatIntegrationType)
+    public LogCatAttachmentEventProcessor(LogCatIntegrationType logCatIntegrationType)
     {
         _logCatIntegrationType = logCatIntegrationType;
     }
@@ -37,9 +36,9 @@ internal class SentryAndroidLogsEventProcessor : ISentryEventProcessorWithHint
                 return @event;
 
             // Only send logcat logs if the event is unhandled if the integration is set to Unhandled
-            if(_logCatIntegrationType == LogCatIntegrationType.Unhandled)
+            if (_logCatIntegrationType == LogCatIntegrationType.Unhandled)
             {
-                if(!@event.HasTerminalException())
+                if (!@event.HasTerminalException())
                     return @event;
             }
 
@@ -78,4 +77,3 @@ internal class SentryAndroidLogsEventProcessor : ISentryEventProcessorWithHint
         return Process(@event, new Hint());
     }
 }
-#endif

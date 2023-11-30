@@ -19,7 +19,6 @@ public class SentryMauiOptions : SentryLoggingOptions
 
         AutoSessionTracking = true;
         DetectStartupTime = StartupTimeDetectionMode.Fast;
-        LogCatIntegration = LogCatIntegrationType.Unhandled;
 #if !PLATFORM_NEUTRAL
         CacheDirectoryPath = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
 #endif
@@ -50,10 +49,4 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// The default is <c>false</c> (exclude).
     /// </summary>
     public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether when LogCat logs are attached to events.
-    /// The default is <see cref="LogCatIntegrationType.Unhandled"/>
-    /// </summary>
-    public LogCatIntegrationType LogCatIntegration { get; set; }
 }
