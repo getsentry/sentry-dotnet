@@ -134,7 +134,7 @@ public static class SentryMauiAppBuilderExtensions
         }
 
         // Bind the events
-        var binder = services.GetRequiredService<MauiEventsBinder>();
+        var binder = services.GetRequiredService<IMauiEventsBinder>();
         binder.HandleApplicationEvents(application, bind);
     }
 }
