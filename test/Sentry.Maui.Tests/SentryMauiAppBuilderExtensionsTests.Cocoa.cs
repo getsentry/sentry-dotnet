@@ -32,7 +32,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
                 del.Invoke(null!, launchOptions));
 
         // Assert
-        binder.Received(1).BindApplicationEvents(application);
+        binder.Received(1).HandleApplicationEvents(application);
     }
 
     private class MockIosApplication : NSObject, IPlatformApplication

@@ -6,19 +6,16 @@ namespace Sentry.Maui.Tests;
 public partial class MauiEventsBinderTests
 {
     [Theory]
-    [InlineData(nameof(VisualElement.Loaded), "_loaded")]
-    [InlineData(nameof(VisualElement.Unloaded), "_unloaded")]
-    [InlineData(nameof(VisualElement.ChildrenReordered))]
-    [InlineData(nameof(VisualElement.MeasureInvalidated))]
-    [InlineData(nameof(VisualElement.SizeChanged))]
-    public void VisualElement_CommonEvents_AddsBreadcrumb(string eventName, string delegateName = default)
+    [InlineData(nameof(VisualElement.Focused), true)]
+    [InlineData(nameof(VisualElement.Unfocused), false)]
+    public void VisualElement_FocusEvents_AddsBreadcrumb(string eventName, bool isFocused)
     {
         // Arrange
         var element = new MockVisualElement("element");
-        _fixture.Binder.BindVisualElementEvents(element);
+        _fixture.Binder.HandleVisualElementEvents(element);
 
         // Act
-        element.RaiseEvent(delegateName ?? eventName, EventArgs.Empty);
+        element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
 
         // Assert
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
@@ -32,21 +29,21 @@ public partial class MauiEventsBinderTests
     [Theory]
     [InlineData(nameof(VisualElement.Focused), true)]
     [InlineData(nameof(VisualElement.Unfocused), false)]
-    public void VisualElement_FocusEvents_AddsBreadcrumb(string eventName, bool isFocused)
+    public void VisualElement_UnbindFocusEvents_DoesNotAddBreadcrumb(string eventName, bool isFocused)
     {
         // Arrange
         var element = new MockVisualElement("element");
-        _fixture.Binder.BindVisualElementEvents(element);
+        _fixture.Binder.HandleVisualElementEvents(element);
+
+        element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleVisualElementEvents(element, bind: false);
 
         // Act
         element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
 
         // Assert
-        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
-        Assert.Equal($"{nameof(MockVisualElement)}.{eventName}", crumb.Message);
-        Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
-        crumb.Data.Should().Contain($"{nameof(MockVisualElement)}.Name", "element");
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
     }
 }

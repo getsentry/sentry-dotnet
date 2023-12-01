@@ -78,27 +78,46 @@ public static class SentryMauiAppBuilderExtensions
         builder.ConfigureLifecycleEvents(events =>
         {
 #if __IOS__
-            events.AddiOS(lifecycle => lifecycle.WillFinishLaunching((application, launchOptions) =>
+            events.AddiOS(lifecycle =>
             {
-                // A bit of hackery here, because we can't mock UIKit.UIApplication in tests.
-                var platformApplication = application != null!
-                    ? application.Delegate as IPlatformApplication
-                    : launchOptions["application"] as IPlatformApplication;
+                lifecycle.WillFinishLaunching((application, launchOptions) =>
+                {
+                    // A bit of hackery here, because we can't mock UIKit.UIApplication in tests.
+                    var platformApplication = application != null!
+                        ? application.Delegate as IPlatformApplication
+                        : launchOptions["application"] as IPlatformApplication;
 
-                platformApplication?.BindMauiEvents();
-                return true;
-            }));
+                    platformApplication?.HandleMauiEvents();
+                    return true;
+                });
+                lifecycle.WillTerminate(application =>
+                {
+                    if (application == null!)
+                    {
+                        return;
+                    }
+
+                    var platformApplication = application.Delegate as IPlatformApplication;
+                    platformApplication?.HandleMauiEvents(bind: false);
+                });
+            });
 #elif ANDROID
-            events.AddAndroid(lifecycle => lifecycle.OnApplicationCreating(application =>
-                (application as IPlatformApplication)?.BindMauiEvents()));
+            events.AddAndroid(lifecycle =>
+            {
+                lifecycle.OnApplicationCreating(application => (application as IPlatformApplication)?.HandleMauiEvents());
+                lifecycle.OnDestroy(application => (application as IPlatformApplication)?.HandleMauiEvents(bind: false));
+            });
 #elif WINDOWS
-            events.AddWindows(lifecycle => lifecycle.OnLaunching((application, _) =>
-                (application as IPlatformApplication)?.BindMauiEvents()));
+            events.AddWindows(lifecycle =>
+            {
+                lifecycle.OnLaunching((application, _) => (application as IPlatformApplication)?.HandleMauiEvents());
+                lifecycle.OnClosed((application, _) => (application as IPlatformApplication)?.HandleMauiEvents(bind: false));
+            });
 #endif
         });
     }
 
-    private static void BindMauiEvents(this IPlatformApplication platformApplication)
+    private static void HandleMauiEvents(this IPlatformApplication platformApplication, bool bind = true)
     {
         // We need to resolve the application manually, because it's not necessarily
         // set on platformApplication.Application at this point in the lifecycle.
@@ -116,6 +135,6 @@ public static class SentryMauiAppBuilderExtensions
 
         // Bind the events
         var binder = services.GetRequiredService<IMauiEventsBinder>();
-        binder.BindApplicationEvents(application);
+        binder.HandleApplicationEvents(application, bind);
     }
 }

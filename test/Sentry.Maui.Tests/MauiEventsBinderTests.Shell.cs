@@ -12,7 +12,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "shell"
         };
-        _fixture.Binder.BindShellEvents(shell);
+        _fixture.Binder.HandleShellEvents(shell);
 
         var current = new ShellNavigationState("foo");
         var target = new ShellNavigationState("bar");
@@ -34,6 +34,32 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
+    public void Shell_UnbindNavigating_DoesNotAddBreadcrumb()
+    {
+        // Arrange
+        var shell = new Shell
+        {
+            StyleId = "shell"
+        };
+        _fixture.Binder.HandleShellEvents(shell);
+
+        var current = new ShellNavigationState("foo");
+        var target = new ShellNavigationState("bar");
+        const ShellNavigationSource source = ShellNavigationSource.Push;
+
+        shell.RaiseEvent(nameof(Shell.Navigating), new ShellNavigatingEventArgs(current, target, source, false));
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleShellEvents(shell, bind: false);
+
+        // Act
+        shell.RaiseEvent(nameof(Shell.Navigating), new ShellNavigatingEventArgs(target, current, source, false));
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+    }
+
+    [Fact]
     public void Shell_Navigated_AddsBreadcrumb()
     {
         // Arrange
@@ -41,7 +67,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "shell"
         };
-        _fixture.Binder.BindShellEvents(shell);
+        _fixture.Binder.HandleShellEvents(shell);
 
         var previous = new ShellNavigationState("foo");
         var current = new ShellNavigationState("bar");
@@ -60,5 +86,31 @@ public partial class MauiEventsBinderTests
         crumb.Data.Should().Contain($"from", "foo");
         crumb.Data.Should().Contain($"to", "bar");
         crumb.Data.Should().Contain($"Source", "Push");
+    }
+
+    [Fact]
+    public void Shell_UnbindNavigated_DoesNotAddBreadcrumb()
+    {
+        // Arrange
+        var shell = new Shell
+        {
+            StyleId = "shell"
+        };
+        _fixture.Binder.HandleShellEvents(shell);
+
+        var previous = new ShellNavigationState("foo");
+        var current = new ShellNavigationState("bar");
+        const ShellNavigationSource source = ShellNavigationSource.Push;
+
+        shell.RaiseEvent(nameof(Shell.Navigated), new ShellNavigatedEventArgs(previous, current, source));
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandleShellEvents(shell, bind: false);
+
+        // Act
+        shell.RaiseEvent(nameof(Shell.Navigated), new ShellNavigatedEventArgs(current, previous, source));
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
     }
 }
