@@ -16,6 +16,6 @@ internal class BindableSentryMauiOptions : BindableSentryLoggingOptions
         options.IncludeTextInBreadcrumbs = IncludeTextInBreadcrumbs ?? options.IncludeTextInBreadcrumbs;
         options.IncludeTitleInBreadcrumbs = IncludeTitleInBreadcrumbs ?? options.IncludeTitleInBreadcrumbs;
         options.IncludeBackgroundingStateInBreadcrumbs = IncludeBackgroundingStateInBreadcrumbs?? options.IncludeBackgroundingStateInBreadcrumbs;
-        options.CreateElementEventsBreadcrumbs = CreateElementEventsBreadcrumbs?? options.CreateElementEventsBreadcrumbs;
+        options.CreateElementEventsBreadcrumbs = CreateElementEventsBreadcrumbs ?? options.CreateElementEventsBreadcrumbs;
     }
 }
