@@ -27,6 +27,7 @@ internal class SerializableNSObject : ISerializable
         // TODO can we pipe NSOutputStream directly? It can be passed as a second argument
         // TODO how do we check if the error happened? Is it non-null? Then we can rethrow as NSErrorException?
         var data = NSJsonSerialization.Serialize(obj, 0, out NSError error);
-        data.AsStream().CopyTo(stream);
+        using var dataStream = data.AsStream();
+        dataStream.CopyTo(stream);
     }
 }
