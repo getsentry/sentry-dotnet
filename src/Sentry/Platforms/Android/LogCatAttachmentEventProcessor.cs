@@ -34,7 +34,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 
         try
         {
-            if (_logCatIntegrationType != LogCatIntegrationType.All && (@event.SentryExceptions?.Any() ?? false))
+            if (_logCatIntegrationType != LogCatIntegrationType.All && !@event.HasException())
             {
                 return @event;
             }
