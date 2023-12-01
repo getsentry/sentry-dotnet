@@ -48,7 +48,7 @@ Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project,
 ```xml
 <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
-  <Import Project="Platforms\iOS\Sentry.iOS.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+  <Import Project="Platforms\Cocoa\Sentry.Cocoa.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 ```
 
 These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK (which provide .NET wrappers around native Android or Cocoa functions).

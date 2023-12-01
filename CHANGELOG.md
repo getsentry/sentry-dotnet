@@ -10,15 +10,16 @@
 
 #### Removed APIs
 
-- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
-
-### Fixes
-
-- Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
+- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902))
 
 #### Changed APIs
 
 - `AssemblyExtensions` have been made public again. ([#2917](https://github.com/getsentry/sentry-dotnet/pull/2917))
+- Rename iOS and MacCatalyst platform specific options from `iOS` to `Cocoa` ([#2929](https://github.com/getsentry/sentry-dotnet/pull/2929))
+
+### Fixes
+
+- Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
 
 ### Dependencies
 

@@ -1,21 +1,21 @@
-using Sentry.iOS.Extensions;
+using Sentry.Cocoa.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry.iOS;
+namespace Sentry.Cocoa;
 
-internal sealed class IosScopeObserver : IScopeObserver
+internal sealed class CocoaScopeObserver : IScopeObserver
 {
     private readonly SentryOptions _options;
     private readonly IScopeObserver? _innerObserver;
 
-    public IosScopeObserver(SentryOptions options)
+    public CocoaScopeObserver(SentryOptions options)
     {
         _options = options;
 
         // Chain any previous observer, but guard against circular reference.
         var observer = options.ScopeObserver;
-        _innerObserver = observer is IosScopeObserver ? null : observer;
+        _innerObserver = observer is CocoaScopeObserver ? null : observer;
     }
 
     public void AddBreadcrumb(Breadcrumb breadcrumb)

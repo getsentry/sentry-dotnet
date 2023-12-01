@@ -1,13 +1,13 @@
 using Sentry.Extensibility;
-using Sentry.iOS.Extensions;
+using Sentry.Cocoa.Extensions;
 
-namespace Sentry.iOS;
+namespace Sentry.Cocoa;
 
-internal class IosEventProcessor : ISentryEventProcessor, IDisposable
+internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable
 {
     private readonly SentryCocoaOptions _options;
 
-    public IosEventProcessor(SentryCocoaOptions options)
+    public CocoaEventProcessor(SentryCocoaOptions options)
     {
         _options = options;
     }
