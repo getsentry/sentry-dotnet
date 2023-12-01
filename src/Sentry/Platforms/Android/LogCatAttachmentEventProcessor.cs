@@ -1,7 +1,5 @@
 using Sentry.Extensibility;
 using Runtime = Java.Lang.Runtime;
-using Android.Content;
-using Application = Android.App.Application;
 
 namespace Sentry.Android;
 
