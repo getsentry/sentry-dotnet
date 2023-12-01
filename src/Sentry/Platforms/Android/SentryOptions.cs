@@ -208,6 +208,7 @@ public partial class SentryOptions
         /// Gets or sets the maximum number of lines to read from LogCat logs.
         /// The default value is 1000.
         /// </summary>
+        /// <seealso cref="LogCatIntegration" />
         public int LogCatMaxLines { get; set; } = 1000;
 
 
