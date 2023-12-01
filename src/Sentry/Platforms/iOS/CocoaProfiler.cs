@@ -36,10 +36,19 @@ internal class CocoaProfiler : ITransactionProfiler
 
     public ISerializable Collect(Transaction transaction)
     {
-        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_starTimeNs, _endTimeNs, _cocoaTraceId);
-        ArgumentNullException.ThrowIfNull(payload, "profile payload");
-
+        // TODO change return type of CocoaSDKs CollectProfileBetween to NSMutableDictionary
+        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_starTimeNs, _endTimeNs, _cocoaTraceId)?.MutableCopy() as NSMutableDictionary;
         _options.LogDebug("Trace {0} profile payload collected", _traceId);
+
+        ArgumentNullException.ThrowIfNull(payload, "profile payload");
+        payload["timestamp"] = transaction.StartTimestamp.ToString("o", CultureInfo.InvariantCulture).ToNSString();
+
+        var payloadTx = payload["transaction"]?.MutableCopy() as NSMutableDictionary;
+        ArgumentNullException.ThrowIfNull(payloadTx, "profile payload transaction");
+        payloadTx["id"] = transaction.EventId.ToString().ToNSString();
+        payloadTx["trace_id"] = _traceId.ToString().ToNSString();
+        payloadTx["name"] = transaction.Name.ToNSString();
+        payload["transaction"] = payloadTx;
         return new SerializableNSObject(payload);
     }
 }

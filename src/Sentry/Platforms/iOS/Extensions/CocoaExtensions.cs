@@ -8,6 +8,8 @@ internal static class CocoaExtensions
 
     public static NSDate ToNSDate(this DateTimeOffset timestamp) => (NSDate)timestamp.UtcDateTime;
 
+    public static NSString ToNSString(this string str) => new NSString(str);
+
     public static string? ToJsonString(this NSObject? obj, IDiagnosticLogger? logger = null)
     {
         using var data = obj.ToJsonData(logger);
