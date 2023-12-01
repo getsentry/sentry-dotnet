@@ -99,7 +99,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     public Protocol.Envelopes.ISerializable Collect(Transaction transaction)
         => Protocol.Envelopes.AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
 
-    private async Task<ProfileInfo> CollectAsync(Transaction transaction)
+    internal async Task<ProfileInfo> CollectAsync(Transaction transaction)
     {
         if (!_stopped)
         {

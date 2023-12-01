@@ -78,7 +78,7 @@ public class SamplingTransactionProfilerTests
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
         var transaction = new Transaction(transactionTracer);
-        var collectTask = sut.CollectAsync(transaction);
+        var collectTask = (sut as SamplingTransactionProfiler).CollectAsync(transaction);
         collectTask.Wait();
         var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
