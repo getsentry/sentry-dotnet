@@ -14,6 +14,8 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 
     public LogCatAttachmentEventProcessor(IDiagnosticLogger? diagnosticLogger, LogCatIntegrationType logCatIntegrationType, int maxLines = 1000)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxLines);
+
         _diagnosticLogger = diagnosticLogger;
         _logCatIntegrationType = logCatIntegrationType;
         _maxLines = maxLines;
@@ -41,14 +43,6 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
                 return @event;
             }
 
-            var filesDir = Application.Context.FilesDir;
-            if (filesDir == null)
-            {
-                _diagnosticLogger?.LogWarning("LogCat: Failed to get files directory");
-                SendLogcatLogs = false;
-                return @event;
-            }
-
             // Only send logcat logs if the event is unhandled if the integration is set to Unhandled
             if (_logCatIntegrationType == LogCatIntegrationType.Unhandled)
             {
@@ -67,18 +61,22 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
                 return @event;
             }
 
-            var fileName = $"sentry_logcat_{Thread.CurrentThread.ManagedThreadId}.txt";
-            // We write the logcat logs to a file so we can attach it
-            using var output = Application.Context.OpenFileOutput(fileName, FileCreationMode.Private);
-            if (output is null)
-            {
-                return @event;
-            }
+            // We write the logcat logs to a memory stream so we can attach it
+            using var output = new MemoryStream();
 
             process.InputStream.CopyTo(output);
             process.WaitFor();
 
-            hint.AddAttachment($"{filesDir.Path}/{fileName}", AttachmentType.Default, "text/logcat");
+            // Flush the stream to make sure all data is written
+            process.InputStream.Flush();
+
+            // Reset the position of the stream to the beginning so we can read it
+            output.Seek(0, SeekOrigin.Begin);
+            var bytes = output.ToArray();
+
+            hint.Attachments.Add(new Attachment(AttachmentType.Default, new ByteAttachmentContent(bytes), "logcat.log", "text/logcat"));
+
+            //hint.AddAttachment($"{filesDir.Path}/{fileName}", AttachmentType.Default, "text/logcat");
 
             return @event;
         }
