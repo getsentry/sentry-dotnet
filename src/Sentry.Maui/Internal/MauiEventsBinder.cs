@@ -2,7 +2,12 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Maui.Internal;
 
-internal class MauiEventsBinder
+internal interface IMauiEventsBinder
+{
+    void HandleApplicationEvents(Application application, bool bind = true);
+}
+
+internal class MauiEventsBinder : IMauiEventsBinder
 {
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;

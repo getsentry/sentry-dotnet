@@ -12,7 +12,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
     {
         // Arrange
         var application = MockApplication.Create();
-        var binder = Substitute.For<MauiEventsBinder>();
+        var binder = Substitute.For<IMauiEventsBinder>();
 
         var builder = _fixture.Builder;
         builder.Services.AddSingleton<IApplication>(application);
