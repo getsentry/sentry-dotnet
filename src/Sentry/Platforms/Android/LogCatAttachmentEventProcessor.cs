@@ -10,11 +10,13 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
     private static bool SendLogcatLogs = true;
     private readonly LogCatIntegrationType _logCatIntegrationType;
     private readonly IDiagnosticLogger? _diagnosticLogger;
+    private readonly int _maxLines;
 
-    public LogCatAttachmentEventProcessor(LogCatIntegrationType logCatIntegrationType, IDiagnosticLogger? diagnosticLogger)
+    public LogCatAttachmentEventProcessor(IDiagnosticLogger? diagnosticLogger, LogCatIntegrationType logCatIntegrationType, int maxLines = 1000)
     {
-        _logCatIntegrationType = logCatIntegrationType;
         _diagnosticLogger = diagnosticLogger;
+        _logCatIntegrationType = logCatIntegrationType;
+        _maxLines = maxLines;
     }
 
     public SentryEvent Process(SentryEvent @event, Hint hint)
@@ -43,6 +45,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             if (filesDir == null)
             {
                 _diagnosticLogger?.LogWarning("LogCat: Failed to get files directory");
+                SendLogcatLogs = false;
                 return @event;
             }
 
@@ -56,7 +59,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             }
 
             // We run the logcat command via the runtime
-            var process = Runtime.GetRuntime()?.Exec("logcat -t 1000 *:I");
+            var process = Runtime.GetRuntime()?.Exec($"logcat -t {_maxLines} *:I");
 
             // Strangely enough, process.InputStream is the *output* of the command
             if (process?.InputStream is null)
@@ -64,8 +67,9 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
                 return @event;
             }
 
+            var fileName = $"sentry_logcat_{Thread.CurrentThread.ManagedThreadId}.txt";
             // We write the logcat logs to a file so we can attach it
-            using var output = Application.Context.OpenFileOutput("sentry_logcat.txt", FileCreationMode.Private);
+            using var output = Application.Context.OpenFileOutput(fileName, FileCreationMode.Private);
             if (output is null)
             {
                 return @event;
@@ -74,7 +78,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             process.InputStream.CopyTo(output);
             process.WaitFor();
 
-            hint.AddAttachment(filesDir!.Path + "/sentry_logcat.txt", AttachmentType.Default, "text/logcat");
+            hint.AddAttachment($"{filesDir.Path}/{fileName}", AttachmentType.Default, "text/logcat");
 
             return @event;
         }

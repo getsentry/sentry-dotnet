@@ -190,7 +190,7 @@ public static partial class SentrySdk
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
         if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
         {
-            options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.Android.LogCatIntegration, options.DiagnosticLogger));
+            options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Android.LogCatIntegration, options.Android.LogCatMaxLines));
         }
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
