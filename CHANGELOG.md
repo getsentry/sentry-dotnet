@@ -17,7 +17,12 @@
 
 #### Removed APIs
 
-- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
+- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902))
+
+#### Changed APIs
+
+- `AssemblyExtensions` have been made public again. ([#2917](https://github.com/getsentry/sentry-dotnet/pull/2917))
+- Rename iOS and MacCatalyst platform specific options from `iOS` to `Cocoa` ([#2929](https://github.com/getsentry/sentry-dotnet/pull/2929))
 
 ### Fixes
 
@@ -34,6 +39,9 @@
 - Bump Native SDK from v0.6.5 to v0.6.7 ([#2914](https://github.com/getsentry/sentry-dotnet/pull/2914))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#067)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.6.5...0.6.7)
+- Bump Java SDK from v6.34.0 to v7.0.0 ([#2932](https://github.com/getsentry/sentry-dotnet/pull/2932))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.34.0...7.0.0)
 
 ## 4.0.0-beta.2
 
@@ -196,6 +204,7 @@ There are some functional differences when publishing Native AOT:
 - `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these enhanced stack traces relies heavily on reflection which isn't compatible with trimming.
 - Reflection cannot be leveraged for JSON Serialization and you may need to use `SentryOptions.AddJsonSerializerContext` to supply a serialization context for types that you'd like to send to Sentry (e.g. in the `Span.Context`). ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732), [#2793](https://github.com/getsentry/sentry-dotnet/pull/2793))
 - WinUI applications: when publishing Native AOT, Sentry isn't able to automatically register an unhandled exception handler  because that relies on reflection. You'll need to [register the unhandled event handler manually](https://github.com/getsentry/sentry-dotnet/issues/2778) instead.
+- For Azure Functions Workers, when AOT/Trimming is enabled we can't use reflection to read route data from the HttpTrigger so the route name will always be `/api/<FUNCTION_NAME>` ([#2920](https://github.com/getsentry/sentry-dotnet/pull/2920))
 
 ### Dependencies
 

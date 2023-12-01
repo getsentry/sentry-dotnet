@@ -6,19 +6,19 @@ namespace Sentry;
 public partial class SentryOptions
 {
     /// <summary>
-    /// Exposes additional options for the iOS platform.
+    /// Exposes additional options for iOS and MacCatalyst.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public IosOptions iOS { get; }
+    public CocoaOptions Cocoa { get; }
 
     /// <summary>
-    /// Provides additional options for the iOS platform.
+    /// Provides additional options for iOS and MacCatalyst.
     /// </summary>
-    public class IosOptions
+    public class CocoaOptions
     {
         private readonly SentryOptions _options;
 
-        internal IosOptions(SentryOptions options)
+        internal CocoaOptions(SentryOptions options)
         {
             _options = options;
         }

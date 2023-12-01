@@ -1,5 +1,5 @@
-using Sentry.iOS;
-using Sentry.iOS.Extensions;
+using Sentry.Cocoa;
+using Sentry.Cocoa.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -71,7 +71,7 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options is {IsPerformanceMonitoringEnabled: true, iOS.EnableCocoaSdkTracing: true})
+        if (options is {IsPerformanceMonitoringEnabled: true, Cocoa.EnableCocoaSdkTracing: true})
         {
             if (options.EnableTracing != null)
             {
@@ -96,7 +96,7 @@ public static partial class SentrySdk
 
         // TODO: Finish SentryEventExtensions to enable these
 
-        // if (options.iOS.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
+        // if (options.Cocoa.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
         // {
         //     cocoaOptions.BeforeSend = evt =>
         //     {
@@ -109,7 +109,7 @@ public static partial class SentrySdk
         //     };
         // }
 
-        // if (options.iOS.OnCrashedLastRun is { } onCrashedLastRun)
+        // if (options.Cocoa.OnCrashedLastRun is { } onCrashedLastRun)
         // {
         //     cocoaOptions.OnCrashedLastRun = evt =>
         //     {
@@ -119,29 +119,29 @@ public static partial class SentrySdk
         // }
 
         // These options are from Cocoa's SentryOptions
-        cocoaOptions.AttachScreenshot = options.iOS.AttachScreenshot;
-        cocoaOptions.AppHangTimeoutInterval = options.iOS.AppHangTimeoutInterval.TotalSeconds;
-        cocoaOptions.IdleTimeout = options.iOS.IdleTimeout.TotalSeconds;
+        cocoaOptions.AttachScreenshot = options.Cocoa.AttachScreenshot;
+        cocoaOptions.AppHangTimeoutInterval = options.Cocoa.AppHangTimeoutInterval.TotalSeconds;
+        cocoaOptions.IdleTimeout = options.Cocoa.IdleTimeout.TotalSeconds;
         cocoaOptions.Dist = options.Distribution;
-        cocoaOptions.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
-        cocoaOptions.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
-        cocoaOptions.EnableAutoPerformanceTracing = options.iOS.EnableAutoPerformanceTracing;
-        cocoaOptions.EnableCoreDataTracing = options.iOS.EnableCoreDataTracing;
-        cocoaOptions.EnableFileIOTracing = options.iOS.EnableFileIOTracing;
-        cocoaOptions.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
-        cocoaOptions.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
-        cocoaOptions.EnableWatchdogTerminationTracking = options.iOS.EnableWatchdogTerminationTracking;
-        cocoaOptions.EnableSwizzling = options.iOS.EnableSwizzling;
-        cocoaOptions.EnableUIViewControllerTracing = options.iOS.EnableUIViewControllerTracing;
-        cocoaOptions.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
-        cocoaOptions.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
+        cocoaOptions.EnableAppHangTracking = options.Cocoa.EnableAppHangTracking;
+        cocoaOptions.EnableAutoBreadcrumbTracking = options.Cocoa.EnableAutoBreadcrumbTracking;
+        cocoaOptions.EnableAutoPerformanceTracing = options.Cocoa.EnableAutoPerformanceTracing;
+        cocoaOptions.EnableCoreDataTracing = options.Cocoa.EnableCoreDataTracing;
+        cocoaOptions.EnableFileIOTracing = options.Cocoa.EnableFileIOTracing;
+        cocoaOptions.EnableNetworkBreadcrumbs = options.Cocoa.EnableNetworkBreadcrumbs;
+        cocoaOptions.EnableNetworkTracking = options.Cocoa.EnableNetworkTracking;
+        cocoaOptions.EnableWatchdogTerminationTracking = options.Cocoa.EnableWatchdogTerminationTracking;
+        cocoaOptions.EnableSwizzling = options.Cocoa.EnableSwizzling;
+        cocoaOptions.EnableUIViewControllerTracing = options.Cocoa.EnableUIViewControllerTracing;
+        cocoaOptions.EnableUserInteractionTracing = options.Cocoa.EnableUserInteractionTracing;
+        cocoaOptions.UrlSessionDelegate = options.Cocoa.UrlSessionDelegate;
 
         // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
-        // cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
+        // cocoaOptions.StitchAsyncCode = options.Cocoa.StitchAsyncCode;
 
         // In-App Excludes and Includes to be passed to the Cocoa SDK
-        options.iOS.InAppExcludes?.ForEach(x => cocoaOptions.AddInAppExclude(x));
-        options.iOS.InAppIncludes?.ForEach(x => cocoaOptions.AddInAppInclude(x));
+        options.Cocoa.InAppExcludes?.ForEach(x => cocoaOptions.AddInAppExclude(x));
+        options.Cocoa.InAppIncludes?.ForEach(x => cocoaOptions.AddInAppInclude(x));
 
         // These options are intentionally not expose or modified
         // cocoaOptions.Enabled
@@ -183,10 +183,10 @@ public static partial class SentrySdk
         SentryCocoaSdk.StartWithOptions(cocoaOptions);
 
         // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
-        options.AddEventProcessor(new IosEventProcessor(cocoaOptions));
+        options.AddEventProcessor(new CocoaEventProcessor(cocoaOptions));
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
-        options.ScopeObserver = new IosScopeObserver(options);
+        options.ScopeObserver = new CocoaScopeObserver(options);
 
         // TODO: Pause/Resume
     }

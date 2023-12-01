@@ -244,7 +244,7 @@ internal class DebugStackTrace : SentryStackTrace
         // TODO there will be support for NativeAOT in the future.
         _nativeDebugImages ??= new();
 #elif __IOS__ || MACCATALYST
-        _nativeDebugImages ??= Sentry.iOS.C.LoadDebugImages(_options.DiagnosticLogger);
+        _nativeDebugImages ??= Sentry.Cocoa.C.LoadDebugImages(_options.DiagnosticLogger);
 #else
         _nativeDebugImages ??= Sentry.Native.C.LoadDebugImages(_options.DiagnosticLogger);
 #endif
