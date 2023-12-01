@@ -12,7 +12,10 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 
     public LogCatAttachmentEventProcessor(IDiagnosticLogger? diagnosticLogger, LogCatIntegrationType logCatIntegrationType, int maxLines = 1000)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxLines);
+        if (maxLines <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxLines), "LogCatMaxLines must be greater than 0");
+        }
 
         _diagnosticLogger = diagnosticLogger;
         _logCatIntegrationType = logCatIntegrationType;
@@ -31,6 +34,12 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
         if (!OperatingSystem.IsAndroidVersionAtLeast(23))
         {
             SendLogcatLogs = false;
+            return @event;
+        }
+
+        // Just in case the setting got overridden at the scope level
+        if (_logCatIntegrationType == LogCatIntegrationType.None)
+        {
             return @event;
         }
 

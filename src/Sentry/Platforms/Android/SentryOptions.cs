@@ -200,10 +200,10 @@ public partial class SentryOptions
 
         /// <summary>
         /// Gets or sets whether when LogCat logs are attached to events.
-        /// The default is <see cref="LogCatIntegrationType.Unhandled"/>
+        /// The default is <see cref="LogCatIntegrationType.None"/>
         /// </summary>
         /// <seealso cref="LogCatMaxLines" />
-        public LogCatIntegrationType LogCatIntegration { get; set; } = LogCatIntegrationType.Unhandled;
+        public LogCatIntegrationType LogCatIntegration { get; set; } = LogCatIntegrationType.None;
 
         /// <summary>
         /// Gets or sets the maximum number of lines to read from LogCat logs.
