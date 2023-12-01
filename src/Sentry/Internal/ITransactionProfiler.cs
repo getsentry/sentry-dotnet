@@ -23,9 +23,7 @@ internal interface ITransactionProfiler
     /// </summary>
     void Finish();
 
-    /// <summary>
-    /// Process and collect the profile.
-    /// </summary>
-    /// <returns>The collected profile. See EnvelopeItem.FromProfileInfo() for supported return types.</returns>
-    object Collect(Transaction transaction);
+    /// <summary>Process and collect the profile.</summary>
+    /// <returns>The collected profile.</returns>
+    ISerializable Collect(Transaction transaction);
 }

@@ -34,7 +34,7 @@ internal class CocoaProfiler : ITransactionProfiler
         }
     }
 
-    public object Collect(Transaction transaction)
+    public ISerializable Collect(Transaction transaction)
     {
         var payload = SentryCocoaHybridSdk.CollectProfileBetween(_starTimeNs, _endTimeNs, _cocoaTraceId);
         ArgumentNullException.ThrowIfNull(payload, "profile payload");

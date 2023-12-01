@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
-using ISerializable = Sentry.Protocol.Envelopes.ISerializable;
 
 namespace Sentry.iOS.Facades;
 
