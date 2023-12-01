@@ -42,7 +42,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             var filesDir = Application.Context.FilesDir;
             if (filesDir == null)
             {
-                _diagnosticLogger?.LogWarning("Failed to get files directory");
+                _diagnosticLogger?.LogWarning("LogCat: Failed to get files directory");
                 return @event;
             }
 
