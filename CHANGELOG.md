@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-### Fixes
+### API breaking Changes
 
-### Features
+#### Changed APIs
 
 - Move `SentryOptions.Android.LogCatIntegration` and `SentryOptions.Android.LogCatMaxLines` to `SentryOptions.LogCatIntegration` and `SentryOptions.LogCatMaxLines` ([2937](https://github.com/getsentry/sentry-dotnet/pull/2937))
 
