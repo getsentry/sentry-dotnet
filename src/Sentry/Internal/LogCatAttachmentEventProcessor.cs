@@ -1,3 +1,4 @@
+#if ANDROID
 using Sentry.Extensibility;
 using Runtime = Java.Lang.Runtime;
 
@@ -103,3 +104,5 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
         return Process(@event, new Hint());
     }
 }
+
+#endif

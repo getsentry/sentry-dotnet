@@ -17,6 +17,11 @@ public static class MauiProgram
                 // If you want to see everything we can capture from MAUI, you may wish to use a larger value.
                 options.MaxBreadcrumbs = 1000;
 
+#if ANDROID // These options are only ever available on Android,so a preprocessor directive may be needed
+                options.LogCatIntegration = LogCatIntegrationType.Errors; // Get logcat logs for both handled and unhandled errors; default is LogCatIntegrationType.None
+                options.LogCatMaxLines = 1000; // Defaults to 1000
+#endif
+
                 options.Debug = true;
             })
 
