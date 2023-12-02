@@ -3,6 +3,7 @@ using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
+using Sentry.Internal;
 using Sentry.JavaSdk.Android.Core;
 
 // Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
@@ -187,6 +188,10 @@ public static partial class SentrySdk
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
+        if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
+        {
+            options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Android.LogCatIntegration, options.Android.LogCatMaxLines));
+        }
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
