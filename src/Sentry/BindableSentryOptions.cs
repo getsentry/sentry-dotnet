@@ -47,10 +47,6 @@ internal partial class BindableSentryOptions
     public bool? AutoSessionTracking { get; set; }
     public bool? UseAsyncFileIO { get; set; }
     public bool? JsonPreserveReferences { get; set; }
-#if ANDROID
-    public LogCatIntegrationType? LogCatIntegration { get; set; }
-    public int? LogCatMaxLines { get; set; }
-#endif
 
     public void ApplyTo(SentryOptions options)
     {

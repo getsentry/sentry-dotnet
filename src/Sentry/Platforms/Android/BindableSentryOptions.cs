@@ -1,11 +1,13 @@
-// ReSharper disable once CheckNamespace
 using Sentry.Android;
 
+// ReSharper disable once CheckNamespace
 namespace Sentry;
 
 internal partial class BindableSentryOptions
 {
     public AndroidOptions Android { get; } = new AndroidOptions();
+    public LogCatIntegrationType? LogCatIntegration { get; set; }
+    public int? LogCatMaxLines { get; set; }
 
     /// <summary>
     /// Provides additional options for the Android platform.

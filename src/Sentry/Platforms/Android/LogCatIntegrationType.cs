@@ -1,6 +1,5 @@
-namespace Sentry;
+namespace Sentry.Android;
 
-#if ANDROID
 /// <summary>
 /// Configures when to attach LogCat logs to events.
 /// </summary>
@@ -27,4 +26,3 @@ public enum LogCatIntegrationType
     /// </summary>
     All
 }
-#endif
