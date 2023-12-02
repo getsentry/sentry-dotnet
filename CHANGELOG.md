@@ -6,7 +6,7 @@
 
 ### Features
 
-- Move `SentryOptions.Android.LogCatIntegration` and `SentryOptions.Android.LogCatMaxLines` to `SentryOptions.LogCatIntegration` and `SentryOptions.LogCatMaxLines` ([#???]())
+- Move `SentryOptions.Android.LogCatIntegration` and `SentryOptions.Android.LogCatMaxLines` to `SentryOptions.LogCatIntegration` and `SentryOptions.LogCatMaxLines` ([2937](https://github.com/getsentry/sentry-dotnet/pull/2937))
 
 ## 4.0.0-beta.3
 
