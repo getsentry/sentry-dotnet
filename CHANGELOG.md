@@ -8,6 +8,7 @@
   - The SDK no longer uses on reflection to bind to all public element events. This also fixes issues where the SDK would consume third-party events.
   - Added `CreateElementEventsBreadcrumbs` to the SentryMauiOptions to allow users to opt-in automatic breadcrumb creation for `BindingContextChanged`, `ChildAdded`, `ChildRemoved` and `ParentChanged` on `Element`.
   - Reduced amount of automatic breadcrumbs by limiting the amount of bindings created in `VisualElement`, `Window`, `Shell`, `Page` and `Button`.
+- Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
 
 ### Features
 
@@ -24,10 +25,6 @@
 
 - `AssemblyExtensions` have been made public again. ([#2917](https://github.com/getsentry/sentry-dotnet/pull/2917))
 - Rename iOS and MacCatalyst platform specific options from `iOS` to `Cocoa` ([#2929](https://github.com/getsentry/sentry-dotnet/pull/2929))
-
-### Fixes
-
-- Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
 
 ### Dependencies
 
@@ -216,6 +213,11 @@ There are some functional differences when publishing Native AOT:
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2222)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.22.2)
 
+## 3.41.3
+
+### Fixes
+
+- Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2918](https://github.com/getsentry/sentry-dotnet/pull/2918))
 
 ## 3.41.2
 
