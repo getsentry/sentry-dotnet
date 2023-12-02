@@ -35,8 +35,6 @@ internal partial class BindableSentryOptions
         public TimeSpan? ReadTimeout { get; set; }
         public bool? EnableAndroidSdkTracing { get; set; }
         public bool? EnableAndroidSdkBeforeSend { get; set; }
-        public LogCatIntegrationType? LogCatIntegration { get; set; }
-        public int? LogCatMaxLines { get; set; }
 
         public void ApplyTo(SentryOptions.AndroidOptions options)
         {
@@ -63,8 +61,6 @@ internal partial class BindableSentryOptions
             options.ReadTimeout = ReadTimeout ?? options.ReadTimeout;
             options.EnableAndroidSdkTracing = EnableAndroidSdkTracing ?? options.EnableAndroidSdkTracing;
             options.EnableAndroidSdkBeforeSend = EnableAndroidSdkBeforeSend ?? options.EnableAndroidSdkBeforeSend;
-            options.LogCatIntegration = LogCatIntegration ?? options.LogCatIntegration;
-            options.LogCatMaxLines = LogCatMaxLines ?? options.LogCatMaxLines;
         }
     }
 }

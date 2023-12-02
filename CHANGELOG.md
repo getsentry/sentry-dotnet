@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+### Features
+
+- Move `SentryOptions.Android.LogCatIntegration` and `SentryOptions.Android.LogCatMaxLines` to `SentryOptions.LogCatIntegration` and `SentryOptions.LogCatMaxLines` ([#???]())
+
 ## 4.0.0-beta.3
 
 ### Fixes

@@ -188,9 +188,9 @@ public static partial class SentrySdk
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
-        if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
+        if (options.LogCatIntegration != LogCatIntegrationType.None)
         {
-            options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Android.LogCatIntegration, options.Android.LogCatMaxLines));
+            options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.LogCatIntegration, options.LogCatMaxLines));
         }
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;

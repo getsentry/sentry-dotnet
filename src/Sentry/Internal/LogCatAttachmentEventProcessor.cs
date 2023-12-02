@@ -1,7 +1,7 @@
 using Sentry.Extensibility;
 using Runtime = Java.Lang.Runtime;
 
-namespace Sentry.Android;
+namespace Sentry.Internal;
 
 internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 {

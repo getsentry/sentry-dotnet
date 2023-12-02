@@ -1,4 +1,4 @@
-namespace Sentry.Android;
+namespace Sentry;
 
 /// <summary>
 /// Configures when to attach LogCat logs to events.

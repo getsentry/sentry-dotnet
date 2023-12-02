@@ -48,6 +48,10 @@ internal partial class BindableSentryOptions
     public bool? UseAsyncFileIO { get; set; }
     public bool? JsonPreserveReferences { get; set; }
 
+    public LogCatIntegrationType? LogCatIntegration { get; set; }
+
+    public int? LogCatMaxLines { get; set; }
+
     public void ApplyTo(SentryOptions options)
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
@@ -91,6 +95,8 @@ internal partial class BindableSentryOptions
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
 #if ANDROID
+        options.LogCatIntegration = LogCatIntegration ?? options.LogCatIntegration;
+        options.LogCatMaxLines = LogCatMaxLines ?? options.LogCatMaxLines;
         Android.ApplyTo(options.Android);
 #elif __IOS__
         Cocoa.ApplyTo(options.Cocoa);
