@@ -116,7 +116,7 @@ public static partial class SentrySdk
             }
 
             // These options we have behind feature flags
-            if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableAndroidSdkTracing: true })
+            if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
             {
                 o.EnableTracing = (JavaBoolean?)options.EnableTracing;
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
@@ -127,7 +127,7 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Native.EnableAndroidSdkBeforeSend && options.BeforeSendInternal is { } beforeSend)
+            if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
             {
                 o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
             }

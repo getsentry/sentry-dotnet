@@ -8,6 +8,7 @@
 
 - Rename iOS and MacCatalyst platform specific options from `Cocoa` to `Native` ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
 - Rename Android platform specific options from `Android` to `Native` ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
+- Rename Android platform specific options `EnableAndroidSdkTracing` and `EnableAndroidSdkBeforeSend` to `EnableTracing` and `EnableBeforeSend` respectively ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
 
 ### Dependencies
 
