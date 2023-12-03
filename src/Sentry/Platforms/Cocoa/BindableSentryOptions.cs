@@ -24,7 +24,7 @@ internal partial class BindableSentryOptions
         public bool? EnableSwizzling { get; set; }
         public bool? EnableUIViewControllerTracing { get; set; }
         public bool? EnableUserInteractionTracing { get; set; }
-        public bool? EnableCocoaSdkTracing { get; set; }
+        public bool? EnableTracing { get; set; }
 
         public void ApplyTo(SentryOptions.NativeOptions options)
         {
@@ -42,7 +42,7 @@ internal partial class BindableSentryOptions
             options.EnableSwizzling = EnableSwizzling ?? options.EnableSwizzling;
             options.EnableUIViewControllerTracing = EnableUIViewControllerTracing ?? options.EnableUIViewControllerTracing;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
-            options.EnableCocoaSdkTracing = EnableCocoaSdkTracing ?? options.EnableCocoaSdkTracing;
+            options.EnableTracing = EnableTracing ?? options.EnableTracing;
         }
     }
 }
