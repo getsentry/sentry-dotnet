@@ -132,7 +132,7 @@ public static partial class SentrySdk
                 o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
             }
 
-            // These options are from SentryNativeOptions
+            // These options are from SentryAndroidOptions
             o.AttachScreenshot = options.Native.AttachScreenshot;
             o.AnrEnabled = options.Native.AnrEnabled;
             o.AnrReportInDebug = options.Native.AnrReportInDebug;

@@ -31,9 +31,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                 !p.PropertyType.IsSubclassOf(typeof(Delegate)) // Exclude delegate properties
                 && !p.PropertyType.IsInterface // Exclude interface properties
                 && !skipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
-#if ANDROID
-                && !(p.PropertyType == typeof(SentryOptions.NativeOptions)) // Exclude the Mobile sub-property
-#elif __IOS__
+#if ANDROID || __IOS__
                 && !(p.PropertyType == typeof(SentryOptions.NativeOptions)) // Exclude the Mobile sub-property
 #endif
                 );
