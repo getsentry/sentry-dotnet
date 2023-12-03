@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### API breaking Changes
+
+#### Changed APIs
+
+- Rename iOS and MacCatalyst platform specific options from `Cocoa` to `Native` ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
+- Rename Android platform specific options from `Android` to `Native` ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.17.0 to v8.17.1 ([#2936](https://github.com/getsentry/sentry-dotnet/pull/2936))
