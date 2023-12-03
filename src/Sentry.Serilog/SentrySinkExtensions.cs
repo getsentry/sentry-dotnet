@@ -207,40 +207,118 @@ public static class SentrySinkExtensions
         DeduplicateMode? deduplicateMode = null,
         Dictionary<string, string>? defaultTags = null)
     {
-        sentrySerilogOptions.Dsn = dsn ?? sentrySerilogOptions.Dsn;
-        sentrySerilogOptions.MinimumEventLevel = minimumEventLevel ?? sentrySerilogOptions.MinimumEventLevel;
-        sentrySerilogOptions.MinimumBreadcrumbLevel = minimumBreadcrumbLevel ?? sentrySerilogOptions.MinimumBreadcrumbLevel;
-        sentrySerilogOptions.FormatProvider = formatProvider ?? sentrySerilogOptions.FormatProvider;
-        sentrySerilogOptions.TextFormatter = textFormatter ?? sentrySerilogOptions.TextFormatter;
-        sentrySerilogOptions.SendDefaultPii = sendDefaultPii ?? sentrySerilogOptions.SendDefaultPii;
-        sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser ?? sentrySerilogOptions.IsEnvironmentUser;
+        if (dsn is not null)
+        {
+            sentrySerilogOptions.Dsn = dsn;
+        }
+
+        if (minimumEventLevel.HasValue)
+        {
+            sentrySerilogOptions.MinimumEventLevel = minimumEventLevel.Value;
+        }
+
+        if (minimumBreadcrumbLevel.HasValue)
+        {
+            sentrySerilogOptions.MinimumBreadcrumbLevel = minimumBreadcrumbLevel.Value;
+        }
+
+        if (formatProvider != null)
+        {
+            sentrySerilogOptions.FormatProvider = formatProvider;
+        }
+
+        if (textFormatter != null)
+        {
+            sentrySerilogOptions.TextFormatter = textFormatter;
+        }
+
+        if (sendDefaultPii.HasValue)
+        {
+            sentrySerilogOptions.SendDefaultPii = sendDefaultPii.Value;
+        }
+
+        if (isEnvironmentUser.HasValue)
+        {
+            sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser.Value;
+        }
+
         if (!string.IsNullOrWhiteSpace(serverName))
         {
             sentrySerilogOptions.ServerName = serverName;
         }
-        sentrySerilogOptions.AttachStacktrace = attachStackTrace ?? sentrySerilogOptions.AttachStacktrace;
-        sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs ?? sentrySerilogOptions.MaxBreadcrumbs;
-        sentrySerilogOptions.SampleRate = sampleRate ?? sentrySerilogOptions.SampleRate;
+
+        if (attachStackTrace.HasValue)
+        {
+            sentrySerilogOptions.AttachStacktrace = attachStackTrace.Value;
+        }
+
+        if (maxBreadcrumbs.HasValue)
+        {
+            sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs.Value;
+        }
+
+        if (sampleRate.HasValue)
+        {
+            sentrySerilogOptions.SampleRate = sampleRate;
+        }
+
         if (!string.IsNullOrWhiteSpace(release))
         {
             sentrySerilogOptions.Release = release;
         }
+
         if (!string.IsNullOrWhiteSpace(environment))
         {
             sentrySerilogOptions.Environment = environment;
         }
-        sentrySerilogOptions.MaxQueueItems = maxQueueItems ?? sentrySerilogOptions.MaxQueueItems;
-        sentrySerilogOptions.ShutdownTimeout = shutdownTimeout ?? sentrySerilogOptions.ShutdownTimeout;
-        sentrySerilogOptions.DecompressionMethods = decompressionMethods ?? sentrySerilogOptions.DecompressionMethods;
-        sentrySerilogOptions.RequestBodyCompressionLevel = requestBodyCompressionLevel ?? sentrySerilogOptions.RequestBodyCompressionLevel;
-        sentrySerilogOptions.RequestBodyCompressionBuffered = requestBodyCompressionBuffered ?? sentrySerilogOptions.RequestBodyCompressionBuffered;
-        sentrySerilogOptions.Debug = debug ?? sentrySerilogOptions.Debug;
-        sentrySerilogOptions.DiagnosticLevel = diagnosticLevel ?? sentrySerilogOptions.DiagnosticLevel;
-        sentrySerilogOptions.ReportAssembliesMode = reportAssembliesMode ?? sentrySerilogOptions.ReportAssembliesMode;
-        sentrySerilogOptions.DeduplicateMode = deduplicateMode ?? sentrySerilogOptions.DeduplicateMode;
+
+        if (maxQueueItems.HasValue)
+        {
+            sentrySerilogOptions.MaxQueueItems = maxQueueItems.Value;
+        }
+
+        if (shutdownTimeout.HasValue)
+        {
+            sentrySerilogOptions.ShutdownTimeout = shutdownTimeout.Value;
+        }
+
+        if (decompressionMethods.HasValue)
+        {
+            sentrySerilogOptions.DecompressionMethods = decompressionMethods.Value;
+        }
+
+        if (requestBodyCompressionLevel.HasValue)
+        {
+            sentrySerilogOptions.RequestBodyCompressionLevel = requestBodyCompressionLevel.Value;
+        }
+
+        if (requestBodyCompressionBuffered.HasValue)
+        {
+            sentrySerilogOptions.RequestBodyCompressionBuffered = requestBodyCompressionBuffered.Value;
+        }
+
+        if (debug.HasValue)
+        {
+            sentrySerilogOptions.Debug = debug.Value;
+        }
+
+        if (diagnosticLevel.HasValue)
+        {
+            sentrySerilogOptions.DiagnosticLevel = diagnosticLevel.Value;
+        }
+
+        if (reportAssembliesMode.HasValue)
+        {
+            sentrySerilogOptions.ReportAssembliesMode = reportAssembliesMode.Value;
+        }
+
+        if (deduplicateMode.HasValue)
+        {
+            sentrySerilogOptions.DeduplicateMode = deduplicateMode.Value;
+        }
 
         // Serilog-specific items
-        sentrySerilogOptions.InitializeSdk = dsn is not null;
+        sentrySerilogOptions.InitializeSdk = dsn is not null;  // Inferred from the Sentry overload that is used
         if (defaultTags?.Count > 0)
         {
             foreach (var tag in defaultTags)
