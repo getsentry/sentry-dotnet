@@ -12,7 +12,7 @@ public static class SentrySinkExtensions
     /// Initialize Sentry and add the SentrySink for Serilog.
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
-    /// <param name="dsn">The Sentry DSN (required) <seealso cref="SentryOptions.Dsn"/></param>
+    /// <param name="dsn">The Sentry DSN (required). <seealso cref="SentryOptions.Dsn"/></param>
     /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
     /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
     /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
@@ -214,12 +214,21 @@ public static class SentrySinkExtensions
         sentrySerilogOptions.TextFormatter = textFormatter ?? sentrySerilogOptions.TextFormatter;
         sentrySerilogOptions.SendDefaultPii = sendDefaultPii ?? sentrySerilogOptions.SendDefaultPii;
         sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser ?? sentrySerilogOptions.IsEnvironmentUser;
-        sentrySerilogOptions.ServerName = NonNullOrWhiteSpaceOrDefault(serverName, sentrySerilogOptions.ServerName);
+        if (!string.IsNullOrWhiteSpace(serverName))
+        {
+            sentrySerilogOptions.ServerName = serverName;
+        }
         sentrySerilogOptions.AttachStacktrace = attachStackTrace ?? sentrySerilogOptions.AttachStacktrace;
         sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs ?? sentrySerilogOptions.MaxBreadcrumbs;
         sentrySerilogOptions.SampleRate = sampleRate ?? sentrySerilogOptions.SampleRate;
-        sentrySerilogOptions.Release = NonNullOrWhiteSpaceOrDefault(release, sentrySerilogOptions.Release);
-        sentrySerilogOptions.Environment = NonNullOrWhiteSpaceOrDefault(environment, sentrySerilogOptions.Environment);
+        if (!string.IsNullOrWhiteSpace(release))
+        {
+            sentrySerilogOptions.Release = release;
+        }
+        if (!string.IsNullOrWhiteSpace(environment))
+        {
+            sentrySerilogOptions.Environment = environment;
+        }
         sentrySerilogOptions.MaxQueueItems = maxQueueItems ?? sentrySerilogOptions.MaxQueueItems;
         sentrySerilogOptions.ShutdownTimeout = shutdownTimeout ?? sentrySerilogOptions.ShutdownTimeout;
         sentrySerilogOptions.DecompressionMethods = decompressionMethods ?? sentrySerilogOptions.DecompressionMethods;
@@ -238,11 +247,6 @@ public static class SentrySinkExtensions
             {
                 sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
             }
-        }
-
-        string? NonNullOrWhiteSpaceOrDefault(string? value, string? defaultValue)
-        {
-            return string.IsNullOrWhiteSpace(value) ? defaultValue : value;
         }
     }
 
