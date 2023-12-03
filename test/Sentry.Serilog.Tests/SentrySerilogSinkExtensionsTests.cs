@@ -62,6 +62,7 @@ public class SentrySerilogSinkExtensionsTests
         // Compare. I'm not sure how to deep compare--I don't see a nuget ref to that type
         // of functionality and I'm hesitant to introduce new technologies with such a
         // small commit.
+        _fixture.Options.InitializeSdk = false; // Since we're not passing in a DSN... would use a different overload otherwise
         _fixture.Options.MinimumEventLevel = _fixture.MinimumEventLevel;
         _fixture.Options.MinimumBreadcrumbLevel = _fixture.MinimumBreadcrumbLevel;
         AssertEqualDeep(_fixture.Options, sut);
