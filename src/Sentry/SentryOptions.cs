@@ -1133,7 +1133,7 @@ public class SentryOptions
                                ;
 
 #if ANDROID
-        Android = new AndroidOptions(this);
+        Native = new NativeOptions(this);
 
         var reader = new Lazy<IAndroidAssemblyReader?>(() => AndroidHelpers.GetAndroidAssemblyReader(DiagnosticLogger));
         AssemblyReader = name => reader.Value?.TryReadAssembly(name);

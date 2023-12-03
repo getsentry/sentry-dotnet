@@ -5,12 +5,12 @@ namespace Sentry;
 
 internal partial class BindableSentryOptions
 {
-    public AndroidOptions Android { get; } = new AndroidOptions();
+    public NativeOptions Native { get; } = new NativeOptions();
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
-    public class AndroidOptions
+    public class NativeOptions
     {
         public bool? AnrEnabled { get; set; }
         public bool? AnrReportInDebug { get; set; }
@@ -38,7 +38,7 @@ internal partial class BindableSentryOptions
         public LogCatIntegrationType? LogCatIntegration { get; set; }
         public int? LogCatMaxLines { get; set; }
 
-        public void ApplyTo(SentryOptions.AndroidOptions options)
+        public void ApplyTo(SentryOptions.NativeOptions options)
         {
             options.AnrEnabled = AnrEnabled ?? options.AnrEnabled;
             options.AnrReportInDebug = AnrReportInDebug ?? options.AnrReportInDebug;

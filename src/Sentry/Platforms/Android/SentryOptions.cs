@@ -8,16 +8,16 @@ public partial class SentryOptions
     /// <summary>
     /// Exposes additional options for the Android platform.
     /// </summary>
-    public AndroidOptions Android { get; }
+    public NativeOptions Native { get; }
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
-    public class AndroidOptions
+    public class NativeOptions
     {
         private readonly SentryOptions _options;
 
-        internal AndroidOptions(SentryOptions options)
+        internal NativeOptions(SentryOptions options)
         {
             _options = options;
         }
