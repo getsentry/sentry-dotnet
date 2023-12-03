@@ -9,16 +9,16 @@ public partial class SentryOptions
     /// Exposes additional options for iOS and MacCatalyst.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public CocoaOptions Cocoa { get; }
+    public NativeOptions Native { get; }
 
     /// <summary>
     /// Provides additional options for iOS and MacCatalyst.
     /// </summary>
-    public class CocoaOptions
+    public class NativeOptions
     {
         private readonly SentryOptions _options;
 
-        internal CocoaOptions(SentryOptions options)
+        internal NativeOptions(SentryOptions options)
         {
             _options = options;
         }

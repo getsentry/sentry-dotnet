@@ -1139,7 +1139,7 @@ public class SentryOptions
         AssemblyReader = name => reader.Value?.TryReadAssembly(name);
 
 #elif __IOS__
-        Cocoa = new CocoaOptions(this);
+        Native = new NativeOptions(this);
 #endif
 
         InAppExclude = new() {
