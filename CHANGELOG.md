@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Workaround a .NET 8 NativeAOT crash on transaction finish. ([#2943](https://github.com/getsentry/sentry-dotnet/pull/2943))
+
 ### API breaking Changes
 
 #### Changed APIs
