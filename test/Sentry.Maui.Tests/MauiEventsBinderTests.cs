@@ -7,7 +7,7 @@ public partial class MauiEventsBinderTests
 {
     private class Fixture
     {
-        public IMauiEventsBinder Binder { get; }
+        public MauiEventsBinder Binder { get; }
 
         public Scope Scope { get; } = new();
 

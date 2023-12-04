@@ -1,7 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 
-namespace Sentry.iOS.Facades;
+namespace Sentry.Cocoa.Facades;
 
 internal class SerializableNSObject : ISerializable
 {

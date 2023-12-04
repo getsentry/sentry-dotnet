@@ -1,10 +1,10 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol;
-using Sentry.iOS.Extensions;
-using Sentry.iOS.Facades;
+using Sentry.Cocoa.Extensions;
+using Sentry.Cocoa.Facades;
 
-namespace Sentry.iOS;
+namespace Sentry.Cocoa;
 
 internal class CocoaProfiler : ITransactionProfiler
 {

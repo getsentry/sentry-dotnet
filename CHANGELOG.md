@@ -2,19 +2,48 @@
 
 ## Unreleased
 
-### Features
-
-- Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
-
 ### API breaking Changes
 
-#### Removed APIs
+#### Changed APIs
 
-- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902)) 
+- Rename iOS and MacCatalyst platform specific options from `Cocoa` to `Native` ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
+- Rename iOS platform specific options `EnableCocoaSdkTracing` to `EnableTracing` ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
+- Rename Android platform specific options from `Android` to `Native` ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
+- Rename Android platform specific options `EnableAndroidSdkTracing` and `EnableAndroidSdkBeforeSend` to `EnableTracing` and `EnableBeforeSend` respectively ([#2940](https://github.com/getsentry/sentry-dotnet/pull/2940))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.17.0 to v8.17.1 ([#2936](https://github.com/getsentry/sentry-dotnet/pull/2936))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8171)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.17.0...8.17.1)
+
+## 4.0.0-beta.3
 
 ### Fixes
 
+- Reworked automatic breadcrumb creation for MAUI. ([#2900](https://github.com/getsentry/sentry-dotnet/pull/2900))
+  - The SDK no longer uses on reflection to bind to all public element events. This also fixes issues where the SDK would consume third-party events.
+  - Added `CreateElementEventsBreadcrumbs` to the SentryMauiOptions to allow users to opt-in automatic breadcrumb creation for `BindingContextChanged`, `ChildAdded`, `ChildRemoved` and `ParentChanged` on `Element`.
+  - Reduced amount of automatic breadcrumbs by limiting the amount of bindings created in `VisualElement`, `Window`, `Shell`, `Page` and `Button`.
 - Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2911](https://github.com/getsentry/sentry-dotnet/pull/2911))
+
+### Features
+
+- Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
+- Android: By default attaches LogCat logs to unhandled exceptions. Configurable via `SentryOptions.Android.LogCatIntegration` and `SentryOptions.Android.LogCatMaxLines`. Available when targeting `net7.0-android` or later, on API level 23 or later. ([#2926](https://github.com/getsentry/sentry-dotnet/pull/2926))
+
+### API breaking Changes
+
+- The method used to configure a Sentry Sink for Serilog now has an additional overload. Calling `WriteTo.Sentry()` with no arguments will no longer attempt to initialize the SDK (it has optional arguments to configure the behaviour of the Sink only). If you want to initialize Sentry at the same time you configure the Sentry Sink then you will need to use the overload of this method that accepts a DSN as the first parameter (e.g. `WriteTo.Sentry("https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647")`). ([#2928](https://github.com/getsentry/sentry-dotnet/pull/2928))
+
+#### Removed APIs
+
+- SentrySinkExtensions.ConfigureSentrySerilogOptions is now internal. If you were using this method, please use one of the `SentrySinkExtensions.Sentry` extension methods instead. ([#2902](https://github.com/getsentry/sentry-dotnet/pull/2902))
+
+#### Changed APIs
+
+- `AssemblyExtensions` have been made public again. ([#2917](https://github.com/getsentry/sentry-dotnet/pull/2917))
+- Rename iOS and MacCatalyst platform specific options from `iOS` to `Cocoa` ([#2929](https://github.com/getsentry/sentry-dotnet/pull/2929))
 
 ### Dependencies
 
@@ -27,6 +56,9 @@
 - Bump Native SDK from v0.6.5 to v0.6.7 ([#2914](https://github.com/getsentry/sentry-dotnet/pull/2914))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#067)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.6.5...0.6.7)
+- Bump Java SDK from v6.34.0 to v7.0.0 ([#2932](https://github.com/getsentry/sentry-dotnet/pull/2932))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.34.0...7.0.0)
 
 ## 4.0.0-beta.2
 
@@ -189,6 +221,7 @@ There are some functional differences when publishing Native AOT:
 - `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these enhanced stack traces relies heavily on reflection which isn't compatible with trimming.
 - Reflection cannot be leveraged for JSON Serialization and you may need to use `SentryOptions.AddJsonSerializerContext` to supply a serialization context for types that you'd like to send to Sentry (e.g. in the `Span.Context`). ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732), [#2793](https://github.com/getsentry/sentry-dotnet/pull/2793))
 - WinUI applications: when publishing Native AOT, Sentry isn't able to automatically register an unhandled exception handler  because that relies on reflection. You'll need to [register the unhandled event handler manually](https://github.com/getsentry/sentry-dotnet/issues/2778) instead.
+- For Azure Functions Workers, when AOT/Trimming is enabled we can't use reflection to read route data from the HttpTrigger so the route name will always be `/api/<FUNCTION_NAME>` ([#2920](https://github.com/getsentry/sentry-dotnet/pull/2920))
 
 ### Dependencies
 
@@ -199,6 +232,11 @@ There are some functional differences when publishing Native AOT:
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2222)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.22.2)
 
+## 3.41.3
+
+### Fixes
+
+- Fixed Sentry SDK has not been initialised when using ASP.NET Core, Serilog and OpenTelemetry ([#2918](https://github.com/getsentry/sentry-dotnet/pull/2918))
 
 ## 3.41.2
 

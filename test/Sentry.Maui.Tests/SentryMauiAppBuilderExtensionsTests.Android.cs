@@ -27,7 +27,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
             (nameof(AndroidLifecycle.OnApplicationCreating), del => del.Invoke(androidApplication));
 
         // Assert
-        binder.Received(1).BindApplicationEvents(application);
+        binder.Received(1).HandleApplicationEvents(application);
     }
 
     private class MockAndroidApplication : global::Android.App.Application, IPlatformApplication

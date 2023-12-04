@@ -1,7 +1,7 @@
 using Sentry.Internal;
-using Sentry.iOS.Extensions;
+using Sentry.Cocoa.Extensions;
 
-namespace Sentry.iOS;
+namespace Sentry.Cocoa;
 
 internal class CocoaProfilerFactory : ITransactionProfilerFactory
 {

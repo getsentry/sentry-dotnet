@@ -1,6 +1,6 @@
 using Sentry.Extensibility;
 
-namespace Sentry.iOS.Extensions;
+namespace Sentry.Cocoa.Extensions;
 
 internal static class BreadcrumbExtensions
 {

@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'ios' And '$(TargetPlatformIdentifier)' != 'maccatalyst'">
+    <!-- Exclude our platform-specific code: -->
+    <Compile Remove="**\*.Cocoa.cs" />
+    <Compile Remove="**\Cocoa\**\*.cs" />
+    <!-- Maui device test projects have these too: -->
     <Compile Remove="**\*.iOS.cs" />
     <Compile Remove="**\iOS\**\*.cs" />
   </ItemGroup>

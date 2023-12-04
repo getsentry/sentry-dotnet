@@ -1,7 +1,7 @@
 // using Sentry.Extensibility;
 // using Sentry.Protocol.Envelopes;
 //
-// namespace Sentry.iOS.Extensions;
+// namespace Sentry.Cocoa.Extensions;
 //
 // internal static class SentryEventExtensions
 // {
@@ -18,7 +18,7 @@
 //      * updating the objects on either side.
 //      */
 //
-//     public static SentryEvent ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent, SentryCocoaOptions cocoaOptions)
+//     public static SentryEvent ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent, SentryCocoaSdkOptions nativeOptions)
 //     {
 //         using var stream = sentryEvent.ToJsonStream()!;
 //         //stream.Seek(0, SeekOrigin.Begin); ??
@@ -28,7 +28,7 @@
 //         return SentryEvent.FromJson(json.RootElement, exception);
 //     }
 //
-//     public static CocoaSdk.SentryEvent ToCocoaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, SentryCocoaOptions cocoaOptions)
+//     public static CocoaSdk.SentryEvent ToCocoaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, SentryCocoaSdkOptions nativeOptions)
 //     {
 //         var envelope = Envelope.FromEvent(sentryEvent);
 //

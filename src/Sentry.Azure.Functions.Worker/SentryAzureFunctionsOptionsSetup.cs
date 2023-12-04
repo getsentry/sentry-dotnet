@@ -3,6 +3,30 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Azure.Functions.Worker;
 
+#if NET8_0_OR_GREATER
+internal class SentryAzureFunctionsOptionsSetup : IConfigureOptions<SentryAzureFunctionsOptions>
+{
+    private readonly IConfiguration _config;
+
+    public SentryAzureFunctionsOptionsSetup(IConfiguration config)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        _config = config;
+    }
+
+    public void Configure(SentryAzureFunctionsOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        var bindable = new BindableSentryAzureFunctionsOptions();
+        _config.Bind(bindable);
+        bindable.ApplyTo(options);
+
+        // These can't be changed by the user
+        options.TagFilters.Add("AzureFunctions_");
+    }
+}
+#else
 internal class SentryAzureFunctionsOptionsSetup : ConfigureFromConfigurationOptions<SentryAzureFunctionsOptions>
 {
     public SentryAzureFunctionsOptionsSetup(IConfiguration config) : base(config)
@@ -20,3 +44,4 @@ internal class SentryAzureFunctionsOptionsSetup : ConfigureFromConfigurationOpti
         options.TagFilters.Add("AzureFunctions_");
     }
 }
+#endif

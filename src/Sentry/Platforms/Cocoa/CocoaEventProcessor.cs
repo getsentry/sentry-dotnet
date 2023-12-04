@@ -1,17 +1,10 @@
 using Sentry.Extensibility;
-using Sentry.iOS.Extensions;
+using Sentry.Cocoa.Extensions;
 
-namespace Sentry.iOS;
+namespace Sentry.Cocoa;
 
-internal class IosEventProcessor : ISentryEventProcessor, IDisposable
+internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable
 {
-    private readonly SentryCocoaOptions _options;
-
-    public IosEventProcessor(SentryCocoaOptions options)
-    {
-        _options = options;
-    }
-
     public SentryEvent Process(SentryEvent @event)
     {
         // Get a temp event from the Cocoa SDK

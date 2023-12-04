@@ -2,7 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
-namespace Sentry.iOS;
+namespace Sentry.Cocoa;
 
 internal static class C
 {
