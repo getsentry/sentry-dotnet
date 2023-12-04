@@ -207,115 +207,28 @@ public static class SentrySinkExtensions
         DeduplicateMode? deduplicateMode = null,
         Dictionary<string, string>? defaultTags = null)
     {
-        if (dsn is not null)
-        {
-            sentrySerilogOptions.Dsn = dsn;
-        }
-
-        if (minimumEventLevel.HasValue)
-        {
-            sentrySerilogOptions.MinimumEventLevel = minimumEventLevel.Value;
-        }
-
-        if (minimumBreadcrumbLevel.HasValue)
-        {
-            sentrySerilogOptions.MinimumBreadcrumbLevel = minimumBreadcrumbLevel.Value;
-        }
-
-        if (formatProvider != null)
-        {
-            sentrySerilogOptions.FormatProvider = formatProvider;
-        }
-
-        if (textFormatter != null)
-        {
-            sentrySerilogOptions.TextFormatter = textFormatter;
-        }
-
-        if (sendDefaultPii.HasValue)
-        {
-            sentrySerilogOptions.SendDefaultPii = sendDefaultPii.Value;
-        }
-
-        if (isEnvironmentUser.HasValue)
-        {
-            sentrySerilogOptions.IsEnvironmentUser = isEnvironmentUser.Value;
-        }
-
-        if (!string.IsNullOrWhiteSpace(serverName))
-        {
-            sentrySerilogOptions.ServerName = serverName;
-        }
-
-        if (attachStackTrace.HasValue)
-        {
-            sentrySerilogOptions.AttachStacktrace = attachStackTrace.Value;
-        }
-
-        if (maxBreadcrumbs.HasValue)
-        {
-            sentrySerilogOptions.MaxBreadcrumbs = maxBreadcrumbs.Value;
-        }
-
-        if (sampleRate.HasValue)
-        {
-            sentrySerilogOptions.SampleRate = sampleRate;
-        }
-
-        if (!string.IsNullOrWhiteSpace(release))
-        {
-            sentrySerilogOptions.Release = release;
-        }
-
-        if (!string.IsNullOrWhiteSpace(environment))
-        {
-            sentrySerilogOptions.Environment = environment;
-        }
-
-        if (maxQueueItems.HasValue)
-        {
-            sentrySerilogOptions.MaxQueueItems = maxQueueItems.Value;
-        }
-
-        if (shutdownTimeout.HasValue)
-        {
-            sentrySerilogOptions.ShutdownTimeout = shutdownTimeout.Value;
-        }
-
-        if (decompressionMethods.HasValue)
-        {
-            sentrySerilogOptions.DecompressionMethods = decompressionMethods.Value;
-        }
-
-        if (requestBodyCompressionLevel.HasValue)
-        {
-            sentrySerilogOptions.RequestBodyCompressionLevel = requestBodyCompressionLevel.Value;
-        }
-
-        if (requestBodyCompressionBuffered.HasValue)
-        {
-            sentrySerilogOptions.RequestBodyCompressionBuffered = requestBodyCompressionBuffered.Value;
-        }
-
-        if (debug.HasValue)
-        {
-            sentrySerilogOptions.Debug = debug.Value;
-        }
-
-        if (diagnosticLevel.HasValue)
-        {
-            sentrySerilogOptions.DiagnosticLevel = diagnosticLevel.Value;
-        }
-
-        if (reportAssembliesMode.HasValue)
-        {
-            sentrySerilogOptions.ReportAssembliesMode = reportAssembliesMode.Value;
-        }
-
-        if (deduplicateMode.HasValue)
-        {
-            sentrySerilogOptions.DeduplicateMode = deduplicateMode.Value;
-        }
+        SetIfNotNull(dsn, value => sentrySerilogOptions.Dsn = value);
+        SetIfNotNull(minimumEventLevel, value => sentrySerilogOptions.MinimumEventLevel = value!.Value);
+        SetIfNotNull(minimumBreadcrumbLevel, value => sentrySerilogOptions.MinimumBreadcrumbLevel = value!.Value);
+        SetIfNotNull(formatProvider, value => sentrySerilogOptions.FormatProvider = value);
+        SetIfNotNull(textFormatter, value => sentrySerilogOptions.TextFormatter = value);
+        SetIfNotNull(sendDefaultPii, value => sentrySerilogOptions.SendDefaultPii = value!.Value);
+        SetIfNotNull(isEnvironmentUser, value => sentrySerilogOptions.IsEnvironmentUser = value!.Value);
+        SetIfNotNullOrWhitespace(serverName, value => sentrySerilogOptions.ServerName = value!);
+        SetIfNotNull(attachStackTrace, value => sentrySerilogOptions.AttachStacktrace = value!.Value);
+        SetIfNotNull(maxBreadcrumbs, value => sentrySerilogOptions.MaxBreadcrumbs = value!.Value);
+        SetIfNotNull(sampleRate, value => sentrySerilogOptions.SampleRate = value!);
+        SetIfNotNullOrWhitespace(release, value => sentrySerilogOptions.Release = value);
+        SetIfNotNullOrWhitespace(environment, value => sentrySerilogOptions.Environment = value);
+        SetIfNotNull(maxQueueItems, value => sentrySerilogOptions.MaxQueueItems = value!.Value);
+        SetIfNotNull(shutdownTimeout, value => sentrySerilogOptions.ShutdownTimeout = value!.Value);
+        SetIfNotNull(decompressionMethods, value => sentrySerilogOptions.DecompressionMethods = value!.Value);
+        SetIfNotNull(requestBodyCompressionLevel, value => sentrySerilogOptions.RequestBodyCompressionLevel = value!.Value);
+        SetIfNotNull(requestBodyCompressionBuffered, value => sentrySerilogOptions.RequestBodyCompressionBuffered = value!.Value);
+        SetIfNotNull(debug, value => sentrySerilogOptions.Debug = value!.Value);
+        SetIfNotNull(diagnosticLevel, value => sentrySerilogOptions.DiagnosticLevel = value!.Value);
+        SetIfNotNull(reportAssembliesMode, value => sentrySerilogOptions.ReportAssembliesMode = value!.Value);
+        SetIfNotNull(deduplicateMode, value => sentrySerilogOptions.DeduplicateMode = value!.Value);
 
         // Serilog-specific items
         sentrySerilogOptions.InitializeSdk = dsn is not null;  // Inferred from the Sentry overload that is used
@@ -324,6 +237,22 @@ public static class SentrySinkExtensions
             foreach (var tag in defaultTags)
             {
                 sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
+            }
+        }
+
+        return;
+        static void SetIfNotNull<T>(T? value, Action<T> setter)
+        {
+            if (value is not null)
+            {
+                setter(value);
+            }
+        }
+        static void SetIfNotNullOrWhitespace(string? value, Action<string> setter)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                setter(value);
             }
         }
     }
