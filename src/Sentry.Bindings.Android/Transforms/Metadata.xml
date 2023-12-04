@@ -76,12 +76,6 @@
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
 
   <!--
-    This is very strange, but this API causes the dotnet process to crash during the BindingsGenerator task when the interface containing it is marked internal.
-    Either removing this method or switching the interface back to public fixes the issue.  Since we don't need it in .NET, we can remove the method.
-  -->
-  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IntegrationName']/method[@name='addIntegrationToSdkVersion']" />
-
-  <!--
     The BackfillingEventProcessor interface creates a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
     AnrV2EventProcessor is dependenant on BackfillingEventProcessor
