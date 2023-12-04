@@ -10,6 +10,8 @@ public class ProfilingIntegration : ISdkIntegration
     /// <inheritdoc/>
     public void Register(IHub hub, SentryOptions options)
     {
-        options.TransactionProfilerFactory = SamplingTransactionProfilerFactory.Create(options);
+        if (options.IsProfilingEnabled) {
+            options.TransactionProfilerFactory = SamplingTransactionProfilerFactory.Create(options);
+        }
     }
 }

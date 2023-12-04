@@ -154,8 +154,9 @@ internal class Hub : IHub, IDisposable
                 transaction.SampleRate = sampleRate;
             }
 
-            // TODO profileSampleRate
-            if (transaction.IsSampled is true && _options.TransactionProfilerFactory is { } profilerFactory)
+            if (transaction.IsSampled is true &&
+                _options.TransactionProfilerFactory is { } profilerFactory &&
+                _randomValuesFactory.NextBool(_options.ProfilesSampleRate ?? 0.0))
             {
                 // TODO cancellation token based on Hub being closed?
                 transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
@@ -529,11 +530,11 @@ internal class Hub : IHub, IDisposable
 #elif ANDROID
             // TODO
 #elif NET8_0_OR_GREATER
-            if (AotHelper.IsNativeAot)
-            {
-                _options?.LogDebug("Closing native SDK");
-                SentrySdk.CloseNativeSdk();
-            }
+        if (AotHelper.IsNativeAot)
+        {
+            _options?.LogDebug("Closing native SDK");
+            SentrySdk.CloseNativeSdk();
+        }
 #endif
     }
 

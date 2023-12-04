@@ -634,6 +634,7 @@ namespace Sentry
         public int MaxCacheItems { get; set; }
         public int MaxQueueItems { get; set; }
         public Sentry.Extensibility.INetworkStatusListener? NetworkStatusListener { get; set; }
+        public double? ProfilesSampleRate { get; set; }
         public string? Release { get; set; }
         public Sentry.ReportAssembliesMode ReportAssembliesMode { get; set; }
         public bool RequestBodyCompressionBuffered { get; set; }
