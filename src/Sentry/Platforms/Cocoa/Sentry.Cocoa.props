@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <Using Include="Foundation" />
-    <Using Include="Sentry.CocoaSdk.SentryOptions" Alias="SentryCocoaOptions" />
+    <Using Include="Sentry.CocoaSdk.SentryOptions" Alias="SentryCocoaSdkOptions" />
     <Using Include="Sentry.CocoaSdk.SentrySDK" Alias="SentryCocoaSdk" />
     <Using Include="Sentry.CocoaSdk.PrivateSentrySDKOnly" Alias="SentryCocoaHybridSdk" />
   </ItemGroup>

@@ -59,11 +59,11 @@ public static partial class SentrySdk
         AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
 
         // Define the configuration for the Android SDK
-        SentryAndroidOptions? androidOptions = null;
+        SentryAndroidOptions? nativeOptions = null;
         var configuration = new OptionsConfigurationCallback(o =>
         {
             // Capture the android options reference on the outer scope
-            androidOptions = o;
+            nativeOptions = o;
 
             // TODO: Should we set the DistinctId to match the one used by GlobalSessionManager?
             //o.DistinctId = ?
@@ -116,7 +116,7 @@ public static partial class SentrySdk
             }
 
             // These options we have behind feature flags
-            if (options is { IsPerformanceMonitoringEnabled: true, Android.EnableAndroidSdkTracing: true })
+            if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
             {
                 o.EnableTracing = (JavaBoolean?)options.EnableTracing;
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
@@ -127,39 +127,39 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Android.EnableAndroidSdkBeforeSend && options.BeforeSendInternal is { } beforeSend)
+            if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
             {
                 o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
             }
 
             // These options are from SentryAndroidOptions
-            o.AttachScreenshot = options.Android.AttachScreenshot;
-            o.AnrEnabled = options.Android.AnrEnabled;
-            o.AnrReportInDebug = options.Android.AnrReportInDebug;
-            o.AnrTimeoutIntervalMillis = (long)options.Android.AnrTimeoutInterval.TotalMilliseconds;
-            o.EnableActivityLifecycleBreadcrumbs = options.Android.EnableActivityLifecycleBreadcrumbs;
-            o.EnableAutoActivityLifecycleTracing = options.Android.EnableAutoActivityLifecycleTracing;
-            o.EnableActivityLifecycleTracingAutoFinish = options.Android.EnableActivityLifecycleTracingAutoFinish;
-            o.EnableAppComponentBreadcrumbs = options.Android.EnableAppComponentBreadcrumbs;
-            o.EnableAppLifecycleBreadcrumbs = options.Android.EnableAppLifecycleBreadcrumbs;
-            o.EnableRootCheck = options.Android.EnableRootCheck;
-            o.EnableSystemEventBreadcrumbs = options.Android.EnableSystemEventBreadcrumbs;
-            o.EnableUserInteractionBreadcrumbs = options.Android.EnableUserInteractionBreadcrumbs;
-            o.EnableUserInteractionTracing = options.Android.EnableUserInteractionTracing;
+            o.AttachScreenshot = options.Native.AttachScreenshot;
+            o.AnrEnabled = options.Native.AnrEnabled;
+            o.AnrReportInDebug = options.Native.AnrReportInDebug;
+            o.AnrTimeoutIntervalMillis = (long)options.Native.AnrTimeoutInterval.TotalMilliseconds;
+            o.EnableActivityLifecycleBreadcrumbs = options.Native.EnableActivityLifecycleBreadcrumbs;
+            o.EnableAutoActivityLifecycleTracing = options.Native.EnableAutoActivityLifecycleTracing;
+            o.EnableActivityLifecycleTracingAutoFinish = options.Native.EnableActivityLifecycleTracingAutoFinish;
+            o.EnableAppComponentBreadcrumbs = options.Native.EnableAppComponentBreadcrumbs;
+            o.EnableAppLifecycleBreadcrumbs = options.Native.EnableAppLifecycleBreadcrumbs;
+            o.EnableRootCheck = options.Native.EnableRootCheck;
+            o.EnableSystemEventBreadcrumbs = options.Native.EnableSystemEventBreadcrumbs;
+            o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
+            o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
 
             // These options are in Java.SentryOptions but not ours
-            o.AttachThreads = options.Android.AttachThreads;
-            o.ConnectionTimeoutMillis = (int)options.Android.ConnectionTimeout.TotalMilliseconds;
-            o.EnableNdk = options.Android.EnableNdk;
-            o.EnableShutdownHook = options.Android.EnableShutdownHook;
-            o.EnableUncaughtExceptionHandler = options.Android.EnableUncaughtExceptionHandler;
-            o.ProfilesSampleRate = (JavaDouble?)options.Android.ProfilesSampleRate;
-            o.PrintUncaughtStackTrace = options.Android.PrintUncaughtStackTrace;
-            o.ReadTimeoutMillis = (int)options.Android.ReadTimeout.TotalMilliseconds;
+            o.AttachThreads = options.Native.AttachThreads;
+            o.ConnectionTimeoutMillis = (int)options.Native.ConnectionTimeout.TotalMilliseconds;
+            o.EnableNdk = options.Native.EnableNdk;
+            o.EnableShutdownHook = options.Native.EnableShutdownHook;
+            o.EnableUncaughtExceptionHandler = options.Native.EnableUncaughtExceptionHandler;
+            o.ProfilesSampleRate = (JavaDouble?)options.Native.ProfilesSampleRate;
+            o.PrintUncaughtStackTrace = options.Native.PrintUncaughtStackTrace;
+            o.ReadTimeoutMillis = (int)options.Native.ReadTimeout.TotalMilliseconds;
 
             // In-App Excludes and Includes to be passed to the Android SDK
-            options.Android.InAppExcludes?.ForEach(o.AddInAppExclude);
-            options.Android.InAppIncludes?.ForEach(o.AddInAppInclude);
+            options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
+            options.Native.InAppIncludes?.ForEach(o.AddInAppInclude);
 
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;
@@ -187,10 +187,10 @@ public static partial class SentrySdk
         }
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
-        options.AddEventProcessor(new AndroidEventProcessor(androidOptions!));
-        if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
+        options.AddEventProcessor(new AndroidEventProcessor(nativeOptions!));
+        if (options.Native.LogCatIntegration != LogCatIntegrationType.None)
         {
-            options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Android.LogCatIntegration, options.Android.LogCatMaxLines));
+            options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Native.LogCatIntegration, options.Native.LogCatMaxLines));
         }
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;

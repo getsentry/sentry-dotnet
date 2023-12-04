@@ -3,17 +3,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace Sentry.Tests.Platforms.Cocoa;
 
-public class BindableSentryOptionsTests : BindableTests<SentryOptions.CocoaOptions>
+public class BindableSentryOptionsTests : BindableTests<SentryOptions.NativeOptions>
 {
     public BindableSentryOptionsTests()
-    : base(nameof(SentryOptions.CocoaOptions.UrlSessionDelegate))
+    : base(nameof(SentryOptions.NativeOptions.UrlSessionDelegate))
     {
     }
 
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {
-        var actual = GetPropertyNames<BindableSentryOptions.CocoaOptions>();
+        var actual = GetPropertyNames<BindableSentryOptions.NativeOptions>();
         AssertContainsAllOptionsProperties(actual);
     }
 
@@ -21,8 +21,8 @@ public class BindableSentryOptionsTests : BindableTests<SentryOptions.CocoaOptio
     public void ApplyTo_SetsOptionsFromConfig()
     {
         // Arrange
-        var actual = new SentryOptions.CocoaOptions(new SentryOptions());
-        var bindable = new BindableSentryOptions.CocoaOptions();
+        var actual = new SentryOptions.NativeOptions(new SentryOptions());
+        var bindable = new BindableSentryOptions.NativeOptions();
 
         // Act
         Fixture.Config.Bind(bindable);
