@@ -21,7 +21,7 @@ internal class CocoaProfiler : ITransactionProfiler
         _startTimeNs = startTimeNs;
         _traceId = traceId;
         _cocoaTraceId = cocoaTraceId;
-        _options.LogDebug("Trace {0} profile start timestamp: {1} ns", _traceId, _starTimeNs);
+        _options.LogDebug("Trace {0} profile start timestamp: {1} ns", _traceId, _startTimeNs);
     }
 
     /// <inheritdoc />
