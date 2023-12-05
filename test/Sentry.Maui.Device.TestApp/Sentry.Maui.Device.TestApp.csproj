@@ -33,6 +33,7 @@
     <!-- https://github.com/xamarin/xamarin-android/issues/6809 -->
     <NoWarn>$(NoWarn);XA4218</NoWarn>
 
+    <PublishAot Condition="'$(TestNativeAot)' == 'true'">true</PublishAot>
   </PropertyGroup>
 
   <!--
