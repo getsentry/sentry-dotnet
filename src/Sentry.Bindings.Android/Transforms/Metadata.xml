@@ -70,12 +70,6 @@
   </add-node>
 
   <!--
-    This API uses FrameMetrics, which requires Android >= 24.0.  We currently target Android >= 21.0 which is the minimum supported by MAUI.
-    TODO: If we need this, figure out how to multi-target or late bind.
-  -->
-  <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
-
-  <!--
     The BackfillingEventProcessor interface creates a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
     AnrV2EventProcessor is dependenant on BackfillingEventProcessor
