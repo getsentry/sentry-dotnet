@@ -232,6 +232,48 @@ public class SamplingTransactionProfilerTests
     }
 
     [Fact]
+    public void ProfilerIntegration_WithProfilingDisabled_LeavesFactoryNull()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 0,
+        };
+        options.AddIntegration(new ProfilingIntegration());
+        using var hub = new Hub(options);
+        Assert.Null(hub.Options.TransactionProfilerFactory);
+    }
+
+    [Fact]
+    public void ProfilerIntegration_WithTracingDisabled_LeavesFactoryNull()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0,
+            ProfilesSampleRate = 1.0,
+        };
+        options.AddIntegration(new ProfilingIntegration());
+        using var hub = new Hub(options);
+        Assert.Null(hub.Options.TransactionProfilerFactory);
+    }
+
+    [Fact]
+    public void ProfilerIntegration_WithProfilingEnabled_SetsFactory()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+        };
+        options.AddIntegration(new ProfilingIntegration());
+        using var hub = new Hub(options);
+        Assert.NotNull(hub.Options.TransactionProfilerFactory);
+    }
+
+    [Fact]
     public void Downsampler_ShouldSample_Works()
     {
         var sut = new Downsampler();
