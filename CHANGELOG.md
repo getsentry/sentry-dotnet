@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 4.0.0-beta.4
+
+### Fixes
+
+- Workaround a .NET 8 NativeAOT crash on transaction finish. ([#2943](https://github.com/getsentry/sentry-dotnet/pull/2943))
 
 ### Features
 
