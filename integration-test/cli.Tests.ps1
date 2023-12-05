@@ -105,12 +105,9 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 }
 
-# TODO creating a sample app with `dotnet new` currently fails in CI on all platforms with:
-#  'error: NU1100: Unable to resolve 'Microsoft.Extensions.Http (>= 6.0.0)' for 'net7.0-android33.0'. PackageSourceMapping is enabled, the following source(s) were not considered: integration-test.'
-# Tracking issue: https://github.com/getsentry/sentry-dotnet/issues/2809
 Describe 'MAUI' -ForEach @(
-    @{ framework = "net7.0" }
-) -Skip:$true {
+    @{ framework = "net8.0" }
+) {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
         RegisterLocalPackage 'Sentry.Bindings.Android'
@@ -155,7 +152,7 @@ Describe 'MAUI' -ForEach @(
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Found 1 debug information file \(1 with embedded sources\)'
+        $result.ScriptOutput | Should -AnyElementMatch 'Found 17 debug information files \(1 with embedded sources\)'
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
