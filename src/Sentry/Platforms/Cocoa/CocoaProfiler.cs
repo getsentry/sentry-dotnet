@@ -11,14 +11,14 @@ internal class CocoaProfiler : ITransactionProfiler
     private readonly SentryOptions _options;
     private readonly SentryId _traceId;
     private readonly CocoaSdk.SentryId _cocoaTraceId;
-    private readonly ulong _starTimeNs;
+    private readonly ulong _startTimeNs;
     private ulong _endTimeNs;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
 
-    public CocoaProfiler(SentryOptions options, ulong starTimeNs, SentryId traceId, CocoaSdk.SentryId cocoaTraceId)
+    public CocoaProfiler(SentryOptions options, ulong startTimeNs, SentryId traceId, CocoaSdk.SentryId cocoaTraceId)
     {
         _options = options;
-        _starTimeNs = starTimeNs;
+        _startTimeNs = startTimeNs;
         _traceId = traceId;
         _cocoaTraceId = cocoaTraceId;
         _options.LogDebug("Trace {0} profile start timestamp: {1} ns", _traceId, _starTimeNs);
@@ -29,7 +29,7 @@ internal class CocoaProfiler : ITransactionProfiler
     {
         if (_endTimeNs == 0)
         {
-            _endTimeNs = _starTimeNs + (ulong)_stopwatch.ElapsedNanoseconds;
+            _endTimeNs = _startTimeNs + (ulong)_stopwatch.ElapsedNanoseconds;
             _options.LogDebug("Trace {0} profile end timestamp: {1} ns", _traceId, _endTimeNs);
         }
     }
@@ -37,7 +37,7 @@ internal class CocoaProfiler : ITransactionProfiler
     public ISerializable Collect(Transaction transaction)
     {
         // TODO change return type of CocoaSDKs CollectProfileBetween to NSMutableDictionary
-        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_starTimeNs, _endTimeNs, _cocoaTraceId)?.MutableCopy() as NSMutableDictionary;
+        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_startTimeNs, _endTimeNs, _cocoaTraceId)?.MutableCopy() as NSMutableDictionary;
         _options.LogDebug("Trace {0} profile payload collected", _traceId);
 
         ArgumentNullException.ThrowIfNull(payload, "profile payload");
