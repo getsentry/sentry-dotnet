@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>4.0.0-beta.1</Version>
+    <Version>4.0.0-beta.4</Version>
     <LangVersion>12</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
@@ -9,9 +9,6 @@
     <Deterministic>true</Deterministic>
     <Features>strict</Features>
     <ImplicitUsings>true</ImplicitUsings>
-
-    <!-- Ignore EOL warnings... we need to support old stuff -->
-    <CheckEolWorkloads>false</CheckEolWorkloads>
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -68,12 +65,6 @@
     <DefineConstants Condition="'$(TargetPlatformIdentifier)' == ''">$(DefineConstants);PLATFORM_NEUTRAL</DefineConstants>
   </PropertyGroup>
 
-  <!-- We're aware it's out of support but this is a library and it doesn't require nca3.1.  -->
-  <!-- there's no reason to cause friction to a consumer that for some reason is stuck on an unsupported version. -->
-  <PropertyGroup>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <DefineConstants>$(DefineConstants);CI_BUILD</DefineConstants>
@@ -95,7 +86,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.21.5</SentryCLIVersion>
+    <SentryCLIVersion>2.22.3</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

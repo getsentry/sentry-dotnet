@@ -23,7 +23,12 @@ internal sealed class SentryLogger : ILogger
         _hub = hub;
     }
 
+#if NET8_0_OR_GREATER
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
+        => _hub.PushScope(state);
+#else
     public IDisposable BeginScope<TState>(TState state) => _hub.PushScope(state);
+#endif
 
     public bool IsEnabled(LogLevel logLevel)
         => _hub.IsEnabled

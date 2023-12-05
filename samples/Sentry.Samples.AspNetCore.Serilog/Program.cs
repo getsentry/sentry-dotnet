@@ -25,53 +25,63 @@ public class Program
                 }));
 
         // Add Sentry integration
-        // It can also be defined via configuration (including appsettings.json)
+        // It can be defined via configuration (including `appsettings.json`, as we do here)
         // or coded explicitly, via parameter like:
         // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
         builder.WebHost.UseSentry();
 
         // The App:
-        builder.WebHost.Configure(a =>
+        var webApplication = builder.Build();
+        Configure(webApplication);
+
+        return webApplication;
+    }
+
+    private static void Configure(IApplicationBuilder app)
+    {
+        // An example ASP.NET Core middleware that throws an
+        // exception when serving a request to path: /throw
+        app.Use(async (context, next) =>
         {
-            // An example ASP.NET Core middleware that throws an
-            // exception when serving a request to path: /throw
-            a.Use(async (context, next) =>
+            // See MinimumBreadcrumbLevel set at the Serilog configuration above
+            Log.Logger.Debug("Static Serilog logger debug log stored as breadcrumbs.");
+
+            var log = context.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger<Program>();
+
+            log.LogInformation("Handling some request...");
+
+            // Sends an event which includes the info and debug messages above
+            Log.Logger.Error("Logging using static Serilog directly also goes to Sentry.");
+
+            if (context.Request.Path == "/greetings")
             {
-                // See MinimumBreadcrumbLevel set at the Serilog configuration above
-                Log.Logger.Debug("Static Serilog logger debug log stored as breadcrumbs.");
-
-                var log = context.RequestServices.GetRequiredService<ILoggerFactory>()
-                    .CreateLogger<Program>();
-
-                log.LogInformation("Handling some request...");
-
-                // Sends an event which includes the info and debug messages above
-                Log.Logger.Error("Logging using static Serilog directly also goes to Sentry.");
-
-                if (context.Request.Path == "/throw")
+                context.Response.ContentType = "text/plain";
+                await context.Response.WriteAsync("Hello, World!");
+            }
+            else if (context.Request.Path == "/throw")
+            {
+                var hub = context.RequestServices.GetRequiredService<IHub>();
+                hub.ConfigureScope(s =>
                 {
-                    var hub = context.RequestServices.GetRequiredService<IHub>();
-                    hub.ConfigureScope(s =>
-                    {
-                        // More data can be added to the scope like this:
-                        s.SetTag("Sample", "ASP.NET Core"); // indexed by Sentry
-                        s.SetExtra("Extra!", "Some extra information");
-                    });
+                    // More data can be added to the scope like this:
+                    s.SetTag("Sample", "ASP.NET Core"); // indexed by Sentry
+                    s.SetExtra("Extra!", "Some extra information");
+                });
 
-                    // Logging through the ASP.NET Core `ILogger` while using Serilog
-                    log.LogInformation("Logging info...");
-                    log.LogWarning("Logging some warning!");
+                // Logging through the ASP.NET Core `ILogger` while using Serilog
+                log.LogInformation("Logging info...");
+                log.LogWarning("Logging some warning!");
 
-                    // The following exception will be captured by the SDK and the event
-                    // will include the Log messages and any custom scope modifications
-                    // as exemplified above.
-                    throw new Exception("An exception thrown from the ASP.NET Core pipeline");
-                }
-
+                // The following exception will be captured by the SDK and the event
+                // will include the Log messages and any custom scope modifications
+                // as exemplified above.
+                throw new Exception("An exception thrown from the ASP.NET Core pipeline");
+            }
+            else
+            {
                 await next();
-            });
+            }
         });
-
-        return builder.Build();
     }
 }

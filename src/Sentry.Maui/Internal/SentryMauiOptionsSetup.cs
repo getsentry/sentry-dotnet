@@ -3,15 +3,23 @@ using Microsoft.Extensions.Options;
 
 namespace Sentry.Maui.Internal;
 
-internal class SentryMauiOptionsSetup : ConfigureFromConfigurationOptions<SentryMauiOptions>
+internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 {
-    public SentryMauiOptionsSetup(IConfiguration config) : base(config)
+    private readonly IConfiguration _config;
+
+    public SentryMauiOptionsSetup(IConfiguration config)
     {
+        ArgumentNullException.ThrowIfNull(config);
+        _config = config;
     }
 
-    public override void Configure(SentryMauiOptions options)
+    public void Configure(SentryMauiOptions options)
     {
-        base.Configure(options);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var bindable = new BindableSentryMauiOptions();
+        _config.Bind(bindable);
+        bindable.ApplyTo(options);
 
         // NOTE: Anything set here will overwrite options set by the user.
         //       For option defaults that can be changed, use the constructor in SentryMauiOptions instead.

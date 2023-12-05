@@ -1686,6 +1686,13 @@ namespace Sentry.Protocol.Envelopes
         System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default);
     }
 }
+namespace Sentry.Reflection
+{
+    public static class AssemblyExtensions
+    {
+        public static Sentry.SdkVersion GetNameAndVersion(this System.Reflection.Assembly asm) { }
+    }
+}
 public static class SentryExceptionExtensions
 {
     public static void AddSentryContext(this System.Exception ex, string name, System.Collections.Generic.IReadOnlyDictionary<string, object> data) { }

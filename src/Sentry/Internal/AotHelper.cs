@@ -9,16 +9,17 @@ internal static class AotHelper
         public void Test() { }
     }
 
+#if NET8_0_OR_GREATER
     internal static bool IsNativeAot { get; }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     static AotHelper()
     {
-#if NET6_0_OR_GREATER   // TODO NET7 once we target it
         var stackTrace = new StackTrace(false);
         IsNativeAot = stackTrace.GetFrame(0)?.GetMethod() is null;
-#else
-        IsNativeAot = false;
-#endif
     }
+#else
+    // This is a compile-time const so that the irrelevant code is removed during compilation.
+    internal const bool IsNativeAot = false;
+#endif
 }

@@ -5,10 +5,14 @@ namespace Sentry.Tests;
 
 public class SentrySdkCrashTests
 {
-    [Theory]
+    [SkippableTheory]
     [MemberData(nameof(GetTestCases))]
     public void CauseCrashInSeparateProcess(CrashType crashType)
     {
+#if NET8_0_OR_GREATER
+        Skip.If(crashType == CrashType.Native, "Currently this test doesn't handle native crashes");
+#endif
+
         RunCrashingApp(crashType, out var exitCode, out var stderr);
 
         Assert.Contains($"({nameof(CrashType)}.{crashType})", stderr);
@@ -18,7 +22,7 @@ public class SentrySdkCrashTests
     public static IEnumerable<object[]> GetTestCases =>
         Enum.GetValues(typeof(CrashType))
             .Cast<CrashType>()
-            .Select(crashType => new object[] {crashType});
+            .Select(crashType => new object[] { crashType });
 
     private static void RunCrashingApp(CrashType crashType, out int exitCode, out string stderr)
     {

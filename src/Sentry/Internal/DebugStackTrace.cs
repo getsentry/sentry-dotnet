@@ -17,7 +17,7 @@ internal class DebugStackTrace : SentryStackTrace
     private const int DebugImageMissing = -1;
     private bool _debugImagesMerged;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private Dictionary<long, DebugImage>? _nativeDebugImages;
     private HashSet<long> _usedNativeDebugImages = new();
 #endif
@@ -222,7 +222,7 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     /// <summary>
     /// Native AOT implementation of CreateFrame.
     /// Native frames have only limited method information at runtime (and even that can be disabled).
@@ -244,7 +244,7 @@ internal class DebugStackTrace : SentryStackTrace
         // TODO there will be support for NativeAOT in the future.
         _nativeDebugImages ??= new();
 #elif __IOS__ || MACCATALYST
-        _nativeDebugImages ??= Sentry.iOS.C.LoadDebugImages(_options.DiagnosticLogger);
+        _nativeDebugImages ??= Sentry.Cocoa.C.LoadDebugImages(_options.DiagnosticLogger);
 #else
         _nativeDebugImages ??= Sentry.Native.C.LoadDebugImages(_options.DiagnosticLogger);
 #endif
@@ -364,7 +364,7 @@ internal class DebugStackTrace : SentryStackTrace
     internal SentryStackFrame? CreateFrame(IStackFrame stackFrame)
     {
         var frame = TryCreateManagedFrame(stackFrame);
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         frame ??= TryCreateNativeAOTFrame(stackFrame);
 #endif
         if (frame is null)
@@ -499,8 +499,10 @@ internal class DebugStackTrace : SentryStackTrace
     {
         if (AotHelper.IsNativeAot)
         {
+            #pragma warning disable 0162 // Unreachable code on old .NET frameworks
             assemblyName = null;
             return null;
+            #pragma warning restore 0162
         }
 
         assemblyName = module.FullyQualifiedName;

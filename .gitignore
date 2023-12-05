@@ -25,3 +25,4 @@ test_output/
 test/**/*.apk
 /tools/
 *.log
+.sentry-native

@@ -96,6 +96,7 @@ namespace Sentry
     {
         Managed = 0,
         ManagedBackgroundThread = 1,
+        Native = 2,
     }
     [System.Flags]
     public enum DeduplicateMode
@@ -1686,6 +1687,13 @@ namespace Sentry.Protocol.Envelopes
     {
         void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger);
         System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default);
+    }
+}
+namespace Sentry.Reflection
+{
+    public static class AssemblyExtensions
+    {
+        public static Sentry.SdkVersion GetNameAndVersion(this System.Reflection.Assembly asm) { }
     }
 }
 public static class SentryExceptionExtensions

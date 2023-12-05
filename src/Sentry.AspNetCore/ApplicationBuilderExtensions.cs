@@ -1,8 +1,4 @@
-#if NETSTANDARD2_0
-using IHostApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
-#else
 using Microsoft.Extensions.Hosting;
-#endif
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

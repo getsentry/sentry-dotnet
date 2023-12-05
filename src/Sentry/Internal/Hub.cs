@@ -46,9 +46,9 @@ internal class Hub : IHub, IDisposable
 
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
-        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory);
-        _clock = clock ?? SystemClock.Clock;
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
+        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
+        _clock = clock ?? SystemClock.Clock;
 
         ScopeManager = scopeManager ?? new SentryScopeManager(options, _ownedClient);
 
@@ -522,6 +522,18 @@ internal class Hub : IHub, IDisposable
 
         _ownedClient.Flush(_options.ShutdownTimeout);
         //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
+
+#if __IOS__
+            // TODO
+#elif ANDROID
+            // TODO
+#elif NET8_0_OR_GREATER
+            if (AotHelper.IsNativeAot)
+            {
+                _options?.LogDebug("Closing native SDK");
+                SentrySdk.CloseNativeSdk();
+            }
+#endif
     }
 
     public SentryId LastEventId

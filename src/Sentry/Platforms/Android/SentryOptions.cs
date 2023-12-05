@@ -1,3 +1,5 @@
+using Sentry.Android;
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 
@@ -6,16 +8,16 @@ public partial class SentryOptions
     /// <summary>
     /// Exposes additional options for the Android platform.
     /// </summary>
-    public AndroidOptions Android { get; }
+    public NativeOptions Native { get; }
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
-    public class AndroidOptions
+    public class NativeOptions
     {
         private readonly SentryOptions _options;
 
-        internal AndroidOptions(SentryOptions options)
+        internal NativeOptions(SentryOptions options)
         {
             _options = options;
         }
@@ -196,6 +198,20 @@ public partial class SentryOptions
         /// </summary>
         public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
+        /// <summary>
+        /// Gets or sets whether when LogCat logs are attached to events.
+        /// The default is <see cref="LogCatIntegrationType.None"/>
+        /// </summary>
+        /// <seealso cref="LogCatMaxLines" />
+        public LogCatIntegrationType LogCatIntegration { get; set; } = LogCatIntegrationType.None;
+
+        /// <summary>
+        /// Gets or sets the maximum number of lines to read from LogCat logs.
+        /// The default value is 1000.
+        /// </summary>
+        /// <seealso cref="LogCatIntegration" />
+        public int LogCatMaxLines { get; set; } = 1000;
+
 
         // ---------- Other ----------
 
@@ -239,7 +255,7 @@ public partial class SentryOptions
         /// Gets or sets a value that indicates if tracing features are enabled on the embedded Android SDK.
         /// The default value is <c>false</c> (disabled).
         /// </summary>
-        public bool EnableAndroidSdkTracing { get; set; } = false;
+        public bool EnableTracing { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value that indicates if the <c>BeforeSend</c> callback set in <see cref="o:SetBeforeSend"/>
@@ -250,6 +266,6 @@ public partial class SentryOptions
         /// implement all of the same features that may be present in the event graph. Some optional elements may
         /// be stripped away during the round-tripping between the two SDKs.  Use with caution.
         /// </remarks>
-        public bool EnableAndroidSdkBeforeSend { get; set; } = false;
+        public bool EnableBeforeSend { get; set; } = false;
     }
 }

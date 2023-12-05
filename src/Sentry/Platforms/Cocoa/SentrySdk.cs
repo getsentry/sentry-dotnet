@@ -1,5 +1,5 @@
-using Sentry.iOS;
-using Sentry.iOS.Extensions;
+using Sentry.Cocoa;
+using Sentry.Cocoa.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -19,34 +19,34 @@ public static partial class SentrySdk
         options.Distribution ??= GetDefaultDistributionString();
 
         // Set options for the Cocoa SDK
-        var cocoaOptions = new SentryCocoaOptions();
+        var nativeOptions = new SentryCocoaSdkOptions();
 
         // These options are copied over from our SentryOptions
-        cocoaOptions.AttachStacktrace = options.AttachStacktrace;
-        cocoaOptions.Debug = options.Debug;
-        cocoaOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
-        cocoaOptions.Dsn = options.Dsn;
-        cocoaOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
-        cocoaOptions.EnableCaptureFailedRequests = options.CaptureFailedRequests;
-        cocoaOptions.FailedRequestStatusCodes = GetFailedRequestStatusCodes(options.FailedRequestStatusCodes);
-        cocoaOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
-        cocoaOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
-        cocoaOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
-        cocoaOptions.ReleaseName = options.Release;
-        cocoaOptions.SampleRate = options.SampleRate;
-        cocoaOptions.SendClientReports = options.SendClientReports;
-        cocoaOptions.SendDefaultPii = options.SendDefaultPii;
-        cocoaOptions.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
+        nativeOptions.AttachStacktrace = options.AttachStacktrace;
+        nativeOptions.Debug = options.Debug;
+        nativeOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
+        nativeOptions.Dsn = options.Dsn;
+        nativeOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
+        nativeOptions.EnableCaptureFailedRequests = options.CaptureFailedRequests;
+        nativeOptions.FailedRequestStatusCodes = GetFailedRequestStatusCodes(options.FailedRequestStatusCodes);
+        nativeOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
+        nativeOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
+        nativeOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
+        nativeOptions.ReleaseName = options.Release;
+        nativeOptions.SampleRate = options.SampleRate;
+        nativeOptions.SendClientReports = options.SendClientReports;
+        nativeOptions.SendDefaultPii = options.SendDefaultPii;
+        nativeOptions.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
 
         if (options.Environment is { } environment)
         {
-            cocoaOptions.Environment = environment;
+            nativeOptions.Environment = environment;
         }
 
         // These options are not available in the Sentry Cocoa SDK
-        // cocoaOptions.? = options.InitCacheFlushTimeout;
-        // cocoaOptions.? = options.MaxQueueItems;
-        // cocoaOptions.? = options.ShutdownTimeout;
+        // nativeOptions.? = options.InitCacheFlushTimeout;
+        // nativeOptions.? = options.MaxQueueItems;
+        // nativeOptions.? = options.ShutdownTimeout;
 
         // NOTE: options.CacheDirectoryPath - No option for this in Sentry Cocoa, but caching is still enabled
         // https://github.com/getsentry/sentry-cocoa/issues/1051
@@ -56,7 +56,7 @@ public static partial class SentrySdk
 
         if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
-            cocoaOptions.BeforeBreadcrumb = b =>
+            nativeOptions.BeforeBreadcrumb = b =>
             {
                 // Note: The Cocoa SDK doesn't yet support hints.
                 // See https://github.com/getsentry/sentry-cocoa/issues/2325
@@ -71,18 +71,18 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options is {IsPerformanceMonitoringEnabled: true, iOS.EnableCocoaSdkTracing: true})
+        if (options is {IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true})
         {
             if (options.EnableTracing != null)
             {
-                cocoaOptions.EnableTracing = options.EnableTracing.Value;
+                nativeOptions.EnableTracing = options.EnableTracing.Value;
             }
 
-            cocoaOptions.TracesSampleRate = options.TracesSampleRate;
+            nativeOptions.TracesSampleRate = options.TracesSampleRate;
 
             if (options.TracesSampler is { } tracesSampler)
             {
-                cocoaOptions.TracesSampler = cocoaContext =>
+                nativeOptions.TracesSampler = cocoaContext =>
                 {
                     var context = cocoaContext.ToTransactionSamplingContext();
                     var result = tracesSampler(context);
@@ -96,12 +96,12 @@ public static partial class SentrySdk
 
         // TODO: Finish SentryEventExtensions to enable these
 
-        // if (options.iOS.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
+        // if (options.Native.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
         // {
-        //     cocoaOptions.BeforeSend = evt =>
+        //     nativeOptions.BeforeSend = evt =>
         //     {
-        //         var sentryEvent = evt.ToSentryEvent(cocoaOptions);
-        //         var result = beforeSend(sentryEvent)?.ToCocoaSentryEvent(options, cocoaOptions);
+        //         var sentryEvent = evt.ToSentryEvent(nativeOptions);
+        //         var result = beforeSend(sentryEvent)?.ToCocoaSentryEvent(options, nativeOptions);
         //
         //         // Note: Nullable result is allowed but delegate is generated incorrectly
         //         // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
@@ -109,46 +109,46 @@ public static partial class SentrySdk
         //     };
         // }
 
-        // if (options.iOS.OnCrashedLastRun is { } onCrashedLastRun)
+        // if (options.Native.OnCrashedLastRun is { } onCrashedLastRun)
         // {
-        //     cocoaOptions.OnCrashedLastRun = evt =>
+        //     nativeOptions.OnCrashedLastRun = evt =>
         //     {
-        //         var sentryEvent = evt.ToSentryEvent(cocoaOptions);
+        //         var sentryEvent = evt.ToSentryEvent(nativeOptions);
         //         onCrashedLastRun(sentryEvent);
         //     };
         // }
 
         // These options are from Cocoa's SentryOptions
-        cocoaOptions.AttachScreenshot = options.iOS.AttachScreenshot;
-        cocoaOptions.AppHangTimeoutInterval = options.iOS.AppHangTimeoutInterval.TotalSeconds;
-        cocoaOptions.IdleTimeout = options.iOS.IdleTimeout.TotalSeconds;
-        cocoaOptions.Dist = options.Distribution;
-        cocoaOptions.EnableAppHangTracking = options.iOS.EnableAppHangTracking;
-        cocoaOptions.EnableAutoBreadcrumbTracking = options.iOS.EnableAutoBreadcrumbTracking;
-        cocoaOptions.EnableAutoPerformanceTracing = options.iOS.EnableAutoPerformanceTracing;
-        cocoaOptions.EnableCoreDataTracing = options.iOS.EnableCoreDataTracing;
-        cocoaOptions.EnableFileIOTracing = options.iOS.EnableFileIOTracing;
-        cocoaOptions.EnableNetworkBreadcrumbs = options.iOS.EnableNetworkBreadcrumbs;
-        cocoaOptions.EnableNetworkTracking = options.iOS.EnableNetworkTracking;
-        cocoaOptions.EnableWatchdogTerminationTracking = options.iOS.EnableWatchdogTerminationTracking;
-        cocoaOptions.EnableSwizzling = options.iOS.EnableSwizzling;
-        cocoaOptions.EnableUIViewControllerTracing = options.iOS.EnableUIViewControllerTracing;
-        cocoaOptions.EnableUserInteractionTracing = options.iOS.EnableUserInteractionTracing;
-        cocoaOptions.UrlSessionDelegate = options.iOS.UrlSessionDelegate;
+        nativeOptions.AttachScreenshot = options.Native.AttachScreenshot;
+        nativeOptions.AppHangTimeoutInterval = options.Native.AppHangTimeoutInterval.TotalSeconds;
+        nativeOptions.IdleTimeout = options.Native.IdleTimeout.TotalSeconds;
+        nativeOptions.Dist = options.Distribution;
+        nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking;
+        nativeOptions.EnableAutoBreadcrumbTracking = options.Native.EnableAutoBreadcrumbTracking;
+        nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
+        nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
+        nativeOptions.EnableFileIOTracing = options.Native.EnableFileIOTracing;
+        nativeOptions.EnableNetworkBreadcrumbs = options.Native.EnableNetworkBreadcrumbs;
+        nativeOptions.EnableNetworkTracking = options.Native.EnableNetworkTracking;
+        nativeOptions.EnableWatchdogTerminationTracking = options.Native.EnableWatchdogTerminationTracking;
+        nativeOptions.EnableSwizzling = options.Native.EnableSwizzling;
+        nativeOptions.EnableUIViewControllerTracing = options.Native.EnableUIViewControllerTracing;
+        nativeOptions.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
+        nativeOptions.UrlSessionDelegate = options.Native.UrlSessionDelegate;
 
         // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
-        // cocoaOptions.StitchAsyncCode = options.iOS.StitchAsyncCode;
+        // nativeOptions.StitchAsyncCode = options.Native.StitchAsyncCode;
 
         // In-App Excludes and Includes to be passed to the Cocoa SDK
-        options.iOS.InAppExcludes?.ForEach(x => cocoaOptions.AddInAppExclude(x));
-        options.iOS.InAppIncludes?.ForEach(x => cocoaOptions.AddInAppInclude(x));
+        options.Native.InAppExcludes?.ForEach(x => nativeOptions.AddInAppExclude(x));
+        options.Native.InAppIncludes?.ForEach(x => nativeOptions.AddInAppInclude(x));
 
         // These options are intentionally not expose or modified
-        // cocoaOptions.Enabled
-        // cocoaOptions.SdkInfo
-        // cocoaOptions.Integrations
-        // cocoaOptions.DefaultIntegrations
-        // cocoaOptions.EnableProfiling  (deprecated)
+        // nativeOptions.Enabled
+        // nativeOptions.SdkInfo
+        // nativeOptions.Integrations
+        // nativeOptions.DefaultIntegrations
+        // nativeOptions.EnableProfiling  (deprecated)
 
         // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
         // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
@@ -157,7 +157,7 @@ public static partial class SentrySdk
         // Thankfully, we can see Xamarin's unhandled exception handler on the stack trace, so we can filter them out.
         // Here is the function that calls abort(), which we will use as a filter:
         // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
-        cocoaOptions.BeforeSend = evt =>
+        nativeOptions.BeforeSend = evt =>
         {
             // There should only be one exception on the event in this case
             if (evt.Exceptions?.Length == 1)
@@ -180,13 +180,13 @@ public static partial class SentrySdk
         SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
 
         // Now initialize the Cocoa SDK
-        SentryCocoaSdk.StartWithOptions(cocoaOptions);
+        SentryCocoaSdk.StartWithOptions(nativeOptions);
 
         // Set options for the managed SDK that depend on the Cocoa SDK. (The user will not be able to modify these.)
-        options.AddEventProcessor(new IosEventProcessor(cocoaOptions));
+        options.AddEventProcessor(new CocoaEventProcessor());
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
-        options.ScopeObserver = new IosScopeObserver(options);
+        options.ScopeObserver = new CocoaScopeObserver(options);
 
         // TODO: Pause/Resume
     }

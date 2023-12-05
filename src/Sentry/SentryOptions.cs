@@ -729,7 +729,8 @@ public class SentryOptions
     /// <remarks>
     /// If the key already exists in the event, it will not be overwritten by a default tag.
     /// </remarks>
-    public Dictionary<string, string> DefaultTags {
+    public Dictionary<string, string> DefaultTags
+    {
         get => _defaultTags ??= new Dictionary<string, string>();
         internal set => _defaultTags = value;
     }
@@ -1011,7 +1012,7 @@ public class SentryOptions
     /// able to accept an instance of <see cref="SentryOptions"/>.
     /// </remarks>
     public void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> contextBuilder)
-        where T: JsonSerializerContext
+        where T : JsonSerializerContext
     {
         // protect against null because user may not have nullability annotations enabled
         if (contextBuilder == null!)
@@ -1073,6 +1074,12 @@ public class SentryOptions
     internal bool InitNativeSdks { get; set; } = true;
 
     /// <summary>
+    /// These callbacks are Called after Hub init and may be used, for example, to synchronize native contexts.
+    /// This list is cleared after init to avoid duplicate invocations when the same Options object is used again.
+    /// </summary>
+    internal List<Action<IHub>> PostInitCallbacks { get; set; } = new();
+
+    /// <summary>
     /// Creates a new instance of <see cref="SentryOptions"/>
     /// </summary>
     public SentryOptions()
@@ -1085,7 +1092,7 @@ public class SentryOptions
 
         _clientReportRecorder = new Lazy<IClientReportRecorder>(() => new ClientReportRecorder(this));
 
-        _sentryStackTraceFactory = new (() => new SentryStackTraceFactory(this));
+        _sentryStackTraceFactory = new(() => new SentryStackTraceFactory(this));
 
         ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
@@ -1126,13 +1133,13 @@ public class SentryOptions
                                ;
 
 #if ANDROID
-        Android = new AndroidOptions(this);
+        Native = new NativeOptions(this);
 
         var reader = new Lazy<IAndroidAssemblyReader?>(() => AndroidHelpers.GetAndroidAssemblyReader(DiagnosticLogger));
         AssemblyReader = name => reader.Value?.TryReadAssembly(name);
 
 #elif __IOS__
-        iOS = new IosOptions(this);
+        Native = new NativeOptions(this);
 #endif
 
         InAppExclude = new() {
@@ -1198,7 +1205,7 @@ public class SentryOptions
 
     internal void RemoveIntegration<TIntegration>()
     {
-    // Note: Not removing default integrations
+        // Note: Not removing default integrations
         _integrations.RemoveAll(integration => integration is TIntegration);
     }
 

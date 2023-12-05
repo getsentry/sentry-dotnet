@@ -12,6 +12,7 @@ namespace Sentry.Maui
     public class SentryMauiOptions : Sentry.Extensions.Logging.SentryLoggingOptions
     {
         public SentryMauiOptions() { }
+        public bool CreateElementEventsBreadcrumbs { get; set; }
         public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
         public bool IncludeTextInBreadcrumbs { get; set; }
         public bool IncludeTitleInBreadcrumbs { get; set; }

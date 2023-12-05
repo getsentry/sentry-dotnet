@@ -2,6 +2,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Azure.Functions.Worker;
 
@@ -79,6 +80,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     private async Task<TransactionContext> StartOrContinueTraceAsync(FunctionContext context)
     {
         var transactionName = context.FunctionDefinition.Name;
@@ -94,7 +96,11 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         var httpMethod = requestData.Method.ToUpperInvariant();
         var transactionNameKey = $"{context.FunctionDefinition.EntryPoint}-{httpMethod}";
 
-        if (!TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
+        // Note that, when Trimming is enabled, we can't use reflection to read route data from the HttpTrigger
+        // attribute. In that case the route name will always be /api/<FUNCTION_NAME>
+        // If this is ever a problem for customers, we can potentially see if there are alternate ways to get this info
+        // from route tables or something. We're not even sure if anyone will use this functionality for now though. 
+        if (!AotHelper.IsNativeAot && !TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
         {
             // Find the HTTP Trigger attribute via reflection
             var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);

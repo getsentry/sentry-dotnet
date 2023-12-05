@@ -31,10 +31,8 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                 !p.PropertyType.IsSubclassOf(typeof(Delegate)) // Exclude delegate properties
                 && !p.PropertyType.IsInterface // Exclude interface properties
                 && !skipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
-#if ANDROID
-                && !(p.PropertyType == typeof(SentryOptions.AndroidOptions)) // Exclude the Mobile sub-property
-#elif __IOS__
-                && !(p.PropertyType == typeof(SentryOptions.IosOptions)) // Exclude the Mobile sub-property
+#if ANDROID || __IOS__
+                && !(p.PropertyType == typeof(SentryOptions.NativeOptions)) // Exclude the Mobile sub-property
 #endif
                 );
     }
@@ -78,7 +76,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
         }
         else
         {
-            yield return new KeyValuePair<string, string>(prop.Name, value.ToString());
+            yield return new KeyValuePair<string, string>(prop.Name, Convert.ToString(value, CultureInfo.InvariantCulture));
         }
     }
 

@@ -1,4 +1,4 @@
-namespace Sentry.iOS.Extensions;
+namespace Sentry.Cocoa.Extensions;
 
 internal static class EnumExtensions
 {

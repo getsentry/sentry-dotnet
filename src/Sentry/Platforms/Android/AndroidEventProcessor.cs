@@ -9,17 +9,17 @@ internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
     private readonly JavaSdk.IEventProcessor? _androidProcessor;
     private readonly JavaSdk.Hint _hint = new();
 
-    public AndroidEventProcessor(SentryAndroidOptions androidOptions)
+    public AndroidEventProcessor(SentryAndroidOptions nativeOptions)
     {
         // Locate the Android SDK's default event processor by its class
         // NOTE: This approach avoids hardcoding the class name (which could be obfuscated by proguard)
-        _androidProcessor = androidOptions.EventProcessors.OfType<JavaObject>()
+        _androidProcessor = nativeOptions.EventProcessors.OfType<JavaObject>()
             .Where(o => o.Class == JavaClass.FromType(typeof(DefaultAndroidEventProcessor)))
             .Cast<JavaSdk.IEventProcessor>()
             .FirstOrDefault();
 
         // TODO: This would be cleaner, but doesn't compile. Figure out why.
-        // _androidProcessor = androidOptions.EventProcessors
+        // _androidProcessor = nativeOptions.EventProcessors
         //     .OfType<DefaultAndroidEventProcessor>()
         //     .FirstOrDefault();
     }
