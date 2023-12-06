@@ -13,13 +13,16 @@ internal class SetMetric : Metric
         Value = new HashSet<int>();
     }
 
-    public SetMetric(string key, int value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null)
-        : base(key, unit, tags)
+    public SetMetric(string key, int value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null)
+        : base(key, unit, tags, timestamp)
     {
         Value = new HashSet<int>() { value };
     }
 
     public HashSet<int> Value { get; private set; }
+
+    protected override string MetricType => "s";
 
     public override void Add(double value)
     {

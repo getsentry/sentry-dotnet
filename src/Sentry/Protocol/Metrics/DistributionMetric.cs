@@ -14,13 +14,15 @@ internal class DistributionMetric : Metric
     }
 
     public DistributionMetric(string key, double value, MeasurementUnit? unit = null,
-        IDictionary<string, string>? tags = null)
-        : base(key, unit, tags)
+        IDictionary<string, string>? tags = null, DateTime? timestamp = null)
+        : base(key, unit, tags, timestamp)
     {
         Value = new List<double>() { value };
     }
 
     public IList<double> Value { get; set; }
+
+    protected override string MetricType => "d";
 
     public override void Add(double value)
     {

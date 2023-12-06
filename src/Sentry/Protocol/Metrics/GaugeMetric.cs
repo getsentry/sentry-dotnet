@@ -17,8 +17,9 @@ internal class GaugeMetric : Metric
         Count = 0;
     }
 
-    public GaugeMetric(string key, double value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null)
-        : base(key, unit, tags)
+    public GaugeMetric(string key, double value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null)
+        : base(key, unit, tags, timestamp)
     {
         Value = value;
         First = value;
@@ -34,6 +35,8 @@ internal class GaugeMetric : Metric
     public double Max { get; private set; }
     public double Sum { get; private set; }
     public double Count { get; private set; }
+
+    protected override string MetricType => "g";
 
     public override void Add(double value)
     {

@@ -77,7 +77,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (options.ExperimentalMetrics is { MetricSampleRate: > 0 } experimentalMetricsOptions)
         {
-            Metrics = new MetricAggregator();
+            Metrics = new MetricAggregator(options, CaptureMetrics);
         }
         else
         {
@@ -238,10 +238,12 @@ public class SentryClient : ISentryClient, IDisposable
         return transaction;
     }
 
-    /// <inheritdoc />
-    internal void CaptureMetric(Metric metric)
+    /// <summary>
+    /// Captures one or more metrics to be sent to Sentry.
+    /// </summary>
+    internal void CaptureMetrics(IEnumerable<Metric> metrics)
     {
-        CaptureEnvelope(Envelope.FromMetric(metric));
+        CaptureEnvelope(Envelope.FromMetrics(metrics));
     }
 
     /// <inheritdoc />

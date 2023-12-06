@@ -12,16 +12,16 @@ internal class CounterMetric : Metric
         Value = 0;
     }
 
-    /// <summary>
-    /// Counters track a value that can only be incremented.
-    /// </summary>
-    public CounterMetric(string key, double value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null)
-        : base(key, unit, tags)
+    public CounterMetric(string key, double value, MeasurementUnit? unit = null, IDictionary<string,
+        string>? tags = null, DateTime? timestamp = null)
+        : base(key, unit, tags, timestamp)
     {
         Value = value;
     }
 
     public double Value { get; private set; }
+
+    protected override string MetricType => "c";
 
     public override void Add(double value) => Value += value;
 

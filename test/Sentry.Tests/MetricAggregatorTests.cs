@@ -6,8 +6,11 @@ public class MetricAggregatorTests
 {
     class Fixture
     {
+        public SentryOptions Options { get; set; } = new();
+        public Action<IEnumerable<Metric>> CaptureMetrics { get; set; } = (_ => { });
+        public bool DisableFlushLoop { get; set; } = true;
         public MetricAggregator GetSut()
-            => new();
+            => new(Options, CaptureMetrics, disableLoopTask: DisableFlushLoop);
     }
 
     private readonly Fixture _fixture = new();
@@ -54,7 +57,7 @@ public class MetricAggregatorTests
         var key = "counter_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
-        var sut = new MetricAggregator();
+        var sut = _fixture.GetSut();
 
         // Act
         DateTime firstTime = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
@@ -84,7 +87,7 @@ public class MetricAggregatorTests
         var key = "gauge_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
-        var sut = new MetricAggregator();
+        var sut = _fixture.GetSut();
 
         // Act
         DateTime time1 = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
@@ -124,7 +127,7 @@ public class MetricAggregatorTests
         var key = "distribution_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
-        var sut = new MetricAggregator();
+        var sut = _fixture.GetSut();
 
         // Act
         DateTime time1 = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
@@ -154,7 +157,7 @@ public class MetricAggregatorTests
         var key = "set_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
-        var sut = new MetricAggregator();
+        var sut = _fixture.GetSut();
 
         // Act
         DateTime time1 = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);

@@ -322,16 +322,13 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an envelope that contains a <see cref="Metric"/>
+    /// Creates an envelope that contains one or more Metrics
     /// </summary>
-    internal static Envelope FromMetric(Metric metric)
+    internal static Envelope FromMetrics(IEnumerable<Metric> metrics)
     {
         var header = DefaultHeader;
 
-        var items = new[]
-        {
-            EnvelopeItem.FromMetric(metric)
-        };
+        var items = metrics.Select(EnvelopeItem.FromMetric).ToArray();
 
         return new Envelope(header, items);
     }
