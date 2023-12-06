@@ -5,20 +5,31 @@ namespace Sentry.Protocol.Metrics;
 
 internal abstract class Metric : IJsonSerializable
 {
-    public string Name { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; } = DateTime.Now; // TODO: Replace with constructor
-    public MeasurementUnit? Unit { get; set; }
+    protected Metric() : this(string.Empty)
+    {
+    }
 
-    private readonly Lazy<IDictionary<string, string>> _tags = new(() => new Dictionary<string, string>());
-    public IDictionary<string, string> Tags => _tags.Value;
+    protected Metric(string key, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null)
+    {
+        Key = key;
+        Unit = unit;
+        Tags = tags ?? new Dictionary<string, string>();
+    }
 
-    public abstract void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger);
+    public string Key { get; private set; }
+
+    public MeasurementUnit? Unit { get; private set; }
+
+    public IDictionary<string, string> Tags { get; private set; }
+
+    public abstract void Add(double value);
+
+    protected abstract void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger);
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
-        writer.WriteString("name", Name.ToString());
-        writer.WriteString("timestamp", Timestamp);
+        writer.WriteString("name", Key.ToString());
         if (Unit.HasValue)
         {
             writer.WriteStringIfNotWhiteSpace("unit", Unit.ToString());

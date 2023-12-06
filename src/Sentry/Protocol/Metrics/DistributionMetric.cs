@@ -8,8 +8,25 @@ namespace Sentry.Protocol.Metrics;
 /// </summary>
 internal class DistributionMetric : Metric
 {
-    IEnumerable<double> Value { get; set; } = new List<double>();
+    public DistributionMetric()
+    {
+        Value = new List<double>();
+    }
 
-    public override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
+    public DistributionMetric(string key, double value, MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null)
+        : base(key, unit, tags)
+    {
+        Value = new List<double>() { value };
+    }
+
+    public IList<double> Value { get; set; }
+
+    public override void Add(double value)
+    {
+        Value.Add(value);
+    }
+
+    protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteArrayIfNotEmpty<double>("value", Value, logger);
 }

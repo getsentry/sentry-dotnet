@@ -8,8 +8,24 @@ namespace Sentry.Protocol.Metrics;
 /// </summary>
 internal class SetMetric : Metric
 {
-    private HashSet<int> Value { get; set; } = new();
+    public SetMetric()
+    {
+        Value = new HashSet<int>();
+    }
 
-    public override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
+    public SetMetric(string key, int value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null)
+        : base(key, unit, tags)
+    {
+        Value = new HashSet<int>() { value };
+    }
+
+    public HashSet<int> Value { get; private set; }
+
+    public override void Add(double value)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteArrayIfNotEmpty("value", Value, logger);
 }

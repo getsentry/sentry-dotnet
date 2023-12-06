@@ -8,12 +8,15 @@ internal class MetricAggregator
     private const int RollupInSeconds = 10;
     private readonly TimeSpan _flushInterval = TimeSpan.FromSeconds(5);
 
+    internal enum MetricType : byte { Counter, Gauge, Distribution, Set }
+
+
     // The key for this dictionary is the Timestamp for the bucket, rounded down to the nearest RollupInSeconds... so it
     // aggregates all of the metrics data for a particular time period. The Value is a dictionary for the metrics,
     // each of which has a key that uniquely identifies it within the time period
-    internal ConcurrentDictionary<long, ConcurrentDictionary<string, MetricData>> Buckets => _buckets.Value;
-    private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, MetricData>>> _buckets
-        = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, MetricData>>());
+    internal ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>> Buckets => _buckets.Value;
+    private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
+        = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
 
     // private readonly Timer _flushTimer;
     // private readonly Action<IEnumerable<Metric>> _onFlush;
@@ -53,8 +56,13 @@ internal class MetricAggregator
     }
 
     /// <summary>
-    /// Emit a counter.
+    /// Emits a Counter metric
     /// </summary>
+    /// <param name="key">A unique key identifying the metric</param>
+    /// <param name="value">The value to be added</param>
+    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
+    /// <param name="tags">Optional Tags to associate with the metric</param>
+    /// <param name="timestamp">The time when the metric was emitted</param>
     public void Increment(
         string key,
         double value = 1.0,
@@ -62,41 +70,95 @@ internal class MetricAggregator
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null
         // , int stacklevel = 0 // Used for code locations
-        )
+        ) => Emit(MetricType.Counter, key, value, unit, tags, timestamp);
+
+    /// <summary>
+    /// Emits a Gauge metric
+    /// </summary>
+    /// <param name="key">A unique key identifying the metric</param>
+    /// <param name="value">The value to be added</param>
+    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
+    /// <param name="tags">Optional Tags to associate with the metric</param>
+    /// <param name="timestamp">The time when the metric was emitted</param>
+    public void Gauge(
+        string key,
+        double value = 1.0,
+        MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null
+        // , int stacklevel = 0 // Used for code locations
+    ) => Emit(MetricType.Gauge, key, value, unit, tags, timestamp);
+
+    /// <summary>
+    /// Emits a Distribution metric
+    /// </summary>
+    /// <param name="key">A unique key identifying the metric</param>
+    /// <param name="value">The value to be added</param>
+    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
+    /// <param name="tags">Optional Tags to associate with the metric</param>
+    /// <param name="timestamp">The time when the metric was emitted</param>
+    public void Distribution(
+        string key,
+        double value = 1.0,
+        MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null
+        // , int stacklevel = 0 // Used for code locations
+    ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp);
+
+    /// <summary>
+    /// Emits a Set metric
+    /// </summary>
+    /// <param name="key">A unique key identifying the metric</param>
+    /// <param name="value">The value to be added</param>
+    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
+    /// <param name="tags">Optional Tags to associate with the metric</param>
+    /// <param name="timestamp">The time when the metric was emitted</param>
+    public void Set(
+        string key,
+        double value = 1.0,
+        MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null
+        // , int stacklevel = 0 // Used for code locations
+    ) => Emit(MetricType.Set, key, value, unit, tags, timestamp);
+
+    private void Emit(
+        MetricType type,
+        string key,
+        double value = 1.0,
+        MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null
+        // , int stacklevel = 0 // Used for code locations
+    )
     {
         timestamp ??= DateTime.UtcNow;
+        unit ??= MeasurementUnit.None;
         var timeBucket = Buckets.GetOrAdd(
             GetTimeBucketKey(timestamp.Value),
-            _ => new ConcurrentDictionary<string, MetricData>()
+            _ => new ConcurrentDictionary<string, Metric>()
         );
 
+        Func<string, Metric> addValuesFactory = type switch
+        {
+            MetricType.Counter => (string _) => new CounterMetric(key, value, unit.Value, tags),
+            MetricType.Gauge => (string _) => new GaugeMetric(key, value, unit.Value, tags),
+            MetricType.Distribution => (string _) => new DistributionMetric(key, value, unit.Value, tags),
+            MetricType.Set => (string _) => new SetMetric(key, (int)value, unit.Value, tags),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+
         timeBucket.AddOrUpdate(
-            GetMetricBucketKey(MetricType.Counter, key, unit ?? MeasurementUnit.None, tags),
-            _ => new MetricData
-            {
-                Type = MetricType.Counter,
-                Key = key,
-                Value = value,
-                Unit = unit ?? MeasurementUnit.None,
-                Timestamp = timestamp.Value,
-                Tags = tags
-            },
+            GetMetricBucketKey(type, key, unit.Value, tags),
+            addValuesFactory,
             (_, metric) =>
             {
-                metric.Value += value;
+                metric.Add(value);
                 return metric;
             }
         );
     }
-
-    // // Emit a gauge.
-    // public void Gauge(string gaugeName, double value, IDictionary<string, string> tags);
-    //
-    // // Emit a distribution.
-    // public void Distribution(string distributionName, double value, IDictionary<string, string> tags, string? unit = "second");
-    //
-    // // Emit a set
-    // public void Set(string key, string value, IDictionary<string, string> tags);
 
     // private void FlushData(object? state)
     // {

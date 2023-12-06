@@ -7,14 +7,44 @@ namespace Sentry.Protocol.Metrics;
 /// </summary>
 internal class GaugeMetric : Metric
 {
-    double Value { get; set; }
-    double First { get; set; }
-    double Min { get; set; }
-    double Max { get; set; }
-    double Sum { get; set; }
-    double Count { get; set; }
+    public GaugeMetric()
+    {
+        Value = 0;
+        First = 0;
+        Min = 0;
+        Max = 0;
+        Sum = 0;
+        Count = 0;
+    }
 
-    public override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    public GaugeMetric(string key, double value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null)
+        : base(key, unit, tags)
+    {
+        Value = value;
+        First = value;
+        Min = value;
+        Max = value;
+        Sum = value;
+        Count = 1;
+    }
+
+    public double Value { get; private set; }
+    public double First { get; private set; }
+    public double Min { get; private set; }
+    public double Max { get; private set; }
+    public double Sum { get; private set; }
+    public double Count { get; private set; }
+
+    public override void Add(double value)
+    {
+        Value = value;
+        Min = Math.Min(Min, value);
+        Max = Math.Max(Max, value);
+        Sum += value;
+        Count++;
+    }
+
+    protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteNumber("value", Value);
         writer.WriteNumber("first", First);

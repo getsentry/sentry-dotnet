@@ -1,3 +1,5 @@
+using Sentry.Protocol.Metrics;
+
 namespace Sentry.Tests;
 
 public class MetricsAggregatorTests
@@ -32,7 +34,7 @@ public class MetricsAggregatorTests
     public void GetMetricBucketKey_GeneratesExpectedKey()
     {
         // Arrange
-        var type = MetricType.Counter;
+        var type = MetricAggregator.MetricType.Counter;
         var metricKey = "quibbles";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
@@ -45,31 +47,10 @@ public class MetricsAggregatorTests
     }
 
     [Fact]
-    public void Increment_NoMetric_CreatesBucketAndMetric()
+    public void Increment_AggregatesMetrics()
     {
         // Arrange
-        var key = "counter_key";
-        var value = 5.0;
-        var unit = MeasurementUnit.None;
-        var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
-        var timestamp = DateTime.UtcNow;
-
-        var sut = new MetricAggregator();
-
-        // Act
-        sut.Increment(key, value, unit, tags, timestamp);
-
-        // Assert
-        var timeBucket = sut.Buckets[MetricAggregator.GetTimeBucketKey(timestamp)];
-        var metric = timeBucket[MetricAggregator.GetMetricBucketKey(MetricType.Counter, key, unit, tags)];
-
-        metric.Value.Should().Be(value);
-    }
-
-    [Fact]
-    public void Increment_MultipleMetrics_Aggregates()
-    {
-        // Arrange
+        var metricType = MetricAggregator.MetricType.Counter;
         var key = "counter_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
@@ -87,11 +68,51 @@ public class MetricsAggregatorTests
 
         // Assert
         var bucket1 = sut.Buckets[MetricAggregator.GetTimeBucketKey(firstTime)];
-        var data1 = bucket1[MetricAggregator.GetMetricBucketKey(MetricType.Counter, key, unit, tags)];
+        var data1 = (CounterMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().Be(8); // First two emits are in the same bucket
 
         var bucket2 = sut.Buckets[MetricAggregator.GetTimeBucketKey(thirdTime)];
-        var data2 = bucket2[MetricAggregator.GetMetricBucketKey(MetricType.Counter, key, unit, tags)];
+        var data2 = (CounterMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().Be(13); // First two emits are in the same bucket
+    }
+
+    [Fact]
+    public void Gauge_AggregatesMetrics()
+    {
+        // Arrange
+        var metricType = MetricAggregator.MetricType.Gauge;
+        var key = "gauge_key";
+        var unit = MeasurementUnit.None;
+        var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
+        var sut = new MetricAggregator();
+
+        // Act
+        DateTime time1 = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
+        sut.Gauge(key, 3, unit, tags, time1);
+
+        DateTime time2 = new(1970, 1, 1, 0, 0, 38, 0, DateTimeKind.Utc);
+        sut.Gauge(key, 5, unit, tags, time2);
+
+        DateTime time3 = new(1970, 1, 1, 0, 0, 40, 0, DateTimeKind.Utc);
+        sut.Gauge(key, 13, unit, tags, time3);
+
+        // Assert
+        var bucket1 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time1)];
+        var data1 = (GaugeMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        data1.Value.Should().Be(5);
+        data1.First.Should().Be(3);
+        data1.Min.Should().Be(3);
+        data1.Max.Should().Be(5);
+        data1.Sum.Should().Be(8);
+        data1.Count.Should().Be(2);
+
+        var bucket2 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time3)];
+        var data2 = (GaugeMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        data2.Value.Should().Be(13);
+        data2.First.Should().Be(13);
+        data2.Min.Should().Be(13);
+        data2.Max.Should().Be(13);
+        data2.Sum.Should().Be(13);
+        data2.Count.Should().Be(1);
     }
 }
