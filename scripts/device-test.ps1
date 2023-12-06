@@ -11,7 +11,6 @@ param(
 
 Set-StrictMode -Version latest
 $ErrorActionPreference = 'Stop'
-$PSNativeCommandUseErrorActionPreference = $true
 
 if (!$Build -and !$Run)
 {
@@ -60,6 +59,10 @@ try
     if ($Build)
     {
         dotnet build -f $tfm -c Release test/Sentry.Maui.Device.TestApp -p:TestNativeAot=$NativeAot
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw 'Failed to build Sentry.Maui.Device.TestApp'
+        }
     }
 
     if ($Run)
@@ -76,6 +79,10 @@ try
         try
         {
             xharness $group test $arguments --output-directory=test_output
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw 'xharness run failed with non-zero exit code'
+            }
         }
         finally
         {
