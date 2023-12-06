@@ -23,7 +23,7 @@ internal class SetMetric : Metric
 
     public override void Add(double value)
     {
-        throw new NotImplementedException();
+        Value.Add((int)value);
     }
 
     protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
