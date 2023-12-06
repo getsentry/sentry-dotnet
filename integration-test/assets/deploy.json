@@ -1,0 +1,8 @@
+{
+    "id": "1",
+    "environment": "production",
+    "dateStarted": null,
+    "dateFinished": "2022-01-01T12:00:00.000000Z",
+    "name": "fixture-deploy",
+    "url": null
+}

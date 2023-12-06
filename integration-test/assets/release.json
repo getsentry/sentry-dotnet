@@ -1,0 +1,38 @@
+{
+    "dateReleased": "2022-01-01T12:00:00.000000Z",
+    "newGroups": 0,
+    "commitCount": 0,
+    "url": null,
+    "data": {},
+    "lastDeploy": null,
+    "deployCount": 0,
+    "dateCreated": "2022-01-01T12:00:00.000000Z",
+    "lastEvent": null,
+    "version": "1.1.0",
+    "firstEvent": null,
+    "lastCommit": null,
+    "shortVersion": "1.1.0",
+    "authors": [],
+    "owner": null,
+    "versionInfo": {
+        "buildHash": null,
+        "version": {
+            "raw": "1.1.0"
+        },
+        "description": "1.1.0",
+        "package": null
+    },
+    "ref": null,
+    "projects": [
+        {
+            "name": "Sentry Test App",
+            "platform": "ruby",
+            "slug": "sentry-test-app",
+            "platforms": [
+                "ruby"
+            ],
+            "newGroups": 0,
+            "id": 1234567
+        }
+    ]
+}

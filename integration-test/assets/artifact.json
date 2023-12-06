@@ -1,0 +1,10 @@
+{
+    "id": "fixture-id",
+    "sha1": "fixture-sha1",
+    "name": "fixture-name",
+    "size": 1,
+    "dist": null,
+    "headers": {
+        "fixture-header-key": "fixture-header-value"
+    }
+}

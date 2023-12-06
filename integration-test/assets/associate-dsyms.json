@@ -1,0 +1,17 @@
+{
+    "associatedDsymFiles": [
+        {
+            "uuid": null,
+            "debugId": null,
+            "objectName": "fixture-objectName",
+            "cpuName": "fixture-cpuName",
+            "sha1": "fixture-sha1",
+            "data": {
+                "type": null,
+                "features": [
+                    "fixture-feature"
+                ]
+            }
+        }
+    ]
+}
