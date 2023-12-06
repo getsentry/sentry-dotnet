@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Protocol.Envelopes;
 
@@ -318,6 +319,21 @@ public sealed class Envelope : ISerializable, IDisposable
         }
 
         return new Envelope(eventId, header, items);
+    }
+
+    /// <summary>
+    /// Creates an envelope that contains a <see cref="Metric"/>
+    /// </summary>
+    internal static Envelope FromMetric(Metric metric)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromMetric(metric)
+        };
+
+        return new Envelope(header, items);
     }
 
     /// <summary>

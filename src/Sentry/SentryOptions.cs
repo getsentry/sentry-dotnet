@@ -1064,6 +1064,18 @@ public class SentryOptions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
+    /// <summary>
+    /// <para>
+    /// Settings for the EXPERIMENTAL metrics feature. This feature is preview only and subject to change without a
+    /// major version bump. Currently it's recommended for noodling only - DON'T USE IN PRODUCTION!
+    /// </para>
+    /// <para>
+    /// By default the ExperimentalMetrics Options is null, which means the feature is disabled. If you want to enable
+    /// Experimental metrics, you must set this property to a non-null value.
+    /// </para>
+    /// </summary>
+    public ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
+
     internal SettingLocator SettingLocator { get; set; }
 
     /// <summary>
@@ -1230,4 +1242,17 @@ public class SentryOptions
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
     }
+}
+
+/// <summary>
+/// Settings to the experimental Metrics feature. This feature is preview only and will very likely change in the future
+/// without a major version bump... so use at your own risk.
+/// </summary>
+public class ExperimentalMetricsOptions
+{
+    /// <summary>
+    /// Determines the sample rate for metrics. 0.0 means no metrics will be sent (metrics disabled). 1.0 implies all
+    /// metrics will be sent.
+    /// </summary>
+    public double MetricSampleRate { get; set; } = 0;
 }

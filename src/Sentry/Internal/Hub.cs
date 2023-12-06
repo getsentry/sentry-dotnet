@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
 using Sentry.Internal.ScopeStack;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
@@ -21,6 +22,11 @@ internal class Hub : IHub, IDisposable
     internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
+
+    /// <summary>
+    /// <inheritdoc cref="IMetricAggregator"/>
+    /// </summary>
+    public IMetricAggregator Metrics { get; }
 
     private int _isEnabled = 1;
     public bool IsEnabled => _isEnabled == 1;
@@ -57,6 +63,10 @@ internal class Hub : IHub, IDisposable
             // Push the first scope so the async local starts from here
             PushScope();
         }
+
+        Metrics = _ownedClient is SentryClient sentryClient
+            ? new DelegatingMetricAggregator(sentryClient.Metrics)
+            : new DisabledMetricAggregator();
 
         foreach (var integration in options.Integrations)
         {

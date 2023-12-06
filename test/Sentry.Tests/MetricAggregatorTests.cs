@@ -2,7 +2,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry.Tests;
 
-public class MetricsAggregatorTests
+public class MetricAggregatorTests
 {
     class Fixture
     {

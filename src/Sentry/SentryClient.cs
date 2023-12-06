@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -21,6 +22,12 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly Enricher _enricher;
 
     internal IBackgroundWorker Worker { get; }
+
+    /// <summary>
+    /// <inheritdoc cref="IMetricAggregator"/>
+    /// </summary>
+    public IMetricAggregator Metrics { get; }
+
     internal SentryOptions Options => _options;
 
     /// <summary>
@@ -66,6 +73,15 @@ public class SentryClient : ISentryClient, IDisposable
         {
             options.LogDebug("Worker of type {0} was provided via Options.", worker.GetType().Name);
             Worker = worker;
+        }
+
+        if (options.ExperimentalMetrics is { MetricSampleRate: > 0 } experimentalMetricsOptions)
+        {
+            Metrics = new MetricAggregator();
+        }
+        else
+        {
+            Metrics = new DisabledMetricAggregator();
         }
     }
 
@@ -220,6 +236,12 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         return transaction;
+    }
+
+    /// <inheritdoc />
+    internal void CaptureMetric(Metric metric)
+    {
+        CaptureEnvelope(Envelope.FromMetric(metric));
     }
 
     /// <inheritdoc />

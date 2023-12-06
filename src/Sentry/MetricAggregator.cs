@@ -3,7 +3,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
-internal class MetricAggregator
+internal class MetricAggregator() : IMetricAggregator
 {
     private const int RollupInSeconds = 10;
     private readonly TimeSpan _flushInterval = TimeSpan.FromSeconds(5);
@@ -55,14 +55,7 @@ internal class MetricAggregator
         return $"{typePrefix}_{metricKey}_{unit}_{serializedTags}";
     }
 
-    /// <summary>
-    /// Emits a Counter metric
-    /// </summary>
-    /// <param name="key">A unique key identifying the metric</param>
-    /// <param name="value">The value to be added</param>
-    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
-    /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <inheritdoc cref="IMetricAggregator.Increment"/>
     public void Increment(
         string key,
         double value = 1.0,
@@ -72,14 +65,7 @@ internal class MetricAggregator
         // , int stacklevel = 0 // Used for code locations
         ) => Emit(MetricType.Counter, key, value, unit, tags, timestamp);
 
-    /// <summary>
-    /// Emits a Gauge metric
-    /// </summary>
-    /// <param name="key">A unique key identifying the metric</param>
-    /// <param name="value">The value to be added</param>
-    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
-    /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <inheritdoc cref="IMetricAggregator.Gauge"/>
     public void Gauge(
         string key,
         double value = 1.0,
@@ -89,14 +75,7 @@ internal class MetricAggregator
         // , int stacklevel = 0 // Used for code locations
     ) => Emit(MetricType.Gauge, key, value, unit, tags, timestamp);
 
-    /// <summary>
-    /// Emits a Distribution metric
-    /// </summary>
-    /// <param name="key">A unique key identifying the metric</param>
-    /// <param name="value">The value to be added</param>
-    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
-    /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <inheritdoc cref="IMetricAggregator.Distribution"/>
     public void Distribution(
         string key,
         double value = 1.0,
@@ -106,14 +85,7 @@ internal class MetricAggregator
         // , int stacklevel = 0 // Used for code locations
     ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp);
 
-    /// <summary>
-    /// Emits a Set metric
-    /// </summary>
-    /// <param name="key">A unique key identifying the metric</param>
-    /// <param name="value">The value to be added</param>
-    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
-    /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <inheritdoc cref="IMetricAggregator.Set"/>
     public void Set(
         string key,
         double value = 1.0,

@@ -590,6 +590,10 @@ public static partial class SentrySdk
         string? operation = null)
         => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
+    /// <inheritdoc cref="IMetricAggregator"/>
+    public static IMetricAggregator Metrics
+        => CurrentHub.Metrics;
+
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]
     public static void StartSession()
