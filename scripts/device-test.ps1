@@ -1,7 +1,7 @@
 param(
     [Parameter(Position = 0, Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('android', 'ios', 'maccatalyst')]
+    [ValidateSet('android', 'ios')] # TODO , 'maccatalyst'
     [String] $Platform,
 
     [Switch] $Build,
@@ -46,16 +46,16 @@ try
             '--launch-timeout', '00:10:00'
         )
     }
-    elseif ($Platform -eq 'maccatalyst')
-    {
-        $tfm += 'maccatalyst'
-        $group = 'apple'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
-        $arguments = @(
-            '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
-            '--launch-timeout', '00:10:00'
-        )
-    }
+    # elseif ($Platform -eq 'maccatalyst')
+    # {
+    #     $tfm += 'maccatalyst'
+    #     $group = 'apple'
+    #     $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+    #     $arguments = @(
+    #         '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
+    #         '--launch-timeout', '00:10:00'
+    #     )
+    # }
 
     if ($Build)
     {
