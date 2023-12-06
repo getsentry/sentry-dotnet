@@ -5,8 +5,8 @@ namespace Sentry.Protocol.Metrics;
 
 internal abstract class Metric : IJsonSerializable
 {
-    public string Name { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.Now;
+    public string Name { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; } = DateTime.Now; // TODO: Replace with constructor
     public MeasurementUnit? Unit { get; set; }
 
     private readonly Lazy<IDictionary<string, string>> _tags = new(() => new Dictionary<string, string>());
