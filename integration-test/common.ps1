@@ -181,19 +181,6 @@ BeforeAll {
             throw "Failed to create the test app '$name' from template '$type'."
         }
 
-        if ($type -eq 'maui')
-        {
-                            @"
-<Project>
-  <PropertyGroup>
-      <SentryUploadAndroidProguardMapping>true</SentryUploadAndroidProguardMapping>
-      <AndroidLinkTool Condition=`" '`$(AndroidLinkTool)' == '' `">r8</AndroidLinkTool>
-      <AndroidDexTool Condition=`" '`$(AndroidDexTool)' == '' `">d8</AndroidDexTool>
-  </PropertyGroup>
-</Project>
-"@ | Out-File $name/Directory.Build.props
-        }
-
         if ($type -eq 'console')
         {
             AddPackageReference $name 'Sentry'
