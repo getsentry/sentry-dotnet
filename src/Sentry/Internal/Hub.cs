@@ -23,9 +23,7 @@ internal class Hub : IHub, IDisposable
 
     internal IInternalScopeManager ScopeManager { get; }
 
-    /// <summary>
     /// <inheritdoc cref="IMetricAggregator"/>
-    /// </summary>
     public IMetricAggregator Metrics { get; }
 
     private int _isEnabled = 1;
@@ -64,9 +62,7 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
-        Metrics = _ownedClient is SentryClient sentryClient
-            ? new DelegatingMetricAggregator(sentryClient.Metrics)
-            : new DisabledMetricAggregator();
+        Metrics = new DelegatingMetricAggregator(_ownedClient.Metrics);
 
         foreach (var integration in options.Integrations)
         {
