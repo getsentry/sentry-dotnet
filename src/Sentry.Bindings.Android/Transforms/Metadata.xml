@@ -70,27 +70,22 @@
   </add-node>
 
   <!--
-    This API uses FrameMetrics, which requires Android >= 24.0.  We currently target Android >= 21.0 which is the minimum supported by MAUI.
     TODO: If we need this, figure out how to multi-target or late bind.
+    This API uses FrameMetrics, which requires Android >= 24.0.  We currently target Android >= 21.0 which is the minimum supported by MAUI.
+    AndroidProfiler is dependant on SentryFrameMetricsCollector
   -->
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
-
-  <!--
-    This is very strange, but this API causes the dotnet process to crash during the BindingsGenerator task when the interface containing it is marked internal.
-    Either removing this method or switching the interface back to public fixes the issue.  Since we don't need it in .NET, we can remove the method.
-  -->
-  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IntegrationName']/method[@name='addIntegrationToSdkVersion']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidProfiler']/*" />
 
   <!--
     The BackfillingEventProcessor interface creates a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
-    AnrV2EventProcessor is dependenant on BackfillingEventProcessor
+    AnrV2EventProcessor is dependant on BackfillingEventProcessor
     We currently don't need to use either of these via C# bindings.
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
-
-
+    
   <!--
     SentryEvent.serialize() expects an parameter which implements ObjectWriter.
     JsonObjectWriter implements ObjectWriter in Java, but somehow this is not reflected in the generated binding.
