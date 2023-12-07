@@ -2,7 +2,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry.Tests;
 
-public class MetricAggregatorTests
+public class MetricBucketHelperTests
 {
     [Theory]
     [InlineData(30)]
