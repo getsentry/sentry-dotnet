@@ -152,6 +152,7 @@ Describe 'MAUI' -ForEach @(
             'libxamarin-app.so',
             'maui-app.pdb'
         )
+        $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
         $result.ScriptOutput | Should -AnyElementMatch 'Found 17 debug information files \(1 with embedded sources\)'
     }
 
