@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Stop Sentry for MacCatalyst from creating `default.profraw` in the app bundle using xcodebuild archive to build sentry-cocoa ([#2960](https://github.com/getsentry/sentry-dotnet/pull/2960))
+
 ### Dependencies
 
 - Bump CLI from v2.22.3 to v2.23.0 ([#2956](https://github.com/getsentry/sentry-dotnet/pull/2956))
