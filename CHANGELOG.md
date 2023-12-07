@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Experimental pre-release availability of Delightful Developer Metrics. We're exploring the use of Metrics in Sentry. The API will very likely change and we don't yet have any documentation. ([#2949](https://github.com/getsentry/sentry-dotnet/pull/2949))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.17.0 to v8.17.1 ([#2936](https://github.com/getsentry/sentry-dotnet/pull/2936))
