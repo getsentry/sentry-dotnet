@@ -21,10 +21,13 @@ internal class CounterMetric : Metric
 
     public double Value { get; private set; }
 
-    protected override string MetricType => "c";
-
     public override void Add(double value) => Value += value;
 
-    protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
+    protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteNumber("value", Value);
+
+    protected override IEnumerable<IConvertible> SerializedStatsdValues()
+    {
+        yield return Value;
+    }
 }

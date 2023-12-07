@@ -15,11 +15,12 @@ public class Program
             .UseSentry(o =>
             {
                 // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
-                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                o.Dsn = "https://b887218a80114d26a9b1a51c5f88e0b4@o447951.ingest.sentry.io/6601807";
 
                 // Enable Sentry performance monitoring
                 o.EnableTracing = true;
 
+                o.ExperimentalMetrics = new ExperimentalMetricsOptions(){ MetricSampleRate = 1.0 };
 #if DEBUG
                 // Log debug information about the Sentry SDK
                 o.Debug = true;
@@ -35,6 +36,11 @@ public class Program
                 // exception when serving a request to path: /throw
                 app.UseEndpoints(endpoints =>
                 {
+                    endpoints.MapGet("/hello", () =>
+                    {
+                        SentrySdk.Metrics.Increment("hello.world");
+                        return "Hello World!";
+                    });
                     // Reported events will be grouped by route pattern
                     endpoints.MapGet("/throw/{message?}", context =>
                     {

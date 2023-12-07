@@ -27,7 +27,7 @@ public class MetricAggregatorTests
         var timestamp = new DateTime(1970, 1, 1, 1, 1, seconds, DateTimeKind.Utc);
 
         // Act
-        var result = MetricAggregator.GetTimeBucketKey(timestamp);
+        var result = timestamp.GetTimeBucketKey();
 
         // Assert
         result.Should().Be(3690); // (1 hour) + (1 minute) plus (30 seconds) = 3690
@@ -70,11 +70,11 @@ public class MetricAggregatorTests
         sut.Increment(key, 13, unit, tags, thirdTime);
 
         // Assert
-        var bucket1 = sut.Buckets[MetricAggregator.GetTimeBucketKey(firstTime)];
+        var bucket1 = sut.Buckets[firstTime.GetTimeBucketKey()];
         var data1 = (CounterMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().Be(8); // First two emits are in the same bucket
 
-        var bucket2 = sut.Buckets[MetricAggregator.GetTimeBucketKey(thirdTime)];
+        var bucket2 = sut.Buckets[thirdTime.GetTimeBucketKey()];
         var data2 = (CounterMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().Be(13); // First two emits are in the same bucket
     }
@@ -100,7 +100,7 @@ public class MetricAggregatorTests
         sut.Gauge(key, 13, unit, tags, time3);
 
         // Assert
-        var bucket1 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time1)];
+        var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
         var data1 = (GaugeMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().Be(5);
         data1.First.Should().Be(3);
@@ -109,7 +109,7 @@ public class MetricAggregatorTests
         data1.Sum.Should().Be(8);
         data1.Count.Should().Be(2);
 
-        var bucket2 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time3)];
+        var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
         var data2 = (GaugeMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().Be(13);
         data2.First.Should().Be(13);
@@ -140,11 +140,11 @@ public class MetricAggregatorTests
         sut.Distribution(key, 13, unit, tags, time3);
 
         // Assert
-        var bucket1 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time1)];
+        var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
         var data1 = (DistributionMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().BeEquivalentTo(new[] {3, 5});
 
-        var bucket2 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time3)];
+        var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
         var data2 = (DistributionMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().BeEquivalentTo(new[] {13});
     }
@@ -173,11 +173,11 @@ public class MetricAggregatorTests
         sut.Set(key, 13, unit, tags, time3);
 
         // Assert
-        var bucket1 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time1)];
+        var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
         var data1 = (SetMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().BeEquivalentTo(new[] {3, 5});
 
-        var bucket2 = sut.Buckets[MetricAggregator.GetTimeBucketKey(time3)];
+        var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
         var data2 = (SetMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().BeEquivalentTo(new[] {13});
     }

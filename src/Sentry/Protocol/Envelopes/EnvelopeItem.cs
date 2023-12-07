@@ -233,7 +233,8 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             [TypeKey] = TypeValueMetric
         };
 
-        return new EnvelopeItem(header, new JsonSerializable(metric));
+        // Note that metrics are serialized using statsd encoding (not JSON)
+        return new EnvelopeItem(header, metric);
     }
 
     /// <summary>

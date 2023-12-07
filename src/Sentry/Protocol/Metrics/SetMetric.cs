@@ -22,13 +22,14 @@ internal class SetMetric : Metric
 
     public HashSet<int> Value { get; private set; }
 
-    protected override string MetricType => "s";
-
     public override void Add(double value)
     {
         Value.Add((int)value);
     }
 
-    protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
+    protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteArrayIfNotEmpty("value", Value, logger);
+
+    protected override IEnumerable<IConvertible> SerializedStatsdValues()
+        => Value.Select(v => (IConvertible)v);
 }

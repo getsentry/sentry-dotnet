@@ -36,8 +36,6 @@ internal class GaugeMetric : Metric
     public double Sum { get; private set; }
     public double Count { get; private set; }
 
-    protected override string MetricType => "g";
-
     public override void Add(double value)
     {
         Value = value;
@@ -47,7 +45,7 @@ internal class GaugeMetric : Metric
         Count++;
     }
 
-    protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteNumber("value", Value);
         writer.WriteNumber("first", First);
@@ -55,5 +53,14 @@ internal class GaugeMetric : Metric
         writer.WriteNumber("max", Max);
         writer.WriteNumber("sum", Sum);
         writer.WriteNumber("count", Count);
+    }
+
+    protected override IEnumerable<IConvertible> SerializedStatsdValues()
+    {
+        yield return Value;
+        yield return Min;
+        yield return Max;
+        yield return Sum;
+        yield return Count;
     }
 }

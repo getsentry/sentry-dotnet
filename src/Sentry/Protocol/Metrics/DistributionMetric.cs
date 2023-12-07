@@ -22,13 +22,14 @@ internal class DistributionMetric : Metric
 
     public IList<double> Value { get; set; }
 
-    protected override string MetricType => "d";
-
     public override void Add(double value)
     {
         Value.Add(value);
     }
 
-    protected override void WriteConcreteProperties(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
+    protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteArrayIfNotEmpty<double>("value", Value, logger);
+
+    protected override IEnumerable<IConvertible> SerializedStatsdValues()
+        => Value.Select(v => (IConvertible)v);
 }
