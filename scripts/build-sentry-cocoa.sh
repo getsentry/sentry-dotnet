@@ -18,31 +18,37 @@ ios_simulator_sdk=$(echo "$sdks" | awk '/iOS Simulator SDKs/{getline; print $NF}
 
 # Build for iOS and iOS simulator.
 echo "::group::Building sentry-cocoa for iOS and iOS simulator"
-xcodebuild -project Sentry.xcodeproj \
+xcodebuild archive -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
     -sdk "$ios_sdk" \
-    -derivedDataPath ./Carthage/output-ios
-xcodebuild -project Sentry.xcodeproj \
+    -archivePath ./Carthage/output-ios.xcarchive \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+xcodebuild archive -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
     -sdk "$ios_simulator_sdk" \
-    -derivedDataPath ./Carthage/output-ios
+    -archivePath ./Carthage/output-iossimulator.xcarchive \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES
 xcodebuild -create-xcframework \
-    -framework ./Carthage/output-ios/Build/Products/Release-iphoneos/Sentry.framework \
-    -framework ./Carthage/output-ios/Build/Products/Release-iphonesimulator/Sentry.framework \
+    -framework ./Carthage/output-ios.xcarchive/Products/Library/Frameworks/Sentry.framework \
+    -framework ./Carthage/output-iossimulator.xcarchive/Products/Library/Frameworks/Sentry.framework \
     -output ./Carthage/Build-ios/Sentry.xcframework
 echo "::endgroup::"
 
 # Separately, build for Mac Catalyst
 echo "::group::Building sentry-cocoa for Mac Catalyst"
-xcodebuild -project Sentry.xcodeproj \
+xcodebuild archive -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
-    -destination 'platform=macOS,variant=Mac Catalyst' \
-    -derivedDataPath ./Carthage/output-maccatalyst
+    -destination 'generic/platform=macOS,variant=Mac Catalyst' \
+    -archivePath ./Carthage/output-maccatalyst.xcarchive \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARY_FOR_DISTRIBUTION=YES
 xcodebuild -create-xcframework \
-    -framework ./Carthage/output-maccatalyst/Build/Products/Release-maccatalyst/Sentry.framework \
+    -framework ./Carthage/output-maccatalyst.xcarchive/Products/Library/Frameworks/Sentry.framework \
     -output ./Carthage/Build-maccatalyst/Sentry.xcframework
 echo "::endgroup::"
 
