@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Cocoa.Extensions;
 using Sentry.Cocoa.Facades;
 

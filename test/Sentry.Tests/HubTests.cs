@@ -983,6 +983,146 @@ public partial class HubTests
         hub.ConfigureScope(scope => scope.Transaction.Should().BeNull());
     }
 
+#nullable enable
+    private class ThrowingProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new ThrowingProfiler();
+    }
+
+    internal class ThrowingProfiler : ITransactionProfiler
+    {
+        public void Finish() {}
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => throw new Exception("test");
+    }
+
+    private class AsyncThrowingProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new AsyncThrowingProfiler();
+    }
+
+    internal class AsyncThrowingProfiler : ITransactionProfiler
+    {
+        public void Finish() {}
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction transaction)
+            => AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
+
+        private async Task<ProfileInfo> CollectAsync(Transaction transaction)
+        {
+            await Task.Delay(1);
+            throw new Exception("test");
+        }
+    }
+    private class TestProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new TestProfiler();
+    }
+
+    internal class TestProfiler : ITransactionProfiler
+    {
+        public void Finish() {}
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => new JsonSerializable(new ProfileInfo());
+    }
+
+#nullable disable
+
+    [Fact]
+    public void CaptureTransaction_WithSyncThrowingTransactionProfiler_DoesntSendTransaction()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new ThrowingProfilerFactory()
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CaptureTransaction_WithAsyncThrowingTransactionProfiler_SendsTransactionWithoutProfile()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new AsyncThrowingProfilerFactory(),
+            DiagnosticLogger = logger,
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        hub.FlushAsync().Wait();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().HaveCount(1);
+        var envelope = transport.GetSentEnvelopes().Single();
+
+        using var stream = new MemoryStream();
+        envelope.Serialize(stream, logger);
+        stream.Flush();
+        var envelopeStr = Encoding.UTF8.GetString(stream.ToArray());
+        var lines = envelopeStr.Split('\n');
+        lines.Should().HaveCount(4);
+        lines[0].Should().StartWith("{\"sdk\"");
+        lines[1].Should().StartWith("{\"type\":\"transaction\",\"length\":");
+        lines[2].Should().StartWith("{\"type\":\"transaction\"");
+        lines[3].Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CaptureTransaction_WithTransactionProfiler_SendsTransactionWithProfile()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new TestProfilerFactory(),
+            DiagnosticLogger = logger,
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        hub.FlushAsync().Wait();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().HaveCount(1);
+        var envelope = transport.GetSentEnvelopes().Single();
+
+        using var stream = new MemoryStream();
+        envelope.Serialize(stream, logger);
+        stream.Flush();
+        var envelopeStr = Encoding.UTF8.GetString(stream.ToArray());
+        var lines = envelopeStr.Split('\n');
+        lines.Should().HaveCount(6);
+        lines[0].Should().StartWith("{\"sdk\"");
+        lines[1].Should().StartWith("{\"type\":\"transaction\",\"length\":");
+        lines[2].Should().StartWith("{\"type\":\"transaction\"");
+        lines[3].Should().StartWith("{\"type\":\"profile\",\"length\":");
+        lines[4].Should().Contain("\"profile\":{");
+        lines[5].Should().BeEmpty();
+    }
+
     [Fact]
     public void Dispose_IsEnabled_SetToFalse()
     {
