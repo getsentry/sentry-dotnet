@@ -52,11 +52,11 @@ internal class CocoaProfiler : ITransactionProfiler
             return null;
         }
 
-        payload["timestamp"] = transaction.StartTimestamp.ToString("o", CultureInfo.InvariantCulture).ToNSString();
         payloadTx["id"] = transaction.EventId.ToString().ToNSString();
         payloadTx["trace_id"] = _traceId.ToString().ToNSString();
         payloadTx["name"] = transaction.Name.ToNSString();
         payload["transaction"] = payloadTx;
+        payload["timestamp"] = transaction.StartTimestamp.ToString("o", CultureInfo.InvariantCulture).ToNSString();
         return new SerializableNSObject(payload);
     }
 }
