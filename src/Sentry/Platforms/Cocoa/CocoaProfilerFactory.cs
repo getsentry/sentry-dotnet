@@ -17,10 +17,6 @@ internal class CocoaProfilerFactory : ITransactionProfilerFactory
     {
         var traceId = tracer.TraceId.ToCocoaSentryId();
         var startTime = SentryCocoaHybridSdk.StartProfilerForTrace(traceId);
-        if (startTime == 0)
-        {
-            return null;
-        }
         return new CocoaProfiler(_options, startTime, tracer.TraceId, traceId);
     }
 }
