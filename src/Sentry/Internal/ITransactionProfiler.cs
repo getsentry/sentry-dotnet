@@ -25,5 +25,5 @@ internal interface ITransactionProfiler
 
     /// <summary>Process and collect the profile.</summary>
     /// <returns>The collected profile.</returns>
-    ISerializable Collect(Transaction transaction);
+    ISerializable? Collect(Transaction transaction);
 }

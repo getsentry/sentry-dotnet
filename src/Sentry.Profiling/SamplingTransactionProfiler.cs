@@ -96,7 +96,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     /// <inheritdoc />
-    public Protocol.Envelopes.ISerializable Collect(Transaction transaction)
+    public Protocol.Envelopes.ISerializable? Collect(Transaction transaction)
         => Protocol.Envelopes.AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
 
     internal async Task<ProfileInfo> CollectAsync(Transaction transaction)
