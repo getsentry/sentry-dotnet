@@ -44,8 +44,6 @@ internal class CocoaProfiler : ITransactionProfiler
         }
         _options.LogDebug("Trace {0} profile payload collected", _traceId);
 
-        payload["timestamp"] = transaction.StartTimestamp.ToString("o", CultureInfo.InvariantCulture).ToNSString();
-
         var payloadTx = payload["transaction"]?.MutableCopy() as NSMutableDictionary;
         if (payloadTx is null)
         {
@@ -53,6 +51,7 @@ internal class CocoaProfiler : ITransactionProfiler
             return null;
         }
 
+        payload["timestamp"] = transaction.StartTimestamp.ToString("o", CultureInfo.InvariantCulture).ToNSString();
         payloadTx["id"] = transaction.EventId.ToString().ToNSString();
         payloadTx["trace_id"] = _traceId.ToString().ToNSString();
         payloadTx["name"] = transaction.Name.ToNSString();
