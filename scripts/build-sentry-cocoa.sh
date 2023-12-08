@@ -43,7 +43,7 @@ echo "::group::Building sentry-cocoa for Mac Catalyst"
 xcodebuild archive -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
-    -destination 'platform=macOS,variant=Mac Catalyst' \
+    -destination 'generic/platform=macOS,variant=Mac Catalyst' \
     -archivePath ./Carthage/output-maccatalyst.xcarchive \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES
