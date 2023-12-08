@@ -5,6 +5,7 @@
 ### Features
 
 - iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
+
 ### Fixes
 
 - Stop Sentry for MacCatalyst from creating `default.profraw` in the app bundle using xcodebuild archive to build sentry-cocoa ([#2960](https://github.com/getsentry/sentry-dotnet/pull/2960))
