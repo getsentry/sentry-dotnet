@@ -12,7 +12,7 @@ public class ProfilerTests
 #if __IOS__
     [Fact]
 #else
-    [Theory(Skip = "Profiling is not supported on this platform")]
+    [Fact(Skip = "Profiling is not supported on this platform")]
 #endif
     public async Task Profiler_RunningUnderFullClient_SendsProfileData()
     {
