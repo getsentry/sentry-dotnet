@@ -27,9 +27,6 @@ public class ProfilerTests
             }
         }
 
-        var cts = new CancellationTokenSource();
-        cts.Token.Register(() => tcs.TrySetCanceled());
-
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -54,12 +51,9 @@ public class ProfilerTests
             tx.Finish();
             await hub.FlushAsync();
 
-            // Synchronizing in the tests to go through the caching and http transports
-            cts.CancelAfter(options.FlushTimeout + TimeSpan.FromSeconds(1));
-            var ex = Record.Exception(() => tcs.Task.Wait());
-            ex.Should().BeNull();
-            tcs.Task.IsCompleted.Should().BeTrue();
-
+            // Asserts
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(1_000)).ConfigureAwait(false);
+            completedTask.Should().Be(tcs.Task);
             var envelopeLines = tcs.Task.Result.Split('\n');
             envelopeLines.Length.Should().Be(6);
 
