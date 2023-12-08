@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 
 if ([string]::IsNullOrEmpty($File) -or !(Test-Path($File)))
 {
-    Write-Warning "Test output file was not found."
+    Write-Warning "Test output file was not found: '$File'."
 
     # Return success exit code so that GitHub Actions highlights the failure in the test run, rather than in this script.
     return
