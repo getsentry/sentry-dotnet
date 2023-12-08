@@ -1036,6 +1036,7 @@ public partial class HubTests
         using var hub = new Hub(new SentryOptions
         {
             Dsn = ValidDsn,
+            AutoSessionTracking = false,
             TracesSampleRate = 1.0,
             ProfilesSampleRate = 1.0,
             Transport = transport,
@@ -1058,6 +1059,7 @@ public partial class HubTests
         using var hub = new Hub(new SentryOptions
         {
             Dsn = ValidDsn,
+            AutoSessionTracking = false,
             TracesSampleRate = 1.0,
             ProfilesSampleRate = 1.0,
             Transport = transport,
@@ -1094,6 +1096,7 @@ public partial class HubTests
         using var hub = new Hub(new SentryOptions
         {
             Dsn = ValidDsn,
+            AutoSessionTracking = false,
             TracesSampleRate = 1.0,
             ProfilesSampleRate = 1.0,
             Transport = transport,
