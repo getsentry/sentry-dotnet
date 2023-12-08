@@ -188,7 +188,8 @@ public static partial class SentrySdk
         options.EnableScopeSync = true;
         options.ScopeObserver = new CocoaScopeObserver(options);
 
-        if (options.IsProfilingEnabled) {
+        if (options.IsProfilingEnabled)
+        {
             options.TransactionProfilerFactory = new CocoaProfilerFactory(options);
         }
 
