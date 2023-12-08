@@ -12,10 +12,11 @@ internal class CocoaProfiler : ITransactionProfiler
     private readonly CocoaSdk.SentryId _cocoaTraceId;
     private readonly ulong _startTimeNs;
     private ulong _endTimeNs;
-    private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private readonly SentryStopwatch _stopwatch;
 
     public CocoaProfiler(SentryOptions options, ulong startTimeNs, SentryId traceId, CocoaSdk.SentryId cocoaTraceId)
     {
+        _stopwatch = SentryStopwatch.StartNew();
         _options = options;
         _startTimeNs = startTimeNs;
         _traceId = traceId;
