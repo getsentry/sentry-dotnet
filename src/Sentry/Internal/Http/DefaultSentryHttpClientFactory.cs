@@ -20,7 +20,7 @@ internal class DefaultSentryHttpClientFactory : ISentryHttpClientFactory
             throw new ArgumentNullException(nameof(options));
         }
 
-        HttpMessageHandler handler = options.CreateHttpMessageHandler?.Invoke() ?? new HttpClientHandler();
+        var handler = options.CreateHttpMessageHandler?.Invoke() ?? new HttpClientHandler();
         if (handler is HttpClientHandler httpClientHandler)
         {
             if (options.HttpProxy is not null)
