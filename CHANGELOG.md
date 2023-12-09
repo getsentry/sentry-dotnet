@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Feature
+
+- Support for [Spotlight](https://spotlightjs.com/). Debug tool for local development. ([#2961](https://github.com/getsentry/sentry-dotnet/pull/2961))
+  - Enable it with option `EnableSpotlight`
+  - Optionally configure the URL to connect via `SpotlightUrl`. Defaults to `http://localhost:8969/stream`.
+
 ### Fixes
 
 - Stop Sentry for MacCatalyst from creating `default.profraw` in the app bundle using xcodebuild archive to build sentry-cocoa ([#2960](https://github.com/getsentry/sentry-dotnet/pull/2960))

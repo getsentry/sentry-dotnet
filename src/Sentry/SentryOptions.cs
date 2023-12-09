@@ -1071,14 +1071,14 @@ public class SentryOptions
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
     /// <summary>
-    /// The Spotlight URL. Defaults to http://localhost:8969
+    /// The Spotlight URL. Defaults to http://localhost:8969/stream
     /// </summary>
     /// <see cref="EnableSpotlight"/>
     /// <see href="https://spotlightjs.com/"/>
     public string SpotlightUrl { get; set; } = "http://localhost:8969/stream";
 
     /// <summary>
-    /// Whether to enable spotlight for local development.
+    /// Whether to enable Spotlight for local development.
     /// </summary>
     /// <remarks>
     /// Only set this option to `true` while developing, not in production!
