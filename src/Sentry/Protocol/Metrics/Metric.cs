@@ -59,23 +59,22 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
          * We're serializing using the statsd format here: https://github.com/b/statsd_spec
          */
         var metricName = SanitizeKey(Key);
-        await Write(metricName).ConfigureAwait(false);
-        await Write("@").ConfigureAwait(false);
+        await Write($"{metricName}@").ConfigureAwait(false);
         var unit = Unit ?? MeasurementUnit.None;
-        await Write(unit.ToString()).ConfigureAwait(false);
+// We don't need ConfigureAwait(false) here as ConfigureAwait on metricName above avoids capturing the ExecutionContext.
+#pragma warning disable CA2007
+        await Write(unit.ToString());
 
         foreach (var value in SerializedStatsdValues())
         {
-            await Write(":").ConfigureAwait(false);
-            await Write(value.ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
+            await Write($":{value.ToString(CultureInfo.InvariantCulture)}");
         }
 
-        await Write("|").ConfigureAwait(false);
-        await Write(StatsdType).ConfigureAwait(false);
+        await Write($"|{StatsdType}");
 
         if (Tags is { Count: > 0 } tags)
         {
-            await Write("|#").ConfigureAwait(false);
+            await Write("|#");
             var first = true;
             foreach (var (key, value) in tags)
             {
@@ -90,17 +89,14 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
                 }
                 else
                 {
-                    await Write(",").ConfigureAwait(false);
+                    await Write(",");
                 }
-                await Write(key).ConfigureAwait(false);
-                await Write(":").ConfigureAwait(false);
-                await Write(SanitizeValue(value)).ConfigureAwait(false);
+                await Write($"{key}:SanitizeValue(value)");
             }
         }
+#pragma warning restore CA2007
 
-        await Write("|T").ConfigureAwait(false);
-        await Write(Timestamp.GetTimeBucketKey().ToString(CultureInfo.InvariantCulture)).ConfigureAwait(false);
-        await Write("\n").ConfigureAwait(false);
+        await Write($"|T{Timestamp.GetTimeBucketKey().ToString(CultureInfo.InvariantCulture)}\n").ConfigureAwait(false);
         return;
 
         async Task Write(string content)

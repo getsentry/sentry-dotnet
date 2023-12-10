@@ -151,7 +151,6 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                 {
                     try
                     {
-                        var delay = Task.Delay(_flushInterval, shutdownTimeout.Token).ConfigureAwait(false);
                         await Task.Delay(_flushInterval, shutdownTimeout.Token).ConfigureAwait(false);
                     }
                     // Cancellation requested and no timeout allowed, so exit even if there are more items
@@ -179,12 +178,18 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                 // Work with the envelope while it's in the queue
                 foreach (var key in GetFlushableBuckets())
                 {
-                    // TODO: Check if a shutdown request has been made
+                    if (shutdownRequested)
+                    {
+                        break;
+                    }
                     try
                     {
                         _options.LogDebug("Flushing metrics for bucket {0}", key);
-                        var bucket = Buckets[key];
-                        _captureMetrics(bucket.Values);
+                        if (Buckets.TryRemove(key, out var bucket))
+                        {
+                            _captureMetrics(bucket.Values);
+                            _options.LogDebug("Metric flushed for bucket {0}", key);
+                        }
                     }
                     catch (OperationCanceledException)
                     {
@@ -194,11 +199,6 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                     catch (Exception exception)
                     {
                         _options.LogError(exception, "Error while processing metric aggregates.");
-                    }
-                    finally
-                    {
-                        _options.LogDebug("Metric flushed for bucket {0}", key);
-                        Buckets.TryRemove(key, out _);
                     }
                 }
             }
@@ -218,6 +218,11 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
     /// </returns>
     internal IEnumerable<long> GetFlushableBuckets()
     {
+        if (!_buckets.IsValueCreated)
+        {
+            yield break;
+        }
+
         var cutoff = MetricBucketHelper.GetCutoff();
         foreach (var bucket in Buckets)
         {

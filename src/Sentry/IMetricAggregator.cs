@@ -13,7 +13,9 @@ public interface IMetricAggregator
     /// <param name="value">The value to be added</param>
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <param name="timestamp">
+    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    /// </param>
     void Increment(
         string key,
         double value = 1.0,
@@ -30,7 +32,9 @@ public interface IMetricAggregator
     /// <param name="value">The value to be added</param>
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <param name="timestamp">
+    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    /// </param>
     void Gauge(
         string key,
         double value = 1.0,
@@ -47,7 +51,9 @@ public interface IMetricAggregator
     /// <param name="value">The value to be added</param>
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <param name="timestamp">
+    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    /// </param>
     void Distribution(
         string key,
         double value = 1.0,
@@ -64,7 +70,9 @@ public interface IMetricAggregator
     /// <param name="value">The value to be added</param>
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
-    /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <param name="timestamp">
+    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    /// </param>
     void Set(
         string key,
         double value = 1.0,

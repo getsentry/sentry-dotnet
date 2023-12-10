@@ -328,7 +328,11 @@ public sealed class Envelope : ISerializable, IDisposable
     {
         var header = DefaultHeader;
 
-        var items = metrics.Select(EnvelopeItem.FromMetric).ToArray();
+        List<EnvelopeItem> items = new();
+        foreach (var metric in metrics)
+        {
+            items.Add(EnvelopeItem.FromMetric(metric));
+        }
 
         return new Envelope(header, items);
     }
