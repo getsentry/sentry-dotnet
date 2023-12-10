@@ -43,7 +43,8 @@ public class ProfilerTests
 
         try
         {
-            using var hub = new Hub(options);
+            using var hub = SentrySdk.InitHub(options) as Hub;
+            options.TransactionProfilerFactory.Should().NotBeNull();
 
             var clock = SentryStopwatch.StartNew();
             var tx = hub.StartTransaction("name", "op");
