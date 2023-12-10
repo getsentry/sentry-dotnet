@@ -11,7 +11,7 @@ public partial class HubTests
     {
         public SentryOptions Options { get; }
 
-        public ISentryClient Client { get; set;  }
+        public ISentryClient Client { get; set; }
 
         public ISessionManager SessionManager { get; set; }
 
@@ -948,7 +948,7 @@ public partial class HubTests
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
         hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
         var traceHeader = "5bd5f6d346b442dd9177dce9302fd737-2000000000000000";
-        var baggageHeader ="sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
+        var baggageHeader = "sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
 
         hub.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be("43365712692146d08ee11a729dfbcaca")); // Sanity check
 
@@ -991,7 +991,7 @@ public partial class HubTests
 
     internal class ThrowingProfiler : ITransactionProfiler
     {
-        public void Finish() {}
+        public void Finish() { }
 
         public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => throw new Exception("test");
     }
@@ -1003,7 +1003,7 @@ public partial class HubTests
 
     internal class AsyncThrowingProfiler : ITransactionProfiler
     {
-        public void Finish() {}
+        public void Finish() { }
 
         public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction transaction)
             => AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
@@ -1021,7 +1021,7 @@ public partial class HubTests
 
     internal class TestProfiler : ITransactionProfiler
     {
-        public void Finish() {}
+        public void Finish() { }
 
         public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => new JsonSerializable(new ProfileInfo());
     }
@@ -1029,7 +1029,7 @@ public partial class HubTests
 #nullable disable
 
     [Fact]
-    public void CaptureTransaction_WithSyncThrowingTransactionProfiler_DoesntSendTransaction()
+    public async Task CaptureTransaction_WithSyncThrowingTransactionProfiler_DoesntSendTransaction()
     {
         // Arrange
         var transport = new FakeTransport();
@@ -1045,13 +1045,14 @@ public partial class HubTests
 
         // Act
         hub.StartTransaction("foo", "bar").Finish();
+        await hub.FlushAsync();
 
         // Assert
         transport.GetSentEnvelopes().Should().BeEmpty();
     }
 
     [Fact]
-    public void CaptureTransaction_WithAsyncThrowingTransactionProfiler_SendsTransactionWithoutProfile()
+    public async Task CaptureTransaction_WithAsyncThrowingTransactionProfiler_SendsTransactionWithoutProfile()
     {
         // Arrange
         var transport = new FakeTransport();
@@ -1069,7 +1070,7 @@ public partial class HubTests
 
         // Act
         hub.StartTransaction("foo", "bar").Finish();
-        hub.FlushAsync().Wait();
+        await hub.FlushAsync();
 
         // Assert
         transport.GetSentEnvelopes().Should().HaveCount(1);
@@ -1088,7 +1089,7 @@ public partial class HubTests
     }
 
     [Fact]
-    public void CaptureTransaction_WithTransactionProfiler_SendsTransactionWithProfile()
+    public async Task CaptureTransaction_WithTransactionProfiler_SendsTransactionWithProfile()
     {
         // Arrange
         var transport = new FakeTransport();
@@ -1106,7 +1107,7 @@ public partial class HubTests
 
         // Act
         hub.StartTransaction("foo", "bar").Finish();
-        hub.FlushAsync().Wait();
+        await hub.FlushAsync();
 
         // Assert
         transport.GetSentEnvelopes().Should().HaveCount(1);
@@ -1452,7 +1453,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled),Arg.Any<Scope>(), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
