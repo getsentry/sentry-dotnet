@@ -12,7 +12,7 @@ public class ProfilingIntegration : ISdkIntegration
     {
         if (options.IsProfilingEnabled)
         {
-            options.TransactionProfilerFactory = SamplingTransactionProfilerFactory.Create(options);
+            options.TransactionProfilerFactory ??= SamplingTransactionProfilerFactory.Create(options);
         }
     }
 }

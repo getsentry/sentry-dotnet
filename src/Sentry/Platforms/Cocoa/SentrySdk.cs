@@ -190,7 +190,7 @@ public static partial class SentrySdk
 
         if (options.IsProfilingEnabled)
         {
-            options.TransactionProfilerFactory = new CocoaProfilerFactory(options);
+            options.TransactionProfilerFactory ??= new CocoaProfilerFactory(options);
         }
 
         // TODO: Pause/Resume
