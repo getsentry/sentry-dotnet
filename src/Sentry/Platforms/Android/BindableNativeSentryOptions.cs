@@ -1,16 +1,14 @@
 // ReSharper disable once CheckNamespace
-using Sentry.Android;
-
 namespace Sentry;
 
 internal partial class BindableSentryOptions
 {
-    public AndroidOptions Android { get; } = new AndroidOptions();
+    public NativeOptions Native { get; } = new NativeOptions();
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
-    public class AndroidOptions
+    public class NativeOptions
     {
         public bool? AnrEnabled { get; set; }
         public bool? AnrReportInDebug { get; set; }
@@ -33,12 +31,10 @@ internal partial class BindableSentryOptions
         public bool? PrintUncaughtStackTrace { get; set; }
         public double? ProfilesSampleRate { get; set; }
         public TimeSpan? ReadTimeout { get; set; }
-        public bool? EnableAndroidSdkTracing { get; set; }
-        public bool? EnableAndroidSdkBeforeSend { get; set; }
-        public LogCatIntegrationType? LogCatIntegration { get; set; }
-        public int? LogCatMaxLines { get; set; }
+        public bool? EnableTracing { get; set; }
+        public bool? EnableBeforeSend { get; set; }
 
-        public void ApplyTo(SentryOptions.AndroidOptions options)
+        public void ApplyTo(SentryOptions.NativeOptions options)
         {
             options.AnrEnabled = AnrEnabled ?? options.AnrEnabled;
             options.AnrReportInDebug = AnrReportInDebug ?? options.AnrReportInDebug;
@@ -61,10 +57,8 @@ internal partial class BindableSentryOptions
             options.PrintUncaughtStackTrace = PrintUncaughtStackTrace ?? options.PrintUncaughtStackTrace;
             options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
             options.ReadTimeout = ReadTimeout ?? options.ReadTimeout;
-            options.EnableAndroidSdkTracing = EnableAndroidSdkTracing ?? options.EnableAndroidSdkTracing;
-            options.EnableAndroidSdkBeforeSend = EnableAndroidSdkBeforeSend ?? options.EnableAndroidSdkBeforeSend;
-            options.LogCatIntegration = LogCatIntegration ?? options.LogCatIntegration;
-            options.LogCatMaxLines = LogCatMaxLines ?? options.LogCatMaxLines;
+            options.EnableTracing = EnableTracing ?? options.EnableTracing;
+            options.EnableBeforeSend = EnableBeforeSend ?? options.EnableBeforeSend;
         }
     }
 }

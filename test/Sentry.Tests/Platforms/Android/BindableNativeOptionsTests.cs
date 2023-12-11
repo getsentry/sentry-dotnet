@@ -3,12 +3,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace Sentry.Tests.Platforms.Android;
 
-public class BindableSentryOptionsTests : BindableTests<SentryOptions.AndroidOptions>
+public class BindableNativeOptionsTests : BindableTests<SentryOptions.NativeOptions>
 {
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {
-        var actual = GetPropertyNames<BindableSentryOptions.AndroidOptions>();
+        var actual = GetPropertyNames<BindableSentryOptions.NativeOptions>();
         AssertContainsAllOptionsProperties(actual);
     }
 
@@ -16,8 +16,8 @@ public class BindableSentryOptionsTests : BindableTests<SentryOptions.AndroidOpt
     public void ApplyTo_SetsOptionsFromConfig()
     {
         // Arrange
-        var actual = new SentryOptions.AndroidOptions(new SentryOptions());
-        var bindable = new BindableSentryOptions.AndroidOptions();
+        var actual = new SentryOptions.NativeOptions(new SentryOptions());
+        var bindable = new BindableSentryOptions.NativeOptions();
 
         // Act
         Fixture.Config.Bind(bindable);

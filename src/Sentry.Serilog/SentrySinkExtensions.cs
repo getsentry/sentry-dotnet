@@ -9,10 +9,10 @@ namespace Serilog;
 public static class SentrySinkExtensions
 {
     /// <summary>
-    /// Add Sentry Serilog Sink.
+    /// Initialize Sentry and add the SentrySink for Serilog.
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
-    /// <param name="dsn">The Sentry DSN. <seealso cref="SentryOptions.Dsn"/></param>
+    /// <param name="dsn">The Sentry DSN (required). <seealso cref="SentryOptions.Dsn"/></param>
     /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
     /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
     /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
@@ -34,7 +34,6 @@ public static class SentrySinkExtensions
     /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
     /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
     /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
-    /// <param name="initializeSdk">Whether to initialize this SDK through this integration. <seealso cref="SentrySerilogOptions.InitializeSdk"/></param>
     /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
     /// <example>This sample shows how each item may be set from within a configuration file:
@@ -69,7 +68,6 @@ public static class SentrySinkExtensions
     ///                     "diagnosticLevel": "Debug",
     ///                     "reportAssembliesMode": ReportAssembliesMode.None,
     ///                     "deduplicateMode": "All",
-    ///                     "initializeSdk": true,
     ///                     "defaultTags": {
     ///                         "key-1", "value-1",
     ///                         "key-2", "value-2"
@@ -83,9 +81,9 @@ public static class SentrySinkExtensions
     /// </example>
     public static LoggerConfiguration Sentry(
         this LoggerSinkConfiguration loggerConfiguration,
-        string? dsn = null,
-        LogEventLevel minimumBreadcrumbLevel = LogEventLevel.Information,
-        LogEventLevel minimumEventLevel = LogEventLevel.Error,
+        string dsn,
+        LogEventLevel? minimumBreadcrumbLevel = null,
+        LogEventLevel? minimumEventLevel = null,
         IFormatProvider? formatProvider = null,
         ITextFormatter? textFormatter = null,
         bool? sendDefaultPii = null,
@@ -105,7 +103,6 @@ public static class SentrySinkExtensions
         SentryLevel? diagnosticLevel = null,
         ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
-        bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
@@ -131,13 +128,62 @@ public static class SentrySinkExtensions
             diagnosticLevel,
             reportAssembliesMode,
             deduplicateMode,
-            initializeSdk,
             defaultTags));
+    }
+
+    /// <summary>
+    /// <para>Adds a Sentry Sink for Serilog.</para>
+    /// <remarks>
+    /// Note this overload doesn't initialize Sentry for you, so you'll need to have already done so. Alternatively you
+    /// can use use the overload of this extension method, passing a DSN string in the first argument.
+    /// </remarks>
+    /// </summary>
+    /// <param name="loggerConfiguration">The logger configuration .<seealso cref="LoggerSinkConfiguration"/></param>
+    /// <param name="minimumEventLevel">Minimum log level to send an event. <seealso cref="SentrySerilogOptions.MinimumEventLevel"/></param>
+    /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
+    /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
+    /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
+    /// <returns><see cref="LoggerConfiguration"/></returns>
+    /// <example>This sample shows how each item may be set from within a configuration file:
+    /// <code>
+    /// {
+    ///     "Serilog": {
+    ///         "Using": [
+    ///             "Serilog",
+    ///             "Sentry",
+    ///         ],
+    ///         "WriteTo": [{
+    ///                 "Name": "Sentry",
+    ///                 "Args": {
+    ///                     "minimumEventLevel": "Error",
+    ///                     "minimumBreadcrumbLevel": "Verbose",
+    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"///
+    ///                 }
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    public static LoggerConfiguration Sentry(
+        this LoggerSinkConfiguration loggerConfiguration,
+        LogEventLevel? minimumEventLevel = null,
+        LogEventLevel? minimumBreadcrumbLevel = null,
+        IFormatProvider? formatProvider = null,
+        ITextFormatter? textFormatter = null
+        )
+    {
+        return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
+            null,
+            minimumEventLevel,
+            minimumBreadcrumbLevel,
+            formatProvider,
+            textFormatter));
     }
 
     internal static void ConfigureSentrySerilogOptions(
         SentrySerilogOptions sentrySerilogOptions,
-        string? dsn = null,
+        string? dsn,
         LogEventLevel? minimumEventLevel = null,
         LogEventLevel? minimumBreadcrumbLevel = null,
         IFormatProvider? formatProvider = null,
@@ -159,7 +205,6 @@ public static class SentrySinkExtensions
         SentryLevel? diagnosticLevel = null,
         ReportAssembliesMode? reportAssembliesMode = null,
         DeduplicateMode? deduplicateMode = null,
-        bool? initializeSdk = null,
         Dictionary<string, string>? defaultTags = null)
     {
         if (dsn is not null)
@@ -273,12 +318,8 @@ public static class SentrySinkExtensions
         }
 
         // Serilog-specific items
-        if (initializeSdk.HasValue)
-        {
-            sentrySerilogOptions.InitializeSdk = initializeSdk.Value;
-        }
-
-        if (defaultTags?.Any() == true)
+        sentrySerilogOptions.InitializeSdk = dsn is not null;  // Inferred from the Sentry overload that is used
+        if (defaultTags?.Count > 0)
         {
             foreach (var tag in defaultTags)
             {

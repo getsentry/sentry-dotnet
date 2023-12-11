@@ -31,10 +31,13 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                 !p.PropertyType.IsSubclassOf(typeof(Delegate)) // Exclude delegate properties
                 && !p.PropertyType.IsInterface // Exclude interface properties
                 && !skipProperties.Contains(p.Name) // Exclude any properties explicitly excluded by derived classes
+
+                // Exclude the Mobile sub-properties
 #if ANDROID
-                && !(p.PropertyType == typeof(SentryOptions.AndroidOptions)) // Exclude the Mobile sub-property
+                && !(p.PropertyType == typeof(SentryOptions.AndroidOptions))
+                && !(p.PropertyType == typeof(SentryOptions.NativeOptions))
 #elif __IOS__
-                && !(p.PropertyType == typeof(SentryOptions.CocoaOptions)) // Exclude the Mobile sub-property
+                && !(p.PropertyType == typeof(SentryOptions.NativeOptions))
 #endif
                 );
     }
