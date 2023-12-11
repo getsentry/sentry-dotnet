@@ -5,13 +5,6 @@ namespace Sentry.Cocoa;
 
 internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable
 {
-    private readonly SentryCocoaOptions _options;
-
-    public CocoaEventProcessor(SentryCocoaOptions options)
-    {
-        _options = options;
-    }
-
     public SentryEvent Process(SentryEvent @event)
     {
         // Get a temp event from the Cocoa SDK

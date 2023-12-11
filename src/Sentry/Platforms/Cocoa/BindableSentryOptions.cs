@@ -3,12 +3,12 @@ namespace Sentry;
 
 internal partial class BindableSentryOptions
 {
-    public CocoaOptions Cocoa { get; } = new CocoaOptions();
+    public NativeOptions Native { get; } = new NativeOptions();
 
     /// <summary>
     /// Provides additional options for the Android platform.
     /// </summary>
-    public class CocoaOptions
+    public class NativeOptions
     {
         public bool? AttachScreenshot { get; set; }
         public TimeSpan? AppHangTimeoutInterval { get; set; }
@@ -24,9 +24,9 @@ internal partial class BindableSentryOptions
         public bool? EnableSwizzling { get; set; }
         public bool? EnableUIViewControllerTracing { get; set; }
         public bool? EnableUserInteractionTracing { get; set; }
-        public bool? EnableCocoaSdkTracing { get; set; }
+        public bool? EnableTracing { get; set; }
 
-        public void ApplyTo(SentryOptions.CocoaOptions options)
+        public void ApplyTo(SentryOptions.NativeOptions options)
         {
             options.AttachScreenshot = AttachScreenshot ?? options.AttachScreenshot;
             options.AppHangTimeoutInterval = AppHangTimeoutInterval ?? options.AppHangTimeoutInterval;
@@ -42,7 +42,7 @@ internal partial class BindableSentryOptions
             options.EnableSwizzling = EnableSwizzling ?? options.EnableSwizzling;
             options.EnableUIViewControllerTracing = EnableUIViewControllerTracing ?? options.EnableUIViewControllerTracing;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
-            options.EnableCocoaSdkTracing = EnableCocoaSdkTracing ?? options.EnableCocoaSdkTracing;
+            options.EnableTracing = EnableTracing ?? options.EnableTracing;
         }
     }
 }

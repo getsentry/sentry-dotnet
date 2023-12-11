@@ -90,10 +90,12 @@ internal partial class BindableSentryOptions
         options.AutoSessionTracking = AutoSessionTracking ?? options.AutoSessionTracking;
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
+
 #if ANDROID
         Android.ApplyTo(options.Android);
+        Native.ApplyTo(options.Native);
 #elif __IOS__
-        Cocoa.ApplyTo(options.Cocoa);
+        Native.ApplyTo(options.Native);
 #endif
     }
 }

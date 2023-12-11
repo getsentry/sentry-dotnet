@@ -165,7 +165,7 @@ public class TransactionTracer : ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-    private readonly ConcurrentBag<SpanTracer> _spans = new();
+    private readonly ConcurrentBag<ISpan> _spans = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<ISpan> Spans => _spans;

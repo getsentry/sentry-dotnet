@@ -9,16 +9,16 @@ public partial class SentryOptions
     /// Exposes additional options for iOS and MacCatalyst.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public CocoaOptions Cocoa { get; }
+    public NativeOptions Native { get; }
 
     /// <summary>
     /// Provides additional options for iOS and MacCatalyst.
     /// </summary>
-    public class CocoaOptions
+    public class NativeOptions
     {
         private readonly SentryOptions _options;
 
-        internal CocoaOptions(SentryOptions options)
+        internal NativeOptions(SentryOptions options)
         {
             _options = options;
         }
@@ -182,7 +182,7 @@ public partial class SentryOptions
         /// Gets or sets a value that indicates if tracing features are enabled on the embedded Cocoa SDK.
         /// The default value is <c>false</c> (disabled).
         /// </summary>
-        public bool EnableCocoaSdkTracing { get; set; } = false;
+        public bool EnableTracing { get; set; } = false;
 
         internal List<string>? InAppExcludes { get; private set; }
         internal List<string>? InAppIncludes { get; private set; }

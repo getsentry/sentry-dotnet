@@ -1145,13 +1145,14 @@ public class SentryOptions
                                ;
 
 #if ANDROID
-        Android = new AndroidOptions(this);
+        Android = new AndroidOptions();
+        Native = new NativeOptions(this);
 
         var reader = new Lazy<IAndroidAssemblyReader?>(() => AndroidHelpers.GetAndroidAssemblyReader(DiagnosticLogger));
         AssemblyReader = name => reader.Value?.TryReadAssembly(name);
 
 #elif __IOS__
-        Cocoa = new CocoaOptions(this);
+        Native = new NativeOptions(this);
 #endif
 
         InAppExclude = new() {
