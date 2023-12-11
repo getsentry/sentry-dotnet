@@ -1028,7 +1028,7 @@ public partial class HubTests
 
 #nullable disable
 
-    [Fact(Skip = "times out?")]
+    [Fact]
     public async Task CaptureTransaction_WithSyncThrowingTransactionProfiler_DoesntSendTransaction()
     {
         // Arrange
