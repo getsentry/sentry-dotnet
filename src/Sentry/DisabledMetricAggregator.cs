@@ -25,4 +25,10 @@ internal class DisabledMetricAggregator : IMetricAggregator
     {
         // No Op
     }
+
+    public void Timing(string key, double value, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second, IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null)
+    {
+        // No Op
+    }
 }

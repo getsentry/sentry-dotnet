@@ -13,4 +13,7 @@ internal class DelegatingMetricAggregator(IMetricAggregator innerAggregator) : I
 
     public void Set(string key, double value = 1, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null,
         DateTime? timestamp = null) => innerAggregator.Set(key, value, unit, tags, timestamp);
+
+    public void Timing(string key, double value, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second, IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null) => innerAggregator.Timing(key, value, unit, tags, timestamp);
 }

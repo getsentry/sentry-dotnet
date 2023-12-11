@@ -24,10 +24,19 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
 
     private Task LoopTask { get; }
 
-    public MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>>? captureMetrics = null, CancellationTokenSource? shutdownSource = null, bool disableLoopTask = false)
+    /// <summary>
+    /// MetricAggregator constructor.
+    /// </summary>
+    /// <param name="options">The <see cref="SentryOptions"/></param>
+    /// <param name="captureMetrics">The callback to be called to transmit aggregated metrics to a statsd server</param>
+    /// <param name="shutdownSource">A <see cref="CancellationTokenSource"/></param>
+    /// <param name="disableLoopTask">
+    /// A boolean value indicating whether the Loop to flush metrics should run. This is provided for unit testing only.
+    /// </param>
+    public MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics, CancellationTokenSource? shutdownSource = null, bool disableLoopTask = false)
     {
         _options = options;
-        _captureMetrics = captureMetrics ?? (_ => { });
+        _captureMetrics = captureMetrics;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
 
         if (disableLoopTask)
@@ -97,6 +106,16 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         DateTime? timestamp = null
         // , int stacklevel = 0 // Used for code locations
     ) => Emit(MetricType.Set, key, value, unit, tags, timestamp);
+
+    /// <inheritdoc cref="IMetricAggregator.Timing"/>
+    public void Timing(
+        string key,
+        double value,
+        MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null,
+        DateTime? timestamp = null)
+        // , int stacklevel = 0 // Used for code locations
+        => Emit(MetricType.Distribution, key, value, unit, tags, timestamp);
 
     private void Emit(
         MetricType type,
