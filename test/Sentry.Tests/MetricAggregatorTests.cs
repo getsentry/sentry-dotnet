@@ -9,8 +9,9 @@ public class MetricAggregatorTests
         public SentryOptions Options { get; set; } = new();
         public Action<IEnumerable<Metric>> CaptureMetrics { get; set; } = (_ => { });
         public bool DisableFlushLoop { get; set; } = true;
+        public TimeSpan FlushInterval { get; set; } = TimeSpan.FromMilliseconds(100);
         public MetricAggregator GetSut()
-            => new(Options, CaptureMetrics, disableLoopTask: DisableFlushLoop);
+            => new(Options, CaptureMetrics, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
     }
 
     private readonly Fixture _fixture = new();
@@ -163,4 +164,31 @@ public class MetricAggregatorTests
         var data2 = (SetMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().BeEquivalentTo(new[] {13});
     }
+
+    // [Fact]
+    // public async Task GetFlushableBuckets_IsThreadsafe()
+    // {
+    //     // Arrange
+    //     var rnd = new Random();
+    //     MetricBucketHelper.FlushShift = 0.0;
+    //     _fixture.DisableFlushLoop = false;
+    //     _fixture.CaptureMetrics = _ => Thread.Sleep(rnd.Next(10, 20));
+    //     var sut = _fixture.GetSut();
+    //
+    //     // Act... spawn some threads that add loads of metrics
+    //     var started = DateTime.UtcNow;
+    //     while (DateTime.UtcNow - started < TimeSpan.FromSeconds(600))
+    //     {
+    //         for (var i = 0; i < 100; i++)
+    //         {
+    //             await Task.Run(() => sut.Gauge("meter", rnd.NextDouble()));
+    //         }
+    //     }
+    //
+    //     // Wait for the flush loop to clear everything out
+    //     await Task.Delay(TimeSpan.FromMilliseconds(500));
+    //
+    //     // Assert
+    //     sut.Buckets.Should().BeEmpty(); // Ensures no metrics were added to a bucket after it was removed
+    // }
 }

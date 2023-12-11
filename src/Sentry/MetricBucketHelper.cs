@@ -18,8 +18,9 @@ internal static class MetricBucketHelper
     /// once per aggregator boot to achieve some level of offsetting across a fleet of deployed SDKs.  Relay itself will
     /// also apply independent jittering.
     /// </summary>
-    private static readonly double _flushShift = new Random().NextDouble() * RollupInSeconds;
+    /// <remarks>Internal for testing</remarks>
+    internal static double FlushShift = new Random().NextDouble() * RollupInSeconds;
     internal static DateTime GetCutoff() => DateTime.UtcNow
         .Subtract(TimeSpan.FromSeconds(RollupInSeconds))
-        .Subtract(TimeSpan.FromSeconds(_flushShift));
+        .Subtract(TimeSpan.FromSeconds(FlushShift));
 }

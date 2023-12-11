@@ -10,7 +10,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
 
     private readonly SentryOptions _options;
     private readonly Action<IEnumerable<Metric>> _captureMetrics;
-    private readonly TimeSpan _flushInterval = TimeSpan.FromSeconds(5);
+    private readonly TimeSpan _flushInterval;
 
     private readonly CancellationTokenSource _shutdownSource;
     private volatile bool _disposed;
@@ -31,13 +31,16 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
     /// <param name="captureMetrics">The callback to be called to transmit aggregated metrics to a statsd server</param>
     /// <param name="shutdownSource">A <see cref="CancellationTokenSource"/></param>
     /// <param name="disableLoopTask">
-    /// A boolean value indicating whether the Loop to flush metrics should run. This is provided for unit testing only.
+    /// A boolean value indicating whether the Loop to flush metrics should run, for testing only.
     /// </param>
-    public MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics, CancellationTokenSource? shutdownSource = null, bool disableLoopTask = false)
+    /// <param name="flushInterval">An optional flushInterval, for testing only</param>
+    public MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics,
+        CancellationTokenSource? shutdownSource = null, bool disableLoopTask = false, TimeSpan? flushInterval = null)
     {
         _options = options;
         _captureMetrics = captureMetrics;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
+        _flushInterval = flushInterval ?? TimeSpan.FromSeconds(5);
 
         if (disableLoopTask)
         {
