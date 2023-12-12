@@ -11,7 +11,7 @@ public partial class HubTests
     {
         public SentryOptions Options { get; }
 
-        public ISentryClient Client { get; set;  }
+        public ISentryClient Client { get; set; }
 
         public ISessionManager SessionManager { get; set; }
 
@@ -948,7 +948,7 @@ public partial class HubTests
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
         hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
         var traceHeader = "5bd5f6d346b442dd9177dce9302fd737-2000000000000000";
-        var baggageHeader ="sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
+        var baggageHeader = "sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
 
         hub.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be("43365712692146d08ee11a729dfbcaca")); // Sanity check
 
@@ -981,6 +981,150 @@ public partial class HubTests
 
         // Assert
         hub.ConfigureScope(scope => scope.Transaction.Should().BeNull());
+    }
+
+#nullable enable
+    private class ThrowingProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new ThrowingProfiler();
+    }
+
+    internal class ThrowingProfiler : ITransactionProfiler
+    {
+        public void Finish() { }
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => throw new Exception("test");
+    }
+
+    private class AsyncThrowingProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new AsyncThrowingProfiler();
+    }
+
+    internal class AsyncThrowingProfiler : ITransactionProfiler
+    {
+        public void Finish() { }
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction transaction)
+            => AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
+
+        private async Task<ProfileInfo> CollectAsync(Transaction transaction)
+        {
+            await Task.Delay(1);
+            throw new Exception("test");
+        }
+    }
+    private class TestProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new TestProfiler();
+    }
+
+    internal class TestProfiler : ITransactionProfiler
+    {
+        public void Finish() { }
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => new JsonSerializable(new ProfileInfo());
+    }
+
+#nullable disable
+
+    [Fact]
+    public async Task CaptureTransaction_WithSyncThrowingTransactionProfiler_DoesntSendTransaction()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            AutoSessionTracking = false,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new ThrowingProfilerFactory()
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        await hub.FlushAsync();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CaptureTransaction_WithAsyncThrowingTransactionProfiler_SendsTransactionWithoutProfile()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            AutoSessionTracking = false,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new AsyncThrowingProfilerFactory(),
+            DiagnosticLogger = logger,
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        await hub.FlushAsync();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().HaveCount(1);
+        var envelope = transport.GetSentEnvelopes().Single();
+
+        using var stream = new MemoryStream();
+        envelope.Serialize(stream, logger);
+        stream.Flush();
+        var envelopeStr = Encoding.UTF8.GetString(stream.ToArray());
+        var lines = envelopeStr.Split('\n');
+        lines.Should().HaveCount(4);
+        lines[0].Should().StartWith("{\"sdk\"");
+        lines[1].Should().StartWith("{\"type\":\"transaction\",\"length\":");
+        lines[2].Should().StartWith("{\"type\":\"transaction\"");
+        lines[3].Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CaptureTransaction_WithTransactionProfiler_SendsTransactionWithProfile()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            AutoSessionTracking = false,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new TestProfilerFactory(),
+            DiagnosticLogger = logger,
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        await hub.FlushAsync();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().HaveCount(1);
+        var envelope = transport.GetSentEnvelopes().Single();
+
+        using var stream = new MemoryStream();
+        envelope.Serialize(stream, logger);
+        stream.Flush();
+        var envelopeStr = Encoding.UTF8.GetString(stream.ToArray());
+        var lines = envelopeStr.Split('\n');
+        lines.Should().HaveCount(6);
+        lines[0].Should().StartWith("{\"sdk\"");
+        lines[1].Should().StartWith("{\"type\":\"transaction\",\"length\":");
+        lines[2].Should().StartWith("{\"type\":\"transaction\"");
+        lines[3].Should().StartWith("{\"type\":\"profile\",\"length\":");
+        lines[4].Should().Contain("\"profile\":{");
+        lines[5].Should().BeEmpty();
     }
 
     [Fact]
@@ -1309,7 +1453,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled),Arg.Any<Scope>(), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]

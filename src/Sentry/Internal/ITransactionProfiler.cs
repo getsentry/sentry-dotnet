@@ -23,8 +23,7 @@ internal interface ITransactionProfiler
     /// </summary>
     void Finish();
 
-    /// <summary>
-    /// Process and collect the profile.
-    /// </summary>
-    Task<ProfileInfo> CollectAsync(Transaction transaction);
+    /// <summary>Process and collect the profile.</summary>
+    /// <returns>The collected profile.</returns>
+    ISerializable? Collect(Transaction transaction);
 }
