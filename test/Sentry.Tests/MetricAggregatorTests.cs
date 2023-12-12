@@ -9,7 +9,7 @@ public class MetricAggregatorTests
         public SentryOptions Options { get; set; } = new();
         public Action<IEnumerable<Metric>> CaptureMetrics { get; set; } = (_ => { });
         public bool DisableFlushLoop { get; set; } = true;
-        public TimeSpan FlushInterval { get; set; } = TimeSpan.FromMilliseconds(100);
+        public TimeSpan? FlushInterval { get; set; }
         public MetricAggregator GetSut()
             => new(Options, CaptureMetrics, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
     }
@@ -175,6 +175,7 @@ public class MetricAggregatorTests
         var sent = 0;
         MetricBucketHelper.FlushShift = 0.0;
         _fixture.DisableFlushLoop = false;
+        _fixture.FlushInterval = TimeSpan.FromMilliseconds(100);
         _fixture.CaptureMetrics = metrics =>
         {
             foreach (var metric in metrics)

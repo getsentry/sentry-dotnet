@@ -124,7 +124,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         // , int stacklevel = 0 // Used for code locations
         => Emit(MetricType.Distribution, key, value, unit, tags, timestamp);
 
-    private readonly object _emitLock = new();
+    private object _bucketLock = new object();
     private void Emit(
         MetricType type,
         string key,
@@ -138,32 +138,37 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         timestamp ??= DateTime.UtcNow;
         unit ??= MeasurementUnit.None;
 
-        var timeBucket = Buckets.GetOrAdd(
-            timestamp.Value.GetTimeBucketKey(),
-            _ => new ConcurrentDictionary<string, Metric>()
-        );
-
-        var metric = timeBucket.GetOrAdd(
-            GetMetricBucketKey(type, key, unit.Value, tags),
-            _ => AddValues(timestamp.Value));
-        lock (_emitLock)
+        lock (_bucketLock)
         {
-            metric.Add(value);
+            var timeBucket = Buckets.GetOrAdd(
+                timestamp.Value.GetTimeBucketKey(),
+                _ => new ConcurrentDictionary<string, Metric>()
+            );
+
+            Func<string, Metric> addValuesFactory = type switch
+            {
+                MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, tags, timestamp),
+                MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, tags, timestamp),
+                MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, tags, timestamp),
+                MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, tags, timestamp),
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
+            };
+
+            timeBucket.AddOrUpdate(
+                GetMetricBucketKey(type, key, unit.Value, tags),
+                addValuesFactory,
+                (_, metric) =>
+                {
+                    metric.Add(value);
+                    return metric;
+                }
+            );
         }
 
         // TODO: record the code location
         // if stacklevel is not None:
         //     self.record_code_location(ty, key, unit, stacklevel + 2, timestamp)
 
-        Metric AddValues(DateTime ts) =>
-            type switch
-            {
-                MetricType.Counter => new CounterMetric(key, value, unit.Value, tags, ts),
-                MetricType.Gauge => new GaugeMetric(key, value, unit.Value, tags, ts),
-                MetricType.Distribution => new DistributionMetric(key, value, unit.Value, tags, ts),
-                MetricType.Set => new SetMetric(key, (int)value, unit.Value, tags, ts),
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
-            };
     }
 
     // TODO: record_code_location
@@ -263,25 +268,28 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         // triggered a flush at the same time ForceFlush is called
         lock(_flushLock)
         {
-            foreach (var key in GetFlushableBuckets(force))
+            lock (_bucketLock)
             {
-                try
+                foreach (var key in GetFlushableBuckets(force))
                 {
-                    _options.LogDebug("Flushing metrics for bucket {0}", key);
-                    if (Buckets.TryRemove(key, out var bucket))
+                    try
                     {
-                        _captureMetrics(bucket.Values);
-                        _options.LogDebug("Metric flushed for bucket {0}", key);
+                        _options.LogDebug("Flushing metrics for bucket {0}", key);
+                        if (Buckets.TryRemove(key, out var bucket))
+                        {
+                            _captureMetrics(bucket.Values);
+                            _options.LogDebug("Metric flushed for bucket {0}", key);
+                        }
                     }
-                }
-                catch (OperationCanceledException)
-                {
-                    _options.LogInfo("Shutdown token triggered. Time to exit.");
-                    return false;
-                }
-                catch (Exception exception)
-                {
-                    _options.LogError(exception, "Error while processing metric aggregates.");
+                    catch (OperationCanceledException)
+                    {
+                        _options.LogInfo("Shutdown token triggered. Time to exit.");
+                        return false;
+                    }
+                    catch (Exception exception)
+                    {
+                        _options.LogError(exception, "Error while processing metric aggregates.");
+                    }
                 }
             }
 
