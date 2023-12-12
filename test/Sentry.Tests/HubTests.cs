@@ -1088,7 +1088,7 @@ public partial class HubTests
         lines[3].Should().BeEmpty();
     }
 
-    [Fact(Skip = "times out?")]
+    [Fact]
     public async Task CaptureTransaction_WithTransactionProfiler_SendsTransactionWithProfile()
     {
         // Arrange
