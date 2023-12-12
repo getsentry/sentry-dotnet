@@ -1051,7 +1051,7 @@ public partial class HubTests
         transport.GetSentEnvelopes().Should().BeEmpty();
     }
 
-    [Fact(Skip = "times out?")]
+    [Fact]
     public async Task CaptureTransaction_WithAsyncThrowingTransactionProfiler_SendsTransactionWithoutProfile()
     {
         // Arrange
