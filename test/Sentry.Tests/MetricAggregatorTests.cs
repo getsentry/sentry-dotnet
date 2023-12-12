@@ -14,7 +14,8 @@ public class MetricAggregatorTests
             => new(Options, CaptureMetrics, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
     }
 
-    private readonly Fixture _fixture = new();
+    // private readonly Fixture _fixture = new();
+    private static readonly Fixture _fixture = new();
 
     [Fact]
     public void GetMetricBucketKey_GeneratesExpectedKey()
@@ -165,30 +166,48 @@ public class MetricAggregatorTests
         data2.Value.Should().BeEquivalentTo(new[] {13});
     }
 
-    // [Fact]
-    // public async Task GetFlushableBuckets_IsThreadsafe()
-    // {
-    //     // Arrange
-    //     var rnd = new Random();
-    //     MetricBucketHelper.FlushShift = 0.0;
-    //     _fixture.DisableFlushLoop = false;
-    //     _fixture.CaptureMetrics = _ => Thread.Sleep(rnd.Next(10, 20));
-    //     var sut = _fixture.GetSut();
-    //
-    //     // Act... spawn some threads that add loads of metrics
-    //     var started = DateTime.UtcNow;
-    //     while (DateTime.UtcNow - started < TimeSpan.FromSeconds(600))
-    //     {
-    //         for (var i = 0; i < 100; i++)
-    //         {
-    //             await Task.Run(() => sut.Gauge("meter", rnd.NextDouble()));
-    //         }
-    //     }
-    //
-    //     // Wait for the flush loop to clear everything out
-    //     await Task.Delay(TimeSpan.FromMilliseconds(500));
-    //
-    //     // Assert
-    //     sut.Buckets.Should().BeEmpty(); // Ensures no metrics were added to a bucket after it was removed
-    // }
+    [Fact]
+    public void GetFlushableBuckets_IsThreadsafe()
+    {
+        // Arrange
+        const int numThreads = 100;
+        const int numThreadIterations = 1000;
+        var sent = 0;
+        MetricBucketHelper.FlushShift = 0.0;
+        _fixture.DisableFlushLoop = false;
+        _fixture.CaptureMetrics = metrics =>
+        {
+            foreach (var metric in metrics)
+            {
+                Interlocked.Add(ref sent, (int)((CounterMetric)metric).Value);
+            }
+        };
+        var sut = _fixture.GetSut();
+
+        // Act... spawn some threads that add loads of metrics
+        var resetEvent = new ManualResetEvent(false);
+        var toProcess = numThreads;
+        for(var i = 0; i < numThreads; i++)
+        {
+            new Thread(delegate()
+            {
+                for(var i = 0; i < numThreadIterations; i++)
+                {
+                    sut.Increment("counter");
+                }
+                // If we're the last thread, signal
+                if (Interlocked.Decrement(ref toProcess) == 0)
+                {
+                    resetEvent.Set();
+                }
+            }).Start();
+        }
+
+        // Wait for workers.
+        resetEvent.WaitOne();
+        sut.ForceFlush();
+
+        // Assert
+        sent.Should().Be(numThreads * numThreadIterations);
+    }
 }

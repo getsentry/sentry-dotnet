@@ -22,6 +22,10 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
     private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
         = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
 
+    // TODO: Initialize seen_locations
+    // self._seen_locations = _set()  # type: Set[Tuple[int, MetricMetaKey]]
+    // self._pending_locations = {}  # type: Dict[int, List[Tuple[MetricMetaKey, Any]]]
+
     private Task LoopTask { get; }
 
     /// <summary>
@@ -120,6 +124,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         // , int stacklevel = 0 // Used for code locations
         => Emit(MetricType.Distribution, key, value, unit, tags, timestamp);
 
+    private object _bucketLock = new object();
     private void Emit(
         MetricType type,
         string key,
@@ -132,30 +137,69 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
     {
         timestamp ??= DateTime.UtcNow;
         unit ??= MeasurementUnit.None;
-        var timeBucket = Buckets.GetOrAdd(
-            timestamp.Value.GetTimeBucketKey(),
-            _ => new ConcurrentDictionary<string, Metric>()
-        );
 
-        Func<string, Metric> addValuesFactory = type switch
+        lock (_bucketLock)
         {
-            MetricType.Counter => (string _) => new CounterMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Gauge => (string _) => new GaugeMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Distribution => (string _) => new DistributionMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Set => (string _) => new SetMetric(key, (int)value, unit.Value, tags, timestamp),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
-        };
+            var timeBucket = Buckets.GetOrAdd(
+                timestamp.Value.GetTimeBucketKey(),
+                _ => new ConcurrentDictionary<string, Metric>()
+            );
 
-        timeBucket.AddOrUpdate(
-            GetMetricBucketKey(type, key, unit.Value, tags),
-            addValuesFactory,
-            (_, metric) =>
+            Func<string, Metric> addValuesFactory = type switch
             {
-                metric.Add(value);
-                return metric;
-            }
-        );
+                MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, tags, timestamp),
+                MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, tags, timestamp),
+                MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, tags, timestamp),
+                MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, tags, timestamp),
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
+            };
+
+            timeBucket.AddOrUpdate(
+                GetMetricBucketKey(type, key, unit.Value, tags),
+                addValuesFactory,
+                (_, metric) =>
+                {
+                    metric.Add(value);
+                    return metric;
+                }
+            );
+        }
+
+        // TODO: record the code location
+        // if stacklevel is not None:
+        //     self.record_code_location(ty, key, unit, stacklevel + 2, timestamp)
+
     }
+
+    // TODO: record_code_location
+    // def record_code_location(
+    //     self,
+    //     ty,  # type: MetricType
+    //     key,  # type: str
+    //     unit,  # type: MeasurementUnit
+    //     stacklevel,  # type: int
+    //     timestamp=None,  # type: Optional[float]
+    // ):
+    //     # type: (...) -> None
+    //     if not self._enable_code_locations:
+    //         return
+    //     if timestamp is None:
+    //         timestamp = time.time()
+    //     meta_key = (ty, key, unit)
+    //     start_of_day = utc_from_timestamp(timestamp).replace(
+    //         hour=0, minute=0, second=0, microsecond=0, tzinfo=None
+    //     )
+    //     start_of_day = int(to_timestamp(start_of_day))
+    //
+    //     if (start_of_day, meta_key) not in self._seen_locations:
+    //         self._seen_locations.add((start_of_day, meta_key))
+    //         loc = get_code_location(stacklevel + 3)
+    //         if loc is not None:
+    //             # Group metadata by day to make flushing more efficient.
+    //             # There needs to be one envelope item per timestamp.
+    //             self._pending_locations.setdefault(start_of_day, []).append(
+    //                 (meta_key, loc)
+    //             )
 
     private async Task RunLoopAsync()
     {
@@ -197,13 +241,37 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                     }
                 }
 
-                // Work with the envelope while it's in the queue
-                foreach (var key in GetFlushableBuckets())
+                if (shutdownRequested || !Flush())
                 {
-                    if (shutdownRequested)
-                    {
-                        break;
-                    }
+                    return;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _options.LogFatal(e, "Exception in the Metric Aggregator.");
+            throw;
+        }
+    }
+
+    private readonly object _flushLock = new();
+
+    /// <summary>
+    /// Flushes any flushable buckets.
+    /// If <paramref name="force"/> is true then the cutoff is ignored and all buckets are flushed.
+    /// </summary>
+    /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
+    /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
+    private bool Flush(bool force = false)
+    {
+        // We don't want multiple flushes happening concurrently... which might be possible if the regular flush loop
+        // triggered a flush at the same time ForceFlush is called
+        lock(_flushLock)
+        {
+            lock (_bucketLock)
+            {
+                foreach (var key in GetFlushableBuckets(force))
+                {
                     try
                     {
                         _options.LogDebug("Flushing metrics for bucket {0}", key);
@@ -216,7 +284,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                     catch (OperationCanceledException)
                     {
                         _options.LogInfo("Shutdown token triggered. Time to exit.");
-                        return;
+                        return false;
                     }
                     catch (Exception exception)
                     {
@@ -224,37 +292,61 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                     }
                 }
             }
+
+            // TODO: Flush the code locations
+            // for timestamp, locations in GetFlushableLocations()):
+            //     encoded_locations = _encode_locations(timestamp, locations)
+            //     envelope.add_item(Item(payload=encoded_locations, type="metric_meta"))
         }
-        catch (Exception e)
-        {
-            _options.LogFatal(e, "Exception in the Metric Aggregator.");
-            throw;
-        }
+
+        return true;
     }
+
+    internal bool ForceFlush() => Flush(true);
 
     /// <summary>
     /// Returns the keys for any buckets that are ready to be flushed (i.e. are for periods before the cutoff)
     /// </summary>
+    /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
     /// <returns>
     /// An enumerable containing the keys for any buckets that are ready to be flushed
     /// </returns>
-    internal IEnumerable<long> GetFlushableBuckets()
+    internal IEnumerable<long> GetFlushableBuckets(bool force = false)
     {
         if (!_buckets.IsValueCreated)
         {
             yield break;
         }
 
-        var cutoff = MetricBucketHelper.GetCutoff();
-        foreach (var bucket in Buckets)
+        if (force)
         {
-            var bucketTime = DateTimeOffset.FromUnixTimeSeconds(bucket.Key);
-            if (bucketTime < cutoff)
+            // Return all the buckets in this case
+            foreach (var key in Buckets.Keys)
             {
-                yield return bucket.Key;
+                yield return key;
+            }
+        }
+        else
+        {
+            var cutoff = MetricBucketHelper.GetCutoff();
+            foreach (var key in Buckets.Keys)
+            {
+                var bucketTime = DateTimeOffset.FromUnixTimeSeconds(key);
+                if (bucketTime < cutoff)
+                {
+                    yield return key;
+                }
             }
         }
     }
+
+    // TODO: _flushable_locations
+    // def _flushable_locations(self):
+    //     # type: (...) -> Dict[int, List[Tuple[MetricMetaKey, Dict[str, Any]]]]
+    //     with self._lock:
+    //         locations = self._pending_locations
+    //         self._pending_locations = {}
+    //     return locations
 
     /// <summary>
     /// Stops the background worker and waits for it to empty the queue until 'shutdownTimeout' is reached

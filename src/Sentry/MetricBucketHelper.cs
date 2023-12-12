@@ -4,11 +4,15 @@ internal static class MetricBucketHelper
 {
     private const int RollupInSeconds = 10;
 
-    private static readonly DateTime EpochStart = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+#if NET6_0_OR_GREATER
+        static readonly DateTime UnixEpoch = DateTime.UnixEpoch;
+#else
+    static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+#endif
 
     internal static long GetTimeBucketKey(this DateTime timestamp)
     {
-        var seconds = (long)(timestamp.ToUniversalTime() - EpochStart).TotalSeconds;
+        var seconds = (long)(timestamp.ToUniversalTime() - UnixEpoch).TotalSeconds;
         return (seconds / RollupInSeconds) * RollupInSeconds;
     }
 
@@ -19,8 +23,8 @@ internal static class MetricBucketHelper
     /// also apply independent jittering.
     /// </summary>
     /// <remarks>Internal for testing</remarks>
-    internal static double FlushShift = new Random().NextDouble() * RollupInSeconds;
+    internal static double FlushShift = new Random().Next(0, 1000) * RollupInSeconds;
     internal static DateTime GetCutoff() => DateTime.UtcNow
         .Subtract(TimeSpan.FromSeconds(RollupInSeconds))
-        .Subtract(TimeSpan.FromSeconds(FlushShift));
+        .Subtract(TimeSpan.FromMilliseconds(FlushShift));
 }
