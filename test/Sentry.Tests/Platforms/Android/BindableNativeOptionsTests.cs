@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Sentry.Tests.Platforms.Android;
 
-public class BindableSentryOptionsTests : BindableTests<SentryOptions.NativeOptions>
+public class BindableNativeOptionsTests : BindableTests<SentryOptions.NativeOptions>
 {
     [Fact]
     public void BindableProperties_MatchOptionsProperties()

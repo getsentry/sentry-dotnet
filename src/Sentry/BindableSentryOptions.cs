@@ -40,6 +40,7 @@ internal partial class BindableSentryOptions
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
+    public double? ProfilesSampleRate { get; set; }
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
     public StartupTimeDetectionMode? DetectStartupTime { get; set; }
@@ -82,6 +83,7 @@ internal partial class BindableSentryOptions
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
         options.EnableTracing = EnableTracing ?? options.EnableTracing;
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
+        options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.TracePropagationTargets;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
@@ -90,7 +92,11 @@ internal partial class BindableSentryOptions
         options.AutoSessionTracking = AutoSessionTracking ?? options.AutoSessionTracking;
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
-#if ANDROID || __IOS__
+
+#if ANDROID
+        Android.ApplyTo(options.Android);
+        Native.ApplyTo(options.Native);
+#elif __IOS__
         Native.ApplyTo(options.Native);
 #endif
     }

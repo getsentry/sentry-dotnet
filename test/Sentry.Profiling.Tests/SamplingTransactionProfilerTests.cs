@@ -78,7 +78,7 @@ public class SamplingTransactionProfilerTests
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
         var transaction = new Transaction(transactionTracer);
-        var collectTask = sut.CollectAsync(transaction);
+        var collectTask = (sut as SamplingTransactionProfiler).CollectAsync(transaction);
         collectTask.Wait();
         var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
@@ -229,6 +229,48 @@ public class SamplingTransactionProfilerTests
                 cachingTransport.Dispose();
             }
         }
+    }
+
+    [Fact]
+    public void ProfilerIntegration_WithProfilingDisabled_LeavesFactoryNull()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 0,
+        };
+        options.AddIntegration(new ProfilingIntegration());
+        using var hub = new Hub(options);
+        Assert.Null(hub.Options.TransactionProfilerFactory);
+    }
+
+    [Fact]
+    public void ProfilerIntegration_WithTracingDisabled_LeavesFactoryNull()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 0,
+            ProfilesSampleRate = 1.0,
+        };
+        options.AddIntegration(new ProfilingIntegration());
+        using var hub = new Hub(options);
+        Assert.Null(hub.Options.TransactionProfilerFactory);
+    }
+
+    [Fact]
+    public void ProfilerIntegration_WithProfilingEnabled_SetsFactory()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+        };
+        options.AddIntegration(new ProfilingIntegration());
+        using var hub = new Hub(options);
+        Assert.NotNull(hub.Options.TransactionProfilerFactory);
     }
 
     [Fact]

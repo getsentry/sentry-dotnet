@@ -175,6 +175,96 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void ProfilesSampleRate_Default_Null()
+    {
+        var sut = new SentryOptions();
+        Assert.Null(sut.ProfilesSampleRate);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_Default_False()
+    {
+        var sut = new SentryOptions();
+        Assert.False(sut.IsProfilingEnabled);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_EnableTracing_True()
+    {
+        var sut = new SentryOptions
+        {
+            EnableTracing = true,
+            ProfilesSampleRate = double.Epsilon
+        };
+
+        Assert.True(sut.IsProfilingEnabled);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_EnableTracing_False()
+    {
+        var sut = new SentryOptions
+        {
+            EnableTracing = false,
+            ProfilesSampleRate = double.Epsilon
+        };
+
+        Assert.False(sut.IsProfilingEnabled);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_TracesSampleRate_Zero()
+    {
+        var sut = new SentryOptions
+        {
+            TracesSampleRate = 0.0,
+            ProfilesSampleRate = double.Epsilon
+        };
+
+        Assert.False(sut.IsProfilingEnabled);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_ProfilessSampleRate_Zero()
+    {
+        var sut = new SentryOptions
+        {
+            TracesSampleRate = double.Epsilon,
+            ProfilesSampleRate = 0.0
+        };
+
+        Assert.False(sut.IsProfilingEnabled);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_TracesSampleRate_GreaterThanZero()
+    {
+        var sut = new SentryOptions
+        {
+            TracesSampleRate = double.Epsilon,
+            ProfilesSampleRate = double.Epsilon
+        };
+
+        Assert.True(sut.IsProfilingEnabled);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_TracesSampleRate_LessThanZero()
+    {
+        var sut = new SentryOptions();
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            sut.ProfilesSampleRate = -double.Epsilon);
+    }
+
+    [Fact]
+    public void IsProfilingEnabled_TracesSampleRate_GreaterThanOne()
+    {
+        var sut = new SentryOptions();
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            sut.ProfilesSampleRate = 1.0000000000000002);
+    }
+
+    [Fact]
     public void CaptureFailedRequests_ByDefault_IsTrue()
     {
         var sut = new SentryOptions();

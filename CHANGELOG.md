@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
+
+### Fixes
+
+- Stop Sentry for MacCatalyst from creating `default.profraw` in the app bundle using xcodebuild archive to build sentry-cocoa ([#2960](https://github.com/getsentry/sentry-dotnet/pull/2960))
+
+### Dependencies
+
+- Bump CLI from v2.22.3 to v2.23.0 ([#2956](https://github.com/getsentry/sentry-dotnet/pull/2956))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2230)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.22.3...2.23.0)
+
 ## 4.0.0-beta.4
 
 ### Fixes

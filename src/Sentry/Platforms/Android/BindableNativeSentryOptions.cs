@@ -1,6 +1,4 @@
 // ReSharper disable once CheckNamespace
-using Sentry.Android;
-
 namespace Sentry;
 
 internal partial class BindableSentryOptions
@@ -35,8 +33,6 @@ internal partial class BindableSentryOptions
         public TimeSpan? ReadTimeout { get; set; }
         public bool? EnableTracing { get; set; }
         public bool? EnableBeforeSend { get; set; }
-        public LogCatIntegrationType? LogCatIntegration { get; set; }
-        public int? LogCatMaxLines { get; set; }
 
         public void ApplyTo(SentryOptions.NativeOptions options)
         {
@@ -63,8 +59,6 @@ internal partial class BindableSentryOptions
             options.ReadTimeout = ReadTimeout ?? options.ReadTimeout;
             options.EnableTracing = EnableTracing ?? options.EnableTracing;
             options.EnableBeforeSend = EnableBeforeSend ?? options.EnableBeforeSend;
-            options.LogCatIntegration = LogCatIntegration ?? options.LogCatIntegration;
-            options.LogCatMaxLines = LogCatMaxLines ?? options.LogCatMaxLines;
         }
     }
 }
