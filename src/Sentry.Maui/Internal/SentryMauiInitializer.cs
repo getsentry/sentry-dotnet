@@ -18,7 +18,7 @@ internal class SentryMauiInitializer : IMauiInitializeService
         if (options.AttachScreenshots)
         {
             SentrySdk.ConfigureScope(s =>
-                s.AddAttachment(new ScreenshotAttachment()));
+                s.AddEventProcessor(new SentryMauiScreenshotProcessor()));
         }
 
         // Register the return value from initializing the SDK with the disposer.
