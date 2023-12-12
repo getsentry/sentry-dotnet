@@ -3,7 +3,6 @@
   <PropertyGroup>
     <!-- TODO check and update the list of supported frameworks. -->
     <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
-    <VersionSuffix>-alpha.0</VersionSuffix>
     <PackageTags>$(PackageTags);Profiling;Diagnostic</PackageTags>
     <Description>Performance profiling support for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>

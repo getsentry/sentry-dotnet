@@ -95,6 +95,10 @@
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="Sentry.Protocol.Envelopes.ISerializable" Alias="ISerializable" />
+  </ItemGroup>
+
   <!-- Download the Sentry CLI during the restore phase. -->
   <Target Name="DownloadSentryCLI" BeforeTargets="CollectPackageReferences" Condition="'$(SentryCLIDirectory)' != ''">
 

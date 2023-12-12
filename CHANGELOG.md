@@ -5,6 +5,7 @@
 ### Features
 
 - MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
+- iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
 
 ### Fixes
 

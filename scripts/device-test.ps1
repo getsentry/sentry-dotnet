@@ -22,7 +22,7 @@ Push-Location $PSScriptRoot/..
 try
 {
     $tfm = 'net7.0-'
-    $arch = $(uname -m) -eq 'arm64' ? 'arm64' : 'x64'
+    $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
         $tfm += 'android'
@@ -75,7 +75,11 @@ try
         }
         finally
         {
-            scripts/parse-xunit2-xml.ps1 ./test_output/TestResults.xml | Out-File $env:GITHUB_STEP_SUMMARY
+            if ($CI)
+            {
+                scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
+            }
+
         }
     }
 }
