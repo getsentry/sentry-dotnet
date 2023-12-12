@@ -4,7 +4,7 @@
 
 ### Features
 
-- Add an option to attach screenshots to crashes for MAUI apps. Configurable via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
+- MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
 
 ### Fixes
 
