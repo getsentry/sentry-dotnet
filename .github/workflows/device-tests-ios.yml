@@ -7,7 +7,7 @@ on:
       - release/*
   pull_request:
     paths-ignore:
-      - '**.md'
+      - "**.md"
 
 jobs:
   build:
@@ -65,7 +65,7 @@ jobs:
 
       - name: Run Tests
         id: first-run
-        # continue-on-error: true
+        continue-on-error: true
         run: pwsh scripts/device-test.ps1 ios -Run
 
       - name: Retry Tests (if previous failed to run)
