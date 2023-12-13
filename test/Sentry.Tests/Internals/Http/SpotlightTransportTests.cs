@@ -28,6 +28,7 @@ public class SpotlightTransportTests
                 DiagnosticLogger = logger
             },
             new HttpClient(httpHandler),
+            new Uri("http://localhost:8969/stream"),
             Substitute.For<ISystemClock>());
 
         var envelope = Envelope.FromEvent(new SentryEvent());

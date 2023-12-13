@@ -10,27 +10,24 @@ internal class SpotlightHttpTransport : HttpTransport
     private readonly ITransport _inner;
     private readonly SentryOptions _options;
     private readonly HttpClient _httpClient;
+    private readonly Uri _spotlightUrl;
     private readonly ISystemClock _clock;
 
-    public SpotlightHttpTransport(ITransport inner, SentryOptions options, HttpClient httpClient, ISystemClock clock)
+    public SpotlightHttpTransport(ITransport inner, SentryOptions options, HttpClient httpClient, Uri spotlightUrl, ISystemClock clock)
         : base(options, httpClient)
     {
         _options = options;
         _httpClient = httpClient;
+        _spotlightUrl = spotlightUrl;
         _inner = inner;
         _clock = clock;
     }
 
     protected internal override HttpRequestMessage CreateRequest(Envelope envelope)
     {
-        if (!Uri.TryCreate(_options.SpotlightUrl,  UriKind.Absolute, out var spotlightUrl))
-        {
-            throw new InvalidOperationException("Invalid option for SpotlightUrl: " + _options.SpotlightUrl);
-        }
-
         return new HttpRequestMessage
         {
-            RequestUri = spotlightUrl,
+            RequestUri = _spotlightUrl,
             Method = HttpMethod.Post,
             Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger, _clock)
             { Headers = { ContentType = MediaTypeHeaderValue.Parse("application/x-sentry-envelope") } }

@@ -46,8 +46,11 @@ internal class SdkComposer
             {
                 _options.LogInfo("Connecting to Spotlight at {0}", _options.SpotlightUrl);
             }
-
-            transport = new SpotlightHttpTransport(transport, _options, _options.GetHttpClient(), SystemClock.Clock);
+            if (!Uri.TryCreate(_options.SpotlightUrl,  UriKind.Absolute, out var spotlightUrl))
+            {
+                throw new InvalidOperationException("Invalid option for SpotlightUrl: " + _options.SpotlightUrl);
+            }
+            transport = new SpotlightHttpTransport(transport, _options, _options.GetHttpClient(), spotlightUrl, SystemClock.Clock);
         }
 
         // Always persist the transport on the options, so other places can pick it up where necessary.
