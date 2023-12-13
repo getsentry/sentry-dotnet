@@ -1,16 +1,18 @@
 # Changelog
 
-## 4.0.0-beta.5
-
-### Features
-
-- iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
+## Unreleased
 
 ### Feature
 
 - Support for [Spotlight](https://spotlightjs.com/). Debug tool for local development. ([#2961](https://github.com/getsentry/sentry-dotnet/pull/2961))
   - Enable it with option `EnableSpotlight`
   - Optionally configure the URL to connect via `SpotlightUrl`. Defaults to `http://localhost:8969/stream`.
+
+## 4.0.0-beta.5
+
+### Features
+
+- iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
 
 ### Fixes
 
