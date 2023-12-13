@@ -15,12 +15,6 @@ internal class SentryMauiInitializer : IMauiInitializeService
         // Initialize the Sentry SDK.
         var disposable = SentrySdk.Init(options);
 
-        if (options.AttachScreenshots)
-        {
-            SentrySdk.ConfigureScope(s =>
-                s.AddEventProcessor(new SentryMauiScreenshotProcessor()));
-        }
-
         // Register the return value from initializing the SDK with the disposer.
         // This will ensure that it gets disposed when the service provider is disposed.
         disposer.Register(disposable);
