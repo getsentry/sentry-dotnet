@@ -214,6 +214,12 @@ public class SentryOptions
 
     internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
+    internal HttpClient GetHttpClient()
+    {
+        var factory = SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
+        return factory.Create(this);
+    }
+
     /// <summary>
     /// Scope state processor.
     /// </summary>
@@ -1110,6 +1116,23 @@ public class SentryOptions
 #endif
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<string, PEReader?>? AssemblyReader { get; set; }
+
+    /// <summary>
+    /// The Spotlight URL. Defaults to http://localhost:8969/stream
+    /// </summary>
+    /// <see cref="EnableSpotlight"/>
+    /// <see href="https://spotlightjs.com/"/>
+    public string SpotlightUrl { get; set; } = "http://localhost:8969/stream";
+
+    /// <summary>
+    /// Whether to enable Spotlight for local development.
+    /// </summary>
+    /// <remarks>
+    /// Only set this option to `true` while developing, not in production!
+    /// </remarks>
+    /// <see cref="SpotlightUrl"/>
+    /// <see href="https://spotlightjs.com/"/>
+    public bool EnableSpotlight { get; set; }
 
     internal SettingLocator SettingLocator { get; set; }
 
