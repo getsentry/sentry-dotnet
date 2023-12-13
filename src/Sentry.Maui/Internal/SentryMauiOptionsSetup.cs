@@ -35,7 +35,7 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 
         if (options.AttachScreenshots)
         {
-            options.AddEventProcessor(new SentryMauiScreenshotProcessor());
+            options.AddEventProcessor(new SentryMauiScreenshotProcessor(options));
         }
 
 #if !PLATFORM_NEUTRAL

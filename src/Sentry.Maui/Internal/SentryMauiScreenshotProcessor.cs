@@ -4,6 +4,13 @@ namespace Sentry.Maui.Internal;
 
 internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint
 {
+    private readonly SentryMauiOptions _options;
+
+    public SentryMauiScreenshotProcessor(SentryMauiOptions options)
+    {
+        _options = options;
+    }
+
     public SentryEvent? Process(SentryEvent @event)
     {
         return @event;
@@ -11,7 +18,7 @@ internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint
 
     public SentryEvent? Process(SentryEvent @event, Hint hint)
     {
-        hint.Attachments.Add(new ScreenshotAttachment());
+        hint.Attachments.Add(new ScreenshotAttachment(_options));
         return @event;
     }
 }

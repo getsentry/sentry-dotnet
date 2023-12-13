@@ -2,10 +2,10 @@ namespace Sentry.Maui.Internal;
 
 internal class ScreenshotAttachment : Attachment
 {
-    public ScreenshotAttachment()
+    public ScreenshotAttachment(SentryMauiOptions options)
         : this(
             AttachmentType.Default,
-            new ScreenshotAttachmentContent(),
+            new ScreenshotAttachmentContent(options),
             "screenshot.jpg",
             "image/jpeg")
     {
@@ -23,6 +23,13 @@ internal class ScreenshotAttachment : Attachment
 
 internal class ScreenshotAttachmentContent : IAttachmentContent
 {
+    private readonly SentryMauiOptions _options;
+
+    public ScreenshotAttachmentContent(SentryMauiOptions options)
+    {
+        _options = options;
+    }
+
     public Stream GetStream()
     {
 // Not including this on Windows specific build because on WinUI this can deadlock.
@@ -40,13 +47,18 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 
                 return stream;
             }
+            else
+            {
+                _options.DiagnosticLogger?.Log(SentryLevel.Warning, "Capturing screenshot not supported");
+            }
         }
-#endif
         //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
-        catch (Exception)
+        catch (Exception ex)
         {
+            _options.DiagnosticLogger?.Log(SentryLevel.Error, "Error capturing screenshot", ex);
             return Stream.Null;
         }
+#endif
 
         return Stream.Null;
     }
