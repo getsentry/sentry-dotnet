@@ -33,6 +33,11 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         // We'll use an event processor to set things like SDK name
         options.AddEventProcessor(new SentryMauiEventProcessor(options));
 
+        if (options.AttachScreenshots)
+        {
+            options.AddEventProcessor(new SentryMauiScreenshotProcessor());
+        }
+
 #if !PLATFORM_NEUTRAL
         // We can use MAUI's network connectivity information to inform the CachingTransport when we're offline.
         options.NetworkStatusListener = new MauiNetworkStatusListener(Connectivity.Current, options);
