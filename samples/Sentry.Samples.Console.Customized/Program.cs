@@ -22,9 +22,7 @@ internal static class Program
             // A Sentry Data Source Name (DSN) is required.
             // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
             // You can set it in the SENTRY_DSN environment variable, or you can set it in code here.
-            o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-
-            o.EnableSpotlight = true;
+            // o.Dsn = "... Your DSN ...";
 
             // Send stack trace for events that were not created from an exception
             // e.g: CaptureMessage, log.LogDebug, log.LogInformation ...
@@ -109,8 +107,6 @@ internal static class Program
             // Ignored by its type due to the setting above
             SentrySdk.CaptureException(new XsltCompileException());
 
-            return;
-#pragma warning disable CS0162 // Unreachable code detected
             SentrySdk.AddBreadcrumb(
                 "A 'bad breadcrumb' that will be rejected because of 'BeforeBreadcrumb callback above.'");
 
@@ -211,7 +207,6 @@ internal static class Program
 
             SentrySdk.CaptureException(
                 new Exception("Error outside of the admin section: Goes to the default DSN"));
-#pragma warning restore CS0162 // Unreachable code detected
         }  // On Dispose: SDK closed, events queued are flushed/sent to Sentry
     }
 
