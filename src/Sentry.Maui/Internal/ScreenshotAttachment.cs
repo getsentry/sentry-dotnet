@@ -25,9 +25,10 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 {
     public Stream GetStream()
     {
+// Not including this on Windows specific build because on WinUI this can deadlock.
+#if !WINDOWS
         try
         {
-#if !WINDOWS
             if (Screenshot.Default.IsCaptureSupported)
             {
                 // This actually runs synchronously (returning Task.FromResult) on the following platforms:
@@ -39,14 +40,14 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 
                 return stream;
             }
-#endif
         }
+#endif
         //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
         catch (Exception)
         {
-            return MemoryStream.Null;
+            return Stream.Null;
         }
 
-        return MemoryStream.Null;
+        return Stream.Null;
     }
 }
