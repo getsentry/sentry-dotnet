@@ -33,7 +33,7 @@ internal class HttpTransport : HttpTransportBase, ITransport
     /// such that they can be shared with higher-level SDKs (such as Unity) that may implement their own method
     /// for performing HTTP transport.
     /// </remarks>
-    public async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
+    public virtual async Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
     {
         using var processedEnvelope = ProcessEnvelope(envelope);
         if (processedEnvelope.Items.Count > 0)

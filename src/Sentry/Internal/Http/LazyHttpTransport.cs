@@ -9,11 +9,7 @@ internal class LazyHttpTransport : ITransport
 
     public LazyHttpTransport(SentryOptions options)
     {
-        _httpTransport = new Lazy<HttpTransport>(() =>
-        {
-            var factory = (options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory()).Create(options);
-            return new HttpTransport(options, factory);
-        });
+        _httpTransport = new Lazy<HttpTransport>(() => new HttpTransport(options, options.GetHttpClient()));
     }
 
     public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default)
