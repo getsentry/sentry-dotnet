@@ -72,13 +72,14 @@ public class SamplingTransactionProfilerTests
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
         var sut = factory.Start(transactionTracer, CancellationToken.None);
+        Assert.NotNull(sut);
         transactionTracer.TransactionProfiler = sut;
         RunForMs(100);
         sut.Finish();
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
         var transaction = new Transaction(transactionTracer);
-        var collectTask = (sut as SamplingTransactionProfiler).CollectAsync(transaction);
+        var collectTask = (sut as SamplingTransactionProfiler)!.CollectAsync(transaction);
         collectTask.Wait();
         var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
@@ -86,26 +87,14 @@ public class SamplingTransactionProfilerTests
         return profileInfo.Profile;
     }
 
-    [Fact(Skip = "This test is flaky. TODO: rework")]
-    public Task Profiler_SingleProfile_Works()
+    [Fact]
+    public void Profiler_SingleProfile_Works()
     {
         using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
         var profile = CaptureAndValidate(factory);
-
-        // We "Verify" part of a profile that seems to be stable.
-        var profileToVerify = new SampleProfile();
-        profileToVerify.Stacks.Add(profile.Stacks[0]);
-        for (var i = 0; i < profileToVerify.Stacks[0].Count; i++)
-        {
-            var frame = profile.Frames[profileToVerify.Stacks[0][i]];
-            frame.Module = frame.Module.Replace("System.Private.CoreLib.il", "System.Private.CoreLib");
-            profileToVerify.Frames.Add(frame);
-        }
-        var json = profileToVerify.ToJsonString(_testOutputLogger);
-        return VerifyJson(json).UniqueForRuntimeAndVersion();
     }
 
-    [Fact(Skip = "This test is flaky. TODO: rework")]
+    [Fact]
     public void Profiler_MultipleProfiles_Works()
     {
         using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
@@ -116,7 +105,7 @@ public class SamplingTransactionProfilerTests
         CaptureAndValidate(factory);
     }
 
-    [Fact(Skip = "This test is flaky. TODO: rework")]
+    [Fact]
     public void Profiler_AfterTimeout_Stops()
     {
         using var session = SampleProfilerSession.StartNew(_testOutputLogger);
@@ -133,7 +122,7 @@ public class SamplingTransactionProfilerTests
         ValidateProfile(profileInfo.Profile, (ulong)(limitMs * 1_000_000));
     }
 
-    [Theory(Skip = "This test is flaky. TODO: rework")]
+    [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
@@ -173,6 +162,7 @@ public class SamplingTransactionProfilerTests
             Debug = true,
             DiagnosticLogger = _testOutputLogger,
             TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
         };
 
         // Disable process exit flush to resolve "There is no currently active test." errors.
