@@ -16,34 +16,34 @@ using PlatformView = System.Object;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
-    public static class TestWindow
-    {
-        static PlatformView? s_platformWindow;
+	public static class TestWindow
+	{
+		static PlatformView? s_platformWindow;
 
-        public static PlatformView PlatformWindow
-        {
-            get
-            {
-                if (s_platformWindow is null)
-                {
+		public static PlatformView PlatformWindow
+		{
+			get
+			{
+				if (s_platformWindow is null)
+				{
 #if __ANDROID__
-                    s_platformWindow = MauiTestInstrumentation.Current?.CurrentExecutionContext as PlatformView;
+					s_platformWindow = MauiTestInstrumentation.Current?.CurrentExecutionContext as PlatformView;
 #elif __IOS__
-                    s_platformWindow = MauiTestApplicationDelegate.Current?.Window;
+					s_platformWindow = MauiTestApplicationDelegate.Current?.Window;
 #endif
-                }
+				}
 
-                if (s_platformWindow is null)
-                {
-                    var application = TestServices.Services.GetService<IApplication>();
-                    s_platformWindow = application?.Windows.FirstOrDefault()?.Handler?.PlatformView as PlatformView;
-                }
+				if (s_platformWindow is null)
+				{
+					var application = TestServices.Services.GetService<IApplication>();
+					s_platformWindow = application?.Windows.FirstOrDefault()?.Handler?.PlatformView as PlatformView;
+				}
 
-                if (s_platformWindow is null)
-                    throw new InvalidOperationException($"Test app did not provide a window.");
+				if (s_platformWindow is null)
+					throw new InvalidOperationException($"Test app did not provide a window.");
 
-                return s_platformWindow;
-            }
-        }
-    }
+				return s_platformWindow;
+			}
+		}
+	}
 }
