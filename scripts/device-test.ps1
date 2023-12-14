@@ -41,7 +41,7 @@ try
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
-            '--target', 'ios-simulator-64',
+            '--target', 'ios-simulator-64_17.0',
             '--launch-timeout', '00:10:00'
         )
     }
@@ -70,7 +70,7 @@ try
         if (!(Get-Command xharness -ErrorAction SilentlyContinue))
         {
             Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '1.*-*' `
+            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '9.*-*' `
                 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
             Pop-Location
         }
