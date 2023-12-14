@@ -65,7 +65,7 @@ public class Timing: IDisposable
         }
         if (aggregator is MetricAggregator metrics)
         {
-            metrics.RecordCodeLocation(MetricType.Distribution, key, unit, 2, _startTime);
+            metrics.RecordCodeLocation(MetricType.Distribution, key, unit, 1, _startTime);
         }
     }
 
