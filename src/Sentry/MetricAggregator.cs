@@ -5,7 +5,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
-internal class MetricAggregator : IMetricAggregator, IDisposable
+internal class MetricAggregator : IMetricAggregator, IDisposable, IAsyncDisposable
 {
     private readonly SentryOptions _options;
     private readonly Action<IEnumerable<Metric>> _captureMetrics;
@@ -243,35 +243,34 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
             while (!shutdownTimeout.IsCancellationRequested)
             {
                 // If the cancellation was signaled, run until the end of the queue or shutdownTimeout
-                if (!shutdownRequested)
+                try
                 {
-                    try
-                    {
-                        await Task.Delay(_flushInterval, shutdownTimeout.Token).ConfigureAwait(false);
-                    }
-                    // Cancellation requested and no timeout allowed, so exit even if there are more items
-                    catch (OperationCanceledException) when (_options.ShutdownTimeout == TimeSpan.Zero)
-                    {
-                        _options.LogDebug("Exiting immediately due to 0 shutdown timeout.");
+                    await Task.Delay(_flushInterval, _shutdownSource.Token).ConfigureAwait(false);
+                }
+                // Cancellation requested and no timeout allowed, so exit even if there are more items
+                catch (OperationCanceledException) when (_options.ShutdownTimeout == TimeSpan.Zero)
+                {
+                    _options.LogDebug("Exiting immediately due to 0 shutdown timeout.");
 
-                        shutdownTimeout.Cancel();
+                    await shutdownTimeout.CancelAsync().ConfigureAwait(false);
 
-                        return;
-                    }
-                    // Cancellation requested, scheduled shutdown
-                    catch (OperationCanceledException)
-                    {
-                        _options.LogDebug(
-                            "Shutdown scheduled. Stopping by: {0}.",
-                            _options.ShutdownTimeout);
+                    return;
+                }
+                // Cancellation requested, scheduled shutdown
+                catch (OperationCanceledException)
+                {
+                    _options.LogDebug(
+                        "Shutdown scheduled. Stopping by: {0}.",
+                        _options.ShutdownTimeout);
 
-                        shutdownTimeout.CancelAfterSafe(_options.ShutdownTimeout);
+                    shutdownTimeout.CancelAfterSafe(_options.ShutdownTimeout);
 
-                        shutdownRequested = true;
-                    }
+                    shutdownRequested = true;
                 }
 
-                if (shutdownRequested || !Flush(false))
+                await FlushAsync(false, shutdownTimeout.Token).ConfigureAwait(false);
+
+                if (shutdownRequested)
                 {
                     return;
                 }
@@ -284,51 +283,59 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         }
     }
 
-    private readonly object _flushLock = new();
+    private readonly SemaphoreSlim _flushLock = new(1, 1);
 
     /// <summary>
     /// Flushes any flushable metrics and/or code locations.
     /// If <paramref name="force"/> is true then the cutoff is ignored and all metrics are flushed.
     /// </summary>
     /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
     /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
-    internal bool Flush(bool force = true)
+    internal async Task FlushAsync(bool force = true, CancellationToken cancellationToken = default)
     {
         try
         {
-            // We don't want multiple flushes happening concurrently... which might be possible if the regular flush loop
-            // triggered a flush at the same time ForceFlush is called
-            lock (_flushLock)
+            await _flushLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            foreach (var key in GetFlushableBuckets(force))
             {
-                foreach (var key in GetFlushableBuckets(force))
+                cancellationToken.ThrowIfCancellationRequested();
+
+                _options.LogDebug("Flushing metrics for bucket {0}", key);
+                if (!Buckets.TryRemove(key, out var bucket))
                 {
-                    _options.LogDebug("Flushing metrics for bucket {0}", key);
-                    if (Buckets.TryRemove(key, out var bucket))
-                    {
-                        _captureMetrics(bucket.Values);
-                        _options.LogDebug("Metric flushed for bucket {0}", key);
-                    }
+                    continue;
                 }
 
-                foreach (var (timestamp, locations) in FlushableLocations())
-                {
-                    // There needs to be one envelope item per timestamp.
-                    var codeLocations = new CodeLocations(timestamp, locations);
-                    _captureCodeLocations(codeLocations);
-                }
+                _captureMetrics(bucket.Values);
+                _options.LogDebug("Metric flushed for bucket {0}", key);
+            }
+
+            foreach (var (timestamp, locations) in FlushableLocations())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                _options.LogDebug("Flushing code locations: ", timestamp);
+                var codeLocations = new CodeLocations(timestamp, locations);
+                _captureCodeLocations(codeLocations);
+                _options.LogDebug("Code locations flushed: ", timestamp);
             }
         }
         catch (OperationCanceledException)
         {
-            _options.LogInfo("Shutdown token triggered. Time to exit.");
-            return false;
+            _options.LogInfo("Shutdown token triggered. Exiting metric aggregator.");
+
+            return;
         }
         catch (Exception exception)
         {
-            _options.LogError(exception, "Error while processing metric aggregates.");
+            _options.LogError(exception, "Error processing metrics.");
         }
-
-        return true;
+        finally
+        {
+            _flushLock.Release();
+        }
     }
 
     /// <summary>
@@ -367,7 +374,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         }
     }
 
-    Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> FlushableLocations()
+    private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> FlushableLocations()
     {
         _codeLocationLock.EnterWriteLock();
         try
@@ -382,11 +389,8 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         }
     }
 
-    /// <summary>
-    /// Stops the background worker and waits for it to empty the queue until 'shutdownTimeout' is reached
-    /// </summary>
     /// <inheritdoc />
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _options.LogDebug("Disposing MetricAggregator.");
 
@@ -401,7 +405,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         try
         {
             // Request the LoopTask stop.
-            _shutdownSource.Cancel();
+            await _shutdownSource.CancelAsync().ConfigureAwait(false);
 
             // Now wait for the Loop to stop.
             // NOTE: While non-intuitive, do not pass a timeout or cancellation token here.  We are waiting for
@@ -419,8 +423,12 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         }
         finally
         {
+            _flushLock.Dispose();
             _shutdownSource.Dispose();
             LoopTask.Dispose();
         }
     }
+
+    /// <inheritdoc />
+    public void Dispose() => DisposeAsync().GetAwaiter().GetResult();
 }

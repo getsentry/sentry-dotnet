@@ -168,7 +168,7 @@ public class MetricAggregatorTests
     }
 
     [Fact]
-    public void GetFlushableBuckets_IsThreadsafe()
+    public async Task GetFlushableBuckets_IsThreadsafe()
     {
         // Arrange
         const int numThreads = 100;
@@ -207,7 +207,7 @@ public class MetricAggregatorTests
 
         // Wait for workers.
         resetEvent.WaitOne();
-        sut.Flush();
+        await sut.FlushAsync();
 
         // Assert
         sent.Should().Be(numThreads * numThreadIterations);
