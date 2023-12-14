@@ -1,5 +1,6 @@
 using Sentry.Cocoa;
 using Sentry.Cocoa.Extensions;
+using Sentry.Extensibility;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -8,6 +9,7 @@ public static partial class SentrySdk
 {
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
+        options.LogDebug("Initializing native SDK");
         // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
         ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
         {
@@ -29,14 +31,14 @@ public static partial class SentrySdk
         nativeOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
         nativeOptions.EnableCaptureFailedRequests = options.CaptureFailedRequests;
         nativeOptions.FailedRequestStatusCodes = GetFailedRequestStatusCodes(options.FailedRequestStatusCodes);
-        nativeOptions.MaxAttachmentSize = (nuint) options.MaxAttachmentSize;
-        nativeOptions.MaxBreadcrumbs = (nuint) options.MaxBreadcrumbs;
-        nativeOptions.MaxCacheItems = (nuint) options.MaxCacheItems;
+        nativeOptions.MaxAttachmentSize = (nuint)options.MaxAttachmentSize;
+        nativeOptions.MaxBreadcrumbs = (nuint)options.MaxBreadcrumbs;
+        nativeOptions.MaxCacheItems = (nuint)options.MaxCacheItems;
         nativeOptions.ReleaseName = options.Release;
         nativeOptions.SampleRate = options.SampleRate;
         nativeOptions.SendClientReports = options.SendClientReports;
         nativeOptions.SendDefaultPii = options.SendDefaultPii;
-        nativeOptions.SessionTrackingIntervalMillis = (nuint) options.AutoSessionTrackingInterval.TotalMilliseconds;
+        nativeOptions.SessionTrackingIntervalMillis = (nuint)options.AutoSessionTrackingInterval.TotalMilliseconds;
 
         if (options.Environment is { } environment)
         {
@@ -71,7 +73,7 @@ public static partial class SentrySdk
         }
 
         // These options we have behind feature flags
-        if (options is {IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true})
+        if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
         {
             if (options.EnableTracing != null)
             {
@@ -96,7 +98,7 @@ public static partial class SentrySdk
 
         // TODO: Finish SentryEventExtensions to enable these
 
-        // if (options.Native.EnableCocoaSdkBeforeSend && options.BeforeSend is { } beforeSend)
+        // if (options.Native.EnableBeforeSend && options.BeforeSend is { } beforeSend)
         // {
         //     nativeOptions.BeforeSend = evt =>
         //     {
@@ -187,6 +189,12 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => SentryCocoaSdk.CrashedLastRun;
         options.EnableScopeSync = true;
         options.ScopeObserver = new CocoaScopeObserver(options);
+
+        if (options.IsProfilingEnabled)
+        {
+            options.LogDebug("Profiling is enabled, attaching native SDK profiler factory");
+            options.TransactionProfilerFactory ??= new CocoaProfilerFactory(options);
+        }
 
         // TODO: Pause/Resume
     }

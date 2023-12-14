@@ -1,7 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Protocol.Envelopes;
-using ISerializable = Sentry.Protocol.Envelopes.ISerializable;
 
 namespace Sentry.Internal;
 

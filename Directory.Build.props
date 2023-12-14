@@ -1,8 +1,9 @@
 <Project>
 
   <PropertyGroup>
-    <Version>4.0.0-beta.4</Version>
+    <Version>4.0.0-beta.6</Version>
     <LangVersion>12</LangVersion>
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

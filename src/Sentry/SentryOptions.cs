@@ -214,6 +214,12 @@ public class SentryOptions
 
     internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
+    internal HttpClient GetHttpClient()
+    {
+        var factory = SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
+        return factory.Create(this);
+    }
+
     /// <summary>
     /// Scope state processor.
     /// </summary>
@@ -747,6 +753,12 @@ public class SentryOptions
     };
 
     /// <summary>
+    /// Indicates whether profiling is enabled, via any combination of
+    /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
+    /// </summary>
+    internal bool IsProfilingEnabled => IsPerformanceMonitoringEnabled && ProfilesSampleRate > 0.0;
+
+    /// <summary>
     /// Simplified option for enabling or disabling tracing.
     /// <list type="table">
     ///   <listheader>
@@ -821,6 +833,47 @@ public class SentryOptions
             }
 
             _tracesSampleRate = value;
+        }
+    }
+
+    private double? _profilesSampleRate;
+
+    /// <summary>
+    /// The sampling rate for profiling is relative to <see cref="TracesSampleRate"/>.
+    /// Setting to 1.0 will profile 100% of sampled transactions.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>&gt;= 0.0 and &lt;=1.0</c></term>
+    ///     <description>
+    ///       A custom sample rate is. Values outside of this range are invalid.
+    ///       Setting to 0.0 will disable profiling.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       At this time, this is equivalent to 0.0, i.e. disabling profiling, but that may change in the future.
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// </summary>
+    public double? ProfilesSampleRate
+    {
+        get => _profilesSampleRate;
+        set
+        {
+            if (value is < 0.0 or > 1.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "The profiles sample rate must be between 0.0 and 1.0, inclusive.");
+            }
+
+            _profilesSampleRate = value;
         }
     }
 
@@ -1075,6 +1128,23 @@ public class SentryOptions
     /// </para>
     /// </summary>
     public ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
+
+    /// <summary>
+    /// The Spotlight URL. Defaults to http://localhost:8969/stream
+    /// <see cref="EnableSpotlight"/>
+    /// <see href="https://spotlightjs.com/"/>
+    /// </summary>
+    public string SpotlightUrl { get; set; } = "http://localhost:8969/stream";
+
+    /// <summary>
+    /// Whether to enable Spotlight for local development.
+    /// </summary>
+    /// <remarks>
+    /// Only set this option to `true` while developing, not in production!
+    /// </remarks>
+    /// <see cref="SpotlightUrl"/>
+    /// <see href="https://spotlightjs.com/"/>
+    public bool EnableSpotlight { get; set; }
 
     internal SettingLocator SettingLocator { get; set; }
 

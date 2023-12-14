@@ -40,6 +40,7 @@ internal partial class BindableSentryOptions
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
+    public double? ProfilesSampleRate { get; set; }
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
     public StartupTimeDetectionMode? DetectStartupTime { get; set; }
@@ -47,6 +48,8 @@ internal partial class BindableSentryOptions
     public bool? AutoSessionTracking { get; set; }
     public bool? UseAsyncFileIO { get; set; }
     public bool? JsonPreserveReferences { get; set; }
+    public bool? EnableSpotlight { get; set; }
+    public string? SpotlightUrl { get; set; }
 
     public void ApplyTo(SentryOptions options)
     {
@@ -82,6 +85,7 @@ internal partial class BindableSentryOptions
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
         options.EnableTracing = EnableTracing ?? options.EnableTracing;
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
+        options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.TracePropagationTargets;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
@@ -90,6 +94,8 @@ internal partial class BindableSentryOptions
         options.AutoSessionTracking = AutoSessionTracking ?? options.AutoSessionTracking;
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
+        options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
+        options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
 
 #if ANDROID
         Android.ApplyTo(options.Android);

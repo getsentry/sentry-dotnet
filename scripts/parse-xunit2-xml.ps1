@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 
 if ([string]::IsNullOrEmpty($File) -or !(Test-Path($File)))
 {
-    Write-Warning "Test output file was not found."
+    Write-Warning "Test output file was not found: '$File'."
 
     # Return success exit code so that GitHub Actions highlights the failure in the test run, rather than in this script.
     return
@@ -20,7 +20,7 @@ function ElementText([System.Xml.XmlElement] $element)
 $summary = "## Summary`n`n"
 $summary += "| Assembly | Passed | Failed | Skipped |`n"
 $summary += "| -------- | -----: | -----: | ------: |`n"
-$failures = ""
+$failures = ''
 foreach ($assembly in $xml.assemblies.assembly)
 {
     $summary += "| $($assembly.name) | $($assembly.passed) | $($assembly.failed) | $($assembly.skipped) |`n"
@@ -30,13 +30,13 @@ foreach ($assembly in $xml.assemblies.assembly)
         $failures += "### $($assembly.name)`n"
         foreach ($test in $assembly.collection.test)
         {
-            if ($test.result -eq "Pass")
+            if ($test.result -eq 'Pass')
             {
                 continue
             }
 
             $failures += "#### $($test.name.Replace('\"', '"'))"
-            if ($test.result -eq "Skip")
+            if ($test.result -eq 'Skip')
             {
                 $failures += " - Skipped`n"
                 $failures += "$(ElementText $test.reason)"
@@ -44,9 +44,11 @@ foreach ($assembly in $xml.assemblies.assembly)
             else
             {
                 $failures += " - $($test.result)ed`n"
-                if ($test.PSobject.Properties.name -match "output")
+                if ($test.PSobject.Properties.name -match 'output')
                 {
+                    $failures += '```' + "`n"
                     $failures += "$(ElementText $test.output)`n"
+                    $failures += '```'
                 }
                 $failures += '```' + "`n"
                 $failures += "$(ElementText $test.failure.message)`n"

@@ -634,6 +634,7 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
+        public bool EnableSpotlight { get; set; }
         public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
         public Sentry.ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
@@ -650,6 +651,7 @@ namespace Sentry
         public int MaxCacheItems { get; set; }
         public int MaxQueueItems { get; set; }
         public Sentry.Extensibility.INetworkStatusListener? NetworkStatusListener { get; set; }
+        public double? ProfilesSampleRate { get; set; }
         public string? Release { get; set; }
         public Sentry.ReportAssembliesMode ReportAssembliesMode { get; set; }
         public bool RequestBodyCompressionBuffered { get; set; }
@@ -661,6 +663,7 @@ namespace Sentry
         public Sentry.ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; }
         public string? ServerName { get; set; }
         public System.TimeSpan ShutdownTimeout { get; set; }
+        public string SpotlightUrl { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
         public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> TracePropagationTargets { get; set; }
@@ -1362,7 +1365,7 @@ namespace Sentry.Http
     public abstract class HttpTransportBase
     {
         protected HttpTransportBase(Sentry.SentryOptions options, System.Func<string, string?>? getEnvironmentVariable = null, Sentry.Infrastructure.ISystemClock? clock = null) { }
-        protected System.Net.Http.HttpRequestMessage CreateRequest(Sentry.Protocol.Envelopes.Envelope envelope) { }
+        protected virtual System.Net.Http.HttpRequestMessage CreateRequest(Sentry.Protocol.Envelopes.Envelope envelope) { }
         protected void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.Protocol.Envelopes.Envelope envelope) { }
         protected System.Threading.Tasks.Task HandleResponseAsync(System.Net.Http.HttpResponseMessage response, Sentry.Protocol.Envelopes.Envelope envelope, System.Threading.CancellationToken cancellationToken) { }
         protected Sentry.Protocol.Envelopes.Envelope ProcessEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
