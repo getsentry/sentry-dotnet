@@ -17,6 +17,7 @@ internal static class Program
 
                    options.Debug = true;
                    options.IsGlobalModeEnabled = true;
+                   options.StackTraceMode = StackTraceMode.Enhanced;
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
@@ -26,9 +27,9 @@ internal static class Program
                }))
         {
             System.Console.WriteLine("Measure, Yeah, Measure");
-            PlaySetBingo(30);
-            CreateRevenueGauge(1000);
-            MeasureShrimp(1000);
+            PlaySetBingo(10);
+            // CreateRevenueGauge(1000);
+            // MeasureShrimp(1000);
             System.Console.WriteLine("Measure up");
         }
     }
@@ -39,7 +40,7 @@ internal static class Program
 
         // The Timing class creates a distribution that is designed to measure the amount of time it takes to run code
         // blocks. By default it will use a unit of Seconds - we're configuring it to use milliseconds here though.
-        using (new Timing(nameof(PlaySetBingo), MeasurementUnit.Duration.Millisecond))
+        using (new Timing("bingo", MeasurementUnit.Duration.Millisecond))
         {
             for (var i = 0; i < attempts; i++)
             {

@@ -27,8 +27,15 @@ internal class CodeLocations(long timestamp, Dictionary<MetricResourceIdentifier
                 loc.IsCodeLocation = true;
                 return loc;
             });
-        writer.WriteDictionary("mapping", mapping, logger);
 
+        writer.WritePropertyName("mapping");
+        writer.WriteStartObject();
+        foreach (var (mri, loc) in mapping)
+        {
+            // TODO: Seemingly we can have multiple locations per metric... review how this works with seen locations
+            writer.WriteArray(mri, new[]{loc}, logger);
+        }
+        writer.WriteEndObject();
         writer.WriteEndObject();
     }
 }

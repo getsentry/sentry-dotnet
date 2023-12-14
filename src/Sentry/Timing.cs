@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -20,6 +21,7 @@ public class Timing: IDisposable
     private readonly IDictionary<string, string>? _tags;
     private readonly Stopwatch _stopwatch = new();
     private readonly ISpan _span;
+    private readonly DateTime _startTime = DateTime.UtcNow;
 
     /// <summary>
     /// Creates a new <see cref="Timing"/> instance.
@@ -55,11 +57,16 @@ public class Timing: IDisposable
             }
         }
 
-        // TODO: Record the code location
-        // # report code locations here for better accuracy
-        // aggregator = _get_aggregator()
-        // if aggregator is not None:
-        //     aggregator.record_code_location("d", self.key, self.unit, self.stacklevel)
+        // Report code locations here for better accuracy
+        var aggregator = hub.Metrics;
+        while (aggregator is DelegatingMetricAggregator metricsWrapper)
+        {
+            aggregator = metricsWrapper.InnerAggregator;
+        }
+        if (aggregator is MetricAggregator metrics)
+        {
+            metrics.RecordCodeLocation(MetricType.Distribution, key, unit, 2, _startTime);
+        }
     }
 
     /// <inheritdoc cref="IDisposable"/>
@@ -81,7 +88,7 @@ public class Timing: IDisposable
                 MeasurementUnit.Duration.Nanosecond => _stopwatch.Elapsed.TotalMilliseconds * 1000000,
                 _ => throw new ArgumentOutOfRangeException(nameof(_unit), _unit, null)
             };
-            _hub.Metrics.Timing(_key, value, _unit, _tags);
+            _hub.Metrics.Timing(_key, value, _unit, _tags, _startTime);
         }
         catch(Exception e)
         {

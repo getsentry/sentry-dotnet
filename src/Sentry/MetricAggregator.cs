@@ -23,6 +23,7 @@ internal class MetricAggregator : IMetricAggregator
     private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
         = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
 
+    private long lastClearedStaleLocations = DateTime.UtcNow.GetDayBucketKey();
     private readonly HashSet<(long, MetricResourceIdentifier)> _seenLocations = new();
     private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
@@ -78,7 +79,7 @@ internal class MetricAggregator : IMetricAggregator
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     ) => Emit(MetricType.Counter, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Gauge"/>
@@ -88,7 +89,7 @@ internal class MetricAggregator : IMetricAggregator
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     ) => Emit(MetricType.Gauge, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Distribution"/>
@@ -98,7 +99,7 @@ internal class MetricAggregator : IMetricAggregator
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Set"/>
@@ -108,7 +109,7 @@ internal class MetricAggregator : IMetricAggregator
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     ) => Emit(MetricType.Set, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Timing"/>
@@ -118,7 +119,7 @@ internal class MetricAggregator : IMetricAggregator
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
     private readonly object _emitLock = new object();
@@ -130,7 +131,7 @@ internal class MetricAggregator : IMetricAggregator
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     )
     {
         timestamp ??= DateTime.UtcNow;
@@ -170,7 +171,7 @@ internal class MetricAggregator : IMetricAggregator
 
     private readonly ReaderWriterLockSlim _codeLocationLock = new();
 
-    private void RecordCodeLocation(
+    internal void RecordCodeLocation(
         MetricType type,
         string key,
         MeasurementUnit unit,
@@ -364,6 +365,18 @@ internal class MetricAggregator : IMetricAggregator
         _codeLocationLock.EnterWriteLock();
         try
         {
+            // TODO: Clear out stale seen locations once a day
+            // var today = DateTime.UtcNow.GetDayBucketKey();
+            // if (lastClearedStaleLocations != today)
+            // {
+            //     var startOfDay = var startOfDay = timestamp.GetDayBucketKey();
+            //     foreach (var VARIABLE in _seenLocations)
+            //     {
+            //
+            //     }
+            //     lastClearedStaleLocations = today;
+            // }
+
             var result = _pendingLocations;
             _pendingLocations = new Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>>();
             return result;

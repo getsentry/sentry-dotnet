@@ -23,7 +23,7 @@ public interface IMetricAggregator: IAsyncDisposable
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     );
 
     /// <summary>
@@ -43,7 +43,7 @@ public interface IMetricAggregator: IAsyncDisposable
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     );
 
     /// <summary>
@@ -63,7 +63,7 @@ public interface IMetricAggregator: IAsyncDisposable
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     );
 
     /// <summary>
@@ -83,7 +83,7 @@ public interface IMetricAggregator: IAsyncDisposable
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     );
 
     /// <summary>
@@ -103,7 +103,7 @@ public interface IMetricAggregator: IAsyncDisposable
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
         DateTime? timestamp = null,
-        int stackLevel = 0
+        int stackLevel = 1
     );
 
     /// <summary>
