@@ -38,17 +38,20 @@ public class SentryMauiScreenshotTests
         // Act
         using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
-        client.CaptureException(new Exception());
+        var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
 
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
         var transport = options.Transport as FakeTransport;
 
-        var envelopeItem = transport.GetSentEnvelopes()[0].Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+        var envelope = transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull();
+
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
 
         // Assert
         envelopeItem.Should().NotBeNull();
-        envelopeItem.TryGetFileName().Should().Be("screenshot.jpg");
+        envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
     }
 
     [Fact]
@@ -65,13 +68,16 @@ public class SentryMauiScreenshotTests
         // Act
         using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
-        client.CaptureException(new Exception());
+        var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
 
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
         var transport = options.Transport as FakeTransport;
 
-        var envelopeItem = transport.GetSentEnvelopes()[0].Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+        var envelope = transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull();
+
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
 
         // Assert
         envelopeItem.Should().BeNull();
