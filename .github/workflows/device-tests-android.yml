@@ -45,7 +45,7 @@ jobs:
         with:
           name: device-test-android
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
