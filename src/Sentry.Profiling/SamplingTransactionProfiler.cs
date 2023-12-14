@@ -80,6 +80,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
             }
             else
             {
+                _options.LogDebug("Profiler received a sample past the end time; stopping.");
                 _session.SampleEventParser.ThreadSample -= OnThreadSample;
                 _completionSource.TrySetResult();
             }

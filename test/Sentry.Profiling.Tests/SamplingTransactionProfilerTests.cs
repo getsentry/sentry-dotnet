@@ -71,15 +71,15 @@ public class SamplingTransactionProfilerTests
         var clock = SentryStopwatch.StartNew();
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
-        var sut = factory.Start(transactionTracer, CancellationToken.None);
+        var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
         Assert.NotNull(sut);
         transactionTracer.TransactionProfiler = sut;
-        RunForMs(100);
+        RunForMs(1000);
         sut.Finish();
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
         var transaction = new Transaction(transactionTracer);
-        var collectTask = (sut as SamplingTransactionProfiler)!.CollectAsync(transaction);
+        var collectTask = sut.CollectAsync(transaction);
         collectTask.Wait();
         var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
