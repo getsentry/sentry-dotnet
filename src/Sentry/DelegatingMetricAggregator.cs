@@ -16,4 +16,9 @@ internal class DelegatingMetricAggregator(IMetricAggregator innerAggregator) : I
 
     public void Timing(string key, double value, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second, IDictionary<string, string>? tags = null,
         DateTime? timestamp = null, int stackLevel = 0) => innerAggregator.Timing(key, value, unit, tags, timestamp, stackLevel + 1);
+
+    public Task FlushAsync(bool force = true, CancellationToken cancellationToken = default) =>
+        innerAggregator.FlushAsync(force, cancellationToken);
+
+    public ValueTask DisposeAsync() => innerAggregator.DisposeAsync();
 }

@@ -242,9 +242,10 @@ namespace Sentry
     {
         void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
     }
-    public interface IMetricAggregator
+    public interface IMetricAggregator : System.IAsyncDisposable
     {
         void Distribution(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 0);
+        System.Threading.Tasks.Task FlushAsync(bool force = true, System.Threading.CancellationToken cancellationToken = default);
         void Gauge(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 0);
         void Increment(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 0);
         void Set(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 0);
@@ -485,7 +486,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SdkVersion FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class SentryClient : Sentry.ISentryClient, System.IDisposable
+    public class SentryClient : Sentry.ISentryClient, System.IAsyncDisposable, System.IDisposable
     {
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
@@ -496,6 +497,7 @@ namespace Sentry
         public void CaptureTransaction(Sentry.Transaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void Dispose() { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
     }
     public static class SentryClientExtensions

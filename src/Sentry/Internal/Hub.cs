@@ -525,7 +525,11 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        _ownedClient.Flush(_options.ShutdownTimeout);
+        var disposeTasks = new List<Task> {
+            _ownedClient.Metrics.FlushAsync(),
+            _ownedClient.FlushAsync(_options.ShutdownTimeout)
+        };
+        Task.WhenAll(disposeTasks).GetAwaiter().GetResult();
         //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
 #if __IOS__

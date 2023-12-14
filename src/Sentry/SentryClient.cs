@@ -14,7 +14,7 @@ namespace Sentry;
 /// </remarks>
 /// <inheritdoc cref="ISentryClient" />
 /// <inheritdoc cref="IDisposable" />
-public class SentryClient : ISentryClient, IDisposable
+public class SentryClient : ISentryClient, IDisposable, IAsyncDisposable
 {
     private readonly SentryOptions _options;
     private readonly ISessionManager _sessionManager;
@@ -462,22 +462,20 @@ public class SentryClient : ISentryClient, IDisposable
         return @event;
     }
 
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        _options.LogDebug("Flushing SentryClient.");
+
+        await Metrics.DisposeAsync().ConfigureAwait(false);
+
+        // Worker should empty it's queue until SentryOptions.ShutdownTimeout
+        await Worker.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Disposes this client
     /// </summary>
     /// <inheritdoc />
-    public void Dispose()
-    {
-        _options.LogDebug("Flushing SentryClient.");
-
-        // Worker should empty it's queue until SentryOptions.ShutdownTimeout
-        Worker.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
-
-        // TODO: Implement async... should probably move Metrics to the Hub and do it in Hub.Dispose as well
-        if (Metrics is IDisposable disposableMetrics)
-        {
-            _options.LogDebug("Flushing MetricsAggregator");
-            disposableMetrics.Dispose();
-        }
-    }
+    public void Dispose() => DisposeAsync().GetAwaiter().GetResult();
 }

@@ -31,4 +31,16 @@ internal class DisabledMetricAggregator : IMetricAggregator
     {
         // No Op
     }
+
+    public Task FlushAsync(bool force = true, CancellationToken cancellationToken = default)
+    {
+        // No Op
+        return Task.CompletedTask;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        // No Op
+        return default;
+    }
 }

@@ -20,7 +20,6 @@ public class Program
                 // Enable Sentry performance monitoring
                 o.EnableTracing = true;
 
-                o.ExperimentalMetrics = new ExperimentalMetricsOptions();
 #if DEBUG
                 // Log debug information about the Sentry SDK
                 o.Debug = true;
@@ -36,11 +35,6 @@ public class Program
                 // exception when serving a request to path: /throw
                 app.UseEndpoints(endpoints =>
                 {
-                    endpoints.MapGet("/hello", () =>
-                    {
-                        SentrySdk.Metrics.Increment("hello.world");
-                        return "Hello World!";
-                    });
                     // Reported events will be grouped by route pattern
                     endpoints.MapGet("/throw/{message?}", context =>
                     {

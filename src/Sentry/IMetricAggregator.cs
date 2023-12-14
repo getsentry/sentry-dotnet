@@ -4,7 +4,7 @@ namespace Sentry;
 /// Exposes EXPERIMENTAL capability to emit metrics. This API is subject to change without major version bumps so use
 /// with caution. We advise disabling in production at the moment.
 /// </summary>
-public interface IMetricAggregator
+public interface IMetricAggregator: IAsyncDisposable
 {
     /// <summary>
     /// Emits a Counter metric
@@ -105,4 +105,13 @@ public interface IMetricAggregator
         DateTime? timestamp = null,
         int stackLevel = 0
     );
+
+    /// <summary>
+    /// Flushes any flushable metrics and/or code locations.
+    /// If <paramref name="force"/> is true then the cutoff is ignored and all metrics are flushed.
+    /// </summary>
+    /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
+    Task FlushAsync(bool force = true, CancellationToken cancellationToken = default);
 }

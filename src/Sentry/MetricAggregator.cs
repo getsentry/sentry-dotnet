@@ -5,7 +5,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
-internal class MetricAggregator : IMetricAggregator, IDisposable, IAsyncDisposable
+internal class MetricAggregator : IMetricAggregator
 {
     private readonly SentryOptions _options;
     private readonly Action<IEnumerable<Metric>> _captureMetrics;
@@ -65,14 +65,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable, IAsyncDisposab
     internal static string GetMetricBucketKey(MetricType type, string metricKey, MeasurementUnit unit,
         IDictionary<string, string>? tags)
     {
-        var typePrefix = type switch
-        {
-            MetricType.Counter => "c",
-            MetricType.Gauge => "g",
-            MetricType.Distribution => "d",
-            MetricType.Set => "s",
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
+        var typePrefix = type.ToStatsdType();
         var serializedTags = tags?.ToUtf8Json() ?? string.Empty;
 
         return $"{typePrefix}_{metricKey}_{unit}_{serializedTags}";
@@ -268,7 +261,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable, IAsyncDisposab
                     shutdownRequested = true;
                 }
 
-                await FlushAsync(false, shutdownTimeout.Token).ConfigureAwait(false);
+                await FlushAsync(shutdownRequested, shutdownTimeout.Token).ConfigureAwait(false);
 
                 if (shutdownRequested)
                 {
@@ -285,14 +278,8 @@ internal class MetricAggregator : IMetricAggregator, IDisposable, IAsyncDisposab
 
     private readonly SemaphoreSlim _flushLock = new(1, 1);
 
-    /// <summary>
-    /// Flushes any flushable metrics and/or code locations.
-    /// If <paramref name="force"/> is true then the cutoff is ignored and all metrics are flushed.
-    /// </summary>
-    /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
-    internal async Task FlushAsync(bool force = true, CancellationToken cancellationToken = default)
+    /// <inheritdoc cref="IMetricAggregator.FlushAsync"/>
+    public async Task FlushAsync(bool force = true, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -325,8 +312,6 @@ internal class MetricAggregator : IMetricAggregator, IDisposable, IAsyncDisposab
         catch (OperationCanceledException)
         {
             _options.LogInfo("Shutdown token triggered. Exiting metric aggregator.");
-
-            return;
         }
         catch (Exception exception)
         {
@@ -428,7 +413,4 @@ internal class MetricAggregator : IMetricAggregator, IDisposable, IAsyncDisposab
             LoopTask.Dispose();
         }
     }
-
-    /// <inheritdoc />
-    public void Dispose() => DisposeAsync().GetAwaiter().GetResult();
 }
