@@ -1,6 +1,6 @@
 namespace Sentry;
 
-internal static class MetricBucketHelper
+internal static class MetricHelper
 {
     private const int RollupInSeconds = 10;
 
@@ -9,6 +9,13 @@ internal static class MetricBucketHelper
 #else
     static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 #endif
+
+    internal static long GetDayBucketKey(this DateTime timestamp)
+    {
+        var utc = timestamp.ToUniversalTime();
+        var dayOnly = new DateTime(utc.Year, utc.Month, utc.Day, 0, 0, 0, 0, DateTimeKind.Utc);
+        return (long)(dayOnly - UnixEpoch).TotalSeconds;
+    }
 
     internal static long GetTimeBucketKey(this DateTime timestamp)
     {
@@ -27,4 +34,7 @@ internal static class MetricBucketHelper
     internal static DateTime GetCutoff() => DateTime.UtcNow
         .Subtract(TimeSpan.FromSeconds(RollupInSeconds))
         .Subtract(TimeSpan.FromMilliseconds(FlushShift));
+
+    internal static string SanitizeKey(string input) => Regex.Replace(input, @"[^a-zA-Z0-9_/.-]+", "_");
+    internal static string SanitizeValue(string input) => Regex.Replace(input, @"[^\w\d_:/@\.\{\}\[\]$-]+", "_");
 }

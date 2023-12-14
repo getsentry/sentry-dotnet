@@ -1255,5 +1255,5 @@ public class ExperimentalMetricsOptions
     /// Determines the sample rate for metrics. 0.0 means no metrics will be sent (metrics disabled). 1.0 implies all
     /// metrics will be sent.
     /// </summary>
-    public double MetricSampleRate { get; set; } = 0;
+    public bool EnableCodeLocations { get; set; } = true;
 }

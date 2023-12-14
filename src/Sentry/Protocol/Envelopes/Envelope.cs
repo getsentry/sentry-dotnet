@@ -322,6 +322,19 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     /// <summary>
+    /// Creates an envelope that contains one or more <see cref="CodeLocations"/>
+    /// </summary>
+    internal static Envelope FromCodeLocations(CodeLocations codeLocations)
+    {
+        var header = DefaultHeader;
+
+        List<EnvelopeItem> items = new();
+        items.Add(EnvelopeItem.FromCodeLocations(codeLocations));
+
+        return new Envelope(header, items);
+    }
+
+    /// <summary>
     /// Creates an envelope that contains one or more Metrics
     /// </summary>
     internal static Envelope FromMetrics(IEnumerable<Metric> metrics)

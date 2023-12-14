@@ -8,10 +8,11 @@ public class MetricAggregatorTests
     {
         public SentryOptions Options { get; set; } = new();
         public Action<IEnumerable<Metric>> CaptureMetrics { get; set; } = (_ => { });
+        public Action<CodeLocations> CaptureCodeLocations { get; set; } = (_ => { });
         public bool DisableFlushLoop { get; set; } = true;
         public TimeSpan? FlushInterval { get; set; }
         public MetricAggregator GetSut()
-            => new(Options, CaptureMetrics, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
+            => new(Options, CaptureMetrics, CaptureCodeLocations, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
     }
 
     // private readonly Fixture _fixture = new();
@@ -21,7 +22,7 @@ public class MetricAggregatorTests
     public void GetMetricBucketKey_GeneratesExpectedKey()
     {
         // Arrange
-        var type = MetricAggregator.MetricType.Counter;
+        var type = MetricType.Counter;
         var metricKey = "quibbles";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
@@ -37,7 +38,7 @@ public class MetricAggregatorTests
     public void Increment_AggregatesMetrics()
     {
         // Arrange
-        var metricType = MetricAggregator.MetricType.Counter;
+        var metricType = MetricType.Counter;
         var key = "counter_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
@@ -67,7 +68,7 @@ public class MetricAggregatorTests
     public void Gauge_AggregatesMetrics()
     {
         // Arrange
-        var metricType = MetricAggregator.MetricType.Gauge;
+        var metricType = MetricType.Gauge;
         var key = "gauge_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
@@ -107,7 +108,7 @@ public class MetricAggregatorTests
     public void Distribution_AggregatesMetrics()
     {
         // Arrange
-        var metricType = MetricAggregator.MetricType.Distribution;
+        var metricType = MetricType.Distribution;
         var key = "distribution_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
@@ -137,7 +138,7 @@ public class MetricAggregatorTests
     public void Set_AggregatesMetrics()
     {
         // Arrange
-        var metricType = MetricAggregator.MetricType.Set;
+        var metricType = MetricType.Set;
         var key = "set_key";
         var unit = MeasurementUnit.None;
         var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
@@ -173,7 +174,7 @@ public class MetricAggregatorTests
         const int numThreads = 100;
         const int numThreadIterations = 1000;
         var sent = 0;
-        MetricBucketHelper.FlushShift = 0.0;
+        MetricHelper.FlushShift = 0.0;
         _fixture.DisableFlushLoop = false;
         _fixture.FlushInterval = TimeSpan.FromMilliseconds(100);
         _fixture.CaptureMetrics = metrics =>
@@ -206,9 +207,23 @@ public class MetricAggregatorTests
 
         // Wait for workers.
         resetEvent.WaitOne();
-        sut.ForceFlush();
+        sut.Flush();
 
         // Assert
         sent.Should().Be(numThreads * numThreadIterations);
+    }
+
+    [Fact]
+    public void TestGetCodeLocation() {
+        // Arrange
+        _fixture.Options.StackTraceMode = StackTraceMode.Enhanced;
+        var sut = _fixture.GetSut();
+
+        // Act
+        var result = sut.GetCodeLocation(1);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Function.Should().Be($"void {nameof(MetricAggregatorTests)}.{nameof(TestGetCodeLocation)}()");
     }
 }

@@ -50,15 +50,12 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
 
     protected abstract IEnumerable<IConvertible> SerializedStatsdValues();
 
-    internal static string SanitizeKey(string input) => Regex.Replace(input, @"[^a-zA-Z0-9_/.-]+", "_");
-    internal static string SanitizeValue(string input) => Regex.Replace(input, @"[^\w\d_:/@\.\{\}\[\]$-]+", "_");
-
     public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
     {
         /*
          * We're serializing using the statsd format here: https://github.com/b/statsd_spec
          */
-        var metricName = SanitizeKey(Key);
+        var metricName = MetricHelper.SanitizeKey(Key);
         await Write($"{metricName}@").ConfigureAwait(false);
         var unit = Unit ?? MeasurementUnit.None;
 // We don't need ConfigureAwait(false) here as ConfigureAwait on metricName above avoids capturing the ExecutionContext.
@@ -78,7 +75,7 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
             var first = true;
             foreach (var (key, value) in tags)
             {
-                var tagKey = SanitizeKey(key);
+                var tagKey = MetricHelper.SanitizeKey(key);
                 if (string.IsNullOrWhiteSpace(tagKey))
                 {
                     continue;

@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Metrics;
 
@@ -6,10 +7,9 @@ namespace Sentry;
 
 internal class MetricAggregator : IMetricAggregator, IDisposable
 {
-    internal enum MetricType : byte { Counter, Gauge, Distribution, Set }
-
     private readonly SentryOptions _options;
     private readonly Action<IEnumerable<Metric>> _captureMetrics;
+    private readonly Action<CodeLocations> _captureCodeLocations;
     private readonly TimeSpan _flushInterval;
 
     private readonly CancellationTokenSource _shutdownSource;
@@ -19,12 +19,12 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
     // aggregates all of the metrics data for a particular time period. The Value is a dictionary for the metrics,
     // each of which has a key that uniquely identifies it within the time period
     internal ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>> Buckets => _buckets.Value;
+
     private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
         = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
 
-    // TODO: Initialize seen_locations
-    // self._seen_locations = _set()  # type: Set[Tuple[int, MetricMetaKey]]
-    // self._pending_locations = {}  # type: Dict[int, List[Tuple[MetricMetaKey, Any]]]
+    private readonly HashSet<(long, MetricResourceIdentifier)> _seenLocations = new();
+    private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
     private Task LoopTask { get; }
 
@@ -32,17 +32,20 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
     /// MetricAggregator constructor.
     /// </summary>
     /// <param name="options">The <see cref="SentryOptions"/></param>
-    /// <param name="captureMetrics">The callback to be called to transmit aggregated metrics to a statsd server</param>
+    /// <param name="captureMetrics">The callback to be called to transmit aggregated metrics</param>
+    /// <param name="captureCodeLocations">The callback to be called to transmit new code locations</param>
     /// <param name="shutdownSource">A <see cref="CancellationTokenSource"/></param>
     /// <param name="disableLoopTask">
     /// A boolean value indicating whether the Loop to flush metrics should run, for testing only.
     /// </param>
     /// <param name="flushInterval">An optional flushInterval, for testing only</param>
     public MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics,
-        CancellationTokenSource? shutdownSource = null, bool disableLoopTask = false, TimeSpan? flushInterval = null)
+        Action<CodeLocations> captureCodeLocations, CancellationTokenSource? shutdownSource = null,
+        bool disableLoopTask = false, TimeSpan? flushInterval = null)
     {
         _options = options;
         _captureMetrics = captureMetrics;
+        _captureCodeLocations = captureCodeLocations;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
         _flushInterval = flushInterval ?? TimeSpan.FromSeconds(5);
 
@@ -59,7 +62,8 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         }
     }
 
-    internal static string GetMetricBucketKey(MetricType type, string metricKey, MeasurementUnit unit, IDictionary<string, string>? tags)
+    internal static string GetMetricBucketKey(MetricType type, string metricKey, MeasurementUnit unit,
+        IDictionary<string, string>? tags)
     {
         var typePrefix = type switch
         {
@@ -80,9 +84,9 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
-        ) => Emit(MetricType.Counter, key, value, unit, tags, timestamp);
+        DateTime? timestamp = null,
+        int stackLevel = 0
+    ) => Emit(MetricType.Counter, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Gauge"/>
     public void Gauge(
@@ -90,9 +94,9 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
-    ) => Emit(MetricType.Gauge, key, value, unit, tags, timestamp);
+        DateTime? timestamp = null,
+        int stackLevel = 0
+    ) => Emit(MetricType.Gauge, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Distribution"/>
     public void Distribution(
@@ -100,9 +104,9 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
-    ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp);
+        DateTime? timestamp = null,
+        int stackLevel = 0
+    ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Set"/>
     public void Set(
@@ -110,9 +114,9 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
-    ) => Emit(MetricType.Set, key, value, unit, tags, timestamp);
+        DateTime? timestamp = null,
+        int stackLevel = 0
+    ) => Emit(MetricType.Set, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Timing"/>
     public void Timing(
@@ -120,19 +124,20 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         double value,
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null)
-        // , int stacklevel = 0 // Used for code locations
-        => Emit(MetricType.Distribution, key, value, unit, tags, timestamp);
+        DateTime? timestamp = null,
+        int stackLevel = 0
+    ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
     private readonly object _emitLock = new object();
+
     private void Emit(
         MetricType type,
         string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
+        DateTime? timestamp = null,
+        int stackLevel = 0
     )
     {
         timestamp ??= DateTime.UtcNow;
@@ -157,47 +162,74 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
             timeBucket.AddOrUpdate(
                 GetMetricBucketKey(type, key, unit.Value, tags),
                 addValuesFactory,
-                (_, metric) => {
+                (_, metric) =>
+                {
                     metric.Add(value);
                     return metric;
                 });
         }
 
-        // TODO: record the code location
-        // if stacklevel is not None:
-        //     self.record_code_location(ty, key, unit, stacklevel + 2, timestamp)
-
+        if (_options.ExperimentalMetrics is { EnableCodeLocations: true })
+        {
+            RecordCodeLocation(type, key, unit.Value, stackLevel + 1, timestamp.Value);
+        }
     }
 
-    // TODO: record_code_location
-    // def record_code_location(
-    //     self,
-    //     ty,  # type: MetricType
-    //     key,  # type: str
-    //     unit,  # type: MeasurementUnit
-    //     stacklevel,  # type: int
-    //     timestamp=None,  # type: Optional[float]
-    // ):
-    //     # type: (...) -> None
-    //     if not self._enable_code_locations:
-    //         return
-    //     if timestamp is None:
-    //         timestamp = time.time()
-    //     meta_key = (ty, key, unit)
-    //     start_of_day = utc_from_timestamp(timestamp).replace(
-    //         hour=0, minute=0, second=0, microsecond=0, tzinfo=None
-    //     )
-    //     start_of_day = int(to_timestamp(start_of_day))
-    //
-    //     if (start_of_day, meta_key) not in self._seen_locations:
-    //         self._seen_locations.add((start_of_day, meta_key))
-    //         loc = get_code_location(stacklevel + 3)
-    //         if loc is not None:
-    //             # Group metadata by day to make flushing more efficient.
-    //             # There needs to be one envelope item per timestamp.
-    //             self._pending_locations.setdefault(start_of_day, []).append(
-    //                 (meta_key, loc)
-    //             )
+    private readonly ReaderWriterLockSlim _codeLocationLock = new();
+
+    private void RecordCodeLocation(
+        MetricType type,
+        string key,
+        MeasurementUnit unit,
+        int stackLevel,
+        DateTime timestamp
+    )
+    {
+        var startOfDay = timestamp.GetDayBucketKey();
+        var metaKey = new MetricResourceIdentifier(type, key, unit);
+
+        _codeLocationLock.EnterUpgradeableReadLock();
+        try
+        {
+            if (_seenLocations.Contains((startOfDay, metaKey)))
+            {
+                return;
+            }
+            _codeLocationLock.EnterWriteLock();
+            try
+            {
+                // Group metadata by day to make flushing more efficient.
+                _seenLocations.Add((startOfDay, metaKey));
+                if (GetCodeLocation(stackLevel + 1) is not { } location)
+                {
+                    return;
+                }
+
+                if (!_pendingLocations.ContainsKey(startOfDay))
+                {
+                    _pendingLocations[startOfDay] = new Dictionary<MetricResourceIdentifier, SentryStackFrame>();
+                }
+                _pendingLocations[startOfDay][metaKey] = location;
+            }
+            finally
+            {
+                _codeLocationLock.ExitWriteLock();
+            }
+        }
+        finally
+        {
+            _codeLocationLock.ExitUpgradeableReadLock();
+        }
+    }
+
+    internal SentryStackFrame? GetCodeLocation(int stackLevel)
+    {
+        var stackTrace = new StackTrace(false);
+        var frames = DebugStackTrace.Create(_options, stackTrace, false).Frames;
+         return (frames.Count >= stackLevel)
+            ? frames[^(stackLevel + 1)]
+            : null;
+    }
 
     private async Task RunLoopAsync()
     {
@@ -239,7 +271,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                     }
                 }
 
-                if (shutdownRequested || !Flush())
+                if (shutdownRequested || !Flush(false))
                 {
                     return;
                 }
@@ -255,20 +287,20 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
     private readonly object _flushLock = new();
 
     /// <summary>
-    /// Flushes any flushable buckets.
-    /// If <paramref name="force"/> is true then the cutoff is ignored and all buckets are flushed.
+    /// Flushes any flushable metrics and/or code locations.
+    /// If <paramref name="force"/> is true then the cutoff is ignored and all metrics are flushed.
     /// </summary>
     /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
     /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
-    private bool Flush(bool force = false)
+    internal bool Flush(bool force = true)
     {
-        // We don't want multiple flushes happening concurrently... which might be possible if the regular flush loop
-        // triggered a flush at the same time ForceFlush is called
-        lock(_flushLock)
+        try
         {
-            foreach (var key in GetFlushableBuckets(force))
+            // We don't want multiple flushes happening concurrently... which might be possible if the regular flush loop
+            // triggered a flush at the same time ForceFlush is called
+            lock (_flushLock)
             {
-                try
+                foreach (var key in GetFlushableBuckets(force))
                 {
                     _options.LogDebug("Flushing metrics for bucket {0}", key);
                     if (Buckets.TryRemove(key, out var bucket))
@@ -277,27 +309,27 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
                         _options.LogDebug("Metric flushed for bucket {0}", key);
                     }
                 }
-                catch (OperationCanceledException)
+
+                foreach (var (timestamp, locations) in FlushableLocations())
                 {
-                    _options.LogInfo("Shutdown token triggered. Time to exit.");
-                    return false;
-                }
-                catch (Exception exception)
-                {
-                    _options.LogError(exception, "Error while processing metric aggregates.");
+                    // There needs to be one envelope item per timestamp.
+                    var codeLocations = new CodeLocations(timestamp, locations);
+                    _captureCodeLocations(codeLocations);
                 }
             }
-
-            // TODO: Flush the code locations
-            // for timestamp, locations in GetFlushableLocations()):
-            //     encoded_locations = _encode_locations(timestamp, locations)
-            //     envelope.add_item(Item(payload=encoded_locations, type="metric_meta"))
+        }
+        catch (OperationCanceledException)
+        {
+            _options.LogInfo("Shutdown token triggered. Time to exit.");
+            return false;
+        }
+        catch (Exception exception)
+        {
+            _options.LogError(exception, "Error while processing metric aggregates.");
         }
 
         return true;
     }
-
-    internal bool ForceFlush() => Flush(true);
 
     /// <summary>
     /// Returns the keys for any buckets that are ready to be flushed (i.e. are for periods before the cutoff)
@@ -323,7 +355,7 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         }
         else
         {
-            var cutoff = MetricBucketHelper.GetCutoff();
+            var cutoff = MetricHelper.GetCutoff();
             foreach (var key in Buckets.Keys)
             {
                 var bucketTime = DateTimeOffset.FromUnixTimeSeconds(key);
@@ -335,13 +367,20 @@ internal class MetricAggregator : IMetricAggregator, IDisposable
         }
     }
 
-    // TODO: _flushable_locations
-    // def _flushable_locations(self):
-    //     # type: (...) -> Dict[int, List[Tuple[MetricMetaKey, Dict[str, Any]]]]
-    //     with self._lock:
-    //         locations = self._pending_locations
-    //         self._pending_locations = {}
-    //     return locations
+    Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> FlushableLocations()
+    {
+        _codeLocationLock.EnterWriteLock();
+        try
+        {
+            var result = _pendingLocations;
+            _pendingLocations = new Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>>();
+            return result;
+        }
+        finally
+        {
+            _codeLocationLock.ExitWriteLock();
+        }
+    }
 
     /// <summary>
     /// Stops the background worker and waits for it to empty the queue until 'shutdownTimeout' is reached

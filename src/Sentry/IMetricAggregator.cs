@@ -16,13 +16,14 @@ public interface IMetricAggregator
     /// <param name="timestamp">
     /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
+    /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
     void Increment(
         string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
+        DateTime? timestamp = null,
+        int stackLevel = 0
     );
 
     /// <summary>
@@ -35,13 +36,14 @@ public interface IMetricAggregator
     /// <param name="timestamp">
     /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
+    /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
     void Gauge(
         string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
+        DateTime? timestamp = null,
+        int stackLevel = 0
     );
 
     /// <summary>
@@ -54,13 +56,14 @@ public interface IMetricAggregator
     /// <param name="timestamp">
     /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
+    /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
     void Distribution(
         string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
+        DateTime? timestamp = null,
+        int stackLevel = 0
     );
 
     /// <summary>
@@ -73,13 +76,14 @@ public interface IMetricAggregator
     /// <param name="timestamp">
     /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
+    /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
     void Set(
         string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
+        DateTime? timestamp = null,
+        int stackLevel = 0
     );
 
     /// <summary>
@@ -92,12 +96,13 @@ public interface IMetricAggregator
     /// </param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
     /// <param name="timestamp">The time when the metric was emitted</param>
+    /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
     void Timing(
         string key,
         double value,
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null
-        // , int stacklevel = 0 // Used for code locations
+        DateTime? timestamp = null,
+        int stackLevel = 0
     );
 }

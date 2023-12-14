@@ -20,6 +20,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string TypeValueClientReport = "client_report";
     private const string TypeValueProfile = "profile";
     private const string TypeValueMetric = "statsd";
+    private const string TypeValueCodeLocations = "metric_meta";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";
@@ -221,6 +222,20 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(transaction));
+    }
+
+    /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from one or more <paramref name="codeLocations"/>.
+    /// </summary>
+    internal static EnvelopeItem FromCodeLocations(CodeLocations codeLocations)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueCodeLocations
+        };
+
+        // Note that metrics are serialized using statsd encoding (not JSON)
+        return new EnvelopeItem(header, new JsonSerializable(codeLocations));
     }
 
     /// <summary>

@@ -75,9 +75,9 @@ public class SentryClient : ISentryClient, IDisposable
             Worker = worker;
         }
 
-        if (options.ExperimentalMetrics is { MetricSampleRate: > 0 } experimentalMetricsOptions)
+        if (options.ExperimentalMetrics is not null)
         {
-            Metrics = new MetricAggregator(options, CaptureMetrics);
+            Metrics = new MetricAggregator(options, CaptureMetrics, CaptureCodeLocations);
         }
         else
         {
@@ -245,6 +245,15 @@ public class SentryClient : ISentryClient, IDisposable
     {
         _options.LogDebug($"Capturing metrics");
         CaptureEnvelope(Envelope.FromMetrics(metrics));
+    }
+
+    /// <summary>
+    /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
+    /// </summary>
+    internal void CaptureCodeLocations(CodeLocations codeLocations)
+    {
+        _options.LogDebug($"Capturing code locations for period: {codeLocations.Timestamp}");
+        CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
     }
 
     /// <inheritdoc />
@@ -460,5 +469,12 @@ public class SentryClient : ISentryClient, IDisposable
 
         // Worker should empty it's queue until SentryOptions.ShutdownTimeout
         Worker.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+
+        // TODO: Implement async... should probably move Metrics to the Hub and do it in Hub.Dispose as well
+        if (Metrics is IDisposable disposableMetrics)
+        {
+            _options.LogDebug("Flushing MetricsAggregator");
+            disposableMetrics.Dispose();
+        }
     }
 }
