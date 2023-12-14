@@ -20,7 +20,7 @@ public class Program
                 // Enable Sentry performance monitoring
                 o.EnableTracing = true;
 
-                o.ExperimentalMetrics = new ExperimentalMetricsOptions(){ MetricSampleRate = 1.0 };
+                o.ExperimentalMetrics = new ExperimentalMetricsOptions();
 #if DEBUG
                 // Log debug information about the Sentry SDK
                 o.Debug = true;
