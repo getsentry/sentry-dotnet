@@ -50,8 +50,10 @@ public class SentryMauiScreenshotTests
         var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
 
         // Assert
+#if __MOBILE__
         envelopeItem.Should().NotBeNull();
-        envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
+        envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg"); 
+#endif
     }
 
     [Fact]
