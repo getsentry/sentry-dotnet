@@ -28,7 +28,7 @@ public class Timing: IDisposable
     /// </summary>
     public Timing(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null)
-        : this(SentrySdk.CurrentHub, key, unit, tags)
+        : this(SentrySdk.CurrentHub, key, unit, tags, stackLevel: 1)
     {
     }
 
@@ -37,6 +37,12 @@ public class Timing: IDisposable
     /// </summary>
     public Timing(IHub hub, string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null)
+    : this(hub, key, unit, tags, stackLevel: 1)
+    {
+    }
+
+    internal Timing(IHub hub, string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null, int stackLevel = 1)
     {
         _hub = hub;
         _key = key;
@@ -65,7 +71,7 @@ public class Timing: IDisposable
         }
         if (aggregator is MetricAggregator metrics)
         {
-            metrics.RecordCodeLocation(MetricType.Distribution, key, unit, 1, _startTime);
+            metrics.RecordCodeLocation(MetricType.Distribution, key, unit, stackLevel + 1, _startTime);
         }
     }
 
