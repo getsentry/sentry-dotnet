@@ -24,7 +24,7 @@ internal class MetricAggregator : IMetricAggregator
         = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
 
     private long lastClearedStaleLocations = DateTime.UtcNow.GetDayBucketKey();
-    private readonly HashSet<(long, MetricResourceIdentifier)> _seenLocations = new();
+    private readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
     private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
     private Task LoopTask { get; }
@@ -169,7 +169,7 @@ internal class MetricAggregator : IMetricAggregator
         }
     }
 
-    private readonly ReaderWriterLockSlim _codeLocationLock = new();
+    private readonly SemaphoreSlim _codeLocationLock = new(1,1);
 
     internal void RecordCodeLocation(
         MetricType type,
@@ -182,37 +182,30 @@ internal class MetricAggregator : IMetricAggregator
         var startOfDay = timestamp.GetDayBucketKey();
         var metaKey = new MetricResourceIdentifier(type, key, unit);
 
-        _codeLocationLock.EnterUpgradeableReadLock();
+        var seenToday = _seenLocations.GetOrAdd(startOfDay,_ => []);
+        if (seenToday.Contains(metaKey))
+        {
+            return;
+        }
+        _codeLocationLock.Wait();
         try
         {
-            if (_seenLocations.Contains((startOfDay, metaKey)))
+            // Group metadata by day to make flushing more efficient.
+            seenToday.Add(metaKey);
+            if (GetCodeLocation(stackLevel + 1) is not { } location)
             {
                 return;
             }
-            _codeLocationLock.EnterWriteLock();
-            try
-            {
-                // Group metadata by day to make flushing more efficient.
-                _seenLocations.Add((startOfDay, metaKey));
-                if (GetCodeLocation(stackLevel + 1) is not { } location)
-                {
-                    return;
-                }
 
-                if (!_pendingLocations.ContainsKey(startOfDay))
-                {
-                    _pendingLocations[startOfDay] = new Dictionary<MetricResourceIdentifier, SentryStackFrame>();
-                }
-                _pendingLocations[startOfDay][metaKey] = location;
-            }
-            finally
+            if (!_pendingLocations.ContainsKey(startOfDay))
             {
-                _codeLocationLock.ExitWriteLock();
+                _pendingLocations[startOfDay] = new Dictionary<MetricResourceIdentifier, SentryStackFrame>();
             }
+            _pendingLocations[startOfDay][metaKey] = location;
         }
         finally
         {
-            _codeLocationLock.ExitUpgradeableReadLock();
+            _codeLocationLock.Release();
         }
     }
 
@@ -309,6 +302,8 @@ internal class MetricAggregator : IMetricAggregator
                 _captureCodeLocations(codeLocations);
                 _options.LogDebug("Code locations flushed: ", timestamp);
             }
+
+            ClearStaleLocations();
         }
         catch (OperationCanceledException)
         {
@@ -362,29 +357,45 @@ internal class MetricAggregator : IMetricAggregator
 
     private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> FlushableLocations()
     {
-        _codeLocationLock.EnterWriteLock();
+        _codeLocationLock.Wait();
         try
         {
-            // TODO: Clear out stale seen locations once a day
-            // var today = DateTime.UtcNow.GetDayBucketKey();
-            // if (lastClearedStaleLocations != today)
-            // {
-            //     var startOfDay = var startOfDay = timestamp.GetDayBucketKey();
-            //     foreach (var VARIABLE in _seenLocations)
-            //     {
-            //
-            //     }
-            //     lastClearedStaleLocations = today;
-            // }
-
             var result = _pendingLocations;
             _pendingLocations = new Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>>();
             return result;
         }
         finally
         {
-            _codeLocationLock.ExitWriteLock();
+            _codeLocationLock.Release();
         }
+    }
+
+    /// <summary>
+    /// Clear out stale seen locations once a day
+    /// </summary>
+    private void ClearStaleLocations()
+    {
+        var now = DateTime.UtcNow;
+        var today = now.GetDayBucketKey();
+        if (lastClearedStaleLocations == today)
+        {
+            return;
+        }
+        // Allow 60 seconds for all code locations to be sent at the transition from one day to the next
+        const int staleGraceInMinutes = 1;
+        if (now.Minute < staleGraceInMinutes)
+        {
+            return;
+        }
+
+        foreach (var dailyValues in _seenLocations.Keys.ToArray())
+        {
+            if (dailyValues < today)
+            {
+                _seenLocations.TryRemove(dailyValues, out _);
+            }
+        }
+        lastClearedStaleLocations = today;
     }
 
     /// <inheritdoc />
