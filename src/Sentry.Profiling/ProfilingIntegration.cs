@@ -17,7 +17,9 @@ public class ProfilingIntegration : ISdkIntegration
     /// This is useful for applications that need to start quickly. The profiler will start in the background
     /// and will be ready to capture transactions that have started after the profiler has started.
     ///
-    /// If given a non-zero timeout, profiling startup blocks up to the given amount of time.
+    /// If given a non-zero timeout, profiling startup blocks up to the given amount of time. If the timeout is reached
+    /// and the profiler session hasn't started yet, the execution is unblocked and behaves as the async startup,
+    /// i.e. transactions will be profiled only after the session is eventually started.
     /// </param>
     public ProfilingIntegration(TimeSpan startupTimeout = default)
     {

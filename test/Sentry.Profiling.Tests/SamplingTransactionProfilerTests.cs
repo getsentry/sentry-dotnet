@@ -8,8 +8,6 @@ namespace Sentry.Profiling.Tests;
 [UsesVerify]
 public class SamplingTransactionProfilerTests
 {
-    private TimeSpan _defaultStartTimeout = TimeSpan.FromSeconds(5);
-
     private readonly IDiagnosticLogger _testOutputLogger;
     private readonly SentryOptions _testSentryOptions;
 
@@ -89,17 +87,31 @@ public class SamplingTransactionProfilerTests
         return profileInfo.Profile;
     }
 
-    [Fact]
-    public void Profiler_SingleProfile_Works()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(5)]
+    public void Profiler_SingleProfile_Works(int startTimeoutSeconds)
     {
-        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, _defaultStartTimeout);
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
+        // in the async startup case, we need to wait before collecting
+        if (startTimeoutSeconds == 0)
+        {
+            factory._sessionTask.Wait(5 * 1000);
+        }
         var profile = CaptureAndValidate(factory);
     }
 
-    [Fact]
-    public void Profiler_MultipleProfiles_Works()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(5)]
+    public void Profiler_MultipleProfiles_Works(int startTimeoutSeconds)
     {
-        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, _defaultStartTimeout);
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
+        // in the async startup case, we need to wait before collecting
+        if (startTimeoutSeconds == 0)
+        {
+            factory._sessionTask.Wait(5 * 1000);
+        }
         CaptureAndValidate(factory);
         Thread.Sleep(100);
         CaptureAndValidate(factory);
@@ -170,7 +182,7 @@ public class SamplingTransactionProfilerTests
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
 
-        options.AddIntegration(new ProfilingIntegration(_defaultStartTimeout));
+        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(5)));
 
         try
         {

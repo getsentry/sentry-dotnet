@@ -15,7 +15,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     private const int TIME_LIMIT_MS = 30_000;
 
     private readonly SentryOptions _options;
-    private Task<SampleProfilerSession> _sessionTask;
+    internal Task<SampleProfilerSession> _sessionTask;
 
     public SamplingTransactionProfilerFactory(SentryOptions options, TimeSpan startupTimeout)
     {
