@@ -11,5 +11,6 @@ public partial class MainActivity : MauiAppCompatActivity
         base.OnCreate(savedInstanceState);
 
         Microsoft.Maui.ApplicationModel.ActivityStateManager.Default.Init(this, savedInstanceState);
+        Platform.Init(this, savedInstanceState);
     }
 }
