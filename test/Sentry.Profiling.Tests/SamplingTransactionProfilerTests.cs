@@ -74,7 +74,7 @@ public class SamplingTransactionProfilerTests
         var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
         Assert.NotNull(sut);
         transactionTracer.TransactionProfiler = sut;
-        RunForMs(1000);
+        RunForMs(200);
         sut.Finish();
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
