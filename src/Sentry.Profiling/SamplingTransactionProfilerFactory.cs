@@ -15,21 +15,20 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     private const int TIME_LIMIT_MS = 30_000;
 
     private readonly SentryOptions _options;
-    private SampleProfilerSession _session;
+    private Task<SampleProfilerSession> _session;
 
     public static SamplingTransactionProfilerFactory Create(SentryOptions options)
     {
-        var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+        var session = Task.Run(async () =>
+        {
+            var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+            return session;
+        });
         return new SamplingTransactionProfilerFactory(options, session);
     }
 
-    public static async Task<SamplingTransactionProfilerFactory> CreateAsync(SentryOptions options)
-    {
-        var session = await Task.Run(() => SampleProfilerSession.StartNew(options.DiagnosticLogger)).ConfigureAwait(false);
-        return new SamplingTransactionProfilerFactory(options, session);
-    }
-
-    private SamplingTransactionProfilerFactory(SentryOptions options, SampleProfilerSession session)
+    private SamplingTransactionProfilerFactory(SentryOptions options, Task<SampleProfilerSession> session)
     {
         _options = options;
         _session = session;
@@ -41,10 +40,17 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
+            if (!_session.IsCompletedSuccessfully)
+            {
+                _options.LogDebug("Cannot start a a sampling profiler, the session hasn't started yet.");
+                _inProgress = FALSE;
+                return null;
+            }
+
             _options.LogDebug("Starting a sampling profiler.");
             try
             {
-                return new SamplingTransactionProfiler(_options, _session, TIME_LIMIT_MS, cancellationToken)
+                return new SamplingTransactionProfiler(_options, _session.Result, TIME_LIMIT_MS, cancellationToken)
                 {
                     OnFinish = () => _inProgress = FALSE
                 };

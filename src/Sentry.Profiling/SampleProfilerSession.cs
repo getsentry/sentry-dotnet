@@ -61,22 +61,23 @@ internal class SampleProfilerSession : IDisposable
         // Process() blocks until the session is stopped so we need to run it on a separate thread.
         Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning);
 
+        return new SampleProfilerSession(stopWatch, session, eventSource, logger);
+    }
+
+    public async Task WaitForFirstEventAsync(CancellationToken cancellationToken = default)
+    {
         var tcs = new TaskCompletionSource();
         var cb = (TraceEvent _) => { tcs.TrySetResult(); };
-        eventSource.AllEvents += cb;
+        _eventSource.AllEvents += cb;
         try
         {
             // Wait for the first event to be processed.
-            tcs.Task.Wait(1_000);
+            await tcs.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        finally
         {
-            // Log a warning but still try to keep the session running.
-            logger?.LogWarning("Profiler session startup: timed out waiting for the first event to be received.", ex);
+            _eventSource.AllEvents -= cb;
         }
-        eventSource.AllEvents -= cb;
-
-        return new SampleProfilerSession(stopWatch, session, eventSource, logger);
     }
 
     public void Stop()
