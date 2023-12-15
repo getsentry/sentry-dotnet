@@ -8,6 +8,8 @@ namespace Sentry.Profiling.Tests;
 [UsesVerify]
 public class SamplingTransactionProfilerTests
 {
+    private TimeSpan _defaultStartTimeout = TimeSpan.FromSeconds(5);
+
     private readonly IDiagnosticLogger _testOutputLogger;
     private readonly SentryOptions _testSentryOptions;
 
@@ -90,14 +92,14 @@ public class SamplingTransactionProfilerTests
     [Fact]
     public void Profiler_SingleProfile_Works()
     {
-        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, _defaultStartTimeout);
         var profile = CaptureAndValidate(factory);
     }
 
     [Fact]
     public void Profiler_MultipleProfiles_Works()
     {
-        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, _defaultStartTimeout);
         CaptureAndValidate(factory);
         Thread.Sleep(100);
         CaptureAndValidate(factory);
@@ -168,7 +170,7 @@ public class SamplingTransactionProfilerTests
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
 
-        options.AddIntegration(new ProfilingIntegration());
+        options.AddIntegration(new ProfilingIntegration(_defaultStartTimeout));
 
         try
         {
