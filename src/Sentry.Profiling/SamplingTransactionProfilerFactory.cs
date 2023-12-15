@@ -21,6 +21,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
+        Debug.Assert(TimeSpan.FromSeconds(0) == TimeSpan.Zero);
         if (startupTimeout == TimeSpan.Zero)
         {
             _sessionTask = Task.Run(async () =>
