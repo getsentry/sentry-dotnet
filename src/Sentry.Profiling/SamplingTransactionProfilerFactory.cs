@@ -33,16 +33,24 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         }
         else
         {
-            var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
-            var firstEventTask = session.WaitForFirstEventAsync();
-            if (firstEventTask.Wait(startupTimeout))
+            try
             {
-                _sessionTask = Task.FromResult(session);
+                var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+                var firstEventTask = session.WaitForFirstEventAsync();
+                if (firstEventTask.Wait(startupTimeout))
+                {
+                    _sessionTask = Task.FromResult(session);
+                }
+                else
+                {
+                    options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profilling will start once the first event is received.", startupTimeout);
+                    _sessionTask = firstEventTask.ContinueWith(_ => session);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profilling will start once the first event is received.", startupTimeout);
-                _sessionTask = firstEventTask.ContinueWith(_ => session);
+                // Already logged in SampleProfilerSession.StartNew so let's just make sure the task is set.
+                _sessionTask = Task.FromException<SampleProfilerSession>(ex);
             }
         }
     }
@@ -53,9 +61,16 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         // Start a profiler if one wasn't running yet.
         if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
+            if (!_sessionTask.IsCompleted)
+            {
+                _options.LogDebug("Cannot start a sampling profiler, the session hasn't started yet.");
+                _inProgress = FALSE;
+                return null;
+            }
+
             if (!_sessionTask.IsCompletedSuccessfully)
             {
-                _options.LogDebug("Cannot start a a sampling profiler, the session hasn't started yet.");
+                _options.LogDebug("Cannot start a sampling profiler, the session startup has not been successful.");
                 _inProgress = FALSE;
                 return null;
             }

@@ -23,6 +23,7 @@ public class ProfilingIntegration : ISdkIntegration
     /// </param>
     public ProfilingIntegration(TimeSpan startupTimeout = default)
     {
+        Debug.Assert(TimeSpan.Zero == default);
         _startupTimeout = startupTimeout;
     }
 

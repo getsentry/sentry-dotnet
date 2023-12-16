@@ -53,15 +53,23 @@ internal class SampleProfilerSession : IDisposable
 
     public static SampleProfilerSession StartNew(IDiagnosticLogger? logger = null)
     {
-        var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
-        var session = client.StartEventPipeSession(Providers, requestRundown: false, CircularBufferMB);
-        var stopWatch = SentryStopwatch.StartNew();
-        var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
+        try
+        {
+            var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
+            var session = client.StartEventPipeSession(Providers, requestRundown: false, CircularBufferMB);
+            var stopWatch = SentryStopwatch.StartNew();
+            var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
-        // Process() blocks until the session is stopped so we need to run it on a separate thread.
-        Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning);
+            // Process() blocks until the session is stopped so we need to run it on a separate thread.
+            Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning);
 
-        return new SampleProfilerSession(stopWatch, session, eventSource, logger);
+            return new SampleProfilerSession(stopWatch, session, eventSource, logger);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogWarning("Error during sampler profiler EventPipeSession startup.", ex);
+            throw;
+        }
     }
 
     public async Task WaitForFirstEventAsync(CancellationToken cancellationToken = default)
