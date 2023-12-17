@@ -21,37 +21,21 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
+        _sessionTask = Task.Run(async () =>
+        {
+            // This can block up to 30 seconds. The timeout is out of our hands.
+            var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+
+            // This can block indefinitely.
+            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+
+            return session;
+        });
+
         Debug.Assert(TimeSpan.FromSeconds(0) == TimeSpan.Zero);
-        if (startupTimeout == TimeSpan.Zero)
+        if (startupTimeout != TimeSpan.Zero && !_sessionTask.Wait(startupTimeout))
         {
-            _sessionTask = Task.Run(async () =>
-            {
-                var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
-                await session.WaitForFirstEventAsync().ConfigureAwait(false);
-                return session;
-            });
-        }
-        else
-        {
-            try
-            {
-                var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
-                var firstEventTask = session.WaitForFirstEventAsync();
-                if (firstEventTask.Wait(startupTimeout))
-                {
-                    _sessionTask = Task.FromResult(session);
-                }
-                else
-                {
-                    options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profilling will start once the first event is received.", startupTimeout);
-                    _sessionTask = firstEventTask.ContinueWith(_ => session);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Already logged in SampleProfilerSession.StartNew so let's just make sure the task is set.
-                _sessionTask = Task.FromException<SampleProfilerSession>(ex);
-            }
+            options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profilling will start once the first event is received.", startupTimeout);
         }
     }
 

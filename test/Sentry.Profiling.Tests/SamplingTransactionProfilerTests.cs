@@ -120,9 +120,10 @@ public class SamplingTransactionProfilerTests
     }
 
     [Fact]
-    public void Profiler_AfterTimeout_Stops()
+    public async Task Profiler_AfterTimeout_Stops()
     {
         using var session = SampleProfilerSession.StartNew(_testOutputLogger);
+        await session.WaitForFirstEventAsync(CancellationToken.None);
         var limitMs = 50;
         var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);
         RunForMs(limitMs * 4);

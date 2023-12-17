@@ -56,7 +56,11 @@ internal class SampleProfilerSession : IDisposable
         try
         {
             var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
+
+            // Note: StartEventPipeSession() can time out after 30 seconds on resource constrained systems.
+            // See https://github.com/dotnet/diagnostics/blob/991c78895323a953008e15fe34b736c03706afda/src/Microsoft.Diagnostics.NETCore.Client/DiagnosticsIpc/IpcClient.cs#L40C52-L40C52
             var session = client.StartEventPipeSession(Providers, requestRundown: false, CircularBufferMB);
+
             var stopWatch = SentryStopwatch.StartNew();
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
