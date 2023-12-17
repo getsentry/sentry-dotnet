@@ -5,6 +5,19 @@ $ErrorActionPreference = "Stop"
 Push-Location $PSScriptRoot/..
 try
 {
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        # PowerShell Core
+        $IsWindows = $PSVersionTable.OS -like "*Win*"
+        $IsLinux = $PSVersionTable.OS -like "*Linux*"
+        $IsMacOS = $PSVersionTable.OS -like "*Darwin*"
+    } else {
+        # Windows PowerShell
+        $os = [System.Environment]::OSVersion
+        $IsWindows = $os.Platform -eq [System.PlatformID]::Win32NT
+        $IsLinux = $os.Platform -eq [System.PlatformID]::Unix
+        $IsMacOS = $false  # macOS determination is complex in Windows PowerShell
+    }
+
     $submodule = 'modules/sentry-native'
     $outDir = 'src/Sentry/Platforms/Native/sentry-native'
     $buildDir = "$submodule/build"
