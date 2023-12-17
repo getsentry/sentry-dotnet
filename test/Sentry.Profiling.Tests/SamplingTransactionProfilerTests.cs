@@ -87,6 +87,16 @@ public class SamplingTransactionProfilerTests
         return profileInfo.Profile;
     }
 
+    [Fact]
+    public void Profiler_WithZeroStartupTimeout_CapturesAfterStartingAsynchronously()
+    {
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
+        var profiler = factory.Start(new TransactionTracer(Substitute.For<IHub>(), "test", ""), CancellationToken.None);
+        Assert.Null(profiler);
+        factory._sessionTask.Wait(5 * 1000);
+        CaptureAndValidate(factory);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(5)]
