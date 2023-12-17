@@ -59,8 +59,10 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
                 return Stream.Null;
             }
         }).ConfigureAwait(false).GetAwaiter().GetResult();
-#endif
 
+        return stream;
+#else
         return Stream.Null;
+#endif
     }
 }
