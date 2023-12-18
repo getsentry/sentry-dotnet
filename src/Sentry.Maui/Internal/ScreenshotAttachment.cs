@@ -1,3 +1,5 @@
+using Sentry.Extensibility;
+
 namespace Sentry.Maui.Internal;
 
 internal class ScreenshotAttachment : Attachment
